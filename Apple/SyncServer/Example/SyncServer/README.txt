@@ -1,0 +1,1 @@
+The files `GoogleService-Info.plist` and `Server.plist` contain private info, and so are not contained in the public repo. For now, search the code for these file names to find out the keys/values they contain. Hopefully later, I document this better! :).

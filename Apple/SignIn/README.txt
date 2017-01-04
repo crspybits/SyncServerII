@@ -1,0 +1,1 @@
+These files are not compiled into the framework because individual developers need to make the choice about what systems they are going to use to enable authorization. These files must, however, be compiled/linked into your app if you want to provide that specific form of sign-in for your users.

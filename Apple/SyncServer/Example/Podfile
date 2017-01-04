@@ -1,0 +1,14 @@
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/crspybits/Specs.git'
+
+use_frameworks!
+
+target 'SyncServer_Example' do
+	pod 'SyncServer', :path => '../'
+	pod 'SMCoreLib'
+    pod 'Google/SignIn'
+
+	target 'SyncServer_Tests' do
+    	inherit! :search_paths
+  	end
+end
