@@ -1,0 +1,10 @@
+version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
+options: "2f8782fe47c93c263cc1db1a0bcc2ec6"
+build_time: [537149681, 410361000]
+inputs:
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Gloss-1.1.1/Sources/Decoder.swift": [537145401, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Gloss-1.1.1/Sources/Encoder.swift": [537145401, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Gloss-1.1.1/Sources/ExtensionArray.swift": [537145398, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Gloss-1.1.1/Sources/ExtensionDictionary.swift": [537145398, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Gloss-1.1.1/Sources/Gloss.swift": [537145401, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Gloss-1.1.1/Sources/Operators.swift": [537145401, 0]

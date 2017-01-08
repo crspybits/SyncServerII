@@ -1,0 +1,14 @@
+version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
+options: "396dc1945db36bd926bae51717399888"
+build_time: [537149681, 412434000]
+inputs:
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/Bytes.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/Dir.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/File.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/JSONConvertible.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/Log.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/PerfectError.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/PerfectServer.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/SwiftCompatibility.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/SysProcess.swift": [537145291, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/PerfectLib-2.0.5/Sources/PerfectLib/Utilities.swift": [537145291, 0]

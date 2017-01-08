@@ -1,0 +1,66 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "Metadata"
+- "_Metadata"
+- "is64BitPlatform"
+provides-nominal:
+- "V10Reflection8Metadata"
+- "V10Reflection9_Metadata"
+provides-member:
+- ["V10Reflection8Metadata", ""]
+- ["V10Reflection9_Metadata", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "Int64"
+- "is64BitPlatform"
+- "_Metadata"
+- "Metadata"
+- "Bool"
+- "=="
+- "Int"
+- "MetadataType"
+- "UnsafePointer"
+- !private "sizeof"
+- !private "unsafeBitCast"
+depends-member:
+- ["Ps9Equatable", "Pointee"]
+- !private ["Ps9Equatable", "UnsafePointer"]
+- !private ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "kind"]
+- ["Ps9Equatable", "pointer"]
+- !private ["Ps9Equatable", "unsafeBitCast"]
+- ["Ps9Equatable", ""]
+- ["V10Reflection8Metadata", "Int"]
+- ["V10Reflection8Metadata", "Pointee"]
+- ["V10Reflection8Metadata", "UnsafePointer"]
+- ["V10Reflection8Metadata", "deinit"]
+- ["V10Reflection8Metadata", "init"]
+- ["V10Reflection8Metadata", "kind"]
+- ["V10Reflection8Metadata", "pointer"]
+- !private ["V10Reflection8Metadata", "unsafeBitCast"]
+- ["P10Reflection12MetadataType", "Pointee"]
+- !private ["P10Reflection12MetadataType", "UnsafePointer"]
+- !private ["P10Reflection12MetadataType", "init"]
+- ["P10Reflection12MetadataType", "kind"]
+- ["P10Reflection12MetadataType", "pointer"]
+- !private ["P10Reflection12MetadataType", "unsafeBitCast"]
+- ["P10Reflection12MetadataType", ""]
+- ["P10Reflection11PointerType", "Pointee"]
+- !private ["P10Reflection11PointerType", "UnsafePointer"]
+- !private ["P10Reflection11PointerType", "init"]
+- ["P10Reflection11PointerType", "kind"]
+- ["P10Reflection11PointerType", "pointer"]
+- !private ["P10Reflection11PointerType", "unsafeBitCast"]
+- ["P10Reflection11PointerType", ""]
+- ["V10Reflection9_Metadata", "init"]
+depends-nominal:
+- "Ps9Equatable"
+- "V10Reflection8Metadata"
+- "P10Reflection12MetadataType"
+- "P10Reflection11PointerType"
+- "V10Reflection9_Metadata"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "74a232e091a61ba45f1ffa4061e1eaf1"

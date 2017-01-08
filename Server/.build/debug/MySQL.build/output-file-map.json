@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.build/master.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/MySQL-2.1.1/Sources/MySQL/MySQL.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.build/MySQL.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.build/MySQL.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.build/MySQL~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.build/MySQL.swiftdeps"
+  }
+}

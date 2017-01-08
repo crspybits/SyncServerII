@@ -1,0 +1,7 @@
+version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
+options: "af92d05ea999c9af64c41131e12cd0cb"
+build_time: [537149681, 411200000]
+inputs:
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Socket-0.12.17/Sources/Socket.swift": [537145379, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Socket-0.12.17/Sources/SocketProtocols.swift": [537145379, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Socket-0.12.17/Sources/SocketUtils.swift": [537145379, 0]

@@ -1,0 +1,143 @@
+{
+  "": {
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/master.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Advance.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Advance.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Advance.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Advance~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Advance.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Any+Extensions.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Any+Extensions.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Any+Extensions.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Any+Extensions~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Any+Extensions.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Array+Extensions.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Array+Extensions.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Array+Extensions.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Array+Extensions~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Array+Extensions.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Construct.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Construct.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Construct.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Construct~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Construct.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Get.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Get.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Get.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Get~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Get.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Identity.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Identity.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Identity.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Identity~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Identity.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/MemoryProperties.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MemoryProperties.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MemoryProperties.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MemoryProperties~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MemoryProperties.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Metadata+Class.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Class.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Class.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Class~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Class.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Metadata+Kind.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Kind.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Kind.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Kind~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Kind.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Metadata+Struct.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Struct.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Struct.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Struct~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Struct.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Metadata+Tuple.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Tuple.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Tuple.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Tuple~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata+Tuple.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Metadata.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Metadata.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/MetadataType.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MetadataType.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MetadataType.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MetadataType~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/MetadataType.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/NominalType.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalType.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalType.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalType~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalType.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/NominalTypeDescriptor.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalTypeDescriptor.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalTypeDescriptor.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalTypeDescriptor~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/NominalTypeDescriptor.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/PointerType.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/PointerType.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/PointerType.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/PointerType~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/PointerType.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Properties.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Properties.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Properties.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Properties~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Properties.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/ReflectionError.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ReflectionError.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ReflectionError.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ReflectionError~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ReflectionError.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/RelativePointer.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/RelativePointer.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/RelativePointer.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/RelativePointer~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/RelativePointer.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Set.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Set.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Set.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Set~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Set.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/Storage.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Storage.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Storage.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Storage~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/Storage.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/UnsafePointer+Extensions.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/UnsafePointer+Extensions.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/UnsafePointer+Extensions.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/UnsafePointer+Extensions~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/UnsafePointer+Extensions.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Reflection-0.14.3/Sources/Reflection/ValueWitnessTable.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ValueWitnessTable.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ValueWitnessTable.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ValueWitnessTable~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.build/ValueWitnessTable.swiftdeps"
+  }
+}

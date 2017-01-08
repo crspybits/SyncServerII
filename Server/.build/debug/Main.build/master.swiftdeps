@@ -1,0 +1,5 @@
+version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
+options: "21176b9ad7bba8da79177dee43b48032"
+build_time: [537149716, 680609000]
+inputs:
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Main/main.swift": [534150550, 0]

@@ -11,10 +11,16 @@ import SMServerLib
 
 // Server-internal constants
 
+protocol ConstantsDelegate {
+func plistFilePath(forConstants:Constants) -> String
+}
+
 class Constants {
-    /* When adding this .plist into your project make sure to
+    /* When adding this .plist into your Xcode project make sure to
     a) add it into Copy Files in Build Phases, and 
     b) select Products Directory as a destination.
+    For testing, I've had to put a build script in that does:
+        cp Server.plist /tmp
     */
     static let serverPlistFile = "Server.plist"
     
@@ -30,10 +36,21 @@ class Constants {
     var googleClientSecret:String = ""
 
     static var session = Constants()
+
+    // If there is a delegate, then use this to get the plist file path. This is purely a hack for testing-- because I've not been able to get access to the Server.plist file otherwise.
+    static var delegate:ConstantsDelegate?
     
     fileprivate init() {
-        let plist = try! PlistDictLoader(plistFileNameInBundle: Constants.serverPlistFile)
-
+        var plist:PlistDictLoader
+        
+        if Constants.delegate == nil {
+            plist = try! PlistDictLoader(plistFileNameInBundle: Constants.serverPlistFile)
+        }
+        else {
+            let path = Constants.delegate!.plistFilePath(forConstants: self)
+            plist = try! PlistDictLoader(usingPath: path, andPlistFileName: Constants.serverPlistFile)
+        }
+        
         googleClientId = try! plist.getString(varName: "GoogleServerClientId")
         googleClientSecret = try! plist.getString(varName: "GoogleServerSecret")
 

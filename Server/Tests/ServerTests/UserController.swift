@@ -10,7 +10,7 @@ import XCTest
 @testable import Server
 import LoggerAPI
 
-class UserControllerTests: XCTestCase {
+class UserControllerTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()        

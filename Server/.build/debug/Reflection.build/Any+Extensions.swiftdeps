@@ -1,0 +1,130 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "AnyExtensions"
+- "extensions"
+- "extensions"
+provides-nominal:
+- "P10Reflection13AnyExtensions"
+provides-member:
+- ["P10Reflection13AnyExtensions", ""]
+- ["P10Reflection13AnyExtensions", "construct"]
+- ["P10Reflection13AnyExtensions", "construct"]
+- ["P10Reflection13AnyExtensions", "isValueTypeOrSubtype"]
+- ["P10Reflection13AnyExtensions", "value"]
+- ["P10Reflection13AnyExtensions", "write"]
+provides-dynamic-lookup:
+depends-top-level:
+- "Bool"
+- !private "withUnsafePointer"
+- !private "Reflection"
+- "AnyExtensions"
+- "String"
+- !private "AssignmentPrecedence"
+- "CastingPrecedence"
+- "UnsafeMutableRawPointer"
+- "extensions"
+- !private "construct"
+- "UnsafeRawPointer"
+- "Property"
+- !private "ReflectionError"
+depends-member:
+- ["P10Reflection13AnyExtensions", "Bool"]
+- ["P10Reflection13AnyExtensions", "Property"]
+- !private ["P10Reflection13AnyExtensions", "Reflection"]
+- !private ["P10Reflection13AnyExtensions", "ReflectionError"]
+- !private ["P10Reflection13AnyExtensions", "Self"]
+- ["P10Reflection13AnyExtensions", "String"]
+- ["P10Reflection13AnyExtensions", "UnsafeMutableRawPointer"]
+- ["P10Reflection13AnyExtensions", "UnsafeRawPointer"]
+- ["P10Reflection13AnyExtensions", "construct"]
+- !private ["P10Reflection13AnyExtensions", "init"]
+- ["P10Reflection13AnyExtensions", "isValueTypeOrSubtype"]
+- ["P10Reflection13AnyExtensions", "value"]
+- ["P10Reflection13AnyExtensions", "write"]
+- !private ["P10Reflection13AnyExtensions", ""]
+- !private ["Ps7CVarArg", "initialize"]
+- !private ["Ps7CVarArg", "pointee"]
+- !private ["Ps10Comparable", "assumingMemoryBound"]
+- !private ["Ps10Comparable", "init"]
+- !private ["Ps10Comparable", "initialize"]
+- !private ["Ps10Comparable", "pointee"]
+- !private ["Ps28CustomDebugStringConvertible", "assumingMemoryBound"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "initialize"]
+- !private ["Ps28CustomDebugStringConvertible", "pointee"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "assumingMemoryBound"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "initialize"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "pointee"]
+- !private ["Ps17CustomReflectable", "assumingMemoryBound"]
+- !private ["Ps17CustomReflectable", "init"]
+- !private ["Ps17CustomReflectable", "initialize"]
+- !private ["Ps17CustomReflectable", "pointee"]
+- !private ["Ps23CustomStringConvertible", "valueIsNotType"]
+- !private ["Ps9Equatable", "assumingMemoryBound"]
+- !private ["Ps9Equatable", "init"]
+- !private ["Ps9Equatable", "initialize"]
+- !private ["Ps9Equatable", "pointee"]
+- !private ["Ps9Equatable", "valueIsNotType"]
+- !private ["Ps5Error", "valueIsNotType"]
+- !private ["Ps23ExpressibleByNilLiteral", "assumingMemoryBound"]
+- !private ["Ps8Hashable", "assumingMemoryBound"]
+- !private ["Ps8Hashable", "init"]
+- !private ["Ps8Hashable", "initialize"]
+- !private ["Ps8Hashable", "pointee"]
+- !private ["Sq", "assumingMemoryBound"]
+- ["V10Reflection8Property", "Description"]
+- !private ["O10Reflection15ReflectionError", "deinit"]
+- !private ["O10Reflection15ReflectionError", "valueIsNotType"]
+- !private ["Ps10Strideable", "assumingMemoryBound"]
+- !private ["Ps10Strideable", "init"]
+- !private ["Ps10Strideable", "initialize"]
+- !private ["Ps10Strideable", "pointee"]
+- !private ["Sp", "initialize"]
+- !private ["Sp", "pointee"]
+- !private ["Sv", "assumingMemoryBound"]
+- !private ["Sv", "init"]
+- !private ["SP", "pointee"]
+- !private ["SV", "assumingMemoryBound"]
+- !private ["Ps9_Hashable", "assumingMemoryBound"]
+- !private ["Ps9_Hashable", "init"]
+- !private ["Ps9_Hashable", "initialize"]
+- !private ["Ps9_Hashable", "pointee"]
+- !private ["Ps21_ObjectiveCBridgeable", "assumingMemoryBound"]
+- !private ["Ps8_Pointer", "assumingMemoryBound"]
+- !private ["Ps8_Pointer", "init"]
+- !private ["Ps8_Pointer", "initialize"]
+- !private ["Ps8_Pointer", "pointee"]
+- !private ["Ps11_Strideable", "assumingMemoryBound"]
+- !private ["Ps11_Strideable", "init"]
+- !private ["Ps11_Strideable", "initialize"]
+- !private ["Ps11_Strideable", "pointee"]
+depends-nominal:
+- "P10Reflection13AnyExtensions"
+- !private "Ps7CVarArg"
+- !private "Ps10Comparable"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- !private "Ps23CustomStringConvertible"
+- !private "Ps9Equatable"
+- !private "Ps5Error"
+- !private "Ps23ExpressibleByNilLiteral"
+- !private "Ps8Hashable"
+- !private "Sq"
+- "V10Reflection8Property"
+- !private "O10Reflection15ReflectionError"
+- !private "Ps10Strideable"
+- !private "Sp"
+- !private "Sv"
+- !private "SP"
+- !private "SV"
+- !private "Ps9_Hashable"
+- !private "Ps21_ObjectiveCBridgeable"
+- !private "Ps8_Pointer"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "46854bcadd25907b5f05124272887743"

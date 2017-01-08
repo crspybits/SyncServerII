@@ -49,9 +49,7 @@ public class ServerSetup {
             
             for route in ServerEndpoints.session.all {
                 if route.authenticationLevel == .none &&
-                    route.path == request.urlURL.path {
-                    // route.path == request.urlComponents.path {
-                    
+                    route.path == request.urlURL.path {                    
                     next()
                     return
                 }

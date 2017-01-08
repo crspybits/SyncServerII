@@ -1,0 +1,17 @@
+{
+  "": {
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/master.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/SwiftyJSON-15.0.4/Source/LclJSONSerialization.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/LclJSONSerialization.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/LclJSONSerialization.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/LclJSONSerialization~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/LclJSONSerialization.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/SwiftyJSON-15.0.4/Source/SwiftyJSON.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/SwiftyJSON.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/SwiftyJSON.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/SwiftyJSON~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.build/SwiftyJSON.swiftdeps"
+  }
+}

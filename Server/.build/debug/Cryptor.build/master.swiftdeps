@@ -1,0 +1,15 @@
+version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
+options: "ddd2eb1d2aad549923094fc99204e34e"
+build_time: [537149681, 411558000]
+inputs:
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/Crypto.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/Cryptor.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/Digest.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/HMAC.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/KeyDerivation.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/Random.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/RSA.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/Status.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/StreamCryptor.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/Updatable.swift": [537145406, 0]
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Cryptor-0.8.6/Sources/Utilities.swift": [537145406, 0]

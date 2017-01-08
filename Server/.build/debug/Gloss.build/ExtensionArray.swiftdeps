@@ -1,0 +1,191 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+provides-nominal:
+provides-member:
+- ["Sa", ""]
+- ["Sa", "from"]
+- ["Sa", "toJSONArray"]
+provides-dynamic-lookup:
+depends-top-level:
+- "Array"
+- "Encodable"
+- "Decodable"
+- "JSON"
+depends-member:
+- ["Sa", "Decodable"]
+- ["Sa", "Element"]
+- ["Sa", "Encodable"]
+- !private ["Sa", "Iterator"]
+- ["Sa", "JSON"]
+- !private ["Sa", "_Element"]
+- !private ["Sa", "append"]
+- ["Sa", "deinit"]
+- ["Sa", "from"]
+- ["Sa", "toJSONArray"]
+- ["Ps23BidirectionalCollection", "Decodable"]
+- !private ["Ps23BidirectionalCollection", "Element"]
+- ["Ps23BidirectionalCollection", "Encodable"]
+- !private ["Ps23BidirectionalCollection", "Iterator"]
+- !private ["Ps23BidirectionalCollection", "_Element"]
+- !private ["Ps23BidirectionalCollection", "append"]
+- ["Ps22BidirectionalIndexable", "Decodable"]
+- !private ["Ps22BidirectionalIndexable", "Element"]
+- ["Ps22BidirectionalIndexable", "Encodable"]
+- !private ["Ps22BidirectionalIndexable", "Iterator"]
+- !private ["Ps22BidirectionalIndexable", "_Element"]
+- !private ["Ps22BidirectionalIndexable", "append"]
+- ["Ps7CVarArg", "Decodable"]
+- !private ["Ps7CVarArg", "Element"]
+- ["Ps7CVarArg", "Encodable"]
+- !private ["Ps7CVarArg", "Iterator"]
+- !private ["Ps7CVarArg", "_Element"]
+- !private ["Ps7CVarArg", "append"]
+- ["Ps10Collection", "Decodable"]
+- !private ["Ps10Collection", "Element"]
+- ["Ps10Collection", "Encodable"]
+- !private ["Ps10Collection", "Iterator"]
+- !private ["Ps10Collection", "_Element"]
+- !private ["Ps10Collection", "append"]
+- ["Ps28CustomDebugStringConvertible", "Decodable"]
+- !private ["Ps28CustomDebugStringConvertible", "Element"]
+- ["Ps28CustomDebugStringConvertible", "Encodable"]
+- !private ["Ps28CustomDebugStringConvertible", "Iterator"]
+- !private ["Ps28CustomDebugStringConvertible", "_Element"]
+- !private ["Ps28CustomDebugStringConvertible", "append"]
+- ["Ps17CustomReflectable", "Decodable"]
+- !private ["Ps17CustomReflectable", "Element"]
+- ["Ps17CustomReflectable", "Encodable"]
+- !private ["Ps17CustomReflectable", "Iterator"]
+- !private ["Ps17CustomReflectable", "_Element"]
+- !private ["Ps17CustomReflectable", "append"]
+- ["Ps23CustomStringConvertible", "Decodable"]
+- !private ["Ps23CustomStringConvertible", "Element"]
+- ["Ps23CustomStringConvertible", "Encodable"]
+- !private ["Ps23CustomStringConvertible", "Iterator"]
+- !private ["Ps23CustomStringConvertible", "_Element"]
+- !private ["Ps23CustomStringConvertible", "append"]
+- !private ["P5Gloss9Decodable", "init"]
+- ["Vs10Dictionary", "deinit"]
+- !private ["P5Gloss9Encodable", "toJSON"]
+- ["Ps25ExpressibleByArrayLiteral", "Decodable"]
+- !private ["Ps25ExpressibleByArrayLiteral", "Element"]
+- ["Ps25ExpressibleByArrayLiteral", "Encodable"]
+- !private ["Ps25ExpressibleByArrayLiteral", "Iterator"]
+- !private ["Ps25ExpressibleByArrayLiteral", "_Element"]
+- !private ["Ps25ExpressibleByArrayLiteral", "append"]
+- ["Ps9Indexable", "Decodable"]
+- !private ["Ps9Indexable", "Element"]
+- ["Ps9Indexable", "Encodable"]
+- !private ["Ps9Indexable", "Iterator"]
+- !private ["Ps9Indexable", "_Element"]
+- !private ["Ps9Indexable", "append"]
+- ["Ps13IndexableBase", "Decodable"]
+- !private ["Ps13IndexableBase", "Element"]
+- ["Ps13IndexableBase", "Encodable"]
+- !private ["Ps13IndexableBase", "Iterator"]
+- !private ["Ps13IndexableBase", "_Element"]
+- !private ["Ps13IndexableBase", "append"]
+- !private ["Vs16IndexingIterator", "Element"]
+- !private ["Ps16IteratorProtocol", "Element"]
+- ["Ps17MutableCollection", "Decodable"]
+- !private ["Ps17MutableCollection", "Element"]
+- ["Ps17MutableCollection", "Encodable"]
+- !private ["Ps17MutableCollection", "Iterator"]
+- !private ["Ps17MutableCollection", "_Element"]
+- !private ["Ps17MutableCollection", "append"]
+- ["Ps16MutableIndexable", "Decodable"]
+- !private ["Ps16MutableIndexable", "Element"]
+- ["Ps16MutableIndexable", "Encodable"]
+- !private ["Ps16MutableIndexable", "Iterator"]
+- !private ["Ps16MutableIndexable", "_Element"]
+- !private ["Ps16MutableIndexable", "append"]
+- ["Sq", "deinit"]
+- ["Ps22RandomAccessCollection", "Decodable"]
+- !private ["Ps22RandomAccessCollection", "Element"]
+- ["Ps22RandomAccessCollection", "Encodable"]
+- !private ["Ps22RandomAccessCollection", "Iterator"]
+- !private ["Ps22RandomAccessCollection", "_Element"]
+- !private ["Ps22RandomAccessCollection", "append"]
+- ["Ps21RandomAccessIndexable", "Decodable"]
+- !private ["Ps21RandomAccessIndexable", "Element"]
+- ["Ps21RandomAccessIndexable", "Encodable"]
+- !private ["Ps21RandomAccessIndexable", "Iterator"]
+- !private ["Ps21RandomAccessIndexable", "_Element"]
+- !private ["Ps21RandomAccessIndexable", "append"]
+- ["Ps26RangeReplaceableCollection", "Decodable"]
+- !private ["Ps26RangeReplaceableCollection", "Element"]
+- ["Ps26RangeReplaceableCollection", "Encodable"]
+- !private ["Ps26RangeReplaceableCollection", "Iterator"]
+- !private ["Ps26RangeReplaceableCollection", "_Element"]
+- !private ["Ps26RangeReplaceableCollection", "append"]
+- ["Ps25RangeReplaceableIndexable", "Decodable"]
+- !private ["Ps25RangeReplaceableIndexable", "Element"]
+- ["Ps25RangeReplaceableIndexable", "Encodable"]
+- !private ["Ps25RangeReplaceableIndexable", "Iterator"]
+- !private ["Ps25RangeReplaceableIndexable", "_Element"]
+- !private ["Ps25RangeReplaceableIndexable", "append"]
+- ["Ps8Sequence", "Decodable"]
+- !private ["Ps8Sequence", "Element"]
+- ["Ps8Sequence", "Encodable"]
+- !private ["Ps8Sequence", "Iterator"]
+- !private ["Ps8Sequence", "_Element"]
+- !private ["Ps8Sequence", "append"]
+- ["Ps14_ArrayProtocol", "Decodable"]
+- !private ["Ps14_ArrayProtocol", "Element"]
+- ["Ps14_ArrayProtocol", "Encodable"]
+- !private ["Ps14_ArrayProtocol", "Iterator"]
+- !private ["Ps14_ArrayProtocol", "_Element"]
+- !private ["Ps14_ArrayProtocol", "append"]
+- ["Ps24_DestructorSafeContainer", "Decodable"]
+- !private ["Ps24_DestructorSafeContainer", "Element"]
+- ["Ps24_DestructorSafeContainer", "Encodable"]
+- !private ["Ps24_DestructorSafeContainer", "Iterator"]
+- !private ["Ps24_DestructorSafeContainer", "_Element"]
+- !private ["Ps24_DestructorSafeContainer", "append"]
+- ["Ps21_ObjectiveCBridgeable", "Decodable"]
+- !private ["Ps21_ObjectiveCBridgeable", "Element"]
+- ["Ps21_ObjectiveCBridgeable", "Encodable"]
+- !private ["Ps21_ObjectiveCBridgeable", "Iterator"]
+- !private ["Ps21_ObjectiveCBridgeable", "_Element"]
+- !private ["Ps21_ObjectiveCBridgeable", "append"]
+depends-nominal:
+- "Sa"
+- "Ps23BidirectionalCollection"
+- "Ps22BidirectionalIndexable"
+- "Ps7CVarArg"
+- "Ps10Collection"
+- "Ps28CustomDebugStringConvertible"
+- "Ps17CustomReflectable"
+- "Ps23CustomStringConvertible"
+- !private "P5Gloss9Decodable"
+- "Vs10Dictionary"
+- !private "P5Gloss9Encodable"
+- "Ps25ExpressibleByArrayLiteral"
+- "Ps9Indexable"
+- "Ps13IndexableBase"
+- !private "Vs16IndexingIterator"
+- !private "Ps16IteratorProtocol"
+- "Ps17MutableCollection"
+- "Ps16MutableIndexable"
+- "Sq"
+- "Ps22RandomAccessCollection"
+- "Ps21RandomAccessIndexable"
+- "Ps26RangeReplaceableCollection"
+- "Ps25RangeReplaceableIndexable"
+- "Ps8Sequence"
+- "Ps14_ArrayProtocol"
+- "Ps24_DestructorSafeContainer"
+- "Ps21_ObjectiveCBridgeable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+interface-hash: "9f24998b42052c891ef14bab01a6a729"

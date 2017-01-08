@@ -1,0 +1,143 @@
+{
+  "": {
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/master.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/ServerConstants.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerConstants.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerConstants.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerConstants~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerConstants.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/ServerMain.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerMain.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerMain.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerMain~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerMain.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/ServerRoutes.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerRoutes.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerRoutes.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerRoutes~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerRoutes.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/ServerSetup.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerSetup.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerSetup.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerSetup~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ServerSetup.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Account Specifics/Google.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Google.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Account Specifics/Google.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Google~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Google.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Controllers/Constants.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Constants.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers/Constants.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Constants~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Constants.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Controllers/ControllerProtocol.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ControllerProtocol.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers/ControllerProtocol.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ControllerProtocol~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ControllerProtocol.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Controllers/Controllers.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers/Controllers.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Controllers/UserController.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UserController.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers/UserController.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UserController~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UserController.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Controllers/UtilController.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UtilController.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Controllers/UtilController.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UtilController~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UtilController.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Database/Database.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Database.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Database/Database.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Database~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Database.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Database/Model.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Model.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Database/Model.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Model~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Model.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Database/Repository.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Repository.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Database/Repository.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Repository~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Repository.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Database/UserRepository.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UserRepository.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Database/UserRepository.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UserRepository~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/UserRepository.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Requests and responses/AddUser.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/AddUser.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Requests and responses/AddUser.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/AddUser~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/AddUser.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Requests and responses/CheckCreds.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/CheckCreds.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Requests and responses/CheckCreds.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/CheckCreds~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/CheckCreds.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Requests and responses/CheckPrimaryCreds.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/CheckPrimaryCreds.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Requests and responses/CheckPrimaryCreds.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/CheckPrimaryCreds~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/CheckPrimaryCreds.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Requests and responses/HealthCheck.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/HealthCheck.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Requests and responses/HealthCheck.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/HealthCheck~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/HealthCheck.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Requests and responses/RemoveUser.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/RemoveUser.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Requests and responses/RemoveUser.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/RemoveUser~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/RemoveUser.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Requests and responses/RequestMessage.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/RequestMessage.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Requests and responses/RequestMessage.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/RequestMessage~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/RequestMessage.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Requests and responses/ResponseMessage.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ResponseMessage.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Requests and responses/ResponseMessage.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ResponseMessage~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/ResponseMessage.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Utils/NSObject+Extras.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/NSObject+Extras.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Utils/NSObject+Extras.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/NSObject+Extras~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/NSObject+Extras.swiftdeps"
+  },
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Sources/Server/Utils/SwiftKVC.swift": {
+    "dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/SwiftKVC.d",
+    "object": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/Utils/SwiftKVC.swift.o",
+    "swiftmodule": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/SwiftKVC~partial.swiftmodule",
+    "swift-dependencies": "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.build/SwiftKVC.swiftdeps"
+  }
+}

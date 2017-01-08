@@ -5,7 +5,7 @@ import KituraNet
 import LoggerAPI
 import CredentialsGoogle
 
-class GoogleAuthenticationTests: XCTestCase {    
+class GoogleAuthenticationTests: ServerTestCase {    
     let serverResponseTime:TimeInterval = 10
 
     func testGoodEndpointWithBadCredsFails() {

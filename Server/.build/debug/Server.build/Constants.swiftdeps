@@ -1,0 +1,171 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "Constants"
+provides-nominal:
+- "C6Server9Constants"
+- "VC6Server9Constants5mySQL"
+provides-member:
+- ["C6Server9Constants", ""]
+- ["VC6Server9Constants5mySQL", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "StringLiteralType"
+- "Constants"
+- !private "PlistDictLoader"
+- "String"
+- !private "AssignmentPrecedence"
+depends-member:
+- ["Ps9AnyObject", "Constants"]
+- !private ["Ps9AnyObject", "PlistDictLoader"]
+- !private ["Ps9AnyObject", "db"]
+- !private ["Ps9AnyObject", "getString"]
+- !private ["Ps9AnyObject", "googleClientId"]
+- !private ["Ps9AnyObject", "googleClientSecret"]
+- ["Ps9AnyObject", "init"]
+- ["Ps9AnyObject", "mySQL"]
+- !private ["Ps9AnyObject", "serverPlistFile"]
+- ["Ps9AnyObject", ""]
+- ["Ps7CVarArg", "init"]
+- ["Ps10Comparable", "init"]
+- ["C6Server9Constants", "Constants"]
+- !private ["C6Server9Constants", "PlistDictLoader"]
+- ["C6Server9Constants", "String"]
+- ["C6Server9Constants", "db"]
+- ["C6Server9Constants", "deinit"]
+- ["C6Server9Constants", "googleClientId"]
+- ["C6Server9Constants", "googleClientSecret"]
+- ["C6Server9Constants", "init"]
+- ["C6Server9Constants", "mySQL"]
+- ["C6Server9Constants", "serverPlistFile"]
+- ["C6Server9Constants", "session"]
+- ["P7Cryptor12CryptoDigest", "init"]
+- ["Ps28CustomDebugStringConvertible", "init"]
+- ["Ps29CustomPlaygroundQuickLookable", "init"]
+- ["Ps17CustomReflectable", "init"]
+- ["Ps23CustomStringConvertible", "init"]
+- ["Ps9Equatable", "init"]
+- ["Ps43ExpressibleByExtendedGraphemeClusterLiteral", "init"]
+- ["Ps32ExpressibleByStringInterpolation", "init"]
+- ["Ps26ExpressibleByStringLiteral", "init"]
+- ["Ps33ExpressibleByUnicodeScalarLiteral", "init"]
+- ["Ps8Hashable", "init"]
+- ["P10PerfectLib15JSONConvertible", "init"]
+- ["P10SwiftyJSON17JSONSubscriptType", "init"]
+- ["Ps25LosslessStringConvertible", "init"]
+- ["Ps10MirrorPath", "init"]
+- ["PSo8NSCoding", "init"]
+- ["PSo9NSCopying", "init"]
+- ["PSo16NSMutableCopying", "init"]
+- ["CSo8NSObject", "init"]
+- ["PSo16NSObjectProtocol", "init"]
+- ["PSo14NSSecureCoding", "init"]
+- ["CSo8NSString", "init"]
+- !private ["C11SMServerLib15PlistDictLoader", "deinit"]
+- !private ["C11SMServerLib15PlistDictLoader", "getString"]
+- !private ["C11SMServerLib15PlistDictLoader", "init"]
+- ["SS", "deinit"]
+- ["SS", "init"]
+- ["Ps16TextOutputStream", "init"]
+- ["Ps20TextOutputStreamable", "init"]
+- ["P10Reflection17UTF8Initializable", "init"]
+- ["Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral", "init"]
+- ["Ps34_ExpressibleByBuiltinStringLiteral", "init"]
+- ["Ps39_ExpressibleByBuiltinUTF16StringLiteral", "init"]
+- ["Ps41_ExpressibleByBuiltinUnicodeScalarLiteral", "init"]
+- ["Ps35_HasCustomAnyHashableRepresentation", "init"]
+- ["Ps9_Hashable", "init"]
+- ["Ps21_ObjectiveCBridgeable", "init"]
+- ["VC6Server9Constants5mySQL", "String"]
+- ["VC6Server9Constants5mySQL", "database"]
+- ["VC6Server9Constants5mySQL", "deinit"]
+- ["VC6Server9Constants5mySQL", "host"]
+- ["VC6Server9Constants5mySQL", "init"]
+- ["VC6Server9Constants5mySQL", "password"]
+- ["VC6Server9Constants5mySQL", "user"]
+depends-nominal:
+- "Ps9AnyObject"
+- "Ps7CVarArg"
+- "Ps10Comparable"
+- "C6Server9Constants"
+- "P7Cryptor12CryptoDigest"
+- "Ps28CustomDebugStringConvertible"
+- "Ps29CustomPlaygroundQuickLookable"
+- "Ps17CustomReflectable"
+- "Ps23CustomStringConvertible"
+- "Ps9Equatable"
+- "Ps43ExpressibleByExtendedGraphemeClusterLiteral"
+- "Ps32ExpressibleByStringInterpolation"
+- "Ps26ExpressibleByStringLiteral"
+- "Ps33ExpressibleByUnicodeScalarLiteral"
+- "Ps8Hashable"
+- "P10PerfectLib15JSONConvertible"
+- "P10SwiftyJSON17JSONSubscriptType"
+- "Ps25LosslessStringConvertible"
+- "Ps10MirrorPath"
+- "PSo8NSCoding"
+- "PSo9NSCopying"
+- "PSo16NSMutableCopying"
+- "CSo8NSObject"
+- "PSo16NSObjectProtocol"
+- "PSo14NSSecureCoding"
+- "CSo8NSString"
+- !private "C11SMServerLib15PlistDictLoader"
+- "SS"
+- "Ps16TextOutputStream"
+- "Ps20TextOutputStreamable"
+- "P10Reflection17UTF8Initializable"
+- "Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral"
+- "Ps34_ExpressibleByBuiltinStringLiteral"
+- "Ps39_ExpressibleByBuiltinUTF16StringLiteral"
+- "Ps41_ExpressibleByBuiltinUnicodeScalarLiteral"
+- "Ps35_HasCustomAnyHashableRepresentation"
+- "Ps9_Hashable"
+- "Ps21_ObjectiveCBridgeable"
+- "VC6Server9Constants5mySQL"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/HeliumLogger.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/PerfectLib.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Kitura.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraNet.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraTemplateEngine.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Gloss.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraSession.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Cryptor.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Credentials.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/CredentialsGoogle.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SMServerLib.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.swiftmodule"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_base.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_memory.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_alloc.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/typelib.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/plugin_auth_common.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/client_plugin.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_list.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_time.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_command.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/binary_log_types.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_com.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_version.h"
+- "/usr/local/include/mysql/mysql.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.swiftmodule"
+interface-hash: "5878e2f5f1b5ae52ea1a3b4179e028ee"

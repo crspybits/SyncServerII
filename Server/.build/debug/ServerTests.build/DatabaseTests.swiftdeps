@@ -1,0 +1,1332 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "model"
+- "TestEnum"
+- "model2"
+- "GeneralDatabaseTests"
+provides-nominal:
+- "C11ServerTests5model"
+- "O11ServerTests8TestEnum"
+- "C11ServerTests6model2"
+- "C11ServerTests20GeneralDatabaseTests"
+provides-member:
+- ["C11ServerTests5model", ""]
+- ["O11ServerTests8TestEnum", ""]
+- ["C11ServerTests6model2", ""]
+- ["C11ServerTests20GeneralDatabaseTests", ""]
+provides-dynamic-lookup:
+- "testSelectForEachRowIgnoringErrors"
+- "c6Value"
+- "createTable2"
+- "c3Value"
+- "equalDMY"
+- "testTypeConverters"
+- "c16Value"
+- "c9Value"
+- "c10Value"
+- "c15Value"
+- "testSelectForEachRowNotIgnoringErrors"
+- "c7Value"
+- "testTableName2"
+- "c12Value"
+- "c18Value"
+- "c4Value"
+- "c1Value"
+- "c17String"
+- "c18String"
+- "c8Value"
+- "runSelectTestForEachRow"
+- "c17Value"
+- "createTable"
+- "insertRows2"
+- "c15String"
+- "c2Table2Value"
+- "c5Value"
+- "c2Value"
+- "c13Value"
+- "c16String"
+- "testTableName"
+- "setUp"
+- "c11Value"
+- "insertRows"
+depends-top-level:
+- "Int8"
+- !private "XCTFail"
+- !private "Database"
+- "Bool"
+- "GeneralDatabaseTests"
+- "String"
+- "Float"
+- "UnicodeScalarType"
+- "Double"
+- "TestEnum"
+- "XCTestCase"
+- "=="
+- !private "~="
+- "AssignmentPrecedence"
+- !private "Select"
+- !private "Calendar"
+- !private "CastingPrecedence"
+- "Int64"
+- !private "Log"
+- !private "+"
+- !private "Array"
+- !private "HeliumLogger"
+- !private "+="
+- "Int16"
+- "model2"
+- !private "XCTAssert"
+- "StringLiteralType"
+- "model"
+- !private "&&"
+- "Int32"
+- !private "-"
+- !private "BooleanLiteralType"
+- "Date"
+- "Model"
+depends-member:
+- !private ["Ps16AbsoluteValuable", "RawValue"]
+- ["Ps16AbsoluteValuable", "init"]
+- !private ["Ps9AnyObject", "Calendar"]
+- !private ["Ps9AnyObject", "Database"]
+- ["Ps9AnyObject", "Date"]
+- ["Ps9AnyObject", "Double"]
+- ["Ps9AnyObject", "Float"]
+- !private ["Ps9AnyObject", "HeliumLogger"]
+- !private ["Ps9AnyObject", "Log"]
+- !private ["Ps9AnyObject", "Select"]
+- !private ["Ps9AnyObject", "TestEnum"]
+- !private ["Ps9AnyObject", "XCTAssert"]
+- !private ["Ps9AnyObject", "XCTFail"]
+- !private ["Ps9AnyObject", "c1"]
+- !private ["Ps9AnyObject", "c10"]
+- ["Ps9AnyObject", "c10Value"]
+- !private ["Ps9AnyObject", "c11"]
+- ["Ps9AnyObject", "c11Value"]
+- !private ["Ps9AnyObject", "c12"]
+- ["Ps9AnyObject", "c12Value"]
+- !private ["Ps9AnyObject", "c13"]
+- ["Ps9AnyObject", "c13Value"]
+- !private ["Ps9AnyObject", "c15"]
+- ["Ps9AnyObject", "c15String"]
+- ["Ps9AnyObject", "c15Value"]
+- !private ["Ps9AnyObject", "c16"]
+- ["Ps9AnyObject", "c16String"]
+- ["Ps9AnyObject", "c16Value"]
+- !private ["Ps9AnyObject", "c17"]
+- ["Ps9AnyObject", "c17String"]
+- ["Ps9AnyObject", "c17Value"]
+- !private ["Ps9AnyObject", "c18"]
+- ["Ps9AnyObject", "c18String"]
+- ["Ps9AnyObject", "c18Value"]
+- ["Ps9AnyObject", "c1Value"]
+- !private ["Ps9AnyObject", "c2"]
+- ["Ps9AnyObject", "c2Table2Value"]
+- ["Ps9AnyObject", "c2Value"]
+- !private ["Ps9AnyObject", "c3"]
+- ["Ps9AnyObject", "c3Value"]
+- !private ["Ps9AnyObject", "c4"]
+- ["Ps9AnyObject", "c4Value"]
+- !private ["Ps9AnyObject", "c5"]
+- ["Ps9AnyObject", "c5Value"]
+- !private ["Ps9AnyObject", "c6"]
+- ["Ps9AnyObject", "c6Value"]
+- !private ["Ps9AnyObject", "c7"]
+- ["Ps9AnyObject", "c7Value"]
+- !private ["Ps9AnyObject", "c8"]
+- ["Ps9AnyObject", "c8Value"]
+- !private ["Ps9AnyObject", "c9"]
+- ["Ps9AnyObject", "c9Value"]
+- !private ["Ps9AnyObject", "connection"]
+- ["Ps9AnyObject", "createTable"]
+- ["Ps9AnyObject", "createTable2"]
+- !private ["Ps9AnyObject", "createTableIfNeeded"]
+- !private ["Ps9AnyObject", "date"]
+- !private ["Ps9AnyObject", "debug"]
+- ["Ps9AnyObject", "equalDMY"]
+- !private ["Ps9AnyObject", "errorMessage"]
+- !private ["Ps9AnyObject", "forEachRow"]
+- !private ["Ps9AnyObject", "forEachRowStatus"]
+- !private ["Ps9AnyObject", "info"]
+- ["Ps9AnyObject", "init"]
+- ["Ps9AnyObject", "insertRows"]
+- ["Ps9AnyObject", "insertRows2"]
+- !private ["Ps9AnyObject", "logger"]
+- !private ["Ps9AnyObject", "model"]
+- !private ["Ps9AnyObject", "model2"]
+- !private ["Ps9AnyObject", "numberResultRows"]
+- !private ["Ps9AnyObject", "query"]
+- ["Ps9AnyObject", "runSelectTestForEachRow"]
+- !private ["Ps9AnyObject", "session"]
+- ["Ps9AnyObject", "setUp"]
+- ["Ps9AnyObject", "testSelectForEachRowIgnoringErrors"]
+- ["Ps9AnyObject", "testSelectForEachRowNotIgnoringErrors"]
+- ["Ps9AnyObject", "testTableName"]
+- ["Ps9AnyObject", "testTableName2"]
+- ["Ps9AnyObject", "testTypeConverters"]
+- ["Ps9AnyObject", "typeConvertersToModel"]
+- ["Ps9AnyObject", ""]
+- !private ["Ps19BinaryFloatingPoint", "RawValue"]
+- ["Ps19BinaryFloatingPoint", "init"]
+- !private ["Ps17BitwiseOperations", "hashValue"]
+- !private ["Sb", "_getBuiltinLogicValue"]
+- ["Sb", "deinit"]
+- !private ["Ps7CVarArg", "Calendar"]
+- !private ["Ps7CVarArg", "Database"]
+- ["Ps7CVarArg", "Date"]
+- ["Ps7CVarArg", "Double"]
+- !private ["Ps7CVarArg", "Element"]
+- ["Ps7CVarArg", "Float"]
+- !private ["Ps7CVarArg", "HeliumLogger"]
+- !private ["Ps7CVarArg", "Log"]
+- !private ["Ps7CVarArg", "RawValue"]
+- !private ["Ps7CVarArg", "Select"]
+- !private ["Ps7CVarArg", "XCTAssert"]
+- !private ["Ps7CVarArg", "XCTFail"]
+- ["Ps7CVarArg", "c10Value"]
+- ["Ps7CVarArg", "c11Value"]
+- ["Ps7CVarArg", "c12Value"]
+- ["Ps7CVarArg", "c13Value"]
+- ["Ps7CVarArg", "c15String"]
+- ["Ps7CVarArg", "c15Value"]
+- ["Ps7CVarArg", "c16String"]
+- ["Ps7CVarArg", "c16Value"]
+- ["Ps7CVarArg", "c17String"]
+- ["Ps7CVarArg", "c17Value"]
+- ["Ps7CVarArg", "c18String"]
+- ["Ps7CVarArg", "c18Value"]
+- ["Ps7CVarArg", "c1Value"]
+- ["Ps7CVarArg", "c2Table2Value"]
+- ["Ps7CVarArg", "c2Value"]
+- ["Ps7CVarArg", "c3Value"]
+- ["Ps7CVarArg", "c4Value"]
+- ["Ps7CVarArg", "c5Value"]
+- ["Ps7CVarArg", "c6Value"]
+- ["Ps7CVarArg", "c7Value"]
+- ["Ps7CVarArg", "c8Value"]
+- ["Ps7CVarArg", "c9Value"]
+- ["Ps7CVarArg", "createTable"]
+- ["Ps7CVarArg", "createTable2"]
+- ["Ps7CVarArg", "equalDMY"]
+- !private ["Ps7CVarArg", "hashValue"]
+- ["Ps7CVarArg", "init"]
+- ["Ps7CVarArg", "insertRows"]
+- ["Ps7CVarArg", "insertRows2"]
+- !private ["Ps7CVarArg", "model"]
+- !private ["Ps7CVarArg", "model2"]
+- ["Ps7CVarArg", "runSelectTestForEachRow"]
+- ["Ps7CVarArg", "setUp"]
+- ["Ps7CVarArg", "testSelectForEachRowIgnoringErrors"]
+- ["Ps7CVarArg", "testSelectForEachRowNotIgnoringErrors"]
+- ["Ps7CVarArg", "testTableName"]
+- ["Ps7CVarArg", "testTableName2"]
+- ["Ps7CVarArg", "testTypeConverters"]
+- ["Ps7CVarArg", ""]
+- !private ["V10Foundation8Calendar", "current"]
+- !private ["V10Foundation8Calendar", "dateComponents"]
+- ["V10Foundation8Calendar", "deinit"]
+- !private ["Vs9Character", "deinit"]
+- !private ["Vs11ClosedRange", "deinit"]
+- !private ["Ps10Collection", "Element"]
+- !private ["Ps10Comparable", "RawValue"]
+- !private ["Ps10Comparable", "hashValue"]
+- ["Ps10Comparable", "init"]
+- !private ["OV10Foundation8Calendar9Component", "day"]
+- ["OV10Foundation8Calendar9Component", "deinit"]
+- !private ["OV10Foundation8Calendar9Component", "month"]
+- !private ["OV10Foundation8Calendar9Component", "year"]
+- !private ["Vs20CountableClosedRange", "deinit"]
+- !private ["Vs14CountableRange", "deinit"]
+- ["P7Cryptor12CryptoDigest", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "Calendar"]
+- !private ["Ps28CustomDebugStringConvertible", "Database"]
+- ["Ps28CustomDebugStringConvertible", "Date"]
+- ["Ps28CustomDebugStringConvertible", "Double"]
+- !private ["Ps28CustomDebugStringConvertible", "Element"]
+- ["Ps28CustomDebugStringConvertible", "Float"]
+- !private ["Ps28CustomDebugStringConvertible", "HeliumLogger"]
+- !private ["Ps28CustomDebugStringConvertible", "Log"]
+- !private ["Ps28CustomDebugStringConvertible", "RawValue"]
+- !private ["Ps28CustomDebugStringConvertible", "Select"]
+- !private ["Ps28CustomDebugStringConvertible", "TestEnum1"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTAssert"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTFail"]
+- ["Ps28CustomDebugStringConvertible", "c10Value"]
+- ["Ps28CustomDebugStringConvertible", "c11Value"]
+- ["Ps28CustomDebugStringConvertible", "c12Value"]
+- ["Ps28CustomDebugStringConvertible", "c13Value"]
+- ["Ps28CustomDebugStringConvertible", "c15String"]
+- ["Ps28CustomDebugStringConvertible", "c15Value"]
+- ["Ps28CustomDebugStringConvertible", "c16String"]
+- ["Ps28CustomDebugStringConvertible", "c16Value"]
+- ["Ps28CustomDebugStringConvertible", "c17String"]
+- ["Ps28CustomDebugStringConvertible", "c17Value"]
+- ["Ps28CustomDebugStringConvertible", "c18String"]
+- ["Ps28CustomDebugStringConvertible", "c18Value"]
+- ["Ps28CustomDebugStringConvertible", "c1Value"]
+- ["Ps28CustomDebugStringConvertible", "c2Table2Value"]
+- ["Ps28CustomDebugStringConvertible", "c2Value"]
+- ["Ps28CustomDebugStringConvertible", "c3Value"]
+- ["Ps28CustomDebugStringConvertible", "c4Value"]
+- ["Ps28CustomDebugStringConvertible", "c5Value"]
+- ["Ps28CustomDebugStringConvertible", "c6Value"]
+- ["Ps28CustomDebugStringConvertible", "c7Value"]
+- ["Ps28CustomDebugStringConvertible", "c8Value"]
+- ["Ps28CustomDebugStringConvertible", "c9Value"]
+- ["Ps28CustomDebugStringConvertible", "createTable"]
+- ["Ps28CustomDebugStringConvertible", "createTable2"]
+- !private ["Ps28CustomDebugStringConvertible", "current"]
+- !private ["Ps28CustomDebugStringConvertible", "dateComponents"]
+- !private ["Ps28CustomDebugStringConvertible", "day"]
+- ["Ps28CustomDebugStringConvertible", "equalDMY"]
+- ["Ps28CustomDebugStringConvertible", "init"]
+- ["Ps28CustomDebugStringConvertible", "insertRows"]
+- ["Ps28CustomDebugStringConvertible", "insertRows2"]
+- !private ["Ps28CustomDebugStringConvertible", "model"]
+- !private ["Ps28CustomDebugStringConvertible", "model2"]
+- !private ["Ps28CustomDebugStringConvertible", "month"]
+- ["Ps28CustomDebugStringConvertible", "runSelectTestForEachRow"]
+- ["Ps28CustomDebugStringConvertible", "setUp"]
+- ["Ps28CustomDebugStringConvertible", "testSelectForEachRowIgnoringErrors"]
+- ["Ps28CustomDebugStringConvertible", "testSelectForEachRowNotIgnoringErrors"]
+- ["Ps28CustomDebugStringConvertible", "testTableName"]
+- ["Ps28CustomDebugStringConvertible", "testTableName2"]
+- ["Ps28CustomDebugStringConvertible", "testTypeConverters"]
+- !private ["Ps28CustomDebugStringConvertible", "year"]
+- ["Ps28CustomDebugStringConvertible", ""]
+- !private ["Ps29CustomPlaygroundQuickLookable", "RawValue"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "_getBuiltinLogicValue"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "hashValue"]
+- ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps17CustomReflectable", "Element"]
+- !private ["Ps17CustomReflectable", "RawValue"]
+- !private ["Ps17CustomReflectable", "TestEnum1"]
+- !private ["Ps17CustomReflectable", "_getBuiltinLogicValue"]
+- !private ["Ps17CustomReflectable", "current"]
+- !private ["Ps17CustomReflectable", "dateComponents"]
+- !private ["Ps17CustomReflectable", "day"]
+- !private ["Ps17CustomReflectable", "hashValue"]
+- ["Ps17CustomReflectable", "init"]
+- !private ["Ps17CustomReflectable", "month"]
+- !private ["Ps17CustomReflectable", "year"]
+- !private ["Ps23CustomStringConvertible", "Calendar"]
+- !private ["Ps23CustomStringConvertible", "Database"]
+- ["Ps23CustomStringConvertible", "Date"]
+- ["Ps23CustomStringConvertible", "Double"]
+- !private ["Ps23CustomStringConvertible", "Element"]
+- ["Ps23CustomStringConvertible", "Float"]
+- !private ["Ps23CustomStringConvertible", "HeliumLogger"]
+- !private ["Ps23CustomStringConvertible", "Log"]
+- !private ["Ps23CustomStringConvertible", "RawValue"]
+- !private ["Ps23CustomStringConvertible", "Select"]
+- !private ["Ps23CustomStringConvertible", "XCTAssert"]
+- !private ["Ps23CustomStringConvertible", "XCTFail"]
+- !private ["Ps23CustomStringConvertible", "_getBuiltinLogicValue"]
+- ["Ps23CustomStringConvertible", "c10Value"]
+- ["Ps23CustomStringConvertible", "c11Value"]
+- ["Ps23CustomStringConvertible", "c12Value"]
+- ["Ps23CustomStringConvertible", "c13Value"]
+- ["Ps23CustomStringConvertible", "c15String"]
+- ["Ps23CustomStringConvertible", "c15Value"]
+- ["Ps23CustomStringConvertible", "c16String"]
+- ["Ps23CustomStringConvertible", "c16Value"]
+- ["Ps23CustomStringConvertible", "c17String"]
+- ["Ps23CustomStringConvertible", "c17Value"]
+- ["Ps23CustomStringConvertible", "c18String"]
+- ["Ps23CustomStringConvertible", "c18Value"]
+- ["Ps23CustomStringConvertible", "c1Value"]
+- ["Ps23CustomStringConvertible", "c2Table2Value"]
+- ["Ps23CustomStringConvertible", "c2Value"]
+- ["Ps23CustomStringConvertible", "c3Value"]
+- ["Ps23CustomStringConvertible", "c4Value"]
+- ["Ps23CustomStringConvertible", "c5Value"]
+- ["Ps23CustomStringConvertible", "c6Value"]
+- ["Ps23CustomStringConvertible", "c7Value"]
+- ["Ps23CustomStringConvertible", "c8Value"]
+- ["Ps23CustomStringConvertible", "c9Value"]
+- ["Ps23CustomStringConvertible", "createTable"]
+- ["Ps23CustomStringConvertible", "createTable2"]
+- !private ["Ps23CustomStringConvertible", "current"]
+- !private ["Ps23CustomStringConvertible", "dateComponents"]
+- !private ["Ps23CustomStringConvertible", "day"]
+- ["Ps23CustomStringConvertible", "equalDMY"]
+- !private ["Ps23CustomStringConvertible", "hashValue"]
+- ["Ps23CustomStringConvertible", "init"]
+- ["Ps23CustomStringConvertible", "insertRows"]
+- ["Ps23CustomStringConvertible", "insertRows2"]
+- !private ["Ps23CustomStringConvertible", "model"]
+- !private ["Ps23CustomStringConvertible", "model2"]
+- !private ["Ps23CustomStringConvertible", "month"]
+- ["Ps23CustomStringConvertible", "runSelectTestForEachRow"]
+- ["Ps23CustomStringConvertible", "setUp"]
+- ["Ps23CustomStringConvertible", "testSelectForEachRowIgnoringErrors"]
+- ["Ps23CustomStringConvertible", "testSelectForEachRowNotIgnoringErrors"]
+- ["Ps23CustomStringConvertible", "testTableName"]
+- ["Ps23CustomStringConvertible", "testTableName2"]
+- ["Ps23CustomStringConvertible", "testTypeConverters"]
+- !private ["Ps23CustomStringConvertible", "year"]
+- ["Ps23CustomStringConvertible", ""]
+- !private ["C6Server8Database", "connection"]
+- !private ["C6Server8Database", "createTableIfNeeded"]
+- !private ["C6Server8Database", "date"]
+- ["C6Server8Database", "deinit"]
+- !private ["C6Server8Database", "session"]
+- ["V10Foundation4Date", "deinit"]
+- ["V10Foundation4Date", "init"]
+- !private ["V10Foundation14DateComponents", "day"]
+- ["V10Foundation14DateComponents", "deinit"]
+- !private ["V10Foundation14DateComponents", "month"]
+- !private ["V10Foundation14DateComponents", "year"]
+- !private ["Sd", "RawValue"]
+- ["Sd", "deinit"]
+- ["Sd", "init"]
+- !private ["Ps9Equatable", "Calendar"]
+- !private ["Ps9Equatable", "DATE"]
+- !private ["Ps9Equatable", "DATETIME"]
+- !private ["Ps9Equatable", "Database"]
+- ["Ps9Equatable", "Date"]
+- ["Ps9Equatable", "Double"]
+- !private ["Ps9Equatable", "Element"]
+- ["Ps9Equatable", "Float"]
+- !private ["Ps9Equatable", "HeliumLogger"]
+- !private ["Ps9Equatable", "Log"]
+- ["Ps9Equatable", "RawValue"]
+- !private ["Ps9Equatable", "Select"]
+- !private ["Ps9Equatable", "TIME"]
+- !private ["Ps9Equatable", "TIMESTAMP"]
+- !private ["Ps9Equatable", "TestEnum1"]
+- !private ["Ps9Equatable", "XCTAssert"]
+- !private ["Ps9Equatable", "XCTFail"]
+- !private ["Ps9Equatable", "_getBuiltinLogicValue"]
+- ["Ps9Equatable", "_toAnyHashable"]
+- ["Ps9Equatable", "c10Value"]
+- ["Ps9Equatable", "c11Value"]
+- ["Ps9Equatable", "c12Value"]
+- ["Ps9Equatable", "c13Value"]
+- ["Ps9Equatable", "c15String"]
+- ["Ps9Equatable", "c15Value"]
+- ["Ps9Equatable", "c16String"]
+- ["Ps9Equatable", "c16Value"]
+- ["Ps9Equatable", "c17String"]
+- ["Ps9Equatable", "c17Value"]
+- ["Ps9Equatable", "c18String"]
+- ["Ps9Equatable", "c18Value"]
+- ["Ps9Equatable", "c1Value"]
+- ["Ps9Equatable", "c2Table2Value"]
+- ["Ps9Equatable", "c2Value"]
+- ["Ps9Equatable", "c3Value"]
+- ["Ps9Equatable", "c4Value"]
+- ["Ps9Equatable", "c5Value"]
+- ["Ps9Equatable", "c6Value"]
+- ["Ps9Equatable", "c7Value"]
+- ["Ps9Equatable", "c8Value"]
+- ["Ps9Equatable", "c9Value"]
+- ["Ps9Equatable", "createTable"]
+- ["Ps9Equatable", "createTable2"]
+- ["Ps9Equatable", "created"]
+- !private ["Ps9Equatable", "current"]
+- !private ["Ps9Equatable", "dateComponents"]
+- !private ["Ps9Equatable", "day"]
+- ["Ps9Equatable", "equalDMY"]
+- ["Ps9Equatable", "hashValue"]
+- ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "insertRows"]
+- ["Ps9Equatable", "insertRows2"]
+- !private ["Ps9Equatable", "model"]
+- !private ["Ps9Equatable", "model2"]
+- !private ["Ps9Equatable", "month"]
+- ["Ps9Equatable", "rawValue"]
+- ["Ps9Equatable", "runSelectTestForEachRow"]
+- ["Ps9Equatable", "setUp"]
+- ["Ps9Equatable", "testSelectForEachRowIgnoringErrors"]
+- ["Ps9Equatable", "testSelectForEachRowNotIgnoringErrors"]
+- ["Ps9Equatable", "testTableName"]
+- ["Ps9Equatable", "testTableName2"]
+- ["Ps9Equatable", "testTypeConverters"]
+- !private ["Ps9Equatable", "year"]
+- ["Ps9Equatable", ""]
+- !private ["Ps25ExpressibleByArrayLiteral", "Element"]
+- !private ["Ps27ExpressibleByBooleanLiteral", "_getBuiltinLogicValue"]
+- ["Ps43ExpressibleByExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps25ExpressibleByFloatLiteral", "RawValue"]
+- ["Ps25ExpressibleByFloatLiteral", "init"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "RawValue"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "hashValue"]
+- ["Ps27ExpressibleByIntegerLiteral", "init"]
+- !private ["Ps23ExpressibleByNilLiteral", "TestEnum1"]
+- ["Ps32ExpressibleByStringInterpolation", "init"]
+- ["Ps26ExpressibleByStringLiteral", "init"]
+- ["Ps33ExpressibleByUnicodeScalarLiteral", "init"]
+- !private ["Sf", "RawValue"]
+- ["Sf", "deinit"]
+- ["Sf", "init"]
+- !private ["Ps13FloatingPoint", "RawValue"]
+- ["Ps13FloatingPoint", "init"]
+- ["C11ServerTests20GeneralDatabaseTests", "Bool"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "Calendar"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "Database"]
+- ["C11ServerTests20GeneralDatabaseTests", "Date"]
+- ["C11ServerTests20GeneralDatabaseTests", "Double"]
+- ["C11ServerTests20GeneralDatabaseTests", "Float"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "HeliumLogger"]
+- ["C11ServerTests20GeneralDatabaseTests", "Int16"]
+- ["C11ServerTests20GeneralDatabaseTests", "Int32"]
+- ["C11ServerTests20GeneralDatabaseTests", "Int64"]
+- ["C11ServerTests20GeneralDatabaseTests", "Int8"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "Log"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "Select"]
+- ["C11ServerTests20GeneralDatabaseTests", "String"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "TestEnum"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "XCTAssert"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "XCTFail"]
+- ["C11ServerTests20GeneralDatabaseTests", "c10Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c11Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c12Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c13Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c15String"]
+- ["C11ServerTests20GeneralDatabaseTests", "c15Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c16String"]
+- ["C11ServerTests20GeneralDatabaseTests", "c16Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c17String"]
+- ["C11ServerTests20GeneralDatabaseTests", "c17Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c18String"]
+- ["C11ServerTests20GeneralDatabaseTests", "c18Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c1Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c2Table2Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c2Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c3Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c4Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c5Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c6Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c7Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c8Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "c9Value"]
+- ["C11ServerTests20GeneralDatabaseTests", "createTable"]
+- ["C11ServerTests20GeneralDatabaseTests", "createTable2"]
+- ["C11ServerTests20GeneralDatabaseTests", "deinit"]
+- ["C11ServerTests20GeneralDatabaseTests", "equalDMY"]
+- ["C11ServerTests20GeneralDatabaseTests", "init"]
+- ["C11ServerTests20GeneralDatabaseTests", "insertRows"]
+- ["C11ServerTests20GeneralDatabaseTests", "insertRows2"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "model"]
+- !private ["C11ServerTests20GeneralDatabaseTests", "model2"]
+- ["C11ServerTests20GeneralDatabaseTests", "runSelectTestForEachRow"]
+- ["C11ServerTests20GeneralDatabaseTests", "setUp"]
+- ["C11ServerTests20GeneralDatabaseTests", "testSelectForEachRowIgnoringErrors"]
+- ["C11ServerTests20GeneralDatabaseTests", "testSelectForEachRowNotIgnoringErrors"]
+- ["C11ServerTests20GeneralDatabaseTests", "testTableName"]
+- ["C11ServerTests20GeneralDatabaseTests", "testTableName2"]
+- ["C11ServerTests20GeneralDatabaseTests", "testTypeConverters"]
+- !private ["Ps8Hashable", "Calendar"]
+- !private ["Ps8Hashable", "DATE"]
+- !private ["Ps8Hashable", "DATETIME"]
+- !private ["Ps8Hashable", "Database"]
+- ["Ps8Hashable", "Date"]
+- ["Ps8Hashable", "Double"]
+- !private ["Ps8Hashable", "Element"]
+- ["Ps8Hashable", "Float"]
+- !private ["Ps8Hashable", "HeliumLogger"]
+- !private ["Ps8Hashable", "Log"]
+- ["Ps8Hashable", "RawValue"]
+- !private ["Ps8Hashable", "Select"]
+- !private ["Ps8Hashable", "TIME"]
+- !private ["Ps8Hashable", "TIMESTAMP"]
+- !private ["Ps8Hashable", "TestEnum1"]
+- !private ["Ps8Hashable", "XCTAssert"]
+- !private ["Ps8Hashable", "XCTFail"]
+- !private ["Ps8Hashable", "_getBuiltinLogicValue"]
+- ["Ps8Hashable", "_toAnyHashable"]
+- ["Ps8Hashable", "c10Value"]
+- ["Ps8Hashable", "c11Value"]
+- ["Ps8Hashable", "c12Value"]
+- ["Ps8Hashable", "c13Value"]
+- ["Ps8Hashable", "c15String"]
+- ["Ps8Hashable", "c15Value"]
+- ["Ps8Hashable", "c16String"]
+- ["Ps8Hashable", "c16Value"]
+- ["Ps8Hashable", "c17String"]
+- ["Ps8Hashable", "c17Value"]
+- ["Ps8Hashable", "c18String"]
+- ["Ps8Hashable", "c18Value"]
+- ["Ps8Hashable", "c1Value"]
+- ["Ps8Hashable", "c2Table2Value"]
+- ["Ps8Hashable", "c2Value"]
+- ["Ps8Hashable", "c3Value"]
+- ["Ps8Hashable", "c4Value"]
+- ["Ps8Hashable", "c5Value"]
+- ["Ps8Hashable", "c6Value"]
+- ["Ps8Hashable", "c7Value"]
+- ["Ps8Hashable", "c8Value"]
+- ["Ps8Hashable", "c9Value"]
+- ["Ps8Hashable", "createTable"]
+- ["Ps8Hashable", "createTable2"]
+- ["Ps8Hashable", "created"]
+- !private ["Ps8Hashable", "current"]
+- !private ["Ps8Hashable", "dateComponents"]
+- !private ["Ps8Hashable", "day"]
+- ["Ps8Hashable", "equalDMY"]
+- ["Ps8Hashable", "hashValue"]
+- ["Ps8Hashable", "init"]
+- ["Ps8Hashable", "insertRows"]
+- ["Ps8Hashable", "insertRows2"]
+- !private ["Ps8Hashable", "model"]
+- !private ["Ps8Hashable", "model2"]
+- !private ["Ps8Hashable", "month"]
+- ["Ps8Hashable", "rawValue"]
+- ["Ps8Hashable", "runSelectTestForEachRow"]
+- ["Ps8Hashable", "setUp"]
+- ["Ps8Hashable", "testSelectForEachRowIgnoringErrors"]
+- ["Ps8Hashable", "testSelectForEachRowNotIgnoringErrors"]
+- ["Ps8Hashable", "testTableName"]
+- ["Ps8Hashable", "testTableName2"]
+- ["Ps8Hashable", "testTypeConverters"]
+- !private ["Ps8Hashable", "year"]
+- ["Ps8Hashable", ""]
+- ["C12HeliumLogger12HeliumLogger", "deinit"]
+- !private ["C12HeliumLogger12HeliumLogger", "init"]
+- ["SQ", "deinit"]
+- !private ["Ps9Indexable", "Element"]
+- !private ["Ps13IndexableBase", "Element"]
+- ["Si", "deinit"]
+- !private ["Si", "hashValue"]
+- ["Vs5Int16", "deinit"]
+- ["Vs5Int32", "deinit"]
+- ["Vs5Int64", "deinit"]
+- ["Vs4Int8", "deinit"]
+- !private ["Ps7Integer", "hashValue"]
+- !private ["Ps17IntegerArithmetic", "hashValue"]
+- !private ["P10PerfectLib15JSONConvertible", "RawValue"]
+- !private ["P10PerfectLib15JSONConvertible", "TestEnum1"]
+- !private ["P10PerfectLib15JSONConvertible", "_getBuiltinLogicValue"]
+- !private ["P10PerfectLib15JSONConvertible", "hashValue"]
+- ["P10PerfectLib15JSONConvertible", "init"]
+- !private ["P10SwiftyJSON17JSONSubscriptType", "hashValue"]
+- ["P10SwiftyJSON17JSONSubscriptType", "init"]
+- !private ["P11ServerTests10KituraTest", "Calendar"]
+- !private ["P11ServerTests10KituraTest", "Database"]
+- ["P11ServerTests10KituraTest", "Date"]
+- ["P11ServerTests10KituraTest", "Double"]
+- ["P11ServerTests10KituraTest", "Float"]
+- !private ["P11ServerTests10KituraTest", "HeliumLogger"]
+- !private ["P11ServerTests10KituraTest", "Log"]
+- !private ["P11ServerTests10KituraTest", "Select"]
+- !private ["P11ServerTests10KituraTest", "XCTAssert"]
+- !private ["P11ServerTests10KituraTest", "XCTFail"]
+- ["P11ServerTests10KituraTest", "c10Value"]
+- ["P11ServerTests10KituraTest", "c11Value"]
+- ["P11ServerTests10KituraTest", "c12Value"]
+- ["P11ServerTests10KituraTest", "c13Value"]
+- ["P11ServerTests10KituraTest", "c15String"]
+- ["P11ServerTests10KituraTest", "c15Value"]
+- ["P11ServerTests10KituraTest", "c16String"]
+- ["P11ServerTests10KituraTest", "c16Value"]
+- ["P11ServerTests10KituraTest", "c17String"]
+- ["P11ServerTests10KituraTest", "c17Value"]
+- ["P11ServerTests10KituraTest", "c18String"]
+- ["P11ServerTests10KituraTest", "c18Value"]
+- ["P11ServerTests10KituraTest", "c1Value"]
+- ["P11ServerTests10KituraTest", "c2Table2Value"]
+- ["P11ServerTests10KituraTest", "c2Value"]
+- ["P11ServerTests10KituraTest", "c3Value"]
+- ["P11ServerTests10KituraTest", "c4Value"]
+- ["P11ServerTests10KituraTest", "c5Value"]
+- ["P11ServerTests10KituraTest", "c6Value"]
+- ["P11ServerTests10KituraTest", "c7Value"]
+- ["P11ServerTests10KituraTest", "c8Value"]
+- ["P11ServerTests10KituraTest", "c9Value"]
+- ["P11ServerTests10KituraTest", "createTable"]
+- ["P11ServerTests10KituraTest", "createTable2"]
+- ["P11ServerTests10KituraTest", "equalDMY"]
+- !private ["P11ServerTests10KituraTest", "init"]
+- ["P11ServerTests10KituraTest", "insertRows"]
+- ["P11ServerTests10KituraTest", "insertRows2"]
+- !private ["P11ServerTests10KituraTest", "model"]
+- !private ["P11ServerTests10KituraTest", "model2"]
+- ["P11ServerTests10KituraTest", "runSelectTestForEachRow"]
+- ["P11ServerTests10KituraTest", "setUp"]
+- ["P11ServerTests10KituraTest", "testSelectForEachRowIgnoringErrors"]
+- ["P11ServerTests10KituraTest", "testSelectForEachRowNotIgnoringErrors"]
+- ["P11ServerTests10KituraTest", "testTableName"]
+- ["P11ServerTests10KituraTest", "testTableName2"]
+- ["P11ServerTests10KituraTest", "testTypeConverters"]
+- ["P11ServerTests10KituraTest", ""]
+- !private ["C9LoggerAPI3Log", "debug"]
+- !private ["C9LoggerAPI3Log", "info"]
+- !private ["C9LoggerAPI3Log", "logger"]
+- !private ["P9LoggerAPI6Logger", "init"]
+- !private ["Ps25LosslessStringConvertible", "RawValue"]
+- !private ["Ps25LosslessStringConvertible", "_getBuiltinLogicValue"]
+- ["Ps25LosslessStringConvertible", "init"]
+- !private ["Ps10MirrorPath", "hashValue"]
+- ["Ps10MirrorPath", "init"]
+- !private ["P6Server5Model", "Database"]
+- !private ["P6Server5Model", "TestEnum"]
+- !private ["P6Server5Model", "c1"]
+- !private ["P6Server5Model", "c10"]
+- !private ["P6Server5Model", "c11"]
+- !private ["P6Server5Model", "c12"]
+- !private ["P6Server5Model", "c13"]
+- !private ["P6Server5Model", "c15"]
+- !private ["P6Server5Model", "c16"]
+- !private ["P6Server5Model", "c17"]
+- !private ["P6Server5Model", "c18"]
+- !private ["P6Server5Model", "c2"]
+- !private ["P6Server5Model", "c3"]
+- !private ["P6Server5Model", "c4"]
+- !private ["P6Server5Model", "c5"]
+- !private ["P6Server5Model", "c6"]
+- !private ["P6Server5Model", "c7"]
+- !private ["P6Server5Model", "c8"]
+- !private ["P6Server5Model", "c9"]
+- !private ["P6Server5Model", "init"]
+- ["P6Server5Model", "typeConvertersToModel"]
+- ["P6Server5Model", ""]
+- !private ["C5MySQL5MySQL", "errorMessage"]
+- !private ["C5MySQL5MySQL", "query"]
+- !private ["OC6Server8Database15MySQLDateFormat", "DATE"]
+- !private ["OC6Server8Database15MySQLDateFormat", "DATETIME"]
+- !private ["OC6Server8Database15MySQLDateFormat", "TIME"]
+- !private ["OC6Server8Database15MySQLDateFormat", "TIMESTAMP"]
+- ["OC6Server8Database15MySQLDateFormat", "deinit"]
+- ["PSo8NSCoding", "init"]
+- ["PSo9NSCopying", "init"]
+- ["PSo16NSMutableCopying", "init"]
+- ["CSo8NSObject", "Bool"]
+- !private ["CSo8NSObject", "Calendar"]
+- !private ["CSo8NSObject", "Database"]
+- ["CSo8NSObject", "Date"]
+- ["CSo8NSObject", "Double"]
+- ["CSo8NSObject", "Float"]
+- !private ["CSo8NSObject", "HeliumLogger"]
+- ["CSo8NSObject", "Int16"]
+- ["CSo8NSObject", "Int32"]
+- ["CSo8NSObject", "Int64"]
+- ["CSo8NSObject", "Int8"]
+- !private ["CSo8NSObject", "Log"]
+- !private ["CSo8NSObject", "Select"]
+- ["CSo8NSObject", "String"]
+- !private ["CSo8NSObject", "TestEnum"]
+- !private ["CSo8NSObject", "XCTAssert"]
+- !private ["CSo8NSObject", "XCTFail"]
+- ["CSo8NSObject", "c10Value"]
+- ["CSo8NSObject", "c11Value"]
+- ["CSo8NSObject", "c12Value"]
+- ["CSo8NSObject", "c13Value"]
+- ["CSo8NSObject", "c15String"]
+- ["CSo8NSObject", "c15Value"]
+- ["CSo8NSObject", "c16String"]
+- ["CSo8NSObject", "c16Value"]
+- ["CSo8NSObject", "c17String"]
+- ["CSo8NSObject", "c17Value"]
+- ["CSo8NSObject", "c18String"]
+- ["CSo8NSObject", "c18Value"]
+- ["CSo8NSObject", "c1Value"]
+- ["CSo8NSObject", "c2Table2Value"]
+- ["CSo8NSObject", "c2Value"]
+- ["CSo8NSObject", "c3Value"]
+- ["CSo8NSObject", "c4Value"]
+- ["CSo8NSObject", "c5Value"]
+- ["CSo8NSObject", "c6Value"]
+- ["CSo8NSObject", "c7Value"]
+- ["CSo8NSObject", "c8Value"]
+- ["CSo8NSObject", "c9Value"]
+- ["CSo8NSObject", "createTable"]
+- ["CSo8NSObject", "createTable2"]
+- ["CSo8NSObject", "equalDMY"]
+- ["CSo8NSObject", "init"]
+- ["CSo8NSObject", "insertRows"]
+- ["CSo8NSObject", "insertRows2"]
+- !private ["CSo8NSObject", "model"]
+- !private ["CSo8NSObject", "model2"]
+- ["CSo8NSObject", "runSelectTestForEachRow"]
+- ["CSo8NSObject", "setUp"]
+- ["CSo8NSObject", "testSelectForEachRowIgnoringErrors"]
+- ["CSo8NSObject", "testSelectForEachRowNotIgnoringErrors"]
+- ["CSo8NSObject", "testTableName"]
+- ["CSo8NSObject", "testTableName2"]
+- ["CSo8NSObject", "testTypeConverters"]
+- !private ["PSo16NSObjectProtocol", "Calendar"]
+- !private ["PSo16NSObjectProtocol", "Database"]
+- ["PSo16NSObjectProtocol", "Date"]
+- ["PSo16NSObjectProtocol", "Double"]
+- ["PSo16NSObjectProtocol", "Float"]
+- !private ["PSo16NSObjectProtocol", "HeliumLogger"]
+- !private ["PSo16NSObjectProtocol", "Log"]
+- !private ["PSo16NSObjectProtocol", "Select"]
+- !private ["PSo16NSObjectProtocol", "XCTAssert"]
+- !private ["PSo16NSObjectProtocol", "XCTFail"]
+- ["PSo16NSObjectProtocol", "c10Value"]
+- ["PSo16NSObjectProtocol", "c11Value"]
+- ["PSo16NSObjectProtocol", "c12Value"]
+- ["PSo16NSObjectProtocol", "c13Value"]
+- ["PSo16NSObjectProtocol", "c15String"]
+- ["PSo16NSObjectProtocol", "c15Value"]
+- ["PSo16NSObjectProtocol", "c16String"]
+- ["PSo16NSObjectProtocol", "c16Value"]
+- ["PSo16NSObjectProtocol", "c17String"]
+- ["PSo16NSObjectProtocol", "c17Value"]
+- ["PSo16NSObjectProtocol", "c18String"]
+- ["PSo16NSObjectProtocol", "c18Value"]
+- ["PSo16NSObjectProtocol", "c1Value"]
+- ["PSo16NSObjectProtocol", "c2Table2Value"]
+- ["PSo16NSObjectProtocol", "c2Value"]
+- ["PSo16NSObjectProtocol", "c3Value"]
+- ["PSo16NSObjectProtocol", "c4Value"]
+- ["PSo16NSObjectProtocol", "c5Value"]
+- ["PSo16NSObjectProtocol", "c6Value"]
+- ["PSo16NSObjectProtocol", "c7Value"]
+- ["PSo16NSObjectProtocol", "c8Value"]
+- ["PSo16NSObjectProtocol", "c9Value"]
+- ["PSo16NSObjectProtocol", "createTable"]
+- ["PSo16NSObjectProtocol", "createTable2"]
+- ["PSo16NSObjectProtocol", "equalDMY"]
+- ["PSo16NSObjectProtocol", "init"]
+- ["PSo16NSObjectProtocol", "insertRows"]
+- ["PSo16NSObjectProtocol", "insertRows2"]
+- !private ["PSo16NSObjectProtocol", "model"]
+- !private ["PSo16NSObjectProtocol", "model2"]
+- ["PSo16NSObjectProtocol", "runSelectTestForEachRow"]
+- ["PSo16NSObjectProtocol", "setUp"]
+- ["PSo16NSObjectProtocol", "testSelectForEachRowIgnoringErrors"]
+- ["PSo16NSObjectProtocol", "testSelectForEachRowNotIgnoringErrors"]
+- ["PSo16NSObjectProtocol", "testTableName"]
+- ["PSo16NSObjectProtocol", "testTableName2"]
+- ["PSo16NSObjectProtocol", "testTypeConverters"]
+- ["PSo16NSObjectProtocol", ""]
+- ["PSo19NSPasteboardReading", "init"]
+- ["PSo19NSPasteboardWriting", "init"]
+- ["PSo14NSSecureCoding", "init"]
+- ["CSo8NSString", "init"]
+- !private ["P6Server6Object", "Database"]
+- !private ["P6Server6Object", "TestEnum"]
+- !private ["P6Server6Object", "c1"]
+- !private ["P6Server6Object", "c10"]
+- !private ["P6Server6Object", "c11"]
+- !private ["P6Server6Object", "c12"]
+- !private ["P6Server6Object", "c13"]
+- !private ["P6Server6Object", "c15"]
+- !private ["P6Server6Object", "c16"]
+- !private ["P6Server6Object", "c17"]
+- !private ["P6Server6Object", "c18"]
+- !private ["P6Server6Object", "c2"]
+- !private ["P6Server6Object", "c3"]
+- !private ["P6Server6Object", "c4"]
+- !private ["P6Server6Object", "c5"]
+- !private ["P6Server6Object", "c6"]
+- !private ["P6Server6Object", "c7"]
+- !private ["P6Server6Object", "c8"]
+- !private ["P6Server6Object", "c9"]
+- !private ["P6Server6Object", "init"]
+- ["P6Server6Object", "typeConvertersToModel"]
+- ["P6Server6Object", ""]
+- !private ["Sq", "TestEnum1"]
+- ["Sq", "deinit"]
+- !private ["OC6Server6Select22ProcessResultRowsError", "deinit"]
+- !private ["Vs5Range", "deinit"]
+- ["Ps16RawRepresentable", "RawValue"]
+- !private ["Ps16RawRepresentable", "TestEnum1"]
+- ["Ps16RawRepresentable", "_toAnyHashable"]
+- ["Ps16RawRepresentable", "hashValue"]
+- ["Ps16RawRepresentable", "init"]
+- ["Ps16RawRepresentable", "rawValue"]
+- ["Ps16RawRepresentable", ""]
+- !private ["P10Foundation20ReferenceConvertible", "current"]
+- !private ["P10Foundation20ReferenceConvertible", "dateComponents"]
+- !private ["P10Foundation20ReferenceConvertible", "day"]
+- ["P10Foundation20ReferenceConvertible", "init"]
+- !private ["P10Foundation20ReferenceConvertible", "month"]
+- !private ["P10Foundation20ReferenceConvertible", "year"]
+- ["C6Server6Select", "deinit"]
+- !private ["C6Server6Select", "forEachRow"]
+- !private ["C6Server6Select", "forEachRowStatus"]
+- !private ["C6Server6Select", "init"]
+- !private ["C6Server6Select", "numberResultRows"]
+- ["V10ObjectiveC8Selector", "deinit"]
+- !private ["Ps8Sequence", "Element"]
+- !private ["Vs3Set", "Element"]
+- ["Vs3Set", "deinit"]
+- !private ["Ps10SetAlgebra", "Element"]
+- !private ["Ps13SignedInteger", "hashValue"]
+- !private ["Ps12SignedNumber", "RawValue"]
+- !private ["Ps12SignedNumber", "hashValue"]
+- ["Ps12SignedNumber", "init"]
+- ["Vs12StaticString", "deinit"]
+- !private ["Vs12StaticString", "init"]
+- !private ["Ps10Strideable", "RawValue"]
+- !private ["Ps10Strideable", "hashValue"]
+- ["Ps10Strideable", "init"]
+- ["SS", "deinit"]
+- ["SS", "init"]
+- ["OC6Server8Database19TableCreationResult", "deinit"]
+- ["OC6Server8Database19TableCreationResult", "success"]
+- ["OC6Server8Database20TableCreationSuccess", "created"]
+- ["O11ServerTests8TestEnum", "RawValue"]
+- ["O11ServerTests8TestEnum", "TestEnum1"]
+- ["O11ServerTests8TestEnum", "TestEnum2"]
+- ["O11ServerTests8TestEnum", "_toAnyHashable"]
+- ["O11ServerTests8TestEnum", "deinit"]
+- ["O11ServerTests8TestEnum", "hashValue"]
+- ["O11ServerTests8TestEnum", "init"]
+- ["O11ServerTests8TestEnum", "rawValue"]
+- ["Ps16TextOutputStream", "init"]
+- ["Ps20TextOutputStreamable", "init"]
+- ["Su", "deinit"]
+- !private ["Vs6UInt16", "deinit"]
+- !private ["Vs6UInt32", "deinit"]
+- !private ["Vs6UInt64", "deinit"]
+- !private ["Vs5UInt8", "deinit"]
+- ["P10Reflection17UTF8Initializable", "init"]
+- !private ["Sc", "deinit"]
+- ["CSo6XCTest", "Bool"]
+- !private ["CSo6XCTest", "Calendar"]
+- !private ["CSo6XCTest", "Database"]
+- ["CSo6XCTest", "Date"]
+- ["CSo6XCTest", "Double"]
+- ["CSo6XCTest", "Float"]
+- !private ["CSo6XCTest", "HeliumLogger"]
+- ["CSo6XCTest", "Int16"]
+- ["CSo6XCTest", "Int32"]
+- ["CSo6XCTest", "Int64"]
+- ["CSo6XCTest", "Int8"]
+- !private ["CSo6XCTest", "Log"]
+- !private ["CSo6XCTest", "Select"]
+- ["CSo6XCTest", "String"]
+- !private ["CSo6XCTest", "TestEnum"]
+- !private ["CSo6XCTest", "XCTAssert"]
+- !private ["CSo6XCTest", "XCTFail"]
+- ["CSo6XCTest", "c10Value"]
+- ["CSo6XCTest", "c11Value"]
+- ["CSo6XCTest", "c12Value"]
+- ["CSo6XCTest", "c13Value"]
+- ["CSo6XCTest", "c15String"]
+- ["CSo6XCTest", "c15Value"]
+- ["CSo6XCTest", "c16String"]
+- ["CSo6XCTest", "c16Value"]
+- ["CSo6XCTest", "c17String"]
+- ["CSo6XCTest", "c17Value"]
+- ["CSo6XCTest", "c18String"]
+- ["CSo6XCTest", "c18Value"]
+- ["CSo6XCTest", "c1Value"]
+- ["CSo6XCTest", "c2Table2Value"]
+- ["CSo6XCTest", "c2Value"]
+- ["CSo6XCTest", "c3Value"]
+- ["CSo6XCTest", "c4Value"]
+- ["CSo6XCTest", "c5Value"]
+- ["CSo6XCTest", "c6Value"]
+- ["CSo6XCTest", "c7Value"]
+- ["CSo6XCTest", "c8Value"]
+- ["CSo6XCTest", "c9Value"]
+- ["CSo6XCTest", "createTable"]
+- ["CSo6XCTest", "createTable2"]
+- ["CSo6XCTest", "equalDMY"]
+- ["CSo6XCTest", "init"]
+- ["CSo6XCTest", "insertRows"]
+- ["CSo6XCTest", "insertRows2"]
+- !private ["CSo6XCTest", "model"]
+- !private ["CSo6XCTest", "model2"]
+- ["CSo6XCTest", "runSelectTestForEachRow"]
+- ["CSo6XCTest", "setUp"]
+- ["CSo6XCTest", "testSelectForEachRowIgnoringErrors"]
+- ["CSo6XCTest", "testSelectForEachRowNotIgnoringErrors"]
+- ["CSo6XCTest", "testTableName"]
+- ["CSo6XCTest", "testTableName2"]
+- ["CSo6XCTest", "testTypeConverters"]
+- ["CSo10XCTestCase", "Bool"]
+- !private ["CSo10XCTestCase", "Calendar"]
+- !private ["CSo10XCTestCase", "Database"]
+- ["CSo10XCTestCase", "Date"]
+- ["CSo10XCTestCase", "Double"]
+- ["CSo10XCTestCase", "Float"]
+- !private ["CSo10XCTestCase", "HeliumLogger"]
+- ["CSo10XCTestCase", "Int16"]
+- ["CSo10XCTestCase", "Int32"]
+- ["CSo10XCTestCase", "Int64"]
+- ["CSo10XCTestCase", "Int8"]
+- !private ["CSo10XCTestCase", "Log"]
+- !private ["CSo10XCTestCase", "Select"]
+- ["CSo10XCTestCase", "String"]
+- !private ["CSo10XCTestCase", "TestEnum"]
+- !private ["CSo10XCTestCase", "XCTAssert"]
+- !private ["CSo10XCTestCase", "XCTFail"]
+- ["CSo10XCTestCase", "c10Value"]
+- ["CSo10XCTestCase", "c11Value"]
+- ["CSo10XCTestCase", "c12Value"]
+- ["CSo10XCTestCase", "c13Value"]
+- ["CSo10XCTestCase", "c15String"]
+- ["CSo10XCTestCase", "c15Value"]
+- ["CSo10XCTestCase", "c16String"]
+- ["CSo10XCTestCase", "c16Value"]
+- ["CSo10XCTestCase", "c17String"]
+- ["CSo10XCTestCase", "c17Value"]
+- ["CSo10XCTestCase", "c18String"]
+- ["CSo10XCTestCase", "c18Value"]
+- ["CSo10XCTestCase", "c1Value"]
+- ["CSo10XCTestCase", "c2Table2Value"]
+- ["CSo10XCTestCase", "c2Value"]
+- ["CSo10XCTestCase", "c3Value"]
+- ["CSo10XCTestCase", "c4Value"]
+- ["CSo10XCTestCase", "c5Value"]
+- ["CSo10XCTestCase", "c6Value"]
+- ["CSo10XCTestCase", "c7Value"]
+- ["CSo10XCTestCase", "c8Value"]
+- ["CSo10XCTestCase", "c9Value"]
+- ["CSo10XCTestCase", "createTable"]
+- ["CSo10XCTestCase", "createTable2"]
+- ["CSo10XCTestCase", "deinit"]
+- ["CSo10XCTestCase", "equalDMY"]
+- ["CSo10XCTestCase", "init"]
+- ["CSo10XCTestCase", "insertRows"]
+- ["CSo10XCTestCase", "insertRows2"]
+- !private ["CSo10XCTestCase", "model"]
+- !private ["CSo10XCTestCase", "model2"]
+- ["CSo10XCTestCase", "runSelectTestForEachRow"]
+- ["CSo10XCTestCase", "setUp"]
+- ["CSo10XCTestCase", "testSelectForEachRowIgnoringErrors"]
+- ["CSo10XCTestCase", "testSelectForEachRowNotIgnoringErrors"]
+- ["CSo10XCTestCase", "testTableName"]
+- ["CSo10XCTestCase", "testTableName2"]
+- ["CSo10XCTestCase", "testTypeConverters"]
+- ["CSo10XCTestCase", ""]
+- !private ["Ps15_CVarArgAligned", "RawValue"]
+- ["Ps15_CVarArgAligned", "init"]
+- !private ["Ps22_CVarArgPassedAsDouble", "RawValue"]
+- ["Ps22_CVarArgPassedAsDouble", "init"]
+- !private ["Ps35_ExpressibleByBuiltinBooleanLiteral", "_getBuiltinLogicValue"]
+- ["Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps33_ExpressibleByBuiltinFloatLiteral", "RawValue"]
+- ["Ps33_ExpressibleByBuiltinFloatLiteral", "init"]
+- !private ["Ps35_ExpressibleByBuiltinIntegerLiteral", "RawValue"]
+- !private ["Ps35_ExpressibleByBuiltinIntegerLiteral", "hashValue"]
+- ["Ps35_ExpressibleByBuiltinIntegerLiteral", "init"]
+- ["Ps34_ExpressibleByBuiltinStringLiteral", "init"]
+- ["Ps39_ExpressibleByBuiltinUTF16StringLiteral", "init"]
+- ["Ps41_ExpressibleByBuiltinUnicodeScalarLiteral", "init"]
+- ["Ps35_HasCustomAnyHashableRepresentation", "init"]
+- !private ["Ps9_Hashable", "Calendar"]
+- !private ["Ps9_Hashable", "DATE"]
+- !private ["Ps9_Hashable", "DATETIME"]
+- !private ["Ps9_Hashable", "Database"]
+- ["Ps9_Hashable", "Date"]
+- ["Ps9_Hashable", "Double"]
+- !private ["Ps9_Hashable", "Element"]
+- ["Ps9_Hashable", "Float"]
+- !private ["Ps9_Hashable", "HeliumLogger"]
+- !private ["Ps9_Hashable", "Log"]
+- ["Ps9_Hashable", "RawValue"]
+- !private ["Ps9_Hashable", "Select"]
+- !private ["Ps9_Hashable", "TIME"]
+- !private ["Ps9_Hashable", "TIMESTAMP"]
+- !private ["Ps9_Hashable", "TestEnum1"]
+- !private ["Ps9_Hashable", "XCTAssert"]
+- !private ["Ps9_Hashable", "XCTFail"]
+- !private ["Ps9_Hashable", "_getBuiltinLogicValue"]
+- ["Ps9_Hashable", "_toAnyHashable"]
+- ["Ps9_Hashable", "c10Value"]
+- ["Ps9_Hashable", "c11Value"]
+- ["Ps9_Hashable", "c12Value"]
+- ["Ps9_Hashable", "c13Value"]
+- ["Ps9_Hashable", "c15String"]
+- ["Ps9_Hashable", "c15Value"]
+- ["Ps9_Hashable", "c16String"]
+- ["Ps9_Hashable", "c16Value"]
+- ["Ps9_Hashable", "c17String"]
+- ["Ps9_Hashable", "c17Value"]
+- ["Ps9_Hashable", "c18String"]
+- ["Ps9_Hashable", "c18Value"]
+- ["Ps9_Hashable", "c1Value"]
+- ["Ps9_Hashable", "c2Table2Value"]
+- ["Ps9_Hashable", "c2Value"]
+- ["Ps9_Hashable", "c3Value"]
+- ["Ps9_Hashable", "c4Value"]
+- ["Ps9_Hashable", "c5Value"]
+- ["Ps9_Hashable", "c6Value"]
+- ["Ps9_Hashable", "c7Value"]
+- ["Ps9_Hashable", "c8Value"]
+- ["Ps9_Hashable", "c9Value"]
+- ["Ps9_Hashable", "createTable"]
+- ["Ps9_Hashable", "createTable2"]
+- ["Ps9_Hashable", "created"]
+- !private ["Ps9_Hashable", "current"]
+- !private ["Ps9_Hashable", "dateComponents"]
+- !private ["Ps9_Hashable", "day"]
+- ["Ps9_Hashable", "equalDMY"]
+- ["Ps9_Hashable", "hashValue"]
+- ["Ps9_Hashable", "init"]
+- ["Ps9_Hashable", "insertRows"]
+- ["Ps9_Hashable", "insertRows2"]
+- !private ["Ps9_Hashable", "model"]
+- !private ["Ps9_Hashable", "model2"]
+- !private ["Ps9_Hashable", "month"]
+- ["Ps9_Hashable", "rawValue"]
+- ["Ps9_Hashable", "runSelectTestForEachRow"]
+- ["Ps9_Hashable", "setUp"]
+- ["Ps9_Hashable", "testSelectForEachRowIgnoringErrors"]
+- ["Ps9_Hashable", "testSelectForEachRowNotIgnoringErrors"]
+- ["Ps9_Hashable", "testTableName"]
+- ["Ps9_Hashable", "testTableName2"]
+- ["Ps9_Hashable", "testTypeConverters"]
+- !private ["Ps9_Hashable", "year"]
+- ["Ps9_Hashable", ""]
+- !private ["Ps14_Incrementable", "hashValue"]
+- !private ["Ps8_Integer", "hashValue"]
+- !private ["Ps18_IntegerArithmetic", "hashValue"]
+- !private ["P10Foundation14_MutableBoxing", "current"]
+- !private ["P10Foundation14_MutableBoxing", "dateComponents"]
+- !private ["P10Foundation14_MutableBoxing", "day"]
+- !private ["P10Foundation14_MutableBoxing", "month"]
+- !private ["P10Foundation14_MutableBoxing", "year"]
+- !private ["Ps21_ObjectiveCBridgeable", "Element"]
+- !private ["Ps21_ObjectiveCBridgeable", "RawValue"]
+- !private ["Ps21_ObjectiveCBridgeable", "TestEnum1"]
+- !private ["Ps21_ObjectiveCBridgeable", "_getBuiltinLogicValue"]
+- !private ["Ps21_ObjectiveCBridgeable", "current"]
+- !private ["Ps21_ObjectiveCBridgeable", "dateComponents"]
+- !private ["Ps21_ObjectiveCBridgeable", "day"]
+- !private ["Ps21_ObjectiveCBridgeable", "hashValue"]
+- ["Ps21_ObjectiveCBridgeable", "init"]
+- !private ["Ps21_ObjectiveCBridgeable", "month"]
+- !private ["Ps21_ObjectiveCBridgeable", "year"]
+- !private ["Vs26_OptionalNilComparisonType", "TestEnum1"]
+- ["Vs26_OptionalNilComparisonType", "deinit"]
+- !private ["Ps14_SignedInteger", "hashValue"]
+- !private ["Ps11_Strideable", "RawValue"]
+- !private ["Ps11_Strideable", "hashValue"]
+- ["Ps11_Strideable", "init"]
+- ["C11ServerTests5model", "Double"]
+- ["C11ServerTests5model", "Float"]
+- ["C11ServerTests5model", "Int16"]
+- ["C11ServerTests5model", "Int32"]
+- ["C11ServerTests5model", "Int64"]
+- ["C11ServerTests5model", "Int8"]
+- ["C11ServerTests5model", "String"]
+- ["C11ServerTests5model", "c1"]
+- ["C11ServerTests5model", "c10"]
+- ["C11ServerTests5model", "c11"]
+- ["C11ServerTests5model", "c12"]
+- ["C11ServerTests5model", "c13"]
+- ["C11ServerTests5model", "c15"]
+- ["C11ServerTests5model", "c16"]
+- ["C11ServerTests5model", "c17"]
+- ["C11ServerTests5model", "c18"]
+- ["C11ServerTests5model", "c2"]
+- ["C11ServerTests5model", "c3"]
+- ["C11ServerTests5model", "c4"]
+- ["C11ServerTests5model", "c5"]
+- ["C11ServerTests5model", "c6"]
+- ["C11ServerTests5model", "c7"]
+- ["C11ServerTests5model", "c8"]
+- ["C11ServerTests5model", "c9"]
+- ["C11ServerTests5model", "deinit"]
+- ["C11ServerTests5model", "init"]
+- ["C11ServerTests5model", "typeConvertersToModel"]
+- !private ["C11ServerTests6model2", "Database"]
+- ["C11ServerTests6model2", "Date"]
+- ["C11ServerTests6model2", "String"]
+- ["C11ServerTests6model2", "TestEnum"]
+- ["C11ServerTests6model2", "c1"]
+- ["C11ServerTests6model2", "c2"]
+- ["C11ServerTests6model2", "deinit"]
+- ["C11ServerTests6model2", "init"]
+- ["C11ServerTests6model2", "typeConvertersToModel"]
+depends-nominal:
+- "Ps16AbsoluteValuable"
+- "Ps9AnyObject"
+- "Ps19BinaryFloatingPoint"
+- !private "Ps17BitwiseOperations"
+- "Sb"
+- "Ps7CVarArg"
+- "V10Foundation8Calendar"
+- !private "Vs9Character"
+- !private "Vs11ClosedRange"
+- !private "Ps10Collection"
+- "Ps10Comparable"
+- "OV10Foundation8Calendar9Component"
+- !private "Vs20CountableClosedRange"
+- !private "Vs14CountableRange"
+- "P7Cryptor12CryptoDigest"
+- "Ps28CustomDebugStringConvertible"
+- "Ps29CustomPlaygroundQuickLookable"
+- "Ps17CustomReflectable"
+- "Ps23CustomStringConvertible"
+- "C6Server8Database"
+- "V10Foundation4Date"
+- "V10Foundation14DateComponents"
+- "Sd"
+- "Ps9Equatable"
+- !private "Ps25ExpressibleByArrayLiteral"
+- !private "Ps27ExpressibleByBooleanLiteral"
+- "Ps43ExpressibleByExtendedGraphemeClusterLiteral"
+- "Ps25ExpressibleByFloatLiteral"
+- "Ps27ExpressibleByIntegerLiteral"
+- !private "Ps23ExpressibleByNilLiteral"
+- "Ps32ExpressibleByStringInterpolation"
+- "Ps26ExpressibleByStringLiteral"
+- "Ps33ExpressibleByUnicodeScalarLiteral"
+- "Sf"
+- "Ps13FloatingPoint"
+- "C11ServerTests20GeneralDatabaseTests"
+- "Ps8Hashable"
+- "C12HeliumLogger12HeliumLogger"
+- "SQ"
+- !private "Ps9Indexable"
+- !private "Ps13IndexableBase"
+- "Si"
+- "Vs5Int16"
+- "Vs5Int32"
+- "Vs5Int64"
+- "Vs4Int8"
+- !private "Ps7Integer"
+- !private "Ps17IntegerArithmetic"
+- "P10PerfectLib15JSONConvertible"
+- "P10SwiftyJSON17JSONSubscriptType"
+- "P11ServerTests10KituraTest"
+- !private "C9LoggerAPI3Log"
+- !private "P9LoggerAPI6Logger"
+- "Ps25LosslessStringConvertible"
+- "Ps10MirrorPath"
+- "P6Server5Model"
+- !private "C5MySQL5MySQL"
+- "OC6Server8Database15MySQLDateFormat"
+- "PSo8NSCoding"
+- "PSo9NSCopying"
+- "PSo16NSMutableCopying"
+- "CSo8NSObject"
+- "PSo16NSObjectProtocol"
+- "PSo19NSPasteboardReading"
+- "PSo19NSPasteboardWriting"
+- "PSo14NSSecureCoding"
+- "CSo8NSString"
+- "P6Server6Object"
+- "Sq"
+- !private "OC6Server6Select22ProcessResultRowsError"
+- !private "Vs5Range"
+- "Ps16RawRepresentable"
+- "P10Foundation20ReferenceConvertible"
+- "C6Server6Select"
+- "V10ObjectiveC8Selector"
+- !private "Ps8Sequence"
+- "Vs3Set"
+- !private "Ps10SetAlgebra"
+- !private "Ps13SignedInteger"
+- "Ps12SignedNumber"
+- "Vs12StaticString"
+- "Ps10Strideable"
+- "SS"
+- "OC6Server8Database19TableCreationResult"
+- "OC6Server8Database20TableCreationSuccess"
+- "O11ServerTests8TestEnum"
+- "Ps16TextOutputStream"
+- "Ps20TextOutputStreamable"
+- "Su"
+- !private "Vs6UInt16"
+- !private "Vs6UInt32"
+- !private "Vs6UInt64"
+- !private "Vs5UInt8"
+- "P10Reflection17UTF8Initializable"
+- !private "Sc"
+- "CSo6XCTest"
+- "CSo10XCTestCase"
+- "Ps15_CVarArgAligned"
+- "Ps22_CVarArgPassedAsDouble"
+- !private "Ps35_ExpressibleByBuiltinBooleanLiteral"
+- "Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral"
+- "Ps33_ExpressibleByBuiltinFloatLiteral"
+- "Ps35_ExpressibleByBuiltinIntegerLiteral"
+- "Ps34_ExpressibleByBuiltinStringLiteral"
+- "Ps39_ExpressibleByBuiltinUTF16StringLiteral"
+- "Ps41_ExpressibleByBuiltinUnicodeScalarLiteral"
+- "Ps35_HasCustomAnyHashableRepresentation"
+- "Ps9_Hashable"
+- !private "Ps14_Incrementable"
+- !private "Ps8_Integer"
+- !private "Ps18_IntegerArithmetic"
+- !private "P10Foundation14_MutableBoxing"
+- "Ps21_ObjectiveCBridgeable"
+- "Vs26_OptionalNilComparisonType"
+- !private "Ps14_SignedInteger"
+- "Ps11_Strideable"
+- "C11ServerTests5model"
+- "C11ServerTests6model2"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/XCTest.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIRemote.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIKeyboardKeys.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementQuery.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUICoordinate.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIDevice.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypeQueryProvider.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypes.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementAttributes.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElement.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIApplication.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuiteRun.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuite.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestProbe.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservation.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservationCenter.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObserver.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestLog.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestExpectation.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestRun.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCaseRun.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase+AsynchronousTesting.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertionsImpl.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertions.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCAbstractTest.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestErrors.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestDefines.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTest.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Modules/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/AppKit.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreData.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/QuartzCore.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/XPC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreImage.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Credentials.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Kitura.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraNet.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraTemplateEngine.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraSession.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Cryptor.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/CredentialsGoogle.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Gloss.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/HeliumLogger.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.swiftmodule"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_base.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_memory.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_alloc.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/typelib.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/plugin_auth_common.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/client_plugin.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_list.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_time.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_command.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/binary_log_types.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_com.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_version.h"
+- "/usr/local/include/mysql/mysql.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/PerfectLib.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SMServerLib.swiftmodule"
+interface-hash: "3076b290afab39d65f0ace6b9eba511a"

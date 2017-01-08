@@ -1,0 +1,173 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "ClientResponse"
+provides-nominal:
+- "C9KituraNet14ClientResponse"
+provides-member:
+- ["C9KituraNet14ClientResponse", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "StringLiteralType"
+- "ClientResponse"
+- "BufferList"
+- "HTTPStatusCode"
+- !private "BooleanLiteralType"
+- "HTTPParserStatus"
+- "FloatLiteralType"
+- !private "NSMutableData"
+- !private "-"
+- "IntegerLiteralType"
+- "HTTPIncomingMessage"
+- "AssignmentPrecedence"
+depends-member:
+- ["Ps9AnyObject", "BufferList"]
+- ["Ps9AnyObject", "HTTPStatusCode"]
+- !private ["Ps9AnyObject", "NSMutableData"]
+- !private ["Ps9AnyObject", "fill"]
+- ["Ps9AnyObject", "init"]
+- !private ["Ps9AnyObject", "length"]
+- ["Ps9AnyObject", "parse"]
+- ["Ps9AnyObject", "responseBuffers"]
+- !private ["Ps9AnyObject", "rewind"]
+- ["Ps9AnyObject", "startParsingFrom"]
+- ["Ps9AnyObject", "status"]
+- ["Ps9AnyObject", "statusCode"]
+- ["Ps9AnyObject", ""]
+- ["Sb", "deinit"]
+- ["C9KituraNet10BufferList", "deinit"]
+- !private ["C9KituraNet10BufferList", "fill"]
+- ["C9KituraNet10BufferList", "init"]
+- !private ["C9KituraNet10BufferList", "rewind"]
+- !private ["Ps7CVarArg", "init"]
+- !private ["Ps7CVarArg", "length"]
+- ["C9KituraNet14ClientResponse", "BufferList"]
+- ["C9KituraNet14ClientResponse", "HTTPParserStatus"]
+- ["C9KituraNet14ClientResponse", "HTTPStatusCode"]
+- !private ["C9KituraNet14ClientResponse", "NSMutableData"]
+- ["C9KituraNet14ClientResponse", "deinit"]
+- ["C9KituraNet14ClientResponse", "init"]
+- ["C9KituraNet14ClientResponse", "parse"]
+- ["C9KituraNet14ClientResponse", "responseBuffers"]
+- !private ["C9KituraNet14ClientResponse", "startParsingFrom"]
+- ["C9KituraNet14ClientResponse", "status"]
+- ["C9KituraNet14ClientResponse", "statusCode"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "length"]
+- !private ["Ps17CustomReflectable", "init"]
+- !private ["Ps23CustomStringConvertible", "init"]
+- !private ["Ps23CustomStringConvertible", "length"]
+- !private ["Ps9Equatable", "init"]
+- !private ["Ps9Equatable", "length"]
+- ["Ps9Equatable", "unknown"]
+- !private ["Ps43ExpressibleByExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps26ExpressibleByStringLiteral", "init"]
+- !private ["Ps33ExpressibleByUnicodeScalarLiteral", "init"]
+- ["C9KituraNet19HTTPIncomingMessage", "BufferList"]
+- ["C9KituraNet19HTTPIncomingMessage", "HTTPParserStatus"]
+- ["C9KituraNet19HTTPIncomingMessage", "HTTPStatusCode"]
+- !private ["C9KituraNet19HTTPIncomingMessage", "NSMutableData"]
+- ["C9KituraNet19HTTPIncomingMessage", "deinit"]
+- ["C9KituraNet19HTTPIncomingMessage", "init"]
+- ["C9KituraNet19HTTPIncomingMessage", "parse"]
+- ["C9KituraNet19HTTPIncomingMessage", "responseBuffers"]
+- ["C9KituraNet19HTTPIncomingMessage", "startParsingFrom"]
+- ["C9KituraNet19HTTPIncomingMessage", "status"]
+- ["C9KituraNet19HTTPIncomingMessage", "statusCode"]
+- ["C9KituraNet19HTTPIncomingMessage", ""]
+- !private ["V9KituraNet16HTTPParserStatus", "bytesLeft"]
+- ["V9KituraNet16HTTPParserStatus", "deinit"]
+- ["O9KituraNet14HTTPStatusCode", "deinit"]
+- !private ["O9KituraNet14HTTPStatusCode", "init"]
+- ["O9KituraNet14HTTPStatusCode", "unknown"]
+- !private ["Ps8Hashable", "init"]
+- !private ["Ps8Hashable", "length"]
+- ["Ps8Hashable", "unknown"]
+- ["Si", "deinit"]
+- !private ["PSo8NSCoding", "init"]
+- !private ["PSo8NSCoding", "length"]
+- !private ["PSo9NSCopying", "init"]
+- !private ["PSo9NSCopying", "length"]
+- !private ["CSo6NSData", "init"]
+- !private ["CSo6NSData", "length"]
+- !private ["PSo16NSMutableCopying", "init"]
+- !private ["PSo16NSMutableCopying", "length"]
+- ["CSo13NSMutableData", "deinit"]
+- !private ["CSo13NSMutableData", "init"]
+- !private ["CSo13NSMutableData", "length"]
+- !private ["CSo8NSObject", "init"]
+- !private ["CSo8NSObject", "length"]
+- !private ["PSo16NSObjectProtocol", "init"]
+- !private ["PSo16NSObjectProtocol", "length"]
+- !private ["PSo14NSSecureCoding", "init"]
+- !private ["PSo14NSSecureCoding", "length"]
+- ["Os5Never", "deinit"]
+- ["Sq", "deinit"]
+- !private ["Ps16RawRepresentable", "init"]
+- ["Ps16RawRepresentable", "unknown"]
+- ["Vs12StaticString", "deinit"]
+- !private ["Vs12StaticString", "init"]
+- ["Su", "deinit"]
+- !private ["Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps34_ExpressibleByBuiltinStringLiteral", "init"]
+- !private ["Ps41_ExpressibleByBuiltinUnicodeScalarLiteral", "init"]
+- !private ["Ps35_HasCustomAnyHashableRepresentation", "init"]
+- !private ["Ps35_HasCustomAnyHashableRepresentation", "length"]
+- !private ["Ps9_Hashable", "init"]
+- !private ["Ps9_Hashable", "length"]
+- ["Ps9_Hashable", "unknown"]
+depends-nominal:
+- "Ps9AnyObject"
+- "Sb"
+- "C9KituraNet10BufferList"
+- !private "Ps7CVarArg"
+- "C9KituraNet14ClientResponse"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps17CustomReflectable"
+- !private "Ps23CustomStringConvertible"
+- "Ps9Equatable"
+- !private "Ps43ExpressibleByExtendedGraphemeClusterLiteral"
+- !private "Ps26ExpressibleByStringLiteral"
+- !private "Ps33ExpressibleByUnicodeScalarLiteral"
+- "C9KituraNet19HTTPIncomingMessage"
+- "V9KituraNet16HTTPParserStatus"
+- "O9KituraNet14HTTPStatusCode"
+- "Ps8Hashable"
+- "Si"
+- !private "PSo8NSCoding"
+- !private "PSo9NSCopying"
+- !private "CSo6NSData"
+- !private "PSo16NSMutableCopying"
+- "CSo13NSMutableData"
+- !private "CSo8NSObject"
+- !private "PSo16NSObjectProtocol"
+- !private "PSo14NSSecureCoding"
+- "Os5Never"
+- "Sq"
+- "Ps16RawRepresentable"
+- "Vs12StaticString"
+- "Su"
+- !private "Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral"
+- !private "Ps34_ExpressibleByBuiltinStringLiteral"
+- !private "Ps41_ExpressibleByBuiltinUnicodeScalarLiteral"
+- !private "Ps35_HasCustomAnyHashableRepresentation"
+- "Ps9_Hashable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+interface-hash: "5cf3de0a05eff2938d78e530ae1ffe6f"

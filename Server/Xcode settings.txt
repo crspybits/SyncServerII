@@ -1,0 +1,8 @@
+Xcode settings:
+
+1) Copy Files Phase
+	Server.plist
+	to the Products directory
+
+2) For testing, need to add in script to copy Server.plist file to products directory
+	cp Server.plist /tmp

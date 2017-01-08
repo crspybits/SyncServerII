@@ -1,0 +1,160 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "ServerRoutes"
+provides-nominal:
+- "C6Server12ServerRoutes"
+provides-member:
+- ["C6Server12ServerRoutes", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "ServerEndpoints"
+- !private "HealthCheckRequest"
+- !private "UserController"
+- !private "RemoveUserRequest"
+- "CreateRoutes"
+- !private "UtilController"
+- !private "CheckCredsRequest"
+- "ServerRoutes"
+- !private "AddUserRequest"
+depends-member:
+- !private ["C6Server14AddUserRequest", "deinit"]
+- !private ["C6Server14AddUserRequest", "init"]
+- !private ["C6Server15AddUserResponse", "deinit"]
+- !private ["Ps9AnyObject", "AddUserRequest"]
+- !private ["Ps9AnyObject", "CheckCredsRequest"]
+- !private ["Ps9AnyObject", "HealthCheckRequest"]
+- !private ["Ps9AnyObject", "RemoveUserRequest"]
+- !private ["Ps9AnyObject", "ServerEndpoints"]
+- !private ["Ps9AnyObject", "UserController"]
+- !private ["Ps9AnyObject", "UtilController"]
+- !private ["Ps9AnyObject", "addRoute"]
+- !private ["Ps9AnyObject", "addUser"]
+- !private ["Ps9AnyObject", "checkCreds"]
+- !private ["Ps9AnyObject", "healthCheck"]
+- !private ["Ps9AnyObject", "init"]
+- !private ["Ps9AnyObject", "removeUser"]
+- ["Ps9AnyObject", ""]
+- !private ["Ps7CVarArg", "init"]
+- !private ["C6Server17CheckCredsRequest", "deinit"]
+- !private ["C6Server17CheckCredsRequest", "init"]
+- !private ["C6Server18CheckCredsResponse", "deinit"]
+- !private ["P6Server18ControllerProtocol", "addUser"]
+- !private ["P6Server18ControllerProtocol", "checkCreds"]
+- !private ["P6Server18ControllerProtocol", "healthCheck"]
+- !private ["P6Server18ControllerProtocol", "init"]
+- !private ["P6Server18ControllerProtocol", "removeUser"]
+- !private ["C6Server12CreateRoutes", "addRoute"]
+- ["C6Server12CreateRoutes", "deinit"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps23CustomStringConvertible", "init"]
+- !private ["P5Gloss9Decodable", "init"]
+- !private ["Ps9Equatable", "init"]
+- !private ["Ps8Hashable", "init"]
+- !private ["C6Server18HealthCheckRequest", "deinit"]
+- !private ["C6Server18HealthCheckRequest", "init"]
+- !private ["C6Server19HealthCheckResponse", "deinit"]
+- !private ["PSo16NSObjectProtocol", "init"]
+- !private ["Sq", "deinit"]
+- !private ["C6Server17RemoveUserRequest", "deinit"]
+- !private ["C6Server17RemoveUserRequest", "init"]
+- !private ["C6Server18RemoveUserResponse", "deinit"]
+- !private ["P6Server14RequestMessage", "init"]
+- ["V6Server14ServerEndpoint", "deinit"]
+- !private ["C6Server15ServerEndpoints", "addUser"]
+- !private ["C6Server15ServerEndpoints", "checkCreds"]
+- !private ["C6Server15ServerEndpoints", "healthCheck"]
+- !private ["C6Server15ServerEndpoints", "removeUser"]
+- !private ["C6Server12ServerRoutes", "AddUserRequest"]
+- !private ["C6Server12ServerRoutes", "CheckCredsRequest"]
+- ["C6Server12ServerRoutes", "CreateRoutes"]
+- !private ["C6Server12ServerRoutes", "HealthCheckRequest"]
+- !private ["C6Server12ServerRoutes", "RemoveUserRequest"]
+- !private ["C6Server12ServerRoutes", "ServerEndpoints"]
+- !private ["C6Server12ServerRoutes", "UserController"]
+- !private ["C6Server12ServerRoutes", "UtilController"]
+- ["C6Server12ServerRoutes", "add"]
+- ["C6Server12ServerRoutes", "deinit"]
+- ["C6Server12ServerRoutes", "init"]
+- !private ["C6Server14UserController", "addUser"]
+- !private ["C6Server14UserController", "checkCreds"]
+- ["C6Server14UserController", "deinit"]
+- !private ["C6Server14UserController", "init"]
+- !private ["C6Server14UserController", "removeUser"]
+- ["C6Server14UtilController", "deinit"]
+- !private ["C6Server14UtilController", "healthCheck"]
+- !private ["C6Server14UtilController", "init"]
+- !private ["Ps9_Hashable", "init"]
+depends-nominal:
+- !private "C6Server14AddUserRequest"
+- !private "C6Server15AddUserResponse"
+- "Ps9AnyObject"
+- !private "Ps7CVarArg"
+- !private "C6Server17CheckCredsRequest"
+- !private "C6Server18CheckCredsResponse"
+- !private "P6Server18ControllerProtocol"
+- "C6Server12CreateRoutes"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps23CustomStringConvertible"
+- !private "P5Gloss9Decodable"
+- !private "Ps9Equatable"
+- !private "Ps8Hashable"
+- !private "C6Server18HealthCheckRequest"
+- !private "C6Server19HealthCheckResponse"
+- !private "PSo16NSObjectProtocol"
+- !private "Sq"
+- !private "C6Server17RemoveUserRequest"
+- !private "C6Server18RemoveUserResponse"
+- !private "P6Server14RequestMessage"
+- "V6Server14ServerEndpoint"
+- !private "C6Server15ServerEndpoints"
+- "C6Server12ServerRoutes"
+- "C6Server14UserController"
+- "C6Server14UtilController"
+- !private "Ps9_Hashable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/HeliumLogger.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/PerfectLib.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Kitura.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraNet.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraTemplateEngine.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Gloss.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraSession.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Cryptor.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Credentials.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/CredentialsGoogle.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SMServerLib.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.swiftmodule"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_base.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_memory.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_alloc.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/typelib.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/plugin_auth_common.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/client_plugin.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_list.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_time.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_command.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/binary_log_types.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_com.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_version.h"
+- "/usr/local/include/mysql/mysql.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.swiftmodule"
+interface-hash: "6da9c685d433b9c4f9a00a9410914b3f"

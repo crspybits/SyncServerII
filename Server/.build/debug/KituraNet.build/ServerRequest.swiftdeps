@@ -1,0 +1,60 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "ServerRequest"
+provides-nominal:
+- "P9KituraNet13ServerRequest"
+provides-member:
+- ["P9KituraNet13ServerRequest", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "Int"
+- "Data"
+- "URLComponents"
+- "ServerRequest"
+- "UInt16"
+- "String"
+- "URL"
+- "HeadersContainer"
+depends-member:
+- ["P9KituraNet13ServerRequest", "Data"]
+- ["P9KituraNet13ServerRequest", "HeadersContainer"]
+- ["P9KituraNet13ServerRequest", "Int"]
+- ["P9KituraNet13ServerRequest", "String"]
+- ["P9KituraNet13ServerRequest", "UInt16"]
+- ["P9KituraNet13ServerRequest", "URL"]
+- ["P9KituraNet13ServerRequest", "URLComponents"]
+- ["P9KituraNet13ServerRequest", "headers"]
+- ["P9KituraNet13ServerRequest", "httpVersionMajor"]
+- ["P9KituraNet13ServerRequest", "httpVersionMinor"]
+- ["P9KituraNet13ServerRequest", "method"]
+- ["P9KituraNet13ServerRequest", "read"]
+- ["P9KituraNet13ServerRequest", "readAllData"]
+- ["P9KituraNet13ServerRequest", "readString"]
+- ["P9KituraNet13ServerRequest", "remoteAddress"]
+- ["P9KituraNet13ServerRequest", "url"]
+- ["P9KituraNet13ServerRequest", "urlComponents"]
+- ["P9KituraNet13ServerRequest", "urlString"]
+- ["P9KituraNet13ServerRequest", "urlURL"]
+- ["P9KituraNet13ServerRequest", ""]
+depends-nominal:
+- "P9KituraNet13ServerRequest"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+interface-hash: "c41335e8f3cce5e687c088beba230d6b"

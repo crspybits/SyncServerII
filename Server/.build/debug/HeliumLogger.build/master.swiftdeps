@@ -1,0 +1,5 @@
+version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
+options: "1081318fd0c3550f9c0cdeacc1f2bb2d"
+build_time: [537149682, 506726000]
+inputs:
+  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/HeliumLogger-1.4.0/Sources/HeliumLogger/HeliumLogger.swift": [537145412, 0]

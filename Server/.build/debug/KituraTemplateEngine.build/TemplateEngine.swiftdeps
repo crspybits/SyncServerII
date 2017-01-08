@@ -1,0 +1,23 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "TemplateEngine"
+provides-nominal:
+- "P20KituraTemplateEngine14TemplateEngine"
+provides-member:
+- ["P20KituraTemplateEngine14TemplateEngine", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "TemplateEngine"
+- "String"
+depends-member:
+- ["P20KituraTemplateEngine14TemplateEngine", "String"]
+- ["P20KituraTemplateEngine14TemplateEngine", "fileExtension"]
+- ["P20KituraTemplateEngine14TemplateEngine", "render"]
+- ["P20KituraTemplateEngine14TemplateEngine", ""]
+depends-nominal:
+- "P20KituraTemplateEngine14TemplateEngine"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "a1ddc7b6abcb0ea7d3072612688bda91"

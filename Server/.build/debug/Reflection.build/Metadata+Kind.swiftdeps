@@ -1,0 +1,196 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "=="
+provides-nominal:
+- "OV10Reflection8Metadata4Kind"
+provides-member:
+- ["V10Reflection8Metadata", ""]
+- ["OV10Reflection8Metadata4Kind", ""]
+- ["V10Reflection8Metadata", "kind"]
+- ["V10Reflection8Metadata", "Kind"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "IntegerLiteralType"
+- !private "FloatLiteralType"
+- !private "~="
+- "=="
+- "AssignmentPrecedence"
+- "Int"
+- "Metadata"
+depends-member:
+- !private ["Ps17BitwiseOperations", "Stride"]
+- !private ["Ps17BitwiseOperations", "hashValue"]
+- !private ["Sb", "_getBuiltinLogicValue"]
+- !private ["Ps7CVarArg", "Stride"]
+- !private ["Ps7CVarArg", "hashValue"]
+- !private ["Vs11ClosedRange", "deinit"]
+- !private ["Ps10Comparable", "Stride"]
+- !private ["Ps10Comparable", "hashValue"]
+- !private ["Vs20CountableClosedRange", "deinit"]
+- !private ["Vs14CountableRange", "deinit"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "Stride"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "_getBuiltinLogicValue"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "hashValue"]
+- !private ["Ps17CustomReflectable", "Stride"]
+- !private ["Ps17CustomReflectable", "_getBuiltinLogicValue"]
+- !private ["Ps17CustomReflectable", "hashValue"]
+- !private ["Ps23CustomStringConvertible", "Stride"]
+- !private ["Ps23CustomStringConvertible", "_getBuiltinLogicValue"]
+- !private ["Ps23CustomStringConvertible", "hashValue"]
+- !private ["Ps9Equatable", "Stride"]
+- !private ["Ps9Equatable", "_getBuiltinLogicValue"]
+- ["Ps9Equatable", "_toAnyHashable"]
+- !private ["Ps9Equatable", "class"]
+- !private ["Ps9Equatable", "enum"]
+- !private ["Ps9Equatable", "errorObject"]
+- !private ["Ps9Equatable", "existential"]
+- !private ["Ps9Equatable", "existentialMetatype"]
+- !private ["Ps9Equatable", "foreignClass"]
+- !private ["Ps9Equatable", "function"]
+- ["Ps9Equatable", "hashValue"]
+- !private ["Ps9Equatable", "heapGenericLocalVariable"]
+- !private ["Ps9Equatable", "heapLocalVariable"]
+- !private ["Ps9Equatable", "metatype"]
+- !private ["Ps9Equatable", "objCClassWrapper"]
+- !private ["Ps9Equatable", "opaque"]
+- !private ["Ps9Equatable", "optional"]
+- !private ["Ps9Equatable", "struct"]
+- !private ["Ps9Equatable", "tuple"]
+- ["Ps9Equatable", ""]
+- !private ["Ps27ExpressibleByBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "Stride"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "hashValue"]
+- !private ["Ps8Hashable", "Stride"]
+- !private ["Ps8Hashable", "_getBuiltinLogicValue"]
+- ["Ps8Hashable", "_toAnyHashable"]
+- !private ["Ps8Hashable", "class"]
+- !private ["Ps8Hashable", "enum"]
+- !private ["Ps8Hashable", "errorObject"]
+- !private ["Ps8Hashable", "existential"]
+- !private ["Ps8Hashable", "existentialMetatype"]
+- !private ["Ps8Hashable", "foreignClass"]
+- !private ["Ps8Hashable", "function"]
+- ["Ps8Hashable", "hashValue"]
+- !private ["Ps8Hashable", "heapGenericLocalVariable"]
+- !private ["Ps8Hashable", "heapLocalVariable"]
+- !private ["Ps8Hashable", "metatype"]
+- !private ["Ps8Hashable", "objCClassWrapper"]
+- !private ["Ps8Hashable", "opaque"]
+- !private ["Ps8Hashable", "optional"]
+- !private ["Ps8Hashable", "struct"]
+- !private ["Ps8Hashable", "tuple"]
+- ["Ps8Hashable", ""]
+- !private ["Si", "Stride"]
+- !private ["Si", "hashValue"]
+- !private ["Ps7Integer", "Stride"]
+- !private ["Ps7Integer", "hashValue"]
+- !private ["Ps17IntegerArithmetic", "Stride"]
+- !private ["Ps17IntegerArithmetic", "hashValue"]
+- ["OV10Reflection8Metadata4Kind", "=="]
+- ["OV10Reflection8Metadata4Kind", "Int"]
+- ["OV10Reflection8Metadata4Kind", "_toAnyHashable"]
+- ["OV10Reflection8Metadata4Kind", "class"]
+- ["OV10Reflection8Metadata4Kind", "deinit"]
+- ["OV10Reflection8Metadata4Kind", "enum"]
+- ["OV10Reflection8Metadata4Kind", "errorObject"]
+- ["OV10Reflection8Metadata4Kind", "existential"]
+- ["OV10Reflection8Metadata4Kind", "existentialMetatype"]
+- ["OV10Reflection8Metadata4Kind", "foreignClass"]
+- ["OV10Reflection8Metadata4Kind", "function"]
+- ["OV10Reflection8Metadata4Kind", "hashValue"]
+- ["OV10Reflection8Metadata4Kind", "heapGenericLocalVariable"]
+- ["OV10Reflection8Metadata4Kind", "heapLocalVariable"]
+- ["OV10Reflection8Metadata4Kind", "init"]
+- ["OV10Reflection8Metadata4Kind", "metatype"]
+- ["OV10Reflection8Metadata4Kind", "objCClassWrapper"]
+- ["OV10Reflection8Metadata4Kind", "opaque"]
+- ["OV10Reflection8Metadata4Kind", "optional"]
+- ["OV10Reflection8Metadata4Kind", "struct"]
+- ["OV10Reflection8Metadata4Kind", "tuple"]
+- !private ["Ps25LosslessStringConvertible", "_getBuiltinLogicValue"]
+- ["V10Reflection8Metadata", "Int"]
+- ["V10Reflection8Metadata", "Kind"]
+- ["V10Reflection8Metadata", "kind"]
+- !private ["Ps10MirrorPath", "Stride"]
+- !private ["Ps10MirrorPath", "hashValue"]
+- !private ["Vs5Range", "deinit"]
+- !private ["Ps13SignedInteger", "Stride"]
+- !private ["Ps13SignedInteger", "hashValue"]
+- !private ["Ps12SignedNumber", "Stride"]
+- !private ["Ps12SignedNumber", "hashValue"]
+- !private ["Ps10Strideable", "Stride"]
+- !private ["Ps10Strideable", "hashValue"]
+- !private ["Ps35_ExpressibleByBuiltinBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps35_ExpressibleByBuiltinIntegerLiteral", "Stride"]
+- !private ["Ps35_ExpressibleByBuiltinIntegerLiteral", "hashValue"]
+- !private ["Ps9_Hashable", "Stride"]
+- !private ["Ps9_Hashable", "_getBuiltinLogicValue"]
+- ["Ps9_Hashable", "_toAnyHashable"]
+- !private ["Ps9_Hashable", "class"]
+- !private ["Ps9_Hashable", "enum"]
+- !private ["Ps9_Hashable", "errorObject"]
+- !private ["Ps9_Hashable", "existential"]
+- !private ["Ps9_Hashable", "existentialMetatype"]
+- !private ["Ps9_Hashable", "foreignClass"]
+- !private ["Ps9_Hashable", "function"]
+- ["Ps9_Hashable", "hashValue"]
+- !private ["Ps9_Hashable", "heapGenericLocalVariable"]
+- !private ["Ps9_Hashable", "heapLocalVariable"]
+- !private ["Ps9_Hashable", "metatype"]
+- !private ["Ps9_Hashable", "objCClassWrapper"]
+- !private ["Ps9_Hashable", "opaque"]
+- !private ["Ps9_Hashable", "optional"]
+- !private ["Ps9_Hashable", "struct"]
+- !private ["Ps9_Hashable", "tuple"]
+- ["Ps9_Hashable", ""]
+- !private ["Ps14_Incrementable", "Stride"]
+- !private ["Ps14_Incrementable", "hashValue"]
+- !private ["Ps8_Integer", "Stride"]
+- !private ["Ps8_Integer", "hashValue"]
+- !private ["Ps18_IntegerArithmetic", "Stride"]
+- !private ["Ps18_IntegerArithmetic", "hashValue"]
+- !private ["Vs26_OptionalNilComparisonType", "deinit"]
+- !private ["Ps14_SignedInteger", "Stride"]
+- !private ["Ps14_SignedInteger", "hashValue"]
+- !private ["Ps11_Strideable", "Stride"]
+- !private ["Ps11_Strideable", "hashValue"]
+depends-nominal:
+- !private "Ps17BitwiseOperations"
+- !private "Sb"
+- !private "Ps7CVarArg"
+- !private "Vs11ClosedRange"
+- !private "Ps10Comparable"
+- !private "Vs20CountableClosedRange"
+- !private "Vs14CountableRange"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- !private "Ps23CustomStringConvertible"
+- "Ps9Equatable"
+- !private "Ps27ExpressibleByBooleanLiteral"
+- !private "Ps27ExpressibleByIntegerLiteral"
+- "Ps8Hashable"
+- !private "Si"
+- !private "Ps7Integer"
+- !private "Ps17IntegerArithmetic"
+- "OV10Reflection8Metadata4Kind"
+- !private "Ps25LosslessStringConvertible"
+- "V10Reflection8Metadata"
+- !private "Ps10MirrorPath"
+- !private "Vs5Range"
+- !private "Ps13SignedInteger"
+- !private "Ps12SignedNumber"
+- !private "Ps10Strideable"
+- !private "Ps35_ExpressibleByBuiltinBooleanLiteral"
+- !private "Ps35_ExpressibleByBuiltinIntegerLiteral"
+- "Ps9_Hashable"
+- !private "Ps14_Incrementable"
+- !private "Ps8_Integer"
+- !private "Ps18_IntegerArithmetic"
+- !private "Vs26_OptionalNilComparisonType"
+- !private "Ps14_SignedInteger"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "3cf63f8d7543361757dc540699567a7d"

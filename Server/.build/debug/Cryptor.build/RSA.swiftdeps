@@ -1,0 +1,217 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "RSA"
+provides-nominal:
+- "C7Cryptor3RSA"
+- "OC7Cryptor3RSA12RSAAlgorithm"
+provides-member:
+- ["C7Cryptor3RSA", ""]
+- ["OC7Cryptor3RSA12RSAAlgorithm", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "=="
+- !private "~="
+- "Int"
+- "SecPadding"
+- "RSA"
+depends-member:
+- ["Ps9AnyObject", ""]
+- !private ["Ps17BitwiseOperations", "Stride"]
+- !private ["Ps17BitwiseOperations", "hashValue"]
+- !private ["Sb", "_getBuiltinLogicValue"]
+- ["Sb", "deinit"]
+- !private ["Ps7CVarArg", "Stride"]
+- !private ["Ps7CVarArg", "hashValue"]
+- !private ["Vs11ClosedRange", "deinit"]
+- !private ["Ps10Comparable", "Stride"]
+- !private ["Ps10Comparable", "hashValue"]
+- !private ["Vs20CountableClosedRange", "deinit"]
+- !private ["Vs14CountableRange", "deinit"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "Stride"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "_getBuiltinLogicValue"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "hashValue"]
+- !private ["Ps17CustomReflectable", "Stride"]
+- !private ["Ps17CustomReflectable", "_getBuiltinLogicValue"]
+- !private ["Ps17CustomReflectable", "hashValue"]
+- !private ["Ps23CustomStringConvertible", "Stride"]
+- !private ["Ps23CustomStringConvertible", "_getBuiltinLogicValue"]
+- !private ["Ps23CustomStringConvertible", "hashValue"]
+- !private ["Ps9Equatable", "PKCS1"]
+- !private ["Ps9Equatable", "PKCS1MD2"]
+- !private ["Ps9Equatable", "PKCS1MD5"]
+- !private ["Ps9Equatable", "PKCS1SHA1"]
+- ["Ps9Equatable", "RawValue"]
+- !private ["Ps9Equatable", "Stride"]
+- !private ["Ps9Equatable", "_getBuiltinLogicValue"]
+- ["Ps9Equatable", "_toAnyHashable"]
+- ["Ps9Equatable", "hashValue"]
+- ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "md2"]
+- ["Ps9Equatable", "md5"]
+- ["Ps9Equatable", "none"]
+- ["Ps9Equatable", "pkcs1"]
+- ["Ps9Equatable", "rawValue"]
+- ["Ps9Equatable", "sha1"]
+- ["Ps9Equatable", ""]
+- !private ["Ps27ExpressibleByBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "Stride"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "hashValue"]
+- !private ["Ps8Hashable", "PKCS1"]
+- !private ["Ps8Hashable", "PKCS1MD2"]
+- !private ["Ps8Hashable", "PKCS1MD5"]
+- !private ["Ps8Hashable", "PKCS1SHA1"]
+- ["Ps8Hashable", "RawValue"]
+- !private ["Ps8Hashable", "Stride"]
+- !private ["Ps8Hashable", "_getBuiltinLogicValue"]
+- ["Ps8Hashable", "_toAnyHashable"]
+- ["Ps8Hashable", "hashValue"]
+- ["Ps8Hashable", "init"]
+- ["Ps8Hashable", "md2"]
+- ["Ps8Hashable", "md5"]
+- ["Ps8Hashable", "none"]
+- ["Ps8Hashable", "pkcs1"]
+- ["Ps8Hashable", "rawValue"]
+- ["Ps8Hashable", "sha1"]
+- ["Ps8Hashable", ""]
+- !private ["Si", "Stride"]
+- ["Si", "deinit"]
+- !private ["Si", "hashValue"]
+- !private ["Ps7Integer", "Stride"]
+- !private ["Ps7Integer", "hashValue"]
+- !private ["Ps17IntegerArithmetic", "Stride"]
+- !private ["Ps17IntegerArithmetic", "hashValue"]
+- !private ["Ps25LosslessStringConvertible", "_getBuiltinLogicValue"]
+- !private ["Ps10MirrorPath", "Stride"]
+- !private ["Ps10MirrorPath", "hashValue"]
+- ["C7Cryptor3RSA", "Int"]
+- ["C7Cryptor3RSA", "RSAAlgorithm"]
+- ["C7Cryptor3RSA", "SecPadding"]
+- ["C7Cryptor3RSA", "deinit"]
+- ["C7Cryptor3RSA", "init"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "RawValue"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "SecPadding"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "_toAnyHashable"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "deinit"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "hashValue"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "init"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "md2"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "md5"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "none"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "padding"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "pkcs1"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "rawValue"]
+- ["OC7Cryptor3RSA12RSAAlgorithm", "sha1"]
+- !private ["Vs5Range", "deinit"]
+- !private ["Ps16RawRepresentable", "PKCS1"]
+- !private ["Ps16RawRepresentable", "PKCS1MD2"]
+- !private ["Ps16RawRepresentable", "PKCS1MD5"]
+- !private ["Ps16RawRepresentable", "PKCS1SHA1"]
+- ["Ps16RawRepresentable", "RawValue"]
+- ["Ps16RawRepresentable", "_toAnyHashable"]
+- ["Ps16RawRepresentable", "hashValue"]
+- ["Ps16RawRepresentable", "init"]
+- ["Ps16RawRepresentable", "md2"]
+- ["Ps16RawRepresentable", "md5"]
+- ["Ps16RawRepresentable", "none"]
+- ["Ps16RawRepresentable", "pkcs1"]
+- ["Ps16RawRepresentable", "rawValue"]
+- ["Ps16RawRepresentable", "sha1"]
+- ["Ps16RawRepresentable", ""]
+- !private ["OSC10SecPadding", "PKCS1"]
+- !private ["OSC10SecPadding", "PKCS1MD2"]
+- !private ["OSC10SecPadding", "PKCS1MD5"]
+- !private ["OSC10SecPadding", "PKCS1SHA1"]
+- ["OSC10SecPadding", "deinit"]
+- !private ["OSC10SecPadding", "none"]
+- !private ["Ps13SignedInteger", "Stride"]
+- !private ["Ps13SignedInteger", "hashValue"]
+- !private ["Ps12SignedNumber", "Stride"]
+- !private ["Ps12SignedNumber", "hashValue"]
+- !private ["Ps10Strideable", "Stride"]
+- !private ["Ps10Strideable", "hashValue"]
+- !private ["Ps35_ExpressibleByBuiltinBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps35_ExpressibleByBuiltinIntegerLiteral", "Stride"]
+- !private ["Ps35_ExpressibleByBuiltinIntegerLiteral", "hashValue"]
+- !private ["Ps9_Hashable", "PKCS1"]
+- !private ["Ps9_Hashable", "PKCS1MD2"]
+- !private ["Ps9_Hashable", "PKCS1MD5"]
+- !private ["Ps9_Hashable", "PKCS1SHA1"]
+- ["Ps9_Hashable", "RawValue"]
+- !private ["Ps9_Hashable", "Stride"]
+- !private ["Ps9_Hashable", "_getBuiltinLogicValue"]
+- ["Ps9_Hashable", "_toAnyHashable"]
+- ["Ps9_Hashable", "hashValue"]
+- ["Ps9_Hashable", "init"]
+- ["Ps9_Hashable", "md2"]
+- ["Ps9_Hashable", "md5"]
+- ["Ps9_Hashable", "none"]
+- ["Ps9_Hashable", "pkcs1"]
+- ["Ps9_Hashable", "rawValue"]
+- ["Ps9_Hashable", "sha1"]
+- ["Ps9_Hashable", ""]
+- !private ["Ps14_Incrementable", "Stride"]
+- !private ["Ps14_Incrementable", "hashValue"]
+- !private ["Ps8_Integer", "Stride"]
+- !private ["Ps8_Integer", "hashValue"]
+- !private ["Ps18_IntegerArithmetic", "Stride"]
+- !private ["Ps18_IntegerArithmetic", "hashValue"]
+- !private ["Ps21_ObjectiveCBridgeable", "Stride"]
+- !private ["Ps21_ObjectiveCBridgeable", "_getBuiltinLogicValue"]
+- !private ["Ps21_ObjectiveCBridgeable", "hashValue"]
+- !private ["Vs26_OptionalNilComparisonType", "deinit"]
+- !private ["Ps14_SignedInteger", "Stride"]
+- !private ["Ps14_SignedInteger", "hashValue"]
+- !private ["Ps11_Strideable", "Stride"]
+- !private ["Ps11_Strideable", "hashValue"]
+depends-nominal:
+- "Ps9AnyObject"
+- !private "Ps17BitwiseOperations"
+- "Sb"
+- !private "Ps7CVarArg"
+- !private "Vs11ClosedRange"
+- !private "Ps10Comparable"
+- !private "Vs20CountableClosedRange"
+- !private "Vs14CountableRange"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- !private "Ps23CustomStringConvertible"
+- "Ps9Equatable"
+- !private "Ps27ExpressibleByBooleanLiteral"
+- !private "Ps27ExpressibleByIntegerLiteral"
+- "Ps8Hashable"
+- "Si"
+- !private "Ps7Integer"
+- !private "Ps17IntegerArithmetic"
+- !private "Ps25LosslessStringConvertible"
+- !private "Ps10MirrorPath"
+- "C7Cryptor3RSA"
+- "OC7Cryptor3RSA12RSAAlgorithm"
+- !private "Vs5Range"
+- "Ps16RawRepresentable"
+- "OSC10SecPadding"
+- !private "Ps13SignedInteger"
+- !private "Ps12SignedNumber"
+- !private "Ps10Strideable"
+- !private "Ps35_ExpressibleByBuiltinBooleanLiteral"
+- !private "Ps35_ExpressibleByBuiltinIntegerLiteral"
+- "Ps9_Hashable"
+- !private "Ps14_Incrementable"
+- !private "Ps8_Integer"
+- !private "Ps18_IntegerArithmetic"
+- !private "Ps21_ObjectiveCBridgeable"
+- !private "Vs26_OptionalNilComparisonType"
+- !private "Ps14_SignedInteger"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+interface-hash: "b2c762419cea3cd45f421b485b6b91c5"

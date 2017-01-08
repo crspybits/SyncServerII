@@ -1,0 +1,85 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+provides-nominal:
+provides-member:
+- ["SP", ""]
+- ["SP", "init"]
+provides-dynamic-lookup:
+depends-top-level:
+- "UnsafePointer"
+- !private "UnsafeRawPointer"
+- "AssignmentPrecedence"
+depends-member:
+- !private ["Ps7CVarArg", "Pointee"]
+- !private ["Ps7CVarArg", "UnsafeRawPointer"]
+- !private ["Ps10Comparable", "Pointee"]
+- !private ["Ps10Comparable", "UnsafeRawPointer"]
+- !private ["Ps10Comparable", "assumingMemoryBound"]
+- !private ["Ps10Comparable", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "Pointee"]
+- !private ["Ps28CustomDebugStringConvertible", "UnsafeRawPointer"]
+- !private ["Ps28CustomDebugStringConvertible", "assumingMemoryBound"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "Pointee"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "UnsafeRawPointer"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "assumingMemoryBound"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps17CustomReflectable", "Pointee"]
+- !private ["Ps17CustomReflectable", "UnsafeRawPointer"]
+- !private ["Ps17CustomReflectable", "assumingMemoryBound"]
+- !private ["Ps17CustomReflectable", "init"]
+- !private ["Ps9Equatable", "Pointee"]
+- !private ["Ps9Equatable", "UnsafeRawPointer"]
+- !private ["Ps9Equatable", "assumingMemoryBound"]
+- !private ["Ps9Equatable", "init"]
+- !private ["Ps23ExpressibleByNilLiteral", "assumingMemoryBound"]
+- !private ["Ps8Hashable", "Pointee"]
+- !private ["Ps8Hashable", "UnsafeRawPointer"]
+- !private ["Ps8Hashable", "assumingMemoryBound"]
+- !private ["Ps8Hashable", "init"]
+- !private ["Sq", "assumingMemoryBound"]
+- !private ["Ps10Strideable", "Pointee"]
+- !private ["Ps10Strideable", "UnsafeRawPointer"]
+- !private ["Ps10Strideable", "assumingMemoryBound"]
+- !private ["Ps10Strideable", "init"]
+- !private ["SP", "Pointee"]
+- ["SP", "UnsafePointer"]
+- !private ["SP", "UnsafeRawPointer"]
+- ["SP", "init"]
+- !private ["SV", "assumingMemoryBound"]
+- !private ["SV", "init"]
+- !private ["Ps9_Hashable", "Pointee"]
+- !private ["Ps9_Hashable", "UnsafeRawPointer"]
+- !private ["Ps9_Hashable", "assumingMemoryBound"]
+- !private ["Ps9_Hashable", "init"]
+- !private ["Ps21_ObjectiveCBridgeable", "assumingMemoryBound"]
+- !private ["Ps8_Pointer", "Pointee"]
+- !private ["Ps8_Pointer", "UnsafeRawPointer"]
+- !private ["Ps8_Pointer", "assumingMemoryBound"]
+- !private ["Ps8_Pointer", "init"]
+- !private ["Ps11_Strideable", "Pointee"]
+- !private ["Ps11_Strideable", "UnsafeRawPointer"]
+- !private ["Ps11_Strideable", "assumingMemoryBound"]
+- !private ["Ps11_Strideable", "init"]
+depends-nominal:
+- !private "Ps7CVarArg"
+- !private "Ps10Comparable"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- !private "Ps9Equatable"
+- !private "Ps23ExpressibleByNilLiteral"
+- !private "Ps8Hashable"
+- !private "Sq"
+- !private "Ps10Strideable"
+- "SP"
+- !private "SV"
+- !private "Ps9_Hashable"
+- !private "Ps21_ObjectiveCBridgeable"
+- !private "Ps8_Pointer"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "b494cb6dfb5052803ed1cde156443f48"

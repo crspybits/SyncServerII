@@ -1,0 +1,62 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "PointerType"
+- "=="
+provides-nominal:
+- "P10Reflection11PointerType"
+provides-member:
+- ["P10Reflection11PointerType", ""]
+- ["P10Reflection11PointerType", "init"]
+provides-dynamic-lookup:
+depends-top-level:
+- "PointerType"
+- "Equatable"
+- "UnsafePointer"
+- "=="
+- "AssignmentPrecedence"
+- !private "unsafeBitCast"
+- "Bool"
+depends-member:
+- !private ["Ps7CVarArg", "init"]
+- !private ["Ps10Comparable", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps17CustomReflectable", "init"]
+- ["Ps9Equatable", "Pointee"]
+- ["Ps9Equatable", "UnsafePointer"]
+- !private ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "pointer"]
+- !private ["Ps9Equatable", "unsafeBitCast"]
+- ["Ps9Equatable", ""]
+- !private ["Ps8Hashable", "init"]
+- ["P10Reflection11PointerType", "Pointee"]
+- ["P10Reflection11PointerType", "UnsafePointer"]
+- ["P10Reflection11PointerType", "init"]
+- ["P10Reflection11PointerType", "pointer"]
+- !private ["P10Reflection11PointerType", "unsafeBitCast"]
+- ["P10Reflection11PointerType", ""]
+- !private ["Ps10Strideable", "init"]
+- !private ["SP", "deinit"]
+- !private ["SP", "init"]
+- !private ["Ps9_Hashable", "init"]
+- !private ["Ps8_Pointer", "init"]
+- !private ["Ps11_Strideable", "init"]
+depends-nominal:
+- !private "Ps7CVarArg"
+- !private "Ps10Comparable"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- "Ps9Equatable"
+- !private "Ps8Hashable"
+- "P10Reflection11PointerType"
+- !private "Ps10Strideable"
+- !private "SP"
+- !private "Ps9_Hashable"
+- !private "Ps8_Pointer"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "fa0e4e3ad09643cc6f9955773d8c989d"

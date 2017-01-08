@@ -75,7 +75,7 @@ class model2 : Model {
     }
 }
 
-class GeneralDatabaseTests: XCTestCase {
+class GeneralDatabaseTests: ServerTestCase {
     let c1Value = "a"
     let c2Value = "bc"
     let c3Value = "def"

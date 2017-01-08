@@ -1,0 +1,472 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "IncomingHTTPSocketProcessor"
+- "=="
+provides-nominal:
+- "C9KituraNet27IncomingHTTPSocketProcessor"
+- "OC9KituraNet27IncomingHTTPSocketProcessor5State"
+provides-member:
+- ["C9KituraNet27IncomingHTTPSocketProcessor", ""]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "StringLiteralType"
+- !private "ConnectionUpgrader"
+- !private "Log"
+- !private "Monitor"
+- "Bool"
+- "UnsafeRawPointer"
+- "IncomingHTTPSocketProcessor"
+- "IncomingSocketHandler"
+- "Socket"
+- !private "HTTPServerResponse"
+- !private "-"
+- !private "!"
+- "BooleanLiteralType"
+- !private "DispatchQueue"
+- !private "Date"
+- "IncomingSocketProcessor"
+- "NSData"
+- "FloatLiteralType"
+- "ServerDelegate"
+- "IntegerLiteralType"
+- "Int"
+- !private ">"
+- "ServerResponse"
+- !private "&&"
+- "=="
+- "AssignmentPrecedence"
+- "HTTPServerRequest"
+- "TimeInterval"
+- !private "-="
+depends-member:
+- !private ["Ps9AnyObject", "ConnectionUpgrader"]
+- !private ["Ps9AnyObject", "Date"]
+- !private ["Ps9AnyObject", "DispatchQueue"]
+- !private ["Ps9AnyObject", "HTTPServerRequest"]
+- !private ["Ps9AnyObject", "HTTPServerResponse"]
+- !private ["Ps9AnyObject", "IncomingHTTPSocketProcessor"]
+- !private ["Ps9AnyObject", "Log"]
+- !private ["Ps9AnyObject", "Monitor"]
+- ["Ps9AnyObject", "State"]
+- !private ["Ps9AnyObject", "async"]
+- !private ["Ps9AnyObject", "clientRequestedKeepAlive"]
+- ["Ps9AnyObject", "close"]
+- !private ["Ps9AnyObject", "delegate"]
+- !private ["Ps9AnyObject", "error"]
+- !private ["Ps9AnyObject", "global"]
+- !private ["Ps9AnyObject", "handleBufferedReadData"]
+- ["Ps9AnyObject", "handler"]
+- ["Ps9AnyObject", "inProgress"]
+- !private ["Ps9AnyObject", "init"]
+- !private ["Ps9AnyObject", "isUpgrade"]
+- !private ["Ps9AnyObject", "keepAliveTimeout"]
+- ["Ps9AnyObject", "keepAliveUntil"]
+- !private ["Ps9AnyObject", "length"]
+- !private ["Ps9AnyObject", "numberOfRequests"]
+- !private ["Ps9AnyObject", "parse"]
+- !private ["Ps9AnyObject", "parseStartingFrom"]
+- !private ["Ps9AnyObject", "parsingComplete"]
+- !private ["Ps9AnyObject", "prepareToClose"]
+- !private ["Ps9AnyObject", "prepareToReset"]
+- ["Ps9AnyObject", "process"]
+- !private ["Ps9AnyObject", "request"]
+- !private ["Ps9AnyObject", "response"]
+- ["Ps9AnyObject", "socketClosed"]
+- !private ["Ps9AnyObject", "state"]
+- ["Ps9AnyObject", "write"]
+- ["Ps9AnyObject", ""]
+- !private ["Ps17BitwiseOperations", "hashValue"]
+- !private ["Sb", "_getBuiltinLogicValue"]
+- ["Sb", "deinit"]
+- !private ["Ps7CVarArg", "async"]
+- !private ["Ps7CVarArg", "global"]
+- !private ["Ps7CVarArg", "hashValue"]
+- !private ["Ps7CVarArg", "init"]
+- !private ["Ps7CVarArg", "length"]
+- !private ["Vs9Character", "deinit"]
+- !private ["Ps10Comparable", "hashValue"]
+- !private ["Ps10Comparable", "init"]
+- !private ["Ps10Comparable", "timeIntervalSinceReferenceDate"]
+- !private ["V9KituraNet18ConnectionUpgrader", "instance"]
+- !private ["V9KituraNet18ConnectionUpgrader", "upgradeConnection"]
+- !private ["Ps28CustomDebugStringConvertible", "async"]
+- !private ["Ps28CustomDebugStringConvertible", "badRequest"]
+- !private ["Ps28CustomDebugStringConvertible", "global"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "length"]
+- !private ["Ps28CustomDebugStringConvertible", "timeIntervalSinceReferenceDate"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "_getBuiltinLogicValue"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "hashValue"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "timeIntervalSinceReferenceDate"]
+- !private ["Ps17CustomReflectable", "_getBuiltinLogicValue"]
+- !private ["Ps17CustomReflectable", "badRequest"]
+- !private ["Ps17CustomReflectable", "hashValue"]
+- !private ["Ps17CustomReflectable", "init"]
+- !private ["Ps17CustomReflectable", "timeIntervalSinceReferenceDate"]
+- !private ["Ps23CustomStringConvertible", "_getBuiltinLogicValue"]
+- !private ["Ps23CustomStringConvertible", "async"]
+- !private ["Ps23CustomStringConvertible", "global"]
+- !private ["Ps23CustomStringConvertible", "hashValue"]
+- !private ["Ps23CustomStringConvertible", "init"]
+- !private ["Ps23CustomStringConvertible", "length"]
+- !private ["Ps23CustomStringConvertible", "timeIntervalSinceReferenceDate"]
+- ["V10Foundation4Date", "deinit"]
+- !private ["V10Foundation4Date", "init"]
+- !private ["V10Foundation4Date", "timeIntervalSinceReferenceDate"]
+- !private ["CSo14DispatchObject", "async"]
+- !private ["CSo14DispatchObject", "global"]
+- !private ["CSo13DispatchQueue", "async"]
+- !private ["CSo13DispatchQueue", "deinit"]
+- !private ["CSo13DispatchQueue", "global"]
+- ["Sd", "deinit"]
+- !private ["Ps9Equatable", "_getBuiltinLogicValue"]
+- ["Ps9Equatable", "_toAnyHashable"]
+- !private ["Ps9Equatable", "async"]
+- !private ["Ps9Equatable", "badRequest"]
+- !private ["Ps9Equatable", "global"]
+- ["Ps9Equatable", "hashValue"]
+- !private ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "initial"]
+- !private ["Ps9Equatable", "length"]
+- !private ["Ps9Equatable", "messageComplete"]
+- ["Ps9Equatable", "messageCompletelyRead"]
+- ["Ps9Equatable", "reset"]
+- !private ["Ps9Equatable", "timeIntervalSinceReferenceDate"]
+- ["Ps9Equatable", ""]
+- !private ["Ps27ExpressibleByBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps43ExpressibleByExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "hashValue"]
+- !private ["Ps23ExpressibleByNilLiteral", "badRequest"]
+- !private ["Ps32ExpressibleByStringInterpolation", "init"]
+- !private ["Ps26ExpressibleByStringLiteral", "init"]
+- !private ["Ps33ExpressibleByUnicodeScalarLiteral", "init"]
+- !private ["Sf", "deinit"]
+- !private ["C9KituraNet19HTTPIncomingMessage", "parse"]
+- !private ["C9KituraNet19HTTPIncomingMessage", "prepareToReset"]
+- !private ["O9KituraNet19HTTPParserErrorType", "deinit"]
+- !private ["O9KituraNet15HTTPParserState", "deinit"]
+- !private ["O9KituraNet15HTTPParserState", "initial"]
+- !private ["O9KituraNet15HTTPParserState", "messageComplete"]
+- !private ["O9KituraNet15HTTPParserState", "reset"]
+- !private ["V9KituraNet16HTTPParserStatus", "bytesLeft"]
+- !private ["V9KituraNet16HTTPParserStatus", "deinit"]
+- !private ["V9KituraNet16HTTPParserStatus", "error"]
+- !private ["V9KituraNet16HTTPParserStatus", "keepAlive"]
+- !private ["V9KituraNet16HTTPParserStatus", "state"]
+- !private ["V9KituraNet16HTTPParserStatus", "upgrade"]
+- ["C9KituraNet17HTTPServerRequest", "deinit"]
+- !private ["C9KituraNet17HTTPServerRequest", "init"]
+- !private ["C9KituraNet17HTTPServerRequest", "parse"]
+- !private ["C9KituraNet17HTTPServerRequest", "prepareToReset"]
+- ["C9KituraNet18HTTPServerResponse", "deinit"]
+- !private ["C9KituraNet18HTTPServerResponse", "init"]
+- !private ["O9KituraNet14HTTPStatusCode", "badRequest"]
+- !private ["Ps8Hashable", "_getBuiltinLogicValue"]
+- ["Ps8Hashable", "_toAnyHashable"]
+- !private ["Ps8Hashable", "async"]
+- !private ["Ps8Hashable", "badRequest"]
+- !private ["Ps8Hashable", "global"]
+- ["Ps8Hashable", "hashValue"]
+- !private ["Ps8Hashable", "init"]
+- ["Ps8Hashable", "initial"]
+- !private ["Ps8Hashable", "length"]
+- !private ["Ps8Hashable", "messageComplete"]
+- ["Ps8Hashable", "messageCompletelyRead"]
+- ["Ps8Hashable", "reset"]
+- !private ["Ps8Hashable", "timeIntervalSinceReferenceDate"]
+- ["Ps8Hashable", ""]
+- ["SQ", "deinit"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "Bool"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "ConnectionUpgrader"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "Date"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "DispatchQueue"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "HTTPServerRequest"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "HTTPServerResponse"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "IncomingHTTPSocketProcessor"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "IncomingSocketHandler"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "Int"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "Log"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "Monitor"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "NSData"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "ServerDelegate"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "ServerResponse"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "Socket"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "State"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "TimeInterval"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "UnsafeRawPointer"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "clientRequestedKeepAlive"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "close"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "deinit"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "delegate"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "handler"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "inProgress"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "init"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "isKeepAlive"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "isUpgrade"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "keepAlive"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "keepAliveTimeout"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "keepAliveUntil"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "numberOfRequests"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "parse"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "parseStartingFrom"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "parsingComplete"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "process"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "request"]
+- !private ["C9KituraNet27IncomingHTTPSocketProcessor", "response"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "socketClosed"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "state"]
+- ["C9KituraNet27IncomingHTTPSocketProcessor", "write"]
+- !private ["C9KituraNet21IncomingSocketHandler", "deinit"]
+- !private ["C9KituraNet21IncomingSocketHandler", "handleBufferedReadData"]
+- !private ["C9KituraNet21IncomingSocketHandler", "prepareToClose"]
+- !private ["C9KituraNet21IncomingSocketHandler", "write"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "ConnectionUpgrader"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "Date"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "DispatchQueue"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "HTTPServerRequest"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "HTTPServerResponse"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "IncomingHTTPSocketProcessor"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "Log"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "Monitor"]
+- ["P9KituraNet23IncomingSocketProcessor", "State"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "clientRequestedKeepAlive"]
+- ["P9KituraNet23IncomingSocketProcessor", "close"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "delegate"]
+- ["P9KituraNet23IncomingSocketProcessor", "handler"]
+- ["P9KituraNet23IncomingSocketProcessor", "inProgress"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "isUpgrade"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "keepAliveTimeout"]
+- ["P9KituraNet23IncomingSocketProcessor", "keepAliveUntil"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "numberOfRequests"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "parse"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "parseStartingFrom"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "parsingComplete"]
+- ["P9KituraNet23IncomingSocketProcessor", "process"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "request"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "response"]
+- ["P9KituraNet23IncomingSocketProcessor", "socketClosed"]
+- !private ["P9KituraNet23IncomingSocketProcessor", "state"]
+- ["P9KituraNet23IncomingSocketProcessor", "write"]
+- ["P9KituraNet23IncomingSocketProcessor", ""]
+- ["Si", "deinit"]
+- !private ["Si", "hashValue"]
+- !private ["Vs5Int16", "deinit"]
+- !private ["Vs5Int32", "deinit"]
+- !private ["Vs5Int64", "deinit"]
+- !private ["Vs4Int8", "deinit"]
+- !private ["Ps7Integer", "hashValue"]
+- !private ["Ps17IntegerArithmetic", "hashValue"]
+- !private ["C9LoggerAPI3Log", "error"]
+- !private ["Ps25LosslessStringConvertible", "_getBuiltinLogicValue"]
+- !private ["Ps25LosslessStringConvertible", "init"]
+- !private ["Ps10MirrorPath", "hashValue"]
+- !private ["Ps10MirrorPath", "init"]
+- !private ["V9KituraNet7Monitor", "delegate"]
+- !private ["PSo8NSCoding", "init"]
+- !private ["PSo8NSCoding", "length"]
+- !private ["PSo9NSCopying", "init"]
+- !private ["PSo9NSCopying", "length"]
+- ["CSo6NSData", "deinit"]
+- !private ["CSo6NSData", "length"]
+- !private ["PSo16NSMutableCopying", "init"]
+- !private ["PSo16NSMutableCopying", "length"]
+- !private ["CSo8NSObject", "async"]
+- !private ["CSo8NSObject", "global"]
+- !private ["CSo8NSObject", "init"]
+- !private ["CSo8NSObject", "length"]
+- !private ["PSo16NSObjectProtocol", "async"]
+- !private ["PSo16NSObjectProtocol", "global"]
+- !private ["PSo16NSObjectProtocol", "init"]
+- !private ["PSo16NSObjectProtocol", "length"]
+- !private ["PSo14NSSecureCoding", "init"]
+- !private ["PSo14NSSecureCoding", "length"]
+- !private ["CSo8NSString", "init"]
+- !private ["CSo9OS_object", "async"]
+- !private ["CSo9OS_object", "global"]
+- !private ["Sq", "badRequest"]
+- ["Sq", "deinit"]
+- !private ["Ps16RawRepresentable", "badRequest"]
+- !private ["P10Foundation20ReferenceConvertible", "init"]
+- !private ["P10Foundation20ReferenceConvertible", "timeIntervalSinceReferenceDate"]
+- ["P9KituraNet14ServerDelegate", "deinit"]
+- !private ["P9KituraNet14ServerDelegate", "handle"]
+- !private ["P9KituraNet13ServerMonitor", "started"]
+- !private ["P9KituraNet13ServerRequest", "init"]
+- !private ["P9KituraNet13ServerRequest", "parse"]
+- !private ["P9KituraNet13ServerRequest", "prepareToReset"]
+- !private ["P9KituraNet14ServerResponse", "deinit"]
+- !private ["P9KituraNet14ServerResponse", "end"]
+- !private ["P9KituraNet14ServerResponse", "init"]
+- !private ["P9KituraNet14ServerResponse", "reset"]
+- !private ["P9KituraNet14ServerResponse", "statusCode"]
+- !private ["Ps13SignedInteger", "hashValue"]
+- !private ["Ps12SignedNumber", "hashValue"]
+- ["C6Socket6Socket", "deinit"]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", "=="]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", "_toAnyHashable"]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", "deinit"]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", "hashValue"]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", "initial"]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", "messageCompletelyRead"]
+- ["OC9KituraNet27IncomingHTTPSocketProcessor5State", "reset"]
+- !private ["Ps10Strideable", "hashValue"]
+- !private ["SS", "deinit"]
+- !private ["SS", "init"]
+- !private ["Ps16TextOutputStream", "init"]
+- !private ["Ps20TextOutputStreamable", "init"]
+- !private ["Su", "deinit"]
+- !private ["Vs6UInt16", "deinit"]
+- !private ["Vs6UInt32", "deinit"]
+- !private ["Vs6UInt64", "deinit"]
+- !private ["Vs5UInt8", "deinit"]
+- !private ["Sc", "deinit"]
+- ["SV", "deinit"]
+- !private ["Ps35_ExpressibleByBuiltinBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps35_ExpressibleByBuiltinIntegerLiteral", "hashValue"]
+- !private ["Ps34_ExpressibleByBuiltinStringLiteral", "init"]
+- !private ["Ps39_ExpressibleByBuiltinUTF16StringLiteral", "init"]
+- !private ["Ps41_ExpressibleByBuiltinUnicodeScalarLiteral", "init"]
+- !private ["Ps35_HasCustomAnyHashableRepresentation", "init"]
+- !private ["Ps35_HasCustomAnyHashableRepresentation", "length"]
+- !private ["Ps9_Hashable", "_getBuiltinLogicValue"]
+- ["Ps9_Hashable", "_toAnyHashable"]
+- !private ["Ps9_Hashable", "async"]
+- !private ["Ps9_Hashable", "badRequest"]
+- !private ["Ps9_Hashable", "global"]
+- ["Ps9_Hashable", "hashValue"]
+- !private ["Ps9_Hashable", "init"]
+- ["Ps9_Hashable", "initial"]
+- !private ["Ps9_Hashable", "length"]
+- !private ["Ps9_Hashable", "messageComplete"]
+- ["Ps9_Hashable", "messageCompletelyRead"]
+- ["Ps9_Hashable", "reset"]
+- !private ["Ps9_Hashable", "timeIntervalSinceReferenceDate"]
+- ["Ps9_Hashable", ""]
+- !private ["Ps14_Incrementable", "hashValue"]
+- !private ["Ps8_Integer", "hashValue"]
+- !private ["Ps18_IntegerArithmetic", "hashValue"]
+- !private ["Ps21_ObjectiveCBridgeable", "_getBuiltinLogicValue"]
+- !private ["Ps21_ObjectiveCBridgeable", "badRequest"]
+- !private ["Ps21_ObjectiveCBridgeable", "hashValue"]
+- !private ["Ps21_ObjectiveCBridgeable", "init"]
+- !private ["Ps21_ObjectiveCBridgeable", "timeIntervalSinceReferenceDate"]
+- !private ["Vs26_OptionalNilComparisonType", "deinit"]
+- !private ["Ps14_SignedInteger", "hashValue"]
+- !private ["Ps11_Strideable", "hashValue"]
+depends-nominal:
+- "Ps9AnyObject"
+- !private "Ps17BitwiseOperations"
+- "Sb"
+- !private "Ps7CVarArg"
+- !private "Vs9Character"
+- !private "Ps10Comparable"
+- !private "V9KituraNet18ConnectionUpgrader"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- !private "Ps23CustomStringConvertible"
+- "V10Foundation4Date"
+- !private "CSo14DispatchObject"
+- !private "CSo13DispatchQueue"
+- "Sd"
+- "Ps9Equatable"
+- !private "Ps27ExpressibleByBooleanLiteral"
+- !private "Ps43ExpressibleByExtendedGraphemeClusterLiteral"
+- !private "Ps27ExpressibleByIntegerLiteral"
+- !private "Ps23ExpressibleByNilLiteral"
+- !private "Ps32ExpressibleByStringInterpolation"
+- !private "Ps26ExpressibleByStringLiteral"
+- !private "Ps33ExpressibleByUnicodeScalarLiteral"
+- !private "Sf"
+- !private "C9KituraNet19HTTPIncomingMessage"
+- !private "O9KituraNet19HTTPParserErrorType"
+- !private "O9KituraNet15HTTPParserState"
+- !private "V9KituraNet16HTTPParserStatus"
+- "C9KituraNet17HTTPServerRequest"
+- "C9KituraNet18HTTPServerResponse"
+- !private "O9KituraNet14HTTPStatusCode"
+- "Ps8Hashable"
+- "SQ"
+- "C9KituraNet27IncomingHTTPSocketProcessor"
+- !private "C9KituraNet21IncomingSocketHandler"
+- "P9KituraNet23IncomingSocketProcessor"
+- "Si"
+- !private "Vs5Int16"
+- !private "Vs5Int32"
+- !private "Vs5Int64"
+- !private "Vs4Int8"
+- !private "Ps7Integer"
+- !private "Ps17IntegerArithmetic"
+- !private "C9LoggerAPI3Log"
+- !private "Ps25LosslessStringConvertible"
+- !private "Ps10MirrorPath"
+- !private "V9KituraNet7Monitor"
+- !private "PSo8NSCoding"
+- !private "PSo9NSCopying"
+- "CSo6NSData"
+- !private "PSo16NSMutableCopying"
+- !private "CSo8NSObject"
+- !private "PSo16NSObjectProtocol"
+- !private "PSo14NSSecureCoding"
+- !private "CSo8NSString"
+- !private "CSo9OS_object"
+- "Sq"
+- !private "Ps16RawRepresentable"
+- !private "P10Foundation20ReferenceConvertible"
+- "P9KituraNet14ServerDelegate"
+- !private "P9KituraNet13ServerMonitor"
+- !private "P9KituraNet13ServerRequest"
+- !private "P9KituraNet14ServerResponse"
+- !private "Ps13SignedInteger"
+- !private "Ps12SignedNumber"
+- "C6Socket6Socket"
+- "OC9KituraNet27IncomingHTTPSocketProcessor5State"
+- !private "Ps10Strideable"
+- !private "SS"
+- !private "Ps16TextOutputStream"
+- !private "Ps20TextOutputStreamable"
+- !private "Su"
+- !private "Vs6UInt16"
+- !private "Vs6UInt32"
+- !private "Vs6UInt64"
+- !private "Vs5UInt8"
+- !private "Sc"
+- "SV"
+- !private "Ps35_ExpressibleByBuiltinBooleanLiteral"
+- !private "Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral"
+- !private "Ps35_ExpressibleByBuiltinIntegerLiteral"
+- !private "Ps34_ExpressibleByBuiltinStringLiteral"
+- !private "Ps39_ExpressibleByBuiltinUTF16StringLiteral"
+- !private "Ps41_ExpressibleByBuiltinUnicodeScalarLiteral"
+- !private "Ps35_HasCustomAnyHashableRepresentation"
+- "Ps9_Hashable"
+- !private "Ps14_Incrementable"
+- !private "Ps8_Integer"
+- !private "Ps18_IntegerArithmetic"
+- !private "Ps21_ObjectiveCBridgeable"
+- !private "Vs26_OptionalNilComparisonType"
+- !private "Ps14_SignedInteger"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+interface-hash: "db7cd823a530137db9dffdeab25d3aa1"

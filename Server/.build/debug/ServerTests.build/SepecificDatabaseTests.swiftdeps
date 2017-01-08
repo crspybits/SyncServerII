@@ -1,0 +1,503 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "SepecificDatabaseTests"
+provides-nominal:
+- "C11ServerTests22SepecificDatabaseTests"
+provides-member:
+- ["C11ServerTests22SepecificDatabaseTests", ""]
+provides-dynamic-lookup:
+- "tearDown"
+- "testLookup2"
+- "testAddUser"
+- "testLookup1"
+- "setUp"
+depends-top-level:
+- !private "XCTFail"
+- !private "User"
+- "XCTestCase"
+- "AssignmentPrecedence"
+- !private "=="
+- "CastingPrecedence"
+- !private "GoogleCreds"
+- !private "XCTAssert"
+- !private "StringLiteralType"
+- !private "UserRepository"
+- "SepecificDatabaseTests"
+depends-member:
+- !private ["O6Server11AccountType", "Google"]
+- !private ["O6Server11AccountType", "RawValue"]
+- ["O6Server11AccountType", "deinit"]
+- !private ["Ps9AnyObject", "User"]
+- !private ["Ps9AnyObject", "UserRepository"]
+- !private ["Ps9AnyObject", "XCTAssert"]
+- !private ["Ps9AnyObject", "XCTFail"]
+- !private ["Ps9AnyObject", "accessToken"]
+- !private ["Ps9AnyObject", "accountType"]
+- !private ["Ps9AnyObject", "add"]
+- !private ["Ps9AnyObject", "create"]
+- !private ["Ps9AnyObject", "creds"]
+- !private ["Ps9AnyObject", "credsId"]
+- !private ["Ps9AnyObject", "credsObject"]
+- !private ["Ps9AnyObject", "init"]
+- !private ["Ps9AnyObject", "lookup"]
+- !private ["Ps9AnyObject", "remove"]
+- ["Ps9AnyObject", "setUp"]
+- ["Ps9AnyObject", "tearDown"]
+- ["Ps9AnyObject", "testAddUser"]
+- ["Ps9AnyObject", "testLookup1"]
+- ["Ps9AnyObject", "testLookup2"]
+- !private ["Ps9AnyObject", "userId"]
+- !private ["Ps9AnyObject", "username"]
+- ["Ps9AnyObject", ""]
+- ["Sb", "deinit"]
+- !private ["Ps7CVarArg", "User"]
+- !private ["Ps7CVarArg", "UserRepository"]
+- !private ["Ps7CVarArg", "XCTAssert"]
+- !private ["Ps7CVarArg", "XCTFail"]
+- !private ["Ps7CVarArg", "accountType"]
+- !private ["Ps7CVarArg", "creds"]
+- !private ["Ps7CVarArg", "credsId"]
+- !private ["Ps7CVarArg", "credsObject"]
+- !private ["Ps7CVarArg", "init"]
+- ["Ps7CVarArg", "setUp"]
+- ["Ps7CVarArg", "tearDown"]
+- ["Ps7CVarArg", "testAddUser"]
+- ["Ps7CVarArg", "testLookup1"]
+- ["Ps7CVarArg", "testLookup2"]
+- !private ["Ps7CVarArg", "userId"]
+- !private ["Ps7CVarArg", "username"]
+- ["Ps7CVarArg", ""]
+- !private ["Vs9Character", "deinit"]
+- !private ["Ps10Comparable", "init"]
+- !private ["C6Server5Creds", "accessToken"]
+- !private ["P7Cryptor12CryptoDigest", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "Google"]
+- !private ["Ps28CustomDebugStringConvertible", "User"]
+- !private ["Ps28CustomDebugStringConvertible", "UserRepository"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTAssert"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTFail"]
+- !private ["Ps28CustomDebugStringConvertible", "accountType"]
+- !private ["Ps28CustomDebugStringConvertible", "creds"]
+- !private ["Ps28CustomDebugStringConvertible", "credsId"]
+- !private ["Ps28CustomDebugStringConvertible", "credsObject"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- ["Ps28CustomDebugStringConvertible", "setUp"]
+- ["Ps28CustomDebugStringConvertible", "tearDown"]
+- ["Ps28CustomDebugStringConvertible", "testAddUser"]
+- ["Ps28CustomDebugStringConvertible", "testLookup1"]
+- ["Ps28CustomDebugStringConvertible", "testLookup2"]
+- !private ["Ps28CustomDebugStringConvertible", "userId"]
+- !private ["Ps28CustomDebugStringConvertible", "username"]
+- ["Ps28CustomDebugStringConvertible", ""]
+- !private ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps17CustomReflectable", "Google"]
+- !private ["Ps17CustomReflectable", "init"]
+- !private ["Ps23CustomStringConvertible", "Google"]
+- !private ["Ps23CustomStringConvertible", "User"]
+- !private ["Ps23CustomStringConvertible", "UserRepository"]
+- !private ["Ps23CustomStringConvertible", "XCTAssert"]
+- !private ["Ps23CustomStringConvertible", "XCTFail"]
+- !private ["Ps23CustomStringConvertible", "accountType"]
+- !private ["Ps23CustomStringConvertible", "accountTypeInfo"]
+- !private ["Ps23CustomStringConvertible", "creds"]
+- !private ["Ps23CustomStringConvertible", "credsId"]
+- !private ["Ps23CustomStringConvertible", "credsObject"]
+- !private ["Ps23CustomStringConvertible", "init"]
+- ["Ps23CustomStringConvertible", "setUp"]
+- ["Ps23CustomStringConvertible", "tearDown"]
+- ["Ps23CustomStringConvertible", "testAddUser"]
+- ["Ps23CustomStringConvertible", "testLookup1"]
+- ["Ps23CustomStringConvertible", "testLookup2"]
+- !private ["Ps23CustomStringConvertible", "userId"]
+- !private ["Ps23CustomStringConvertible", "username"]
+- ["Ps23CustomStringConvertible", ""]
+- !private ["Sd", "deinit"]
+- !private ["Ps9Equatable", "Google"]
+- !private ["Ps9Equatable", "RawValue"]
+- !private ["Ps9Equatable", "User"]
+- !private ["Ps9Equatable", "UserRepository"]
+- !private ["Ps9Equatable", "XCTAssert"]
+- !private ["Ps9Equatable", "XCTFail"]
+- !private ["Ps9Equatable", "accountType"]
+- !private ["Ps9Equatable", "creds"]
+- !private ["Ps9Equatable", "credsId"]
+- !private ["Ps9Equatable", "credsObject"]
+- !private ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "setUp"]
+- ["Ps9Equatable", "tearDown"]
+- ["Ps9Equatable", "testAddUser"]
+- ["Ps9Equatable", "testLookup1"]
+- ["Ps9Equatable", "testLookup2"]
+- !private ["Ps9Equatable", "userId"]
+- !private ["Ps9Equatable", "username"]
+- ["Ps9Equatable", ""]
+- !private ["Ps43ExpressibleByExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps23ExpressibleByNilLiteral", "Google"]
+- !private ["Ps32ExpressibleByStringInterpolation", "init"]
+- !private ["Ps26ExpressibleByStringLiteral", "init"]
+- !private ["Ps33ExpressibleByUnicodeScalarLiteral", "init"]
+- !private ["Sf", "deinit"]
+- !private ["C6Server11GoogleCreds", "accessToken"]
+- ["C6Server11GoogleCreds", "deinit"]
+- !private ["Ps8Hashable", "Google"]
+- !private ["Ps8Hashable", "RawValue"]
+- !private ["Ps8Hashable", "User"]
+- !private ["Ps8Hashable", "UserRepository"]
+- !private ["Ps8Hashable", "XCTAssert"]
+- !private ["Ps8Hashable", "XCTFail"]
+- !private ["Ps8Hashable", "accountType"]
+- !private ["Ps8Hashable", "creds"]
+- !private ["Ps8Hashable", "credsId"]
+- !private ["Ps8Hashable", "credsObject"]
+- !private ["Ps8Hashable", "init"]
+- ["Ps8Hashable", "setUp"]
+- ["Ps8Hashable", "tearDown"]
+- ["Ps8Hashable", "testAddUser"]
+- ["Ps8Hashable", "testLookup1"]
+- ["Ps8Hashable", "testLookup2"]
+- !private ["Ps8Hashable", "userId"]
+- !private ["Ps8Hashable", "username"]
+- ["Ps8Hashable", ""]
+- !private ["SQ", "Google"]
+- ["SQ", "deinit"]
+- !private ["Si", "deinit"]
+- !private ["Vs5Int16", "deinit"]
+- !private ["Vs5Int32", "deinit"]
+- ["Vs5Int64", "deinit"]
+- !private ["Vs4Int8", "deinit"]
+- !private ["P10PerfectLib15JSONConvertible", "Google"]
+- !private ["P10PerfectLib15JSONConvertible", "init"]
+- !private ["P10SwiftyJSON17JSONSubscriptType", "init"]
+- !private ["P11ServerTests10KituraTest", "User"]
+- !private ["P11ServerTests10KituraTest", "UserRepository"]
+- !private ["P11ServerTests10KituraTest", "XCTAssert"]
+- !private ["P11ServerTests10KituraTest", "XCTFail"]
+- !private ["P11ServerTests10KituraTest", "init"]
+- ["P11ServerTests10KituraTest", "setUp"]
+- ["P11ServerTests10KituraTest", "tearDown"]
+- ["P11ServerTests10KituraTest", "testAddUser"]
+- ["P11ServerTests10KituraTest", "testLookup1"]
+- ["P11ServerTests10KituraTest", "testLookup2"]
+- ["P11ServerTests10KituraTest", ""]
+- !private ["OC6Server14UserRepository9LookupKey", "accountTypeInfo"]
+- ["OC6Server14UserRepository9LookupKey", "deinit"]
+- !private ["OC6Server14UserRepository9LookupKey", "userId"]
+- ["OC6Server14UserRepository12LookupResult", "deinit"]
+- ["OC6Server14UserRepository12LookupResult", "error"]
+- ["OC6Server14UserRepository12LookupResult", "found"]
+- ["OC6Server14UserRepository12LookupResult", "noUserFound"]
+- !private ["Ps25LosslessStringConvertible", "init"]
+- !private ["Ps10MirrorPath", "init"]
+- !private ["P6Server5Model", "accountType"]
+- !private ["P6Server5Model", "creds"]
+- !private ["P6Server5Model", "credsId"]
+- !private ["P6Server5Model", "credsObject"]
+- !private ["P6Server5Model", "init"]
+- !private ["P6Server5Model", "userId"]
+- !private ["P6Server5Model", "username"]
+- !private ["PSo8NSCoding", "init"]
+- !private ["PSo9NSCopying", "init"]
+- !private ["PSo16NSMutableCopying", "init"]
+- !private ["CSo8NSObject", "GoogleCreds"]
+- !private ["CSo8NSObject", "User"]
+- !private ["CSo8NSObject", "UserRepository"]
+- !private ["CSo8NSObject", "XCTAssert"]
+- !private ["CSo8NSObject", "XCTFail"]
+- !private ["CSo8NSObject", "accountType"]
+- !private ["CSo8NSObject", "creds"]
+- !private ["CSo8NSObject", "credsId"]
+- !private ["CSo8NSObject", "credsObject"]
+- ["CSo8NSObject", "init"]
+- ["CSo8NSObject", "setUp"]
+- ["CSo8NSObject", "tearDown"]
+- ["CSo8NSObject", "testAddUser"]
+- ["CSo8NSObject", "testLookup1"]
+- ["CSo8NSObject", "testLookup2"]
+- !private ["CSo8NSObject", "userId"]
+- !private ["CSo8NSObject", "username"]
+- !private ["PSo16NSObjectProtocol", "User"]
+- !private ["PSo16NSObjectProtocol", "UserRepository"]
+- !private ["PSo16NSObjectProtocol", "XCTAssert"]
+- !private ["PSo16NSObjectProtocol", "XCTFail"]
+- !private ["PSo16NSObjectProtocol", "accountType"]
+- !private ["PSo16NSObjectProtocol", "creds"]
+- !private ["PSo16NSObjectProtocol", "credsId"]
+- !private ["PSo16NSObjectProtocol", "credsObject"]
+- !private ["PSo16NSObjectProtocol", "init"]
+- ["PSo16NSObjectProtocol", "setUp"]
+- ["PSo16NSObjectProtocol", "tearDown"]
+- ["PSo16NSObjectProtocol", "testAddUser"]
+- ["PSo16NSObjectProtocol", "testLookup1"]
+- ["PSo16NSObjectProtocol", "testLookup2"]
+- !private ["PSo16NSObjectProtocol", "userId"]
+- !private ["PSo16NSObjectProtocol", "username"]
+- ["PSo16NSObjectProtocol", ""]
+- !private ["PSo19NSPasteboardReading", "init"]
+- !private ["PSo19NSPasteboardWriting", "init"]
+- !private ["PSo14NSSecureCoding", "init"]
+- !private ["CSo8NSString", "init"]
+- !private ["P6Server6Object", "accountType"]
+- !private ["P6Server6Object", "creds"]
+- !private ["P6Server6Object", "credsId"]
+- !private ["P6Server6Object", "credsObject"]
+- !private ["P6Server6Object", "init"]
+- !private ["P6Server6Object", "userId"]
+- !private ["P6Server6Object", "username"]
+- !private ["Sq", "Google"]
+- ["Sq", "deinit"]
+- !private ["Ps16RawRepresentable", "Google"]
+- !private ["Ps16RawRepresentable", "RawValue"]
+- !private ["P6Server10Repository", "add"]
+- !private ["P6Server10Repository", "create"]
+- !private ["P6Server10Repository", "lookup"]
+- !private ["P6Server10Repository", "remove"]
+- ["V10ObjectiveC8Selector", "deinit"]
+- !private ["C11ServerTests22SepecificDatabaseTests", "GoogleCreds"]
+- !private ["C11ServerTests22SepecificDatabaseTests", "User"]
+- !private ["C11ServerTests22SepecificDatabaseTests", "UserRepository"]
+- !private ["C11ServerTests22SepecificDatabaseTests", "XCTAssert"]
+- !private ["C11ServerTests22SepecificDatabaseTests", "XCTFail"]
+- ["C11ServerTests22SepecificDatabaseTests", "deinit"]
+- ["C11ServerTests22SepecificDatabaseTests", "init"]
+- ["C11ServerTests22SepecificDatabaseTests", "setUp"]
+- ["C11ServerTests22SepecificDatabaseTests", "tearDown"]
+- ["C11ServerTests22SepecificDatabaseTests", "testAddUser"]
+- ["C11ServerTests22SepecificDatabaseTests", "testLookup1"]
+- ["C11ServerTests22SepecificDatabaseTests", "testLookup2"]
+- ["Vs12StaticString", "deinit"]
+- !private ["Vs12StaticString", "init"]
+- ["SS", "deinit"]
+- !private ["SS", "init"]
+- ["OC6Server8Database19TableCreationResult", "deinit"]
+- !private ["Ps16TextOutputStream", "init"]
+- !private ["Ps20TextOutputStreamable", "init"]
+- ["Su", "deinit"]
+- !private ["Vs6UInt16", "deinit"]
+- !private ["Vs6UInt32", "deinit"]
+- !private ["Vs6UInt64", "deinit"]
+- !private ["Vs5UInt8", "deinit"]
+- !private ["P10Reflection17UTF8Initializable", "init"]
+- !private ["Sc", "deinit"]
+- !private ["C6Server4User", "accountType"]
+- !private ["C6Server4User", "creds"]
+- !private ["C6Server4User", "credsId"]
+- !private ["C6Server4User", "credsObject"]
+- ["C6Server4User", "deinit"]
+- !private ["C6Server4User", "init"]
+- !private ["C6Server4User", "userId"]
+- !private ["C6Server4User", "username"]
+- !private ["C6Server14UserRepository", "add"]
+- !private ["C6Server14UserRepository", "create"]
+- !private ["C6Server14UserRepository", "lookup"]
+- !private ["C6Server14UserRepository", "remove"]
+- !private ["CSo6XCTest", "GoogleCreds"]
+- !private ["CSo6XCTest", "User"]
+- !private ["CSo6XCTest", "UserRepository"]
+- !private ["CSo6XCTest", "XCTAssert"]
+- !private ["CSo6XCTest", "XCTFail"]
+- ["CSo6XCTest", "init"]
+- ["CSo6XCTest", "setUp"]
+- ["CSo6XCTest", "tearDown"]
+- ["CSo6XCTest", "testAddUser"]
+- ["CSo6XCTest", "testLookup1"]
+- ["CSo6XCTest", "testLookup2"]
+- !private ["CSo10XCTestCase", "GoogleCreds"]
+- !private ["CSo10XCTestCase", "User"]
+- !private ["CSo10XCTestCase", "UserRepository"]
+- !private ["CSo10XCTestCase", "XCTAssert"]
+- !private ["CSo10XCTestCase", "XCTFail"]
+- ["CSo10XCTestCase", "deinit"]
+- ["CSo10XCTestCase", "init"]
+- ["CSo10XCTestCase", "setUp"]
+- ["CSo10XCTestCase", "tearDown"]
+- ["CSo10XCTestCase", "testAddUser"]
+- ["CSo10XCTestCase", "testLookup1"]
+- ["CSo10XCTestCase", "testLookup2"]
+- ["CSo10XCTestCase", ""]
+- !private ["Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps34_ExpressibleByBuiltinStringLiteral", "init"]
+- !private ["Ps39_ExpressibleByBuiltinUTF16StringLiteral", "init"]
+- !private ["Ps41_ExpressibleByBuiltinUnicodeScalarLiteral", "init"]
+- !private ["Ps35_HasCustomAnyHashableRepresentation", "init"]
+- !private ["Ps9_Hashable", "Google"]
+- !private ["Ps9_Hashable", "RawValue"]
+- !private ["Ps9_Hashable", "User"]
+- !private ["Ps9_Hashable", "UserRepository"]
+- !private ["Ps9_Hashable", "XCTAssert"]
+- !private ["Ps9_Hashable", "XCTFail"]
+- !private ["Ps9_Hashable", "accountType"]
+- !private ["Ps9_Hashable", "creds"]
+- !private ["Ps9_Hashable", "credsId"]
+- !private ["Ps9_Hashable", "credsObject"]
+- !private ["Ps9_Hashable", "init"]
+- ["Ps9_Hashable", "setUp"]
+- ["Ps9_Hashable", "tearDown"]
+- ["Ps9_Hashable", "testAddUser"]
+- ["Ps9_Hashable", "testLookup1"]
+- ["Ps9_Hashable", "testLookup2"]
+- !private ["Ps9_Hashable", "userId"]
+- !private ["Ps9_Hashable", "username"]
+- ["Ps9_Hashable", ""]
+- !private ["Ps21_ObjectiveCBridgeable", "Google"]
+- !private ["Ps21_ObjectiveCBridgeable", "init"]
+- !private ["Vs26_OptionalNilComparisonType", "Google"]
+- !private ["Vs26_OptionalNilComparisonType", "deinit"]
+depends-nominal:
+- "O6Server11AccountType"
+- "Ps9AnyObject"
+- "Sb"
+- "Ps7CVarArg"
+- !private "Vs9Character"
+- !private "Ps10Comparable"
+- !private "C6Server5Creds"
+- !private "P7Cryptor12CryptoDigest"
+- "Ps28CustomDebugStringConvertible"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- "Ps23CustomStringConvertible"
+- !private "Sd"
+- "Ps9Equatable"
+- !private "Ps43ExpressibleByExtendedGraphemeClusterLiteral"
+- !private "Ps23ExpressibleByNilLiteral"
+- !private "Ps32ExpressibleByStringInterpolation"
+- !private "Ps26ExpressibleByStringLiteral"
+- !private "Ps33ExpressibleByUnicodeScalarLiteral"
+- !private "Sf"
+- "C6Server11GoogleCreds"
+- "Ps8Hashable"
+- "SQ"
+- !private "Si"
+- !private "Vs5Int16"
+- !private "Vs5Int32"
+- "Vs5Int64"
+- !private "Vs4Int8"
+- !private "P10PerfectLib15JSONConvertible"
+- !private "P10SwiftyJSON17JSONSubscriptType"
+- "P11ServerTests10KituraTest"
+- "OC6Server14UserRepository9LookupKey"
+- "OC6Server14UserRepository12LookupResult"
+- !private "Ps25LosslessStringConvertible"
+- !private "Ps10MirrorPath"
+- !private "P6Server5Model"
+- !private "PSo8NSCoding"
+- !private "PSo9NSCopying"
+- !private "PSo16NSMutableCopying"
+- "CSo8NSObject"
+- "PSo16NSObjectProtocol"
+- !private "PSo19NSPasteboardReading"
+- !private "PSo19NSPasteboardWriting"
+- !private "PSo14NSSecureCoding"
+- !private "CSo8NSString"
+- !private "P6Server6Object"
+- "Sq"
+- !private "Ps16RawRepresentable"
+- !private "P6Server10Repository"
+- "V10ObjectiveC8Selector"
+- "C11ServerTests22SepecificDatabaseTests"
+- "Vs12StaticString"
+- "SS"
+- "OC6Server8Database19TableCreationResult"
+- !private "Ps16TextOutputStream"
+- !private "Ps20TextOutputStreamable"
+- "Su"
+- !private "Vs6UInt16"
+- !private "Vs6UInt32"
+- !private "Vs6UInt64"
+- !private "Vs5UInt8"
+- !private "P10Reflection17UTF8Initializable"
+- !private "Sc"
+- "C6Server4User"
+- !private "C6Server14UserRepository"
+- "CSo6XCTest"
+- "CSo10XCTestCase"
+- !private "Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral"
+- !private "Ps34_ExpressibleByBuiltinStringLiteral"
+- !private "Ps39_ExpressibleByBuiltinUTF16StringLiteral"
+- !private "Ps41_ExpressibleByBuiltinUnicodeScalarLiteral"
+- !private "Ps35_HasCustomAnyHashableRepresentation"
+- "Ps9_Hashable"
+- !private "Ps21_ObjectiveCBridgeable"
+- !private "Vs26_OptionalNilComparisonType"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/XCTest.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIRemote.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIKeyboardKeys.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementQuery.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUICoordinate.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIDevice.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypeQueryProvider.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypes.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementAttributes.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElement.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIApplication.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuiteRun.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuite.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestProbe.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservation.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservationCenter.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObserver.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestLog.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestExpectation.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestRun.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCaseRun.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase+AsynchronousTesting.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertionsImpl.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertions.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCAbstractTest.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestErrors.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestDefines.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTest.h"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Modules/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/AppKit.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreData.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/QuartzCore.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/XPC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreImage.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Server.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Credentials.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Kitura.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraNet.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraTemplateEngine.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SwiftyJSON.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/KituraSession.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Cryptor.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/CredentialsGoogle.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Gloss.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/HeliumLogger.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/MySQL.swiftmodule"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_base.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/psi/psi_memory.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_alloc.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/typelib.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/plugin_auth_common.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql/client_plugin.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_list.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_time.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/my_command.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/binary_log_types.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_com.h"
+- "/usr/local/Cellar/mysql/5.7.16/include/mysql/mysql_version.h"
+- "/usr/local/include/mysql/mysql.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/PerfectLib.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Reflection.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SMServerLib.swiftmodule"
+interface-hash: "0c787d71ac26faf480441c05135d823a"

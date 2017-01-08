@@ -25,7 +25,7 @@ public class B : Object {
     var p4: Int!
 }
 
-class UtilsTests: XCTestCase {
+class UtilsTests: ServerTestCase {
     override func setUp() {
         Log.logger = HeliumLogger()
     }

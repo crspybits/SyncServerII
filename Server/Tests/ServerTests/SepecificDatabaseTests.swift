@@ -13,7 +13,7 @@ import HeliumLogger
 import Credentials
 import CredentialsGoogle
 
-class SepecificDatabaseTests: XCTestCase {
+class SepecificDatabaseTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()

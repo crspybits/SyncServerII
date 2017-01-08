@@ -1,0 +1,144 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "MetadataType"
+provides-nominal:
+- "P10Reflection12MetadataType"
+provides-member:
+- ["P10Reflection12MetadataType", ""]
+- ["P10Reflection12MetadataType", "valueWitnessTable"]
+- ["P10Reflection12MetadataType", "kind"]
+- ["P10Reflection12MetadataType", "init"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "FloatLiteralType"
+- !private "!="
+- "ValueWitnessTable"
+- !private "IntegerLiteralType"
+- !private "Int"
+- "MetadataType"
+- !private "unsafeBitCast"
+- "PointerType"
+- "Metadata"
+- !private "UnsafePointer"
+depends-member:
+- !private ["Sb", "_getBuiltinLogicValue"]
+- !private ["Ps7CVarArg", "advanced"]
+- !private ["Ps7CVarArg", "init"]
+- !private ["Ps7CVarArg", "pointee"]
+- !private ["Ps10Comparable", "advanced"]
+- !private ["Ps10Comparable", "init"]
+- !private ["Ps10Comparable", "pointee"]
+- !private ["Ps28CustomDebugStringConvertible", "advanced"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "pointee"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "_getBuiltinLogicValue"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "advanced"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps29CustomPlaygroundQuickLookable", "pointee"]
+- !private ["Ps17CustomReflectable", "_getBuiltinLogicValue"]
+- !private ["Ps17CustomReflectable", "advanced"]
+- !private ["Ps17CustomReflectable", "init"]
+- !private ["Ps17CustomReflectable", "pointee"]
+- !private ["Ps23CustomStringConvertible", "_getBuiltinLogicValue"]
+- !private ["Ps9Equatable", "Int"]
+- ["Ps9Equatable", "Kind"]
+- ["Ps9Equatable", "Metadata"]
+- !private ["Ps9Equatable", "Pointee"]
+- !private ["Ps9Equatable", "UnsafePointer"]
+- ["Ps9Equatable", "ValueWitnessTable"]
+- !private ["Ps9Equatable", "_getBuiltinLogicValue"]
+- !private ["Ps9Equatable", "advanced"]
+- !private ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "kind"]
+- !private ["Ps9Equatable", "pointee"]
+- !private ["Ps9Equatable", "pointer"]
+- !private ["Ps9Equatable", "unsafeBitCast"]
+- ["Ps9Equatable", ""]
+- !private ["Ps27ExpressibleByBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps23ExpressibleByNilLiteral", "advanced"]
+- !private ["Ps23ExpressibleByNilLiteral", "pointee"]
+- !private ["Ps8Hashable", "_getBuiltinLogicValue"]
+- !private ["Ps8Hashable", "advanced"]
+- !private ["Ps8Hashable", "init"]
+- !private ["Ps8Hashable", "pointee"]
+- !private ["OV10Reflection8Metadata4Kind", "deinit"]
+- !private ["OV10Reflection8Metadata4Kind", "init"]
+- !private ["Ps25LosslessStringConvertible", "_getBuiltinLogicValue"]
+- ["V10Reflection8Metadata", "Kind"]
+- !private ["P10Reflection12MetadataType", "Int"]
+- ["P10Reflection12MetadataType", "Kind"]
+- ["P10Reflection12MetadataType", "Metadata"]
+- !private ["P10Reflection12MetadataType", "Pointee"]
+- !private ["P10Reflection12MetadataType", "UnsafePointer"]
+- ["P10Reflection12MetadataType", "ValueWitnessTable"]
+- ["P10Reflection12MetadataType", "init"]
+- ["P10Reflection12MetadataType", "kind"]
+- !private ["P10Reflection12MetadataType", "pointer"]
+- !private ["P10Reflection12MetadataType", "unsafeBitCast"]
+- ["P10Reflection12MetadataType", "valueWitnessTable"]
+- ["P10Reflection12MetadataType", ""]
+- !private ["Sq", "advanced"]
+- !private ["Sq", "pointee"]
+- !private ["P10Reflection11PointerType", "Int"]
+- ["P10Reflection11PointerType", "Kind"]
+- ["P10Reflection11PointerType", "Metadata"]
+- !private ["P10Reflection11PointerType", "Pointee"]
+- !private ["P10Reflection11PointerType", "UnsafePointer"]
+- ["P10Reflection11PointerType", "ValueWitnessTable"]
+- !private ["P10Reflection11PointerType", "init"]
+- ["P10Reflection11PointerType", "kind"]
+- !private ["P10Reflection11PointerType", "pointer"]
+- !private ["P10Reflection11PointerType", "unsafeBitCast"]
+- ["P10Reflection11PointerType", ""]
+- !private ["Ps10Strideable", "advanced"]
+- !private ["Ps10Strideable", "init"]
+- !private ["Ps10Strideable", "pointee"]
+- !private ["SP", "advanced"]
+- !private ["SP", "init"]
+- !private ["SP", "pointee"]
+- !private ["V10Reflection17ValueWitnessTable", "deinit"]
+- !private ["V10Reflection17ValueWitnessTable", "init"]
+- !private ["Ps35_ExpressibleByBuiltinBooleanLiteral", "_getBuiltinLogicValue"]
+- !private ["Ps9_Hashable", "_getBuiltinLogicValue"]
+- !private ["Ps9_Hashable", "advanced"]
+- !private ["Ps9_Hashable", "init"]
+- !private ["Ps9_Hashable", "pointee"]
+- !private ["Ps21_ObjectiveCBridgeable", "advanced"]
+- !private ["Ps21_ObjectiveCBridgeable", "pointee"]
+- !private ["Ps8_Pointer", "advanced"]
+- !private ["Ps8_Pointer", "init"]
+- !private ["Ps8_Pointer", "pointee"]
+- !private ["Ps11_Strideable", "advanced"]
+- !private ["Ps11_Strideable", "init"]
+- !private ["Ps11_Strideable", "pointee"]
+depends-nominal:
+- !private "Sb"
+- !private "Ps7CVarArg"
+- !private "Ps10Comparable"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- !private "Ps23CustomStringConvertible"
+- "Ps9Equatable"
+- !private "Ps27ExpressibleByBooleanLiteral"
+- !private "Ps23ExpressibleByNilLiteral"
+- !private "Ps8Hashable"
+- !private "OV10Reflection8Metadata4Kind"
+- !private "Ps25LosslessStringConvertible"
+- "V10Reflection8Metadata"
+- "P10Reflection12MetadataType"
+- !private "Sq"
+- "P10Reflection11PointerType"
+- !private "Ps10Strideable"
+- !private "SP"
+- !private "V10Reflection17ValueWitnessTable"
+- !private "Ps35_ExpressibleByBuiltinBooleanLiteral"
+- !private "Ps9_Hashable"
+- !private "Ps21_ObjectiveCBridgeable"
+- !private "Ps8_Pointer"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "098bae26b0463dc2e23cfb68762df6eb"

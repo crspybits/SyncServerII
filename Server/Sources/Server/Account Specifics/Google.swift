@@ -190,7 +190,7 @@ class GoogleCreds : Creds {
                 let refreshToken = jsonResult?[GoogleCreds.googleAPIRefreshTokenKey].string {
                 self.accessToken = accessToken
                 self.refreshToken = refreshToken
-                Log.debug(message: "Obtained tokens: accessToken: \(accessToken);\n refreshToken: \(refreshToken)")
+                Log.debug(message: "Obtained tokens: accessToken: \(accessToken)\n refreshToken: \(refreshToken)")
                 completion(true, nil)
                 return
             }

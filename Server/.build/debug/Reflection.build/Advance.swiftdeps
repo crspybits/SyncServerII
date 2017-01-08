@@ -1,0 +1,38 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+provides-nominal:
+provides-member:
+- ["Ps10Strideable", ""]
+- ["Ps10Strideable", "advance"]
+provides-dynamic-lookup:
+depends-top-level:
+- "Strideable"
+- "AssignmentPrecedence"
+- !private "FloatLiteralType"
+- !private "IntegerLiteralType"
+depends-member:
+- !private ["Ps10Comparable", "IntegerLiteralType"]
+- !private ["Ps10Comparable", "Stride"]
+- !private ["Ps10Comparable", "advanced"]
+- !private ["Ps9Equatable", "IntegerLiteralType"]
+- !private ["Ps9Equatable", "Stride"]
+- !private ["Ps9Equatable", "advanced"]
+- !private ["Ps27ExpressibleByIntegerLiteral", "IntegerLiteralType"]
+- !private ["Ps12SignedNumber", "IntegerLiteralType"]
+- !private ["Ps10Strideable", "Stride"]
+- ["Ps10Strideable", "advance"]
+- !private ["Ps10Strideable", "advanced"]
+- !private ["Ps11_Strideable", "Stride"]
+- !private ["Ps11_Strideable", "advanced"]
+depends-nominal:
+- !private "Ps10Comparable"
+- !private "Ps9Equatable"
+- !private "Ps27ExpressibleByIntegerLiteral"
+- !private "Ps12SignedNumber"
+- "Ps10Strideable"
+- !private "Ps11_Strideable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "8fef66b46b41161d82e33b66fcb1aa46"

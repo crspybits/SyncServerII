@@ -11,7 +11,7 @@ import LoggerAPI
 import KituraNet
 import XCTest
 
-class GeneralAuthTests: XCTestCase {
+class GeneralAuthTests: ServerTestCase {
     func testBadEndpointFails() {
         performServerTest { expectation in
             let badRoute = ServerEndpoint("foobar", method: .post)

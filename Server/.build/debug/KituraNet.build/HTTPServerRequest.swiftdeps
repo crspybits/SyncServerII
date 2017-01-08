@@ -1,0 +1,146 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "HTTPServerRequest"
+provides-nominal:
+- "C9KituraNet17HTTPServerRequest"
+provides-member:
+- ["C9KituraNet17HTTPServerRequest", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "String"
+- "HTTPIncomingMessage"
+- !private "FloatLiteralType"
+- "HTTPServerRequest"
+- !private "IntegerLiteralType"
+- "AssignmentPrecedence"
+- "ServerRequest"
+- !private "StringLiteralType"
+- "Socket"
+- !private "BooleanLiteralType"
+depends-member:
+- ["Ps9AnyObject", "clientSocket"]
+- ["Ps9AnyObject", "headers"]
+- ["Ps9AnyObject", "httpVersionMajor"]
+- ["Ps9AnyObject", "httpVersionMinor"]
+- ["Ps9AnyObject", "init"]
+- ["Ps9AnyObject", "method"]
+- ["Ps9AnyObject", "read"]
+- ["Ps9AnyObject", "readAllData"]
+- ["Ps9AnyObject", "readString"]
+- ["Ps9AnyObject", "remoteAddress"]
+- !private ["Ps9AnyObject", "remoteHostname"]
+- ["Ps9AnyObject", "url"]
+- ["Ps9AnyObject", "urlComponents"]
+- ["Ps9AnyObject", "urlString"]
+- ["Ps9AnyObject", "urlURL"]
+- ["Ps9AnyObject", ""]
+- ["Sb", "deinit"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps17CustomReflectable", "init"]
+- !private ["Ps23CustomStringConvertible", "init"]
+- !private ["Ps43ExpressibleByExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps26ExpressibleByStringLiteral", "init"]
+- !private ["Ps33ExpressibleByUnicodeScalarLiteral", "init"]
+- ["C9KituraNet19HTTPIncomingMessage", "Socket"]
+- ["C9KituraNet19HTTPIncomingMessage", "String"]
+- ["C9KituraNet19HTTPIncomingMessage", "clientSocket"]
+- ["C9KituraNet19HTTPIncomingMessage", "deinit"]
+- ["C9KituraNet19HTTPIncomingMessage", "headers"]
+- ["C9KituraNet19HTTPIncomingMessage", "httpVersionMajor"]
+- ["C9KituraNet19HTTPIncomingMessage", "httpVersionMinor"]
+- ["C9KituraNet19HTTPIncomingMessage", "init"]
+- ["C9KituraNet19HTTPIncomingMessage", "method"]
+- ["C9KituraNet19HTTPIncomingMessage", "read"]
+- ["C9KituraNet19HTTPIncomingMessage", "readAllData"]
+- ["C9KituraNet19HTTPIncomingMessage", "readString"]
+- ["C9KituraNet19HTTPIncomingMessage", "remoteAddress"]
+- ["C9KituraNet19HTTPIncomingMessage", "url"]
+- ["C9KituraNet19HTTPIncomingMessage", "urlComponents"]
+- ["C9KituraNet19HTTPIncomingMessage", "urlString"]
+- ["C9KituraNet19HTTPIncomingMessage", "urlURL"]
+- ["C9KituraNet19HTTPIncomingMessage", ""]
+- ["C9KituraNet17HTTPServerRequest", "Socket"]
+- ["C9KituraNet17HTTPServerRequest", "String"]
+- !private ["C9KituraNet17HTTPServerRequest", "clientSocket"]
+- ["C9KituraNet17HTTPServerRequest", "deinit"]
+- ["C9KituraNet17HTTPServerRequest", "headers"]
+- ["C9KituraNet17HTTPServerRequest", "httpVersionMajor"]
+- ["C9KituraNet17HTTPServerRequest", "httpVersionMinor"]
+- ["C9KituraNet17HTTPServerRequest", "init"]
+- ["C9KituraNet17HTTPServerRequest", "method"]
+- ["C9KituraNet17HTTPServerRequest", "read"]
+- ["C9KituraNet17HTTPServerRequest", "readAllData"]
+- ["C9KituraNet17HTTPServerRequest", "readString"]
+- ["C9KituraNet17HTTPServerRequest", "remoteAddress"]
+- ["C9KituraNet17HTTPServerRequest", "url"]
+- ["C9KituraNet17HTTPServerRequest", "urlComponents"]
+- ["C9KituraNet17HTTPServerRequest", "urlString"]
+- ["C9KituraNet17HTTPServerRequest", "urlURL"]
+- ["Os5Never", "deinit"]
+- !private ["P9KituraNet13ServerRequest", "clientSocket"]
+- ["P9KituraNet13ServerRequest", "headers"]
+- ["P9KituraNet13ServerRequest", "httpVersionMajor"]
+- ["P9KituraNet13ServerRequest", "httpVersionMinor"]
+- ["P9KituraNet13ServerRequest", "method"]
+- ["P9KituraNet13ServerRequest", "read"]
+- ["P9KituraNet13ServerRequest", "readAllData"]
+- ["P9KituraNet13ServerRequest", "readString"]
+- ["P9KituraNet13ServerRequest", "remoteAddress"]
+- ["P9KituraNet13ServerRequest", "url"]
+- ["P9KituraNet13ServerRequest", "urlComponents"]
+- ["P9KituraNet13ServerRequest", "urlString"]
+- ["P9KituraNet13ServerRequest", "urlURL"]
+- ["P9KituraNet13ServerRequest", ""]
+- ["C6Socket6Socket", "deinit"]
+- !private ["C6Socket6Socket", "remoteHostname"]
+- !private ["P6Socket12SocketReader", "remoteHostname"]
+- !private ["P6Socket12SocketWriter", "remoteHostname"]
+- ["Vs12StaticString", "deinit"]
+- !private ["Vs12StaticString", "init"]
+- ["SS", "deinit"]
+- ["Su", "deinit"]
+- !private ["Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral", "init"]
+- !private ["Ps34_ExpressibleByBuiltinStringLiteral", "init"]
+- !private ["Ps41_ExpressibleByBuiltinUnicodeScalarLiteral", "init"]
+depends-nominal:
+- "Ps9AnyObject"
+- "Sb"
+- !private "Ps28CustomDebugStringConvertible"
+- !private "Ps17CustomReflectable"
+- !private "Ps23CustomStringConvertible"
+- !private "Ps43ExpressibleByExtendedGraphemeClusterLiteral"
+- !private "Ps26ExpressibleByStringLiteral"
+- !private "Ps33ExpressibleByUnicodeScalarLiteral"
+- "C9KituraNet19HTTPIncomingMessage"
+- "C9KituraNet17HTTPServerRequest"
+- "Os5Never"
+- "P9KituraNet13ServerRequest"
+- "C6Socket6Socket"
+- !private "P6Socket12SocketReader"
+- !private "P6Socket12SocketWriter"
+- "Vs12StaticString"
+- "SS"
+- "Su"
+- !private "Ps51_ExpressibleByBuiltinExtendedGraphemeClusterLiteral"
+- !private "Ps34_ExpressibleByBuiltinStringLiteral"
+- !private "Ps41_ExpressibleByBuiltinUnicodeScalarLiteral"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/mysqlclient-2.0.0/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CommonCrypto-0.1.4/module.modulemap"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-8.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/LoggerAPI.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/module.modulemap"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/Socket.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/.build/debug/SSLService.swiftmodule"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/utils.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/Kitura-net-1.4.3/Sources/CHTTPParser/include/http_parser.h"
+- "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/CCurl-0.2.3/module.modulemap"
+interface-hash: "ceb82b478a3e9c433c12ac36e30e39de"

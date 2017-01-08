@@ -21,7 +21,7 @@ import KituraNet
 import LoggerAPI
 import Dispatch
 import Foundation
-import Server
+@testable import Server
 import CredentialsGoogle
 
 protocol KituraTest {
@@ -31,11 +31,11 @@ protocol KituraTest {
 
 extension KituraTest {
     func accessToken() -> String {
-        return "ya29.CjDAA8MvJUFQOtHw9YgHQt1OO-y_G-5z57jgtUpjsgBCaRL_y_Y095AibFiIJ-pgl20"
+        return "ya29.Ci_MA-INb3DA-ojBtk9PkDDZcXUMYf9TuBd9gCE5U9JggAbCYqrmvGyVDXYn3mbMgg"
     }
     
     func refreshToken() -> String {
-        return "1/nfpoy5ER8na8nVlbZ5jLQ7eU3mPS3SdRFJtW1c0bZrw"
+        return "1/gLgz7_uYCEmvPYVgZQgGGme_iRa9Wm23ozsTvVtjVQSop59mB5ng33UbZOf2Dcyh"
     }
     
     func performServerTest(asyncTasks: @escaping (XCTestExpectation) -> Void...) {
@@ -133,3 +133,4 @@ extension XCTestCase: KituraTest {
         self.waitForExpectations(timeout: t, handler: handler)
     }
 }
+
