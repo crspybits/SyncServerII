@@ -198,10 +198,12 @@ public class CreateRoutes {
                 return
             }
             
-            creds.generateTokens() { success, error in
+            // It is not an error at this point to *not* have a server auth code. With most entry points we won't have it.
+            
+            creds.generateTokens() { successGeneratingTokens, error in
                 if error == nil {
                     dbTransaction() {
-                        if success! && authenticationLevel == .secondary {
+                        if successGeneratingTokens! && authenticationLevel == .secondary {
                             // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
                             if !UserRepository.updateCreds(creds: creds, forUser: secondaryAuthUser!) {
                                 self.failWithError(message: "Could not update creds")

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8325C0FD1E21B3AC0018D0DB /* Server.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8325C0FC1E21B3AC0018D0DB /* Server.plist */; };
 		8325C1021E21C5D60018D0DB /* ServerTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8325C1001E21C5460018D0DB /* ServerTestCase.swift */; };
+		8325C1041E21D85D0018D0DB /* GoogleDriveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8325C1031E21D85D0018D0DB /* GoogleDriveTests.swift */; };
 		OBJ_265 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_266 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
 		OBJ_267 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* File.swift */; };
@@ -1045,6 +1046,7 @@
 /* Begin PBXFileReference section */
 		8325C0FC1E21B3AC0018D0DB /* Server.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Server.plist; path = ../../Private/Server/Server.plist; sourceTree = "<group>"; };
 		8325C1001E21C5460018D0DB /* ServerTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerTestCase.swift; sourceTree = "<group>"; };
+		8325C1031E21D85D0018D0DB /* GoogleDriveTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleDriveTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1791,6 +1793,7 @@
 		OBJ_229 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				8325C1031E21D85D0018D0DB /* GoogleDriveTests.swift */,
 				OBJ_233 /* KituraTest.swift */,
 				8325C1001E21C5460018D0DB /* ServerTestCase.swift */,
 				OBJ_230 /* DatabaseTests.swift */,
@@ -2913,6 +2916,7 @@
 				OBJ_741 /* KituraTest.swift in Sources */,
 				OBJ_742 /* SepecificDatabaseTests.swift in Sources */,
 				OBJ_743 /* UserController.swift in Sources */,
+				8325C1041E21D85D0018D0DB /* GoogleDriveTests.swift in Sources */,
 				OBJ_744 /* UtilsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
