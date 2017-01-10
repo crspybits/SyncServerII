@@ -10,6 +10,9 @@
 		8325C0FD1E21B3AC0018D0DB /* Server.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8325C0FC1E21B3AC0018D0DB /* Server.plist */; };
 		8325C1021E21C5D60018D0DB /* ServerTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8325C1001E21C5460018D0DB /* ServerTestCase.swift */; };
 		8325C1041E21D85D0018D0DB /* GoogleDriveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8325C1031E21D85D0018D0DB /* GoogleDriveTests.swift */; };
+		839D940E1E25680A000BAEF0 /* GoogleCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839D940C1E25680A000BAEF0 /* GoogleCreds.swift */; };
+		839D940F1E25680A000BAEF0 /* GoogleCreds+GoogleDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839D940D1E25680A000BAEF0 /* GoogleCreds+GoogleDrive.swift */; };
+		839D94111E25683A000BAEF0 /* Creds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839D94101E25683A000BAEF0 /* Creds.swift */; };
 		OBJ_265 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_266 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
 		OBJ_267 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* File.swift */; };
@@ -241,7 +244,6 @@
 		OBJ_674 /* ServerMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_201 /* ServerMain.swift */; };
 		OBJ_675 /* ServerRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_202 /* ServerRoutes.swift */; };
 		OBJ_676 /* ServerSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_203 /* ServerSetup.swift */; };
-		OBJ_677 /* Google.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_205 /* Google.swift */; };
 		OBJ_678 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_207 /* Constants.swift */; };
 		OBJ_679 /* ControllerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_208 /* ControllerProtocol.swift */; };
 		OBJ_680 /* Controllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_209 /* Controllers.swift */; };
@@ -1047,6 +1049,9 @@
 		8325C0FC1E21B3AC0018D0DB /* Server.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Server.plist; path = ../../Private/Server/Server.plist; sourceTree = "<group>"; };
 		8325C1001E21C5460018D0DB /* ServerTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerTestCase.swift; sourceTree = "<group>"; };
 		8325C1031E21D85D0018D0DB /* GoogleDriveTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleDriveTests.swift; sourceTree = "<group>"; };
+		839D940C1E25680A000BAEF0 /* GoogleCreds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleCreds.swift; sourceTree = "<group>"; };
+		839D940D1E25680A000BAEF0 /* GoogleCreds+GoogleDrive.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GoogleCreds+GoogleDrive.swift"; sourceTree = "<group>"; };
+		839D94101E25683A000BAEF0 /* Creds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Creds.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1148,7 +1153,6 @@
 		OBJ_201 /* ServerMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerMain.swift; sourceTree = "<group>"; };
 		OBJ_202 /* ServerRoutes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerRoutes.swift; sourceTree = "<group>"; };
 		OBJ_203 /* ServerSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSetup.swift; sourceTree = "<group>"; };
-		OBJ_205 /* Google.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Google.swift; sourceTree = "<group>"; };
 		OBJ_207 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_208 /* ControllerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerProtocol.swift; sourceTree = "<group>"; };
 		OBJ_209 /* Controllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controllers.swift; sourceTree = "<group>"; };
@@ -1722,7 +1726,9 @@
 		OBJ_204 /* Account Specifics */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_205 /* Google.swift */,
+				839D94101E25683A000BAEF0 /* Creds.swift */,
+				839D940C1E25680A000BAEF0 /* GoogleCreds.swift */,
+				839D940D1E25680A000BAEF0 /* GoogleCreds+GoogleDrive.swift */,
 			);
 			path = "Account Specifics";
 			sourceTree = "<group>";
@@ -1902,7 +1908,7 @@
 			path = "Packages/Kitura-net-1.4.3/Sources/KituraNet";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				8325C0FC1E21B3AC0018D0DB /* Server.plist */,
@@ -1912,7 +1918,6 @@
 				OBJ_237 /* Other */,
 				OBJ_238 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* FastCGI */ = {
@@ -2524,7 +2529,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_238 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2568,6 +2573,20 @@
 			shellPath = /bin/sh;
 			shellScript = "cp Server.plist /tmp";
 			showEnvVarsInLog = 0;
+		};
+		AE235EE10EC75F915C868138 /* My New Script Phase */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "Fleeb de bibit";
+			showEnvVarsInLog = 1;
 		};
 		OBJ_314 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2881,9 +2900,9 @@
 			files = (
 				OBJ_673 /* ServerConstants.swift in Sources */,
 				OBJ_674 /* ServerMain.swift in Sources */,
+				839D940E1E25680A000BAEF0 /* GoogleCreds.swift in Sources */,
 				OBJ_675 /* ServerRoutes.swift in Sources */,
 				OBJ_676 /* ServerSetup.swift in Sources */,
-				OBJ_677 /* Google.swift in Sources */,
 				OBJ_678 /* Constants.swift in Sources */,
 				OBJ_679 /* ControllerProtocol.swift in Sources */,
 				OBJ_680 /* Controllers.swift in Sources */,
@@ -2894,6 +2913,7 @@
 				OBJ_685 /* Repository.swift in Sources */,
 				OBJ_686 /* UserRepository.swift in Sources */,
 				OBJ_687 /* AddUser.swift in Sources */,
+				839D94111E25683A000BAEF0 /* Creds.swift in Sources */,
 				OBJ_688 /* CheckCreds.swift in Sources */,
 				OBJ_689 /* CheckPrimaryCreds.swift in Sources */,
 				OBJ_690 /* HealthCheck.swift in Sources */,
@@ -2901,6 +2921,7 @@
 				OBJ_692 /* RequestMessage.swift in Sources */,
 				OBJ_693 /* ResponseMessage.swift in Sources */,
 				OBJ_694 /* NSObject+Extras.swift in Sources */,
+				839D940F1E25680A000BAEF0 /* GoogleCreds+GoogleDrive.swift in Sources */,
 				OBJ_695 /* SwiftKVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

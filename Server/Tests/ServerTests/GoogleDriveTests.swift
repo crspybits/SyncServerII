@@ -126,4 +126,22 @@ class GoogleDriveTests: ServerTestCase {
 
         waitForExpectations(timeout: 10, handler: nil)
     }
+    
+    func testDeleteFolderFailure() {
+        let creds = GoogleCreds()
+        creds.refreshToken = self.refreshToken()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            
+            creds.deleteFile(fileId: "foobar") { error in
+                XCTAssert(error != nil)
+                exp.fulfill()
+            }
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+    }
 }

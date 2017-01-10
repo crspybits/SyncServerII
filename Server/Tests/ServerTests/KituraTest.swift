@@ -31,7 +31,7 @@ protocol KituraTest {
 
 extension KituraTest {
     func accessToken() -> String {
-        return "ya29.Ci_MA-INb3DA-ojBtk9PkDDZcXUMYf9TuBd9gCE5U9JggAbCYqrmvGyVDXYn3mbMgg"
+        return "ya29.CjDPA_lbR7luMAyc5mx5slNgS1RPpwESTAt9FfVeZonw4y8QLehNLl3-8VdutHtdjd4"
     }
     
     func refreshToken() -> String {
