@@ -23,37 +23,42 @@ import Dispatch
 import Foundation
 @testable import Server
 import CredentialsGoogle
+import SMServerLib
 
 protocol KituraTest {
     func expectation(_ index: Int) -> XCTestExpectation
     func waitExpectation(timeout t: TimeInterval, handler: XCWaitCompletionHandler?)
 }
 
-extension KituraTest {
-    func accessToken() -> String {
-        return "ya29.CjDPA_lbR7luMAyc5mx5slNgS1RPpwESTAt9FfVeZonw4y8QLehNLl3-8VdutHtdjd4"
-    }
-    
+extension KituraTest {    
     func refreshToken() -> String {
-        return "1/gLgz7_uYCEmvPYVgZQgGGme_iRa9Wm23ozsTvVtjVQSop59mB5ng33UbZOf2Dcyh"
+        let plist = try! PlistDictLoader(usingPath: "/tmp", andPlistFileName: "Server.plist")
+        let refreshToken = try! plist.getString(varName: "GoogleRefreshToken")
+        return refreshToken
     }
     
-    func performServerTest(asyncTasks: @escaping (XCTestExpectation) -> Void...) {
-        ServerMain.startup(type: .nonBlocking)
-        
-        let requestQueue = DispatchQueue(label: "Request queue")
+    func performServerTest(asyncTasks: @escaping (XCTestExpectation, GoogleCreds) -> Void...) {
+        let creds = GoogleCreds()
+        creds.refreshToken = self.refreshToken()
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            
+            ServerMain.startup(type: .nonBlocking)
+            
+            let requestQueue = DispatchQueue(label: "Request queue")
 
-        for (index, asyncTask) in asyncTasks.enumerated() {
-            let expectation = self.expectation(index)
-            requestQueue.async() {
-                asyncTask(expectation)
+            for (index, asyncTask) in asyncTasks.enumerated() {
+                let expectation = self.expectation(index)
+                requestQueue.async() {
+                    asyncTask(expectation, creds)
+                }
             }
-        }
 
-        // blocks test until request completes
-        waitExpectation(timeout: 30) { error in
-            ServerMain.shutdown()
-            XCTAssertNil(error)
+            // blocks test until request completes
+            self.waitExpectation(timeout: 30) { error in
+                ServerMain.shutdown()
+                XCTAssertNil(error)
+            }
         }
     }
 

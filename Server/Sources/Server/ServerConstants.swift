@@ -62,10 +62,9 @@ public class ServerEndpoints {
     // No authentication required because this doesn't do any processing within the server-- just a check to ensure the server is running.
     public static let healthCheck = ServerEndpoint("HealthCheck", method: .get, authenticationLevel: .none)
 
-// TODO: Get these debug flags working with settings
-//#if DEBUG
+#if DEBUG
     public static let checkPrimaryCreds = ServerEndpoint("CheckPrimaryCreds", method: .get, authenticationLevel: .primary)
-//#endif
+#endif
 
     // Only primary authentication because this method is used to add a user into the database (i.e., it creates secondary authentication).
     public static let addUser = ServerEndpoint("AddUser", method: .post, authenticationLevel: .primary)

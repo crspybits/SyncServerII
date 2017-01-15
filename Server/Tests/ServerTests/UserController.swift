@@ -19,8 +19,8 @@ class UserControllerTests: ServerTestCase {
     }
     
     func addNewUser() {
-        performServerTest { expectation in
-            let headers = self.setupHeaders(accessToken: self.accessToken())
+        self.performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request")
@@ -35,9 +35,9 @@ class UserControllerTests: ServerTestCase {
     
     func testAddUserFailsWhenAddingExistingUser() {
         self.addNewUser()
-        
-        performServerTest { expectation in
-            let headers = self.setupHeaders(accessToken: self.accessToken())
+            
+        performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .internalServerError, "Worked on addUser request")
@@ -48,9 +48,9 @@ class UserControllerTests: ServerTestCase {
     
     func testCheckCredsWhenUserDoesExist() {
         self.addNewUser()
-
-        performServerTest { expectation in
-            let headers = self.setupHeaders(accessToken: self.accessToken())
+            
+        performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -61,8 +61,8 @@ class UserControllerTests: ServerTestCase {
     }
     
     func testCheckCredsWhenUserDoesNotExist() {
-        performServerTest { expectation in
-            let headers = self.setupHeaders(accessToken: self.accessToken())
+        performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -73,7 +73,7 @@ class UserControllerTests: ServerTestCase {
     }
     
     func testCheckCredsWithBadAccessToken() {
-        performServerTest { expectation in
+        performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: "Some junk for access token")
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
@@ -86,8 +86,8 @@ class UserControllerTests: ServerTestCase {
     
     func testRemoveUserFailsWithNonExistingUser() {
         // Don't create the user first.
-        performServerTest { expectation in
-            let headers = self.setupHeaders(accessToken: self.accessToken())
+        performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -100,8 +100,8 @@ class UserControllerTests: ServerTestCase {
     func testRemoveUserSucceedsWithExistingUser() {
         self.addNewUser()
 
-        performServerTest { expectation in
-            let headers = self.setupHeaders(accessToken: self.accessToken())
+        performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
