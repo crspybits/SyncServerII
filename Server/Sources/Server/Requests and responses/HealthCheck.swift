@@ -9,9 +9,14 @@
 import Foundation
 import PerfectLib
 import Gloss
+import Kitura
 
 class HealthCheckRequest : NSObject, RequestMessage {
     required init?(json: JSON) {
+        super.init()
+    }
+    
+    required init?(request: RouterRequest) {
         super.init()
     }
 }

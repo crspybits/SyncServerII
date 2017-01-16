@@ -62,7 +62,7 @@ extension KituraTest {
         }
     }
 
-    func performRequest(route:ServerEndpoint, headers: [String: String]? = nil, urlParameters:String? = nil, callback: @escaping (ClientResponse?, [String:Any]?) -> Void) {
+    func performRequest(route:ServerEndpoint, headers: [String: String]? = nil, urlParameters:String? = nil, body:Data? = nil, callback: @escaping (ClientResponse?, [String:Any]?) -> Void) {
     
         var allHeaders = [String: String]()
         if  let headers = headers  {
@@ -90,7 +90,12 @@ extension KituraTest {
             callback(response, dict)
         }
         
-        req.end()
+        if body == nil {
+            req.end()
+        }
+        else {
+            req.end(body!)
+        }
     }
     
     func getResponseDict(response:ClientResponse) -> [String: Any]? {

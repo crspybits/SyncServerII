@@ -1,6 +1,0 @@
-version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
-options: "2f9ce26ef79e7aec4fdf531eb6ab0615"
-build_time: [537149681, 410935000]
-inputs:
-  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/SwiftyJSON-15.0.4/Source/LclJSONSerialization.swift": [537145386, 0]
-  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/SwiftyJSON-15.0.4/Source/SwiftyJSON.swift": [537145386, 0]

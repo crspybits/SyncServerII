@@ -9,10 +9,15 @@
 import Foundation
 import PerfectLib
 import Gloss
+import Kitura
 
 // Check to see if both primary and secondary authentication succeed.
 class CheckCredsRequest : NSObject, RequestMessage {
     required init?(json: JSON) {
+        super.init()
+    }
+    
+    required init?(request: RouterRequest) {
         super.init()
     }
 }

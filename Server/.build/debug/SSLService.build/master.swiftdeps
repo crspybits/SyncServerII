@@ -1,5 +1,0 @@
-version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
-options: "9ddebe900a4664b825c866fc272a2ff6"
-build_time: [537149692, 799227000]
-inputs:
-  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/SSLService-0.12.11/Sources/SSLService.swift": [537145383, 0]

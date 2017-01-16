@@ -111,9 +111,13 @@ public class CreateRoutes {
         self.response.headers["Content-Type"] = "application/json"
     }
     
+    public typealias ProcessRequest = (RequestMessage, Creds?, UserProfile?,
+        _ completion: @escaping (ResponseMessage?)->())->()
+
     // The intent is that, if authorized, a request never returns an empty response. Some JSON is always returned, even with an error.
-    private func doRequest(authenticationLevel:AuthenticationLevel = .secondary, createRequest: @escaping (JSON) -> RequestMessage?,
-        processRequest:@escaping (RequestMessage, Creds?, UserProfile?)->(ResponseMessage?)) {
+    private func doRequest(authenticationLevel:AuthenticationLevel = .secondary,
+        createRequest: @escaping (RouterRequest) -> RequestMessage?,
+        processRequest: @escaping ProcessRequest) {
         
         Log.info(message: "Processing Request: \(request.urlURL.path)")
         setJsonResponseHeaders()
@@ -159,37 +163,37 @@ public class CreateRoutes {
             }
         }
         
-        let params = self.request.queryParameters
-        let requestObject:RequestMessage? = createRequest(params)
+        let requestObject:RequestMessage? = createRequest(self.request)
         if nil == requestObject {
-            self.failWithError(message: "Could not create request object from parameters: \(params)")
+            self.failWithError(message: "Could not create request object from RouterRequest: \(self.request)")
             return
         }
         
-        func doTheRequestProcessing(creds:Creds?) -> Bool {
-            let responseObject = processRequest(requestObject!, creds, profile)
-            if nil == responseObject {
-                self.failWithError(message: "Could not create response object from request object")
-                return false
+        func doTheRequestProcessing(creds:Creds?) {
+            processRequest(requestObject!, creds, profile) { responseObject in
+                if nil == responseObject {
+                    self.failWithError(message: "Could not create response object from request object")
+                    return
+                }
+                
+                let jsonDict = responseObject!.toJSON()
+                if nil == jsonDict {
+                    self.failWithError(message: "Could not convert response object to json dictionary")
+                    return
+                }
+                
+                _ = self.endWith(jsonDict: jsonDict)
             }
-            
-            let jsonDict = responseObject!.toJSON()
-            if nil == jsonDict {
-                self.failWithError(message: "Could not convert response object to json dictionary")
-                return false
-            }
-            
-            return self.endWith(jsonDict: jsonDict)
         }
 
         // TODO: Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
-        func dbTransaction(dbOperations:()->(Bool)) {
+        func dbTransaction(dbOperations:()->()) {
             dbOperations()
         }
         
         if profile == nil {
             dbTransaction() {
-                return doTheRequestProcessing(creds: nil)
+                doTheRequestProcessing(creds: nil)
             }
         }
         else {
@@ -198,7 +202,7 @@ public class CreateRoutes {
                 return
             }
             
-            // It is not an error at this point to *not* have a server auth code. With most entry points we won't have it.
+            // It is not an error at this point to *not* have a server auth code. With most endpoints we won't have it.
             
             creds.generateTokens() { successGeneratingTokens, error in
                 if error == nil {
@@ -207,11 +211,10 @@ public class CreateRoutes {
                             // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
                             if !UserRepository.updateCreds(creds: creds, forUser: secondaryAuthUser!) {
                                 self.failWithError(message: "Could not update creds")
-                                return false
                             }
                         }
                         
-                        return doTheRequestProcessing(creds: creds)
+                        doTheRequestProcessing(creds: creds)
                     }
                 }
                 else {
@@ -222,16 +225,14 @@ public class CreateRoutes {
     }
     
     public func addRoute(ep:ServerEndpoint,
-        createRequest: @escaping (_ json: JSON) ->(RequestMessage?),
-        processRequest: @escaping (RequestMessage, Creds?, UserProfile?)->(ResponseMessage?)) {
+        createRequest: @escaping (RouterRequest) ->(RequestMessage?),
+        processRequest: @escaping ProcessRequest) {
         
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             self.response = routerResponse; self.request = routerRequest
             
             self.doRequest(authenticationLevel: ep.authenticationLevel,
-                createRequest: createRequest) { request, creds, profile in
-                return processRequest(request, creds, profile)
-            }
+                createRequest: createRequest, processRequest: processRequest)
         }
         
         switch (ep.method) {

@@ -34,7 +34,7 @@ phase.add_file_reference(fileRef)
 target = project.targets.select { |target| target.name == 'ServerTests' }.first
 puts "Add Script Phase to #{target}"
 phase = target.new_shell_script_build_phase()
-phase.shell_script = "cp Server.plist /tmp"
+phase.shell_script = "cp Server.plist /tmp; cp Resources/Cat.jpg /tmp"
 
 # 3) Add in DEBUG flag
 	

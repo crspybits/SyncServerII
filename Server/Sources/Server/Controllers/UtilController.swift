@@ -17,13 +17,15 @@ class UtilController : ControllerProtocol {
     init() {
     }
     
-    func healthCheck(_ request: RequestMessage, creds:Creds?, profile:UserProfile?) -> HealthCheckResponse? {
+    func healthCheck(request: RequestMessage, creds: Creds?, profile: UserProfile?,
+        completion: @escaping (ResponseMessage?)->()) {
         let response = HealthCheckResponse()
-        return response
+        completion(response)
     }
     
-    func checkPrimaryCreds(_ request: RequestMessage, creds:Creds?, profile:UserProfile?) -> CheckPrimaryCredsResponse? {
+    func checkPrimaryCreds(request: RequestMessage, creds: Creds?, profile: UserProfile?,
+        completion: @escaping (ResponseMessage?)->()) {
         let response = CheckPrimaryCredsResponse()
-        return response
+        completion(response)
     }
 }

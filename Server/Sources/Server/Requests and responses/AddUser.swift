@@ -9,6 +9,7 @@
 import Foundation
 import PerfectLib
 import Gloss
+import Kitura
 
 class AddUserRequest : NSObject, RequestMessage {
     /*
@@ -20,7 +21,11 @@ class AddUserRequest : NSObject, RequestMessage {
     */
     
     // static let keys = [mobileDeviceUUIDKey, cloudFolderPathKey]
-        
+    
+    required init?(request: RouterRequest) {
+        super.init()
+    }
+    
     required init?(json: JSON) {
         super.init()
         

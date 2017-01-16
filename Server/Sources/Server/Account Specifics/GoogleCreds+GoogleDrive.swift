@@ -9,6 +9,7 @@
 import PerfectLib
 import KituraNet
 import SwiftyJSON
+import Foundation
 
 private let folderMimeType = "application/vnd.google-apps.folder"
 
@@ -27,7 +28,7 @@ extension GoogleCreds {
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
         
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: bodyParameters) { jsonResult, statusCode in
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { jsonResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
                 completion(RefreshError.badStatusCode(statusCode))
                 return
@@ -151,7 +152,7 @@ extension GoogleCreds {
             return
         }
     
-        self.apiCall(method: "POST", path: "/drive/v3/files", additionalHeaders:additionalHeaders, body:jsonString) { (json, statusCode) in
+        self.apiCall(method: "POST", path: "/drive/v3/files", additionalHeaders:additionalHeaders, body: .string(jsonString)) { (json, statusCode) in
             var resultId:String?
             var resultError:Swift.Error?
             
@@ -185,8 +186,6 @@ extension GoogleCreds {
 #if false
     // Move a file or folder to the trash on Google Drive.
     func trashFile(fileId:String, completion:@escaping (Swift.Error?)->()) {
-
-            
         let bodyDict = [
             "trashed": "true"
         ]
@@ -224,6 +223,7 @@ extension GoogleCreds {
         ]
         
         self.apiCall(method: "DELETE", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders) { (json, statusCode) in
+            // The "noContent" correct result was not apparent from the docs-- figured this out by experimentation.
             if statusCode == HTTPStatusCode.noContent {
                 completion(nil)
             }
@@ -233,7 +233,85 @@ extension GoogleCreds {
         }
     }
 
+    enum UploadError : Swift.Error {
+    case badStatusCode(HTTPStatusCode?)
+    }
+
+#if false
+    // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails. mimeType is the MIME type of the file, e.g., "image/jpeg".
+    func uploadSmallFile(mimeType:String, uploadData:Data, completion:@escaping (Swift.Error?)->()) {
+        // See https://developers.google.com/drive/v3/web/manage-uploads#simple
+        
+        let additionalHeaders = [
+            "Authorization" : "Bearer \(self.accessToken!)",
+            "Content-Type" : mimeType
+        ]
+        
+        let urlParameters = "uploadType=media"
+        
+        self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(uploadData)) { (json, statusCode) in
+            var resultError:Swift.Error?
+
+            if statusCode != HTTPStatusCode.OK {
+                resultError = UploadError.badStatusCode(statusCode)
+            }
+            
+            completion(resultError)
+        }
+    }
+#endif
+
+    struct FileUpload {
+        // MIME type of the file, e.g., "image/jpeg".
+        let mimeType:String
+        
+        let uploadData:Data
+        let remoteFileName:String
+        
+        // TODO: Need to add remote folder name.
+    }
+    
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
-    func uploadSmallFile() {
+    func uploadSmallFile(upload:FileUpload, completion:@escaping (Swift.Error?)->()) {
+        // See https://developers.google.com/drive/v3/web/manage-uploads
+        
+        // TODO: Need to utilize remote folder name.
+        
+        let boundary = PerfectLib.UUID().string
+
+        let additionalHeaders = [
+            "Authorization" : "Bearer \(self.accessToken!)",
+            "Content-Type" : "multipart/related; boundary=\(boundary)"
+        ]
+        
+        let urlParameters = "uploadType=multipart"
+        
+        let firstPart =
+            "--\(boundary)\r\n" +
+            "Content-Type: application/json; charset=UTF-8\r\n" +
+            "\r\n" +
+            "{\r\n" +
+                "\"name\": \"\(upload.remoteFileName)\"\r\n" +
+            "}\r\n" +
+            "\r\n" +
+            "--\(boundary)\r\n" +
+            "Content-Type: \(upload.mimeType)\r\n" +
+            "\r\n"
+        
+        var multiPartData = firstPart.data(using: .utf8)!
+        multiPartData.append(upload.uploadData)
+        
+        let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
+        multiPartData.append(endBoundary)
+
+        self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode) in
+            var resultError:Swift.Error?
+
+            if statusCode != HTTPStatusCode.OK {
+                resultError = UploadError.badStatusCode(statusCode)
+            }
+            
+            completion(resultError)
+        }
     }
 }

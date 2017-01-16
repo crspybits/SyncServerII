@@ -104,7 +104,7 @@ class GoogleCreds : Creds {
     static let googleAPIAccessTokenKey = "access_token"
     static let googleAPIRefreshTokenKey = "refresh_token"
     
-        // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is returned with true or false depending on whether the generation occurred successfully.
+    // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is returned with true or false depending on whether the generation occurred successfully.
     override func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->()) {
         if self.serverAuthCode == nil {
             Log.info(message: "No serverAuthCode from client.")
@@ -117,7 +117,7 @@ class GoogleCreds : Creds {
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
 
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: bodyParameters) { jsonResult, statusCode in
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { jsonResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
                 completion(nil, GenerateTokensError.badStatusCode(statusCode))
                 return

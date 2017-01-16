@@ -1,5 +1,0 @@
-version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
-options: "bf473179422240ff863e964ff7b52bee"
-build_time: [537149691, 781847000]
-inputs:
-  "/Users/chris/Desktop/SyncServerII/SwiftySyncServer-Github/Server/Packages/SMServerLib-0.0.2/Sources/PlistDictLoader.swift": [537145288, 0]

@@ -49,7 +49,8 @@ class UserController : ControllerProtocol {
         }
     }
     
-    func addUser(_ request: RequestMessage, creds:Creds?, profile:UserProfile?) -> AddUserResponse? {
+    func addUser(request: RequestMessage, creds: Creds?, profile: UserProfile?,
+        completion: @escaping (ResponseMessage?)->()) {
         
         let userExists = UserController.userExists(userProfile: profile!)
         switch userExists {
@@ -57,7 +58,8 @@ class UserController : ControllerProtocol {
             break
         case .error, .exists(_):
             Log.error(message: "Could not add user: Already exists!")
-            return nil
+            completion(nil)
+            return
         }
         
         let user = User()
@@ -69,34 +71,37 @@ class UserController : ControllerProtocol {
         let userId = UserRepository.add(user: user)
         if userId == nil {
             Log.error(message: "Failed on adding user to User!")
-            return nil
+            completion(nil)
+            return
         }
 
         let response = AddUserResponse()
         response.result = "success"
-        return response
+        completion(response)
     }
     
-    func checkCreds(_ request: RequestMessage, creds:Creds?, profile:UserProfile?) -> CheckCredsResponse? {
+    func checkCreds(request: RequestMessage, creds: Creds?, profile: UserProfile?,
+        completion: @escaping (ResponseMessage?)->()) {
         // We don't have to do anything here. It was already done prior to checkCreds being called because of:
         assert(ServerEndpoints.checkCreds.authenticationLevel == .secondary)
         
         let response = CheckCredsResponse()
         response.result = "Success"
-        return response
+        completion(response)
     }
     
     // A user can only remove themselves, not another user-- this policy is enforced because the currently signed in user (with the UserProfile) is the one removed.
-    func removeUser(_ request: RequestMessage, creds:Creds?, profile:UserProfile?) -> RemoveUserResponse? {
+    func removeUser(request: RequestMessage, creds: Creds?, profile: UserProfile?,
+        completion: @escaping (ResponseMessage?)->()) {
         assert(ServerEndpoints.removeUser.authenticationLevel == .secondary)
         
         if case .removed = UserRepository.remove(user: .accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)) {
             let response = RemoveUserResponse()
             response.result = "Success"
-            return response
+            completion(response)
         }
         else {
-            return nil
+            completion(nil)
         }
     }
 }

@@ -18,17 +18,6 @@ class UserControllerTests: ServerTestCase {
         _ = UserRepository.create()
     }
     
-    func addNewUser() {
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
-            self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on addUser request")
-                expectation.fulfill()
-            }
-        }
-    }
-    
     func testAddUserSucceedsWhenAddingNewUser() {
         self.addNewUser()
     }

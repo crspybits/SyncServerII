@@ -9,8 +9,13 @@
 import Foundation
 import PerfectLib
 import Gloss
+import Kitura
 
 class CheckPrimaryCredsRequest : NSObject, RequestMessage {
+    required init?(request: RouterRequest) {
+        super.init()
+    }
+    
     required init?(json: JSON) {
         super.init()
     }

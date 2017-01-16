@@ -39,9 +39,14 @@ public class Creds {
     func merge(withNewerCreds creds:Creds) {
     }
     
+    enum Body {
+    case string(String)
+    case data(Data)
+    }
+    
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
     func apiCall(method:String, baseURL:String? = nil, path:String,
-        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:String? = nil,
+        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:Body? = nil,
         completion:@escaping (_ result: JSON?, HTTPStatusCode?)->()) {
         
         var hostname = baseURL
@@ -97,11 +102,15 @@ public class Creds {
             completion(nil, nil)
         }
         
-        if body == nil {
+        switch body {
+        case .none:
             req.end()
-        }
-        else {
-            req.end(body!)
+            
+        case .some(.string(let str)):
+            req.end(str)
+            
+        case .some(.data(let data)):
+            req.end(data)
         }
     }
 }
