@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		749C35C8F7B8969D3DCA623C /* Server.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8F7DABFFA3228B0F1EC051A1 /* Server.plist */; };
+		831DC3271E2DD2B300362CBE /* UploadRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831DC3261E2DD2B300362CBE /* UploadRepository.swift */; };
 		OBJ_274 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_275 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
 		OBJ_276 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* File.swift */; };
@@ -1050,6 +1051,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		831DC3261E2DD2B300362CBE /* UploadRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadRepository.swift; sourceTree = "<group>"; };
 		8F7DABFFA3228B0F1EC051A1 /* Server.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Server.plist; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
@@ -1771,6 +1773,7 @@
 				OBJ_217 /* Model.swift */,
 				OBJ_218 /* Repository.swift */,
 				OBJ_219 /* UserRepository.swift */,
+				831DC3261E2DD2B300362CBE /* UploadRepository.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -2907,6 +2910,7 @@
 				OBJ_689 /* Constants.swift in Sources */,
 				OBJ_690 /* ControllerProtocol.swift in Sources */,
 				OBJ_691 /* Controllers.swift in Sources */,
+				831DC3271E2DD2B300362CBE /* UploadRepository.swift in Sources */,
 				OBJ_692 /* FileController.swift in Sources */,
 				OBJ_693 /* UserController.swift in Sources */,
 				OBJ_694 /* UtilController.swift in Sources */,

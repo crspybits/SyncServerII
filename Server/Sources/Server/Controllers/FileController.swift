@@ -14,11 +14,9 @@ import CredentialsGoogle
 class FileController : ControllerProtocol {
     // Don't do this setup in init so that database initalizations don't have to be done per endpoint call.
     class func setup() -> Bool {
-        /*
-        if case .failure(_) = UserRepository.create() {
+        if case .failure(_) = UploadRepository.create() {
             return false
         }
-        */
         return true
     }
     
@@ -44,7 +42,9 @@ class FileController : ControllerProtocol {
         
         // TODO: Need to have streaming data from client, and send streaming data up to Google Drive.
         
-        let upload = GoogleCreds.FileUpload(mimeType: uploadRequest.mimeType, uploadData: uploadRequest.data, remoteFileName: uploadRequest.fileName)
+        // TODO: Need to make use of Upload repository.
+        
+        let upload = GoogleCreds.FileUpload(mimeType: uploadRequest.mimeType, uploadData: uploadRequest.data, remoteFileName: uploadRequest.fileName, remoteFolderName: uploadRequest.folderName)
         googleCreds.uploadSmallFile(upload: upload) { error in
             if error == nil {
                 let response = UploadFileResponse()

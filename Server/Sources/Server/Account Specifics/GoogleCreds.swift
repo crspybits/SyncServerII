@@ -104,6 +104,11 @@ class GoogleCreds : Creds {
     static let googleAPIAccessTokenKey = "access_token"
     static let googleAPIRefreshTokenKey = "refresh_token"
     
+    enum GenerateTokensError : Swift.Error {
+    case badStatusCode(HTTPStatusCode?)
+    case couldNotObtainParameterFromJSON
+    }
+    
     // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is returned with true or false depending on whether the generation occurred successfully.
     override func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->()) {
         if self.serverAuthCode == nil {
@@ -145,5 +150,38 @@ class GoogleCreds : Creds {
         }
         
         self.accessToken = newerGoogleCreds.accessToken
+    }
+    
+    enum RefreshError : Swift.Error {
+    case badStatusCode(HTTPStatusCode?)
+    case couldNotObtainParameterFromJSON
+    }
+    
+    // Use the refresh token to generate a new access token.
+    // If error is nil when the completion handler is called, then the accessToken of this object has been refreshed. It hasn't yet been persistently stored on this server.
+    func refresh(completion:@escaping (Swift.Error?)->()) {
+        // See "Using a refresh token" at https://developers.google.com/identity/protocols/OAuth2WebServer
+
+        let bodyParameters = "client_id=\(Constants.session.googleClientId)&client_secret=\(Constants.session.googleClientSecret)&refresh_token=\(self.refreshToken!)&grant_type=refresh_token"
+        Log.debug(message: "bodyParameters: \(bodyParameters)")
+        
+        let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
+        
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { jsonResult, statusCode in
+            guard statusCode == HTTPStatusCode.OK else {
+                completion(RefreshError.badStatusCode(statusCode))
+                return
+            }
+            
+            if let accessToken =
+                jsonResult?[GoogleCreds.googleAPIAccessTokenKey].string {
+                self.accessToken = accessToken
+                Log.debug(message: "Refreshed access token: \(accessToken)")
+                completion(nil)
+                return
+            }
+            
+            completion(RefreshError.couldNotObtainParameterFromJSON)
+        }
     }
 }

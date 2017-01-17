@@ -13,44 +13,7 @@ import Foundation
 
 private let folderMimeType = "application/vnd.google-apps.folder"
 
-extension GoogleCreds {
-    enum RefreshError : Swift.Error {
-    case badStatusCode(HTTPStatusCode?)
-    case couldNotObtainParameterFromJSON
-    }
-    // Use the refresh token to generate a new access token.
-    // If error is nil when the completion handler is called, then the accessToken of this object has been refreshed. It hasn't yet been persistently stored on this server.
-    func refresh(completion:@escaping (Swift.Error?)->()) {
-        // See "Using a refresh token" at https://developers.google.com/identity/protocols/OAuth2WebServer
-
-        let bodyParameters = "client_id=\(Constants.session.googleClientId)&client_secret=\(Constants.session.googleClientSecret)&refresh_token=\(self.refreshToken!)&grant_type=refresh_token"
-        Log.debug(message: "bodyParameters: \(bodyParameters)")
-        
-        let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
-        
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { jsonResult, statusCode in
-            guard statusCode == HTTPStatusCode.OK else {
-                completion(RefreshError.badStatusCode(statusCode))
-                return
-            }
-            
-            if let accessToken =
-                jsonResult?[GoogleCreds.googleAPIAccessTokenKey].string {
-                self.accessToken = accessToken
-                Log.debug(message: "Refreshed access token: \(accessToken)")
-                completion(nil)
-                return
-            }
-            
-            completion(RefreshError.couldNotObtainParameterFromJSON)
-        }
-    }
-    
-    enum GenerateTokensError : Swift.Error {
-    case badStatusCode(HTTPStatusCode?)
-    case couldNotObtainParameterFromJSON
-    }
-    
+extension GoogleCreds {    
     enum ListFilesError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     }
@@ -84,7 +47,7 @@ extension GoogleCreds {
     }
     
     // Considers it an error for there to be more than one folder with the given name.
-    func searchForFolder(folderName:String, completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
+    func searchForFolder(rootFolderName folderName:String, completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
     
         let query = "mimeType='\(folderMimeType)' and name='\(folderName)' and trashed=false"
         
@@ -132,7 +95,7 @@ extension GoogleCreds {
     }
     
     // Create a folder-- assumes it doesn't yet exist. This won't fail if you use it more than once with the same folder name, you just get multiple instances of a folder with the same name.
-    func createFolder(folderName:String,
+    func createFolder(rootFolderName folderName:String,
         completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
         
         // It's not obvious from the docs, but you use the /drive/v3/files endpoint (metadata only) for creating folders. Also not clear from the docs, you need to give the Content-Type in the headers. See https://developers.google.com/drive/v3/web/manage-uploads
@@ -172,6 +135,28 @@ extension GoogleCreds {
             }
             
             completion(resultId, resultError)
+        }
+    }
+    
+    // Creates a root level folder if it doesn't exist. Returns the folderId in the completion if no error.
+    func createFolderIfDoesNotExist(rootFolderName folderName:String,
+        completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
+        self.searchForFolder(rootFolderName: folderName) { (folderId, error) in
+            if error == nil {
+                if folderId == nil {
+                    // Folder doesn't exist.
+                    self.createFolder(rootFolderName: folderName) { (folderId, error) in
+                        completion(folderId, error)
+                    }
+                }
+                else {
+                    // Folder does exist.
+                    completion(folderId, nil)
+                }
+            }
+            else {
+                completion(nil, error)
+            }
         }
     }
     
@@ -237,30 +222,6 @@ extension GoogleCreds {
     case badStatusCode(HTTPStatusCode?)
     }
 
-#if false
-    // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails. mimeType is the MIME type of the file, e.g., "image/jpeg".
-    func uploadSmallFile(mimeType:String, uploadData:Data, completion:@escaping (Swift.Error?)->()) {
-        // See https://developers.google.com/drive/v3/web/manage-uploads#simple
-        
-        let additionalHeaders = [
-            "Authorization" : "Bearer \(self.accessToken!)",
-            "Content-Type" : mimeType
-        ]
-        
-        let urlParameters = "uploadType=media"
-        
-        self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(uploadData)) { (json, statusCode) in
-            var resultError:Swift.Error?
-
-            if statusCode != HTTPStatusCode.OK {
-                resultError = UploadError.badStatusCode(statusCode)
-            }
-            
-            completion(resultError)
-        }
-    }
-#endif
-
     struct FileUpload {
         // MIME type of the file, e.g., "image/jpeg".
         let mimeType:String
@@ -268,50 +229,58 @@ extension GoogleCreds {
         let uploadData:Data
         let remoteFileName:String
         
-        // TODO: Need to add remote folder name.
+        let remoteFolderName:String
     }
     
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
     func uploadSmallFile(upload:FileUpload, completion:@escaping (Swift.Error?)->()) {
         // See https://developers.google.com/drive/v3/web/manage-uploads
         
-        // TODO: Need to utilize remote folder name.
-        
-        let boundary = PerfectLib.UUID().string
-
-        let additionalHeaders = [
-            "Authorization" : "Bearer \(self.accessToken!)",
-            "Content-Type" : "multipart/related; boundary=\(boundary)"
-        ]
-        
-        let urlParameters = "uploadType=multipart"
-        
-        let firstPart =
-            "--\(boundary)\r\n" +
-            "Content-Type: application/json; charset=UTF-8\r\n" +
-            "\r\n" +
-            "{\r\n" +
-                "\"name\": \"\(upload.remoteFileName)\"\r\n" +
-            "}\r\n" +
-            "\r\n" +
-            "--\(boundary)\r\n" +
-            "Content-Type: \(upload.mimeType)\r\n" +
-            "\r\n"
-        
-        var multiPartData = firstPart.data(using: .utf8)!
-        multiPartData.append(upload.uploadData)
-        
-        let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
-        multiPartData.append(endBoundary)
-
-        self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode) in
-            var resultError:Swift.Error?
-
-            if statusCode != HTTPStatusCode.OK {
-                resultError = UploadError.badStatusCode(statusCode)
+        self.createFolderIfDoesNotExist(rootFolderName: upload.remoteFolderName) { (folderId, error) in
+            if error != nil {
+                completion(error)
+                return
             }
             
-            completion(resultError)
+            let boundary = PerfectLib.UUID().string
+
+            let additionalHeaders = [
+                "Authorization" : "Bearer \(self.accessToken!)",
+                "Content-Type" : "multipart/related; boundary=\(boundary)"
+            ]
+            
+            let urlParameters = "uploadType=multipart"
+            
+            let firstPart =
+                "--\(boundary)\r\n" +
+                "Content-Type: application/json; charset=UTF-8\r\n" +
+                "\r\n" +
+                "{\r\n" +
+                    "\"name\": \"\(upload.remoteFileName)\",\r\n" +
+                    "\"parents\": [\r\n" +
+                        "\"\(folderId!)\"\r\n" +
+                    "]\r\n" +
+                "}\r\n" +
+                "\r\n" +
+                "--\(boundary)\r\n" +
+                "Content-Type: \(upload.mimeType)\r\n" +
+                "\r\n"
+            
+            var multiPartData = firstPart.data(using: .utf8)!
+            multiPartData.append(upload.uploadData)
+            
+            let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
+            multiPartData.append(endBoundary)
+
+            self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode) in
+                var resultError:Swift.Error?
+
+                if statusCode != HTTPStatusCode.OK {
+                    resultError = UploadError.badStatusCode(statusCode)
+                }
+                
+                completion(resultError)
+            }
         }
     }
 }

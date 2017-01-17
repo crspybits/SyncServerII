@@ -21,8 +21,11 @@ class UploadFileRequest : NSObject, RequestMessage {
     static let mimeTypeKey = "mimeType"
     var mimeType:String!
     
+    static let folderNameKey = "folderName"
+    var folderName:String!
+    
     func keys() -> [String] {
-        return [UploadFileRequest.fileNameKey, UploadFileRequest.mimeTypeKey]
+        return [UploadFileRequest.fileNameKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.folderNameKey]
     }
     
     required init?(json: JSON) {
@@ -30,7 +33,8 @@ class UploadFileRequest : NSObject, RequestMessage {
         
         self.fileName = UploadFileRequest.fileNameKey <~~ json
         self.mimeType = UploadFileRequest.mimeTypeKey <~~ json
-        
+        self.folderName = UploadFileRequest.folderNameKey <~~ json
+
         if !self.propertiesHaveValues(propertyNames: self.keys()) {
             return nil
         }

@@ -96,13 +96,14 @@ class UserRepository : Repository {
     private static let tableName = "User"
     static let usernameMaxLength = 255
     static let credsIdMaxLength = 255
+    static let accountTypeMaxLength = 20
     
     static func create() -> Database.TableCreationResult {
         let createColumns =
             "(userId BIGINT NOT NULL AUTO_INCREMENT, " +
             "username VARCHAR(\(usernameMaxLength)) NOT NULL," +
             
-            "accountType VARCHAR(20) NOT NULL, " +
+            "accountType VARCHAR(\(accountTypeMaxLength)) NOT NULL, " +
             
             "credsId VARCHAR(\(credsIdMaxLength)) NOT NULL, " +
         
