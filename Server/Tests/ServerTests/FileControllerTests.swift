@@ -9,6 +9,7 @@
 import XCTest
 @testable import Server
 import LoggerAPI
+import PerfectLib
 
 class FileControllerTests: ServerTestCase {
 
@@ -31,12 +32,10 @@ class FileControllerTests: ServerTestCase {
         let stringToUpload = "Hello World!"
         let data = stringToUpload.data(using: .utf8)
         
-        // TODO: File name should actually be a UUID.
-        
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileNameKey: "HelloWorld.txt",
+            UploadFileRequest.cloudFileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.folderNameKey: testFolder
+            UploadFileRequest.cloudFolderNameKey: testFolder
         ])
                 
         self.performServerTest { expectation, googleCreds in
@@ -55,13 +54,11 @@ class FileControllerTests: ServerTestCase {
 
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
         let data = try! Data(contentsOf: fileURL)
-        
-        // TODO: File name should actually be a UUID.
-        
+                
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileNameKey: "Cat",
+            UploadFileRequest.cloudFileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
-            UploadFileRequest.folderNameKey: testFolder
+            UploadFileRequest.cloudFolderNameKey: testFolder
         ])
                 
         self.performServerTest { expectation, googleCreds in

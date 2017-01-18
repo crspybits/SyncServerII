@@ -15,27 +15,31 @@ class UploadFileRequest : NSObject, RequestMessage {
     var data = Data()
     var sizeOfDataInBytes:Int!
     
-    static let fileNameKey = "fileName"
-    var fileName:String!
+    static let cloudFileUUIDKey = "cloudFileUUID"
+    var cloudFileUUID:String!
     
     static let mimeTypeKey = "mimeType"
     var mimeType:String!
     
-    static let folderNameKey = "folderName"
-    var folderName:String!
+    static let cloudFolderNameKey = "cloudFolderName"
+    var cloudFolderName:String!
     
     func keys() -> [String] {
-        return [UploadFileRequest.fileNameKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.folderNameKey]
+        return [UploadFileRequest.cloudFileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey]
     }
     
     required init?(json: JSON) {
         super.init()
         
-        self.fileName = UploadFileRequest.fileNameKey <~~ json
+        self.cloudFileUUID = UploadFileRequest.cloudFileUUIDKey <~~ json
         self.mimeType = UploadFileRequest.mimeTypeKey <~~ json
-        self.folderName = UploadFileRequest.folderNameKey <~~ json
+        self.cloudFolderName = UploadFileRequest.cloudFolderNameKey <~~ json
 
         if !self.propertiesHaveValues(propertyNames: self.keys()) {
+            return nil
+        }
+        
+        guard let _ = NSUUID(uuidString: self.cloudFileUUID) else {
             return nil
         }
     }

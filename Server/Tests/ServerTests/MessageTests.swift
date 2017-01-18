@@ -8,6 +8,7 @@
 
 import XCTest
 @testable import Server
+import PerfectLib
 
 class MessageTests: ServerTestCase {
 
@@ -22,11 +23,22 @@ class MessageTests: ServerTestCase {
     }
 
     func testURLParameters() {
+        let uuidString = PerfectLib.UUID().string
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileNameKey: "Foobar2",
-            UploadFileRequest.mimeTypeKey: "text/plain"
+            UploadFileRequest.cloudFileUUIDKey : uuidString,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.cloudFolderNameKey: "CloudFolder"
         ])
         let result = uploadRequest!.urlParameters()
-        XCTAssert(result == "fileName=Foobar2&mimeType=text/plain", "Result was: \(result)")
+        XCTAssert(result == "\(UploadFileRequest.cloudFileUUIDKey)=\(uuidString)&mimeType=text/plain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder", "Result was: \(result)")
+    }
+    
+    func testBadUUIDForFileName() {
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.cloudFileUUIDKey : "foobar",
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.cloudFolderNameKey: "CloudFolder"
+        ])
+        XCTAssert(uploadRequest == nil)
     }
 }

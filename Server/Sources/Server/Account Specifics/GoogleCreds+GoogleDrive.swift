@@ -227,16 +227,16 @@ extension GoogleCreds {
         let mimeType:String
         
         let uploadData:Data
-        let remoteFileName:String
+        let cloudFileUUID:String
         
-        let remoteFolderName:String
+        let cloudFolderName:String
     }
     
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
     func uploadSmallFile(upload:FileUpload, completion:@escaping (Swift.Error?)->()) {
         // See https://developers.google.com/drive/v3/web/manage-uploads
         
-        self.createFolderIfDoesNotExist(rootFolderName: upload.remoteFolderName) { (folderId, error) in
+        self.createFolderIfDoesNotExist(rootFolderName: upload.cloudFolderName) { (folderId, error) in
             if error != nil {
                 completion(error)
                 return
@@ -256,7 +256,7 @@ extension GoogleCreds {
                 "Content-Type: application/json; charset=UTF-8\r\n" +
                 "\r\n" +
                 "{\r\n" +
-                    "\"name\": \"\(upload.remoteFileName)\",\r\n" +
+                    "\"name\": \"\(upload.cloudFileUUID)\",\r\n" +
                     "\"parents\": [\r\n" +
                         "\"\(folderId!)\"\r\n" +
                     "]\r\n" +

@@ -44,7 +44,7 @@ class FileController : ControllerProtocol {
         
         // TODO: Need to make use of Upload repository.
         
-        let upload = GoogleCreds.FileUpload(mimeType: uploadRequest.mimeType, uploadData: uploadRequest.data, remoteFileName: uploadRequest.fileName, remoteFolderName: uploadRequest.folderName)
+        let upload = GoogleCreds.FileUpload(mimeType: uploadRequest.mimeType, uploadData: uploadRequest.data, cloudFileUUID: uploadRequest.cloudFileUUID, cloudFolderName: uploadRequest.cloudFolderName)
         googleCreds.uploadSmallFile(upload: upload) { error in
             if error == nil {
                 let response = UploadFileResponse()
