@@ -17,7 +17,7 @@ require 'xcodeproj'
 path_to_project = "Server.xcodeproj"
 project = Xcodeproj::Project.open(path_to_project)
 
-# 1) Add Copy Files Phase for Server.plist to the Products directory for Server target
+# 1) Add Copy Files Phase for Server.json to the Products directory for Server target
 target = project.targets.select { |target| target.name == 'Server' }.first
 puts "Add Copy Files Phase to #{target}"
 phase = target.new_copy_files_build_phase()
@@ -26,7 +26,7 @@ phase = target.new_copy_files_build_phase()
 phase.dst_subfolder_spec = "16"
 
 fileRef = project.new(Xcodeproj::Project::Object::PBXFileReference)
-fileRef.path = 'Server.plist'
+fileRef.path = 'Server.json'
 
 phase.add_file_reference(fileRef)	
 
@@ -34,7 +34,7 @@ phase.add_file_reference(fileRef)
 target = project.targets.select { |target| target.name == 'ServerTests' }.first
 puts "Add Script Phase to #{target}"
 phase = target.new_shell_script_build_phase()
-phase.shell_script = "cp Server.plist /tmp; cp Resources/Cat.jpg /tmp"
+phase.shell_script = "cp Server.json /tmp; cp Resources/Cat.jpg /tmp"
 
 # 3) Add in DEBUG flag
 	

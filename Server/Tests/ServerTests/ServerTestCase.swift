@@ -32,8 +32,8 @@ class ServerTestCase : XCTestCase {
 }
 
 extension ServerTestCase : ConstantsDelegate {
-    // A hack to get access to Server.plist during testing.
-    public func plistFilePath(forConstants:Constants) -> String {
+    // A hack to get access to Server.json during testing.
+    public func configFilePath(forConstants:Constants) -> String {
         return "/tmp"
     }
 }

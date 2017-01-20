@@ -32,8 +32,9 @@ protocol KituraTest {
 
 extension KituraTest {    
     func refreshToken() -> String {
-        let plist = try! PlistDictLoader(usingPath: "/tmp", andPlistFileName: "Server.plist")
-        let refreshToken = try! plist.getString(varName: "GoogleRefreshToken")
+        let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "Server.json", forConfigType: .jsonDictionary)
+        
+        let refreshToken = try! config.getString(varName: "GoogleRefreshToken")
         return refreshToken
     }
     

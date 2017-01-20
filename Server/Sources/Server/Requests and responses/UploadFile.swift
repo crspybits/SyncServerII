@@ -15,12 +15,14 @@ class UploadFileRequest : NSObject, RequestMessage {
     var data = Data()
     var sizeOfDataInBytes:Int!
     
+    // Files in the cloud are referred to by UUID's. This must be a valid UUID.
     static let cloudFileUUIDKey = "cloudFileUUID"
     var cloudFileUUID:String!
     
     static let mimeTypeKey = "mimeType"
     var mimeType:String!
     
+    // A root-level folder in the cloud file service.
     static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName:String!
     

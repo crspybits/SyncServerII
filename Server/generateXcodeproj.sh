@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Usage:
+#		<script> [update]
+#			update -- will update dependencies.
+
 # Odd things seem to happen if you have xcode running when you run tweakXcodeproj.rb
 RESULT=`killall Xcode 2>&1`
 
@@ -13,6 +17,9 @@ elif [ "$RESULT" == "No matching processes belonging to you were found" ]; then
 fi
 
 if [[ KILLED -eq 1 ]]; then
+	if [ "empty$1" == "emptyupdate" ]; then
+    	swift package update
+    fi
 	swift package generate-xcodeproj
 	./tweakXcodeproj.rb
 	echo "Success!"

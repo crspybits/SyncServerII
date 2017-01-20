@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		749C35C8F7B8969D3DCA623C /* Server.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8F7DABFFA3228B0F1EC051A1 /* Server.plist */; };
-		831DC3271E2DD2B300362CBE /* UploadRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831DC3261E2DD2B300362CBE /* UploadRepository.swift */; };
+		940448CF49E79BF14B8D8F87 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 96039AE0FCB0CB2020DF248E /* Server.json */; };
 		OBJ_274 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_275 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
 		OBJ_276 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* File.swift */; };
@@ -19,7 +18,7 @@
 		OBJ_281 /* SwiftCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* SwiftCompatibility.swift */; };
 		OBJ_282 /* SysProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* SysProcess.swift */; };
 		OBJ_283 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Utilities.swift */; };
-		OBJ_290 /* PlistDictLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* PlistDictLoader.swift */; };
+		OBJ_290 /* ConfigLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* ConfigLoader.swift */; };
 		OBJ_292 /* PerfectLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_248 /* PerfectLib.framework */; };
 		OBJ_299 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* Logger.swift */; };
 		OBJ_306 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* Socket.swift */; };
@@ -136,122 +135,122 @@
 		OBJ_487 /* HMAC.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_140 /* HMAC.swift */; };
 		OBJ_488 /* KeyDerivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_141 /* KeyDerivation.swift */; };
 		OBJ_489 /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_142 /* Random.swift */; };
-		OBJ_490 /* RSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_143 /* RSA.swift */; };
-		OBJ_491 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_144 /* Status.swift */; };
-		OBJ_492 /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_145 /* StreamCryptor.swift */; };
-		OBJ_493 /* Updatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_146 /* Updatable.swift */; };
-		OBJ_494 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_147 /* Utilities.swift */; };
-		OBJ_501 /* CookieCryptography.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_149 /* CookieCryptography.swift */; };
-		OBJ_502 /* CookieManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_150 /* CookieManagement.swift */; };
-		OBJ_503 /* CookieParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_151 /* CookieParameter.swift */; };
-		OBJ_504 /* InMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_152 /* InMemoryStore.swift */; };
-		OBJ_505 /* RouterRequest+Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_153 /* RouterRequest+Session.swift */; };
-		OBJ_506 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_154 /* Session.swift */; };
-		OBJ_507 /* SessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_155 /* SessionState.swift */; };
-		OBJ_508 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_156 /* Store.swift */; };
-		OBJ_510 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
-		OBJ_511 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
-		OBJ_512 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
-		OBJ_513 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
-		OBJ_514 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
-		OBJ_515 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
-		OBJ_516 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
-		OBJ_517 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
-		OBJ_518 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
-		OBJ_533 /* AccountSpecificCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_158 /* AccountSpecificCreds.swift */; };
-		OBJ_534 /* BaseCacheElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_159 /* BaseCacheElement.swift */; };
-		OBJ_535 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_160 /* Credentials.swift */; };
-		OBJ_536 /* CredentialsPluginProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_161 /* CredentialsPluginProtocol.swift */; };
-		OBJ_537 /* RouterRequest+UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_162 /* RouterRequest+UserProfile.swift */; };
-		OBJ_538 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_163 /* UserProfile.swift */; };
-		OBJ_539 /* UserProfileDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_164 /* UserProfileDelegate.swift */; };
-		OBJ_541 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
-		OBJ_542 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
-		OBJ_543 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
-		OBJ_544 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
-		OBJ_545 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
-		OBJ_546 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
-		OBJ_547 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
-		OBJ_548 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
-		OBJ_549 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
-		OBJ_550 /* KituraSession.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_261 /* KituraSession.framework */; };
-		OBJ_566 /* CredentialsGoogle.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_166 /* CredentialsGoogle.swift */; };
-		OBJ_567 /* CredentialsGoogleOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_167 /* CredentialsGoogleOptions.swift */; };
-		OBJ_568 /* CredentialsGoogleToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_168 /* CredentialsGoogleToken.swift */; };
-		OBJ_569 /* GoogleSpecificCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_169 /* GoogleSpecificCreds.swift */; };
-		OBJ_570 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_170 /* Utils.swift */; };
-		OBJ_572 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
-		OBJ_573 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
-		OBJ_574 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
-		OBJ_575 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
-		OBJ_576 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
-		OBJ_577 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
-		OBJ_578 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
-		OBJ_579 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
-		OBJ_580 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
-		OBJ_581 /* KituraSession.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_261 /* KituraSession.framework */; };
-		OBJ_582 /* Credentials.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_262 /* Credentials.framework */; };
-		OBJ_599 /* HeliumLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_172 /* HeliumLogger.swift */; };
-		OBJ_601 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
-		OBJ_608 /* Advance.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_174 /* Advance.swift */; };
-		OBJ_609 /* Any+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_175 /* Any+Extensions.swift */; };
-		OBJ_610 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_176 /* Array+Extensions.swift */; };
-		OBJ_611 /* Construct.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_177 /* Construct.swift */; };
-		OBJ_612 /* Get.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_178 /* Get.swift */; };
-		OBJ_613 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_179 /* Identity.swift */; };
-		OBJ_614 /* MemoryProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_180 /* MemoryProperties.swift */; };
-		OBJ_615 /* Metadata+Class.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_181 /* Metadata+Class.swift */; };
-		OBJ_616 /* Metadata+Kind.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_182 /* Metadata+Kind.swift */; };
-		OBJ_617 /* Metadata+Struct.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_183 /* Metadata+Struct.swift */; };
-		OBJ_618 /* Metadata+Tuple.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_184 /* Metadata+Tuple.swift */; };
-		OBJ_619 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_185 /* Metadata.swift */; };
-		OBJ_620 /* MetadataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_186 /* MetadataType.swift */; };
-		OBJ_621 /* NominalType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_187 /* NominalType.swift */; };
-		OBJ_622 /* NominalTypeDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_188 /* NominalTypeDescriptor.swift */; };
-		OBJ_623 /* PointerType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_189 /* PointerType.swift */; };
-		OBJ_624 /* Properties.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_190 /* Properties.swift */; };
-		OBJ_625 /* ReflectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_191 /* ReflectionError.swift */; };
-		OBJ_626 /* RelativePointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_192 /* RelativePointer.swift */; };
-		OBJ_627 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_193 /* Set.swift */; };
-		OBJ_628 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_194 /* Storage.swift */; };
-		OBJ_629 /* UnsafePointer+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_195 /* UnsafePointer+Extensions.swift */; };
-		OBJ_630 /* ValueWitnessTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_196 /* ValueWitnessTable.swift */; };
-		OBJ_637 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_198 /* main.swift */; };
-		OBJ_639 /* PerfectLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_248 /* PerfectLib.framework */; };
-		OBJ_640 /* SMServerLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_249 /* SMServerLib.framework */; };
-		OBJ_641 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
-		OBJ_642 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
-		OBJ_643 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
-		OBJ_644 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
-		OBJ_645 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
-		OBJ_646 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
-		OBJ_647 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
-		OBJ_648 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
-		OBJ_649 /* MySQL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_258 /* MySQL.framework */; };
-		OBJ_650 /* Gloss.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_259 /* Gloss.framework */; };
-		OBJ_651 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
-		OBJ_652 /* KituraSession.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_261 /* KituraSession.framework */; };
-		OBJ_653 /* Credentials.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_262 /* Credentials.framework */; };
-		OBJ_654 /* CredentialsGoogle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_263 /* CredentialsGoogle.framework */; };
-		OBJ_655 /* HeliumLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_264 /* HeliumLogger.framework */; };
-		OBJ_656 /* Reflection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_265 /* Reflection.framework */; };
-		OBJ_657 /* Server.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_267 /* Server.framework */; };
-		OBJ_682 /* ServerConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_200 /* ServerConstants.swift */; };
-		OBJ_683 /* ServerMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_201 /* ServerMain.swift */; };
-		OBJ_684 /* ServerRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_202 /* ServerRoutes.swift */; };
-		OBJ_685 /* ServerSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_203 /* ServerSetup.swift */; };
-		OBJ_686 /* Creds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_205 /* Creds.swift */; };
-		OBJ_687 /* GoogleCreds+GoogleDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_206 /* GoogleCreds+GoogleDrive.swift */; };
-		OBJ_688 /* GoogleCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_207 /* GoogleCreds.swift */; };
-		OBJ_689 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_209 /* Constants.swift */; };
-		OBJ_690 /* ControllerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_210 /* ControllerProtocol.swift */; };
-		OBJ_691 /* Controllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_211 /* Controllers.swift */; };
-		OBJ_692 /* FileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_212 /* FileController.swift */; };
-		OBJ_693 /* UserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_213 /* UserController.swift */; };
-		OBJ_694 /* UtilController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_214 /* UtilController.swift */; };
-		OBJ_695 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_216 /* Database.swift */; };
-		OBJ_696 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_217 /* Model.swift */; };
-		OBJ_697 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_218 /* Repository.swift */; };
+		OBJ_490 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_143 /* Status.swift */; };
+		OBJ_491 /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_144 /* StreamCryptor.swift */; };
+		OBJ_492 /* Updatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_145 /* Updatable.swift */; };
+		OBJ_493 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_146 /* Utilities.swift */; };
+		OBJ_500 /* CookieCryptography.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_148 /* CookieCryptography.swift */; };
+		OBJ_501 /* CookieManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_149 /* CookieManagement.swift */; };
+		OBJ_502 /* CookieParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_150 /* CookieParameter.swift */; };
+		OBJ_503 /* InMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_151 /* InMemoryStore.swift */; };
+		OBJ_504 /* RouterRequest+Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_152 /* RouterRequest+Session.swift */; };
+		OBJ_505 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_153 /* Session.swift */; };
+		OBJ_506 /* SessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_154 /* SessionState.swift */; };
+		OBJ_507 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_155 /* Store.swift */; };
+		OBJ_509 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
+		OBJ_510 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
+		OBJ_511 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
+		OBJ_512 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
+		OBJ_513 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
+		OBJ_514 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
+		OBJ_515 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
+		OBJ_516 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
+		OBJ_517 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
+		OBJ_532 /* AccountSpecificCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_157 /* AccountSpecificCreds.swift */; };
+		OBJ_533 /* BaseCacheElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_158 /* BaseCacheElement.swift */; };
+		OBJ_534 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_159 /* Credentials.swift */; };
+		OBJ_535 /* CredentialsPluginProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_160 /* CredentialsPluginProtocol.swift */; };
+		OBJ_536 /* RouterRequest+UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_161 /* RouterRequest+UserProfile.swift */; };
+		OBJ_537 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_162 /* UserProfile.swift */; };
+		OBJ_538 /* UserProfileDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_163 /* UserProfileDelegate.swift */; };
+		OBJ_540 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
+		OBJ_541 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
+		OBJ_542 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
+		OBJ_543 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
+		OBJ_544 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
+		OBJ_545 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
+		OBJ_546 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
+		OBJ_547 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
+		OBJ_548 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
+		OBJ_549 /* KituraSession.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_261 /* KituraSession.framework */; };
+		OBJ_565 /* CredentialsGoogle.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_165 /* CredentialsGoogle.swift */; };
+		OBJ_566 /* CredentialsGoogleOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_166 /* CredentialsGoogleOptions.swift */; };
+		OBJ_567 /* CredentialsGoogleToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_167 /* CredentialsGoogleToken.swift */; };
+		OBJ_568 /* GoogleSpecificCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_168 /* GoogleSpecificCreds.swift */; };
+		OBJ_569 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_169 /* Utils.swift */; };
+		OBJ_571 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
+		OBJ_572 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
+		OBJ_573 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
+		OBJ_574 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
+		OBJ_575 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
+		OBJ_576 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
+		OBJ_577 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
+		OBJ_578 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
+		OBJ_579 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
+		OBJ_580 /* KituraSession.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_261 /* KituraSession.framework */; };
+		OBJ_581 /* Credentials.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_262 /* Credentials.framework */; };
+		OBJ_598 /* HeliumLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_171 /* HeliumLogger.swift */; };
+		OBJ_600 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
+		OBJ_607 /* Advance.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_173 /* Advance.swift */; };
+		OBJ_608 /* Any+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_174 /* Any+Extensions.swift */; };
+		OBJ_609 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_175 /* Array+Extensions.swift */; };
+		OBJ_610 /* Construct.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_176 /* Construct.swift */; };
+		OBJ_611 /* Get.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_177 /* Get.swift */; };
+		OBJ_612 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_178 /* Identity.swift */; };
+		OBJ_613 /* MemoryProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_179 /* MemoryProperties.swift */; };
+		OBJ_614 /* Metadata+Class.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_180 /* Metadata+Class.swift */; };
+		OBJ_615 /* Metadata+Kind.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_181 /* Metadata+Kind.swift */; };
+		OBJ_616 /* Metadata+Struct.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_182 /* Metadata+Struct.swift */; };
+		OBJ_617 /* Metadata+Tuple.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_183 /* Metadata+Tuple.swift */; };
+		OBJ_618 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_184 /* Metadata.swift */; };
+		OBJ_619 /* MetadataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_185 /* MetadataType.swift */; };
+		OBJ_620 /* NominalType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_186 /* NominalType.swift */; };
+		OBJ_621 /* NominalTypeDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_187 /* NominalTypeDescriptor.swift */; };
+		OBJ_622 /* PointerType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_188 /* PointerType.swift */; };
+		OBJ_623 /* Properties.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_189 /* Properties.swift */; };
+		OBJ_624 /* ReflectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_190 /* ReflectionError.swift */; };
+		OBJ_625 /* RelativePointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_191 /* RelativePointer.swift */; };
+		OBJ_626 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_192 /* Set.swift */; };
+		OBJ_627 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_193 /* Storage.swift */; };
+		OBJ_628 /* UnsafePointer+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_194 /* UnsafePointer+Extensions.swift */; };
+		OBJ_629 /* ValueWitnessTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_195 /* ValueWitnessTable.swift */; };
+		OBJ_636 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_197 /* main.swift */; };
+		OBJ_638 /* PerfectLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_248 /* PerfectLib.framework */; };
+		OBJ_639 /* SMServerLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_249 /* SMServerLib.framework */; };
+		OBJ_640 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_250 /* LoggerAPI.framework */; };
+		OBJ_641 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_251 /* Socket.framework */; };
+		OBJ_642 /* SSLService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_252 /* SSLService.framework */; };
+		OBJ_643 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_253 /* CHTTPParser.framework */; };
+		OBJ_644 /* KituraNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_254 /* KituraNet.framework */; };
+		OBJ_645 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_255 /* SwiftyJSON.framework */; };
+		OBJ_646 /* KituraTemplateEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_256 /* KituraTemplateEngine.framework */; };
+		OBJ_647 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_257 /* Kitura.framework */; };
+		OBJ_648 /* MySQL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_258 /* MySQL.framework */; };
+		OBJ_649 /* Gloss.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_259 /* Gloss.framework */; };
+		OBJ_650 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_260 /* Cryptor.framework */; };
+		OBJ_651 /* KituraSession.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_261 /* KituraSession.framework */; };
+		OBJ_652 /* Credentials.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_262 /* Credentials.framework */; };
+		OBJ_653 /* CredentialsGoogle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_263 /* CredentialsGoogle.framework */; };
+		OBJ_654 /* HeliumLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_264 /* HeliumLogger.framework */; };
+		OBJ_655 /* Reflection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_265 /* Reflection.framework */; };
+		OBJ_656 /* Server.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_267 /* Server.framework */; };
+		OBJ_681 /* ServerConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_199 /* ServerConstants.swift */; };
+		OBJ_682 /* ServerMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_200 /* ServerMain.swift */; };
+		OBJ_683 /* ServerRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_201 /* ServerRoutes.swift */; };
+		OBJ_684 /* ServerSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_202 /* ServerSetup.swift */; };
+		OBJ_685 /* Creds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_204 /* Creds.swift */; };
+		OBJ_686 /* GoogleCreds+GoogleDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_205 /* GoogleCreds+GoogleDrive.swift */; };
+		OBJ_687 /* GoogleCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_206 /* GoogleCreds.swift */; };
+		OBJ_688 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_208 /* Constants.swift */; };
+		OBJ_689 /* ControllerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_209 /* ControllerProtocol.swift */; };
+		OBJ_690 /* Controllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_210 /* Controllers.swift */; };
+		OBJ_691 /* FileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_211 /* FileController.swift */; };
+		OBJ_692 /* UserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_212 /* UserController.swift */; };
+		OBJ_693 /* UtilController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_213 /* UtilController.swift */; };
+		OBJ_694 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_215 /* Database.swift */; };
+		OBJ_695 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_216 /* Model.swift */; };
+		OBJ_696 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_217 /* Repository.swift */; };
+		OBJ_697 /* UploadRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_218 /* UploadRepository.swift */; };
 		OBJ_698 /* UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_219 /* UserRepository.swift */; };
 		OBJ_699 /* AddUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_221 /* AddUser.swift */; };
 		OBJ_700 /* CheckCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_222 /* CheckCreds.swift */; };
@@ -314,745 +313,744 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		831DC2BF1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2641E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_269;
 			remoteInfo = PerfectLib;
 		};
-		831DC2C01E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2651E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_285;
 			remoteInfo = SMServerLib;
 		};
-		831DC2C11E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2661E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_269;
 			remoteInfo = PerfectLib;
 		};
-		831DC2C21E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2671E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2C31E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2681E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2C41E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2691E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC2C51E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C26A1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2C61E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C26B1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC2C71E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C26C1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2C81E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C26D1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2C91E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C26E1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC2CA1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C26F1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_334;
 			remoteInfo = KituraNet;
 		};
-		831DC2CB1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2701E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2CC1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2711E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2CD1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2721E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC2CE1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2731E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC2CF1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2741E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_383;
 			remoteInfo = SwiftyJSON;
 		};
-		831DC2D01E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2751E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_391;
 			remoteInfo = KituraTemplateEngine;
 		};
-		831DC2D11E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2761E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_398;
 			remoteInfo = Kitura;
 		};
-		831DC2D21E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2771E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2D31E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2781E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2D41E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2791E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC2D51E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C27A1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC2D61E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C27B1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_334;
 			remoteInfo = KituraNet;
 		};
-		831DC2D71E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C27C1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_383;
 			remoteInfo = SwiftyJSON;
 		};
-		831DC2D81E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C27D1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_391;
 			remoteInfo = KituraTemplateEngine;
 		};
-		831DC2D91E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C27E1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_460;
 			remoteInfo = MySQL;
 		};
-		831DC2DA1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C27F1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_467;
 			remoteInfo = Gloss;
 		};
-		831DC2DB1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2801E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_479;
 			remoteInfo = Cryptor;
 		};
-		831DC2DC1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2811E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_496;
+			remoteGlobalIDString = OBJ_495;
 			remoteInfo = KituraSession;
 		};
-		831DC2DD1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2821E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2DE1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2831E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2DF1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2841E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC2E01E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2851E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC2E11E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2861E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_334;
 			remoteInfo = KituraNet;
 		};
-		831DC2E21E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2871E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_383;
 			remoteInfo = SwiftyJSON;
 		};
-		831DC2E31E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2881E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_391;
 			remoteInfo = KituraTemplateEngine;
 		};
-		831DC2E41E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2891E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_398;
 			remoteInfo = Kitura;
 		};
-		831DC2E51E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C28A1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_479;
 			remoteInfo = Cryptor;
 		};
-		831DC2E61E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C28B1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_528;
+			remoteGlobalIDString = OBJ_527;
 			remoteInfo = Credentials;
 		};
-		831DC2E71E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C28C1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2E81E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C28D1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2E91E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C28E1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC2EA1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C28F1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC2EB1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2901E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_334;
 			remoteInfo = KituraNet;
 		};
-		831DC2EC1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2911E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_383;
 			remoteInfo = SwiftyJSON;
 		};
-		831DC2ED1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2921E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_391;
 			remoteInfo = KituraTemplateEngine;
 		};
-		831DC2EE1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2931E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_398;
 			remoteInfo = Kitura;
 		};
-		831DC2EF1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2941E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_479;
 			remoteInfo = Cryptor;
 		};
-		831DC2F01E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2951E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_496;
+			remoteGlobalIDString = OBJ_495;
 			remoteInfo = KituraSession;
 		};
-		831DC2F11E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2961E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_561;
+			remoteGlobalIDString = OBJ_560;
 			remoteInfo = CredentialsGoogle;
 		};
-		831DC2F21E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2971E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2F31E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2981E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC2F41E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2991E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC2F51E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C29A1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC2F61E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C29B1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_334;
 			remoteInfo = KituraNet;
 		};
-		831DC2F71E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C29C1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_383;
 			remoteInfo = SwiftyJSON;
 		};
-		831DC2F81E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C29D1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_391;
 			remoteInfo = KituraTemplateEngine;
 		};
-		831DC2F91E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C29E1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_398;
 			remoteInfo = Kitura;
 		};
-		831DC2FA1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C29F1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_479;
 			remoteInfo = Cryptor;
 		};
-		831DC2FB1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A01E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_496;
+			remoteGlobalIDString = OBJ_495;
 			remoteInfo = KituraSession;
 		};
-		831DC2FC1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A11E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_528;
+			remoteGlobalIDString = OBJ_527;
 			remoteInfo = Credentials;
 		};
-		831DC2FD1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A21E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_594;
+			remoteGlobalIDString = OBJ_593;
 			remoteInfo = HeliumLogger;
 		};
-		831DC2FE1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A31E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC2FF1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A41E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_603;
+			remoteGlobalIDString = OBJ_602;
 			remoteInfo = Reflection;
 		};
-		831DC3001E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A51E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_677;
+			remoteGlobalIDString = OBJ_676;
 			remoteInfo = Server;
 		};
-		831DC3011E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A61E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_269;
 			remoteInfo = PerfectLib;
 		};
-		831DC3021E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A71E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_285;
 			remoteInfo = SMServerLib;
 		};
-		831DC3031E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A81E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC3041E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2A91E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC3051E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2AA1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC3061E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2AB1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC3071E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2AC1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_334;
 			remoteInfo = KituraNet;
 		};
-		831DC3081E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2AD1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_383;
 			remoteInfo = SwiftyJSON;
 		};
-		831DC3091E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2AE1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_391;
 			remoteInfo = KituraTemplateEngine;
 		};
-		831DC30A1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2AF1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_398;
 			remoteInfo = Kitura;
 		};
-		831DC30B1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B01E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_460;
 			remoteInfo = MySQL;
 		};
-		831DC30C1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B11E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_467;
 			remoteInfo = Gloss;
 		};
-		831DC30D1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B21E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_479;
 			remoteInfo = Cryptor;
 		};
-		831DC30E1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B31E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_496;
+			remoteGlobalIDString = OBJ_495;
 			remoteInfo = KituraSession;
 		};
-		831DC30F1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B41E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_528;
+			remoteGlobalIDString = OBJ_527;
 			remoteInfo = Credentials;
 		};
-		831DC3101E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B51E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_561;
+			remoteGlobalIDString = OBJ_560;
 			remoteInfo = CredentialsGoogle;
 		};
-		831DC3111E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B61E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_594;
+			remoteGlobalIDString = OBJ_593;
 			remoteInfo = HeliumLogger;
 		};
-		831DC3121E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B71E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_603;
+			remoteGlobalIDString = OBJ_602;
 			remoteInfo = Reflection;
 		};
-		831DC3131E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B81E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_269;
 			remoteInfo = PerfectLib;
 		};
-		831DC3141E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2B91E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_285;
 			remoteInfo = SMServerLib;
 		};
-		831DC3151E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2BA1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_294;
 			remoteInfo = LoggerAPI;
 		};
-		831DC3161E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2BB1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_301;
 			remoteInfo = Socket;
 		};
-		831DC3171E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2BC1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_310;
 			remoteInfo = SSLService;
 		};
-		831DC3181E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2BD1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_319;
 			remoteInfo = CHTTPParser;
 		};
-		831DC3191E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2BE1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_334;
 			remoteInfo = KituraNet;
 		};
-		831DC31A1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2BF1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_383;
 			remoteInfo = SwiftyJSON;
 		};
-		831DC31B1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C01E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_391;
 			remoteInfo = KituraTemplateEngine;
 		};
-		831DC31C1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C11E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_398;
 			remoteInfo = Kitura;
 		};
-		831DC31D1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C21E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_460;
 			remoteInfo = MySQL;
 		};
-		831DC31E1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C31E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_467;
 			remoteInfo = Gloss;
 		};
-		831DC31F1E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C41E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_479;
 			remoteInfo = Cryptor;
 		};
-		831DC3201E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C51E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_496;
+			remoteGlobalIDString = OBJ_495;
 			remoteInfo = KituraSession;
 		};
-		831DC3211E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C61E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_528;
+			remoteGlobalIDString = OBJ_527;
 			remoteInfo = Credentials;
 		};
-		831DC3221E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C71E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_561;
+			remoteGlobalIDString = OBJ_560;
 			remoteInfo = CredentialsGoogle;
 		};
-		831DC3231E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C81E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_594;
+			remoteGlobalIDString = OBJ_593;
 			remoteInfo = HeliumLogger;
 		};
-		831DC3241E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2C91E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_603;
+			remoteGlobalIDString = OBJ_602;
 			remoteInfo = Reflection;
 		};
-		831DC3251E2CA97300362CBE /* PBXContainerItemProxy */ = {
+		8342C2CA1E31B0E200C7CD83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = OBJ_677;
+			remoteGlobalIDString = OBJ_676;
 			remoteInfo = Server;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		504DC7E070E94128AA6E2483 /* CopyFiles */ = {
+		10615FC1DA7E2403C73D200E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				749C35C8F7B8969D3DCA623C /* Server.plist in CopyFiles */,
+				940448CF49E79BF14B8D8F87 /* Server.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		831DC3261E2DD2B300362CBE /* UploadRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadRepository.swift; sourceTree = "<group>"; };
-		8F7DABFFA3228B0F1EC051A1 /* Server.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Server.plist; sourceTree = SOURCE_ROOT; };
+		96039AE0FCB0CB2020DF248E /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1095,77 +1093,77 @@
 		OBJ_140 /* HMAC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HMAC.swift; sourceTree = "<group>"; };
 		OBJ_141 /* KeyDerivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDerivation.swift; sourceTree = "<group>"; };
 		OBJ_142 /* Random.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Random.swift; sourceTree = "<group>"; };
-		OBJ_143 /* RSA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSA.swift; sourceTree = "<group>"; };
-		OBJ_144 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
-		OBJ_145 /* StreamCryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCryptor.swift; sourceTree = "<group>"; };
-		OBJ_146 /* Updatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updatable.swift; sourceTree = "<group>"; };
-		OBJ_147 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
-		OBJ_149 /* CookieCryptography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieCryptography.swift; sourceTree = "<group>"; };
+		OBJ_143 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
+		OBJ_144 /* StreamCryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCryptor.swift; sourceTree = "<group>"; };
+		OBJ_145 /* Updatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updatable.swift; sourceTree = "<group>"; };
+		OBJ_146 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		OBJ_148 /* CookieCryptography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieCryptography.swift; sourceTree = "<group>"; };
+		OBJ_149 /* CookieManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieManagement.swift; sourceTree = "<group>"; };
 		OBJ_15 /* PerfectServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfectServer.swift; sourceTree = "<group>"; };
-		OBJ_150 /* CookieManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieManagement.swift; sourceTree = "<group>"; };
-		OBJ_151 /* CookieParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieParameter.swift; sourceTree = "<group>"; };
-		OBJ_152 /* InMemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryStore.swift; sourceTree = "<group>"; };
-		OBJ_153 /* RouterRequest+Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RouterRequest+Session.swift"; sourceTree = "<group>"; };
-		OBJ_154 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
-		OBJ_155 /* SessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionState.swift; sourceTree = "<group>"; };
-		OBJ_156 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
-		OBJ_158 /* AccountSpecificCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSpecificCreds.swift; sourceTree = "<group>"; };
-		OBJ_159 /* BaseCacheElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCacheElement.swift; sourceTree = "<group>"; };
+		OBJ_150 /* CookieParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieParameter.swift; sourceTree = "<group>"; };
+		OBJ_151 /* InMemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryStore.swift; sourceTree = "<group>"; };
+		OBJ_152 /* RouterRequest+Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RouterRequest+Session.swift"; sourceTree = "<group>"; };
+		OBJ_153 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		OBJ_154 /* SessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionState.swift; sourceTree = "<group>"; };
+		OBJ_155 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		OBJ_157 /* AccountSpecificCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSpecificCreds.swift; sourceTree = "<group>"; };
+		OBJ_158 /* BaseCacheElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCacheElement.swift; sourceTree = "<group>"; };
+		OBJ_159 /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		OBJ_16 /* SwiftCompatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCompatibility.swift; sourceTree = "<group>"; };
-		OBJ_160 /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
-		OBJ_161 /* CredentialsPluginProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsPluginProtocol.swift; sourceTree = "<group>"; };
-		OBJ_162 /* RouterRequest+UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RouterRequest+UserProfile.swift"; sourceTree = "<group>"; };
-		OBJ_163 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
-		OBJ_164 /* UserProfileDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileDelegate.swift; sourceTree = "<group>"; };
-		OBJ_166 /* CredentialsGoogle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsGoogle.swift; sourceTree = "<group>"; };
-		OBJ_167 /* CredentialsGoogleOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsGoogleOptions.swift; sourceTree = "<group>"; };
-		OBJ_168 /* CredentialsGoogleToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsGoogleToken.swift; sourceTree = "<group>"; };
-		OBJ_169 /* GoogleSpecificCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSpecificCreds.swift; sourceTree = "<group>"; };
+		OBJ_160 /* CredentialsPluginProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsPluginProtocol.swift; sourceTree = "<group>"; };
+		OBJ_161 /* RouterRequest+UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RouterRequest+UserProfile.swift"; sourceTree = "<group>"; };
+		OBJ_162 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		OBJ_163 /* UserProfileDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileDelegate.swift; sourceTree = "<group>"; };
+		OBJ_165 /* CredentialsGoogle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsGoogle.swift; sourceTree = "<group>"; };
+		OBJ_166 /* CredentialsGoogleOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsGoogleOptions.swift; sourceTree = "<group>"; };
+		OBJ_167 /* CredentialsGoogleToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsGoogleToken.swift; sourceTree = "<group>"; };
+		OBJ_168 /* GoogleSpecificCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSpecificCreds.swift; sourceTree = "<group>"; };
+		OBJ_169 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		OBJ_17 /* SysProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SysProcess.swift; sourceTree = "<group>"; };
-		OBJ_170 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_172 /* HeliumLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliumLogger.swift; sourceTree = "<group>"; };
-		OBJ_174 /* Advance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Advance.swift; sourceTree = "<group>"; };
-		OBJ_175 /* Any+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Any+Extensions.swift"; sourceTree = "<group>"; };
-		OBJ_176 /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
-		OBJ_177 /* Construct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Construct.swift; sourceTree = "<group>"; };
-		OBJ_178 /* Get.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Get.swift; sourceTree = "<group>"; };
-		OBJ_179 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
+		OBJ_171 /* HeliumLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliumLogger.swift; sourceTree = "<group>"; };
+		OBJ_173 /* Advance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Advance.swift; sourceTree = "<group>"; };
+		OBJ_174 /* Any+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Any+Extensions.swift"; sourceTree = "<group>"; };
+		OBJ_175 /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
+		OBJ_176 /* Construct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Construct.swift; sourceTree = "<group>"; };
+		OBJ_177 /* Get.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Get.swift; sourceTree = "<group>"; };
+		OBJ_178 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
+		OBJ_179 /* MemoryProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryProperties.swift; sourceTree = "<group>"; };
 		OBJ_18 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
-		OBJ_180 /* MemoryProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryProperties.swift; sourceTree = "<group>"; };
-		OBJ_181 /* Metadata+Class.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Class.swift"; sourceTree = "<group>"; };
-		OBJ_182 /* Metadata+Kind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Kind.swift"; sourceTree = "<group>"; };
-		OBJ_183 /* Metadata+Struct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Struct.swift"; sourceTree = "<group>"; };
-		OBJ_184 /* Metadata+Tuple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Tuple.swift"; sourceTree = "<group>"; };
-		OBJ_185 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
-		OBJ_186 /* MetadataType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataType.swift; sourceTree = "<group>"; };
-		OBJ_187 /* NominalType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NominalType.swift; sourceTree = "<group>"; };
-		OBJ_188 /* NominalTypeDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NominalTypeDescriptor.swift; sourceTree = "<group>"; };
-		OBJ_189 /* PointerType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerType.swift; sourceTree = "<group>"; };
-		OBJ_190 /* Properties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Properties.swift; sourceTree = "<group>"; };
-		OBJ_191 /* ReflectionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflectionError.swift; sourceTree = "<group>"; };
-		OBJ_192 /* RelativePointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativePointer.swift; sourceTree = "<group>"; };
-		OBJ_193 /* Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
-		OBJ_194 /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
-		OBJ_195 /* UnsafePointer+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnsafePointer+Extensions.swift"; sourceTree = "<group>"; };
-		OBJ_196 /* ValueWitnessTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueWitnessTable.swift; sourceTree = "<group>"; };
-		OBJ_198 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		OBJ_20 /* PlistDictLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistDictLoader.swift; sourceTree = "<group>"; };
-		OBJ_200 /* ServerConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConstants.swift; sourceTree = "<group>"; };
-		OBJ_201 /* ServerMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerMain.swift; sourceTree = "<group>"; };
-		OBJ_202 /* ServerRoutes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerRoutes.swift; sourceTree = "<group>"; };
-		OBJ_203 /* ServerSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSetup.swift; sourceTree = "<group>"; };
-		OBJ_205 /* Creds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Creds.swift; sourceTree = "<group>"; };
-		OBJ_206 /* GoogleCreds+GoogleDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleCreds+GoogleDrive.swift"; sourceTree = "<group>"; };
-		OBJ_207 /* GoogleCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCreds.swift; sourceTree = "<group>"; };
-		OBJ_209 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		OBJ_210 /* ControllerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerProtocol.swift; sourceTree = "<group>"; };
-		OBJ_211 /* Controllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controllers.swift; sourceTree = "<group>"; };
-		OBJ_212 /* FileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController.swift; sourceTree = "<group>"; };
-		OBJ_213 /* UserController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserController.swift; sourceTree = "<group>"; };
-		OBJ_214 /* UtilController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilController.swift; sourceTree = "<group>"; };
-		OBJ_216 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
-		OBJ_217 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
-		OBJ_218 /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
+		OBJ_180 /* Metadata+Class.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Class.swift"; sourceTree = "<group>"; };
+		OBJ_181 /* Metadata+Kind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Kind.swift"; sourceTree = "<group>"; };
+		OBJ_182 /* Metadata+Struct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Struct.swift"; sourceTree = "<group>"; };
+		OBJ_183 /* Metadata+Tuple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Tuple.swift"; sourceTree = "<group>"; };
+		OBJ_184 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
+		OBJ_185 /* MetadataType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataType.swift; sourceTree = "<group>"; };
+		OBJ_186 /* NominalType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NominalType.swift; sourceTree = "<group>"; };
+		OBJ_187 /* NominalTypeDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NominalTypeDescriptor.swift; sourceTree = "<group>"; };
+		OBJ_188 /* PointerType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerType.swift; sourceTree = "<group>"; };
+		OBJ_189 /* Properties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Properties.swift; sourceTree = "<group>"; };
+		OBJ_190 /* ReflectionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflectionError.swift; sourceTree = "<group>"; };
+		OBJ_191 /* RelativePointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativePointer.swift; sourceTree = "<group>"; };
+		OBJ_192 /* Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
+		OBJ_193 /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
+		OBJ_194 /* UnsafePointer+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnsafePointer+Extensions.swift"; sourceTree = "<group>"; };
+		OBJ_195 /* ValueWitnessTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueWitnessTable.swift; sourceTree = "<group>"; };
+		OBJ_197 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		OBJ_199 /* ServerConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConstants.swift; sourceTree = "<group>"; };
+		OBJ_20 /* ConfigLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigLoader.swift; sourceTree = "<group>"; };
+		OBJ_200 /* ServerMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerMain.swift; sourceTree = "<group>"; };
+		OBJ_201 /* ServerRoutes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerRoutes.swift; sourceTree = "<group>"; };
+		OBJ_202 /* ServerSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSetup.swift; sourceTree = "<group>"; };
+		OBJ_204 /* Creds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Creds.swift; sourceTree = "<group>"; };
+		OBJ_205 /* GoogleCreds+GoogleDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleCreds+GoogleDrive.swift"; sourceTree = "<group>"; };
+		OBJ_206 /* GoogleCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCreds.swift; sourceTree = "<group>"; };
+		OBJ_208 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		OBJ_209 /* ControllerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerProtocol.swift; sourceTree = "<group>"; };
+		OBJ_210 /* Controllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controllers.swift; sourceTree = "<group>"; };
+		OBJ_211 /* FileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController.swift; sourceTree = "<group>"; };
+		OBJ_212 /* UserController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserController.swift; sourceTree = "<group>"; };
+		OBJ_213 /* UtilController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilController.swift; sourceTree = "<group>"; };
+		OBJ_215 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
+		OBJ_216 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		OBJ_217 /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
+		OBJ_218 /* UploadRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadRepository.swift; sourceTree = "<group>"; };
 		OBJ_219 /* UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
 		OBJ_22 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		OBJ_221 /* AddUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUser.swift; sourceTree = "<group>"; };
@@ -1382,102 +1380,102 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_495 /* Frameworks */ = {
+		OBJ_494 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_509 /* Frameworks */ = {
+		OBJ_508 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_510 /* LoggerAPI.framework in Frameworks */,
-				OBJ_511 /* Socket.framework in Frameworks */,
-				OBJ_512 /* SSLService.framework in Frameworks */,
-				OBJ_513 /* CHTTPParser.framework in Frameworks */,
-				OBJ_514 /* KituraNet.framework in Frameworks */,
-				OBJ_515 /* SwiftyJSON.framework in Frameworks */,
-				OBJ_516 /* KituraTemplateEngine.framework in Frameworks */,
-				OBJ_517 /* Kitura.framework in Frameworks */,
-				OBJ_518 /* Cryptor.framework in Frameworks */,
+				OBJ_509 /* LoggerAPI.framework in Frameworks */,
+				OBJ_510 /* Socket.framework in Frameworks */,
+				OBJ_511 /* SSLService.framework in Frameworks */,
+				OBJ_512 /* CHTTPParser.framework in Frameworks */,
+				OBJ_513 /* KituraNet.framework in Frameworks */,
+				OBJ_514 /* SwiftyJSON.framework in Frameworks */,
+				OBJ_515 /* KituraTemplateEngine.framework in Frameworks */,
+				OBJ_516 /* Kitura.framework in Frameworks */,
+				OBJ_517 /* Cryptor.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_540 /* Frameworks */ = {
+		OBJ_539 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_541 /* LoggerAPI.framework in Frameworks */,
-				OBJ_542 /* Socket.framework in Frameworks */,
-				OBJ_543 /* SSLService.framework in Frameworks */,
-				OBJ_544 /* CHTTPParser.framework in Frameworks */,
-				OBJ_545 /* KituraNet.framework in Frameworks */,
-				OBJ_546 /* SwiftyJSON.framework in Frameworks */,
-				OBJ_547 /* KituraTemplateEngine.framework in Frameworks */,
-				OBJ_548 /* Kitura.framework in Frameworks */,
-				OBJ_549 /* Cryptor.framework in Frameworks */,
-				OBJ_550 /* KituraSession.framework in Frameworks */,
+				OBJ_540 /* LoggerAPI.framework in Frameworks */,
+				OBJ_541 /* Socket.framework in Frameworks */,
+				OBJ_542 /* SSLService.framework in Frameworks */,
+				OBJ_543 /* CHTTPParser.framework in Frameworks */,
+				OBJ_544 /* KituraNet.framework in Frameworks */,
+				OBJ_545 /* SwiftyJSON.framework in Frameworks */,
+				OBJ_546 /* KituraTemplateEngine.framework in Frameworks */,
+				OBJ_547 /* Kitura.framework in Frameworks */,
+				OBJ_548 /* Cryptor.framework in Frameworks */,
+				OBJ_549 /* KituraSession.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_571 /* Frameworks */ = {
+		OBJ_570 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_572 /* LoggerAPI.framework in Frameworks */,
-				OBJ_573 /* Socket.framework in Frameworks */,
-				OBJ_574 /* SSLService.framework in Frameworks */,
-				OBJ_575 /* CHTTPParser.framework in Frameworks */,
-				OBJ_576 /* KituraNet.framework in Frameworks */,
-				OBJ_577 /* SwiftyJSON.framework in Frameworks */,
-				OBJ_578 /* KituraTemplateEngine.framework in Frameworks */,
-				OBJ_579 /* Kitura.framework in Frameworks */,
-				OBJ_580 /* Cryptor.framework in Frameworks */,
-				OBJ_581 /* KituraSession.framework in Frameworks */,
-				OBJ_582 /* Credentials.framework in Frameworks */,
+				OBJ_571 /* LoggerAPI.framework in Frameworks */,
+				OBJ_572 /* Socket.framework in Frameworks */,
+				OBJ_573 /* SSLService.framework in Frameworks */,
+				OBJ_574 /* CHTTPParser.framework in Frameworks */,
+				OBJ_575 /* KituraNet.framework in Frameworks */,
+				OBJ_576 /* SwiftyJSON.framework in Frameworks */,
+				OBJ_577 /* KituraTemplateEngine.framework in Frameworks */,
+				OBJ_578 /* Kitura.framework in Frameworks */,
+				OBJ_579 /* Cryptor.framework in Frameworks */,
+				OBJ_580 /* KituraSession.framework in Frameworks */,
+				OBJ_581 /* Credentials.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_600 /* Frameworks */ = {
+		OBJ_599 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_601 /* LoggerAPI.framework in Frameworks */,
+				OBJ_600 /* LoggerAPI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_631 /* Frameworks */ = {
+		OBJ_630 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_638 /* Frameworks */ = {
+		OBJ_637 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_639 /* PerfectLib.framework in Frameworks */,
-				OBJ_640 /* SMServerLib.framework in Frameworks */,
-				OBJ_641 /* LoggerAPI.framework in Frameworks */,
-				OBJ_642 /* Socket.framework in Frameworks */,
-				OBJ_643 /* SSLService.framework in Frameworks */,
-				OBJ_644 /* CHTTPParser.framework in Frameworks */,
-				OBJ_645 /* KituraNet.framework in Frameworks */,
-				OBJ_646 /* SwiftyJSON.framework in Frameworks */,
-				OBJ_647 /* KituraTemplateEngine.framework in Frameworks */,
-				OBJ_648 /* Kitura.framework in Frameworks */,
-				OBJ_649 /* MySQL.framework in Frameworks */,
-				OBJ_650 /* Gloss.framework in Frameworks */,
-				OBJ_651 /* Cryptor.framework in Frameworks */,
-				OBJ_652 /* KituraSession.framework in Frameworks */,
-				OBJ_653 /* Credentials.framework in Frameworks */,
-				OBJ_654 /* CredentialsGoogle.framework in Frameworks */,
-				OBJ_655 /* HeliumLogger.framework in Frameworks */,
-				OBJ_656 /* Reflection.framework in Frameworks */,
-				OBJ_657 /* Server.framework in Frameworks */,
+				OBJ_638 /* PerfectLib.framework in Frameworks */,
+				OBJ_639 /* SMServerLib.framework in Frameworks */,
+				OBJ_640 /* LoggerAPI.framework in Frameworks */,
+				OBJ_641 /* Socket.framework in Frameworks */,
+				OBJ_642 /* SSLService.framework in Frameworks */,
+				OBJ_643 /* CHTTPParser.framework in Frameworks */,
+				OBJ_644 /* KituraNet.framework in Frameworks */,
+				OBJ_645 /* SwiftyJSON.framework in Frameworks */,
+				OBJ_646 /* KituraTemplateEngine.framework in Frameworks */,
+				OBJ_647 /* Kitura.framework in Frameworks */,
+				OBJ_648 /* MySQL.framework in Frameworks */,
+				OBJ_649 /* Gloss.framework in Frameworks */,
+				OBJ_650 /* Cryptor.framework in Frameworks */,
+				OBJ_651 /* KituraSession.framework in Frameworks */,
+				OBJ_652 /* Credentials.framework in Frameworks */,
+				OBJ_653 /* CredentialsGoogle.framework in Frameworks */,
+				OBJ_654 /* HeliumLogger.framework in Frameworks */,
+				OBJ_655 /* Reflection.framework in Frameworks */,
+				OBJ_656 /* Server.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1605,95 +1603,94 @@
 				OBJ_140 /* HMAC.swift */,
 				OBJ_141 /* KeyDerivation.swift */,
 				OBJ_142 /* Random.swift */,
-				OBJ_143 /* RSA.swift */,
-				OBJ_144 /* Status.swift */,
-				OBJ_145 /* StreamCryptor.swift */,
-				OBJ_146 /* Updatable.swift */,
-				OBJ_147 /* Utilities.swift */,
+				OBJ_143 /* Status.swift */,
+				OBJ_144 /* StreamCryptor.swift */,
+				OBJ_145 /* Updatable.swift */,
+				OBJ_146 /* Utilities.swift */,
 			);
 			name = Cryptor;
-			path = "Packages/Cryptor-0.8.6/Sources";
+			path = "Packages/Cryptor-0.8.7/Sources";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_148 /* KituraSession */ = {
+		OBJ_147 /* KituraSession */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_149 /* CookieCryptography.swift */,
-				OBJ_150 /* CookieManagement.swift */,
-				OBJ_151 /* CookieParameter.swift */,
-				OBJ_152 /* InMemoryStore.swift */,
-				OBJ_153 /* RouterRequest+Session.swift */,
-				OBJ_154 /* Session.swift */,
-				OBJ_155 /* SessionState.swift */,
-				OBJ_156 /* Store.swift */,
+				OBJ_148 /* CookieCryptography.swift */,
+				OBJ_149 /* CookieManagement.swift */,
+				OBJ_150 /* CookieParameter.swift */,
+				OBJ_151 /* InMemoryStore.swift */,
+				OBJ_152 /* RouterRequest+Session.swift */,
+				OBJ_153 /* Session.swift */,
+				OBJ_154 /* SessionState.swift */,
+				OBJ_155 /* Store.swift */,
 			);
 			name = KituraSession;
 			path = "Packages/Kitura-Session-1.4.0/Sources/KituraSession";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_157 /* Credentials */ = {
+		OBJ_156 /* Credentials */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_158 /* AccountSpecificCreds.swift */,
-				OBJ_159 /* BaseCacheElement.swift */,
-				OBJ_160 /* Credentials.swift */,
-				OBJ_161 /* CredentialsPluginProtocol.swift */,
-				OBJ_162 /* RouterRequest+UserProfile.swift */,
-				OBJ_163 /* UserProfile.swift */,
-				OBJ_164 /* UserProfileDelegate.swift */,
+				OBJ_157 /* AccountSpecificCreds.swift */,
+				OBJ_158 /* BaseCacheElement.swift */,
+				OBJ_159 /* Credentials.swift */,
+				OBJ_160 /* CredentialsPluginProtocol.swift */,
+				OBJ_161 /* RouterRequest+UserProfile.swift */,
+				OBJ_162 /* UserProfile.swift */,
+				OBJ_163 /* UserProfileDelegate.swift */,
 			);
 			name = Credentials;
 			path = "Packages/Kitura-Credentials-1.4.1/Sources/Credentials";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_165 /* CredentialsGoogle */ = {
+		OBJ_164 /* CredentialsGoogle */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_166 /* CredentialsGoogle.swift */,
-				OBJ_167 /* CredentialsGoogleOptions.swift */,
-				OBJ_168 /* CredentialsGoogleToken.swift */,
-				OBJ_169 /* GoogleSpecificCreds.swift */,
-				OBJ_170 /* Utils.swift */,
+				OBJ_165 /* CredentialsGoogle.swift */,
+				OBJ_166 /* CredentialsGoogleOptions.swift */,
+				OBJ_167 /* CredentialsGoogleToken.swift */,
+				OBJ_168 /* GoogleSpecificCreds.swift */,
+				OBJ_169 /* Utils.swift */,
 			);
 			name = CredentialsGoogle;
 			path = "Packages/Kitura-CredentialsGoogle-1.4.1/Sources/CredentialsGoogle";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_171 /* HeliumLogger */ = {
+		OBJ_170 /* HeliumLogger */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_172 /* HeliumLogger.swift */,
+				OBJ_171 /* HeliumLogger.swift */,
 			);
 			name = HeliumLogger;
 			path = "Packages/HeliumLogger-1.4.0/Sources/HeliumLogger";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_173 /* Reflection */ = {
+		OBJ_172 /* Reflection */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_174 /* Advance.swift */,
-				OBJ_175 /* Any+Extensions.swift */,
-				OBJ_176 /* Array+Extensions.swift */,
-				OBJ_177 /* Construct.swift */,
-				OBJ_178 /* Get.swift */,
-				OBJ_179 /* Identity.swift */,
-				OBJ_180 /* MemoryProperties.swift */,
-				OBJ_181 /* Metadata+Class.swift */,
-				OBJ_182 /* Metadata+Kind.swift */,
-				OBJ_183 /* Metadata+Struct.swift */,
-				OBJ_184 /* Metadata+Tuple.swift */,
-				OBJ_185 /* Metadata.swift */,
-				OBJ_186 /* MetadataType.swift */,
-				OBJ_187 /* NominalType.swift */,
-				OBJ_188 /* NominalTypeDescriptor.swift */,
-				OBJ_189 /* PointerType.swift */,
-				OBJ_190 /* Properties.swift */,
-				OBJ_191 /* ReflectionError.swift */,
-				OBJ_192 /* RelativePointer.swift */,
-				OBJ_193 /* Set.swift */,
-				OBJ_194 /* Storage.swift */,
-				OBJ_195 /* UnsafePointer+Extensions.swift */,
-				OBJ_196 /* ValueWitnessTable.swift */,
+				OBJ_173 /* Advance.swift */,
+				OBJ_174 /* Any+Extensions.swift */,
+				OBJ_175 /* Array+Extensions.swift */,
+				OBJ_176 /* Construct.swift */,
+				OBJ_177 /* Get.swift */,
+				OBJ_178 /* Identity.swift */,
+				OBJ_179 /* MemoryProperties.swift */,
+				OBJ_180 /* Metadata+Class.swift */,
+				OBJ_181 /* Metadata+Kind.swift */,
+				OBJ_182 /* Metadata+Struct.swift */,
+				OBJ_183 /* Metadata+Tuple.swift */,
+				OBJ_184 /* Metadata.swift */,
+				OBJ_185 /* MetadataType.swift */,
+				OBJ_186 /* NominalType.swift */,
+				OBJ_187 /* NominalTypeDescriptor.swift */,
+				OBJ_188 /* PointerType.swift */,
+				OBJ_189 /* Properties.swift */,
+				OBJ_190 /* ReflectionError.swift */,
+				OBJ_191 /* RelativePointer.swift */,
+				OBJ_192 /* Set.swift */,
+				OBJ_193 /* Storage.swift */,
+				OBJ_194 /* UnsafePointer+Extensions.swift */,
+				OBJ_195 /* ValueWitnessTable.swift */,
 			);
 			name = Reflection;
 			path = "Packages/Reflection-0.14.3/Sources/Reflection";
@@ -1702,31 +1699,31 @@
 		OBJ_19 /* SMServerLib */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_20 /* PlistDictLoader.swift */,
+				OBJ_20 /* ConfigLoader.swift */,
 			);
 			name = SMServerLib;
-			path = "Packages/SMServerLib-0.0.2/Sources";
+			path = "Packages/SMServerLib-0.0.3/Sources";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_197 /* Main */ = {
+		OBJ_196 /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_198 /* main.swift */,
+				OBJ_197 /* main.swift */,
 			);
 			name = Main;
 			path = Sources/Main;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_199 /* Server */ = {
+		OBJ_198 /* Server */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_200 /* ServerConstants.swift */,
-				OBJ_201 /* ServerMain.swift */,
-				OBJ_202 /* ServerRoutes.swift */,
-				OBJ_203 /* ServerSetup.swift */,
-				OBJ_204 /* Account Specifics */,
-				OBJ_208 /* Controllers */,
-				OBJ_215 /* Database */,
+				OBJ_199 /* ServerConstants.swift */,
+				OBJ_200 /* ServerMain.swift */,
+				OBJ_201 /* ServerRoutes.swift */,
+				OBJ_202 /* ServerSetup.swift */,
+				OBJ_203 /* Account Specifics */,
+				OBJ_207 /* Controllers */,
+				OBJ_214 /* Database */,
 				OBJ_220 /* Requests and responses */,
 				OBJ_229 /* Utils */,
 			);
@@ -1734,25 +1731,25 @@
 			path = Sources/Server;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_204 /* Account Specifics */ = {
+		OBJ_203 /* Account Specifics */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_205 /* Creds.swift */,
-				OBJ_206 /* GoogleCreds+GoogleDrive.swift */,
-				OBJ_207 /* GoogleCreds.swift */,
+				OBJ_204 /* Creds.swift */,
+				OBJ_205 /* GoogleCreds+GoogleDrive.swift */,
+				OBJ_206 /* GoogleCreds.swift */,
 			);
 			path = "Account Specifics";
 			sourceTree = "<group>";
 		};
-		OBJ_208 /* Controllers */ = {
+		OBJ_207 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_209 /* Constants.swift */,
-				OBJ_210 /* ControllerProtocol.swift */,
-				OBJ_211 /* Controllers.swift */,
-				OBJ_212 /* FileController.swift */,
-				OBJ_213 /* UserController.swift */,
-				OBJ_214 /* UtilController.swift */,
+				OBJ_208 /* Constants.swift */,
+				OBJ_209 /* ControllerProtocol.swift */,
+				OBJ_210 /* Controllers.swift */,
+				OBJ_211 /* FileController.swift */,
+				OBJ_212 /* UserController.swift */,
+				OBJ_213 /* UtilController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -1766,14 +1763,14 @@
 			path = "Packages/LoggerAPI-1.4.0/Sources/LoggerAPI";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_215 /* Database */ = {
+		OBJ_214 /* Database */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_216 /* Database.swift */,
-				OBJ_217 /* Model.swift */,
-				OBJ_218 /* Repository.swift */,
+				OBJ_215 /* Database.swift */,
+				OBJ_216 /* Model.swift */,
+				OBJ_217 /* Repository.swift */,
+				OBJ_218 /* UploadRepository.swift */,
 				OBJ_219 /* UserRepository.swift */,
-				831DC3261E2DD2B300362CBE /* UploadRepository.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -1810,7 +1807,7 @@
 				OBJ_26 /* SocketUtils.swift */,
 			);
 			name = Socket;
-			path = "Packages/Socket-0.12.17/Sources";
+			path = "Packages/Socket-0.12.21/Sources";
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_232 /* Tests */ = {
@@ -1874,7 +1871,7 @@
 				OBJ_28 /* SSLService.swift */,
 			);
 			name = SSLService;
-			path = "Packages/SSLService-0.12.11/Sources";
+			path = "Packages/SSLService-0.12.18/Sources";
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_29 /* CHTTPParser */ = {
@@ -1990,13 +1987,13 @@
 				OBJ_127 /* MySQL */,
 				OBJ_129 /* Gloss */,
 				OBJ_136 /* Cryptor */,
-				OBJ_148 /* KituraSession */,
-				OBJ_157 /* Credentials */,
-				OBJ_165 /* CredentialsGoogle */,
-				OBJ_171 /* HeliumLogger */,
-				OBJ_173 /* Reflection */,
-				OBJ_197 /* Main */,
-				OBJ_199 /* Server */,
+				OBJ_147 /* KituraSession */,
+				OBJ_156 /* Credentials */,
+				OBJ_164 /* CredentialsGoogle */,
+				OBJ_170 /* HeliumLogger */,
+				OBJ_172 /* Reflection */,
+				OBJ_196 /* Main */,
+				OBJ_198 /* Server */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -2020,7 +2017,7 @@
 				OBJ_78 /* SwiftyJSON.swift */,
 			);
 			name = SwiftyJSON;
-			path = "Packages/SwiftyJSON-15.0.4/Source";
+			path = "Packages/SwiftyJSON-15.0.5/Source";
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_79 /* KituraTemplateEngine */ = {
@@ -2047,7 +2044,7 @@
 				OBJ_18 /* Utilities.swift */,
 			);
 			name = PerfectLib;
-			path = "Packages/PerfectLib-2.0.5/Sources/PerfectLib";
+			path = "Packages/PerfectLib-2.0.6/Sources/PerfectLib";
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_81 /* Kitura */ = {
@@ -2083,7 +2080,7 @@
 				OBJ_120 /* staticFileServer */,
 			);
 			name = Kitura;
-			path = "Packages/Kitura-1.4.3/Sources/Kitura";
+			path = "Packages/Kitura-1.4.4/Sources/Kitura";
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
@@ -2303,7 +2300,7 @@
 			buildConfigurationList = OBJ_480 /* Build configuration list for PBXNativeTarget "Cryptor" */;
 			buildPhases = (
 				OBJ_483 /* Sources */,
-				OBJ_495 /* Frameworks */,
+				OBJ_494 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2314,16 +2311,17 @@
 			productReference = OBJ_260 /* Cryptor.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		OBJ_496 /* KituraSession */ = {
+		OBJ_495 /* KituraSession */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_497 /* Build configuration list for PBXNativeTarget "KituraSession" */;
+			buildConfigurationList = OBJ_496 /* Build configuration list for PBXNativeTarget "KituraSession" */;
 			buildPhases = (
-				OBJ_500 /* Sources */,
-				OBJ_509 /* Frameworks */,
+				OBJ_499 /* Sources */,
+				OBJ_508 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				OBJ_518 /* PBXTargetDependency */,
 				OBJ_519 /* PBXTargetDependency */,
 				OBJ_520 /* PBXTargetDependency */,
 				OBJ_521 /* PBXTargetDependency */,
@@ -2332,23 +2330,23 @@
 				OBJ_524 /* PBXTargetDependency */,
 				OBJ_525 /* PBXTargetDependency */,
 				OBJ_526 /* PBXTargetDependency */,
-				OBJ_527 /* PBXTargetDependency */,
 			);
 			name = KituraSession;
 			productName = KituraSession;
 			productReference = OBJ_261 /* KituraSession.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		OBJ_528 /* Credentials */ = {
+		OBJ_527 /* Credentials */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_529 /* Build configuration list for PBXNativeTarget "Credentials" */;
+			buildConfigurationList = OBJ_528 /* Build configuration list for PBXNativeTarget "Credentials" */;
 			buildPhases = (
-				OBJ_532 /* Sources */,
-				OBJ_540 /* Frameworks */,
+				OBJ_531 /* Sources */,
+				OBJ_539 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				OBJ_550 /* PBXTargetDependency */,
 				OBJ_551 /* PBXTargetDependency */,
 				OBJ_552 /* PBXTargetDependency */,
 				OBJ_553 /* PBXTargetDependency */,
@@ -2358,23 +2356,23 @@
 				OBJ_557 /* PBXTargetDependency */,
 				OBJ_558 /* PBXTargetDependency */,
 				OBJ_559 /* PBXTargetDependency */,
-				OBJ_560 /* PBXTargetDependency */,
 			);
 			name = Credentials;
 			productName = Credentials;
 			productReference = OBJ_262 /* Credentials.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		OBJ_561 /* CredentialsGoogle */ = {
+		OBJ_560 /* CredentialsGoogle */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_562 /* Build configuration list for PBXNativeTarget "CredentialsGoogle" */;
+			buildConfigurationList = OBJ_561 /* Build configuration list for PBXNativeTarget "CredentialsGoogle" */;
 			buildPhases = (
-				OBJ_565 /* Sources */,
-				OBJ_571 /* Frameworks */,
+				OBJ_564 /* Sources */,
+				OBJ_570 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				OBJ_582 /* PBXTargetDependency */,
 				OBJ_583 /* PBXTargetDependency */,
 				OBJ_584 /* PBXTargetDependency */,
 				OBJ_585 /* PBXTargetDependency */,
@@ -2385,36 +2383,35 @@
 				OBJ_590 /* PBXTargetDependency */,
 				OBJ_591 /* PBXTargetDependency */,
 				OBJ_592 /* PBXTargetDependency */,
-				OBJ_593 /* PBXTargetDependency */,
 			);
 			name = CredentialsGoogle;
 			productName = CredentialsGoogle;
 			productReference = OBJ_263 /* CredentialsGoogle.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		OBJ_594 /* HeliumLogger */ = {
+		OBJ_593 /* HeliumLogger */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_595 /* Build configuration list for PBXNativeTarget "HeliumLogger" */;
+			buildConfigurationList = OBJ_594 /* Build configuration list for PBXNativeTarget "HeliumLogger" */;
 			buildPhases = (
-				OBJ_598 /* Sources */,
-				OBJ_600 /* Frameworks */,
+				OBJ_597 /* Sources */,
+				OBJ_599 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				OBJ_602 /* PBXTargetDependency */,
+				OBJ_601 /* PBXTargetDependency */,
 			);
 			name = HeliumLogger;
 			productName = HeliumLogger;
 			productReference = OBJ_264 /* HeliumLogger.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		OBJ_603 /* Reflection */ = {
+		OBJ_602 /* Reflection */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_604 /* Build configuration list for PBXNativeTarget "Reflection" */;
+			buildConfigurationList = OBJ_603 /* Build configuration list for PBXNativeTarget "Reflection" */;
 			buildPhases = (
-				OBJ_607 /* Sources */,
-				OBJ_631 /* Frameworks */,
+				OBJ_606 /* Sources */,
+				OBJ_630 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2425,16 +2422,17 @@
 			productReference = OBJ_265 /* Reflection.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		OBJ_632 /* Main */ = {
+		OBJ_631 /* Main */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_633 /* Build configuration list for PBXNativeTarget "Main" */;
+			buildConfigurationList = OBJ_632 /* Build configuration list for PBXNativeTarget "Main" */;
 			buildPhases = (
-				OBJ_636 /* Sources */,
-				OBJ_638 /* Frameworks */,
+				OBJ_635 /* Sources */,
+				OBJ_637 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				OBJ_657 /* PBXTargetDependency */,
 				OBJ_658 /* PBXTargetDependency */,
 				OBJ_659 /* PBXTargetDependency */,
 				OBJ_660 /* PBXTargetDependency */,
@@ -2453,20 +2451,19 @@
 				OBJ_673 /* PBXTargetDependency */,
 				OBJ_674 /* PBXTargetDependency */,
 				OBJ_675 /* PBXTargetDependency */,
-				OBJ_676 /* PBXTargetDependency */,
 			);
 			name = Main;
 			productName = Main;
 			productReference = OBJ_266 /* Main */;
 			productType = "com.apple.product-type.tool";
 		};
-		OBJ_677 /* Server */ = {
+		OBJ_676 /* Server */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_678 /* Build configuration list for PBXNativeTarget "Server" */;
+			buildConfigurationList = OBJ_677 /* Build configuration list for PBXNativeTarget "Server" */;
 			buildPhases = (
-				OBJ_681 /* Sources */,
+				OBJ_680 /* Sources */,
 				OBJ_709 /* Frameworks */,
-				504DC7E070E94128AA6E2483 /* CopyFiles */,
+				10615FC1DA7E2403C73D200E /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -2501,7 +2498,7 @@
 			buildPhases = (
 				OBJ_750 /* Sources */,
 				OBJ_762 /* Frameworks */,
-				C68623F3A01E13A521AE0986 /* ShellScript */,
+				A0EB54C02214CED698717512 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -2564,20 +2561,20 @@
 				OBJ_460 /* MySQL */,
 				OBJ_467 /* Gloss */,
 				OBJ_479 /* Cryptor */,
-				OBJ_496 /* KituraSession */,
-				OBJ_528 /* Credentials */,
-				OBJ_561 /* CredentialsGoogle */,
-				OBJ_594 /* HeliumLogger */,
-				OBJ_603 /* Reflection */,
-				OBJ_632 /* Main */,
-				OBJ_677 /* Server */,
+				OBJ_495 /* KituraSession */,
+				OBJ_527 /* Credentials */,
+				OBJ_560 /* CredentialsGoogle */,
+				OBJ_593 /* HeliumLogger */,
+				OBJ_602 /* Reflection */,
+				OBJ_631 /* Main */,
+				OBJ_676 /* Server */,
 				OBJ_746 /* ServerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		C68623F3A01E13A521AE0986 /* ShellScript */ = {
+		A0EB54C02214CED698717512 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2588,7 +2585,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp Server.plist /tmp; cp Resources/Cat.jpg /tmp";
+			shellScript = "cp Server.json /tmp; cp Resources/Cat.jpg /tmp";
 		};
 		OBJ_323 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2623,7 +2620,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_290 /* PlistDictLoader.swift in Sources */,
+				OBJ_290 /* ConfigLoader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2801,122 +2798,121 @@
 				OBJ_487 /* HMAC.swift in Sources */,
 				OBJ_488 /* KeyDerivation.swift in Sources */,
 				OBJ_489 /* Random.swift in Sources */,
-				OBJ_490 /* RSA.swift in Sources */,
-				OBJ_491 /* Status.swift in Sources */,
-				OBJ_492 /* StreamCryptor.swift in Sources */,
-				OBJ_493 /* Updatable.swift in Sources */,
-				OBJ_494 /* Utilities.swift in Sources */,
+				OBJ_490 /* Status.swift in Sources */,
+				OBJ_491 /* StreamCryptor.swift in Sources */,
+				OBJ_492 /* Updatable.swift in Sources */,
+				OBJ_493 /* Utilities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_500 /* Sources */ = {
+		OBJ_499 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_501 /* CookieCryptography.swift in Sources */,
-				OBJ_502 /* CookieManagement.swift in Sources */,
-				OBJ_503 /* CookieParameter.swift in Sources */,
-				OBJ_504 /* InMemoryStore.swift in Sources */,
-				OBJ_505 /* RouterRequest+Session.swift in Sources */,
-				OBJ_506 /* Session.swift in Sources */,
-				OBJ_507 /* SessionState.swift in Sources */,
-				OBJ_508 /* Store.swift in Sources */,
+				OBJ_500 /* CookieCryptography.swift in Sources */,
+				OBJ_501 /* CookieManagement.swift in Sources */,
+				OBJ_502 /* CookieParameter.swift in Sources */,
+				OBJ_503 /* InMemoryStore.swift in Sources */,
+				OBJ_504 /* RouterRequest+Session.swift in Sources */,
+				OBJ_505 /* Session.swift in Sources */,
+				OBJ_506 /* SessionState.swift in Sources */,
+				OBJ_507 /* Store.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_532 /* Sources */ = {
+		OBJ_531 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_533 /* AccountSpecificCreds.swift in Sources */,
-				OBJ_534 /* BaseCacheElement.swift in Sources */,
-				OBJ_535 /* Credentials.swift in Sources */,
-				OBJ_536 /* CredentialsPluginProtocol.swift in Sources */,
-				OBJ_537 /* RouterRequest+UserProfile.swift in Sources */,
-				OBJ_538 /* UserProfile.swift in Sources */,
-				OBJ_539 /* UserProfileDelegate.swift in Sources */,
+				OBJ_532 /* AccountSpecificCreds.swift in Sources */,
+				OBJ_533 /* BaseCacheElement.swift in Sources */,
+				OBJ_534 /* Credentials.swift in Sources */,
+				OBJ_535 /* CredentialsPluginProtocol.swift in Sources */,
+				OBJ_536 /* RouterRequest+UserProfile.swift in Sources */,
+				OBJ_537 /* UserProfile.swift in Sources */,
+				OBJ_538 /* UserProfileDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_565 /* Sources */ = {
+		OBJ_564 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_566 /* CredentialsGoogle.swift in Sources */,
-				OBJ_567 /* CredentialsGoogleOptions.swift in Sources */,
-				OBJ_568 /* CredentialsGoogleToken.swift in Sources */,
-				OBJ_569 /* GoogleSpecificCreds.swift in Sources */,
-				OBJ_570 /* Utils.swift in Sources */,
+				OBJ_565 /* CredentialsGoogle.swift in Sources */,
+				OBJ_566 /* CredentialsGoogleOptions.swift in Sources */,
+				OBJ_567 /* CredentialsGoogleToken.swift in Sources */,
+				OBJ_568 /* GoogleSpecificCreds.swift in Sources */,
+				OBJ_569 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_598 /* Sources */ = {
+		OBJ_597 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_599 /* HeliumLogger.swift in Sources */,
+				OBJ_598 /* HeliumLogger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_607 /* Sources */ = {
+		OBJ_606 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_608 /* Advance.swift in Sources */,
-				OBJ_609 /* Any+Extensions.swift in Sources */,
-				OBJ_610 /* Array+Extensions.swift in Sources */,
-				OBJ_611 /* Construct.swift in Sources */,
-				OBJ_612 /* Get.swift in Sources */,
-				OBJ_613 /* Identity.swift in Sources */,
-				OBJ_614 /* MemoryProperties.swift in Sources */,
-				OBJ_615 /* Metadata+Class.swift in Sources */,
-				OBJ_616 /* Metadata+Kind.swift in Sources */,
-				OBJ_617 /* Metadata+Struct.swift in Sources */,
-				OBJ_618 /* Metadata+Tuple.swift in Sources */,
-				OBJ_619 /* Metadata.swift in Sources */,
-				OBJ_620 /* MetadataType.swift in Sources */,
-				OBJ_621 /* NominalType.swift in Sources */,
-				OBJ_622 /* NominalTypeDescriptor.swift in Sources */,
-				OBJ_623 /* PointerType.swift in Sources */,
-				OBJ_624 /* Properties.swift in Sources */,
-				OBJ_625 /* ReflectionError.swift in Sources */,
-				OBJ_626 /* RelativePointer.swift in Sources */,
-				OBJ_627 /* Set.swift in Sources */,
-				OBJ_628 /* Storage.swift in Sources */,
-				OBJ_629 /* UnsafePointer+Extensions.swift in Sources */,
-				OBJ_630 /* ValueWitnessTable.swift in Sources */,
+				OBJ_607 /* Advance.swift in Sources */,
+				OBJ_608 /* Any+Extensions.swift in Sources */,
+				OBJ_609 /* Array+Extensions.swift in Sources */,
+				OBJ_610 /* Construct.swift in Sources */,
+				OBJ_611 /* Get.swift in Sources */,
+				OBJ_612 /* Identity.swift in Sources */,
+				OBJ_613 /* MemoryProperties.swift in Sources */,
+				OBJ_614 /* Metadata+Class.swift in Sources */,
+				OBJ_615 /* Metadata+Kind.swift in Sources */,
+				OBJ_616 /* Metadata+Struct.swift in Sources */,
+				OBJ_617 /* Metadata+Tuple.swift in Sources */,
+				OBJ_618 /* Metadata.swift in Sources */,
+				OBJ_619 /* MetadataType.swift in Sources */,
+				OBJ_620 /* NominalType.swift in Sources */,
+				OBJ_621 /* NominalTypeDescriptor.swift in Sources */,
+				OBJ_622 /* PointerType.swift in Sources */,
+				OBJ_623 /* Properties.swift in Sources */,
+				OBJ_624 /* ReflectionError.swift in Sources */,
+				OBJ_625 /* RelativePointer.swift in Sources */,
+				OBJ_626 /* Set.swift in Sources */,
+				OBJ_627 /* Storage.swift in Sources */,
+				OBJ_628 /* UnsafePointer+Extensions.swift in Sources */,
+				OBJ_629 /* ValueWitnessTable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_636 /* Sources */ = {
+		OBJ_635 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_637 /* main.swift in Sources */,
+				OBJ_636 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_681 /* Sources */ = {
+		OBJ_680 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_682 /* ServerConstants.swift in Sources */,
-				OBJ_683 /* ServerMain.swift in Sources */,
-				OBJ_684 /* ServerRoutes.swift in Sources */,
-				OBJ_685 /* ServerSetup.swift in Sources */,
-				OBJ_686 /* Creds.swift in Sources */,
-				OBJ_687 /* GoogleCreds+GoogleDrive.swift in Sources */,
-				OBJ_688 /* GoogleCreds.swift in Sources */,
-				OBJ_689 /* Constants.swift in Sources */,
-				OBJ_690 /* ControllerProtocol.swift in Sources */,
-				OBJ_691 /* Controllers.swift in Sources */,
-				831DC3271E2DD2B300362CBE /* UploadRepository.swift in Sources */,
-				OBJ_692 /* FileController.swift in Sources */,
-				OBJ_693 /* UserController.swift in Sources */,
-				OBJ_694 /* UtilController.swift in Sources */,
-				OBJ_695 /* Database.swift in Sources */,
-				OBJ_696 /* Model.swift in Sources */,
-				OBJ_697 /* Repository.swift in Sources */,
+				OBJ_681 /* ServerConstants.swift in Sources */,
+				OBJ_682 /* ServerMain.swift in Sources */,
+				OBJ_683 /* ServerRoutes.swift in Sources */,
+				OBJ_684 /* ServerSetup.swift in Sources */,
+				OBJ_685 /* Creds.swift in Sources */,
+				OBJ_686 /* GoogleCreds+GoogleDrive.swift in Sources */,
+				OBJ_687 /* GoogleCreds.swift in Sources */,
+				OBJ_688 /* Constants.swift in Sources */,
+				OBJ_689 /* ControllerProtocol.swift in Sources */,
+				OBJ_690 /* Controllers.swift in Sources */,
+				OBJ_691 /* FileController.swift in Sources */,
+				OBJ_692 /* UserController.swift in Sources */,
+				OBJ_693 /* UtilController.swift in Sources */,
+				OBJ_694 /* Database.swift in Sources */,
+				OBJ_695 /* Model.swift in Sources */,
+				OBJ_696 /* Repository.swift in Sources */,
+				OBJ_697 /* UploadRepository.swift in Sources */,
 				OBJ_698 /* UserRepository.swift in Sources */,
 				OBJ_699 /* AddUser.swift in Sources */,
 				OBJ_700 /* CheckCreds.swift in Sources */,
@@ -2955,517 +2951,517 @@
 		OBJ_293 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_269 /* PerfectLib */;
-			targetProxy = 831DC2C11E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2661E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_318 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2C51E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C26A1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_331 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2C71E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C26C1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_332 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2C81E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C26D1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_333 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC2C91E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C26E1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_379 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2CB1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2701E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_380 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2CC1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2711E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_381 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC2CD1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2721E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_382 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC2CE1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2731E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_453 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2D21E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2771E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_454 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2D31E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2781E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_455 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC2D41E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2791E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_456 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC2D51E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C27A1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_457 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_334 /* KituraNet */;
-			targetProxy = 831DC2D61E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C27B1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_458 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_383 /* SwiftyJSON */;
-			targetProxy = 831DC2D71E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C27C1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_459 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_391 /* KituraTemplateEngine */;
-			targetProxy = 831DC2D81E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C27D1E31B0E200C7CD83 /* PBXContainerItemProxy */;
+		};
+		OBJ_518 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = OBJ_294 /* LoggerAPI */;
+			targetProxy = 8342C2821E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_519 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2DD1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_301 /* Socket */;
+			targetProxy = 8342C2831E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_520 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2DE1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_310 /* SSLService */;
+			targetProxy = 8342C2841E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_521 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC2DF1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_319 /* CHTTPParser */;
+			targetProxy = 8342C2851E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_522 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC2E01E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_334 /* KituraNet */;
+			targetProxy = 8342C2861E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_523 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_334 /* KituraNet */;
-			targetProxy = 831DC2E11E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_383 /* SwiftyJSON */;
+			targetProxy = 8342C2871E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_524 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_383 /* SwiftyJSON */;
-			targetProxy = 831DC2E21E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_391 /* KituraTemplateEngine */;
+			targetProxy = 8342C2881E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_525 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_391 /* KituraTemplateEngine */;
-			targetProxy = 831DC2E31E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_398 /* Kitura */;
+			targetProxy = 8342C2891E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_526 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_398 /* Kitura */;
-			targetProxy = 831DC2E41E2CA97300362CBE /* PBXContainerItemProxy */;
-		};
-		OBJ_527 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
 			target = OBJ_479 /* Cryptor */;
-			targetProxy = 831DC2E51E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C28A1E31B0E200C7CD83 /* PBXContainerItemProxy */;
+		};
+		OBJ_550 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = OBJ_294 /* LoggerAPI */;
+			targetProxy = 8342C28C1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_551 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2E71E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_301 /* Socket */;
+			targetProxy = 8342C28D1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_552 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2E81E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_310 /* SSLService */;
+			targetProxy = 8342C28E1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_553 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC2E91E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_319 /* CHTTPParser */;
+			targetProxy = 8342C28F1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_554 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC2EA1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_334 /* KituraNet */;
+			targetProxy = 8342C2901E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_555 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_334 /* KituraNet */;
-			targetProxy = 831DC2EB1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_383 /* SwiftyJSON */;
+			targetProxy = 8342C2911E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_556 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_383 /* SwiftyJSON */;
-			targetProxy = 831DC2EC1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_391 /* KituraTemplateEngine */;
+			targetProxy = 8342C2921E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_557 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_391 /* KituraTemplateEngine */;
-			targetProxy = 831DC2ED1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_398 /* Kitura */;
+			targetProxy = 8342C2931E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_558 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_398 /* Kitura */;
-			targetProxy = 831DC2EE1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_479 /* Cryptor */;
+			targetProxy = 8342C2941E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_559 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_479 /* Cryptor */;
-			targetProxy = 831DC2EF1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_495 /* KituraSession */;
+			targetProxy = 8342C2951E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
-		OBJ_560 /* PBXTargetDependency */ = {
+		OBJ_582 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_496 /* KituraSession */;
-			targetProxy = 831DC2F01E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_294 /* LoggerAPI */;
+			targetProxy = 8342C2971E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_583 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2F21E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_301 /* Socket */;
+			targetProxy = 8342C2981E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_584 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2F31E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_310 /* SSLService */;
+			targetProxy = 8342C2991E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_585 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC2F41E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_319 /* CHTTPParser */;
+			targetProxy = 8342C29A1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_586 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC2F51E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_334 /* KituraNet */;
+			targetProxy = 8342C29B1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_587 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_334 /* KituraNet */;
-			targetProxy = 831DC2F61E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_383 /* SwiftyJSON */;
+			targetProxy = 8342C29C1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_588 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_383 /* SwiftyJSON */;
-			targetProxy = 831DC2F71E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_391 /* KituraTemplateEngine */;
+			targetProxy = 8342C29D1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_589 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_391 /* KituraTemplateEngine */;
-			targetProxy = 831DC2F81E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_398 /* Kitura */;
+			targetProxy = 8342C29E1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_590 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_398 /* Kitura */;
-			targetProxy = 831DC2F91E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_479 /* Cryptor */;
+			targetProxy = 8342C29F1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_591 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_479 /* Cryptor */;
-			targetProxy = 831DC2FA1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_495 /* KituraSession */;
+			targetProxy = 8342C2A01E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_592 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_496 /* KituraSession */;
-			targetProxy = 831DC2FB1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_527 /* Credentials */;
+			targetProxy = 8342C2A11E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
-		OBJ_593 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = OBJ_528 /* Credentials */;
-			targetProxy = 831DC2FC1E2CA97300362CBE /* PBXContainerItemProxy */;
-		};
-		OBJ_602 /* PBXTargetDependency */ = {
+		OBJ_601 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2FE1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2A31E31B0E200C7CD83 /* PBXContainerItemProxy */;
+		};
+		OBJ_657 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = OBJ_269 /* PerfectLib */;
+			targetProxy = 8342C2641E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_658 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_269 /* PerfectLib */;
-			targetProxy = 831DC2BF1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_285 /* SMServerLib */;
+			targetProxy = 8342C2651E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_659 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_285 /* SMServerLib */;
-			targetProxy = 831DC2C01E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_294 /* LoggerAPI */;
+			targetProxy = 8342C2671E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_660 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC2C21E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_301 /* Socket */;
+			targetProxy = 8342C2681E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_661 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC2C31E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_310 /* SSLService */;
+			targetProxy = 8342C2691E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_662 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC2C41E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_319 /* CHTTPParser */;
+			targetProxy = 8342C26B1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_663 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC2C61E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_334 /* KituraNet */;
+			targetProxy = 8342C26F1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_664 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_334 /* KituraNet */;
-			targetProxy = 831DC2CA1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_383 /* SwiftyJSON */;
+			targetProxy = 8342C2741E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_665 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_383 /* SwiftyJSON */;
-			targetProxy = 831DC2CF1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_391 /* KituraTemplateEngine */;
+			targetProxy = 8342C2751E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_666 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_391 /* KituraTemplateEngine */;
-			targetProxy = 831DC2D01E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_398 /* Kitura */;
+			targetProxy = 8342C2761E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_667 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_398 /* Kitura */;
-			targetProxy = 831DC2D11E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_460 /* MySQL */;
+			targetProxy = 8342C27E1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_668 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_460 /* MySQL */;
-			targetProxy = 831DC2D91E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_467 /* Gloss */;
+			targetProxy = 8342C27F1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_669 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_467 /* Gloss */;
-			targetProxy = 831DC2DA1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_479 /* Cryptor */;
+			targetProxy = 8342C2801E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_670 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_479 /* Cryptor */;
-			targetProxy = 831DC2DB1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_495 /* KituraSession */;
+			targetProxy = 8342C2811E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_671 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_496 /* KituraSession */;
-			targetProxy = 831DC2DC1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_527 /* Credentials */;
+			targetProxy = 8342C28B1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_672 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_528 /* Credentials */;
-			targetProxy = 831DC2E61E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_560 /* CredentialsGoogle */;
+			targetProxy = 8342C2961E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_673 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_561 /* CredentialsGoogle */;
-			targetProxy = 831DC2F11E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_593 /* HeliumLogger */;
+			targetProxy = 8342C2A21E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_674 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_594 /* HeliumLogger */;
-			targetProxy = 831DC2FD1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_602 /* Reflection */;
+			targetProxy = 8342C2A41E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_675 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_603 /* Reflection */;
-			targetProxy = 831DC2FF1E2CA97300362CBE /* PBXContainerItemProxy */;
-		};
-		OBJ_676 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = OBJ_677 /* Server */;
-			targetProxy = 831DC3001E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_676 /* Server */;
+			targetProxy = 8342C2A51E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_728 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_269 /* PerfectLib */;
-			targetProxy = 831DC3011E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2A61E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_729 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_285 /* SMServerLib */;
-			targetProxy = 831DC3021E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2A71E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_730 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC3031E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2A81E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_731 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC3041E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2A91E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_732 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC3051E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2AA1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_733 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC3061E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2AB1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_734 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_334 /* KituraNet */;
-			targetProxy = 831DC3071E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2AC1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_735 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_383 /* SwiftyJSON */;
-			targetProxy = 831DC3081E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2AD1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_736 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_391 /* KituraTemplateEngine */;
-			targetProxy = 831DC3091E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2AE1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_737 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_398 /* Kitura */;
-			targetProxy = 831DC30A1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2AF1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_738 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_460 /* MySQL */;
-			targetProxy = 831DC30B1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2B01E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_739 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_467 /* Gloss */;
-			targetProxy = 831DC30C1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2B11E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_740 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_479 /* Cryptor */;
-			targetProxy = 831DC30D1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2B21E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_741 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_496 /* KituraSession */;
-			targetProxy = 831DC30E1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_495 /* KituraSession */;
+			targetProxy = 8342C2B31E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_742 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_528 /* Credentials */;
-			targetProxy = 831DC30F1E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_527 /* Credentials */;
+			targetProxy = 8342C2B41E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_743 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_561 /* CredentialsGoogle */;
-			targetProxy = 831DC3101E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_560 /* CredentialsGoogle */;
+			targetProxy = 8342C2B51E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_744 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_594 /* HeliumLogger */;
-			targetProxy = 831DC3111E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_593 /* HeliumLogger */;
+			targetProxy = 8342C2B61E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_745 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_603 /* Reflection */;
-			targetProxy = 831DC3121E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_602 /* Reflection */;
+			targetProxy = 8342C2B71E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_782 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_269 /* PerfectLib */;
-			targetProxy = 831DC3131E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2B81E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_783 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_285 /* SMServerLib */;
-			targetProxy = 831DC3141E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2B91E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_784 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_294 /* LoggerAPI */;
-			targetProxy = 831DC3151E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2BA1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_785 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_301 /* Socket */;
-			targetProxy = 831DC3161E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2BB1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_786 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_310 /* SSLService */;
-			targetProxy = 831DC3171E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2BC1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_787 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_319 /* CHTTPParser */;
-			targetProxy = 831DC3181E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2BD1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_788 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_334 /* KituraNet */;
-			targetProxy = 831DC3191E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2BE1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_789 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_383 /* SwiftyJSON */;
-			targetProxy = 831DC31A1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2BF1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_790 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_391 /* KituraTemplateEngine */;
-			targetProxy = 831DC31B1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2C01E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_791 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_398 /* Kitura */;
-			targetProxy = 831DC31C1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2C11E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_792 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_460 /* MySQL */;
-			targetProxy = 831DC31D1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2C21E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_793 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_467 /* Gloss */;
-			targetProxy = 831DC31E1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2C31E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_794 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = OBJ_479 /* Cryptor */;
-			targetProxy = 831DC31F1E2CA97300362CBE /* PBXContainerItemProxy */;
+			targetProxy = 8342C2C41E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_795 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_496 /* KituraSession */;
-			targetProxy = 831DC3201E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_495 /* KituraSession */;
+			targetProxy = 8342C2C51E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_796 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_528 /* Credentials */;
-			targetProxy = 831DC3211E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_527 /* Credentials */;
+			targetProxy = 8342C2C61E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_797 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_561 /* CredentialsGoogle */;
-			targetProxy = 831DC3221E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_560 /* CredentialsGoogle */;
+			targetProxy = 8342C2C71E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_798 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_594 /* HeliumLogger */;
-			targetProxy = 831DC3231E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_593 /* HeliumLogger */;
+			targetProxy = 8342C2C81E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_799 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_603 /* Reflection */;
-			targetProxy = 831DC3241E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_602 /* Reflection */;
+			targetProxy = 8342C2C91E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 		OBJ_800 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_677 /* Server */;
-			targetProxy = 831DC3251E2CA97300362CBE /* PBXContainerItemProxy */;
+			target = OBJ_676 /* Server */;
+			targetProxy = 8342C2CA1E31B0E200C7CD83 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -4084,7 +4080,7 @@
 			};
 			name = Release;
 		};
-		OBJ_498 /* Debug */ = {
+		OBJ_497 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4110,7 +4106,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_499 /* Release */ = {
+		OBJ_498 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4136,7 +4132,7 @@
 			};
 			name = Release;
 		};
-		OBJ_530 /* Debug */ = {
+		OBJ_529 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4162,7 +4158,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_531 /* Release */ = {
+		OBJ_530 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4188,7 +4184,7 @@
 			};
 			name = Release;
 		};
-		OBJ_563 /* Debug */ = {
+		OBJ_562 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4214,7 +4210,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_564 /* Release */ = {
+		OBJ_563 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4240,7 +4236,7 @@
 			};
 			name = Release;
 		};
-		OBJ_596 /* Debug */ = {
+		OBJ_595 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4260,7 +4256,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_597 /* Release */ = {
+		OBJ_596 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4280,7 +4276,7 @@
 			};
 			name = Release;
 		};
-		OBJ_605 /* Debug */ = {
+		OBJ_604 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4300,7 +4296,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_606 /* Release */ = {
+		OBJ_605 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4320,7 +4316,7 @@
 			};
 			name = Release;
 		};
-		OBJ_634 /* Debug */ = {
+		OBJ_633 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
@@ -4349,7 +4345,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_635 /* Release */ = {
+		OBJ_634 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
@@ -4378,7 +4374,7 @@
 			};
 			name = Release;
 		};
-		OBJ_679 /* Debug */ = {
+		OBJ_678 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4409,7 +4405,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_680 /* Release */ = {
+		OBJ_679 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
@@ -4625,65 +4621,65 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_497 /* Build configuration list for PBXNativeTarget "KituraSession" */ = {
+		OBJ_496 /* Build configuration list for PBXNativeTarget "KituraSession" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_498 /* Debug */,
-				OBJ_499 /* Release */,
+				OBJ_497 /* Debug */,
+				OBJ_498 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_529 /* Build configuration list for PBXNativeTarget "Credentials" */ = {
+		OBJ_528 /* Build configuration list for PBXNativeTarget "Credentials" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_530 /* Debug */,
-				OBJ_531 /* Release */,
+				OBJ_529 /* Debug */,
+				OBJ_530 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_562 /* Build configuration list for PBXNativeTarget "CredentialsGoogle" */ = {
+		OBJ_561 /* Build configuration list for PBXNativeTarget "CredentialsGoogle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_563 /* Debug */,
-				OBJ_564 /* Release */,
+				OBJ_562 /* Debug */,
+				OBJ_563 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_595 /* Build configuration list for PBXNativeTarget "HeliumLogger" */ = {
+		OBJ_594 /* Build configuration list for PBXNativeTarget "HeliumLogger" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_596 /* Debug */,
-				OBJ_597 /* Release */,
+				OBJ_595 /* Debug */,
+				OBJ_596 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_604 /* Build configuration list for PBXNativeTarget "Reflection" */ = {
+		OBJ_603 /* Build configuration list for PBXNativeTarget "Reflection" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_605 /* Debug */,
-				OBJ_606 /* Release */,
+				OBJ_604 /* Debug */,
+				OBJ_605 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_633 /* Build configuration list for PBXNativeTarget "Main" */ = {
+		OBJ_632 /* Build configuration list for PBXNativeTarget "Main" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_634 /* Debug */,
-				OBJ_635 /* Release */,
+				OBJ_633 /* Debug */,
+				OBJ_634 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_678 /* Build configuration list for PBXNativeTarget "Server" */ = {
+		OBJ_677 /* Build configuration list for PBXNativeTarget "Server" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_679 /* Debug */,
-				OBJ_680 /* Release */,
+				OBJ_678 /* Debug */,
+				OBJ_679 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
