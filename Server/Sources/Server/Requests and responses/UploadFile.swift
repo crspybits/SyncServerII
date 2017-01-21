@@ -15,9 +15,8 @@ class UploadFileRequest : NSObject, RequestMessage {
     var data = Data()
     var sizeOfDataInBytes:Int!
     
-    // Files in the cloud are referred to by UUID's. This must be a valid UUID.
-    static let cloudFileUUIDKey = "cloudFileUUID"
-    var cloudFileUUID:String!
+    static let fileUUIDKey = "fileUUID"
+    var fileUUID:String!
     
     static let mimeTypeKey = "mimeType"
     var mimeType:String!
@@ -26,22 +25,37 @@ class UploadFileRequest : NSObject, RequestMessage {
     static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName:String!
     
+    static let deviceUUIDKey = "deviceUUID"
+    var deviceUUID:String!
+    
+    static let versionKey = "version"
+    
+    // Using a String here because (a) value(forKey: name) doesn't play well with Int's, and (b) because that's how it will arrive in JSON.
+    var version:String!
+    
+    var versionNumber:Int {
+        return Int(version)!
+    }
+    
     func keys() -> [String] {
-        return [UploadFileRequest.cloudFileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey]
+        return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.deviceUUIDKey, UploadFileRequest.versionKey]
     }
     
     required init?(json: JSON) {
         super.init()
         
-        self.cloudFileUUID = UploadFileRequest.cloudFileUUIDKey <~~ json
+        self.fileUUID = UploadFileRequest.fileUUIDKey <~~ json
         self.mimeType = UploadFileRequest.mimeTypeKey <~~ json
         self.cloudFolderName = UploadFileRequest.cloudFolderNameKey <~~ json
+        self.deviceUUID = UploadFileRequest.deviceUUIDKey <~~ json
+        self.version = UploadFileRequest.versionKey <~~ json
 
         if !self.propertiesHaveValues(propertyNames: self.keys()) {
             return nil
         }
         
-        guard let _ = NSUUID(uuidString: self.cloudFileUUID) else {
+        guard let _ = NSUUID(uuidString: self.fileUUID),
+            let _ = NSUUID(uuidString: self.deviceUUID) else {
             return nil
         }
     }

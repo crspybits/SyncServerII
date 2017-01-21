@@ -221,19 +221,9 @@ extension GoogleCreds {
     enum UploadError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     }
-
-    struct FileUpload {
-        // MIME type of the file, e.g., "image/jpeg".
-        let mimeType:String
-        
-        let uploadData:Data
-        let cloudFileUUID:String
-        
-        let cloudFolderName:String
-    }
     
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
-    func uploadSmallFile(upload:FileUpload, completion:@escaping (Swift.Error?)->()) {
+    func uploadSmallFile(upload:UploadFileRequest, completion:@escaping (Swift.Error?)->()) {
         // See https://developers.google.com/drive/v3/web/manage-uploads
         
         self.createFolderIfDoesNotExist(rootFolderName: upload.cloudFolderName) { (folderId, error) in
@@ -256,18 +246,18 @@ extension GoogleCreds {
                 "Content-Type: application/json; charset=UTF-8\r\n" +
                 "\r\n" +
                 "{\r\n" +
-                    "\"name\": \"\(upload.cloudFileUUID)\",\r\n" +
+                    "\"name\": \"\(upload.cloudFileName())\",\r\n" +
                     "\"parents\": [\r\n" +
                         "\"\(folderId!)\"\r\n" +
                     "]\r\n" +
                 "}\r\n" +
                 "\r\n" +
                 "--\(boundary)\r\n" +
-                "Content-Type: \(upload.mimeType)\r\n" +
+                "Content-Type: \(upload.mimeType!)\r\n" +
                 "\r\n"
             
             var multiPartData = firstPart.data(using: .utf8)!
-            multiPartData.append(upload.uploadData)
+            multiPartData.append(upload.data)
             
             let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
             multiPartData.append(endBoundary)

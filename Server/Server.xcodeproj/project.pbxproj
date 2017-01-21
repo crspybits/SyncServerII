@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8342C2CC1E332A3C00C7CD83 /* UploadFileRequest+FileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8342C2CB1E332A3C00C7CD83 /* UploadFileRequest+FileName.swift */; };
 		940448CF49E79BF14B8D8F87 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 96039AE0FCB0CB2020DF248E /* Server.json */; };
 		OBJ_274 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_275 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
@@ -1050,6 +1051,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8342C2CB1E332A3C00C7CD83 /* UploadFileRequest+FileName.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UploadFileRequest+FileName.swift"; sourceTree = "<group>"; };
 		96039AE0FCB0CB2020DF248E /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
@@ -1735,6 +1737,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_204 /* Creds.swift */,
+				8342C2CB1E332A3C00C7CD83 /* UploadFileRequest+FileName.swift */,
 				OBJ_205 /* GoogleCreds+GoogleDrive.swift */,
 				OBJ_206 /* GoogleCreds.swift */,
 			);
@@ -1921,7 +1924,7 @@
 			path = "Packages/Kitura-net-1.4.3/Sources/KituraNet";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -1931,7 +1934,6 @@
 				OBJ_246 /* Resources */,
 				OBJ_247 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* FastCGI */ = {
@@ -2543,7 +2545,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_247 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2918,6 +2920,7 @@
 				OBJ_700 /* CheckCreds.swift in Sources */,
 				OBJ_701 /* CheckPrimaryCreds.swift in Sources */,
 				OBJ_702 /* HealthCheck.swift in Sources */,
+				8342C2CC1E332A3C00C7CD83 /* UploadFileRequest+FileName.swift in Sources */,
 				OBJ_703 /* RemoveUser.swift in Sources */,
 				OBJ_704 /* RequestMessage.swift in Sources */,
 				OBJ_705 /* ResponseMessage.swift in Sources */,

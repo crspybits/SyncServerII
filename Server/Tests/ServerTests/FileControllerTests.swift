@@ -33,9 +33,11 @@ class FileControllerTests: ServerTestCase {
         let data = stringToUpload.data(using: .utf8)
         
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.cloudFileUUIDKey : PerfectLib.UUID().string,
+            UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: testFolder
+            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
+            UploadFileRequest.versionKey: "1",
+            UploadFileRequest.deviceUUIDKey: PerfectLib.UUID().string,
         ])
                 
         self.performServerTest { expectation, googleCreds in
@@ -54,11 +56,13 @@ class FileControllerTests: ServerTestCase {
 
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
         let data = try! Data(contentsOf: fileURL)
-                
+        
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.cloudFileUUIDKey : PerfectLib.UUID().string,
+            UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
-            UploadFileRequest.cloudFolderNameKey: testFolder
+            UploadFileRequest.cloudFolderNameKey: testFolder,
+            UploadFileRequest.versionKey: "1",
+            UploadFileRequest.deviceUUIDKey: PerfectLib.UUID().string,
         ])
                 
         self.performServerTest { expectation, googleCreds in

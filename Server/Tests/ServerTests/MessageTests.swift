@@ -23,21 +23,31 @@ class MessageTests: ServerTestCase {
     }
 
     func testURLParameters() {
-        let uuidString = PerfectLib.UUID().string
+        let uuidString1 = PerfectLib.UUID().string
+        let uuidString2 = PerfectLib.UUID().string
+
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.cloudFileUUIDKey : uuidString,
+            UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: "CloudFolder"
+            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
+            UploadFileRequest.deviceUUIDKey: uuidString2,
+            UploadFileRequest.versionKey: "1"
         ])
+        
         let result = uploadRequest!.urlParameters()
-        XCTAssert(result == "\(UploadFileRequest.cloudFileUUIDKey)=\(uuidString)&mimeType=text/plain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder", "Result was: \(result)")
+        
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text/plain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.versionKey)=1", "Result was: \(result)")
     }
     
     func testBadUUIDForFileName() {
+        let uuidString2 = PerfectLib.UUID().string
+
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.cloudFileUUIDKey : "foobar",
+            UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: "CloudFolder"
+            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
+            UploadFileRequest.versionKey: "1",
+            UploadFileRequest.deviceUUIDKey: uuidString2,
         ])
         XCTAssert(uploadRequest == nil)
     }
