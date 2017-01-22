@@ -20,12 +20,24 @@ class CheckCredsRequest : NSObject, RequestMessage {
     required init?(request: RouterRequest) {
         super.init()
     }
+    
+    func toJSON() -> JSON? {
+        return jsonify([
+        ])
+    }
 }
 
 class CheckCredsResponse : ResponseMessage {
     static let resultKey = "result"
     var result: PerfectLib.JSONConvertible?
 
+    required init?(json: JSON) {
+    }
+    
+    convenience init?() {
+        self.init(json:[:])
+    }
+    
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([

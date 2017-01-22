@@ -11,31 +11,18 @@ import PerfectLib
 import Gloss
 import Kitura
 
-class AddUserRequest : NSObject, RequestMessage {
-    /*
-    static let mobileDeviceUUIDKey = "mobileDeviceUUID"
-    var mobileDeviceUUID:Foundation.UUID?
-    
-    static let cloudFolderPathKey = "cloudFolderPath"
-    var cloudFolderPath:String?
-    */
-    
-    // static let keys = [mobileDeviceUUIDKey, cloudFolderPathKey]
-    
+class AddUserRequest : NSObject, RequestMessage {    
     required init?(request: RouterRequest) {
         super.init()
     }
     
     required init?(json: JSON) {
         super.init()
-        
-        /*
-        self.mobileDeviceUUID = AddUserRequest.mobileDeviceUUIDKey <~~ json
-        self.cloudFolderPath = AddUserRequest.cloudFolderPathKey <~~ json
-        
-        if !self.propertiesHaveValues(propertyNames: AddUserRequest.keys) {
-            return nil
-        }*/
+    }
+    
+    func toJSON() -> JSON? {
+        return jsonify([
+        ])
     }
 }
 
@@ -43,6 +30,13 @@ class AddUserResponse : ResponseMessage {
     static let resultKey = "result"
     var result: PerfectLib.JSONConvertible?
 
+    required init?(json: JSON) {
+    }
+    
+    convenience init?() {
+        self.init(json:[:])
+    }
+    
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([

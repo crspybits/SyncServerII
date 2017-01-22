@@ -69,7 +69,6 @@ class Upload : NSObject, Model {
     var fileUUID: String!
     var userId: Int64!
     var deviceUUID: String!
-    var cloudFileName: String!
     var mimeType: String!
     var appMetaData: String!
     
@@ -107,7 +106,6 @@ class UploadRepository : Repository {
     // See http://stackoverflow.com/questions/13397038/uuid-max-character-length
     static let uuidLength = 36
     
-    static let maxFilenameLength = 256
     static let maxMimeTypeLength = 100
     static let stateMaxLength = 20
 
@@ -125,10 +123,7 @@ class UploadRepository : Repository {
             
             // identifies a specific mobile device (assigned by app)
             "deviceUUID VARCHAR(\(uuidLength)) NOT NULL, " +
-        
-            // name of the file in cloud storage excluding the folder path.
-            "cloudFileName VARCHAR(\(maxFilenameLength)) NOT NULL, " +
-            
+                
             // MIME type of the file
             "mimeType VARCHAR(\(maxMimeTypeLength)) NOT NULL, " +
 
@@ -156,7 +151,7 @@ class UploadRepository : Repository {
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     static func add(upload:Upload) -> Int64? {
-        if upload.fileUUID == nil || upload.userId == nil || upload.deviceUUID == nil || upload.cloudFileName == nil || upload.mimeType == nil || upload.fileUpload == nil || upload.fileVersion == nil || upload.state == nil || upload.fileSizeBytes == nil {
+        if upload.fileUUID == nil || upload.userId == nil || upload.deviceUUID == nil || upload.mimeType == nil || upload.fileUpload == nil || upload.fileVersion == nil || upload.state == nil || upload.fileSizeBytes == nil {
             Log.error(message: "One of the model values was nil!")
             return nil
         }
@@ -172,7 +167,7 @@ class UploadRepository : Repository {
         
         let fileUploadValue = upload.fileUpload == true ? 1 : 0
         
-        let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, cloudFileName, mimeType, \(appMetaDataFieldName) fileUpload, fileVersion, state, fileSizeBytes) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.cloudFileName!)', '\(upload.mimeType!)' \(appMetaDataFieldValue), \(fileUploadValue), \(upload.fileVersion!), '\(upload.state!.rawValue)', \(upload.fileSizeBytes!));"
+        let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) fileUpload, fileVersion, state, fileSizeBytes) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.mimeType!)' \(appMetaDataFieldValue), \(fileUploadValue), \(upload.fileVersion!), '\(upload.state!.rawValue)', \(upload.fileSizeBytes!));"
         
         if Database.session.connection.query(statement: query) {
             return Database.session.connection.lastInsertId()

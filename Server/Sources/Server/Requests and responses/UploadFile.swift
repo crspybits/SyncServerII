@@ -12,8 +12,7 @@ import Gloss
 import Kitura
 
 class UploadFileRequest : NSObject, RequestMessage {
-    var data = Data()
-    var sizeOfDataInBytes:Int!
+    // MARK: Properties for use in request message.
     
     static let fileUUIDKey = "fileUUID"
     var fileUUID:String!
@@ -28,17 +27,29 @@ class UploadFileRequest : NSObject, RequestMessage {
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID:String!
     
-    static let versionKey = "version"
+    static let fileVersionKey = "fileVersion"
+    // Using a String here because (a) value(forKey: name) doesn't appear to play well with Int's, and (b) because that's how it will arrive in JSON.
+    var fileVersion:String!
     
-    // Using a String here because (a) value(forKey: name) doesn't play well with Int's, and (b) because that's how it will arrive in JSON.
-    var version:String!
+    // Overall version for files for the specific user; assigned by the server.
+    static let masterVersionKey = "masterVersion"
+    var masterVersion:String!
     
-    var versionNumber:Int {
-        return Int(version)!
+    // MARK: Properties NOT used in the request message.
+    
+    var data = Data()
+    var sizeOfDataInBytes:Int!
+    
+    var fileVersionNumber:Int {
+        return Int(fileVersion)!
+    }
+    
+    var masterVersionNumber:Int {
+        return Int(masterVersion)!
     }
     
     func keys() -> [String] {
-        return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.deviceUUIDKey, UploadFileRequest.versionKey]
+        return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.deviceUUIDKey, UploadFileRequest.fileVersionKey, UploadFileRequest.masterVersionKey]
     }
     
     required init?(json: JSON) {
@@ -48,7 +59,8 @@ class UploadFileRequest : NSObject, RequestMessage {
         self.mimeType = UploadFileRequest.mimeTypeKey <~~ json
         self.cloudFolderName = UploadFileRequest.cloudFolderNameKey <~~ json
         self.deviceUUID = UploadFileRequest.deviceUUIDKey <~~ json
-        self.version = UploadFileRequest.versionKey <~~ json
+        self.fileVersion = UploadFileRequest.fileVersionKey <~~ json
+        self.masterVersion = UploadFileRequest.masterVersionKey <~~ json
 
         if !self.propertiesHaveValues(propertyNames: self.keys()) {
             return nil
@@ -70,6 +82,17 @@ class UploadFileRequest : NSObject, RequestMessage {
             return nil
         }
     }
+    
+    func toJSON() -> JSON? {
+        return jsonify([
+            UploadFileRequest.fileUUIDKey ~~> self.fileUUID,
+            UploadFileRequest.mimeTypeKey ~~> self.mimeType,
+            UploadFileRequest.cloudFolderNameKey ~~> self.cloudFolderName,
+            UploadFileRequest.deviceUUIDKey ~~> self.deviceUUID,
+            UploadFileRequest.fileVersionKey ~~> self.fileVersion,
+            UploadFileRequest.masterVersionKey ~~> self.masterVersion
+        ])
+    }
 }
 
 class UploadFileResponse : ResponseMessage {
@@ -77,6 +100,14 @@ class UploadFileResponse : ResponseMessage {
     var result: PerfectLib.JSONConvertible?
     static let sizeKey = "sizeInBytes"
     var size:Int64?
+    
+    required init?(json: JSON) {
+        self.size = UploadFileResponse.sizeKey <~~ json
+    }
+    
+    convenience init?() {
+        self.init(json:[:])
+    }
     
     // MARK: - Serialization
     func toJSON() -> JSON? {

@@ -10,6 +10,8 @@ import Foundation
 import PerfectLib
 import Gloss
 
-public protocol ResponseMessage : Encodable {
+public protocol ResponseMessage : Encodable, Decodable {
     var result: JSONConvertible? {get set}
+    init?(json: JSON)
 }
+

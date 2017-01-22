@@ -75,7 +75,7 @@ class UserController : ControllerProtocol {
             return
         }
 
-        let response = AddUserResponse()
+        let response = AddUserResponse()!
         response.result = "success"
         completion(response)
     }
@@ -85,7 +85,7 @@ class UserController : ControllerProtocol {
         // We don't have to do anything here. It was already done prior to checkCreds being called because of:
         assert(ServerEndpoints.checkCreds.authenticationLevel == .secondary)
         
-        let response = CheckCredsResponse()
+        let response = CheckCredsResponse()!
         response.result = "Success"
         completion(response)
     }
@@ -96,7 +96,7 @@ class UserController : ControllerProtocol {
         assert(ServerEndpoints.removeUser.authenticationLevel == .secondary)
         
         if case .removed = UserRepository.remove(user: .accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)) {
-            let response = RemoveUserResponse()
+            let response = RemoveUserResponse()!
             response.result = "Success"
             completion(response)
         }

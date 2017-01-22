@@ -31,12 +31,13 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.deviceUUIDKey: uuidString2,
-            UploadFileRequest.versionKey: "1"
+            UploadFileRequest.fileVersionKey: "1",
+            UploadFileRequest.masterVersionKey: "42"
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text/plain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.versionKey)=1", "Result was: \(result)")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text/plain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
     }
     
     func testBadUUIDForFileName() {
@@ -46,8 +47,9 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.versionKey: "1",
+            UploadFileRequest.fileVersionKey: "1",
             UploadFileRequest.deviceUUIDKey: uuidString2,
+            UploadFileRequest.masterVersionKey: "42"
         ])
         XCTAssert(uploadRequest == nil)
     }

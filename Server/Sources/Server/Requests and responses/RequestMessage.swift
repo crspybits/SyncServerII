@@ -11,7 +11,7 @@ import PerfectLib
 import Gloss
 import Kitura
 
-public protocol RequestMessage : NSObjectProtocol, Decodable {
+public protocol RequestMessage : NSObjectProtocol, Encodable, Decodable {
     init?(json: JSON)
     init?(request: RouterRequest)
     func keys() -> [String]

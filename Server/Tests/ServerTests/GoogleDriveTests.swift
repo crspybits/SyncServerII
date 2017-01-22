@@ -10,12 +10,13 @@ import XCTest
 @testable import Server
 
 class GoogleDriveTests: ServerTestCase {
-    // A folder known to be in my Google Drive:
+    // In my Google Drive:
     let knownPresentFolder = "Programming"
+    let knownPresentFile = "DO-NOT-REMOVE.txt"
     
-    // Folder known to be absent.
     let knownAbsentFolder = "Markwa.Farkwa.Blarkwa"
-    
+    let knownAbsentFile = "Markwa.Farkwa.Blarkwa"
+
     // Folder that will be created and removed.
     let folderCreatedAndDeleted = "abcdefg12345temporary"
 
@@ -26,6 +27,11 @@ class GoogleDriveTests: ServerTestCase {
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
+    }
+    
+    func testSingleQuote() {
+        let x = "'foo'"
+        print(x)
     }
 
     func testListFiles() {
@@ -56,12 +62,12 @@ class GoogleDriveTests: ServerTestCase {
             XCTAssert(error == nil)
             XCTAssert(creds.accessToken != nil)
             
-            creds.searchForFolder(rootFolderName: name) { (folderId, error) in
+            creds.searchFor(.folder, itemName: name) { result, error in
                 if presentExpected {
-                    XCTAssert(folderId != nil)
+                    XCTAssert(result != nil)
                 }
                 else {
-                    XCTAssert(folderId == nil)
+                    XCTAssert(result == nil)
                 }
                 XCTAssert(error == nil)
                 exp.fulfill()
@@ -71,12 +77,65 @@ class GoogleDriveTests: ServerTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func searchForFile(name:String, withMimeType mimeType:String, inFolder folderName:String?, presentExpected:Bool) {
+        let creds = GoogleCreds()
+        creds.refreshToken = self.refreshToken()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        func searchForFile(parentFolderId:String?) {
+            creds.searchFor(.file(mimeType:mimeType, parentFolderId:parentFolderId), itemName: name) { result, error in
+                if presentExpected {
+                    XCTAssert(result != nil)
+                }
+                else {
+                    XCTAssert(result == nil)
+                }
+                XCTAssert(error == nil)
+                exp.fulfill()
+            }
+        }
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            
+            if folderName == nil {
+                searchForFile(parentFolderId: nil)
+            }
+            else {
+                creds.searchFor(.folder, itemName: folderName!) { result, error in
+                    XCTAssert(result != nil)
+                    XCTAssert(error == nil)
+                    searchForFile(parentFolderId: result!.itemId)
+                }
+            }
+        }
+
+        waitForExpectations(timeout: 20, handler: nil)
+    }
+    
     func testSearchForPresentFolder() {
         searchForFolder(name: self.knownPresentFolder, presentExpected: true)
     }
     
     func testSearchForAbsentFolder() {
         searchForFolder(name: self.knownAbsentFolder, presentExpected: false)
+    }
+    
+    func testSearchForPresentFile() {
+        searchForFile(name: knownPresentFile, withMimeType: "text/plain", inFolder: nil, presentExpected: true)
+    }
+    
+    func testSearchForAbsentFile() {
+        searchForFile(name: knownAbsentFile, withMimeType: "text/plain", inFolder: nil, presentExpected: false)
+    }
+    
+    func testSearchForPresentFileInFolder() {
+        searchForFile(name: knownPresentFile, withMimeType: "text/plain", inFolder: knownPresentFolder, presentExpected: true)
+    }
+    
+    func testSearchForAbsentFileInFolder() {
+        searchForFile(name: knownAbsentFile, withMimeType: "text/plain", inFolder: knownPresentFolder, presentExpected: false)
     }
     
     // Haven't been able to get trashFile to work yet.
@@ -161,8 +220,9 @@ class GoogleDriveTests: ServerTestCase {
                 XCTAssert(error == nil)
                 
                 // It should be there after being created.
-                creds.searchForFolder(rootFolderName: self.folderCreatedAndDeleted) { (folderId, error) in
-                    XCTAssert(folderId != nil)
+                creds.searchFor(.folder, itemName: self.folderCreatedAndDeleted) { (result, error) in
+                    
+                    XCTAssert(result != nil)
                     XCTAssert(error == nil)
                     
                     // And attempting to create it again shouldn't fail.

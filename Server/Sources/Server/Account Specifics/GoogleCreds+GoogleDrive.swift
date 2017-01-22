@@ -22,16 +22,36 @@ extension GoogleCreds {
         curl -H "Authorization: Bearer YourAccessToken" https://www.googleapis.com/drive/v3/files
     at the command line.
     */
-    func listFiles(query:String? = nil, completion:@escaping (_ fileListing:JSON?, Swift.Error?)->()) {
+    
+    /* For query parameter, see https://developers.google.com/drive/v3/web/search-parameters
+    
+        fieldsReturned parameter indicates the collection of fields to be returned in the, scoped over the entire response (not just the files resources). See https://developers.google.com/drive/v3/web/performance#partial
+        E.g., "files/id,files/size"
+        See also see http://stackoverflow.com/questions/35143283/google-drive-api-v3-migration
+    */
+    func listFiles(query:String? = nil, fieldsReturned:String? = nil, completion:@escaping (_ fileListing:JSON?, Swift.Error?)->()) {
         let additionalHeaders = ["Authorization" : "Bearer \(self.accessToken!)"]
         
-        var urlParameters:String?
-        
-        if query != nil {
-            urlParameters = "q=" + query!
+        var urlParameters = ""
+
+        if fieldsReturned != nil {
+            urlParameters = "fields=" + fieldsReturned!
         }
         
-        self.apiCall(method: "GET", path: "/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters) { (json, statusCode) in
+        if query != nil {
+            if urlParameters.characters.count != 0 {
+                urlParameters += "&"
+            }
+            
+            urlParameters += "q=" + query!
+        }
+        
+        var urlParams:String? = urlParameters
+        if urlParameters.characters.count == 0 {
+            urlParams = nil
+        }
+        
+        self.apiCall(method: "GET", path: "/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParams) { (json, statusCode) in
             var error:ListFilesError?
             if statusCode != HTTPStatusCode.OK {
                 error = .badStatusCode(statusCode)
@@ -40,50 +60,91 @@ extension GoogleCreds {
         }
     }
     
-    enum SearchForFolderError : Swift.Error {
+    enum SearchError : Swift.Error {
     case noIdInResultingJSON
-    case moreThanOneFolderWithName
+    case moreThanOneItemWithName
     case noJSONDictionaryResult
     }
     
-    // Considers it an error for there to be more than one folder with the given name.
-    func searchForFolder(rootFolderName folderName:String, completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
+    enum SearchType {
+    case folder
     
-        let query = "mimeType='\(folderMimeType)' and name='\(folderName)' and trashed=false"
+    // If parentFolderId is nil, the root folder is assumed.
+    case file(mimeType:String, parentFolderId:String?)
+    
+    case any // folders or files
+    }
+    
+    struct SearchResult {
+        let itemId:String
         
-        self.listFiles(query:query) { (json, error) in
+        // Google specific result-- a partial files resource for the file.
+        // Contains fields: size, and id
+        let json:[String: JSON]
+    }
+    
+    // Considers it an error for there to be more than one item with the given name.
+    func searchFor(_ searchType: SearchType, itemName:String, completion:@escaping (_ result:SearchResult?, Swift.Error?)->()) {
+        
+        var query:String = ""
+        switch searchType {
+        case .folder:
+            query = "mimeType='\(folderMimeType)' and "
+            
+        case .file(mimeType: let mimeType, parentFolderId: let parentFolderId):
+            query += "mimeType='\(mimeType)' and "
+            
+            // See https://developers.google.com/drive/v3/web/folder
+            var folderId = "root"
+            
+            if parentFolderId != nil {
+                folderId = parentFolderId!
+            }
+            
+            query += "'\(folderId)' in parents and "
+            
+        case .any:
+            break
+        }
+        
+        query += "name='\(itemName)' and trashed=false"
+        
+        // The structure of this wasn't obvious to me-- it's scoped over the entire response object, not just within the files resource. See also http://stackoverflow.com/questions/38853938/google-drive-api-v3-invalid-field-selection
+        let fieldsReturned = "files/id,files/size"
+        
+        self.listFiles(query:query, fieldsReturned:fieldsReturned) { (json, error) in
             // For the response structure, see https://developers.google.com/drive/v3/reference/files/list
             
-            var resultId:String?
+            var result:SearchResult?
             var resultError:Swift.Error? = error
             
             if error != nil || json == nil || json!.type != .dictionary {
                 if error == nil {
-                    resultError = SearchForFolderError.noJSONDictionaryResult
+                    resultError = SearchError.noJSONDictionaryResult
                 }
             }
             else {
                 switch json!["files"].count {
                 case 0:
-                    // resultError will be nil as will resultId.
+                    // resultError will be nil as will result.
                     break
                     
                 case 1:
                     if let fileArray = json!["files"].array,
                         let fileDict = fileArray[0].dictionary,
                         let id = fileDict["id"]?.string {
-                        resultId = id
+                        result = SearchResult(itemId: id, json: fileDict)
                     }
                     else {
-                        resultError = SearchForFolderError.noIdInResultingJSON
+                        resultError = SearchError.noIdInResultingJSON
                     }
                 
                 default:
-                    resultError = SearchForFolderError.moreThanOneFolderWithName
+                    resultError = SearchError.moreThanOneItemWithName
                 }
             }
             
-            completion(resultId, resultError)
+            completion(result, resultError)
         }
     }
     
@@ -141,9 +202,9 @@ extension GoogleCreds {
     // Creates a root level folder if it doesn't exist. Returns the folderId in the completion if no error.
     func createFolderIfDoesNotExist(rootFolderName folderName:String,
         completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
-        self.searchForFolder(rootFolderName: folderName) { (folderId, error) in
+        self.searchFor(.folder, itemName: folderName) { (result, error) in
             if error == nil {
-                if folderId == nil {
+                if result == nil {
                     // Folder doesn't exist.
                     self.createFolder(rootFolderName: folderName) { (folderId, error) in
                         completion(folderId, error)
@@ -151,7 +212,7 @@ extension GoogleCreds {
                 }
                 else {
                     // Folder does exist.
-                    completion(folderId, nil)
+                    completion(result!.itemId, nil)
                 }
             }
             else {
@@ -220,15 +281,18 @@ extension GoogleCreds {
 
     enum UploadError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
+    case couldNotObtainFileSize
     }
     
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
-    func uploadSmallFile(upload:UploadFileRequest, completion:@escaping (Swift.Error?)->()) {
+    func uploadSmallFile(request:UploadFileRequest,
+        completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
+        
         // See https://developers.google.com/drive/v3/web/manage-uploads
         
-        self.createFolderIfDoesNotExist(rootFolderName: upload.cloudFolderName) { (folderId, error) in
+        self.createFolderIfDoesNotExist(rootFolderName: request.cloudFolderName) { (folderId, error) in
             if error != nil {
-                completion(error)
+                completion(nil, error)
                 return
             }
             
@@ -246,18 +310,18 @@ extension GoogleCreds {
                 "Content-Type: application/json; charset=UTF-8\r\n" +
                 "\r\n" +
                 "{\r\n" +
-                    "\"name\": \"\(upload.cloudFileName())\",\r\n" +
+                    "\"name\": \"\(request.cloudFileName())\",\r\n" +
                     "\"parents\": [\r\n" +
                         "\"\(folderId!)\"\r\n" +
                     "]\r\n" +
                 "}\r\n" +
                 "\r\n" +
                 "--\(boundary)\r\n" +
-                "Content-Type: \(upload.mimeType!)\r\n" +
+                "Content-Type: \(request.mimeType!)\r\n" +
                 "\r\n"
             
             var multiPartData = firstPart.data(using: .utf8)!
-            multiPartData.append(upload.data)
+            multiPartData.append(request.data)
             
             let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
             multiPartData.append(endBoundary)
@@ -267,9 +331,25 @@ extension GoogleCreds {
 
                 if statusCode != HTTPStatusCode.OK {
                     resultError = UploadError.badStatusCode(statusCode)
+                    completion(nil, resultError)
                 }
-                
-                completion(resultError)
+                else {
+                    let searchType = SearchType.file(mimeType: request.mimeType, parentFolderId: folderId)
+                    self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
+                        if error == nil {
+                            if let sizeString = result?.json["size"]?.string,
+                                let size = Int(sizeString) {
+                                completion(size, resultError)
+                            }
+                            else {
+                                completion(nil, UploadError.couldNotObtainFileSize)
+                            }
+                        }
+                        else {
+                            completion(nil, error)
+                        }
+                    }
+                }
             }
         }
     }

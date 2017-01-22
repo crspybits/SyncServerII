@@ -63,7 +63,12 @@ public class Creds {
             requestOptions.append(.path(path))
         }
         else {
-            let escapedURLParams = urlParameters!.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
+            var charSet = CharacterSet.urlQueryAllowed
+            // At least for the Google REST API, it seems single quotes need to be encoded. See https://developers.google.com/drive/v3/web/search-parameters
+            // urlQueryAllowed doesn't exclude single quotes, so I'm doing that myself.
+            charSet.remove("'")
+            
+            let escapedURLParams = urlParameters!.addingPercentEncoding(withAllowedCharacters: charSet)
             requestOptions.append(.path(path + "?" + escapedURLParams!))
         }
         

@@ -44,9 +44,23 @@ class FileController : ControllerProtocol {
         
         // TODO: Need to make use of Upload repository.
         
-        googleCreds.uploadSmallFile(upload: uploadRequest) { error in
+        googleCreds.uploadSmallFile(request: uploadRequest) { fileSize, error in
             if error == nil {
-                let response = UploadFileResponse()
+                /*
+                let upload = Upload()
+                upload.deviceUUID = request.deviceUUID
+                upload.fileSizeBytes = 100
+                upload.fileUpload = true
+                upload.fileUUID = PerfectLib.UUID().string
+                upload.fileVersion = 1
+                upload.mimeType = "text/plain"
+                upload.state = .uploading
+                upload.userId = 1
+                upload.appMetaData = "{ \"foo\": \"bar\" }"
+                
+                let result1 = UploadRepository.add(upload: upload)
+                */
+                let response = UploadFileResponse()!
                 response.size = Int64(uploadRequest.data.count)
                 completion(response)
             }

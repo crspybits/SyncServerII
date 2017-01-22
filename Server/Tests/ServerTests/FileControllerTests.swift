@@ -36,8 +36,9 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.versionKey: "1",
             UploadFileRequest.deviceUUIDKey: PerfectLib.UUID().string,
+            UploadFileRequest.fileVersionKey: "1",
+            UploadFileRequest.masterVersionKey: "42"
         ])
                 
         self.performServerTest { expectation, googleCreds in
@@ -46,6 +47,15 @@ class FileControllerTests: ServerTestCase {
             self.performRequest(route: ServerEndpoints.uploadFile, headers: headers, urlParameters: "?" + uploadRequest!.urlParameters()!, body:data) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request")
+                XCTAssert(dict != nil)
+                
+                if let uploadResponse = UploadFileResponse(json: dict!) {
+                    XCTAssert(uploadResponse.size != nil)
+                    XCTAssert(uploadResponse.size == Int64(stringToUpload.characters.count))
+                }
+                else {
+                    XCTFail()
+                }
                 expectation.fulfill()
             }
         }
@@ -55,14 +65,16 @@ class FileControllerTests: ServerTestCase {
         self.addNewUser()
 
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
+        let sizeOfCatFileInBytes:Int64 = 1162662
         let data = try! Data(contentsOf: fileURL)
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
-            UploadFileRequest.versionKey: "1",
+            UploadFileRequest.fileVersionKey: "1",
             UploadFileRequest.deviceUUIDKey: PerfectLib.UUID().string,
+            UploadFileRequest.masterVersionKey: "42"
         ])
                 
         self.performServerTest { expectation, googleCreds in
@@ -71,6 +83,15 @@ class FileControllerTests: ServerTestCase {
             self.performRequest(route: ServerEndpoints.uploadFile, headers: headers, urlParameters: "?" + uploadRequest!.urlParameters()!, body:data) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request")
+                XCTAssert(dict != nil)
+                
+                if let uploadResponse = UploadFileResponse(json: dict!) {
+                    XCTAssert(uploadResponse.size != nil)
+                    XCTAssert(uploadResponse.size == sizeOfCatFileInBytes)
+                }
+                else {
+                    XCTFail()
+                }
                 expectation.fulfill()
             }
         }

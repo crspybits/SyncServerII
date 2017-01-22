@@ -94,7 +94,6 @@ class SepecificDatabaseTests: ServerTestCase {
     
     func doUpload() -> Upload {
         let upload = Upload()
-        upload.cloudFileName = "Test.FileName"
         upload.deviceUUID = PerfectLib.UUID().string
         upload.fileSizeBytes = 100
         upload.fileUpload = true
@@ -124,7 +123,6 @@ class SepecificDatabaseTests: ServerTestCase {
             XCTFail("\(error)")
             
         case .found(let upload2):
-            XCTAssert(upload1.cloudFileName != nil && upload1.cloudFileName == upload2.cloudFileName)
             XCTAssert(upload1.deviceUUID != nil && upload1.deviceUUID == upload2.deviceUUID)
             XCTAssert(upload1.fileSizeBytes != nil && upload1.fileSizeBytes == upload2.fileSizeBytes)
             XCTAssert(upload1.fileUpload != nil && upload1.fileUpload == upload2.fileUpload)

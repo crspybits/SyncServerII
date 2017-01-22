@@ -19,12 +19,24 @@ class CheckPrimaryCredsRequest : NSObject, RequestMessage {
     required init?(json: JSON) {
         super.init()
     }
+    
+    func toJSON() -> JSON? {
+        return jsonify([
+        ])
+    }
 }
 
 class CheckPrimaryCredsResponse : ResponseMessage {
     static let resultKey = "result"
     var result: PerfectLib.JSONConvertible?
 
+    required init?(json: JSON) {
+    }
+    
+    convenience init?() {
+        self.init(json:[:])
+    }
+    
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
