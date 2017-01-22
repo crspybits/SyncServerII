@@ -59,7 +59,6 @@ import PerfectLib
 */
 
 enum UploadState : String {
-case uploading
 case uploaded
 case toPurge
 }
@@ -101,12 +100,10 @@ class Upload : NSObject, Model {
 }
 
 class UploadRepository : Repository {
-    private static let tableName = "Upload"
+    static var tableName:String {
+        return "Upload"
+    }
     
-    // See http://stackoverflow.com/questions/13397038/uuid-max-character-length
-    static let uuidLength = 36
-    
-    static let maxMimeTypeLength = 100
     static let stateMaxLength = 20
 
     static func create() -> Database.TableCreationResult {        
@@ -116,18 +113,18 @@ class UploadRepository : Repository {
             // Together, these three form a unique key. The deviceUUID is needed because two devices using the same userId (i.e., the same owning user credentials) could be uploading the same file at the same time.
         
             // permanent reference to file (assigned by app)
-            "fileUUID VARCHAR(\(uuidLength)) NOT NULL, " +
+            "fileUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
         
             // reference into User table
             "userId BIGINT NOT NULL, " +
             
             // identifies a specific mobile device (assigned by app)
-            "deviceUUID VARCHAR(\(uuidLength)) NOT NULL, " +
+            "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
                 
             // MIME type of the file
-            "mimeType VARCHAR(\(maxMimeTypeLength)) NOT NULL, " +
+            "mimeType VARCHAR(\(Database.maxMimeTypeLength)) NOT NULL, " +
 
-            // Free-form JSON Structure; App-specific meta data
+            // App-specific meta data
             "appMetaData TEXT, " +
 
             // true if file-upload, false if upload-deletion.
@@ -142,11 +139,6 @@ class UploadRepository : Repository {
             "UNIQUE (uploadId))"
         
         return Database.session.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
-    }
-    
-    // Remove entire table.
-    static func remove() -> Bool {
-        return Database.session.connection.query(statement: "DROP TABLE \(tableName)")
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
@@ -179,56 +171,26 @@ class UploadRepository : Repository {
         }
     }
     
-    enum LookupResult {
-        case found(Upload)
-        case noUploadFound
-        case error(String)
-    }
-    
     enum LookupKey : CustomStringConvertible {
         case uploadId(Int64)
+        case fileUUID(String)
         
         var description : String {
             switch self {
             case .uploadId(let uploadId):
                 return "uploadId(\(uploadId))"
+            case .fileUUID(let uuid):
+                return "fileUUID(\(uuid))"
             }
         }
     }
     
-    private static func lookupConstraint(key:LookupKey) -> String {
+    static func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .uploadId(let uploadId):
             return "uploadId = '\(uploadId)'"
-        }
-    }
-    
-    static func lookup(key: LookupKey) -> LookupResult {
-        let query = "select * from \(tableName) where " + lookupConstraint(key: key)
-        let select = Select(query: query, modelInit: Upload.init, ignoreErrors:false)
-        
-        switch select.numberResultRows() {
-        case 0:
-            return .noUploadFound
-            
-        case 1:
-            var result:Upload!
-            select.forEachRow { rowModel in
-                result = rowModel as! Upload
-            }
-            
-            if select.forEachRowStatus != nil {
-                let error = "Error: \(select.forEachRowStatus!) in Select forEachRow"
-                Log.error(message: error)
-                return .error(error)
-            }
-            
-            return .found(result)
-
-        default:
-            let error = "Error: \(select.numberResultRows()) in Select result: More than one Upload found!"
-            Log.error(message: error)
-            return .error(error)
+        case .fileUUID(let uuid):
+            return "fileUUID = '\(uuid)'"
         }
     }
 }

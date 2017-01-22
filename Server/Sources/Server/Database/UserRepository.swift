@@ -93,7 +93,9 @@ class User : NSObject, Model {
 }
 
 class UserRepository : Repository {
-    private static let tableName = "User"
+    static var tableName:String {
+        return "User"
+    }
     static let usernameMaxLength = 255
     static let credsIdMaxLength = 255
     static let accountTypeMaxLength = 20
@@ -118,17 +120,6 @@ class UserRepository : Repository {
         return Database.session.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
-    // Remove entire table.
-    static func remove() -> Bool {
-        return Database.session.connection.query(statement: "DROP TABLE \(tableName)")
-    }
-    
-    enum LookupResult {
-        case found(User)
-        case noUserFound
-        case error(String)
-    }
-    
     enum LookupKey : CustomStringConvertible {
         case userId(Int64)
         case accountTypeInfo(accountType:AccountType, credsId:String)
@@ -143,42 +134,13 @@ class UserRepository : Repository {
         }
     }
     
-    private static func lookupConstraint(key:LookupKey) -> String {
+    static func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .userId(let userId):
             return "userId = '\(userId)'"
             
         case .accountTypeInfo(accountType: let accountType, credsId: let credsId):
             return "accountType = '\(accountType)' AND credsId = '\(credsId)'"
-        }
-    }
-    
-    static func lookup(key:LookupKey) -> LookupResult {
-        let userQuery = "select * from \(tableName) where " + lookupConstraint(key: key)
-        let select = Select(query: userQuery, modelInit: User.init, ignoreErrors:false)
-        
-        switch select.numberResultRows() {
-        case 0:
-            return .noUserFound
-            
-        case 1:
-            var result:User!
-            select.forEachRow { rowModel in
-                result = rowModel as! User
-            }
-            
-            if select.forEachRowStatus != nil {
-                let error = "Error: \(select.forEachRowStatus!) in Select forEachRow"
-                Log.error(message: error)
-                return .error(error)
-            }
-            
-            return .found(result)
-
-        default:
-            let error = "Error: \(select.numberResultRows()) in Select result: More than one user for credentials!"
-            Log.error(message: error)
-            return .error(error)
         }
     }
     
@@ -224,26 +186,6 @@ class UserRepository : Repository {
             let error = Database.session.error
             Log.error(message: "Could not add user: \(error)")
             return false
-        }
-    }
-    
-    enum RemoveResult {
-        case removed
-        case error(String)
-    }
-    
-    static func remove(user key:LookupKey) -> RemoveResult {
-        let query = "delete from \(tableName) where " + lookupConstraint(key: key)
-        
-        if Database.session.connection.query(statement: query) {
-            // TODO: Ensure that only a single row was affected.
-            Log.info(message: "Successfully removed user: \(key)")
-            return .removed
-        }
-        else {
-            let error = Database.session.error
-            Log.error(message: "Could not remove user: \(error)")
-            return .error("\(error)")
         }
     }
 }

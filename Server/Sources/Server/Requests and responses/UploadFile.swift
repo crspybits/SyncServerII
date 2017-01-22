@@ -27,6 +27,9 @@ class UploadFileRequest : NSObject, RequestMessage {
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID:String!
     
+    static let appMetaDataKey = "appMetaData"
+    var appMetaData:String!
+    
     static let fileVersionKey = "fileVersion"
     // Using a String here because (a) value(forKey: name) doesn't appear to play well with Int's, and (b) because that's how it will arrive in JSON.
     var fileVersion:String!
@@ -40,16 +43,20 @@ class UploadFileRequest : NSObject, RequestMessage {
     var data = Data()
     var sizeOfDataInBytes:Int!
     
-    var fileVersionNumber:Int {
-        return Int(fileVersion)!
+    var fileVersionNumber:Int32 {
+        return Int32(fileVersion)!
     }
     
     var masterVersionNumber:Int {
         return Int(masterVersion)!
     }
     
-    func keys() -> [String] {
+    func nonNilKeys() -> [String] {
         return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.deviceUUIDKey, UploadFileRequest.fileVersionKey, UploadFileRequest.masterVersionKey]
+    }
+    
+    func allKeys() -> [String] {
+        return self.nonNilKeys() + [UploadFileRequest.appMetaDataKey]
     }
     
     required init?(json: JSON) {
@@ -61,8 +68,9 @@ class UploadFileRequest : NSObject, RequestMessage {
         self.deviceUUID = UploadFileRequest.deviceUUIDKey <~~ json
         self.fileVersion = UploadFileRequest.fileVersionKey <~~ json
         self.masterVersion = UploadFileRequest.masterVersionKey <~~ json
-
-        if !self.propertiesHaveValues(propertyNames: self.keys()) {
+        self.appMetaData = UploadFileRequest.appMetaDataKey <~~ json
+        
+        if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
         }
         
@@ -90,7 +98,8 @@ class UploadFileRequest : NSObject, RequestMessage {
             UploadFileRequest.cloudFolderNameKey ~~> self.cloudFolderName,
             UploadFileRequest.deviceUUIDKey ~~> self.deviceUUID,
             UploadFileRequest.fileVersionKey ~~> self.fileVersion,
-            UploadFileRequest.masterVersionKey ~~> self.masterVersion
+            UploadFileRequest.masterVersionKey ~~> self.masterVersion,
+            UploadFileRequest.appMetaDataKey ~~> self.appMetaData
         ])
     }
 }
@@ -98,11 +107,18 @@ class UploadFileRequest : NSObject, RequestMessage {
 class UploadFileResponse : ResponseMessage {
     static let resultKey = "result"
     var result: PerfectLib.JSONConvertible?
+    
+    // On a successful upload, this will be present in the response.
     static let sizeKey = "sizeInBytes"
     var size:Int64?
     
+    // If the master version for the user on the server has been incremented, this key will be present in the response-- with the new value of the master version. The upload was not attempted in this case.
+    static let masterVersionUpdateKey = "masterVersionUpdate"
+    var masterVersionUpdate:Int64?
+    
     required init?(json: JSON) {
         self.size = UploadFileResponse.sizeKey <~~ json
+        self.masterVersionUpdate = UploadFileResponse.masterVersionUpdateKey <~~ json
     }
     
     convenience init?() {
@@ -113,7 +129,8 @@ class UploadFileResponse : ResponseMessage {
     func toJSON() -> JSON? {
         return jsonify([
             UploadFileResponse.resultKey ~~> self.result,
-            UploadFileResponse.sizeKey ~~> self.size
+            UploadFileResponse.sizeKey ~~> self.size,
+            UploadFileResponse.masterVersionUpdateKey ~~> self.masterVersionUpdate
         ])
     }
 }

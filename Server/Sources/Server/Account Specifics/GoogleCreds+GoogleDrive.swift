@@ -26,7 +26,7 @@ extension GoogleCreds {
     /* For query parameter, see https://developers.google.com/drive/v3/web/search-parameters
     
         fieldsReturned parameter indicates the collection of fields to be returned in the, scoped over the entire response (not just the files resources). See https://developers.google.com/drive/v3/web/performance#partial
-        E.g., "files/id,files/size"
+            E.g., "files/id,files/size"
         See also see http://stackoverflow.com/questions/35143283/google-drive-api-v3-migration
     */
     func listFiles(query:String? = nil, fieldsReturned:String? = nil, completion:@escaping (_ fileListing:JSON?, Swift.Error?)->()) {
@@ -334,6 +334,7 @@ extension GoogleCreds {
                     completion(nil, resultError)
                 }
                 else {
+                    // TODO: This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
                     let searchType = SearchType.file(mimeType: request.mimeType, parentFolderId: folderId)
                     self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
                         if error == nil {

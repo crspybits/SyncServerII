@@ -14,6 +14,11 @@ import MySQL
 // For mySQL interface docs, see: http://perfect.org/docs/MySQL.html
 
 public class Database {
+    // See http://stackoverflow.com/questions/13397038/uuid-max-character-length
+    static let uuidLength = 36
+    
+    static let maxMimeTypeLength = 100
+
     public private(set) var connection: MySQL!
     static let session = Database()
 
@@ -83,7 +88,7 @@ public class Database {
         return .success(.created)
     }
     
-    public enum MySQLDateFormat {
+    public enum MySQLDateFormat : String {
     case DATE
     case DATETIME
     case TIMESTAMP

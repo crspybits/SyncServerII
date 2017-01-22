@@ -145,8 +145,6 @@ public class CreateRoutes {
             }
         }
         
-        var secondaryAuthUser:User?
-        
         if authenticationLevel == .secondary {
             let userExists = UserController.userExists(userProfile: profile!)
             switch userExists {
@@ -159,7 +157,7 @@ public class CreateRoutes {
                 return
                 
             case .exists(let user):
-                secondaryAuthUser = user
+                SignedInUser.session.current = user
             }
         }
         
@@ -209,7 +207,7 @@ public class CreateRoutes {
                     dbTransaction() {
                         if successGeneratingTokens! && authenticationLevel == .secondary {
                             // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
-                            if !UserRepository.updateCreds(creds: creds, forUser: secondaryAuthUser!) {
+                            if !UserRepository.updateCreds(creds: creds, forUser: SignedInUser.session.current!) {
                                 self.failWithError(message: "Could not update creds")
                             }
                         }

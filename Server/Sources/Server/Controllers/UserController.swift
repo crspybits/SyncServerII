@@ -16,6 +16,10 @@ class UserController : ControllerProtocol {
         if case .failure(_) = UserRepository.create() {
             return false
         }
+        
+        if case .failure(_) = MasterVersionRepository.create() {
+            return false
+        }
 
         return true
     }
@@ -35,13 +39,14 @@ class UserController : ControllerProtocol {
             return .error
         }
         
-        let result = UserRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:userProfile.id))
+        let result = UserRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:userProfile.id), modelInit: User.init)
         
         switch result {
-        case .found(let user):
+        case .found(let object):
+            let user = object as! User
             return .exists(user)
             
-        case .noUserFound:
+        case .noObjectFound:
             return .doesNotExist
             
         case .error(_):
@@ -74,7 +79,13 @@ class UserController : ControllerProtocol {
             completion(nil)
             return
         }
-
+        
+        if !MasterVersionRepository.upsert(userId:userId!) {
+            Log.error(message: "Failed on creating MasterVersion record for user!")
+            completion(nil)
+            return
+        }
+        
         let response = AddUserResponse()!
         response.result = "success"
         completion(response)
@@ -95,7 +106,7 @@ class UserController : ControllerProtocol {
         completion: @escaping (ResponseMessage?)->()) {
         assert(ServerEndpoints.removeUser.authenticationLevel == .secondary)
         
-        if case .removed = UserRepository.remove(user: .accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)) {
+        if case .removed = UserRepository.remove(key: .accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)) {
             let response = RemoveUserResponse()!
             response.result = "Success"
             completion(response)
@@ -103,5 +114,7 @@ class UserController : ControllerProtocol {
         else {
             completion(nil)
         }
+        
+        // TODO: Also need to remove records from other tables, e.g., Upload and MasterVersion.
     }
 }

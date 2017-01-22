@@ -14,17 +14,22 @@ import Kitura
 public protocol RequestMessage : NSObjectProtocol, Encodable, Decodable {
     init?(json: JSON)
     init?(request: RouterRequest)
-    func keys() -> [String]
+    func allKeys() -> [String]
+    func nonNilKeys() -> [String]
 }
 
 public extension RequestMessage {
-    func keys() -> [String] {
+    func allKeys() -> [String] {
+        return []
+    }
+
+    func nonNilKeys() -> [String] {
         return []
     }
     
     func urlParameters() -> String? {
         var result = ""
-        for key in self.keys() {
+        for key in self.allKeys() {
             if let value = self.valueForProperty(propertyName: key) {
                 if result.characters.count > 0 {
                     result += "&"

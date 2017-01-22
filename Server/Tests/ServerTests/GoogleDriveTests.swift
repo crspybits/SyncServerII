@@ -28,11 +28,6 @@ class GoogleDriveTests: ServerTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    func testSingleQuote() {
-        let x = "'foo'"
-        print(x)
-    }
 
     func testListFiles() {
         let creds = GoogleCreds()
