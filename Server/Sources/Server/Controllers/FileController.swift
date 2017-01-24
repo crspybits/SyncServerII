@@ -146,6 +146,39 @@ class FileController : ControllerProtocol {
             return
         }
         
-        // TODO: Now, do the heavy lifting. We're transfering info to the FileIndex repository.
+        // Now, do the heavy lifting.
+        
+        // First, transfer info to the FileIndex repository from Upload.
+        let numberTransferred = FileIndexRepository.transferUploads(userId: SignedInUser.session.current!.userId, deviceUUID: doneUploadsRequest.deviceUUID!)
+        
+        if numberTransferred == nil  {
+            _ = LockRepository.unlock(userId: SignedInUser.session.current!.userId)
+            Log.error(message: "Failed on transfer to FileIndex!")
+            completion(nil)
+            return
+        }
+        
+        // Second, remove the corresponding records from the Upload repo.
+        let filesForUser = UploadRepository.LookupKey.filesForUser(userId: SignedInUser.session.current!.userId, deviceUUID: doneUploadsRequest.deviceUUID!)
+        
+        switch UploadRepository.remove(key: filesForUser) {
+        case .removed(let numberRows):
+            if numberRows != numberTransferred {
+                Log.error(message: "Number rows removed from Upload was \(numberRows) but should have been \(numberTransferred)!")
+                completion(nil)
+                return
+            }
+            
+        case .error(_):
+            Log.error(message: "Failed removing rows from Upload!")
+            completion(nil)
+            return
+        }
+        
+        _ = LockRepository.unlock(userId: SignedInUser.session.current!.userId)
+        
+        response = DoneUploadsResponse()
+        response!.numberUploadsTransferred = numberTransferred
+        completion(response)
     }
 }

@@ -22,7 +22,7 @@ protocol Repository {
 }
 
 enum RepositoryRemoveResult {
-    case removed
+    case removed(numberRows:Int32)
     case error(String)
 }
 
@@ -38,18 +38,17 @@ extension Repository {
         return Database.session.connection.query(statement: "DROP TABLE \(tableName)")
     }
     
-    // Remove a single row from the table.
+    // Remove row(s) from the table.
     static func remove(key:LOOKUPKEY) -> RepositoryRemoveResult {
         let query = "delete from \(tableName) where " + lookupConstraint(key: key)
         
         if Database.session.connection.query(statement: query) {
-            // TODO: Ensure that only a single row was affected.
             Log.info(message: "Successfully removed user: \(key)")
-            return .removed
+            return .removed(numberRows:Int32(Database.session.connection.numberAffectedRows()))
         }
         else {
             let error = Database.session.error
-            Log.error(message: "Could not remove user: \(error)")
+            Log.error(message: "Could not remove rows: \(error)")
             return .error("\(error)")
         }
     }

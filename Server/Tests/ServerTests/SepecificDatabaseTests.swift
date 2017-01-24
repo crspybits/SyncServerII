@@ -253,7 +253,6 @@ class SepecificDatabaseTests: ServerTestCase {
     
     func doAddFileIndex() -> FileIndex {
         let fileIndex = FileIndex()
-        fileIndex.deviceUUID = PerfectLib.UUID().string
         fileIndex.fileSizeBytes = 100
         fileIndex.deleted = false
         fileIndex.fileUUID = PerfectLib.UUID().string
@@ -282,7 +281,6 @@ class SepecificDatabaseTests: ServerTestCase {
             
         case .found(let object):
             let fileIndex2 = object as! FileIndex
-            XCTAssert(fileIndex1.deviceUUID != nil && fileIndex1.deviceUUID == fileIndex2.deviceUUID)
             XCTAssert(fileIndex1.fileSizeBytes != nil && fileIndex1.fileSizeBytes == fileIndex2.fileSizeBytes)
             XCTAssert(fileIndex1.deleted != nil && fileIndex1.deleted == fileIndex2.deleted)
             XCTAssert(fileIndex1.fileUUID != nil && fileIndex1.fileUUID == fileIndex2.fileUUID)

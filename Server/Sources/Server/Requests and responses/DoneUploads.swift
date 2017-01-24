@@ -60,11 +60,17 @@ class DoneUploadsResponse : ResponseMessage {
     static let resultKey = "result"
     var result: PerfectLib.JSONConvertible?
     
+    // On successful operation, this gives the number of uploads entries transferred to the FileIndex.
+    static let numberUploadsTransferredKey = "numberUploadsTransferred"
+    var numberUploadsTransferred:Int32?
+    
     // If the master version for the user on the server has been incremented, this key will be present in the response-- with the new value of the master version. The doneUploads operation was not attempted in this case.
     static let masterVersionUpdateKey = "masterVersionUpdate"
     var masterVersionUpdate:Int64?
     
     required init?(json: JSON) {
+        self.numberUploadsTransferred = DoneUploadsResponse.numberUploadsTransferredKey <~~ json
+        self.masterVersionUpdate = DoneUploadsResponse.masterVersionUpdateKey <~~ json
     }
     
     convenience init?() {
@@ -74,7 +80,8 @@ class DoneUploadsResponse : ResponseMessage {
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
-            DoneUploadsResponse.masterVersionUpdateKey ~~> self.masterVersionUpdate
+            DoneUploadsResponse.masterVersionUpdateKey ~~> self.masterVersionUpdate,
+            DoneUploadsResponse.numberUploadsTransferredKey ~~> self.numberUploadsTransferred
         ])
     }
 }

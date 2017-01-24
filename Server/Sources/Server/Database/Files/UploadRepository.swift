@@ -166,7 +166,7 @@ class UploadRepository : Repository {
         }
         else {
             let error = Database.session.error
-            Log.error(message: "Could not add Upload: \(error)")
+            Log.error(message: "Could not insert into \(tableName): \(error)")
             return nil
         }
     }
@@ -174,13 +174,16 @@ class UploadRepository : Repository {
     enum LookupKey : CustomStringConvertible {
         case uploadId(Int64)
         case fileUUID(String)
+        case filesForUser(userId:Int64, deviceUUID:String)
         
         var description : String {
             switch self {
             case .uploadId(let uploadId):
                 return "uploadId(\(uploadId))"
-            case .fileUUID(let uuid):
-                return "fileUUID(\(uuid))"
+            case .fileUUID(let fileUUID):
+                return "fileUUID(\(fileUUID))"
+            case .filesForUser(let userId, let deviceUUID):
+                return "userId(\(userId)); deviceUUID(\(deviceUUID)); "
             }
         }
     }
@@ -189,8 +192,21 @@ class UploadRepository : Repository {
         switch key {
         case .uploadId(let uploadId):
             return "uploadId = '\(uploadId)'"
-        case .fileUUID(let uuid):
-            return "fileUUID = '\(uuid)'"
+        case .fileUUID(let fileUUID):
+            return "fileUUID = '\(fileUUID)'"
+        case .filesForUser(let userId, let deviceUUID):
+            return "userId = \(userId) and deviceUUID = '\(deviceUUID)'"
         }
+    }
+    
+    static func selectForTransferToUpload(userId: Int64, deviceUUID:String) -> String {
+        let filesForUser = lookupConstraint(key: .filesForUser(userId: userId, deviceUUID: deviceUUID))
+        
+        // The ordering of the fields in the following SELECT is *very important*. 
+        // Also: false is a cheat-- and corresponds to the `deleted` field in the FileIndex.
+        let select = "SELECT  fileUUID, userId, mimeType, appMetaData, false, fileVersion, fileSizeBytes " +
+            "FROM  \(tableName) " +
+            "WHERE  \(filesForUser)"
+        return select
     }
 }

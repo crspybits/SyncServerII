@@ -62,6 +62,8 @@ import CredentialsGoogle
 	}
 */
 
+// TODO: We may want to have an additional repository giving the deviceUUID's for each user. This would enable double checking that we have an allowed deviceUUID, plus, we could limit the number of devices per user.
+
 class User : NSObject, Model {
     var userId: Int64!
     var username: String!
@@ -164,7 +166,7 @@ class UserRepository : Repository {
         }
         else {
             let error = Database.session.error
-            Log.error(message: "Could not add user: \(error)")
+            Log.error(message: "Could not insert into \(tableName): \(error)")
             return nil
         }
     }
@@ -184,7 +186,7 @@ class UserRepository : Repository {
         }
         else {
             let error = Database.session.error
-            Log.error(message: "Could not add user: \(error)")
+            Log.error(message: "Could not update row for \(tableName): \(error)")
             return false
         }
     }

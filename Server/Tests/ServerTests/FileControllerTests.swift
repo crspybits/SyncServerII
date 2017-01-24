@@ -23,6 +23,8 @@ class FileControllerTests: ServerTestCase {
         _ = UploadRepository.create()
         _ = MasterVersionRepository.remove()
         _ = MasterVersionRepository.create()
+        _ = FileIndexRepository.remove()
+        _ = FileIndexRepository.create()
     }
     
     override func tearDown() {
@@ -30,7 +32,7 @@ class FileControllerTests: ServerTestCase {
         super.tearDown()
     }
 
-    func runUploadTest(data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64) {
+    func runUploadTest(data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil) {
         self.performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             
@@ -40,8 +42,13 @@ class FileControllerTests: ServerTestCase {
                 XCTAssert(dict != nil)
                 
                 if let uploadResponse = UploadFileResponse(json: dict!) {
-                    XCTAssert(uploadResponse.size != nil)
-                    XCTAssert(uploadResponse.size == expectedUploadSize)
+                    if updatedMasterVersionExpected == nil {
+                        XCTAssert(uploadResponse.size != nil)
+                        XCTAssert(uploadResponse.size == expectedUploadSize)
+                    }
+                    else {
+                        XCTAssert(uploadResponse.masterVersionUpdate == updatedMasterVersionExpected)
+                    }
                 }
                 else {
                     XCTFail()
@@ -53,10 +60,14 @@ class FileControllerTests: ServerTestCase {
                     XCTFail("\(error)")
                     
                 case .found(_):
-                    break
+                    if updatedMasterVersionExpected != nil {
+                        XCTFail("No Upload Found")
+                    }
 
                 case .noObjectFound:
-                    XCTFail("No Upload Found")
+                    if updatedMasterVersionExpected == nil {
+                        XCTFail("No Upload Found")
+                    }
                 }
 
                 expectation.fulfill()
@@ -64,8 +75,10 @@ class FileControllerTests: ServerTestCase {
         }
     }
     
-    func testUploadTextFile() {
-        self.addNewUser()
+    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil) {
+        if addUser {
+            self.addNewUser()
+        }
         
         let stringToUpload = "Hello World!"
         let data = stringToUpload.data(using: .utf8)
@@ -74,17 +87,23 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.deviceUUIDKey: PerfectLib.UUID().string,
+            UploadFileRequest.deviceUUIDKey: deviceUUID,
             UploadFileRequest.fileVersionKey: "1",
             UploadFileRequest.masterVersionKey: "0"
         ])
         
-        runUploadTest(data:data!, uploadRequest:uploadRequest!, expectedUploadSize:Int64(stringToUpload.characters.count))
+        runUploadTest(data:data!, uploadRequest:uploadRequest!, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected)
     }
     
-    func testUploadJPEGFile() {
-        self.addNewUser()
-
+    func testUploadTextFile() {
+        uploadTextFile()
+    }
+    
+    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true) {
+        if addUser {
+            self.addNewUser()
+        }
+        
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
         let sizeOfCatFileInBytes:Int64 = 1162662
         let data = try! Data(contentsOf: fileURL)
@@ -94,23 +113,84 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
             UploadFileRequest.fileVersionKey: "1",
-            UploadFileRequest.deviceUUIDKey: PerfectLib.UUID().string,
+            UploadFileRequest.deviceUUIDKey: deviceUUID,
             UploadFileRequest.masterVersionKey: "0"
         ])
         
         runUploadTest(data:data, uploadRequest:uploadRequest!, expectedUploadSize:sizeOfCatFileInBytes)
     }
     
-    // TODO: A test that causes a conflict with the master version on the server. Presumably this needs to take the form of (a) device1 uploading a file to the server, (b) device2 uploading a file, and finishing that upload (`DoneUploads` endpoint), and (c) device1 uploading a second file using its original master version.
-    func testMasterVersionUpdate() {
+    func testUploadJPEGFile() {
+        uploadJPEGFile()
+    }
+    
+    func sendDoneUploads(expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil) {
+        self.performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            
+            let doneUploadsRequest = DoneUploadsRequest(json: [
+                DoneUploadsRequest.deviceUUIDKey: deviceUUID,
+                DoneUploadsRequest.masterVersionKey : "0"
+            ])
+        
+            self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
+                XCTAssert(dict != nil)
+                
+                if let doneUploadsResponse = DoneUploadsResponse(json: dict!) {
+                    XCTAssert(doneUploadsResponse.masterVersionUpdate == updatedMasterVersionExpected)
+                    XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads)
+                }
+                else {
+                    XCTFail()
+                }
+                
+                expectation.fulfill()
+            }
+        }
+    }
+    
+    // A test that causes a conflict with the master version on the server. Presumably this needs to take the form of (a) device1 uploading a file to the server, (b) device2 uploading a file, and finishing that upload (`DoneUploads` endpoint), and (c) device1 uploading a second file using its original master version.
+    func testMasterVersionConflict1() {
+        let deviceUUID1 = PerfectLib.UUID().string
+        uploadTextFile(deviceUUID:deviceUUID1)
+        
+        let deviceUUID2 = PerfectLib.UUID().string
+        uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2)
+        
+        uploadTextFile(deviceUUID:deviceUUID2, addUser:false, updatedMasterVersionExpected:1)
+    }
+    
+    func testMasterVersionConflict2() {
+        let deviceUUID1 = PerfectLib.UUID().string
+        uploadTextFile(deviceUUID:deviceUUID1)
+        
+        let deviceUUID2 = PerfectLib.UUID().string
+        uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1)
     }
     
     func testDoneUploadsWithNoUploads() {
+        self.addNewUser()
+        self.sendDoneUploads(expectedNumberOfUploads: 0)
     }
     
     func testDoneUploadsWithSingleUpload() {
+        let deviceUUID = PerfectLib.UUID().string
+        uploadTextFile(deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
     }
     
     func testDoneUploadsWithTwoUploads() {
+        let deviceUUID = PerfectLib.UUID().string
+        uploadTextFile(deviceUUID:deviceUUID)
+        uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
+        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
     }
 }

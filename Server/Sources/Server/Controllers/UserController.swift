@@ -106,14 +106,16 @@ class UserController : ControllerProtocol {
         completion: @escaping (ResponseMessage?)->()) {
         assert(ServerEndpoints.removeUser.authenticationLevel == .secondary)
         
-        if case .removed = UserRepository.remove(key: .accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)) {
-            let response = RemoveUserResponse()!
-            response.result = "Success"
-            completion(response)
+        if case .removed(let numberRows) = UserRepository.remove(key: .accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)) {
+            if numberRows == 1 {
+                let response = RemoveUserResponse()!
+                response.result = "Success"
+                completion(response)
+                return
+            }
         }
-        else {
-            completion(nil)
-        }
+        
+        completion(nil)
         
         // TODO: Also need to remove records from other tables, e.g., Upload and MasterVersion.
     }

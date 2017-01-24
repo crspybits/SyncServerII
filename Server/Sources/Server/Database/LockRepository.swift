@@ -95,7 +95,7 @@ class LockRepository : Repository {
         }
         else {
             let error = Database.session.error
-            Log.error(message: "Could not add lock: \(error)")
+            Log.error(message: "Could not insert into \(tableName): \(error)")
             return false
         }
     }
