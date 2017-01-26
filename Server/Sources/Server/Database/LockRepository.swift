@@ -12,7 +12,7 @@ import Foundation
 import PerfectLib
 
 class Lock : NSObject, Model {
-    var userId: Int64!
+    var userId: UserId!
     var deviceUUID: String!
     var expiry: Date!
     

@@ -72,7 +72,7 @@ class FileController : ControllerProtocol {
                 upload.fileSizeBytes = Int64(fileSize!)
                 upload.fileUpload = true
                 upload.fileUUID = uploadRequest.fileUUID
-                upload.fileVersion = uploadRequest.fileVersionNumber
+                upload.fileVersion = uploadRequest.fileVersion
                 upload.mimeType = uploadRequest.mimeType
                 upload.state = .uploaded
                 upload.userId = SignedInUser.session.current!.userId

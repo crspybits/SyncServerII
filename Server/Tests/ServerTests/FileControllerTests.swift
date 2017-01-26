@@ -88,8 +88,8 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.deviceUUIDKey: deviceUUID,
-            UploadFileRequest.fileVersionKey: "1",
-            UploadFileRequest.masterVersionKey: "0"
+            UploadFileRequest.fileVersionKey: 1,
+            UploadFileRequest.masterVersionKey: 0
         ])
         
         runUploadTest(data:data!, uploadRequest:uploadRequest!, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected)
@@ -112,9 +112,9 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
-            UploadFileRequest.fileVersionKey: "1",
+            UploadFileRequest.fileVersionKey: 1,
             UploadFileRequest.deviceUUIDKey: deviceUUID,
-            UploadFileRequest.masterVersionKey: "0"
+            UploadFileRequest.masterVersionKey: 0
         ])
         
         runUploadTest(data:data, uploadRequest:uploadRequest!, expectedUploadSize:sizeOfCatFileInBytes)

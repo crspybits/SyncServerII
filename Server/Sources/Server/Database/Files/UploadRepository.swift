@@ -63,10 +63,10 @@ case uploaded
 case toPurge
 }
 
-class Upload : NSObject, Model {
+class Upload : NSObject, Model, Filenaming {
     var uploadId: Int64!
     var fileUUID: String!
-    var userId: Int64!
+    var userId: UserId!
     var deviceUUID: String!
     var mimeType: String!
     var appMetaData: String!
@@ -74,7 +74,7 @@ class Upload : NSObject, Model {
     let fileUploadKey = "fileUpload"
     var fileUpload:Bool!
     
-    var fileVersion: Int32!
+    var fileVersion: FileVersionInt!
     
     let stateKey = "state"
     var state:UploadState!
@@ -200,13 +200,13 @@ class UploadRepository : Repository {
     }
     
     static func selectForTransferToUpload(userId: Int64, deviceUUID:String) -> String {
-        let filesForUser = lookupConstraint(key: .filesForUser(userId: userId, deviceUUID: deviceUUID))
-        
-        // The ordering of the fields in the following SELECT is *very important*. 
-        // Also: false is a cheat-- and corresponds to the `deleted` field in the FileIndex.
-        let select = "SELECT  fileUUID, userId, mimeType, appMetaData, false, fileVersion, fileSizeBytes " +
+        let filesForUserConstraint = lookupConstraint(key: .filesForUser(userId: userId, deviceUUID: deviceUUID))
+
+        // The ordering of the fields in the following SELECT is *very important*. It must correspond to that used in the FileIndexRepository in the method that uses this method.
+        // Also: false corresponds to the `deleted` field in the FileIndex.
+        let select = "SELECT  fileUUID, userId, deviceUUID, mimeType, appMetaData, false, fileVersion, fileSizeBytes " +
             "FROM  \(tableName) " +
-            "WHERE  \(filesForUser)"
+            "WHERE  \(filesForUserConstraint)"
         return select
     }
 }

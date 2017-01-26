@@ -10,6 +10,7 @@ import Foundation
 import PerfectLib
 import Gloss
 import Kitura
+import Reflection
 
 public protocol RequestMessage : NSObjectProtocol, Encodable, Decodable {
     init?(json: JSON)
@@ -30,12 +31,12 @@ public extension RequestMessage {
     func urlParameters() -> String? {
         var result = ""
         for key in self.allKeys() {
-            if let value = self.valueForProperty(propertyName: key) {
+            if let keyValue = valueForProperty(propertyName: key) {
                 if result.characters.count > 0 {
                     result += "&"
                 }
                 
-                result += "\(key)=\(value)"
+                result += "\(key)=\(keyValue)"
             }
         }
         
@@ -48,9 +49,7 @@ public extension RequestMessage {
     }
     
     func propertyHasValue(propertyName:String) -> Bool {
-        let objSelf = self as! NSObject
-        if objSelf.value(forKey: propertyName) == nil {
-            Log.error(message: "Object: \(self) has nil for property: \(propertyName)")
+        if valueForProperty(propertyName: propertyName) == nil {
             return false
         }
         else {
@@ -59,8 +58,14 @@ public extension RequestMessage {
     }
     
     func valueForProperty(propertyName:String) -> Any? {
-        let objSelf = self as! NSObject
-        return objSelf.value(forKey: propertyName)
+        var keyValue: Any?
+        do {
+            keyValue = try Reflection.get(propertyName, from: self)
+        } catch (let error) {
+            Log.error(message: "Error trying to get \(propertyName): \(error)")
+        }
+        
+        return keyValue
     }
     
     // Returns false if any of the properties do not have value.

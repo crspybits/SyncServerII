@@ -256,6 +256,7 @@ class SepecificDatabaseTests: ServerTestCase {
         fileIndex.fileSizeBytes = 100
         fileIndex.deleted = false
         fileIndex.fileUUID = PerfectLib.UUID().string
+        fileIndex.deviceUUID = PerfectLib.UUID().string
         fileIndex.fileVersion = 1
         fileIndex.mimeType = "text/plain"
         fileIndex.userId = 1
@@ -284,6 +285,8 @@ class SepecificDatabaseTests: ServerTestCase {
             XCTAssert(fileIndex1.fileSizeBytes != nil && fileIndex1.fileSizeBytes == fileIndex2.fileSizeBytes)
             XCTAssert(fileIndex1.deleted != nil && fileIndex1.deleted == fileIndex2.deleted)
             XCTAssert(fileIndex1.fileUUID != nil && fileIndex1.fileUUID == fileIndex2.fileUUID)
+            XCTAssert(fileIndex1.deviceUUID != nil && fileIndex1.deviceUUID == fileIndex2.deviceUUID)
+
             XCTAssert(fileIndex1.fileVersion != nil && fileIndex1.fileVersion == fileIndex2.fileVersion)
             XCTAssert(fileIndex1.mimeType != nil && fileIndex1.mimeType == fileIndex2.mimeType)
             XCTAssert(fileIndex1.userId != nil && fileIndex1.userId == fileIndex2.userId)

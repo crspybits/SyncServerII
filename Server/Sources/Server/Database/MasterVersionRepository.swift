@@ -10,8 +10,8 @@ import Foundation
 import PerfectLib
 
 class MasterVersion : NSObject, Model {
-    var userId: Int64!
-    var masterVersion: Int64!
+    var userId: UserId!
+    var masterVersion: MasterVersionInt!
 }
 
 class MasterVersionRepository : Repository {

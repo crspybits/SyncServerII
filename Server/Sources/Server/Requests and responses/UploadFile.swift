@@ -11,7 +11,7 @@ import PerfectLib
 import Gloss
 import Kitura
 
-class UploadFileRequest : NSObject, RequestMessage {
+class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     // MARK: Properties for use in request message.
     
     static let fileUUIDKey = "fileUUID"
@@ -31,25 +31,16 @@ class UploadFileRequest : NSObject, RequestMessage {
     var appMetaData:String!
     
     static let fileVersionKey = "fileVersion"
-    // Using a String here because (a) value(forKey: name) doesn't appear to play well with Int's, and (b) because that's how it will arrive in JSON.
-    var fileVersion:String!
+    var fileVersion:FileVersionInt!
     
     // Overall version for files for the specific user; assigned by the server.
     static let masterVersionKey = "masterVersion"
-    var masterVersion:String!
+    var masterVersion:MasterVersionInt!
     
     // MARK: Properties NOT used in the request message.
     
     var data = Data()
     var sizeOfDataInBytes:Int!
-    
-    var fileVersionNumber:Int32 {
-        return Int32(fileVersion)!
-    }
-    
-    var masterVersionNumber:Int {
-        return Int(masterVersion)!
-    }
     
     func nonNilKeys() -> [String] {
         return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.deviceUUIDKey, UploadFileRequest.fileVersionKey, UploadFileRequest.masterVersionKey]

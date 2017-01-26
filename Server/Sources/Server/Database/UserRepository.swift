@@ -64,8 +64,10 @@ import CredentialsGoogle
 
 // TODO: We may want to have an additional repository giving the deviceUUID's for each user. This would enable double checking that we have an allowed deviceUUID, plus, we could limit the number of devices per user.
 
+typealias UserId = Int64
+
 class User : NSObject, Model {
-    var userId: Int64!
+    var userId: UserId!
     var username: String!
     
     let accountTypeKey = "accountType"

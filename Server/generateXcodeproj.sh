@@ -19,6 +19,9 @@ fi
 if [[ KILLED -eq 1 ]]; then
 	if [ "empty$1" == "emptyupdate" ]; then
     	swift package update
+    elif [ "$#" -eq 1 ]; then
+    	echo "Unknown argument!"
+    	exit
     fi
 	swift package generate-xcodeproj
 	./tweakXcodeproj.rb

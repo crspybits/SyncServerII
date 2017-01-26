@@ -9,6 +9,7 @@
 import PerfectLib
 import Foundation
 import MySQL
+import Reflection
 
 // See https://github.com/PerfectlySoft/Perfect-MySQL for assumptions about mySQL installation.
 // For mySQL interface docs, see: http://perfect.org/docs/MySQL.html
@@ -180,7 +181,7 @@ class Select {
                 return
             }
             
-            let rowModel = self.modelInit!()
+            var rowModel = self.modelInit!()
             
 			for fieldNumber in 0 ..< results.numFields {
                 let fieldName = self.fieldNames[fieldNumber]!
@@ -229,7 +230,7 @@ class Select {
                 }
                 
                 do {
-                    try rowModel.set(value: rowFieldValue!, key: fieldName)
+                    try Reflection.set(rowFieldValue!, key: fieldName, for: rowModel)
                 } catch {
                     let message = "Problem with KVC set for: \(self.fieldTypes[fieldNumber]!); fieldNumber: \(fieldNumber)"
                     Log.error(message: message)

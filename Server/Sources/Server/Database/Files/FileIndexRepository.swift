@@ -11,17 +11,20 @@
 import Foundation
 import PerfectLib
 
-class FileIndex : NSObject, Model {
-    var fileIndexId: Int64!
+typealias FileIndexId = Int64
+
+class FileIndex : NSObject, Model, Filenaming {
+    var fileIndexId: FileIndexId!
     var fileUUID: String!
-    var userId: Int64!
+    var deviceUUID:String!
+    var userId: UserId!
     var mimeType: String!
     var appMetaData: String!
     
     let deletedKey = "deleted"
     var deleted:Bool!
     
-    var fileVersion: Int32!
+    var fileVersion: FileVersionInt!
     
     var fileSizeBytes: Int64!
     
@@ -46,14 +49,16 @@ class FileIndexRepository : Repository {
     static func create() -> Database.TableCreationResult {        
         let createColumns =
             "(fileIndexId BIGINT NOT NULL AUTO_INCREMENT, " +
-            
-            // Together, these two form a unique key. The deviceUUID is needed because two devices using the same userId (i.e., the same owning user credentials) could be uploading the same file at the same time.
-        
+                        
             // permanent reference to file (assigned by app)
             "fileUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
         
             // reference into User table
             "userId BIGINT NOT NULL, " +
+            
+            // identifies a specific mobile device (assigned by app)
+            // This plays a different role than it did in the Upload table. Here, it forms part of the filename in cloud storage, and thus must be retained. We will ignore this field otherwise, i.e., we will not have two entries in this table for the same userId, fileUUID pair.
+            "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
                 
             // MIME type of the file
             "mimeType VARCHAR(\(Database.maxMimeTypeLength)) NOT NULL, " +
@@ -75,12 +80,12 @@ class FileIndexRepository : Repository {
     }
     
     private static func columnNames(appMetaDataFieldName:String = "appMetaData,") -> String {
-        return "fileUUID, userId, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes"
+        return "fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes"
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     static func add(fileIndex:FileIndex) -> Int64? {
-        if fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil {
+        if fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil {
             Log.error(message: "One of the model values was nil!")
             return nil
         }
@@ -97,7 +102,7 @@ class FileIndexRepository : Repository {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
-        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!));"
+        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!));"
         
         if Database.session.connection.query(statement: query) {
             return Database.session.connection.lastInsertId()
