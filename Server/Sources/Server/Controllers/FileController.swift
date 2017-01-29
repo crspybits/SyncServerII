@@ -181,4 +181,51 @@ class FileController : ControllerProtocol {
         response!.numberUploadsTransferred = numberTransferred
         completion(response)
     }
+    
+    func fileIndex(_ request: RequestMessage, creds:Creds?, profile:UserProfile?,
+        completion:@escaping (ResponseMessage?)->()) {
+        
+        guard request is FileIndexRequest else {
+            Log.error(message: "Did not receive FileIndexRequest")
+            completion(nil)
+            return
+        }
+        
+        // TODO: Should make sure that the device UUID in the FileIndexRequest is actually associated with the user. (But, need DeviceUUIDRepository for that.).
+        
+        var errorMessage:String?
+        var masterVersion:MasterVersionInt?
+        
+        // Get masterVersion to return to caller.
+        let result = MasterVersionRepository.lookup(key: .userId(SignedInUser.session.current!.userId), modelInit: MasterVersion.init)
+        switch result {
+        case .error(let error):
+            errorMessage = "Failed lookup in MasterVersionRepository: \(error)"
+            
+        case .found(let object):
+            let masterVersionObj = object as! MasterVersion
+            masterVersion = masterVersionObj.masterVersion
+            
+        case .noObjectFound:
+            errorMessage = "Could not find MasterVersion"
+        }
+
+        if errorMessage != nil {
+            Log.error(message: errorMessage!)
+            completion(nil)
+            return
+        }
+        
+        let fileIndexResult = FileIndexRepository.fileIndex(forUserId: SignedInUser.session.current!.userId)
+        switch fileIndexResult {
+        case .fileIndex(let fileIndex):
+            let response = FileIndexResponse()!
+            response.fileIndex = fileIndex
+            response.masterVersion = masterVersion
+            completion(response)
+            
+        case .error(_):
+            completion(nil)
+        }
+    }
 }

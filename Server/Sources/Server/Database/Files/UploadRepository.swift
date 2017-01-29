@@ -174,7 +174,8 @@ class UploadRepository : Repository {
     enum LookupKey : CustomStringConvertible {
         case uploadId(Int64)
         case fileUUID(String)
-        case filesForUser(userId:Int64, deviceUUID:String)
+        case userId(UserId)
+        case filesForUser(userId:UserId, deviceUUID:String)
         
         var description : String {
             switch self {
@@ -182,6 +183,8 @@ class UploadRepository : Repository {
                 return "uploadId(\(uploadId))"
             case .fileUUID(let fileUUID):
                 return "fileUUID(\(fileUUID))"
+            case .userId(let userId):
+                return "userId(\(userId))"
             case .filesForUser(let userId, let deviceUUID):
                 return "userId(\(userId)); deviceUUID(\(deviceUUID)); "
             }
@@ -194,12 +197,14 @@ class UploadRepository : Repository {
             return "uploadId = '\(uploadId)'"
         case .fileUUID(let fileUUID):
             return "fileUUID = '\(fileUUID)'"
+        case .userId(let userId):
+            return "userId = '\(userId)'"
         case .filesForUser(let userId, let deviceUUID):
             return "userId = \(userId) and deviceUUID = '\(deviceUUID)'"
         }
     }
     
-    static func selectForTransferToUpload(userId: Int64, deviceUUID:String) -> String {
+    static func selectForTransferToUpload(userId: UserId, deviceUUID:String) -> String {
         let filesForUserConstraint = lookupConstraint(key: .filesForUser(userId: userId, deviceUUID: deviceUUID))
 
         // The ordering of the fields in the following SELECT is *very important*. It must correspond to that used in the FileIndexRepository in the method that uses this method.

@@ -22,7 +22,7 @@ class Lock : NSObject, Model {
         super.init()
     }
     
-    init(userId: Int64, deviceUUID: String,
+    init(userId: UserId, deviceUUID: String,
         additionalExpiryDuration:TimeInterval = Lock.additionalExpiryDuration) {
         self.userId = userId
         self.deviceUUID = deviceUUID
@@ -55,7 +55,7 @@ class LockRepository : Repository {
     }
     
     enum LookupKey : CustomStringConvertible {
-        case userId(Int64)
+        case userId(UserId)
         
         var description : String {
             switch self {
@@ -80,7 +80,7 @@ class LockRepository : Repository {
         }
         
         if removeStale {
-            if !removeStaleLock(forUserId: lock.userId!) {
+            if removeStaleLock(forUserId: lock.userId!) == nil {
                 Log.error(message: "Error removing stale locks!")
                 return false
             }
@@ -101,8 +101,8 @@ class LockRepository : Repository {
     }
     
     // Omit the userId parameter to remove all stale locks.
-    // TODO: It would be good to return whether or not any stale locks were actually removed. e.g., the number of locks removed.
-    static func removeStaleLock(forUserId userId:Int64? = nil) -> Bool {
+    // Returns the number of stale locks that were actually removed, or nil if there was an error.
+    static func removeStaleLock(forUserId userId:UserId? = nil) -> Int? {
         let staleDate = Database.date(Date(), toFormat: dateFormat)
         
         var userIdConstraint = ""
@@ -113,16 +113,18 @@ class LockRepository : Repository {
         let query = "DELETE FROM \(tableName) WHERE \(userIdConstraint) expiry < '\(staleDate)'"
         
         if Database.session.connection.query(statement: query) {
-            return true
+            let numberLocksRemoved = Int(Database.session.connection.numberAffectedRows())
+            Log.info(message: "Number of locks removed: \(numberLocksRemoved)")
+            return numberLocksRemoved
         }
         else {
             let error = Database.session.error
             Log.error(message: "Could not remove stale lock: \(error)")
-            return false
+            return nil
         }
     }
     
-    static func unlock(userId:Int64) -> Bool {
+    static func unlock(userId:UserId) -> Bool {
         let query = "DELETE FROM \(tableName) WHERE userId = \(userId)"
         
         if Database.session.connection.query(statement: query) {

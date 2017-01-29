@@ -106,17 +106,47 @@ class UserController : ControllerProtocol {
         completion: @escaping (ResponseMessage?)->()) {
         assert(ServerEndpoints.removeUser.authenticationLevel == .secondary)
         
-        if case .removed(let numberRows) = UserRepository.remove(key: .accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)) {
+        var success = 0
+        let expectedSuccess = 5
+        
+        // We'll just do each of the removals, not checking for error after each. Since this is done on the basis of a db transaction, we'll be rolling back if there is an error in any case.
+        
+        // I'm not going to remove the users files in their cloud storage. They own those. I think I don't have any business removing their files in this context.
+        
+        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)
+        if case .removed(let numberRows) = UserRepository.remove(key: userRepoKey) {
             if numberRows == 1 {
-                let response = RemoveUserResponse()!
-                response.result = "Success"
-                completion(response)
-                return
+                success += 1
             }
         }
         
-        completion(nil)
+        let uploadRepoKey = UploadRepository.LookupKey.userId(SignedInUser.session.current!.userId)
+        if case .removed(_) = UploadRepository.remove(key: uploadRepoKey) {
+            success += 1
+        }
         
-        // TODO: Also need to remove records from other tables, e.g., Upload and MasterVersion.
+        let masterVersionRepKey = MasterVersionRepository.LookupKey.userId(SignedInUser.session.current!.userId)
+        if case .removed(_) = MasterVersionRepository.remove(key: masterVersionRepKey) {
+            success += 1
+        }
+        
+        let lockRepoKey = LockRepository.LookupKey.userId(SignedInUser.session.current!.userId)
+        if case .removed(_) = LockRepository.remove(key: lockRepoKey) {
+            success += 1
+        }
+        
+        let fileIndexRepoKey = FileIndexRepository.LookupKey.userId(SignedInUser.session.current!.userId)
+        if case .removed(_) = FileIndexRepository.remove(key: fileIndexRepoKey) {
+            success += 1
+        }
+        
+        if success == expectedSuccess {
+            let response = RemoveUserResponse()!
+            response.result = "Success"
+            completion(response)
+        }
+        else {
+            completion(nil)
+        }
     }
 }

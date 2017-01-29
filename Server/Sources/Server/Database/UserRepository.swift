@@ -64,8 +64,6 @@ import CredentialsGoogle
 
 // TODO: We may want to have an additional repository giving the deviceUUID's for each user. This would enable double checking that we have an allowed deviceUUID, plus, we could limit the number of devices per user.
 
-typealias UserId = Int64
-
 class User : NSObject, Model {
     var userId: UserId!
     var username: String!
@@ -125,7 +123,7 @@ class UserRepository : Repository {
     }
     
     enum LookupKey : CustomStringConvertible {
-        case userId(Int64)
+        case userId(UserId)
         case accountTypeInfo(accountType:AccountType, credsId:String)
         
         var description : String {
@@ -183,8 +181,14 @@ class UserRepository : Repository {
             lookupConstraint(key: .userId(user.userId))
         
         if Database.session.connection.query(statement: query) {
-            // TODO: Make sure only a single row was affected.
-            return true
+            let numberUpdates = Database.session.connection.numberAffectedRows()
+            if numberUpdates == 1 {
+                return true
+            }
+            else {
+                Log.error(message: "Expected 1 update, but had \(numberUpdates)")
+                return false
+            }
         }
         else {
             let error = Database.session.error

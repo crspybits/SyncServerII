@@ -116,12 +116,15 @@ class FileIndexRepository : Repository {
     
     enum LookupKey : CustomStringConvertible {
         case fileIndexId(Int64)
+        case userId(UserId)
         case primaryKeys(userId:String, fileUUID:String)
         
         var description : String {
             switch self {
             case .fileIndexId(let fileIndexId):
                 return "fileIndexId(\(fileIndexId))"
+            case .userId(let userId):
+                return "userId(\(userId))"
             case .primaryKeys(let userId, let fileUUID):
                 return "userId(\(userId)); fileUUID(\(fileUUID))"
             }
@@ -132,13 +135,15 @@ class FileIndexRepository : Repository {
         switch key {
         case .fileIndexId(let fileIndexId):
             return "fileIndexId = '\(fileIndexId)'"
+        case .userId(let userId):
+            return "userId = '\(userId)'"
         case .primaryKeys(let userId, let fileUUID):
             return "userId = \(userId) and fileUUID = '\(fileUUID)'"
         }
     }
     
     // Returns nil on failure, and on success returns the number of uploads transferred.
-    static func transferUploads(userId: Int64, deviceUUID:String) -> Int32? {
+    static func transferUploads(userId: UserId, deviceUUID:String) -> Int32? {
         // The ordering of fields in the INSERT must match that in selectForTransferToUpload.
         let query = "INSERT INTO \(tableName) (\(columnNames())) " +
         UploadRepository.selectForTransferToUpload(userId: userId, deviceUUID: deviceUUID)
@@ -150,6 +155,39 @@ class FileIndexRepository : Repository {
             let error = Database.session.error
             Log.error(message: "Could not transferUploads: \(error)")
             return nil
+        }
+    }
+    
+    enum FileIndexResult {
+    case fileIndex([FileIndexResponse.FileInfo])
+    case error(Swift.Error)
+    }
+    
+    static func fileIndex(forUserId userId: UserId) -> FileIndexResult {
+        let query = "select * from \(tableName) where userId = \(userId)"
+        let select = Select(query: query, modelInit: FileIndex.init, ignoreErrors:false)
+        
+        var result:[FileIndexResponse.FileInfo] = []
+        
+        select.forEachRow { rowModel in
+            let rowModel = rowModel as! FileIndex
+
+            let fileInfo = FileIndexResponse.FileInfo()!
+            fileInfo.fileUUID = rowModel.fileUUID
+            fileInfo.appMetaData = rowModel.appMetaData
+            fileInfo.fileVersion = rowModel.fileVersion
+            fileInfo.deleted = rowModel.deleted
+            fileInfo.fileSizeBytes = rowModel.fileSizeBytes
+            fileInfo.mimeType = rowModel.mimeType
+            
+            result.append(fileInfo)
+        }
+        
+        if select.forEachRowStatus == nil {
+            return .fileIndex(result)
+        }
+        else {
+            return .error(select.forEachRowStatus!)
         }
     }
 }

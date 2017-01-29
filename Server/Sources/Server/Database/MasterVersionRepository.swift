@@ -34,7 +34,7 @@ class MasterVersionRepository : Repository {
     }
     
     enum LookupKey : CustomStringConvertible {
-        case userId(Int64)
+        case userId(UserId)
         
         var description : String {
             switch self {
@@ -53,7 +53,7 @@ class MasterVersionRepository : Repository {
 
     // For a new record, gives the version: initialMasterVersion
     // For existing records, adds 1 to the version.
-    static func upsert(userId:Int64) -> Bool {
+    static func upsert(userId:UserId) -> Bool {
         let query = "INSERT INTO \(tableName) (userId, masterVersion) " +
             "VALUES(\(userId), \(initialMasterVersion)) " +
             "ON DUPLICATE KEY UPDATE masterVersion = masterVersion + 1 "

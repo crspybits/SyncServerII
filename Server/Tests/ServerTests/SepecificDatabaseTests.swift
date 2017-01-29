@@ -167,7 +167,7 @@ class SepecificDatabaseTests: ServerTestCase {
         }
     }
     
-    func checkMasterVersion(userId:Int64, version:Int64) {
+    func checkMasterVersion(userId:UserId, version:Int64) {
         let result = MasterVersionRepository.lookup(key: .userId(userId), modelInit: MasterVersion.init)
         switch result {
         case .error(let error):
@@ -182,7 +182,7 @@ class SepecificDatabaseTests: ServerTestCase {
         }
     }
     
-    let userId:Int64 = 1
+    let userId:UserId = 1
 
     func doUpsertMasterVersion() {
         if !MasterVersionRepository.upsert(userId:userId) {
@@ -210,7 +210,7 @@ class SepecificDatabaseTests: ServerTestCase {
     func testThatNewlyAddedLocksAreNotStale() {
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
         XCTAssert(LockRepository.lock(lock: lock))
-        XCTAssert(LockRepository.removeStaleLock(forUserId: 1))
+        XCTAssert(LockRepository.removeStaleLock(forUserId: 1) == 0)
         XCTAssert(!LockRepository.lock(lock: lock))
     }
     
@@ -222,7 +222,7 @@ class SepecificDatabaseTests: ServerTestCase {
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
-        XCTAssert(LockRepository.removeStaleLock(forUserId: 1))
+        XCTAssert(LockRepository.removeStaleLock(forUserId: 1) == 1)
         XCTAssert(LockRepository.lock(lock: lock, removeStale:false))
     }
     
@@ -238,7 +238,7 @@ class SepecificDatabaseTests: ServerTestCase {
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
-        XCTAssert(LockRepository.removeStaleLock())
+        XCTAssert(LockRepository.removeStaleLock() == 2)
         
         XCTAssert(LockRepository.lock(lock: lock1, removeStale:false))
         XCTAssert(LockRepository.lock(lock: lock2, removeStale:false))
@@ -251,7 +251,7 @@ class SepecificDatabaseTests: ServerTestCase {
         XCTAssert(LockRepository.lock(lock: lock))
     }
     
-    func doAddFileIndex() -> FileIndex {
+    func doAddFileIndex(userId:UserId = 1) -> FileIndex {
         let fileIndex = FileIndex()
         fileIndex.fileSizeBytes = 100
         fileIndex.deleted = false
@@ -259,7 +259,7 @@ class SepecificDatabaseTests: ServerTestCase {
         fileIndex.deviceUUID = PerfectLib.UUID().string
         fileIndex.fileVersion = 1
         fileIndex.mimeType = "text/plain"
-        fileIndex.userId = 1
+        fileIndex.userId = userId
         fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
         
         let result1 = FileIndexRepository.add(fileIndex: fileIndex)
@@ -294,6 +294,52 @@ class SepecificDatabaseTests: ServerTestCase {
 
         case .noObjectFound:
             XCTFail("No Upload Found")
+        }
+    }
+    
+    func testFileIndexWithNoFiles() {
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = .Google
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = "100"
+        
+        let result1 = UserRepository.add(user: user1)
+        XCTAssert(result1 == 1, "Bad credentialsId!")
+        
+        let fileIndexResult = FileIndexRepository.fileIndex(forUserId: result1!)
+        switch fileIndexResult {
+        case .fileIndex(let fileIndex):
+            XCTAssert(fileIndex.count == 0)
+        case .error(_):
+            XCTFail()
+        }
+    }
+    
+    func testFileIndexWithOneFile() {
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = .Google
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = "100"
+        
+        let userId = UserRepository.add(user: user1)
+        XCTAssert(userId == 1, "Bad credentialsId!")
+        
+        let fileIndexInserted = doAddFileIndex(userId: userId!)
+
+        let fileIndexResult = FileIndexRepository.fileIndex(forUserId: userId!)
+        switch fileIndexResult {
+        case .fileIndex(let fileIndex):
+            XCTAssert(fileIndex.count == 1)
+            XCTAssert(fileIndexInserted.appMetaData == fileIndex[0].appMetaData)
+            XCTAssert(fileIndexInserted.fileUUID == fileIndex[0].fileUUID)
+            XCTAssert(fileIndexInserted.fileVersion == fileIndex[0].fileVersion)
+            XCTAssert(fileIndexInserted.mimeType == fileIndex[0].mimeType)
+            XCTAssert(fileIndexInserted.deleted == fileIndex[0].deleted)
+            XCTAssert(fileIndexInserted.fileSizeBytes == fileIndex[0].fileSizeBytes)
+        case .error(_):
+            XCTFail()
         }
     }
 }

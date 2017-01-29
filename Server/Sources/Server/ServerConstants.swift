@@ -77,12 +77,13 @@ public class ServerEndpoints {
     // public static let redeemSharingInvitation = "RedeemSharingInvitation"
     // public static let getLinkedAccountsForSharingUser = "GetLinkedAccountsForSharingUser"
     
+    public static let fileIndex = ServerEndpoint("FileIndex", method: .get)
     public static let uploadFile = ServerEndpoint("UploadFile", method: .post)
     public static let doneUploads = ServerEndpoint("DoneUploads", method: .post)
 
     public static let session = ServerEndpoints()
     
     private init() {
-        all.append(contentsOf: [ServerEndpoints.healthCheck, ServerEndpoints.addUser, ServerEndpoints.checkCreds, ServerEndpoints.removeUser, ServerEndpoints.uploadFile, ServerEndpoints.doneUploads])
+        all.append(contentsOf: [ServerEndpoints.healthCheck, ServerEndpoints.addUser, ServerEndpoints.checkCreds, ServerEndpoints.removeUser, ServerEndpoints.fileIndex, ServerEndpoints.uploadFile, ServerEndpoints.doneUploads])
     }
 }

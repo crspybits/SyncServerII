@@ -181,7 +181,7 @@ class Select {
                 return
             }
             
-            var rowModel = self.modelInit!()
+            let rowModel = self.modelInit!()
             
 			for fieldNumber in 0 ..< results.numFields {
                 let fieldName = self.fieldNames[fieldNumber]!
