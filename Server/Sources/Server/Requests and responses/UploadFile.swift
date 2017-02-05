@@ -7,13 +7,17 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
+
+#if SERVER
+import PerfectLib
 import Kitura
+#endif
 
 class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     // MARK: Properties for use in request message.
     
+    // Assigned by client.
     static let fileUUIDKey = "fileUUID"
     var fileUUID:String!
     
@@ -24,6 +28,7 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName:String!
     
+    // Assigned by client.
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID:String!
     
@@ -61,16 +66,19 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
         self.masterVersion = UploadFileRequest.masterVersionKey <~~ json
         self.appMetaData = UploadFileRequest.appMetaDataKey <~~ json
         
+#if SERVER
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
         }
-        
+#endif
+
         guard let _ = NSUUID(uuidString: self.fileUUID),
             let _ = NSUUID(uuidString: self.deviceUUID) else {
             return nil
         }
     }
-    
+
+#if SERVER
     required convenience init?(request: RouterRequest) {
         self.init(json: request.queryParameters)
         do {
@@ -81,6 +89,7 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
             return nil
         }
     }
+#endif
     
     func toJSON() -> JSON? {
         return jsonify([
@@ -96,9 +105,6 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
 }
 
 class UploadFileResponse : ResponseMessage {
-    static let resultKey = "result"
-    var result: PerfectLib.JSONConvertible?
-    
     // On a successful upload, this will be present in the response.
     static let sizeKey = "sizeInBytes"
     var size:Int64?
@@ -119,7 +125,6 @@ class UploadFileResponse : ResponseMessage {
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
-            UploadFileResponse.resultKey ~~> self.result,
             UploadFileResponse.sizeKey ~~> self.size,
             UploadFileResponse.masterVersionUpdateKey ~~> self.masterVersionUpdate
         ])

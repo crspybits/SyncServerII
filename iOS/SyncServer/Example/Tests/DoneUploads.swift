@@ -20,6 +20,7 @@ class DoneUploads: TestCase {
         super.tearDown()
     }
     
+    // TODO: Move `testLockOnDoneUploadsWorks` from server tests to here.
     func testExample() {
     }
 }

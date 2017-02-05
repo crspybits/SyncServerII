@@ -7,14 +7,18 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
+
+#if SERVER
 import Kitura
+#endif
 
 class CheckPrimaryCredsRequest : NSObject, RequestMessage {
-    required init?(request: RouterRequest) {
-        super.init()
+#if SERVER
+    required convenience init?(request: RouterRequest) {
+        self.init(json: request.queryParameters)
     }
+#endif
     
     required init?(json: JSON) {
         super.init()
@@ -27,9 +31,6 @@ class CheckPrimaryCredsRequest : NSObject, RequestMessage {
 }
 
 class CheckPrimaryCredsResponse : ResponseMessage {
-    static let resultKey = "result"
-    var result: PerfectLib.JSONConvertible?
-
     required init?(json: JSON) {
     }
     

@@ -44,7 +44,11 @@ public struct ServerEndpoint {
     public let method:ServerHTTPMethod
     public let authenticationLevel:AuthenticationLevel
     
+    // Don't put a trailing "/" on the pathName.
     public init(_ pathName:String, method:ServerHTTPMethod, authenticationLevel:AuthenticationLevel = .secondary) {
+        
+        assert(pathName.characters.count > 0 && pathName.characters.last != "/")
+        
         self.pathName = pathName
         self.method = method
         self.authenticationLevel = authenticationLevel
@@ -80,6 +84,7 @@ public class ServerEndpoints {
     public static let fileIndex = ServerEndpoint("FileIndex", method: .get)
     public static let uploadFile = ServerEndpoint("UploadFile", method: .post)
     public static let doneUploads = ServerEndpoint("DoneUploads", method: .post)
+    public static let downloadFile = ServerEndpoint("DownloadFile", method: .post)
 
     public static let session = ServerEndpoints()
     

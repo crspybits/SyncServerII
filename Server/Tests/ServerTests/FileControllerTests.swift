@@ -25,6 +25,8 @@ class FileControllerTests: ServerTestCase {
         _ = MasterVersionRepository.create()
         _ = FileIndexRepository.remove()
         _ = FileIndexRepository.create()
+        _ = LockRepository.remove()
+        _ = LockRepository.create()
     }
     
     override func tearDown() {
@@ -35,6 +37,9 @@ class FileControllerTests: ServerTestCase {
     func runUploadTest(data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil) {
         self.performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            
+            // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
+            XCTAssert(ServerEndpoints.uploadFile.method == .post)
             
             self.performRequest(route: ServerEndpoints.uploadFile, headers: headers, urlParameters: "?" + uploadRequest.urlParameters()!, body:data) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -137,7 +142,7 @@ class FileControllerTests: ServerTestCase {
                 DoneUploadsRequest.deviceUUIDKey: deviceUUID,
                 DoneUploadsRequest.masterVersionKey : "0"
             ])
-        
+            
             self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
@@ -178,9 +183,74 @@ class FileControllerTests: ServerTestCase {
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
+        // No uploads should have been successfully finished, i.e., expectedNumberOfUploads = nil, and the updatedMasterVersion should have been updated to 1.
         self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1)
     }
-    
+
+#if false
+    func testLockOnDoneUploadsWorks() {
+        let deviceUUID1 = PerfectLib.UUID().string
+        _ = uploadTextFile(deviceUUID:deviceUUID1)
+        
+        let deviceUUID2 = PerfectLib.UUID().string
+        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
+        
+        let expectation2 = self.expectation(description: "Second")
+
+        self.performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            
+            let doneUploadsRequest1 = DoneUploadsRequest(json: [
+                DoneUploadsRequest.deviceUUIDKey: deviceUUID1,
+                DoneUploadsRequest.masterVersionKey : "0"
+            ])
+            
+            doneUploadsRequest1!.testLockSync = 5 // seconds
+        
+            var doneRequest1 = false
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                // This request will be delayed for 5 seconds because of testLockSync.a`
+                self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest1!.urlParameters()!, body:nil) { response, dict in
+                    Log.info("Done Request1: Status code: \(response!.statusCode)")
+                    XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
+                    XCTAssert(dict != nil)
+                    
+                    doneRequest1 = true
+                    
+                    if let doneUploadsResponse = DoneUploadsResponse(json: dict!) {
+                        XCTAssert(doneUploadsResponse.masterVersionUpdate == nil)
+                        XCTAssert(doneUploadsResponse.numberUploadsTransferred == 1)
+                    }
+                    else {
+                        XCTFail()
+                    }
+                    
+                    expectation.fulfill()
+                }
+            }
+
+            // Let above request get started.
+            Thread.sleep(forTimeInterval: 1)
+            
+            let doneUploadsRequest2 = DoneUploadsRequest(json: [
+                DoneUploadsRequest.deviceUUIDKey: deviceUUID2,
+                DoneUploadsRequest.masterVersionKey : "0"
+            ])
+
+            self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest2!.urlParameters()!, body:nil) { response, dict in
+                Log.info("Done Request2: Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode != .OK, "doneUploadsRequest request succeeded!")
+                
+                // We should complete this request *before* the first request.
+                XCTAssert(!doneRequest1)
+                
+                expectation2.fulfill()
+            }
+        }
+    }
+#endif
+
     func testDoneUploadsWithNoUploads() {
         self.addNewUser()
         self.sendDoneUploads(expectedNumberOfUploads: 0)

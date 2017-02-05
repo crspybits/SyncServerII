@@ -36,17 +36,17 @@ puts "Add Script Phase to #{target}"
 phase = target.new_shell_script_build_phase()
 phase.shell_script = "cp Server.json /tmp; cp Resources/Cat.jpg /tmp"
 
-# 3) Add in DEBUG flag
+# 3) Add in DEBUG and SERVER flags
 	
-# A little overkill, but hopefully appending a DEBUG flag in the Debug configuration for each target doesn't hurt it.
+# A little overkill, but hopefully appending these flags in the Debug configuration for each target doesn't hurt it.
 project.targets.each do |target|
-	puts "Appending DEBUG flag to #{target}"
+	puts "Appending flags to #{target}"
 	
 	if target.build_settings('Debug')['OTHER_SWIFT_FLAGS'].nil?
 		target.build_settings('Debug')['OTHER_SWIFT_FLAGS'] = ""
 	end
 
-	target.build_settings('Debug')['OTHER_SWIFT_FLAGS'] << '-DDEBUG'
+	target.build_settings('Debug')['OTHER_SWIFT_FLAGS'] << '-DDEBUG -DSERVER'
 end
 
 project.save()

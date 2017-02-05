@@ -13,6 +13,8 @@ import PerfectLib
 import Kitura
 
 public class ServerMain {
+    // If server fails to start, try looking for a process using the port:
+    //      sudo lsof -i -n -P | grep TCP | grep 8181
     public static let port = 8181
     
     public enum ServerStartup {

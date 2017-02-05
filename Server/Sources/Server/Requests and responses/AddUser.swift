@@ -7,14 +7,18 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
-import Kitura
 
-class AddUserRequest : NSObject, RequestMessage {    
-    required init?(request: RouterRequest) {
-        super.init()
+#if SERVER
+import Kitura
+#endif
+
+class AddUserRequest : NSObject, RequestMessage {
+#if SERVER
+    required convenience init?(request: RouterRequest) {
+        self.init(json: request.queryParameters)
     }
+#endif
     
     required init?(json: JSON) {
         super.init()
@@ -27,9 +31,6 @@ class AddUserRequest : NSObject, RequestMessage {
 }
 
 class AddUserResponse : ResponseMessage {
-    static let resultKey = "result"
-    var result: PerfectLib.JSONConvertible?
-
     required init?(json: JSON) {
     }
     
@@ -40,7 +41,6 @@ class AddUserResponse : ResponseMessage {
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
-            AddUserResponse.resultKey ~~> self.result,
         ])
     }
 }

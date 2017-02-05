@@ -7,9 +7,11 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
+
+#if SERVER
 import Kitura
+#endif
 
 // Check to see if both primary and secondary authentication succeed.
 class CheckCredsRequest : NSObject, RequestMessage {
@@ -28,9 +30,6 @@ class CheckCredsRequest : NSObject, RequestMessage {
 }
 
 class CheckCredsResponse : ResponseMessage {
-    static let resultKey = "result"
-    var result: PerfectLib.JSONConvertible?
-
     required init?(json: JSON) {
     }
     
@@ -41,7 +40,6 @@ class CheckCredsResponse : ResponseMessage {
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
-            CheckCredsResponse.resultKey ~~> self.result
         ])
     }
 }

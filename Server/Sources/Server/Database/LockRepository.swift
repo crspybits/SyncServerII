@@ -16,18 +16,18 @@ class Lock : NSObject, Model {
     var deviceUUID: String!
     var expiry: Date!
     
-    static let additionalExpiryDuration:TimeInterval = 60
+    static let expiryDuration:TimeInterval = 60
 
     override init() {
         super.init()
     }
     
     init(userId: UserId, deviceUUID: String,
-        additionalExpiryDuration:TimeInterval = Lock.additionalExpiryDuration) {
+        expiryDuration:TimeInterval = Lock.expiryDuration) {
         self.userId = userId
         self.deviceUUID = deviceUUID
         let calendar = Calendar.current
-        expiry = calendar.date(byAdding: .second, value: Int(additionalExpiryDuration), to: Date())!
+        expiry = calendar.date(byAdding: .second, value: Int(expiryDuration), to: Date())!
     }
 }
 

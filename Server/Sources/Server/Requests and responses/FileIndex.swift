@@ -7,9 +7,11 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
+
+#if SERVER
 import Kitura
+#endif
 
 // Request an index of all files owned by the user-- queries the meta data on the sync server.
 
@@ -32,15 +34,19 @@ class FileIndexRequest : NSObject, RequestMessage {
         
         self.deviceUUID = FileIndexRequest.deviceUUIDKey <~~ json
 
+#if SERVER
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
         }
+#endif
     }
     
+#if SERVER
     required convenience init?(request: RouterRequest) {
         self.init(json: request.queryParameters)
     }
-    
+#endif
+
     func toJSON() -> JSON? {
         return jsonify([
             FileIndexRequest.deviceUUIDKey ~~> self.deviceUUID
@@ -96,10 +102,6 @@ class FileIndexResponse : ResponseMessage {
             ])
         }
     }
-
-    // TODO: Need to remove these across all response messages. I'm not using this.
-    static let resultKey = "result"
-    var result: PerfectLib.JSONConvertible?
     
     static let masterVersionKey = "masterVersion"
     var masterVersion:MasterVersionInt!

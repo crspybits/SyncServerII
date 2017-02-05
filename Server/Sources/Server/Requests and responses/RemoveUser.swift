@@ -7,9 +7,11 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
+
+#if SERVER
 import Kitura
+#endif
 
 class RemoveUserRequest : NSObject, RequestMessage {
     // No specific user info is required here because the HTTP auth headers are used to identify the user to be removed. i.e., for now a user can only remove themselves.
@@ -17,9 +19,11 @@ class RemoveUserRequest : NSObject, RequestMessage {
         super.init()
     }
     
-    required init?(request: RouterRequest) {
-        super.init()
+#if SERVER
+    required convenience init?(request: RouterRequest) {
+        self.init(json: request.queryParameters)
     }
+#endif
     
     func toJSON() -> JSON? {
         return jsonify([
@@ -28,9 +32,6 @@ class RemoveUserRequest : NSObject, RequestMessage {
 }
 
 class RemoveUserResponse : ResponseMessage {
-    static let resultKey = "result"
-    var result: PerfectLib.JSONConvertible?
-
     required init?(json: JSON) {
     }
     
@@ -41,7 +42,6 @@ class RemoveUserResponse : ResponseMessage {
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
-            AddUserResponse.resultKey ~~> self.result,
         ])
     }
 }

@@ -8,6 +8,6 @@
 
 import Foundation
 
-typealias MasterVersionInt = Int64
-typealias FileVersionInt = Int32
-typealias UserId = Int64
+public typealias MasterVersionInt = Int64
+public typealias FileVersionInt = Int32
+public typealias UserId = Int64

@@ -40,4 +40,6 @@ TODO: Add long description of the pod here.
   # s.frameworks = 'UIKit', 'MapKit'
 	s.dependency 'AFNetworking'
 	s.dependency 'SMCoreLib'
+	s.dependency 'Gloss'
+	s.dependency 'Reflection'
 end

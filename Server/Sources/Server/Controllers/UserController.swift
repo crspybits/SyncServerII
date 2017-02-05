@@ -87,7 +87,6 @@ class UserController : ControllerProtocol {
         }
         
         let response = AddUserResponse()!
-        response.result = "success"
         completion(response)
     }
     
@@ -97,7 +96,6 @@ class UserController : ControllerProtocol {
         assert(ServerEndpoints.checkCreds.authenticationLevel == .secondary)
         
         let response = CheckCredsResponse()!
-        response.result = "Success"
         completion(response)
     }
     
@@ -142,7 +140,6 @@ class UserController : ControllerProtocol {
         
         if success == expectedSuccess {
             let response = RemoveUserResponse()!
-            response.result = "Success"
             completion(response)
         }
         else {

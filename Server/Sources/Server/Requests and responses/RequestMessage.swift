@@ -7,14 +7,21 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
-import Kitura
 import Reflection
+
+#if SERVER
+import PerfectLib
+import Kitura
+#endif
 
 public protocol RequestMessage : NSObjectProtocol, Encodable, Decodable {
     init?(json: JSON)
+    
+#if SERVER
     init?(request: RouterRequest)
+#endif
+
     func allKeys() -> [String]
     func nonNilKeys() -> [String]
 }
@@ -62,7 +69,12 @@ public extension RequestMessage {
         do {
             keyValue = try Reflection.get(propertyName, from: self)
         } catch (let error) {
-            Log.error(message: "Error trying to get \(propertyName): \(error)")
+            let message = "Error trying to get \(propertyName): \(error)"
+#if SERVER
+            Log.error(message: message)
+#else
+            print(message)
+#endif
         }
         
         return keyValue
@@ -72,6 +84,12 @@ public extension RequestMessage {
     func propertiesHaveValues(propertyNames:[String]) -> Bool {
         for propertyName in propertyNames {
             if !self.propertyHasValue(propertyName: propertyName) {
+                let message = "Property: \(propertyName) does not have a value"
+#if SERVER
+                Log.info(message: message)
+#else
+                print(message)
+#endif
                 return false
             }
         }
@@ -79,3 +97,4 @@ public extension RequestMessage {
         return true
     }
 }
+

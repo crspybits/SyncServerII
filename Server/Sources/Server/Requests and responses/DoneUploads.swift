@@ -7,9 +7,11 @@
 //
 
 import Foundation
-import PerfectLib
 import Gloss
+
+#if SERVER
 import Kitura
+#endif
 
 class DoneUploadsRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.
@@ -21,6 +23,12 @@ class DoneUploadsRequest : NSObject, RequestMessage {
     static let masterVersionKey = "masterVersion"
     var masterVersion:String!
     
+#if DEBUG
+    // Give a time value in seconds -- after the lock is obtained, the server for sleep for this lock to test locking operation.
+    static let testLockSyncKey = "testLockSync"
+    var testLockSync:Int32?
+#endif
+    
     var masterVersionNumber:Int {
         return Int(masterVersion)!
     }
@@ -30,7 +38,11 @@ class DoneUploadsRequest : NSObject, RequestMessage {
     }
     
     func allKeys() -> [String] {
+#if DEBUG
+        return self.nonNilKeys() + [DoneUploadsRequest.testLockSyncKey]
+#else
         return self.nonNilKeys()
+#endif
     }
     
     required init?(json: JSON) {
@@ -38,28 +50,36 @@ class DoneUploadsRequest : NSObject, RequestMessage {
         
         self.masterVersion = DoneUploadsRequest.masterVersionKey <~~ json
         self.deviceUUID = DoneUploadsRequest.deviceUUIDKey <~~ json
+#if DEBUG
+        self.testLockSync = DoneUploadsRequest.testLockSyncKey <~~ json
+#endif
 
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
         }
     }
     
+#if SERVER
     required convenience init?(request: RouterRequest) {
         self.init(json: request.queryParameters)
     }
+#endif
     
     func toJSON() -> JSON? {
-        return jsonify([
+        var result = [
             DoneUploadsRequest.masterVersionKey ~~> self.masterVersion,
             DoneUploadsRequest.deviceUUIDKey ~~> self.deviceUUID
-        ])
+        ]
+        
+#if DEBUG
+        result += [DoneUploadsRequest.testLockSyncKey ~~> self.testLockSync]
+#endif
+        
+        return jsonify(result)
     }
 }
 
 class DoneUploadsResponse : ResponseMessage {
-    static let resultKey = "result"
-    var result: PerfectLib.JSONConvertible?
-    
     // On successful operation, this gives the number of uploads entries transferred to the FileIndex.
     static let numberUploadsTransferredKey = "numberUploadsTransferred"
     var numberUploadsTransferred:Int32?

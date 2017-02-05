@@ -45,7 +45,7 @@ class ServerNetworking {
     }
     
     // In the completion handler, if error != nil, there will be a non-nil serverResponse.
-    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL, withParameters parameters:[String:AnyObject]? = nil,
+    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL, withParameters parameters:[String:Any]? = nil,
         completion:((_ serverResponse:[String:AnyObject]?, _ statusCode:Int?, _ error:Error?)->())?) {
         /*  
         1) The http address here must *not* be localhost as we're addressing my Mac Laptop, where the Node.js server is running, and this app is running on my iPhone, a separate device.
@@ -88,7 +88,7 @@ class ServerNetworking {
         func success(request:URLSessionDataTask, response:Any?) {
             resetHeaderKeys()
             let httpResponse = request.response as! HTTPURLResponse
-            print("httpResponse.statusCode: \(httpResponse.statusCode)")
+            Log.msg("httpResponse.statusCode: \(httpResponse.statusCode)")
         
             if let responseDict = response as? [String:AnyObject] {
                 Log.msg("AFNetworking Success: \(response)")
@@ -102,8 +102,8 @@ class ServerNetworking {
         func failure(request:URLSessionDataTask?, error:Error) {
             resetHeaderKeys()
             let httpResponse = request?.response as? HTTPURLResponse
-            print("response.statusCode: \(httpResponse?.statusCode)")
-            print("**** AFNetworking FAILURE: \(error)")
+            Log.error("response.statusCode: \(httpResponse?.statusCode)")
+            Log.error("**** AFNetworking FAILURE: \(error)")
             completion?(nil, httpResponse?.statusCode, error)
         }
 
@@ -128,7 +128,67 @@ class ServerNetworking {
         }
     }
     
-    /*
+    enum PostUploadDataToError : Error {
+    case ErrorConvertingServerResponseToJsonDict
+    case CouldNotGetHTTPURLResponse
+    case BadStatusCode(statusCode: Int)
+    }
+    
+    // Data is sent in the body via a POST request (not multipart).
+    func postUploadDataTo(_ serverURL: URL, dataToUpload:Data, completion:((_ serverResponse:[String:Any]?, _ error:Error?)->())?) {
+    
+        let sessionConfiguration = URLSessionConfiguration.default
+        sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
+        
+        // If needed, use a delegate here to track upload progress.
+        let session = URLSession(configuration: sessionConfiguration)
+    
+        // Data uploading task. We could use NSURLSessionUploadTask instead of NSURLSessionDataTask if we needed to support uploads in the background
+        
+        var request = URLRequest(url: serverURL)
+        request.httpMethod = "POST"
+        request.httpBody = dataToUpload
+        
+        let uploadTask:URLSessionDataTask = session.dataTask(with: request) { (data, urlResponse, error) in
+            if error == nil {
+                // With an HTTP or HTTPS request, we get HTTPURLResponse back. See https://developer.apple.com/reference/foundation/urlsession/1407613-datatask
+                guard let response = urlResponse as? HTTPURLResponse else {
+                    completion?(nil, PostUploadDataToError.CouldNotGetHTTPURLResponse)
+                    return
+                }
+                
+                if response.statusCode != 200 {
+                    Log.error("Failed upload with HTTP status code: \(response.statusCode)")
+                    completion?(nil, PostUploadDataToError.BadStatusCode(statusCode: response.statusCode))
+                    return
+                }
+                
+                var json:Any?
+                do {
+                    try json = JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions(rawValue: UInt(0)))
+                } catch (let error) {
+                    Log.error("Error in JSON conversion: \(error)")
+                    completion?(nil, error)
+                    return
+                }
+                
+                guard let jsonDict = json as? [String: Any] else {
+                    completion?(nil, PostUploadDataToError.ErrorConvertingServerResponseToJsonDict)
+                    return
+                }
+                
+                Log.msg("No errors on upload: jsonDict: \(jsonDict)")
+                completion?(jsonDict, error)
+            }
+            else {
+                completion?(nil, error)
+            }
+        }
+        
+        uploadTask.resume()
+    }
+
+#if false
     // withParameters must have a non-nil key SMServerConstants.fileMIMEtypeKey
     func uploadFileTo(_ serverURL: URL, fileToUpload:URL, withParameters parameters:[String:AnyObject]?, completion:((_ serverResponse:[String:AnyObject]?, _ error:NSError?)->())?) {
         
@@ -221,13 +281,13 @@ class ServerNetworking {
             })
         
         if nil == self.uploadTask {
-            completion?(nil, Error.Create("Could not start upload task"))
+            completion?(nil, SMError.Create("Could not start upload task"))
             return
         }
         
         self.uploadTask?.resume()
     }
-    
+
     func downloadFileFrom(_ serverURL: URL, fileToDownload:URL, withParameters parameters:[String:AnyObject]?, completion:((_ serverResponse:[String:AnyObject]?, _ error:NSError?)->())?) {
         
         Log.special("serverURL: \(serverURL)")
@@ -351,7 +411,8 @@ class ServerNetworking {
         }) 
         
         task.resume()
-    }*/
+    }
+#endif
 
 /*
     func download0() {

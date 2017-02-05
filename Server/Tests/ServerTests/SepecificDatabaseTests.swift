@@ -216,7 +216,7 @@ class SepecificDatabaseTests: ServerTestCase {
     
     func testThatStaleALockIsRemoved() {
         let duration:TimeInterval = 1
-        let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, additionalExpiryDuration:duration)
+        let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
         XCTAssert(LockRepository.lock(lock: lock))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
@@ -229,10 +229,10 @@ class SepecificDatabaseTests: ServerTestCase {
     func testRemoveAllStaleLocks() {
         let duration:TimeInterval = 1
         
-        let lock1 = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, additionalExpiryDuration:duration)
+        let lock1 = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
         XCTAssert(LockRepository.lock(lock: lock1))
         
-        let lock2 = Lock(userId:2, deviceUUID:PerfectLib.UUID().string, additionalExpiryDuration:duration)
+        let lock2 = Lock(userId:2, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
         XCTAssert(LockRepository.lock(lock: lock2))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
