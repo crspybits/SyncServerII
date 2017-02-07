@@ -9,7 +9,7 @@
 import XCTest
 @testable import SyncServer
 
-class HealthCheck: XCTestCase {
+class ServerAPI_HealthCheck: XCTestCase {
     
     override func setUp() {
         super.setUp()

@@ -43,8 +43,9 @@ extension Repository {
         let query = "delete from \(tableName) where " + lookupConstraint(key: key)
         
         if Database.session.connection.query(statement: query) {
-            Log.info(message: "Successfully removed user: \(key)")
-            return .removed(numberRows:Int32(Database.session.connection.numberAffectedRows()))
+            Log.info(message: "Successfully removed row(s): \(key)")
+            return .removed(
+                numberRows:Int32(Database.session.connection.numberAffectedRows()))
         }
         else {
             let error = Database.session.error

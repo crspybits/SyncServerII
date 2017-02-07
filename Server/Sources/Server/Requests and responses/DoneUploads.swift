@@ -11,6 +11,7 @@ import Gloss
 
 #if SERVER
 import Kitura
+import PerfectLib
 #endif
 
 class DoneUploadsRequest : NSObject, RequestMessage {
@@ -21,17 +22,13 @@ class DoneUploadsRequest : NSObject, RequestMessage {
     
     // Overall version for files for the specific user; assigned by the server.
     static let masterVersionKey = "masterVersion"
-    var masterVersion:String!
+    var masterVersion:MasterVersionInt!
     
 #if DEBUG
     // Give a time value in seconds -- after the lock is obtained, the server for sleep for this lock to test locking operation.
     static let testLockSyncKey = "testLockSync"
     var testLockSync:Int32?
 #endif
-    
-    var masterVersionNumber:Int {
-        return Int(masterVersion)!
-    }
     
     func nonNilKeys() -> [String] {
         return [DoneUploadsRequest.masterVersionKey, DoneUploadsRequest.deviceUUIDKey]
@@ -55,6 +52,9 @@ class DoneUploadsRequest : NSObject, RequestMessage {
 #endif
 
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
+#if SERVER
+            Log.debug(message: "json was: \(json)")
+#endif
             return nil
         }
     }

@@ -44,6 +44,7 @@ class MasterVersionRepository : Repository {
         }
     }
     
+    // The masterVersion is with respect to the userId
     static func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .userId(let userId):

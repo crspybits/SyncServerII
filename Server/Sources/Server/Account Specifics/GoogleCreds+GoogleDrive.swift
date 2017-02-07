@@ -282,6 +282,7 @@ extension GoogleCreds {
     enum UploadError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainFileSize
+    case fileAlreadyExists
     }
     
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
@@ -296,59 +297,80 @@ extension GoogleCreds {
                 return
             }
             
-            let boundary = PerfectLib.UUID().string
-
-            let additionalHeaders = [
-                "Authorization" : "Bearer \(self.accessToken!)",
-                "Content-Type" : "multipart/related; boundary=\(boundary)"
-            ]
+            let searchType = SearchType.file(mimeType: request.mimeType, parentFolderId: folderId)
             
-            let urlParameters = "uploadType=multipart"
-            
-            let firstPart =
-                "--\(boundary)\r\n" +
-                "Content-Type: application/json; charset=UTF-8\r\n" +
-                "\r\n" +
-                "{\r\n" +
-                    "\"name\": \"\(request.cloudFileName())\",\r\n" +
-                    "\"parents\": [\r\n" +
-                        "\"\(folderId!)\"\r\n" +
-                    "]\r\n" +
-                "}\r\n" +
-                "\r\n" +
-                "--\(boundary)\r\n" +
-                "Content-Type: \(request.mimeType!)\r\n" +
-                "\r\n"
-            
-            var multiPartData = firstPart.data(using: .utf8)!
-            multiPartData.append(request.data)
-            
-            let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
-            multiPartData.append(endBoundary)
-
-            self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode) in
-                var resultError:Swift.Error?
-
-                if statusCode != HTTPStatusCode.OK {
-                    resultError = UploadError.badStatusCode(statusCode)
-                    completion(nil, resultError)
+            // I'm going to do this before I attempt the upload-- because I don't want to upload the same file twice. This results in google drive doing odd things with the file names. E.g., 5200B98F-8CD8-4248-B41E-4DA44087AC3C.950DBB91-B152-4D5C-B344-9BAFF49021B7 (1).0
+            self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
+                if error == nil {
+                    if result == nil {
+                        self.completeSmallFileUpload(folderId: folderId!, searchType:searchType, request: request, completion: completion)
+                    }
+                    else {
+                        completion(nil, UploadError.fileAlreadyExists)
+                    }
                 }
                 else {
-                    // TODO: This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
-                    let searchType = SearchType.file(mimeType: request.mimeType, parentFolderId: folderId)
-                    self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
-                        if error == nil {
-                            if let sizeString = result?.json["size"]?.string,
-                                let size = Int(sizeString) {
-                                completion(size, resultError)
-                            }
-                            else {
-                                completion(nil, UploadError.couldNotObtainFileSize)
-                            }
+                    completion(nil, error)
+                }
+            }
+        }
+    }
+    
+    private func completeSmallFileUpload(folderId:String, searchType:SearchType, request:UploadFileRequest,
+        completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
+        
+        let boundary = PerfectLib.UUID().string
+
+        let additionalHeaders = [
+            "Authorization" : "Bearer \(self.accessToken!)",
+            "Content-Type" : "multipart/related; boundary=\(boundary)"
+        ]
+        
+        let urlParameters = "uploadType=multipart"
+        
+        let firstPart =
+            "--\(boundary)\r\n" +
+            "Content-Type: application/json; charset=UTF-8\r\n" +
+            "\r\n" +
+            "{\r\n" +
+                "\"name\": \"\(request.cloudFileName())\",\r\n" +
+                "\"parents\": [\r\n" +
+                    "\"\(folderId)\"\r\n" +
+                "]\r\n" +
+            "}\r\n" +
+            "\r\n" +
+            "--\(boundary)\r\n" +
+            "Content-Type: \(request.mimeType!)\r\n" +
+            "\r\n"
+        
+        var multiPartData = firstPart.data(using: .utf8)!
+        multiPartData.append(request.data)
+        
+        let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
+        multiPartData.append(endBoundary)
+
+        self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode) in
+            var resultError:Swift.Error?
+
+            if statusCode != HTTPStatusCode.OK {
+                resultError = UploadError.badStatusCode(statusCode)
+                completion(nil, resultError)
+            }
+            else {
+                // TODO: This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
+
+                self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
+                    if error == nil {
+                        if let sizeString = result?.json["size"]?.string,
+                            let size = Int(sizeString) {
+                            completion(size, resultError)
                         }
                         else {
-                            completion(nil, error)
+                            completion(nil, UploadError.couldNotObtainFileSize)
                         }
+                    }
+                    else {
+                        completion(nil, error)
                     }
                 }
             }

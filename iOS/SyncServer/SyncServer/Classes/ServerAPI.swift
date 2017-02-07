@@ -9,9 +9,14 @@
 import Foundation
 import SMCoreLib
 
+public protocol ServerAPIDelegate : class {
+    func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID
+}
+
 public class ServerAPI {
-    // Needs to be set by user of this class.
+    // These need to be set by user of this class.
     public var baseURL:String!
+    public weak var delegate:ServerAPIDelegate!
     
     fileprivate var authTokens:[String:String]?
     
@@ -93,17 +98,36 @@ public class ServerAPI {
     
     // MARK: Files
     
-    public func fileIndex(completion:((Error?)->(Void))?) {
+    public enum FileIndexError : Error {
+    case fileIndexResponseConversionError
+    case couldNotCreateFileIndexRequest
+    }
+        
+    public func fileIndex(completion:((_ fileIndex: [FileInfo]?, _ masterVersion:MasterVersionInt?, Error?)->(Void))?) {
+    
         let endpoint = ServerEndpoints.fileIndex
-        let url = URL(string: baseURL + endpoint.path)!
+        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
+        let params = [FileIndexRequest.deviceUUIDKey : deviceUUID]
         
-        // TODO: Need to create the UUID only once for the device, and store in user defaults.
+        guard let fileIndexRequest = FileIndexRequest(json: params) else {
+            completion?(nil, nil, FileIndexError.couldNotCreateFileIndexRequest);
+            return;
+        }
         
-        let params = [FileIndexRequest.deviceUUIDKey : UUID().uuidString]
+        let url = URL(string: baseURL + endpoint.path + "/?" + fileIndexRequest.urlParameters()!)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url, withParameters: params) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
-        
-            completion?(error)
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
+            if error == nil {
+                if let fileIndexResponse = FileIndexResponse(json: response!) {
+                    completion?(fileIndexResponse.fileIndex, fileIndexResponse.masterVersion, nil)
+                }
+                else {
+                    completion?(nil, nil, FileIndexError.fileIndexResponseConversionError)
+                }
+            }
+            else {
+                completion?(nil, nil, error)
+            }
         }
     }
     
@@ -128,12 +152,11 @@ public class ServerAPI {
     case serverMasterVersionUpdate(Int64)
     }
     
-    public func uploadFile(file:File, serverMasterVersion:MasterVersionInt!, completion:((UploadFileResult?, Error?)->(Void))?) {
+    public func uploadFile(file:File, serverMasterVersion:MasterVersionInt, completion:((UploadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadFile
-        
-        // TODO: Need to create the UUID only once for the device, and store in user defaults.
-        let deviceUUID = UUID().uuidString
-        
+
+        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
+
         let params:[String : Any] = [
             UploadFileRequest.fileUUIDKey: file.fileUUID,
             UploadFileRequest.mimeTypeKey: file.mimeType,
@@ -150,27 +173,72 @@ public class ServerAPI {
         }
         
         assert(endpoint.method == .post)
-        let parameters = uploadRequest.urlParameters()!
         
         guard let fileData = try? Data(contentsOf: file.localURL) else {
             completion?(nil, UploadFileError.couldNotReadUploadFile);
             return;
         }
         
+        let parameters = uploadRequest.urlParameters()!
         let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
         
         ServerNetworking.session.postUploadDataTo(url, dataToUpload: fileData) { (resultDict, error) in
             if error == nil {
-                if resultDict![UploadFileResponse.sizeKey] != nil {
-                    let size = resultDict![UploadFileResponse.sizeKey] as! Int64
+                if let size = resultDict?[UploadFileResponse.sizeKey] as? Int64 {
                     completion?(UploadFileResult.success(sizeInBytes:size), nil)
                 }
-                else if resultDict![UploadFileResponse.masterVersionUpdateKey] != nil {
-                    let versionUpdate = resultDict![UploadFileResponse.masterVersionUpdateKey] as! Int64
+                else if let versionUpdate = resultDict?[UploadFileResponse.masterVersionUpdateKey] as? Int64 {
                     completion?(UploadFileResult.serverMasterVersionUpdate(versionUpdate), nil)
                 }
                 else {
                     completion?(nil, UploadFileError.noExpectedResultKey)
+                }
+            }
+            else {
+                completion?(nil, error)
+            }
+        }
+    }
+    
+    public enum DoneUploadsError : Error {
+    case noExpectedResultKey
+    case couldNotCreateDoneUploadsRequest
+    }
+    
+    public enum DoneUploadsResult {
+    case success(numberUploadsTransferred:Int64)
+    case serverMasterVersionUpdate(Int64)
+    }
+    
+    public func doneUploads(serverMasterVersion:MasterVersionInt!, completion:((DoneUploadsResult?, Error?)->(Void))?) {
+        let endpoint = ServerEndpoints.doneUploads
+        
+        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
+
+        let params:[String : Any] = [
+            DoneUploadsRequest.deviceUUIDKey : deviceUUID,
+            DoneUploadsRequest.masterVersionKey : serverMasterVersion
+        ]
+        
+        guard let doneUploadsRequest = DoneUploadsRequest(json: params) else {
+            completion?(nil, DoneUploadsError.couldNotCreateDoneUploadsRequest);
+            return;
+        }
+
+        let parameters = doneUploadsRequest.urlParameters()!
+        let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
+        
+            if error == nil {
+                if let numberUploads = response?[DoneUploadsResponse.numberUploadsTransferredKey] as? Int64 {
+                    completion?(DoneUploadsResult.success(numberUploadsTransferred:numberUploads), nil)
+                }
+                else if let masterVersionUpdate = response?[DoneUploadsResponse.masterVersionUpdateKey] as? Int64 {
+                    completion?(DoneUploadsResult.serverMasterVersionUpdate(masterVersionUpdate), nil)
+                }
+                else {
+                    completion?(nil, DoneUploadsError.noExpectedResultKey)
                 }
             }
             else {

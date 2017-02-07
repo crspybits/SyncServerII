@@ -4,7 +4,7 @@ import XCTest
 // After creating this project afresh, I was getting errors like: "...couldn’t be loaded because it is damaged or missing necessary resources. Try reinstalling the bundle."
 // The solution for me was to manually set the host applicaton. See https://github.com/CocoaPods/CocoaPods/issues/5022
 
-class Authentication: TestCase {    
+class ServerAPI_Authentication: TestCase {
     override func setUp() {
         super.setUp()
         
@@ -96,7 +96,7 @@ class Authentication: TestCase {
             self.authTokens[ServerConstants.GoogleHTTPAccessTokenKey] = "foobar"
             
             ServerAPI.session.removeUser { error in
-                // Expect an error here because we a bad access token.
+                // Expect an error here because we have a bad access token.
                 XCTAssert(error != nil)
                 removeUserExpectation.fulfill()
             }
@@ -104,6 +104,8 @@ class Authentication: TestCase {
         
         waitForExpectations(timeout: 10.0, handler: nil)
     }
+    
+    // TODO: Check what happens when network fails. Do we get an error response back from ServerAPI.session.addUser? This issue applies to all ServerAPI calls.
     
     func testRemoveUserSucceeds() {
         let addUserExpectation = self.expectation(description: "addUser")

@@ -100,10 +100,13 @@ class FileController : ControllerProtocol {
                         completion(response)
                     }
                     else {
+                        Log.error(message: "Could not add to UploadRepository")
+                        // TODO: The file has been uploaded to cloud service. But we don't have a record of it on the server. What do we do?
                         completion(nil)
                     }
                 }
                 else {
+                    Log.error(message: "Could not uploadSmallFile: error: \(error)")
                     completion(nil)
                 }
             }

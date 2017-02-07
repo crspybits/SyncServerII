@@ -7,8 +7,9 @@
 //
 
 import XCTest
+@testable import SyncServer
 
-class FileIndex: TestCase {
+class ServerAPI_FileIndex: TestCase {
     
     override func setUp() {
         super.setUp()
@@ -20,8 +21,15 @@ class FileIndex: TestCase {
         super.tearDown()
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testFileIndex() {
+        let expectation = self.expectation(description: "file index")
+        
+        ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
+            XCTAssert(error == nil)
+            XCTAssert(masterVersion! >= 0)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
     }
 }

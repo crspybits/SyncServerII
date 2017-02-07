@@ -14,6 +14,8 @@ import PerfectLib
 import Kitura
 #endif
 
+// The server considers it to be an error to attempt to upload the same file more than once.
+
 class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     // MARK: Properties for use in request message.
     

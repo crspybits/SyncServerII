@@ -61,6 +61,8 @@ extension ViewController : SignInDelegate {
             
             completion(error)
         }
+        
+        // TODO: If we fail in this, fallback to checking if user exists. Or vice versa.
     }
 }
 

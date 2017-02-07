@@ -159,7 +159,7 @@ class FileIndexRepository : Repository {
     }
     
     enum FileIndexResult {
-    case fileIndex([FileIndexResponse.FileInfo])
+    case fileIndex([FileInfo])
     case error(Swift.Error)
     }
     
@@ -167,12 +167,12 @@ class FileIndexRepository : Repository {
         let query = "select * from \(tableName) where userId = \(userId)"
         let select = Select(query: query, modelInit: FileIndex.init, ignoreErrors:false)
         
-        var result:[FileIndexResponse.FileInfo] = []
+        var result:[FileInfo] = []
         
         select.forEachRow { rowModel in
             let rowModel = rowModel as! FileIndex
 
-            let fileInfo = FileIndexResponse.FileInfo()!
+            let fileInfo = FileInfo()!
             fileInfo.fileUUID = rowModel.fileUUID
             fileInfo.appMetaData = rowModel.appMetaData
             fileInfo.fileVersion = rowModel.fileVersion
