@@ -11,14 +11,16 @@ import PerfectLib
 
 protocol Repository {
     associatedtype LOOKUPKEY
+    
+    var db:Database! {get}
 
-    static var tableName:String {get}
+    var tableName:String {get}
 
     // Create the database table.
-    static func create() -> Database.TableCreationResult
+    func create() -> Database.TableCreationResult
     
     // Returns a constraint for a WHERE clause in mySQL based on the key
-    static func lookupConstraint(key:LOOKUPKEY) -> String
+    func lookupConstraint(key:LOOKUPKEY) -> String
 }
 
 enum RepositoryRemoveResult {
@@ -34,29 +36,29 @@ enum RepositoryLookupResult {
 
 extension Repository {
     // Remove entire table.
-    static func remove() -> Bool {
-        return Database.session.connection.query(statement: "DROP TABLE \(tableName)")
+    func remove() -> Bool {
+        return db.connection.query(statement: "DROP TABLE \(tableName)")
     }
     
     // Remove row(s) from the table.
-    static func remove(key:LOOKUPKEY) -> RepositoryRemoveResult {
+    func remove(key:LOOKUPKEY) -> RepositoryRemoveResult {
         let query = "delete from \(tableName) where " + lookupConstraint(key: key)
         
-        if Database.session.connection.query(statement: query) {
+        if db.connection.query(statement: query) {
             Log.info(message: "Successfully removed row(s): \(key)")
             return .removed(
-                numberRows:Int32(Database.session.connection.numberAffectedRows()))
+                numberRows:Int32(db.connection.numberAffectedRows()))
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not remove rows: \(error)")
             return .error("\(error)")
         }
     }
     
-    static func lookup<MODEL: Model>(key: LOOKUPKEY, modelInit:@escaping () -> MODEL) -> RepositoryLookupResult {
+    func lookup<MODEL: Model>(key: LOOKUPKEY, modelInit:@escaping () -> MODEL) -> RepositoryLookupResult {
         let query = "select * from \(tableName) where " + lookupConstraint(key: key)
-        let select = Select(query: query, modelInit: modelInit, ignoreErrors:false)
+        let select = Select(db:db, query: query, modelInit: modelInit, ignoreErrors:false)
         
         switch select.numberResultRows() {
         case 0:

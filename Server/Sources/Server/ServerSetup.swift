@@ -110,9 +110,8 @@ public class CreateRoutes {
     func setJsonResponseHeaders() {
         self.response.headers["Content-Type"] = "application/json"
     }
-    
-    public typealias ProcessRequest = (RequestMessage, Creds?, UserProfile?,
-        _ completion: @escaping (ResponseMessage?)->())->()
+
+    public typealias ProcessRequest = (RequestProcessingParameters)->()
 
     // The intent is that, if authorized, a request never returns an empty response. Some JSON is always returned, even with an error.
     private func doRequest(authenticationLevel:AuthenticationLevel = .secondary,
@@ -145,8 +144,13 @@ public class CreateRoutes {
             }
         }
         
+        var currentSignedInUser:User?
+        
+        let db = Database()
+        let repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db))
+        
         if authenticationLevel == .secondary {
-            let userExists = UserController.userExists(userProfile: profile!)
+            let userExists = UserController.userExists(userProfile: profile!, userRepository: repositories.user)
             switch userExists {
             case .error:
                 failWithError(message: "Failed on secondary authentication", statusCode: .internalServerError)
@@ -157,7 +161,7 @@ public class CreateRoutes {
                 return
                 
             case .exists(let user):
-                SignedInUser.session.current = user
+                currentSignedInUser = user
             }
         }
         
@@ -168,7 +172,8 @@ public class CreateRoutes {
         }
         
         func doTheRequestProcessing(creds:Creds?) {
-            processRequest(requestObject!, creds, profile) { responseObject in
+            let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories) { responseObject in
+            
                 if nil == responseObject {
                     self.failWithError(message: "Could not create response object from request object")
                     return
@@ -182,6 +187,8 @@ public class CreateRoutes {
                 
                 _ = self.endWith(jsonDict: jsonDict)
             }
+            
+            processRequest(params)
         }
 
         // TODO: Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
@@ -207,7 +214,7 @@ public class CreateRoutes {
                     dbTransaction() {
                         if successGeneratingTokens! && authenticationLevel == .secondary {
                             // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
-                            if !UserRepository.updateCreds(creds: creds, forUser: SignedInUser.session.current!) {
+                            if !repositories.user.updateCreds(creds: creds, forUser: currentSignedInUser!) {
                                 self.failWithError(message: "Could not update creds")
                             }
                         }

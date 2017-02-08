@@ -42,11 +42,17 @@ class FileIndex : NSObject, Model, Filenaming {
 }
 
 class FileIndexRepository : Repository {
-    static var tableName:String {
+    private(set) var db:Database!
+    
+    init(_ db:Database) {
+        self.db = db
+    }
+    
+    var tableName:String {
         return "FileIndex"
     }
     
-    static func create() -> Database.TableCreationResult {        
+    func create() -> Database.TableCreationResult {
         let createColumns =
             "(fileIndexId BIGINT NOT NULL AUTO_INCREMENT, " +
                         
@@ -76,15 +82,15 @@ class FileIndexRepository : Repository {
             "UNIQUE (fileUUID, userId), " +
             "UNIQUE (fileIndexId))"
         
-        return Database.session.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
-    private static func columnNames(appMetaDataFieldName:String = "appMetaData,") -> String {
+    private func columnNames(appMetaDataFieldName:String = "appMetaData,") -> String {
         return "fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes"
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
-    static func add(fileIndex:FileIndex) -> Int64? {
+    func add(fileIndex:FileIndex) -> Int64? {
         if fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil {
             Log.error(message: "One of the model values was nil!")
             return nil
@@ -104,11 +110,11 @@ class FileIndexRepository : Repository {
         
         let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!));"
         
-        if Database.session.connection.query(statement: query) {
-            return Database.session.connection.lastInsertId()
+        if db.connection.query(statement: query) {
+            return db.connection.lastInsertId()
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not insert row into \(tableName): \(error)")
             return nil
         }
@@ -131,7 +137,7 @@ class FileIndexRepository : Repository {
         }
     }
     
-    static func lookupConstraint(key:LookupKey) -> String {
+    func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .fileIndexId(let fileIndexId):
             return "fileIndexId = '\(fileIndexId)'"
@@ -143,16 +149,16 @@ class FileIndexRepository : Repository {
     }
     
     // Returns nil on failure, and on success returns the number of uploads transferred.
-    static func transferUploads(userId: UserId, deviceUUID:String) -> Int32? {
+    func transferUploads(userId: UserId, deviceUUID:String, upload:UploadRepository) -> Int32? {
         // The ordering of fields in the INSERT must match that in selectForTransferToUpload.
         let query = "INSERT INTO \(tableName) (\(columnNames())) " +
-        UploadRepository.selectForTransferToUpload(userId: userId, deviceUUID: deviceUUID)
+        upload.selectForTransferToUpload(userId: userId, deviceUUID: deviceUUID)
         
-        if Database.session.connection.query(statement: query) {
-            return Int32(Database.session.connection.numberAffectedRows())
+        if db.connection.query(statement: query) {
+            return Int32(db.connection.numberAffectedRows())
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not transferUploads: \(error)")
             return nil
         }
@@ -163,9 +169,9 @@ class FileIndexRepository : Repository {
     case error(Swift.Error)
     }
     
-    static func fileIndex(forUserId userId: UserId) -> FileIndexResult {
+    func fileIndex(forUserId userId: UserId) -> FileIndexResult {
         let query = "select * from \(tableName) where userId = \(userId)"
-        let select = Select(query: query, modelInit: FileIndex.init, ignoreErrors:false)
+        let select = Select(db:db, query: query, modelInit: FileIndex.init, ignoreErrors:false)
         
         var result:[FileInfo] = []
         

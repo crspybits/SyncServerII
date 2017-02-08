@@ -17,16 +17,16 @@ class FileControllerTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()
-        _ = UserRepository.remove()
-        _ = UserRepository.create()
-        _ = UploadRepository.remove()
-        _ = UploadRepository.create()
-        _ = MasterVersionRepository.remove()
-        _ = MasterVersionRepository.create()
-        _ = FileIndexRepository.remove()
-        _ = FileIndexRepository.create()
-        _ = LockRepository.remove()
-        _ = LockRepository.create()
+        _ = UserRepository(db).remove()
+        _ = UserRepository(db).create()
+        _ = UploadRepository(db).remove()
+        _ = UploadRepository(db).create()
+        _ = MasterVersionRepository(db).remove()
+        _ = MasterVersionRepository(db).create()
+        _ = FileIndexRepository(db).remove()
+        _ = FileIndexRepository(db).create()
+        _ = LockRepository(db).remove()
+        _ = LockRepository(db).create()
     }
     
     override func tearDown() {
@@ -59,7 +59,7 @@ class FileControllerTests: ServerTestCase {
                     XCTFail()
                 }
                 
-                let result = UploadRepository.lookup(key: .fileUUID(uploadRequest.fileUUID), modelInit: Upload.init)
+                let result = UploadRepository(self.db).lookup(key: .fileUUID(uploadRequest.fileUUID), modelInit: Upload.init)
                 switch result {
                 case .error(let error):
                     XCTFail("\(error)")

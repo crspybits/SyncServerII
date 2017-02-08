@@ -14,8 +14,8 @@ class UserControllerTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()        
-        _ = UserRepository.remove()
-        _ = UserRepository.create()
+        _ = UserRepository(db).remove()
+        _ = UserRepository(db).create()
     }
     
     func testAddUserSucceedsWhenAddingNewUser() {

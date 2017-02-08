@@ -8,6 +8,21 @@
 
 import Foundation
 import LoggerAPI
+import Credentials
+
+protocol ControllerProtocol {
+    static func setup(db:Database) -> Bool
+}
+
+public struct RequestProcessingParameters {
+    let request: RequestMessage!
+    let creds: Creds?
+    let userProfile: UserProfile?
+    let currentSignedInUser:User?
+    let db:Database!
+    let repos:Repositories!
+    let completion: (ResponseMessage?)->()
+}
 
 public class Controllers {
     // When adding a new controller, you must add it to this list.
@@ -15,8 +30,9 @@ public class Controllers {
         [UserController.self, UtilController.self, FileController.self]
     
     static func setup() -> Bool {
+        let db = Database()
         for controller in list {
-            if !controller.setup() {
+            if !controller.setup(db:db) {
                 Log.error("Could not setup controller: \(controller)")
                 return false
             }

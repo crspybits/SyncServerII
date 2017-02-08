@@ -118,8 +118,8 @@ class GeneralDatabaseTests: ServerTestCase {
         c18String = Database.date(c18Value, toFormat: .TIME)
 
         // Ignore any failure in dropping: E.g., a failure resulting from the table not existing the first time around.
-        let _ = Database.session.connection.query(statement: "DROP TABLE \(testTableName)")
-        let _ = Database.session.connection.query(statement: "DROP TABLE \(testTableName2)")
+        let _ = db.connection.query(statement: "DROP TABLE \(testTableName)")
+        let _ = db.connection.query(statement: "DROP TABLE \(testTableName2)")
 
         XCTAssert(createTable())
         XCTAssert(createTable2())
@@ -148,7 +148,7 @@ class GeneralDatabaseTests: ServerTestCase {
             "c17 TIMESTAMP," +
             "c18 TIME)"
 
-        if case .success(.created) = Database.session.createTableIfNeeded(tableName: testTableName, columnCreateQuery: createColumns) {
+        if case .success(.created) = db.createTableIfNeeded(tableName: testTableName, columnCreateQuery: createColumns) {
             return true
         }
         else {
@@ -161,7 +161,7 @@ class GeneralDatabaseTests: ServerTestCase {
             "(c1 VARCHAR(100), " +
             "c2 DATE)"
 
-        if case .success(.created) = Database.session.createTableIfNeeded(tableName: testTableName2, columnCreateQuery: createColumns) {
+        if case .success(.created) = db.createTableIfNeeded(tableName: testTableName2, columnCreateQuery: createColumns) {
             return true
         }
         else {
@@ -172,15 +172,15 @@ class GeneralDatabaseTests: ServerTestCase {
     func insertRows() {
         // Make sure NULL values can be handled.
         let insertRow1 = "INSERT INTO \(testTableName) (c1, c2, c3, c4) VALUES('\(c1Value)', '\(c2Value)', '\(c3Value)', '\(c4Value)');"
-        guard Database.session.connection.query(statement: insertRow1) else {
-            XCTFail(Database.session.connection.errorMessage())
+        guard db.connection.query(statement: insertRow1) else {
+            XCTFail(db.connection.errorMessage())
             return
         }
         
         let insertRow2 = "INSERT INTO \(testTableName) (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c15, c16, c17, c18) VALUES('\(c1Value)', '\(c2Value)', '\(c3Value)', '\(c4Value)','\(c5Value)', '\(c6Value)', '\(c7Value)', '\(c8Value)','\(c9Value)', '\(c10Value)', '\(c11Value)', '\(c12Value)', '\(c13Value)', '\(c15String!)', '\(c16String!)', '\(c17String!)', '\(c18String!)');"
         Log.debug(insertRow2)
-        guard Database.session.connection.query(statement: insertRow2) else {
-            XCTFail(Database.session.connection.errorMessage())
+        guard db.connection.query(statement: insertRow2) else {
+            XCTFail(db.connection.errorMessage())
             return
         }
     }
@@ -190,15 +190,15 @@ class GeneralDatabaseTests: ServerTestCase {
         let c2Value = Database.date(c2Table2Value, toFormat: .DATE)
         
         let insertRow1 = "INSERT INTO \(testTableName2) (c1, c2) VALUES('\(c1Value.rawValue)', '\(c2Value)');"
-        guard Database.session.connection.query(statement: insertRow1) else {
-            XCTFail(Database.session.connection.errorMessage())
+        guard db.connection.query(statement: insertRow1) else {
+            XCTFail(db.connection.errorMessage())
             return
         }
     }
     
     func runSelectTestForEachRow(ignoreErrors:Bool) {
         let query = "select * from \(testTableName)"
-        let select = Select(query: query, modelInit: model.init, ignoreErrors:ignoreErrors)
+        let select = Select(db:db, query: query, modelInit: model.init, ignoreErrors:ignoreErrors)
         var row = 1
         
         select.forEachRow { rowModel in
@@ -269,7 +269,7 @@ class GeneralDatabaseTests: ServerTestCase {
 
     func testTypeConverters() {
         let query = "select * from \(testTableName2)"
-        let select = Select(query: query, modelInit: model2.init, ignoreErrors:false)
+        let select = Select(db:db, query: query, modelInit: model2.init, ignoreErrors:false)
         var rows = 0
         
         select.forEachRow { rowModel in

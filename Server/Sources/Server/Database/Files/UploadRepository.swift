@@ -100,13 +100,19 @@ class Upload : NSObject, Model, Filenaming {
 }
 
 class UploadRepository : Repository {
-    static var tableName:String {
+    private(set) var db:Database!
+
+    init(_ db:Database) {
+        self.db = db
+    }
+    
+    var tableName:String {
         return "Upload"
     }
     
-    static let stateMaxLength = 20
+    let stateMaxLength = 20
 
-    static func create() -> Database.TableCreationResult {        
+    func create() -> Database.TableCreationResult {
         let createColumns =
             "(uploadId BIGINT NOT NULL AUTO_INCREMENT, " +
             
@@ -138,11 +144,11 @@ class UploadRepository : Repository {
             "UNIQUE (fileUUID, userId, deviceUUID), " +
             "UNIQUE (uploadId))"
         
-        return Database.session.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
-    static func add(upload:Upload) -> Int64? {
+    func add(upload:Upload) -> Int64? {
         if upload.fileUUID == nil || upload.userId == nil || upload.deviceUUID == nil || upload.mimeType == nil || upload.fileUpload == nil || upload.fileVersion == nil || upload.state == nil || upload.fileSizeBytes == nil {
             Log.error(message: "One of the model values was nil!")
             return nil
@@ -161,11 +167,11 @@ class UploadRepository : Repository {
         
         let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) fileUpload, fileVersion, state, fileSizeBytes) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.mimeType!)' \(appMetaDataFieldValue), \(fileUploadValue), \(upload.fileVersion!), '\(upload.state!.rawValue)', \(upload.fileSizeBytes!));"
         
-        if Database.session.connection.query(statement: query) {
-            return Database.session.connection.lastInsertId()
+        if db.connection.query(statement: query) {
+            return db.connection.lastInsertId()
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not insert into \(tableName): \(error)")
             return nil
         }
@@ -191,7 +197,7 @@ class UploadRepository : Repository {
         }
     }
     
-    static func lookupConstraint(key:LookupKey) -> String {
+    func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .uploadId(let uploadId):
             return "uploadId = '\(uploadId)'"
@@ -204,7 +210,7 @@ class UploadRepository : Repository {
         }
     }
     
-    static func selectForTransferToUpload(userId: UserId, deviceUUID:String) -> String {
+    func selectForTransferToUpload(userId: UserId, deviceUUID:String) -> String {
         let filesForUserConstraint = lookupConstraint(key: .filesForUser(userId: userId, deviceUUID: deviceUUID))
 
         // The ordering of the fields in the following SELECT is *very important*. It must correspond to that used in the FileIndexRepository in the method that uses this method.

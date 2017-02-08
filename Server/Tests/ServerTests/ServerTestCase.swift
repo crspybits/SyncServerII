@@ -14,9 +14,12 @@ import XCTest
 import LoggerAPI
 
 class ServerTestCase : XCTestCase {
+    var db:Database!
+    
     override func setUp() {
-        Constants.delegate = self
         super.setUp()
+        Constants.delegate = self
+        self.db = Database()
     }
     
     func addNewUser() {

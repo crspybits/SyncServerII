@@ -32,14 +32,20 @@ class Lock : NSObject, Model {
 }
 
 class LockRepository : Repository {
-    static let dateFormat = Database.MySQLDateFormat.DATETIME
+    private(set) var db:Database!
+    
+    init(_ db:Database) {
+        self.db = db
+    }
+    
+    let dateFormat = Database.MySQLDateFormat.DATETIME
 
-    static var tableName:String {
+    var tableName:String {
         // Apparently the table name Lock is special-- get an error if we use it.
         return "ShortLocks"
     }
 
-    static func create() -> Database.TableCreationResult {
+    func create() -> Database.TableCreationResult {
         let createColumns =
             // reference into User table
             "(userId BIGINT NOT NULL, " +
@@ -51,7 +57,7 @@ class LockRepository : Repository {
             
             "UNIQUE (userId));"
         
-        return Database.session.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
     enum LookupKey : CustomStringConvertible {
@@ -65,7 +71,7 @@ class LockRepository : Repository {
         }
     }
     
-    static func lookupConstraint(key:LookupKey) -> String {
+    func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .userId(let userId):
             return "userId = '\(userId)'"
@@ -73,7 +79,7 @@ class LockRepository : Repository {
     }
     
     // removeStale indicates whether to remove any lock, held by the user, past its expiry prior to attempting to obtain lock.
-    static func lock(lock:Lock, removeStale:Bool = true) -> Bool {
+    func lock(lock:Lock, removeStale:Bool = true) -> Bool {
         if lock.userId == nil || lock.deviceUUID == nil || lock.expiry == nil {
             Log.error(message: "One of the model values was nil!")
             return false
@@ -90,11 +96,11 @@ class LockRepository : Repository {
         
         let query = "INSERT INTO \(tableName) (userId, deviceUUID, expiry) VALUES(\(lock.userId!), '\(lock.deviceUUID!)', '\(expiry)');"
         
-        if Database.session.connection.query(statement: query) {
+        if db.connection.query(statement: query) {
             return true
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not insert into \(tableName): \(error)")
             return false
         }
@@ -102,7 +108,7 @@ class LockRepository : Repository {
     
     // Omit the userId parameter to remove all stale locks.
     // Returns the number of stale locks that were actually removed, or nil if there was an error.
-    static func removeStaleLock(forUserId userId:UserId? = nil) -> Int? {
+    func removeStaleLock(forUserId userId:UserId? = nil) -> Int? {
         let staleDate = Database.date(Date(), toFormat: dateFormat)
         
         var userIdConstraint = ""
@@ -112,26 +118,26 @@ class LockRepository : Repository {
         
         let query = "DELETE FROM \(tableName) WHERE \(userIdConstraint) expiry < '\(staleDate)'"
         
-        if Database.session.connection.query(statement: query) {
-            let numberLocksRemoved = Int(Database.session.connection.numberAffectedRows())
+        if db.connection.query(statement: query) {
+            let numberLocksRemoved = Int(db.connection.numberAffectedRows())
             Log.info(message: "Number of locks removed: \(numberLocksRemoved)")
             return numberLocksRemoved
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not remove stale lock: \(error)")
             return nil
         }
     }
     
-    static func unlock(userId:UserId) -> Bool {
+    func unlock(userId:UserId) -> Bool {
         let query = "DELETE FROM \(tableName) WHERE userId = \(userId)"
         
-        if Database.session.connection.query(statement: query) {
+        if db.connection.query(statement: query) {
             return true
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not unlock: \(error)")
             return false
         }

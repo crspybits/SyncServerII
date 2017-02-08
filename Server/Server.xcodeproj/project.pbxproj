@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83F37A291E4AD45000479175 /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A271E4AD40500479175 /* Repositories.swift */; };
 		89EAE9CA00FE241B5E778122 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6B4B7301148E46627DD9341D /* Server.json */; };
 		OBJ_284 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_285 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
@@ -244,7 +245,6 @@
 		OBJ_698 /* GoogleCreds+GoogleDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_207 /* GoogleCreds+GoogleDrive.swift */; };
 		OBJ_699 /* GoogleCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_208 /* GoogleCreds.swift */; };
 		OBJ_700 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_210 /* Constants.swift */; };
-		OBJ_701 /* ControllerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_211 /* ControllerProtocol.swift */; };
 		OBJ_702 /* Controllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_212 /* Controllers.swift */; };
 		OBJ_703 /* FileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_213 /* FileController.swift */; };
 		OBJ_704 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_214 /* Types.swift */; };
@@ -267,7 +267,6 @@
 		OBJ_721 /* RequestMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_236 /* RequestMessage.swift */; };
 		OBJ_722 /* ResponseMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_237 /* ResponseMessage.swift */; };
 		OBJ_723 /* UploadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_238 /* UploadFile.swift */; };
-		OBJ_724 /* SignedInUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_240 /* SignedInUser.swift */; };
 		OBJ_725 /* NSObject+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_242 /* NSObject+Extras.swift */; };
 		OBJ_726 /* FileIndexRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_225 /* FileIndexRepository.swift */; };
 		OBJ_727 /* UploadRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_226 /* UploadRepository.swift */; };
@@ -1060,6 +1059,7 @@
 
 /* Begin PBXFileReference section */
 		6B4B7301148E46627DD9341D /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
+		83F37A271E4AD40500479175 /* Repositories.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Repositories.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1166,7 +1166,6 @@
 		OBJ_207 /* GoogleCreds+GoogleDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleCreds+GoogleDrive.swift"; sourceTree = "<group>"; };
 		OBJ_208 /* GoogleCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCreds.swift; sourceTree = "<group>"; };
 		OBJ_210 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		OBJ_211 /* ControllerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerProtocol.swift; sourceTree = "<group>"; };
 		OBJ_212 /* Controllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controllers.swift; sourceTree = "<group>"; };
 		OBJ_213 /* FileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController.swift; sourceTree = "<group>"; };
 		OBJ_214 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
@@ -1193,7 +1192,6 @@
 		OBJ_237 /* ResponseMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseMessage.swift; sourceTree = "<group>"; };
 		OBJ_238 /* UploadFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadFile.swift; sourceTree = "<group>"; };
 		OBJ_24 /* Socket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Socket.swift; sourceTree = "<group>"; };
-		OBJ_240 /* SignedInUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedInUser.swift; sourceTree = "<group>"; };
 		OBJ_242 /* NSObject+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSObject+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_245 /* DatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseTests.swift; sourceTree = "<group>"; };
 		OBJ_246 /* FileControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileControllerTests.swift; sourceTree = "<group>"; };
@@ -1743,7 +1741,6 @@
 				OBJ_209 /* Controllers */,
 				OBJ_217 /* Database */,
 				OBJ_227 /* Requests and responses */,
-				OBJ_239 /* SignedInUser */,
 				OBJ_241 /* Utils */,
 			);
 			name = Server;
@@ -1765,7 +1762,6 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_210 /* Constants.swift */,
-				OBJ_211 /* ControllerProtocol.swift */,
 				OBJ_212 /* Controllers.swift */,
 				OBJ_213 /* FileController.swift */,
 				OBJ_214 /* Types.swift */,
@@ -1792,6 +1788,7 @@
 				OBJ_220 /* MasterVersionRepository.swift */,
 				OBJ_221 /* Model.swift */,
 				OBJ_222 /* Repository.swift */,
+				83F37A271E4AD40500479175 /* Repositories.swift */,
 				OBJ_223 /* UserRepository.swift */,
 				OBJ_224 /* Files */,
 			);
@@ -1835,14 +1832,6 @@
 			name = Socket;
 			path = "Packages/Socket-0.12.27/Sources";
 			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_239 /* SignedInUser */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_240 /* SignedInUser.swift */,
-			);
-			path = SignedInUser;
-			sourceTree = "<group>";
 		};
 		OBJ_241 /* Utils */ = {
 			isa = PBXGroup;
@@ -1963,7 +1952,7 @@
 			path = "Packages/Kitura-net-1.4.3/Sources/KituraNet";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -1972,7 +1961,6 @@
 				OBJ_256 /* Resources */,
 				OBJ_257 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* FastCGI */ = {
@@ -2584,7 +2572,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_257 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2944,10 +2932,10 @@
 				OBJ_695 /* ServerSetup.swift in Sources */,
 				OBJ_696 /* Creds.swift in Sources */,
 				OBJ_697 /* Filenaming.swift in Sources */,
+				83F37A291E4AD45000479175 /* Repositories.swift in Sources */,
 				OBJ_698 /* GoogleCreds+GoogleDrive.swift in Sources */,
 				OBJ_699 /* GoogleCreds.swift in Sources */,
 				OBJ_700 /* Constants.swift in Sources */,
-				OBJ_701 /* ControllerProtocol.swift in Sources */,
 				OBJ_702 /* Controllers.swift in Sources */,
 				OBJ_703 /* FileController.swift in Sources */,
 				OBJ_704 /* Types.swift in Sources */,
@@ -2970,7 +2958,6 @@
 				OBJ_721 /* RequestMessage.swift in Sources */,
 				OBJ_722 /* ResponseMessage.swift in Sources */,
 				OBJ_723 /* UploadFile.swift in Sources */,
-				OBJ_724 /* SignedInUser.swift in Sources */,
 				OBJ_725 /* NSObject+Extras.swift in Sources */,
 				OBJ_726 /* FileIndexRepository.swift in Sources */,
 				OBJ_727 /* UploadRepository.swift in Sources */,

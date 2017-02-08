@@ -18,16 +18,16 @@ class SepecificDatabaseTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()
-        _ = UserRepository.remove()
-        _ = UserRepository.create()
-        _ = UploadRepository.remove()
-        _ = UploadRepository.create()
-        _ = MasterVersionRepository.remove()
-        _ = MasterVersionRepository.create()
-        _ = LockRepository.remove()
-        _ = LockRepository.create()
-        _ = FileIndexRepository.remove()
-        _ = FileIndexRepository.create()
+        _ = UserRepository(db).remove()
+        _ = UserRepository(db).create()
+        _ = UploadRepository(db).remove()
+        _ = UploadRepository(db).create()
+        _ = MasterVersionRepository(db).remove()
+        _ = MasterVersionRepository(db).create()
+        _ = LockRepository(db).remove()
+        _ = LockRepository(db).create()
+        _ = FileIndexRepository(db).remove()
+        _ = FileIndexRepository(db).create()
     }
     
     override func tearDown() {
@@ -41,7 +41,7 @@ class SepecificDatabaseTests: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let result1 = UserRepository.add(user: user1)
+        let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == 1, "Bad credentialsId!")
 
         let user2 = User()
@@ -50,14 +50,14 @@ class SepecificDatabaseTests: ServerTestCase {
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue2\"}"
         user2.credsId = "200"
         
-        let result2 = UserRepository.add(user: user2)
+        let result2 = UserRepository(db).add(user: user2)
         XCTAssert(result2 == 2, "Bad credentialsId!")
     }
     
     func testUserLookup1() {
         testAddUser()
         
-        let result = UserRepository.lookup(key: .userId(1), modelInit:User.init)
+        let result = UserRepository(db).lookup(key: .userId(1), modelInit:User.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
@@ -77,7 +77,7 @@ class SepecificDatabaseTests: ServerTestCase {
     func testUserLookup1b() {
         testAddUser()
         
-        let result = UserRepository.lookup(key: .userId(1), modelInit: User.init)
+        let result = UserRepository(db).lookup(key: .userId(1), modelInit: User.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
@@ -97,7 +97,7 @@ class SepecificDatabaseTests: ServerTestCase {
     func testUserLookup2() {
         testAddUser()
         
-        let result = UserRepository.lookup(key: .accountTypeInfo(accountType:.Google, credsId:"100"), modelInit:User.init)
+        let result = UserRepository(db).lookup(key: .accountTypeInfo(accountType:.Google, credsId:"100"), modelInit:User.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
@@ -132,7 +132,7 @@ class SepecificDatabaseTests: ServerTestCase {
         upload.userId = 1
         upload.appMetaData = "{ \"foo\": \"bar\" }"
         
-        let result1 = UploadRepository.add(upload: upload)
+        let result1 = UploadRepository(db).add(upload: upload)
         XCTAssert(result1 == 1, "Bad uploadId!")
         
         return upload
@@ -145,7 +145,7 @@ class SepecificDatabaseTests: ServerTestCase {
     func testLookupFromUpload() {
         let upload1 = doAddUpload()
         
-        let result = UploadRepository.lookup(key: .uploadId(1), modelInit: Upload.init)
+        let result = UploadRepository(db).lookup(key: .uploadId(1), modelInit: Upload.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
@@ -168,7 +168,7 @@ class SepecificDatabaseTests: ServerTestCase {
     }
     
     func checkMasterVersion(userId:UserId, version:Int64) {
-        let result = MasterVersionRepository.lookup(key: .userId(userId), modelInit: MasterVersion.init)
+        let result = MasterVersionRepository(db).lookup(key: .userId(userId), modelInit: MasterVersion.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
@@ -185,7 +185,7 @@ class SepecificDatabaseTests: ServerTestCase {
     let userId:UserId = 1
 
     func doUpsertMasterVersion() {
-        if !MasterVersionRepository.upsert(userId:userId) {
+        if !MasterVersionRepository(db).upsert(userId:userId) {
             XCTFail()
         }
     }
@@ -203,52 +203,52 @@ class SepecificDatabaseTests: ServerTestCase {
     
     func testLock() {
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
-        XCTAssert(LockRepository.lock(lock: lock))
-        XCTAssert(!LockRepository.lock(lock: lock))
+        XCTAssert(LockRepository(db).lock(lock: lock))
+        XCTAssert(!LockRepository(db).lock(lock: lock))
     }
     
     func testThatNewlyAddedLocksAreNotStale() {
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
-        XCTAssert(LockRepository.lock(lock: lock))
-        XCTAssert(LockRepository.removeStaleLock(forUserId: 1) == 0)
-        XCTAssert(!LockRepository.lock(lock: lock))
+        XCTAssert(LockRepository(db).lock(lock: lock))
+        XCTAssert(LockRepository(db).removeStaleLock(forUserId: 1) == 0)
+        XCTAssert(!LockRepository(db).lock(lock: lock))
     }
     
     func testThatStaleALockIsRemoved() {
         let duration:TimeInterval = 1
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
-        XCTAssert(LockRepository.lock(lock: lock))
+        XCTAssert(LockRepository(db).lock(lock: lock))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
-        XCTAssert(LockRepository.removeStaleLock(forUserId: 1) == 1)
-        XCTAssert(LockRepository.lock(lock: lock, removeStale:false))
+        XCTAssert(LockRepository(db).removeStaleLock(forUserId: 1) == 1)
+        XCTAssert(LockRepository(db).lock(lock: lock, removeStale:false))
     }
     
     func testRemoveAllStaleLocks() {
         let duration:TimeInterval = 1
         
         let lock1 = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
-        XCTAssert(LockRepository.lock(lock: lock1))
+        XCTAssert(LockRepository(db).lock(lock: lock1))
         
         let lock2 = Lock(userId:2, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
-        XCTAssert(LockRepository.lock(lock: lock2))
+        XCTAssert(LockRepository(db).lock(lock: lock2))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
-        XCTAssert(LockRepository.removeStaleLock() == 2)
+        XCTAssert(LockRepository(db).removeStaleLock() == 2)
         
-        XCTAssert(LockRepository.lock(lock: lock1, removeStale:false))
-        XCTAssert(LockRepository.lock(lock: lock2, removeStale:false))
+        XCTAssert(LockRepository(db).lock(lock: lock1, removeStale:false))
+        XCTAssert(LockRepository(db).lock(lock: lock2, removeStale:false))
     }
     
     func testRemoveLock() {
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
-        XCTAssert(LockRepository.lock(lock: lock))
-        XCTAssert(LockRepository.unlock(userId:1))
-        XCTAssert(LockRepository.lock(lock: lock))
+        XCTAssert(LockRepository(db).lock(lock: lock))
+        XCTAssert(LockRepository(db).unlock(userId:1))
+        XCTAssert(LockRepository(db).lock(lock: lock))
     }
     
     func doAddFileIndex(userId:UserId = 1) -> FileIndex {
@@ -262,7 +262,7 @@ class SepecificDatabaseTests: ServerTestCase {
         fileIndex.userId = userId
         fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
         
-        let result1 = FileIndexRepository.add(fileIndex: fileIndex)
+        let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
         XCTAssert(result1 == 1, "Bad fileIndexId!")
         
         return fileIndex
@@ -275,7 +275,7 @@ class SepecificDatabaseTests: ServerTestCase {
     func testLookupFromFileIndex() {
         let fileIndex1 = doAddFileIndex()
         
-        let result = FileIndexRepository.lookup(key: .fileIndexId(1), modelInit: FileIndex.init)
+        let result = FileIndexRepository(db).lookup(key: .fileIndexId(1), modelInit: FileIndex.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
@@ -304,10 +304,10 @@ class SepecificDatabaseTests: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let result1 = UserRepository.add(user: user1)
+        let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == 1, "Bad credentialsId!")
         
-        let fileIndexResult = FileIndexRepository.fileIndex(forUserId: result1!)
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forUserId: result1!)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             XCTAssert(fileIndex.count == 0)
@@ -323,12 +323,12 @@ class SepecificDatabaseTests: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = UserRepository.add(user: user1)
+        let userId = UserRepository(db).add(user: user1)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         let fileIndexInserted = doAddFileIndex(userId: userId!)
 
-        let fileIndexResult = FileIndexRepository.fileIndex(forUserId: userId!)
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forUserId: userId!)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             XCTAssert(fileIndex.count == 1)

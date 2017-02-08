@@ -10,22 +10,20 @@ import PerfectLib
 import Credentials
 
 class UtilController : ControllerProtocol {
-    class func setup() -> Bool {
+    class func setup(db:Database) -> Bool {
         return true
     }
     
     init() {
     }
     
-    func healthCheck(request: RequestMessage, creds: Creds?, profile: UserProfile?,
-        completion: @escaping (ResponseMessage?)->()) {
+    func healthCheck(params:RequestProcessingParameters) {
         let response = HealthCheckResponse()
-        completion(response)
+        params.completion(response)
     }
     
-    func checkPrimaryCreds(request: RequestMessage, creds: Creds?, profile: UserProfile?,
-        completion: @escaping (ResponseMessage?)->()) {
+    func checkPrimaryCreds(params:RequestProcessingParameters) {
         let response = CheckPrimaryCredsResponse()
-        completion(response)
+        params.completion(response)
     }
 }

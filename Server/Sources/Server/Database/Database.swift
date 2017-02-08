@@ -21,13 +21,12 @@ public class Database {
     static let maxMimeTypeLength = 100
 
     public private(set) var connection: MySQL!
-    static let session = Database()
 
     var error: String {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
     }
     
-    private init() {
+    public init() {
         self.connection = MySQL()
         guard self.connection.connect(host: Constants.session.db.host, user: Constants.session.db.user, password: Constants.session.db.password ) else {
             Log.error(message:
@@ -68,12 +67,12 @@ public class Database {
             "AND table_name = '\(tableName)' " +
             "LIMIT 1;"
         
-        guard Database.session.connection.query(statement: checkForTable) else {
+        guard connection.query(statement: checkForTable) else {
             Log.error(message: "Failure: \(self.error)")
             return .failure(.query)
         }
         
-        if let results = Database.session.connection.storeResults(), results.numRows() == 1 {
+        if let results = connection.storeResults(), results.numRows() == 1 {
             Log.info(message: "Table \(tableName) was already in database")
             return .success(.alreadyPresent)
         }
@@ -81,7 +80,7 @@ public class Database {
         Log.info(message: "**** Table \(tableName) was not already in database")
 
         let query = "CREATE TABLE \(tableName) \(columnCreateQuery)"
-        guard Database.session.connection.query(statement: query) else {
+        guard connection.query(statement: query) else {
             Log.error(message: "Failure: \(self.error)")
             return .failure(.tableCreation)
         }
@@ -131,9 +130,9 @@ class Select {
     
     // Pass a mySQL select statement; the modelInit will be used to create the object type that will be returned in forEachRow
     // ignoreErrors, if true, will ignore type conversion errors and missing fields in your model.
-    init(query:String, modelInit:@escaping () -> Model, ignoreErrors:Bool=true) {
+    init(db:Database, query:String, modelInit:@escaping () -> Model, ignoreErrors:Bool=true) {
         self.modelInit = modelInit
-        self.stmt = MySQLStmt(Database.session.connection)
+        self.stmt = MySQLStmt(db.connection)
         self.ignoreErrors = ignoreErrors
         
         if !self.stmt.prepare(statement: query) {

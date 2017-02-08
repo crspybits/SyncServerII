@@ -12,12 +12,12 @@ import CredentialsGoogle
 
 class UserController : ControllerProtocol {
     // Don't do this setup in init so that database initalizations don't have to be done per endpoint call.
-    class func setup() -> Bool {
-        if case .failure(_) = UserRepository.create() {
+    class func setup(db:Database) -> Bool {
+        if case .failure(_) = UserRepository(db).create() {
             return false
         }
         
-        if case .failure(_) = MasterVersionRepository.create() {
+        if case .failure(_) = MasterVersionRepository(db).create() {
             return false
         }
 
@@ -34,12 +34,12 @@ class UserController : ControllerProtocol {
     }
     
     // Looks up UserProfile in mySQL database.
-    static func userExists(userProfile:UserProfile) -> UserStatus {
+    static func userExists(userProfile:UserProfile, userRepository:UserRepository) -> UserStatus {
         guard let accountType = AccountType.fromSpecificCredsType(specificCreds: userProfile.accountSpecificCreds!) else {
             return .error
         }
         
-        let result = UserRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:userProfile.id), modelInit: User.init)
+        let result = userRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:userProfile.id), modelInit: User.init)
         
         switch result {
         case .found(let object):
@@ -54,54 +54,51 @@ class UserController : ControllerProtocol {
         }
     }
     
-    func addUser(request: RequestMessage, creds: Creds?, profile: UserProfile?,
-        completion: @escaping (ResponseMessage?)->()) {
+    func addUser(params:RequestProcessingParameters) {
         
-        let userExists = UserController.userExists(userProfile: profile!)
+        let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
             break
         case .error, .exists(_):
             Log.error(message: "Could not add user: Already exists!")
-            completion(nil)
+            params.completion(nil)
             return
         }
         
         let user = User()
-        user.username = profile!.displayName
-        user.accountType = creds!.accountType
-        user.credsId = profile!.id
-        user.creds = creds!.toJSON()
+        user.username = params.userProfile!.displayName
+        user.accountType = params.creds!.accountType
+        user.credsId = params.userProfile!.id
+        user.creds = params.creds!.toJSON()
         
-        let userId = UserRepository.add(user: user)
+        let userId = params.repos.user.add(user: user)
         if userId == nil {
             Log.error(message: "Failed on adding user to User!")
-            completion(nil)
+            params.completion(nil)
             return
         }
         
-        if !MasterVersionRepository.upsert(userId:userId!) {
+        if !params.repos.masterVersion.upsert(userId:userId!) {
             Log.error(message: "Failed on creating MasterVersion record for user!")
-            completion(nil)
+            params.completion(nil)
             return
         }
         
         let response = AddUserResponse()!
-        completion(response)
+        params.completion(response)
     }
     
-    func checkCreds(request: RequestMessage, creds: Creds?, profile: UserProfile?,
-        completion: @escaping (ResponseMessage?)->()) {
+    func checkCreds(params:RequestProcessingParameters) {
         // We don't have to do anything here. It was already done prior to checkCreds being called because of:
         assert(ServerEndpoints.checkCreds.authenticationLevel == .secondary)
         
         let response = CheckCredsResponse()!
-        completion(response)
+        params.completion(response)
     }
     
     // A user can only remove themselves, not another user-- this policy is enforced because the currently signed in user (with the UserProfile) is the one removed.
-    func removeUser(request: RequestMessage, creds: Creds?, profile: UserProfile?,
-        completion: @escaping (ResponseMessage?)->()) {
+    func removeUser(params:RequestProcessingParameters) {
         assert(ServerEndpoints.removeUser.authenticationLevel == .secondary)
         
         var success = 0
@@ -111,39 +108,39 @@ class UserController : ControllerProtocol {
         
         // I'm not going to remove the users files in their cloud storage. They own those. I think I don't have any business removing their files in this context.
         
-        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: creds!.accountType, credsId: profile!.id)
-        if case .removed(let numberRows) = UserRepository.remove(key: userRepoKey) {
+        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: params.creds!.accountType, credsId: params.userProfile!.id)
+        if case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey) {
             if numberRows == 1 {
                 success += 1
             }
         }
         
-        let uploadRepoKey = UploadRepository.LookupKey.userId(SignedInUser.session.current!.userId)
-        if case .removed(_) = UploadRepository.remove(key: uploadRepoKey) {
+        let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
+        if case .removed(_) = params.repos.upload.remove(key: uploadRepoKey) {
             success += 1
         }
         
-        let masterVersionRepKey = MasterVersionRepository.LookupKey.userId(SignedInUser.session.current!.userId)
-        if case .removed(_) = MasterVersionRepository.remove(key: masterVersionRepKey) {
+        let masterVersionRepKey = MasterVersionRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        if case .removed(_) = params.repos.masterVersion.remove(key: masterVersionRepKey) {
             success += 1
         }
         
-        let lockRepoKey = LockRepository.LookupKey.userId(SignedInUser.session.current!.userId)
-        if case .removed(_) = LockRepository.remove(key: lockRepoKey) {
+        let lockRepoKey = LockRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        if case .removed(_) = params.repos.lock.remove(key: lockRepoKey) {
             success += 1
         }
         
-        let fileIndexRepoKey = FileIndexRepository.LookupKey.userId(SignedInUser.session.current!.userId)
-        if case .removed(_) = FileIndexRepository.remove(key: fileIndexRepoKey) {
+        let fileIndexRepoKey = FileIndexRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        if case .removed(_) = params.repos.fileIndex.remove(key: fileIndexRepoKey) {
             success += 1
         }
         
         if success == expectedSuccess {
             let response = RemoveUserResponse()!
-            completion(response)
+            params.completion(response)
         }
         else {
-            completion(nil)
+            params.completion(nil)
         }
     }
 }

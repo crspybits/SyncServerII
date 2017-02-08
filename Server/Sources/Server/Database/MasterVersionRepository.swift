@@ -15,13 +15,19 @@ class MasterVersion : NSObject, Model {
 }
 
 class MasterVersionRepository : Repository {
-    static var tableName:String {
+    private(set) var db:Database!
+    
+    init(_ db:Database) {
+        self.db = db
+    }
+    
+    var tableName:String {
         return "MasterVersion"
     }
     
-    static let initialMasterVersion = 0
+    let initialMasterVersion = 0
 
-    static func create() -> Database.TableCreationResult {
+    func create() -> Database.TableCreationResult {
         let createColumns =
             // reference into User table
             "(userId BIGINT NOT NULL, " +
@@ -30,7 +36,7 @@ class MasterVersionRepository : Repository {
 
             "UNIQUE (userId))"
         
-        return Database.session.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
     enum LookupKey : CustomStringConvertible {
@@ -45,7 +51,7 @@ class MasterVersionRepository : Repository {
     }
     
     // The masterVersion is with respect to the userId
-    static func lookupConstraint(key:LookupKey) -> String {
+    func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .userId(let userId):
             return "userId = '\(userId)'"
@@ -54,16 +60,16 @@ class MasterVersionRepository : Repository {
 
     // For a new record, gives the version: initialMasterVersion
     // For existing records, adds 1 to the version.
-    static func upsert(userId:UserId) -> Bool {
+    func upsert(userId:UserId) -> Bool {
         let query = "INSERT INTO \(tableName) (userId, masterVersion) " +
             "VALUES(\(userId), \(initialMasterVersion)) " +
             "ON DUPLICATE KEY UPDATE masterVersion = masterVersion + 1 "
         
-        if Database.session.connection.query(statement: query) {
+        if db.connection.query(statement: query) {
             return true
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not upsert MasterVersion: \(error)")
             return false
         }

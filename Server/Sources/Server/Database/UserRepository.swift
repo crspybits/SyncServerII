@@ -95,14 +95,21 @@ class User : NSObject, Model {
 }
 
 class UserRepository : Repository {
-    static var tableName:String {
+    private(set) var db:Database!
+
+    init(_ db:Database) {
+        self.db = db
+    }
+    
+    var tableName:String {
         return "User"
     }
-    static let usernameMaxLength = 255
-    static let credsIdMaxLength = 255
-    static let accountTypeMaxLength = 20
     
-    static func create() -> Database.TableCreationResult {
+    let usernameMaxLength = 255
+    let credsIdMaxLength = 255
+    let accountTypeMaxLength = 20
+    
+    func create() -> Database.TableCreationResult {
         let createColumns =
             "(userId BIGINT NOT NULL AUTO_INCREMENT, " +
             "username VARCHAR(\(usernameMaxLength)) NOT NULL," +
@@ -119,7 +126,7 @@ class UserRepository : Repository {
             "UNIQUE (accountType, credsId), " +
             "UNIQUE (userId))"
         
-        return Database.session.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
     enum LookupKey : CustomStringConvertible {
@@ -136,7 +143,7 @@ class UserRepository : Repository {
         }
     }
     
-    static func lookupConstraint(key:LookupKey) -> String {
+    func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .userId(let userId):
             return "userId = '\(userId)'"
@@ -147,7 +154,7 @@ class UserRepository : Repository {
     }
     
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
-    static func add(user:User) -> Int64? {
+    func add(user:User) -> Int64? {
         if user.username == nil || user.accountType == nil || user.credsId == nil {
             Log.error(message: "One of the model values was nil!")
             return nil
@@ -161,17 +168,17 @@ class UserRepository : Repository {
     
         let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds) VALUES('\(user.username!)', '\(user.accountType!)', \(user.credsId!), '\(user.creds!)');"
         
-        if Database.session.connection.query(statement: query) {
-            return Database.session.connection.lastInsertId()
+        if db.connection.query(statement: query) {
+            return db.connection.lastInsertId()
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not insert into \(tableName): \(error)")
             return nil
         }
     }
     
-    static func updateCreds(creds newCreds:Creds, forUser user:User) -> Bool {
+    func updateCreds(creds newCreds:Creds, forUser user:User) -> Bool {
         // First need to merge creds-- otherwise, we might override part of the creds with our update.
     
         let oldCreds = user.credsObject!
@@ -180,8 +187,8 @@ class UserRepository : Repository {
         let query = "UPDATE \(tableName) SET creds = '\(oldCreds.toJSON())' WHERE " +
             lookupConstraint(key: .userId(user.userId))
         
-        if Database.session.connection.query(statement: query) {
-            let numberUpdates = Database.session.connection.numberAffectedRows()
+        if db.connection.query(statement: query) {
+            let numberUpdates = db.connection.numberAffectedRows()
             if numberUpdates == 1 {
                 return true
             }
@@ -191,7 +198,7 @@ class UserRepository : Repository {
             }
         }
         else {
-            let error = Database.session.error
+            let error = db.error
             Log.error(message: "Could not update row for \(tableName): \(error)")
             return false
         }
