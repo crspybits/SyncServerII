@@ -11,6 +11,16 @@ import SMCoreLib
 
 public protocol ServerAPIDelegate : class {
     func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID
+    
+#if DEBUG
+    func doneUploadsRequestTestLockSync() -> TimeInterval?
+#endif
+}
+
+public extension ServerAPIDelegate {
+    func doneUploadsRequestTestLockSync() -> TimeInterval? {
+        return nil
+    }
 }
 
 public class ServerAPI {
@@ -215,10 +225,15 @@ public class ServerAPI {
         
         let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
 
-        let params:[String : Any] = [
-            DoneUploadsRequest.deviceUUIDKey : deviceUUID,
-            DoneUploadsRequest.masterVersionKey : serverMasterVersion
-        ]
+        var params = [String : Any]()
+        params[DoneUploadsRequest.deviceUUIDKey] = deviceUUID
+        params[DoneUploadsRequest.masterVersionKey] = serverMasterVersion
+        
+#if DEBUG
+        if let testLockSync = delegate.doneUploadsRequestTestLockSync() {
+            params[DoneUploadsRequest.testLockSyncKey] = Int32(testLockSync)
+        }
+#endif
         
         guard let doneUploadsRequest = DoneUploadsRequest(json: params) else {
             completion?(nil, DoneUploadsError.couldNotCreateDoneUploadsRequest);

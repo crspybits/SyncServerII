@@ -30,6 +30,10 @@ TODO: Add long description of the pod here.
 
   s.ios.deployment_target = '8.0'
 
+  s.pod_target_xcconfig = {
+    'OTHER_SWIFT_FLAGS[config=Debug]' => '-DDEBUG',
+  }
+
   s.source_files = 'SyncServer/Classes/**/*'
   
   # s.resource_bundles = {

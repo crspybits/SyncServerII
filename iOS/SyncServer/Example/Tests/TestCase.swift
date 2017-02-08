@@ -14,7 +14,7 @@ import SMCoreLib
 class TestCase: XCTestCase {
     let cloudFolderName = "Test.Folder"
     var authTokens = [String:String]()
-    let deviceUUID = Foundation.UUID()
+    var deviceUUID = Foundation.UUID()
 
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {

@@ -18,6 +18,9 @@
   "platforms": {
     "ios": "8.0"
   },
+  "pod_target_xcconfig": {
+    "OTHER_SWIFT_FLAGS[config=Debug]": "-DDEBUG"
+  },
   "source_files": "SyncServer/Classes/**/*",
   "dependencies": {
     "AFNetworking": [

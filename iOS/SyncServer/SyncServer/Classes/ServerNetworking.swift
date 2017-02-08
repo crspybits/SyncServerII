@@ -58,7 +58,7 @@ class ServerNetworking {
         Log.special("serverURL: \(serverURL)")
         
         var sendParameters = parameters
-#if DEBUG
+#if false
         if (SMTest.session.serverDebugTest != nil) {
             sendParameters[SMServerConstants.debugTestCaseKey] = SMTest.session.serverDebugTest
         }

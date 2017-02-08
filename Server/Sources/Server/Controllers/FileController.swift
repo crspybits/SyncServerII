@@ -133,6 +133,7 @@ class FileController : ControllerProtocol {
         
 #if DEBUG
         if doneUploadsRequest.testLockSync != nil {
+            Log.info(message: "Starting sleep (testLockSync= \(doneUploadsRequest.testLockSync)).")
             Thread.sleep(forTimeInterval: TimeInterval(doneUploadsRequest.testLockSync!))
         }
 #endif
