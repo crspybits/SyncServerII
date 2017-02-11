@@ -10,7 +10,7 @@ import XCTest
 @testable import SyncServer
 import SMCoreLib
 
-class ServerAPI_DoneUploads: TestCase {
+class ServerAPI_DoneUploads: TestCase {    
     override func setUp() {
         super.setUp()
     }
@@ -74,16 +74,13 @@ class ServerAPI_DoneUploads: TestCase {
     func testDoneUploadsConflict() {
         let masterVersion = getMasterVersion()
         
-        let apiDelegate = ServerAPIDelegateObject()
-        ServerAPI.session.delegate = apiDelegate
-        
         let deviceUUID1 = Foundation.UUID()
         let deviceUUID2 = Foundation.UUID()
 
-        apiDelegate.deviceUUID = deviceUUID1
+        deviceUUID = deviceUUID1
         _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", serverMasterVersion: masterVersion)
         
-        apiDelegate.deviceUUID = deviceUUID2
+        deviceUUID = deviceUUID2
         _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", serverMasterVersion: masterVersion)
         
         let expectation1 = self.expectation(description: "doneUploads1")
@@ -91,9 +88,9 @@ class ServerAPI_DoneUploads: TestCase {
         
         var doneRequest1 = false
         
-        apiDelegate.deviceUUID = deviceUUID1 // for ServerAPIDelegate
-        apiDelegate.testLockSync = 5
-        apiDelegate.deviceUUIDCalled = false
+        deviceUUID = deviceUUID1 // for ServerAPIDelegate
+        testLockSync = 5
+        deviceUUIDCalled = false
         
         ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) {
             doneUploadsResult, error in
@@ -115,10 +112,10 @@ class ServerAPI_DoneUploads: TestCase {
         // Let above `doneUploads` request get started -- by delaying the 2nd request.
         TimedCallback.withDuration(1.0) { 
             // The first request should have started
-            XCTAssert(apiDelegate.deviceUUIDCalled)
+            XCTAssert(self.deviceUUIDCalled)
 
-            apiDelegate.deviceUUID = deviceUUID2
-            apiDelegate.testLockSync = nil
+            self.deviceUUID = deviceUUID2
+            self.testLockSync = nil
             
             ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) {
                 doneUploadsResult, error in
@@ -141,20 +138,4 @@ class ServerAPI_DoneUploads: TestCase {
     }
 }
 
-class ServerAPIDelegateObject : ServerAPIDelegate {
-    var deviceUUID: Foundation.UUID!
-    var testLockSync: TimeInterval?
-    var deviceUUIDCalled:Bool = false
-    var testLockSyncCalled:Bool = false
-    
-    func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
-        deviceUUIDCalled = true
-        return deviceUUID
-    }
-    
-    func doneUploadsRequestTestLockSync() -> TimeInterval? {
-        testLockSyncCalled = true
-        return testLockSync
-    }
-}
 

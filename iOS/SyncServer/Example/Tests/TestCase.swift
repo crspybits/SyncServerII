@@ -14,7 +14,12 @@ import SMCoreLib
 class TestCase: XCTestCase {
     let cloudFolderName = "Test.Folder"
     var authTokens = [String:String]()
+    
     var deviceUUID = Foundation.UUID()
+    var deviceUUIDCalled:Bool = false
+    
+    var testLockSync: TimeInterval?
+    var testLockSyncCalled:Bool = false
 
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {
@@ -158,12 +163,13 @@ extension TestCase : ServerNetworkingAuthentication {
 }
 
 extension TestCase : ServerAPIDelegate {
-    func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
-        return deviceUUID
+    func doneUploadsRequestTestLockSync() -> TimeInterval? {
+        testLockSyncCalled = true
+        return testLockSync
     }
     
-    func doneUploadsRequestTestLockSync() -> TimeInterval? {
-        return nil
+    func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
+        deviceUUIDCalled = true
+        return deviceUUID
     }
 }
-

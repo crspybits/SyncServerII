@@ -17,14 +17,6 @@ public protocol ServerAPIDelegate : class {
 #endif
 }
 
-/*
-public extension ServerAPIDelegate {
-    func doneUploadsRequestTestLockSync() -> TimeInterval? {
-        return nil
-    }
-}
-*/
-
 public class ServerAPI {
     // These need to be set by user of this class.
     public var baseURL:String!
