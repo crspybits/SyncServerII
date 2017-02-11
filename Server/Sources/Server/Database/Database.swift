@@ -174,6 +174,7 @@ class Select {
     }
     
     // Check forEachRowStatus after you have finished this -- it will indicate the error, if any.
+    // TODO: The callback could return a boolean, which indicates whether to continue iterating. This would be useful to enable the iteration to stop, e.g., on an error condition.
     func forEachRow(callback:@escaping (_ row: Model?) ->()) {
         let results = self.stmt.results()
         var failure = false

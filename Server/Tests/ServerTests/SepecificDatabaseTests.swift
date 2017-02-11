@@ -296,12 +296,36 @@ class SepecificDatabaseTests: ServerTestCase {
         
         let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
         XCTAssert(result1 == 1, "Bad fileIndexId!")
+        fileIndex.fileIndexId = result1
         
         return fileIndex
     }
     
     func testAddFileIndex() {
         _ = doAddFileIndex()
+    }
+    
+    func testUpdateFileIndexWithNoChanges() {
+        let fileIndex = doAddFileIndex()
+        XCTAssert(FileIndexRepository(db).update(fileIndex: fileIndex))
+    }
+    
+    func testUpdateFileIndexWithAChange() {
+        let fileIndex = doAddFileIndex()
+        fileIndex.fileVersion = 2
+        XCTAssert(FileIndexRepository(db).update(fileIndex: fileIndex))
+    }
+    
+    func testUpdateFileIndexFailsWithoutFileIndexId() {
+        let fileIndex = doAddFileIndex()
+        fileIndex.fileIndexId = nil
+        XCTAssert(!FileIndexRepository(db).update(fileIndex: fileIndex))
+    }
+    
+    func testUpdateUploadSucceedsWithNilAppMetaData() {
+        let fileIndex = doAddFileIndex()
+        fileIndex.appMetaData = nil
+        XCTAssert(FileIndexRepository(db).update(fileIndex: fileIndex))
     }
     
     func testLookupFromFileIndex() {

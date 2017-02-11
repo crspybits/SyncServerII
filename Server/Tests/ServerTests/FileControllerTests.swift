@@ -80,21 +80,29 @@ class FileControllerTests: ServerTestCase {
         }
     }
     
-    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:Int64 = 0, masterVersion:Int64 = 0) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
             self.addNewUser()
+        }
+        
+        var fileUUIDToSend = ""
+        if fileUUID == nil {
+            fileUUIDToSend = PerfectLib.UUID().string
+        }
+        else {
+            fileUUIDToSend = fileUUID!
         }
         
         let stringToUpload = "Hello World!"
         let data = stringToUpload.data(using: .utf8)
         
         let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
+            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.deviceUUIDKey: deviceUUID,
-            UploadFileRequest.fileVersionKey: 1,
-            UploadFileRequest.masterVersionKey: 0
+            UploadFileRequest.fileVersionKey: fileVersion,
+            UploadFileRequest.masterVersionKey: masterVersion
         ])
         
         runUploadTest(data:data!, uploadRequest:uploadRequest!, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected)
@@ -106,7 +114,7 @@ class FileControllerTests: ServerTestCase {
         _ = uploadTextFile()
     }
     
-    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:Int64 = 0) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
             self.addNewUser()
@@ -120,7 +128,7 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
-            UploadFileRequest.fileVersionKey: 1,
+            UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.deviceUUIDKey: deviceUUID,
             UploadFileRequest.masterVersionKey: 0
         ])
@@ -134,13 +142,13 @@ class FileControllerTests: ServerTestCase {
         _ = uploadJPEGFile()
     }
     
-    func sendDoneUploads(expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil) {
+    func sendDoneUploads(expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0) {
         self.performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
                 DoneUploadsRequest.deviceUUIDKey: deviceUUID,
-                DoneUploadsRequest.masterVersionKey : "0"
+                DoneUploadsRequest.masterVersionKey : "\(masterVersion)"
             ])
             
             self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
@@ -251,6 +259,8 @@ class FileControllerTests: ServerTestCase {
     }
 #endif
 
+    // MARK: DoneUploads tests
+    
     func testDoneUploadsWithNoUploads() {
         self.addNewUser()
         self.sendDoneUploads(expectedNumberOfUploads: 0)
@@ -268,7 +278,18 @@ class FileControllerTests: ServerTestCase {
         _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
         self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
     }
-
+    
+    func testDoneUploadsThatUpdatesFileVersion() {
+        let deviceUUID = PerfectLib.UUID().string
+        let fileUUID = PerfectLib.UUID().string
+        
+        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        
+        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:false, fileVersion:1, masterVersion: 1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1)
+    }
+    
     func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = PerfectLib.UUID().string, masterVersionExpected:Int64, expectedFileSizes: [String: Int64]) {
     
         XCTAssert(expectedFiles.count == expectedFileSizes.count)

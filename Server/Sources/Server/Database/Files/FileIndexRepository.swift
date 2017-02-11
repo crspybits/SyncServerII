@@ -89,9 +89,13 @@ class FileIndexRepository : Repository {
         return "fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes"
     }
     
+    private func haveNilField(fileIndex:FileIndex) -> Bool {
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil
+    }
+    
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     func add(fileIndex:FileIndex) -> Int64? {
-        if fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil {
+        if haveNilField(fileIndex: fileIndex) {
             Log.error(message: "One of the model values was nil!")
             return nil
         }
@@ -117,6 +121,40 @@ class FileIndexRepository : Repository {
             let error = db.error
             Log.error(message: "Could not insert row into \(tableName): \(error)")
             return nil
+        }
+    }
+    
+    // The FileIndex model *must* have an fileIndexId
+    func update(fileIndex:FileIndex) -> Bool {
+        if fileIndex.fileIndexId == nil || haveNilField(fileIndex: fileIndex) {
+            Log.error(message: "One of the model values was nil!")
+            return false
+        }
+    
+        var appMetaDataField = ""
+        if fileIndex.appMetaData != nil {
+            // TODO: Seems like we could use an encoding here to deal with sql injection issues.
+            appMetaDataField = " appMetaData='\(fileIndex.appMetaData!)', "
+        }
+        
+        let deletedValue = fileIndex.deleted == true ? 1 : 0
+
+        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deviceUUID='\(fileIndex.deviceUUID!)', mimeType='\(fileIndex.mimeType!)', \(appMetaDataField) deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!), fileSizeBytes=\(fileIndex.fileSizeBytes!) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
+        
+        if db.connection.query(statement: query) {
+            // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
+            if db.connection.numberAffectedRows() <= 1 {
+                return true
+            }
+            else {
+                Log.error(message: "Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
+                return false
+            }
+        }
+        else {
+            let error = db.error
+            Log.error(message: "Could not update \(tableName): \(error)")
+            return false
         }
     }
     
@@ -148,18 +186,83 @@ class FileIndexRepository : Repository {
         }
     }
     
+    /* For each entry in Upload for the userId/deviceUUID that is in the uploaded state, we need to do the following:
+    
+        1) If there is no file in the FileIndex for the userId/fileUUID, then a new entry needs to be inserted into the FileIndex. This should be version 0 of the file.
+        2) If there is already a file in the FileIndex for the userId/deviceUUID, then the version number we have in Uploads should be the version number in the FileIndex + 1 (if not, it is an error). Update the FileIndex with the new info from Upload, if no error.
+    */
     // Returns nil on failure, and on success returns the number of uploads transferred.
     func transferUploads(userId: UserId, deviceUUID:String, upload:UploadRepository) -> Int32? {
-        // The ordering of fields in the INSERT must match that in selectForTransferToUpload.
-        let query = "INSERT INTO \(tableName) (\(columnNames())) " +
-        upload.selectForTransferToUpload(userId: userId, deviceUUID: deviceUUID)
         
-        if db.connection.query(statement: query) {
-            return Int32(db.connection.numberAffectedRows())
+        var error = false
+        var numberTransferred:Int32 = 0
+        
+        let uploadSelect = upload.select(forUserId: userId, deviceUUID: deviceUUID, andState:.uploaded)
+        uploadSelect.forEachRow { rowModel in
+            if error {
+                return
+            }
+            
+            let upload = rowModel as! Upload
+
+            let fileIndex = FileIndex()
+            fileIndex.fileSizeBytes = upload.fileSizeBytes
+            fileIndex.deleted = false
+            fileIndex.fileUUID = upload.fileUUID
+            fileIndex.deviceUUID = deviceUUID
+            fileIndex.fileVersion = upload.fileVersion
+            fileIndex.mimeType = upload.mimeType
+            fileIndex.userId = userId
+            fileIndex.appMetaData = upload.appMetaData
+            
+            let result = self.lookup(key: .primaryKeys(userId: "\(userId)", fileUUID: upload.fileUUID), modelInit: FileIndex.init)
+            
+            switch result {
+            case .error(_):
+                error = true
+                return
+                
+            case .found(let object):
+                let existingFileIndex = object as! FileIndex
+                guard upload.fileVersion == existingFileIndex.fileVersion + 1 else {
+                    Log.error(message: "Did not have next version of file!")
+                    error = true
+                    return
+                }
+                
+                fileIndex.fileIndexId = existingFileIndex.fileIndexId
+                guard self.update(fileIndex: fileIndex) else {
+                    Log.error(message: "Could not update FileIndex!")
+                    error = true
+                    return
+                }
+                
+            case .noObjectFound:
+                guard upload.fileVersion == 0 else {
+                    Log.error(message: "Did not have version 0 of file!")
+                    error = true
+                    return
+                }
+                
+                let fileIndexId = self.add(fileIndex: fileIndex)
+                if fileIndexId == nil {
+                    Log.error(message: "Could not add new FileIndex!")
+                    error = true
+                    return
+                }
+            }
+            
+            numberTransferred += 1
+        }
+        
+        if error {
+            return nil
+        }
+        
+        if uploadSelect.forEachRowStatus == nil {
+            return numberTransferred
         }
         else {
-            let error = db.error
-            Log.error(message: "Could not transferUploads: \(error)")
             return nil
         }
     }

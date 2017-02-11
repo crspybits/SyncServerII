@@ -214,7 +214,14 @@ class UploadRepository : Repository {
         let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), deviceUUID='\(upload.deviceUUID!)', mimeType='\(upload.mimeType!)', fileUpload=\(fileUploadValue), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)' \(fileSizeBytesField) \(appMetaDataField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.connection.query(statement: query) {
-            return true
+            // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
+            if db.connection.numberAffectedRows() <= 1 {
+                return true
+            }
+            else {
+                Log.error(message: "Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
+                return false
+            }
         }
         else {
             let error = db.error
@@ -256,14 +263,8 @@ class UploadRepository : Repository {
         }
     }
     
-    func selectForTransferToUpload(userId: UserId, deviceUUID:String) -> String {
-        let filesForUserConstraint = lookupConstraint(key: .filesForUserDevice(userId: userId, deviceUUID: deviceUUID))
-
-        // The ordering of the fields in the following SELECT is *very important*. It must correspond to that used in the FileIndexRepository in the method that uses this method.
-        // Also: false corresponds to the `deleted` field in the FileIndex.
-        let select = "SELECT  fileUUID, userId, deviceUUID, mimeType, appMetaData, false, fileVersion, fileSizeBytes " +
-            "FROM  \(tableName) " +
-            "WHERE  \(filesForUserConstraint)"
-        return select
+    func select(forUserId userId: UserId, deviceUUID:String, andState state:UploadState) -> Select {
+        let query = "select * from \(tableName) where userId=\(userId) and deviceUUID='\(deviceUUID)' and state='\(state.rawValue)'"
+        return Select(db:db, query: query, modelInit: Upload.init, ignoreErrors:false)
     }
 }
