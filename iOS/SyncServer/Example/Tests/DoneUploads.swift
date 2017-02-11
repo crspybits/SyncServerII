@@ -72,10 +72,10 @@ class ServerAPI_DoneUploads: TestCase {
     }
     
     func testDoneUploadsConflict() {
-        let apiDelegate = ServerAPIDelegateObject()
-        ServerAPI.session.delegate = self
-        
         let masterVersion = getMasterVersion()
+        
+        let apiDelegate = ServerAPIDelegateObject()
+        ServerAPI.session.delegate = apiDelegate
         
         let deviceUUID1 = Foundation.UUID()
         let deviceUUID2 = Foundation.UUID()
@@ -112,8 +112,8 @@ class ServerAPI_DoneUploads: TestCase {
             expectation1.fulfill()
         }
 
-        // Let above `doneUploads` request get started -- by putting the second request on a background thread.
-        DispatchQueue.global(qos: .background).async {
+        // Let above `doneUploads` request get started -- by delaying the 2nd request.
+        TimedCallback.withDuration(1.0) { 
             // The first request should have started
             XCTAssert(apiDelegate.deviceUUIDCalled)
 
@@ -124,8 +124,7 @@ class ServerAPI_DoneUploads: TestCase {
                 doneUploadsResult, error in
                             
                 XCTAssert(error == nil)
-                if case .serverMasterVersionUpdate(let masterVersionUpdate) = doneUploadsResult! {
-                    XCTAssert(masterVersionUpdate == masterVersion + 1)
+                if case .lockHeld = doneUploadsResult! {
                 }
                 else {
                     XCTFail()
@@ -133,7 +132,7 @@ class ServerAPI_DoneUploads: TestCase {
                 
                 Log.special("Finished doneUploads2")
                 
-                XCTAssert(doneRequest1)
+                XCTAssert(!doneRequest1)
                 expectation2.fulfill()
             }
         }

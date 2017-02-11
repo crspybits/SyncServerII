@@ -121,6 +121,34 @@ class TestCase: XCTestCase {
         
         return fileSize
     }
+    
+    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, withExpectation expectation:XCTestExpectation) {
+    
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
+
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
+        
+        // Just to get the size-- this is redundant with the file read in ServerAPI.session.uploadFile
+        guard let fileData = try? Data(contentsOf: file.localURL) else {
+            XCTFail()
+            return
+        }
+        
+        Log.special("ServerAPI.session.uploadFile")
+        
+        ServerAPI.session.uploadFile(file: file, serverMasterVersion: serverMasterVersion) { uploadFileResult, error in
+        
+            XCTAssert(error == nil)
+            if case .success(let size) = uploadFileResult! {
+                XCTAssert(Int64(fileData.count) == size)
+            }
+            else {
+                XCTFail()
+            }
+            
+            expectation.fulfill()
+        }
+    }
 }
 
 extension TestCase : ServerNetworkingAuthentication {
@@ -132,6 +160,10 @@ extension TestCase : ServerNetworkingAuthentication {
 extension TestCase : ServerAPIDelegate {
     func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
         return deviceUUID
+    }
+    
+    func doneUploadsRequestTestLockSync() -> TimeInterval? {
+        return nil
     }
 }
 

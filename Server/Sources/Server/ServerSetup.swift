@@ -60,14 +60,17 @@ public class ServerSetup {
     }
 }
 
-public class CreateRoutes {
-    private var router = Router()
+public typealias ProcessRequest = (RequestProcessingParameters)->()
+
+private class RequestHandler {
     private var request:RouterRequest!
     private var response:RouterResponse!
-
-    init() {
+    
+    init(request:RouterRequest, response:RouterResponse) {
+        self.request = request
+        self.response = response
     }
-        
+
     public func failWithError(message:String,
         statusCode:HTTPStatusCode = .internalServerError) {
         
@@ -111,10 +114,7 @@ public class CreateRoutes {
         self.response.headers["Content-Type"] = "application/json"
     }
 
-    public typealias ProcessRequest = (RequestProcessingParameters)->()
-
-    // The intent is that, if authorized, a request never returns an empty response. Some JSON is always returned, even with an error.
-    private func doRequest(authenticationLevel:AuthenticationLevel = .secondary,
+    func doRequest(authenticationLevel:AuthenticationLevel = .secondary,
         createRequest: @escaping (RouterRequest) -> RequestMessage?,
         processRequest: @escaping ProcessRequest) {
         
@@ -165,9 +165,9 @@ public class CreateRoutes {
             }
         }
         
-        let requestObject:RequestMessage? = createRequest(self.request)
+        let requestObject:RequestMessage? = createRequest(request)
         if nil == requestObject {
-            self.failWithError(message: "Could not create request object from RouterRequest: \(self.request)")
+            self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
             return
         }
         
@@ -228,15 +228,23 @@ public class CreateRoutes {
             }
         }
     }
+}
+
+public class CreateRoutes {
+    private var router = Router()
+
+    init() {
+    }
     
     public func addRoute(ep:ServerEndpoint,
         createRequest: @escaping (RouterRequest) ->(RequestMessage?),
         processRequest: @escaping ProcessRequest) {
         
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
-            self.response = routerResponse; self.request = routerRequest
+            Log.info(message: "parsedURL: \(routerRequest.parsedURL)")
             
-            self.doRequest(authenticationLevel: ep.authenticationLevel,
+            let handler = RequestHandler(request: routerRequest, response: routerResponse)
+            handler.doRequest(authenticationLevel: ep.authenticationLevel,
                 createRequest: createRequest, processRequest: processRequest)
         }
         
@@ -258,7 +266,7 @@ public class CreateRoutes {
         ServerRoutes.add(proxyRouter: self)
 
         self.router.error { request, response, _ in
-            self.request = request; self.response = response
+            let handler = RequestHandler(request: request, response: response)
             
             let errorDescription: String
             if let error = response.error {
@@ -268,14 +276,14 @@ public class CreateRoutes {
             }
             
             let message = "Server error: \(errorDescription)"
-            self.failWithError(message: message)
+            handler.failWithError(message: message)
         }
 
         self.router.all { request, response, _ in
-            self.request = request; self.response = response
+            let handler = RequestHandler(request: request, response: response)
             let message = "Route not found in server: \(request.originalURL)"
             response.statusCode = .notFound
-            self.failWithError(message: message)
+            handler.failWithError(message: message)
         }
         
         return self.router

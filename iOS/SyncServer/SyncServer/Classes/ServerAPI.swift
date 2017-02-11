@@ -17,11 +17,13 @@ public protocol ServerAPIDelegate : class {
 #endif
 }
 
+/*
 public extension ServerAPIDelegate {
     func doneUploadsRequestTestLockSync() -> TimeInterval? {
         return nil
     }
 }
+*/
 
 public class ServerAPI {
     // These need to be set by user of this class.
@@ -29,6 +31,11 @@ public class ServerAPI {
     public weak var delegate:ServerAPIDelegate!
     
     fileprivate var authTokens:[String:String]?
+    
+    public enum ServerAPIError : Error {
+    case non200StatusCode(Int)
+    case badStatusCode(Int)
+    }
     
     // If this is nil, you must use the ServerNetworking authenticationDelegate to provide credentials.
     public var creds:SignInCreds? {
@@ -50,12 +57,21 @@ public class ServerAPI {
     
     // MARK: Health check
 
+    private func checkForError(statusCode:Int?, error:Error?) -> Error? {
+        if statusCode == HTTPStatus.ok.rawValue || statusCode == nil {
+            return error
+        }
+        else {
+            return ServerAPIError.non200StatusCode(statusCode!)
+        }
+    }
+    
     public func healthCheck(completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.healthCheck
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
-            completion?(error)
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+            completion?(self.checkForError(statusCode: httpStatus, error: error))
         }
     }
 
@@ -67,8 +83,8 @@ public class ServerAPI {
         let url = URL(string: baseURL + endpoint.path)!
         
         ServerNetworking.session.sendRequestUsing(method: endpoint.method,
-            toURL: url) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
-            completion?(error)
+            toURL: url) { (response,  httpStatus, error) in
+            completion?(self.checkForError(statusCode: httpStatus, error: error))
         }
     }
     
@@ -77,7 +93,7 @@ public class ServerAPI {
         let url = URL(string: baseURL + endpoint.path)!
         
         ServerNetworking.session.sendRequestUsing(method: endpoint.method,
-            toURL: url) { (response:[String : AnyObject]?, httpStatus:Int?, error:Error?) in
+            toURL: url) { (response, httpStatus, error) in
             
             var userExists:Bool?
             if httpStatus == HTTPStatus.ok.rawValue {
@@ -88,8 +104,9 @@ public class ServerAPI {
             }
             
             if userExists == nil {
-                assert(error != nil)
-                completion?(nil, error)
+                let result = self.checkForError(statusCode: httpStatus, error: error)
+                assert(result != nil)
+                completion?(nil, result)
             }
             else {
                 completion?(userExists, nil)
@@ -101,8 +118,8 @@ public class ServerAPI {
         let endpoint = ServerEndpoints.removeUser
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
-            completion?(error)
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+            completion?(self.checkForError(statusCode: httpStatus, error: error))
         }
     }
     
@@ -126,8 +143,10 @@ public class ServerAPI {
         
         let url = URL(string: baseURL + endpoint.path + "/?" + fileIndexRequest.urlParameters()!)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
-            if error == nil {
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+            let resultError = self.checkForError(statusCode: httpStatus, error: error)
+            
+            if resultError == nil {
                 if let fileIndexResponse = FileIndexResponse(json: response!) {
                     completion?(fileIndexResponse.fileIndex, fileIndexResponse.masterVersion, nil)
                 }
@@ -136,7 +155,7 @@ public class ServerAPI {
                 }
             }
             else {
-                completion?(nil, nil, error)
+                completion?(nil, nil, resultError)
             }
         }
     }
@@ -167,6 +186,8 @@ public class ServerAPI {
 
         let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
 
+        Log.special("file.fileUUID: \(file.fileUUID)")
+        
         let params:[String : Any] = [
             UploadFileRequest.fileUUIDKey: file.fileUUID,
             UploadFileRequest.mimeTypeKey: file.mimeType,
@@ -192,8 +213,11 @@ public class ServerAPI {
         let parameters = uploadRequest.urlParameters()!
         let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
         
-        ServerNetworking.session.postUploadDataTo(url, dataToUpload: fileData) { (resultDict, error) in
-            if error == nil {
+        ServerNetworking.session.postUploadDataTo(url, dataToUpload: fileData) { (resultDict, httpStatus, error) in
+        
+            let resultError = self.checkForError(statusCode: httpStatus, error: error)
+
+            if resultError == nil {
                 if let size = resultDict?[UploadFileResponse.sizeKey] as? Int64 {
                     completion?(UploadFileResult.success(sizeInBytes:size), nil)
                 }
@@ -205,7 +229,7 @@ public class ServerAPI {
                 }
             }
             else {
-                completion?(nil, error)
+                completion?(nil, resultError)
             }
         }
     }
@@ -218,6 +242,7 @@ public class ServerAPI {
     public enum DoneUploadsResult {
     case success(numberUploadsTransferred:Int64)
     case serverMasterVersionUpdate(Int64)
+    case lockHeld
     }
     
     public func doneUploads(serverMasterVersion:MasterVersionInt!, completion:((DoneUploadsResult?, Error?)->(Void))?) {
@@ -243,21 +268,24 @@ public class ServerAPI {
         let parameters = doneUploadsRequest.urlParameters()!
         let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
 
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response:[String : AnyObject]?,  httpStatus:Int?, error:Error?) in
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
         
-            if error == nil {
+            let resultError = self.checkForError(statusCode: httpStatus, error: error)
+
+            if resultError == nil {
                 if let numberUploads = response?[DoneUploadsResponse.numberUploadsTransferredKey] as? Int64 {
                     completion?(DoneUploadsResult.success(numberUploadsTransferred:numberUploads), nil)
                 }
                 else if let masterVersionUpdate = response?[DoneUploadsResponse.masterVersionUpdateKey] as? Int64 {
                     completion?(DoneUploadsResult.serverMasterVersionUpdate(masterVersionUpdate), nil)
-                }
-                else {
+                } else if let lockHeld = response?[DoneUploadsResponse.couldNotObtainLockKey] as? Bool {
+                    completion?(DoneUploadsResult.lockHeld, nil)
+                } else {
                     completion?(nil, DoneUploadsError.noExpectedResultKey)
                 }
             }
             else {
-                completion?(nil, error)
+                completion?(nil, resultError)
             }
         }
     }

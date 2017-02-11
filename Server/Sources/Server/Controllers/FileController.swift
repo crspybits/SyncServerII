@@ -79,35 +79,46 @@ class FileController : ControllerProtocol {
             // TODO: This needs to be generalized to enabling uploads to various kinds of cloud services. E.g., including Dropbox. Right now, it's just specific to Google Drive.
             
             // TODO: Need to have streaming data from client, and send streaming data up to Google Drive.
-                    
-            googleCreds.uploadSmallFile(request: uploadRequest) { fileSize, error in
-                if error == nil {
-                    let upload = Upload()
-                    upload.deviceUUID = uploadRequest.deviceUUID
-                    upload.fileSizeBytes = Int64(fileSize!)
-                    upload.fileUpload = true
-                    upload.fileUUID = uploadRequest.fileUUID
-                    upload.fileVersion = uploadRequest.fileVersion
-                    upload.mimeType = uploadRequest.mimeType
-                    upload.state = .uploaded
-                    upload.userId = params.currentSignedInUser!.userId
-                    upload.appMetaData = uploadRequest.appMetaData
-                    
-                    if let _ = params.repos.upload.add(upload: upload) {
-                        let response = UploadFileResponse()!
-                        response.size = Int64(uploadRequest.data.count)
-                        params.completion(response)
+            
+            Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName())")
+            
+            // I'm going to create the entry in the Upload repo first because otherwise, there's a race condition-- two processes could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload entry will be the gatekeeper.
+            
+            let upload = Upload()
+            upload.deviceUUID = uploadRequest.deviceUUID
+            upload.fileUpload = true
+            upload.fileUUID = uploadRequest.fileUUID
+            upload.fileVersion = uploadRequest.fileVersion
+            upload.mimeType = uploadRequest.mimeType
+            upload.state = .uploading
+            upload.userId = params.currentSignedInUser!.userId
+            upload.appMetaData = uploadRequest.appMetaData
+            
+            if let uploadId = params.repos.upload.add(upload: upload) {
+                googleCreds.uploadSmallFile(request: uploadRequest) { fileSize, error in
+                    if error == nil {
+                        upload.fileSizeBytes = Int64(fileSize!)
+                        upload.state = .uploaded
+                        upload.uploadId = uploadId
+                        if params.repos.upload.update(upload: upload) {
+                            let response = UploadFileResponse()!
+                            response.size = Int64(fileSize!)
+                            params.completion(response)
+                        }
+                        else {
+                            Log.error(message: "Could not update UploadRepository: \(error)")
+                            params.completion(nil)
+                        }
                     }
                     else {
-                        Log.error(message: "Could not add to UploadRepository")
-                        // TODO: The file has been uploaded to cloud service. But we don't have a record of it on the server. What do we do?
+                        Log.error(message: "Could not uploadSmallFile: error: \(error)")
                         params.completion(nil)
                     }
                 }
-                else {
-                    Log.error(message: "Could not uploadSmallFile: error: \(error)")
-                    params.completion(nil)
-                }
+            }
+            else {
+                Log.error(message: "Could not add to UploadRepository")
+                params.completion(nil)
             }
         }
     }
@@ -123,8 +134,19 @@ class FileController : ControllerProtocol {
         // TODO: Hmmm. I'm not really certain if we need this Locking mechanism. We will have a transactionally based request shortly. Would any other process see the lock prior to us closing the transaction???
         
         let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:doneUploadsRequest.deviceUUID!)
-        if !params.repos.lock.lock(lock: lock) {
-            Log.error(message: "Could not obtain lock!")
+        switch params.repos.lock.lock(lock: lock) {
+        case .success:
+            break
+            
+        case .lockAlreadyHeld:
+            Log.warning(message: "Lock already held.")
+            let response = DoneUploadsResponse()
+            response!.couldNotObtainLock = true
+            params.completion(response)
+            return
+        
+        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+            Log.error(message: "Error obtaining lock!")
             params.completion(nil)
             return
         }
@@ -181,9 +203,9 @@ class FileController : ControllerProtocol {
             }
             
             // Second, remove the corresponding records from the Upload repo.
-            let filesForUser = UploadRepository.LookupKey.filesForUser(userId: params.currentSignedInUser!.userId, deviceUUID: doneUploadsRequest.deviceUUID!)
+            let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: doneUploadsRequest.deviceUUID!)
             
-            switch params.repos.upload.remove(key: filesForUser) {
+            switch params.repos.upload.remove(key: filesForUserDevice) {
             case .removed(let numberRows):
                 if numberRows != numberTransferred {
                     Log.error(message: "Number rows removed from Upload was \(numberRows) but should have been \(numberTransferred)!")

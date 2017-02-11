@@ -120,10 +120,10 @@ class SepecificDatabaseTests: ServerTestCase {
         }
     }
     
-    func doAddUpload() -> Upload {
+    func doAddUpload(fileSizeBytes:Int64?=100) -> Upload {
         let upload = Upload()
         upload.deviceUUID = PerfectLib.UUID().string
-        upload.fileSizeBytes = 100
+        upload.fileSizeBytes = fileSizeBytes
         upload.fileUpload = true
         upload.fileUUID = PerfectLib.UUID().string
         upload.fileVersion = 1
@@ -135,11 +135,34 @@ class SepecificDatabaseTests: ServerTestCase {
         let result1 = UploadRepository(db).add(upload: upload)
         XCTAssert(result1 == 1, "Bad uploadId!")
         
+        upload.uploadId = result1
+        
         return upload
     }
     
     func testAddUpload() {
         _ = doAddUpload()
+    }
+    
+    func testAddUploadSucceedsWithNilFileSizeBytes() {
+        _ = doAddUpload(fileSizeBytes:nil)
+    }
+    
+    func testUpdateUpload() {
+        let upload = doAddUpload()
+        XCTAssert(UploadRepository(db).update(upload: upload))
+    }
+    
+    func testUpdateUploadFailsWithoutUploadId() {
+        let upload = doAddUpload()
+        upload.uploadId = nil
+        XCTAssert(!UploadRepository(db).update(upload: upload))
+    }
+    
+    func testUpdateUploadSucceedsWithNilFileSize() {
+        let upload = doAddUpload()
+        upload.fileSizeBytes = nil
+        XCTAssert(UploadRepository(db).update(upload: upload))
     }
     
     func testLookupFromUpload() {
@@ -201,54 +224,63 @@ class SepecificDatabaseTests: ServerTestCase {
         checkMasterVersion(userId: userId, version: 1)
     }
     
+    func lockIt(lock:Lock, removeStale:Bool = true) -> Bool {
+        if case .success = LockRepository(db).lock(lock: lock, removeStale:removeStale) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+    
     func testLock() {
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
-        XCTAssert(LockRepository(db).lock(lock: lock))
-        XCTAssert(!LockRepository(db).lock(lock: lock))
+        XCTAssert(lockIt(lock: lock))
+        XCTAssert(!lockIt(lock: lock))
     }
     
     func testThatNewlyAddedLocksAreNotStale() {
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
-        XCTAssert(LockRepository(db).lock(lock: lock))
+        XCTAssert(lockIt(lock: lock))
         XCTAssert(LockRepository(db).removeStaleLock(forUserId: 1) == 0)
-        XCTAssert(!LockRepository(db).lock(lock: lock))
+        XCTAssert(!lockIt(lock: lock))
     }
     
     func testThatStaleALockIsRemoved() {
         let duration:TimeInterval = 1
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
-        XCTAssert(LockRepository(db).lock(lock: lock))
+        XCTAssert(lockIt(lock: lock))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
         XCTAssert(LockRepository(db).removeStaleLock(forUserId: 1) == 1)
-        XCTAssert(LockRepository(db).lock(lock: lock, removeStale:false))
+        XCTAssert(lockIt(lock: lock, removeStale:false))
     }
     
     func testRemoveAllStaleLocks() {
         let duration:TimeInterval = 1
         
         let lock1 = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
-        XCTAssert(LockRepository(db).lock(lock: lock1))
+        XCTAssert(lockIt(lock: lock1))
         
         let lock2 = Lock(userId:2, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
-        XCTAssert(LockRepository(db).lock(lock: lock2))
+        XCTAssert(lockIt(lock: lock2))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
         XCTAssert(LockRepository(db).removeStaleLock() == 2)
         
-        XCTAssert(LockRepository(db).lock(lock: lock1, removeStale:false))
-        XCTAssert(LockRepository(db).lock(lock: lock2, removeStale:false))
+        XCTAssert(lockIt(lock: lock1, removeStale:false))
+        XCTAssert(lockIt(lock: lock2, removeStale:false))
     }
     
     func testRemoveLock() {
         let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
-        XCTAssert(LockRepository(db).lock(lock: lock))
+        XCTAssert(lockIt(lock: lock))
         XCTAssert(LockRepository(db).unlock(userId:1))
-        XCTAssert(LockRepository(db).lock(lock: lock))
+        XCTAssert(lockIt(lock: lock))
     }
     
     func doAddFileIndex(userId:UserId = 1) -> FileIndex {

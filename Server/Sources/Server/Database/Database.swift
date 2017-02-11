@@ -20,6 +20,9 @@ public class Database {
     
     static let maxMimeTypeLength = 100
 
+    // E.g.,[ERR] Could not insert into ShortLocks: Failure: 1062 Duplicate entry '1' for key 'userId'
+    static let duplicateEntryForKey = UInt32(1062)
+    
     public private(set) var connection: MySQL!
 
     var error: String {

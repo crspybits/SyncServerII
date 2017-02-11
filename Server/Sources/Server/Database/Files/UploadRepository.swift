@@ -59,6 +59,7 @@ import PerfectLib
 */
 
 enum UploadState : String {
+case uploading
 case uploaded
 case toPurge
 }
@@ -79,7 +80,8 @@ class Upload : NSObject, Model, Filenaming {
     let stateKey = "state"
     var state:UploadState!
     
-    var fileSizeBytes: Int64!
+    // Making this optional to give flexibility about when we create the Upload entry in the repo (e.g., before or after the upload to cloud storage).
+    var fileSizeBytes: Int64?
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
@@ -139,7 +141,8 @@ class UploadRepository : Repository {
             "fileVersion INT NOT NULL, " +
             "state VARCHAR(\(stateMaxLength)) NOT NULL, " +
 
-            "fileSizeBytes BIGINT NOT NULL, " +
+            // Can be null if we create the Upload entry before actually uploading the file.
+            "fileSizeBytes BIGINT, " +
 
             "UNIQUE (fileUUID, userId, deviceUUID), " +
             "UNIQUE (uploadId))"
@@ -147,9 +150,13 @@ class UploadRepository : Repository {
         return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
+    private func haveNilField(upload:Upload) -> Bool {
+        return upload.fileUUID == nil || upload.userId == nil || upload.deviceUUID == nil || upload.mimeType == nil || upload.fileUpload == nil || upload.fileVersion == nil || upload.state == nil
+    }
+    
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     func add(upload:Upload) -> Int64? {
-        if upload.fileUUID == nil || upload.userId == nil || upload.deviceUUID == nil || upload.mimeType == nil || upload.fileUpload == nil || upload.fileVersion == nil || upload.state == nil || upload.fileSizeBytes == nil {
+        if haveNilField(upload: upload) {
             Log.error(message: "One of the model values was nil!")
             return nil
         }
@@ -163,9 +170,16 @@ class UploadRepository : Repository {
             appMetaDataFieldValue = ", '\(upload.appMetaData!)'"
         }
         
+        var fileSizeFieldName = ""
+        var fileSizeFieldValue = ""
+        if upload.fileSizeBytes != nil {
+            fileSizeFieldName = ", fileSizeBytes"
+            fileSizeFieldValue = ", \(upload.fileSizeBytes!)"
+        }
+        
         let fileUploadValue = upload.fileUpload == true ? 1 : 0
         
-        let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) fileUpload, fileVersion, state, fileSizeBytes) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.mimeType!)' \(appMetaDataFieldValue), \(fileUploadValue), \(upload.fileVersion!), '\(upload.state!.rawValue)', \(upload.fileSizeBytes!));"
+        let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) fileUpload, fileVersion, state \(fileSizeFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.mimeType!)' \(appMetaDataFieldValue), \(fileUploadValue), \(upload.fileVersion!), '\(upload.state!.rawValue)' \(fileSizeFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -177,11 +191,43 @@ class UploadRepository : Repository {
         }
     }
     
+    // The Upload model *must* have an uploadId
+    func update(upload:Upload) -> Bool {
+        if upload.uploadId == nil || haveNilField(upload: upload) {
+            Log.error(message: "One of the model values was nil!")
+            return false
+        }
+    
+        var appMetaDataField = ""
+        if upload.appMetaData != nil {
+            // TODO: Seems like we could use an encoding here to deal with sql injection issues.
+            appMetaDataField = ", appMetaData='\(upload.appMetaData!)'"
+        }
+        
+        var fileSizeBytesField = ""
+        if upload.fileSizeBytes != nil {
+            fileSizeBytesField = ", fileSizeBytes=\(upload.fileSizeBytes!)"
+        }
+        
+        let fileUploadValue = upload.fileUpload == true ? 1 : 0
+        
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), deviceUUID='\(upload.deviceUUID!)', mimeType='\(upload.mimeType!)', fileUpload=\(fileUploadValue), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)' \(fileSizeBytesField) \(appMetaDataField) WHERE uploadId=\(upload.uploadId!)"
+        
+        if db.connection.query(statement: query) {
+            return true
+        }
+        else {
+            let error = db.error
+            Log.error(message: "Could not update \(tableName): \(error)")
+            return false
+        }
+    }
+    
     enum LookupKey : CustomStringConvertible {
         case uploadId(Int64)
         case fileUUID(String)
         case userId(UserId)
-        case filesForUser(userId:UserId, deviceUUID:String)
+        case filesForUserDevice(userId:UserId, deviceUUID:String)
         
         var description : String {
             switch self {
@@ -191,7 +237,7 @@ class UploadRepository : Repository {
                 return "fileUUID(\(fileUUID))"
             case .userId(let userId):
                 return "userId(\(userId))"
-            case .filesForUser(let userId, let deviceUUID):
+            case .filesForUserDevice(let userId, let deviceUUID):
                 return "userId(\(userId)); deviceUUID(\(deviceUUID)); "
             }
         }
@@ -205,13 +251,13 @@ class UploadRepository : Repository {
             return "fileUUID = '\(fileUUID)'"
         case .userId(let userId):
             return "userId = '\(userId)'"
-        case .filesForUser(let userId, let deviceUUID):
+        case .filesForUserDevice(let userId, let deviceUUID):
             return "userId = \(userId) and deviceUUID = '\(deviceUUID)'"
         }
     }
     
     func selectForTransferToUpload(userId: UserId, deviceUUID:String) -> String {
-        let filesForUserConstraint = lookupConstraint(key: .filesForUser(userId: userId, deviceUUID: deviceUUID))
+        let filesForUserConstraint = lookupConstraint(key: .filesForUserDevice(userId: userId, deviceUUID: deviceUUID))
 
         // The ordering of the fields in the following SELECT is *very important*. It must correspond to that used in the FileIndexRepository in the method that uses this method.
         // Also: false corresponds to the `deleted` field in the FileIndex.

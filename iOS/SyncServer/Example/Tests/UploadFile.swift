@@ -8,6 +8,7 @@
 
 import XCTest
 @testable import SyncServer
+import SMCoreLib
 
 class ServerAPI_UploadFile: TestCase {
     
@@ -41,5 +42,21 @@ class ServerAPI_UploadFile: TestCase {
 
         _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion)
         _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, expectError: true)
+    }
+    
+    func testParallelUploadsWork() {
+        let masterVersion = getMasterVersion()
+
+        let expectation1 = self.expectation(description: "upload1")
+        let expectation2 = self.expectation(description: "upload2")
+        let fileUUID1 = UUID().uuidString
+        let fileUUID2 = UUID().uuidString
+        Log.special("fileUUID1= \(fileUUID1); fileUUID2= \(fileUUID2)")
+        
+        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID:fileUUID1, serverMasterVersion: masterVersion, withExpectation:expectation1)
+        
+        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID:fileUUID2, serverMasterVersion: masterVersion, withExpectation:expectation2)
+
+        waitForExpectations(timeout: 30.0, handler: nil)
     }
 }
