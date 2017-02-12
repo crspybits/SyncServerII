@@ -85,7 +85,7 @@ class FileControllerTests: ServerTestCase {
         }
     }
     
-    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:Int64 = 0, masterVersion:Int64 = 0, cloudFolderName:String = "CloudFolder") -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:Int64 = 0, masterVersion:Int64 = 0, cloudFolderName:String = "CloudFolder", appMetaData:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
             self.addNewUser()
         }
@@ -108,11 +108,13 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.deviceUUIDKey: deviceUUID,
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.masterVersionKey: masterVersion
-        ])
+        ])!
         
-        runUploadTest(data:data!, uploadRequest:uploadRequest!, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected)
+        uploadRequest.appMetaData = appMetaData
         
-        return (request:uploadRequest!, fileSize: Int64(stringToUpload.characters.count))
+        runUploadTest(data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected)
+        
+        return (request:uploadRequest, fileSize: Int64(stringToUpload.characters.count))
     }
     
     func testUploadTextFile() {
@@ -151,6 +153,14 @@ class FileControllerTests: ServerTestCase {
         let deviceUUID = PerfectLib.UUID().string
         _ = uploadTextFile(deviceUUID:deviceUUID)
         _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
+    }
+    
+    func testUploadTextFileWithStringWithSpacesAppMetaData() {
+        _ = uploadTextFile(appMetaData:"A Simple String")
+    }
+    
+    func testUploadTextFileWithJSONAppMetaData() {
+        _ = uploadTextFile(appMetaData:"{ \"foo\": \"bar\" }")
     }
     
     func sendDoneUploads(expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0) {
@@ -384,14 +394,12 @@ class FileControllerTests: ServerTestCase {
         self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2], masterVersionExpected: 1, expectedFileSizes: expectedSizes)
     }
     
-    func testDownloadFileTextSucceeds() {
-        let deviceUUID = PerfectLib.UUID().string
+    func downloadTextFile(masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil) {
+    
+            let deviceUUID = PerfectLib.UUID().string
         let masterVersion:Int64 = 0
-        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, cloudFolderName: self.testFolder)
+        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, cloudFolderName: self.testFolder, appMetaData:appMetaData)
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
-        
-        // After the DoneUploads
-        let updatedMasterVersion = 1
         
         self.performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
@@ -399,7 +407,7 @@ class FileControllerTests: ServerTestCase {
             let downloadFileRequest = DownloadFileRequest(json: [
                 DownloadFileRequest.deviceUUIDKey: deviceUUID,
                 DownloadFileRequest.fileUUIDKey: uploadRequest.fileUUID,
-                DownloadFileRequest.masterVersionKey : "\(updatedMasterVersion)",
+                DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
                 DownloadFileRequest.fileVersionKey : uploadRequest.fileVersion,
                 DownloadFileRequest.cloudFolderNameKey : self.testFolder
             ])
@@ -410,7 +418,14 @@ class FileControllerTests: ServerTestCase {
                 XCTAssert(dict != nil)
                 
                 if let downloadFileResponse = DownloadFileResponse(json: dict!) {
-                    XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
+                    if expectUpdatedMasterUpdate {
+                        XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
+                    }
+                    else {
+                        XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
+                        XCTAssert(downloadFileResponse.fileSizeBytes == fileSize)
+                        XCTAssert(downloadFileResponse.appMetaData == appMetaData)
+                    }
                 }
                 else {
                     XCTFail()
@@ -421,7 +436,17 @@ class FileControllerTests: ServerTestCase {
         }
     }
     
-    // TODO: *0* Download where master version has changed.
-    // TODO: *0* Download where files has non-nil appMetaData.
+    func testDownloadFileTextSucceeds() {
+        downloadTextFile(masterVersionExpectedWithDownload: 1)
+    }
+    
+    func testDownloadFileTextWhereMasterVersionDiffersFails() {
+        downloadTextFile(masterVersionExpectedWithDownload: 0, expectUpdatedMasterUpdate:true)
+    }
+    
+    func testDownloadFileTextWithAppMetaDataSucceeds() {
+        downloadTextFile(masterVersionExpectedWithDownload: 1,
+            appMetaData:"{ \"foo\": \"bar\" }")
+    }
 }
 

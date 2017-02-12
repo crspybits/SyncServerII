@@ -57,7 +57,7 @@ class MessageTests: ServerTestCase {
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text/plain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
     }
     
     func testURLParametersWithIntegersAsStrings() {
@@ -75,7 +75,7 @@ class MessageTests: ServerTestCase {
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text/plain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
     }
     
     func testBadUUIDForFileName() {

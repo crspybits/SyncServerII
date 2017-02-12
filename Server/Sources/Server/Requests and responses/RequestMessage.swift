@@ -42,8 +42,18 @@ public extension RequestMessage {
                 if result.characters.count > 0 {
                     result += "&"
                 }
+
+                let newKeyValue = "\(key)=\(keyValue)"
                 
-                result += "\(key)=\(keyValue)"
+                if let escapedNewKeyValue = newKeyValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) {
+                    result += escapedNewKeyValue
+                }
+                else {
+                    Log.critical(message: "Failed on escaping new key value!")
+#if DEBUG
+                    assert(false)
+#endif
+                }
             }
         }
         
