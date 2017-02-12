@@ -103,6 +103,10 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible {
 }
 
 class FileIndexResponse : ResponseMessage {
+    public var responseType: ResponseType {
+        return .json
+    }
+    
     static let masterVersionKey = "masterVersion"
     var masterVersion:MasterVersionInt!
     

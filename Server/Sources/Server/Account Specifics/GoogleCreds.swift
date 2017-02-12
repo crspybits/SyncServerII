@@ -35,21 +35,8 @@ class GoogleCreds : Creds {
     }
     
     override static func fromJSON(s:String) -> Creds? {
-        guard let data = s.data(using: String.Encoding.utf8) else {
-            return nil
-        }
-        
-        var json:Any?
-        
-        do {
-            try json = JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: UInt(0)))
-        } catch (let error) {
-            Log.error(message: "Error in JSON conversion: \(error)")
-            return nil
-        }
-        
-        guard let jsonDict = json as? [String:String] else {
-            Log.error(message: "Could not convert json to json Dict")
+        guard let jsonDict = s.toJSONDictionary() as? [String:String] else {
+            Log.error(message: "Could not convert string to JSON [String:String]")
             return nil
         }
         
@@ -107,6 +94,7 @@ class GoogleCreds : Creds {
     enum GenerateTokensError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainParameterFromJSON
+    case nilAPIResult
     }
     
     // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is returned with true or false depending on whether the generation occurred successfully.
@@ -122,14 +110,21 @@ class GoogleCreds : Creds {
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
 
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { jsonResult, statusCode in
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
                 completion(nil, GenerateTokensError.badStatusCode(statusCode))
                 return
             }
             
-            if let accessToken = jsonResult?[GoogleCreds.googleAPIAccessTokenKey].string,
-                let refreshToken = jsonResult?[GoogleCreds.googleAPIRefreshTokenKey].string {
+            guard apiResult != nil else {
+                completion(nil, GenerateTokensError.nilAPIResult)
+                return
+            }
+            
+            if case .json(let jsonResult) = apiResult!,
+                let accessToken = jsonResult[GoogleCreds.googleAPIAccessTokenKey].string,
+                let refreshToken = jsonResult[GoogleCreds.googleAPIRefreshTokenKey].string {
+                
                 self.accessToken = accessToken
                 self.refreshToken = refreshToken
                 Log.debug(message: "Obtained tokens: accessToken: \(accessToken)\n refreshToken: \(refreshToken)")
@@ -155,6 +150,8 @@ class GoogleCreds : Creds {
     enum RefreshError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainParameterFromJSON
+    case nilAPIResult
+    case badJSONResult
     }
     
     // Use the refresh token to generate a new access token.
@@ -167,14 +164,24 @@ class GoogleCreds : Creds {
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
         
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { jsonResult, statusCode in
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
                 completion(RefreshError.badStatusCode(statusCode))
                 return
             }
             
+            guard apiResult != nil else {
+                completion(RefreshError.nilAPIResult)
+                return
+            }
+            
+            guard case .json(let jsonResult) = apiResult! else {
+                completion(RefreshError.badJSONResult)
+                return
+            }
+            
             if let accessToken =
-                jsonResult?[GoogleCreds.googleAPIAccessTokenKey].string {
+                jsonResult[GoogleCreds.googleAPIAccessTokenKey].string {
                 self.accessToken = accessToken
                 Log.debug(message: "Refreshed access token: \(accessToken)")
                 completion(nil)

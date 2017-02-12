@@ -9,6 +9,7 @@
 import Foundation
 import LoggerAPI
 import Credentials
+import Kitura
 
 protocol ControllerProtocol {
     static func setup(db:Database) -> Bool
@@ -21,6 +22,7 @@ public struct RequestProcessingParameters {
     let currentSignedInUser:User?
     let db:Database!
     let repos:Repositories!
+    let routerResponse:RouterResponse!
     
     // Call the completion with a nil ResponseMessage if there was a fatal error processing the request, i.e., an error that could not be handled in the normal responses made in the ResponseMessage.
     let completion: (ResponseMessage?)->()

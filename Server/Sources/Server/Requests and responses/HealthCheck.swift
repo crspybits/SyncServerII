@@ -31,6 +31,10 @@ class HealthCheckRequest : NSObject, RequestMessage {
 }
 
 class HealthCheckResponse : ResponseMessage {
+    public var responseType: ResponseType {
+        return .json
+    }
+
     required init?(json: JSON) {
     }
     

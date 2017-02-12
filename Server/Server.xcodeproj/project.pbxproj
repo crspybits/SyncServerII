@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		83F37A291E4AD45000479175 /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A271E4AD40500479175 /* Repositories.swift */; };
 		83F37A2B1E4EDBF200479175 /* DatabaseTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A2A1E4EDBF200479175 /* DatabaseTransactionTests.swift */; };
+		83F37A2E1E50F42100479175 /* String+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A2C1E50F41800479175 /* String+Extras.swift */; };
 		89EAE9CA00FE241B5E778122 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6B4B7301148E46627DD9341D /* Server.json */; };
 		OBJ_284 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_285 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
@@ -1062,6 +1063,7 @@
 		6B4B7301148E46627DD9341D /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		83F37A271E4AD40500479175 /* Repositories.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Repositories.swift; sourceTree = "<group>"; };
 		83F37A2A1E4EDBF200479175 /* DatabaseTransactionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseTransactionTests.swift; sourceTree = "<group>"; };
+		83F37A2C1E50F41800479175 /* String+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1839,6 +1841,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_242 /* NSObject+Extras.swift */,
+				83F37A2C1E50F41800479175 /* String+Extras.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2936,6 +2939,7 @@
 				OBJ_696 /* Creds.swift in Sources */,
 				OBJ_697 /* Filenaming.swift in Sources */,
 				83F37A291E4AD45000479175 /* Repositories.swift in Sources */,
+				83F37A2E1E50F42100479175 /* String+Extras.swift in Sources */,
 				OBJ_698 /* GoogleCreds+GoogleDrive.swift in Sources */,
 				OBJ_699 /* GoogleCreds.swift in Sources */,
 				OBJ_700 /* Constants.swift in Sources */,

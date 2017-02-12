@@ -82,7 +82,7 @@ class FileController : ControllerProtocol {
             
             Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName())")
             
-            // I'm going to create the entry in the Upload repo first because otherwise, there's a race condition-- two processes could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload entry will be the gatekeeper.
+            // I'm going to create the entry in the Upload repo first because otherwise, there's a race condition-- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload table entry will be the gatekeeper.
             
             let upload = Upload()
             upload.deviceUUID = uploadRequest.deviceUUID
@@ -106,17 +106,20 @@ class FileController : ControllerProtocol {
                             params.completion(response)
                         }
                         else {
+                            // TODO: *1* Need to remove the entry from the Upload repo. And remove the file from the cloud server.
                             Log.error(message: "Could not update UploadRepository: \(error)")
                             params.completion(nil)
                         }
                     }
                     else {
+                        // TODO: *1* Need to remove the entry from the Upload repo. And could be useful to remove the file from the cloud server. It might be there.
                         Log.error(message: "Could not uploadSmallFile: error: \(error)")
                         params.completion(nil)
                     }
                 }
             }
             else {
+                // TODO: *1* It could be useful to attempt to remove the entry from the Upload repo. Just in case it's actually there.
                 Log.error(message: "Could not add to UploadRepository")
                 params.completion(nil)
             }
@@ -168,8 +171,8 @@ class FileController : ControllerProtocol {
             if masterVersion != Int64(doneUploadsRequest.masterVersion) {
                 _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
                 
-                // TODO: *1* This is the point where we need to mark any previous uploads from this device as toPurge.
-                
+                // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
+
                 response = DoneUploadsResponse()
                 response!.masterVersionUpdate = masterVersion
                 params.completion(response)
@@ -256,7 +259,6 @@ class FileController : ControllerProtocol {
     }
     
     func downloadFile(params:RequestProcessingParameters) {
-        
         guard let downloadRequest = params.request as? DownloadFileRequest else {
             Log.error(message: "Did not receive DownloadFileRequest")
             params.completion(nil)
@@ -273,8 +275,69 @@ class FileController : ControllerProtocol {
                 params.completion(response)
                 return
             }
+
+            // TODO: *5* Generalize this to use other cloud storage services.
+            guard let googleCreds = params.creds as? GoogleCreds else {
+                Log.error(message: "Could not obtain Google Creds")
+                params.completion(nil)
+                return
+            }
             
-            // TODO: *1* Need to actually do the download!
+            // Need to get the file from the cloud storage service:
+            
+            // First, lookup the file in the FileIndex
+            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.userId!)", fileUUID: downloadRequest.fileUUID)
+            
+            let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
+            
+            var fileIndexObj:FileIndex?
+            
+            switch lookupResult {
+            case .found(let modelObj):
+                fileIndexObj = modelObj as? FileIndex
+                if fileIndexObj == nil {
+                    Log.error(message: "Could not convert model object to FileIndex")
+                    params.completion(nil)
+                    return
+                }
+                
+            case .noObjectFound:
+                Log.error(message: "Could not find file in FileIndex")
+                params.completion(nil)
+                return
+                
+            case .error(let error):
+                Log.error(message: "Error looking up file in FileIndex: \(error)")
+                params.completion(nil)
+                return
+            }
+            
+            // TODO: *5*: Eventually, this should bypass the middle man and stream from the cloud storage service directly to the client.
+            
+            // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex.
+            
+            googleCreds.downloadSmallFile(cloudFolderName: downloadRequest.cloudFolderName, cloudFileName: fileIndexObj!.cloudFileName(), mimeType: fileIndexObj!.mimeType) { (data, error) in
+                if error == nil {
+                    if Int64(data!.count) != fileIndexObj!.fileSizeBytes {
+                        Log.error(message: "Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
+                        params.completion(nil)
+                        return
+                    }
+                    
+                    let response = DownloadFileResponse()!
+                    response.appMetaData = fileIndexObj!.appMetaData
+                    response.data = data!
+                    response.fileSizeBytes = Int64(data!.count)
+                    
+                    params.completion(response)
+                    return
+                }
+                else {
+                    Log.error(message: "Failed downloading file: \(error)")
+                    params.completion(nil)
+                    return
+                }
+            }            
         }
     }
 }

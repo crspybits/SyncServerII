@@ -80,6 +80,10 @@ class DoneUploadsRequest : NSObject, RequestMessage {
 }
 
 class DoneUploadsResponse : ResponseMessage {
+    public var responseType: ResponseType {
+        return .json
+    }
+    
     // There are two possible non-error responses to DoneUploads:
     
     // 1) On successful operation, this gives the number of uploads entries transferred to the FileIndex.

@@ -16,6 +16,8 @@ private let folderMimeType = "application/vnd.google-apps.folder"
 extension GoogleCreds {    
     enum ListFilesError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
+    case nilAPIResult
+    case badJSONResult
     }
     
     /* If this isn't working for you, try:
@@ -51,12 +53,24 @@ extension GoogleCreds {
             urlParams = nil
         }
         
-        self.apiCall(method: "GET", path: "/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParams) { (json, statusCode) in
+        self.apiCall(method: "GET", path: "/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParams) { (apiResult, statusCode) in
+            
             var error:ListFilesError?
             if statusCode != HTTPStatusCode.OK {
                 error = .badStatusCode(statusCode)
             }
-            completion(json, error)
+            
+            guard apiResult != nil else {
+                completion(nil, ListFilesError.nilAPIResult)
+                return
+            }
+            
+            guard case .json(let jsonResult) = apiResult! else {
+                completion(nil, ListFilesError.badJSONResult)
+                return
+            }
+            
+            completion(jsonResult, error)
         }
     }
     
@@ -151,8 +165,10 @@ extension GoogleCreds {
     enum CreateFolderError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case couldNotConvertJSONToString
+    case badJSONResult
     case noJSONDictionaryResult
     case noIdInResultingJSON
+    case nilAPIResult
     }
     
     // Create a folder-- assumes it doesn't yet exist. This won't fail if you use it more than once with the same folder name, you just get multiple instances of a folder with the same name.
@@ -176,18 +192,28 @@ extension GoogleCreds {
             return
         }
     
-        self.apiCall(method: "POST", path: "/drive/v3/files", additionalHeaders:additionalHeaders, body: .string(jsonString)) { (json, statusCode) in
+        self.apiCall(method: "POST", path: "/drive/v3/files", additionalHeaders:additionalHeaders, body: .string(jsonString)) { (apiResult, statusCode) in
             var resultId:String?
             var resultError:Swift.Error?
+            
+            guard apiResult != nil else {
+                completion(nil, CreateFolderError.nilAPIResult)
+                return
+            }
+            
+            guard case .json(let jsonResult) = apiResult! else {
+                completion(nil, CreateFolderError.badJSONResult)
+                return
+            }
             
             if statusCode != HTTPStatusCode.OK {
                 resultError = CreateFolderError.badStatusCode(statusCode)
             }
-            else if json == nil || json!.type != .dictionary {
+            else if jsonResult.type != .dictionary {
                 resultError = CreateFolderError.noJSONDictionaryResult
             }
             else {
-                if let id = json!["id"].string {
+                if let id = jsonResult["id"].string {
                     resultId = id
                 }
                 else {
@@ -374,6 +400,96 @@ extension GoogleCreds {
                     }
                 }
             }
+        }
+    }
+    
+    enum DownloadSmallFileError : Swift.Error {
+    case cloudFolderDoesNotExist
+    case failedInSearchForCloudFile
+    case cloudFileDoesNotExist
+    case failedInDownloadingCloudFile
+    case badStatusCode(HTTPStatusCode?)
+    case nilAPIResult
+    case noDataInAPIResult
+    }
+    
+    func downloadSmallFile(cloudFolderName:String, cloudFileName:String, mimeType:String,
+        completion:@escaping (_ fileData:Data?, Swift.Error?)->()) {
+
+        // Get the folderId for the folder where we're downloading from.
+        
+        self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in
+            if error == nil {
+                if result == nil {
+                    // Folder doesn't exist. Yikes!
+                    completion(nil, DownloadSmallFileError.cloudFolderDoesNotExist)
+                }
+                else {
+                    // Folder exists. Next need to find the id of our file within this folder.
+                    
+                    let searchType = SearchType.file(mimeType: mimeType, parentFolderId: result!.itemId)
+                    self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
+                        if error == nil {
+                            if result == nil {
+                                completion(nil, DownloadSmallFileError.cloudFileDoesNotExist)
+                            }
+                            else {
+                                // File was found! Need to download it now.
+                                
+                                self.completeSmallFileDownload(fileId: result!.itemId) { (data, error) in
+                                    if error == nil {
+                                        completion(data, nil)
+                                    }
+                                    else {
+                                        completion(nil,
+                                            DownloadSmallFileError.failedInDownloadingCloudFile)
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            completion(nil, DownloadSmallFileError.failedInSearchForCloudFile)
+                        }
+                    }
+                }
+            }
+            else {
+                completion(nil, error)
+            }
+        }
+    }
+    
+    private func completeSmallFileDownload(fileId:String, completion:@escaping (_ data:Data?, Swift.Error?)->()) {
+        // See https://developers.google.com/drive/v3/web/manage-downloads
+        /*
+        GET https://www.googleapis.com/drive/v3/files/0B9jNhSvVjoIVM3dKcGRKRmVIOVU?alt=media
+        Authorization: Bearer <ACCESS_TOKEN>
+        */
+        
+        let path = "/drive/v3/files/\(fileId)?alt=media"
+        
+        let additionalHeaders = [
+            "Authorization" : "Bearer \(self.accessToken!)"
+        ]
+        
+        self.apiCall(method: "GET", path: path, additionalHeaders:additionalHeaders) { (apiResult, statusCode) in
+        
+            if statusCode != HTTPStatusCode.OK {
+                completion(nil, DownloadSmallFileError.badStatusCode(statusCode))
+                return
+            }
+            
+            guard apiResult != nil else {
+                completion(nil, DownloadSmallFileError.nilAPIResult)
+                return
+            }
+            
+            guard case .data(let data) = apiResult! else {
+                completion(nil, DownloadSmallFileError.noDataInAPIResult)
+                return
+            }
+            
+            completion(data, nil)
         }
     }
 }

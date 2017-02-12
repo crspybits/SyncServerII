@@ -61,7 +61,6 @@ import PerfectLib
 enum UploadState : String {
 case uploading
 case uploaded
-case toPurge
 }
 
 class Upload : NSObject, Model, Filenaming {

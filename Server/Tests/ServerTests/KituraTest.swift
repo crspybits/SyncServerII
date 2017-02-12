@@ -24,10 +24,16 @@ import Foundation
 @testable import Server
 import CredentialsGoogle
 import SMServerLib
+import PerfectLib
 
 protocol KituraTest {
     func expectation(_ index: Int) -> XCTestExpectation
     func waitExpectation(timeout t: TimeInterval, handler: XCWaitCompletionHandler?)
+}
+
+enum ResponseDictFrom {
+case body
+case header
 }
 
 extension KituraTest {    
@@ -62,8 +68,8 @@ extension KituraTest {
             }
         }
     }
-
-    func performRequest(route:ServerEndpoint, headers: [String: String]? = nil, urlParameters:String? = nil, body:Data? = nil, callback: @escaping (ClientResponse?, [String:Any]?) -> Void) {
+    
+    func performRequest(route:ServerEndpoint, responseDictFrom:ResponseDictFrom = .body, headers: [String: String]? = nil, urlParameters:String? = nil, body:Data? = nil, callback: @escaping (ClientResponse?, [String:Any]?) -> Void) {
     
         var allHeaders = [String: String]()
         if  let headers = headers  {
@@ -82,11 +88,12 @@ extension KituraTest {
             [.method(route.method.rawValue), .hostname("localhost"),
                 .port(Int16(ServerMain.port)), .path(path), .headers(allHeaders)]
         
-        let req = HTTP.request(options) { response in
+        let req = HTTP.request(options) { (response:ClientResponse?) in
             var dict:[String:Any]?
             if response != nil {
-                dict = self.getResponseDict(response: response!)
+                dict = self.getResponseDict(response: response!, responseDictFrom:responseDictFrom)
             }
+            
             Log.info("Result: \(dict)")
             callback(response, dict)
         }
@@ -98,32 +105,43 @@ extension KituraTest {
             req.end(body!)
         }
     }
+
+    func getResponseDict(response:ClientResponse, responseDictFrom:ResponseDictFrom) -> [String: Any]? {
     
-    func getResponseDict(response:ClientResponse) -> [String: Any]? {
-        var result:String?
-        do {
-            result = try response.readString()
-        } catch (let error) {
-            Log.error("Failed with error \(error)")
-            return nil
+        var jsonString:String?
+
+        switch responseDictFrom {
+        case .body:
+            do {
+                jsonString = try response.readString()
+            } catch (let error) {
+                Log.error("Failed with error \(error)")
+                return nil
+            }
+            
+        case .header:
+            guard let params = response.headers[ServerConstants.httpResponseMessageParams.lowercased()], params.count > 0 else {
+                Log.error("Could not obtain parameters from header")
+                return nil
+            }
+            
+            Log.info("Result params: \(params)")
+            jsonString = params[0]
         }
         
-        Log.info("Result string: \(result)")
-        guard let jsonString = result else {
+        Log.info("Result string: \(jsonString)")
+        
+        guard jsonString != nil else {
             Log.error("Empty string obtained")
             return nil
         }
         
-        if let data = jsonString.data(using: .utf8) {
-            do {
-                return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            } catch (let error) {
-                Log.error("Failed parsing json with error \(error)")
-                return nil
-            }
+        guard let jsonDict = jsonString!.toJSONDictionary() else {
+            Log.error(message: "Could not convert string to JSON dict")
+            return nil
         }
         
-        return nil
+        return jsonDict
     }
     
     func setupHeaders(accessToken: String) -> [String: String] {

@@ -31,6 +31,10 @@ class CheckPrimaryCredsRequest : NSObject, RequestMessage {
 }
 
 class CheckPrimaryCredsResponse : ResponseMessage {
+    public var responseType: ResponseType {
+        return .json
+    }
+    
     required init?(json: JSON) {
     }
     

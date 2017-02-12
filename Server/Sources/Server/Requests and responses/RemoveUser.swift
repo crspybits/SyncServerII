@@ -32,6 +32,10 @@ class RemoveUserRequest : NSObject, RequestMessage {
 }
 
 class RemoveUserResponse : ResponseMessage {
+    public var responseType: ResponseType {
+        return .json
+    }
+    
     required init?(json: JSON) {
     }
     

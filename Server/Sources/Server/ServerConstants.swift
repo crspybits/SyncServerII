@@ -9,14 +9,17 @@
 // These are shared with client apps
 
 public class ServerConstants {
-    // HTTP header authentication keys
+    // HTTP request header authentication keys
     public static let httpUsernameKey = "Kitura-username"
     public static let httpEmailKey = "Kitura-email"
     public static let XTokenTypeKey = "X-token-type"
 
-    // HTTP header Keys specific to Google
+    // HTTP request header Keys specific to Google
     public static let GoogleHTTPAccessTokenKey = "Kitura-access-token"
     public static let GoogleHTTPServerAuthCodeKey = "Kitura-server-auth-code"
+    
+    // HTTP response header keys
+    public static let httpResponseMessageParams = "SyncServer-Message-Params"
     
     public enum AuthTokenType : String {
         case GoogleToken
@@ -87,6 +90,7 @@ public class ServerEndpoints {
     public static let downloadFile = ServerEndpoint("DownloadFile", method: .post)
     
     // TODO: *3* Need a new endpoint that is analogous to FileIndex but is `GetUploads`-- which returns the collection of files that have been Upload'ed. See also [1] in FileControllerTests.swift.
+    // Relatedly: Need a new endpoint that enables clients to flush (i.e., delete) files in the Uploads table which are in the `uploaded` state.
 
     public static let session = ServerEndpoints()
     

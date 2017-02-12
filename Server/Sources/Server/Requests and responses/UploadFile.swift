@@ -107,6 +107,10 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
 }
 
 class UploadFileResponse : ResponseMessage {
+    public var responseType: ResponseType {
+        return .json
+    }
+    
     // On a successful upload, this will be present in the response.
     static let sizeKey = "sizeInBytes"
     var size:Int64?

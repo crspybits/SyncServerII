@@ -44,10 +44,15 @@ public class Creds {
     case data(Data)
     }
     
+    enum APICallResult {
+    case json(JSON)
+    case data(Data)
+    }
+    
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
     func apiCall(method:String, baseURL:String? = nil, path:String,
         additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:Body? = nil,
-        completion:@escaping (_ result: JSON?, HTTPStatusCode?)->()) {
+        completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
         var hostname = baseURL
         if hostname == nil {
@@ -97,7 +102,16 @@ public class Creds {
                 do {
                     try response.readAllData(into: &body)
                     let jsonBody = JSON(data: body)
-                    completion(jsonBody, statusCode)
+                    var result:APICallResult?
+                                        
+                    if jsonBody.type == .null {
+                        result = .data(body)
+                    }
+                    else {
+                        result = .json(jsonBody)
+                    }
+                    
+                    completion(result, statusCode)
                     return
                 } catch (let error) {
                     Log.error(message: "Failed to read Google response: \(error)")

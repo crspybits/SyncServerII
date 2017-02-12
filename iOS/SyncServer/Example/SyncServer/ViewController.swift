@@ -52,17 +52,23 @@ extension ViewController : SignInDelegate {
         Log.msg("Google access token: \(creds.accessToken)")
         
         ServerAPI.session.creds = creds
-        ServerAPI.session.addUser { error in
-            if error != nil {
-                Log.error("Error: \(error)")
-                // So the UI doesn't show the user as being signed in-- which just looks odd given we had a failure of signing in with the server.
-                SignIn.session.googleSignIn.signUserOut()
+        ServerAPI.session.checkCreds { (success, error) in
+            if success != nil && success! {
+                Log.msg("ServerAPI.session.checkCreds: Succesfully signed in.")
+                completion(nil)
             }
-            
-            completion(error)
+            else {
+                ServerAPI.session.addUser { error in
+                    if error != nil {
+                        Log.error("Error: \(error)")
+                        // So the UI doesn't show the user as being signed in-- which just looks odd given we had a failure of signing in with the server.
+                        SignIn.session.googleSignIn.signUserOut()
+                    }
+                    
+                    completion(error)
+                }
+            }
         }
-        
-        // TODO: *0* If we fail in this, fallback to checking if user exists. Or vice versa.
     }
 }
 

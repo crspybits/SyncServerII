@@ -82,21 +82,39 @@ private class RequestHandler {
         let result = [
             "error" : message
         ]
-        _ = self.endWith(jsonDict: result)
+        self.endWith(clientResponse: .json(result))
     }
     
-    private func endWith(jsonDict:JSON?) -> Bool {
+    enum EndWithResponse {
+    case json(JSON)
+    case data(data:Data?, headers:[String:String])
+    }
+    
+    @discardableResult
+    private func endWith(clientResponse:EndWithResponse) -> Bool {
         var jsonString:String?
         
-        do {
-            jsonString = try jsonDict.jsonEncodedString()
-        } catch (let error) {
-            Log.error(message: "Failed on json encode: \(error.localizedDescription)")
-            return false
-        }
-        
-        if jsonString != nil {
-            self.response.send(jsonString!)
+        switch clientResponse {
+        case .json(let jsonDict):
+            do {
+                jsonString = try jsonDict.jsonEncodedString()
+            } catch (let error) {
+                Log.error(message: "Failed on json encode: \(error.localizedDescription)")
+                return false
+            }
+            
+            if jsonString != nil {
+                self.response.send(jsonString!)
+            }
+            
+        case .data(data: let data, headers: let headers):
+            for (key, value) in headers {
+                self.response.headers.append(key, value: value)
+            }
+            
+            if data != nil {
+                self.response.send(data: data!)
+            }
         }
 
         do {
@@ -174,7 +192,7 @@ private class RequestHandler {
         func doTheRequestProcessing(creds:Creds?) -> Bool {
             var success = true
             
-            let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories) { responseObject in
+            let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response) { responseObject in
             
                 if nil == responseObject {
                     self.failWithError(message: "Could not create response object from request object")
@@ -189,7 +207,24 @@ private class RequestHandler {
                     return
                 }
                 
-                _ = self.endWith(jsonDict: jsonDict)
+                switch responseObject!.responseType {
+                case .json:
+                    self.endWith(clientResponse: .json(jsonDict!))
+
+                case .data(let data):
+                    var jsonString:String?
+                    
+                    do {
+                        jsonString = try jsonDict!.jsonEncodedString()
+                    } catch (let error) {
+                        success = false
+                        self.failWithError(message: "Could not convert json dict to string: \(error)")
+                        return
+                    }
+                    
+                    self.endWith(clientResponse:
+                        .data(data:data, headers:[ServerConstants.httpResponseMessageParams:jsonString!]))
+                }
             }
             
             processRequest(params)

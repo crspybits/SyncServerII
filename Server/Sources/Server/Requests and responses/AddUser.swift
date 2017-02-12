@@ -31,6 +31,10 @@ class AddUserRequest : NSObject, RequestMessage {
 }
 
 class AddUserResponse : ResponseMessage {
+    public var responseType: ResponseType {
+        return .json
+    }
+    
     required init?(json: JSON) {
     }
     

@@ -183,7 +183,7 @@ class GoogleDriveTests: ServerTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    func testDeleteFolderFailure() {
+    func testDeleteFolderThatDoesNotExistFailure() {
         let creds = GoogleCreds()
         creds.refreshToken = self.refreshToken()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -236,5 +236,40 @@ class GoogleDriveTests: ServerTestCase {
         }
 
         waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func downloadFile(cloudFileName:String, expectError:Bool = false) {
+        let creds = GoogleCreds()
+        creds.refreshToken = self.refreshToken()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            
+            creds.downloadSmallFile(cloudFolderName: self.knownPresentFolder, cloudFileName: cloudFileName, mimeType: "text/plain") { (data, error) in
+                
+                if expectError {
+                    XCTAssert(error != nil)
+                }
+                else {
+                    XCTAssert(error == nil)
+                }
+                
+                // A different unit test will check to see if the contents of the file are correct.
+                
+                exp.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testBasicFileDownloadWorks() {
+        downloadFile(cloudFileName: self.knownPresentFile)
+    }
+    
+    func testFileDownloadOfNonExistentFileFails() {
+        downloadFile(cloudFileName: self.knownAbsentFile, expectError: true)
     }
 }
