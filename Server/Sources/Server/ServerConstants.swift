@@ -86,7 +86,7 @@ public class ServerEndpoints {
     public static let doneUploads = ServerEndpoint("DoneUploads", method: .post)
     public static let downloadFile = ServerEndpoint("DownloadFile", method: .post)
     
-    // TODO: Need a new endpoint that is analogous to FileIndex but is `GetUploads`-- which returns the collection of files that have been Upload'ed. See also [1] in FileControllerTests.swift.
+    // TODO: *3* Need a new endpoint that is analogous to FileIndex but is `GetUploads`-- which returns the collection of files that have been Upload'ed. See also [1] in FileControllerTests.swift.
 
     public static let session = ServerEndpoints()
     

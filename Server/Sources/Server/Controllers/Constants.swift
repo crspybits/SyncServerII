@@ -24,7 +24,7 @@ class Constants {
     */
     static let serverConfigFile = "Server.json"
     
-    // TODO: Don't know what this should be
+    // TODO: *3* Don't know what this should be
     static let serverConfigFilePathOnLinux = ""
     
     struct mySQL {

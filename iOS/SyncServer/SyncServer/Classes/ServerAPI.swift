@@ -234,9 +234,6 @@ public class ServerAPI {
     public enum DoneUploadsResult {
     case success(numberUploadsTransferred:Int64)
     case serverMasterVersionUpdate(Int64)
-    
-    // TODO: We should NEVER get this. This is an error internally. Remove this. Make a comment in terms of transactional support.
-    case lockHeld
     }
     
     public func doneUploads(serverMasterVersion:MasterVersionInt!, completion:((DoneUploadsResult?, Error?)->(Void))?) {
@@ -272,8 +269,6 @@ public class ServerAPI {
                 }
                 else if let masterVersionUpdate = response?[DoneUploadsResponse.masterVersionUpdateKey] as? Int64 {
                     completion?(DoneUploadsResult.serverMasterVersionUpdate(masterVersionUpdate), nil)
-                } else if let lockHeld = response?[DoneUploadsResponse.couldNotObtainLockKey] as? Bool {
-                    completion?(DoneUploadsResult.lockHeld, nil)
                 } else {
                     completion?(nil, DoneUploadsError.noExpectedResultKey)
                 }

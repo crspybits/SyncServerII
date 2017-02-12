@@ -80,7 +80,7 @@ class DoneUploadsRequest : NSObject, RequestMessage {
 }
 
 class DoneUploadsResponse : ResponseMessage {
-    // There are three possible non-error responses to DoneUploads:
+    // There are two possible non-error responses to DoneUploads:
     
     // 1) On successful operation, this gives the number of uploads entries transferred to the FileIndex.
     static let numberUploadsTransferredKey = "numberUploadsTransferred"
@@ -90,14 +90,9 @@ class DoneUploadsResponse : ResponseMessage {
     static let masterVersionUpdateKey = "masterVersionUpdate"
     var masterVersionUpdate:MasterVersionInt?
     
-    // 3) If the lock could not be obtained (because some other device/app was currently doing DoneUploads), this will have the value true.
-    static let couldNotObtainLockKey = "couldNotObtainLock"
-    var couldNotObtainLock:Bool!
-    
     required init?(json: JSON) {
         self.numberUploadsTransferred = DoneUploadsResponse.numberUploadsTransferredKey <~~ json
         self.masterVersionUpdate = DoneUploadsResponse.masterVersionUpdateKey <~~ json
-        self.couldNotObtainLock = DoneUploadsResponse.couldNotObtainLockKey <~~ json
     }
     
     convenience init?() {
@@ -108,8 +103,7 @@ class DoneUploadsResponse : ResponseMessage {
     func toJSON() -> JSON? {
         return jsonify([
             DoneUploadsResponse.masterVersionUpdateKey ~~> self.masterVersionUpdate,
-            DoneUploadsResponse.numberUploadsTransferredKey ~~> self.numberUploadsTransferred,
-            DoneUploadsResponse.couldNotObtainLockKey ~~> self.couldNotObtainLock
+            DoneUploadsResponse.numberUploadsTransferredKey ~~> self.numberUploadsTransferred
         ])
     }
 }

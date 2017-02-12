@@ -105,7 +105,7 @@ class ServerAPI_Authentication: TestCase {
         waitForExpectations(timeout: 10.0, handler: nil)
     }
     
-    // TODO: Check what happens when network fails. Do we get an error response back from ServerAPI.session.addUser? This issue applies to all ServerAPI calls.
+    // TODO: *2* Check what happens when network fails. Do we get an error response back from ServerAPI.session.addUser? This issue applies to all ServerAPI calls.
     
     func testRemoveUserSucceeds() {
         let addUserExpectation = self.expectation(description: "addUser")

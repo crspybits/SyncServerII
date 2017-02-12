@@ -84,7 +84,7 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     required convenience init?(request: RouterRequest) {
         self.init(json: request.queryParameters)
         do {
-            // TODO: Eventually this needs to be converted into stream processing where a stream from client is passed along to Google Drive or some other cloud service-- so not all of the file has to be read onto the server. For big files this will crash the server.
+            // TODO: *4* Eventually this needs to be converted into stream processing where a stream from client is passed along to Google Drive or some other cloud service-- so not all of the file has to be read onto the server. For big files this will crash the server.
             self.sizeOfDataInBytes = try request.read(into: &self.data)
         } catch (let error) {
             Log.error(message: "Could not upload file: \(error)")

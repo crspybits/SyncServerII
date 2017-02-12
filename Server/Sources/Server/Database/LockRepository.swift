@@ -6,7 +6,7 @@
 //
 //
 
-// Enables short duration locks to be held while info in the UploadRepository is transfered to the FileIndexRepository.
+// Enables short duration locks to be held while info in the UploadRepository is transfered to the FileIndexRepository. This lock works in a somewhat non-obvious manner. Due to the blocking nature of transactions in InnoDB with row-level locking, a lock held by one server request for a specific userId in a transaction will block another server request attempting to obtain the same lock for the same userId.
 
 import Foundation
 import PerfectLib
@@ -16,6 +16,7 @@ class Lock : NSObject, Model {
     var deviceUUID: String!
     var expiry: Date!
     
+    // This expiry mechanism ought never to actually be needed. Since, a lock will be rolled back should a server request fail, we should never have to be concerned about having stale locks. I'm keeping expiries here just as an insurance plan-- e.g., in case a software glitch causes a lock to be retained after a server request has been finished.
     static let expiryDuration:TimeInterval = 60
 
     override init() {
@@ -82,7 +83,10 @@ class LockRepository : Repository {
     case success
     case modelValueWasNil
     case errorRemovingStaleLocks
+    
+    // This represents an error condition. Due to transactions, we should always block when another server request has a lock for a particular userId; we should never be in a state where we observe that a lock is already held.
     case lockAlreadyHeld
+    
     case otherError
     }
     

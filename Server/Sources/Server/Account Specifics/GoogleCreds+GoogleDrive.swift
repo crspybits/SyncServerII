@@ -357,7 +357,7 @@ extension GoogleCreds {
                 completion(nil, resultError)
             }
             else {
-                // TODO: This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
+                // TODO: *4* This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
 
                 self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
                     if error == nil {

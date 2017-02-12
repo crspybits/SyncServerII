@@ -76,9 +76,9 @@ class FileController : ControllerProtocol {
                 return
             }
                     
-            // TODO: This needs to be generalized to enabling uploads to various kinds of cloud services. E.g., including Dropbox. Right now, it's just specific to Google Drive.
+            // TODO: *5* This needs to be generalized to enabling uploads to various kinds of cloud services. E.g., including Dropbox. Right now, it's just specific to Google Drive.
             
-            // TODO: Need to have streaming data from client, and send streaming data up to Google Drive.
+            // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
             
             Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName())")
             
@@ -131,20 +131,16 @@ class FileController : ControllerProtocol {
             return
         }
         
-        // TODO: Hmmm. I'm not really certain if we need this Locking mechanism. We will have a transactionally based request shortly. Would any other process see the lock prior to us closing the transaction???
-        
         let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:doneUploadsRequest.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             Log.info(message: "Sucessfully obtained lock!!")
             break
         
-        // TODO: 2/11/16. WE should actually never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
+        // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
         case .lockAlreadyHeld:
-            Log.warning(message: "Lock already held.")
-            let response = DoneUploadsResponse()
-            response!.couldNotObtainLock = true
-            params.completion(response)
+            Log.error(message: "Error: Lock already held.")
+            params.completion(nil)
             return
         
         case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
@@ -172,7 +168,7 @@ class FileController : ControllerProtocol {
             if masterVersion != Int64(doneUploadsRequest.masterVersion) {
                 _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
                 
-                // TODO: This is the point where we need to mark any previous uploads from this device as toPurge.
+                // TODO: *1* This is the point where we need to mark any previous uploads from this device as toPurge.
                 
                 response = DoneUploadsResponse()
                 response!.masterVersionUpdate = masterVersion
@@ -221,7 +217,7 @@ class FileController : ControllerProtocol {
                 return
             }
             
-            // TODO: Why don't I have a check for errors here?
+            // TODO: *1* Why don't I have a check for errors here?
             _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
             Log.info(message: "Unlocked lock.")
 
@@ -240,9 +236,9 @@ class FileController : ControllerProtocol {
             return
         }
         
-        // TODO: Should make sure that the device UUID in the FileIndexRequest is actually associated with the user. (But, need DeviceUUIDRepository for that.).
+        // TODO: *1* Should make sure that the device UUID in the FileIndexRequest is actually associated with the user. (But, need DeviceUUIDRepository for that.).
         
-        // TODO: The FileIndex serves as a kind of snapshot of the files on the server for the calling apps. We ought to hold the lock while we take the snapshot-- to make sure we're not getting a cross section of changes imposed by other apps.
+        // TODO: *1* The FileIndex serves as a kind of snapshot of the files on the server for the calling apps. We ought to hold the lock while we take the snapshot-- to make sure we're not getting a cross section of changes imposed by other apps.
         
         getMasterVersion(params:params, completion: params.completion) { masterVersion in
             let fileIndexResult = params.repos.fileIndex.fileIndex(forUserId: params.currentSignedInUser!.userId)
@@ -267,7 +263,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        // TODO: Should make sure that the device UUID in the FileIndexRequest is actually associated with the user. (But, need DeviceUUIDRepository for that.).
+        // TODO: *1* Should make sure that the device UUID in the FileIndexRequest is actually associated with the user. (But, need DeviceUUIDRepository for that.).
 
         getMasterVersion(params:params, completion: params.completion) { masterVersion in
             // Verify that downloadRequest.masterVersion is still the same as that stored in the database for this user. If not, inform the caller.
@@ -278,7 +274,7 @@ class FileController : ControllerProtocol {
                 return
             }
             
-            // TODO: Need to actually do the download!
+            // TODO: *1* Need to actually do the download!
         }
     }
 }

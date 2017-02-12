@@ -104,7 +104,7 @@ class FileIndexRepository : Repository {
         var columns = columnNames(appMetaDataFieldName: "")
         
         if fileIndex.appMetaData != nil {
-            // TODO: Seems like we could use an encoding here to deal with sql injection issues.
+            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
             appMetaDataFieldValue = ", '\(fileIndex.appMetaData!)'"
             
             columns = columnNames()
@@ -133,7 +133,7 @@ class FileIndexRepository : Repository {
     
         var appMetaDataField = ""
         if fileIndex.appMetaData != nil {
-            // TODO: Seems like we could use an encoding here to deal with sql injection issues.
+            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
             appMetaDataField = " appMetaData='\(fileIndex.appMetaData!)', "
         }
         

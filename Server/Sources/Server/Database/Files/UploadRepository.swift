@@ -166,7 +166,7 @@ class UploadRepository : Repository {
         if upload.appMetaData != nil {
             appMetaDataFieldName = " appMetaData, "
             
-            // TODO: Seems like we could use an encoding here to deal with sql injection issues.
+            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
             appMetaDataFieldValue = ", '\(upload.appMetaData!)'"
         }
         
@@ -200,7 +200,7 @@ class UploadRepository : Repository {
     
         var appMetaDataField = ""
         if upload.appMetaData != nil {
-            // TODO: Seems like we could use an encoding here to deal with sql injection issues.
+            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
             appMetaDataField = ", appMetaData='\(upload.appMetaData!)'"
         }
         
