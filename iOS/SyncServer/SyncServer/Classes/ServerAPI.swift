@@ -234,6 +234,8 @@ public class ServerAPI {
     public enum DoneUploadsResult {
     case success(numberUploadsTransferred:Int64)
     case serverMasterVersionUpdate(Int64)
+    
+    // TODO: We should NEVER get this. This is an error internally. Remove this. Make a comment in terms of transactional support.
     case lockHeld
     }
     

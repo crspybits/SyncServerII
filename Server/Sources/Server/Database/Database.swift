@@ -82,7 +82,7 @@ public class Database {
         
         Log.info(message: "**** Table \(tableName) was not already in database")
 
-        let query = "CREATE TABLE \(tableName) \(columnCreateQuery)"
+        let query = "CREATE TABLE \(tableName) \(columnCreateQuery) ENGINE=InnoDB;"
         guard connection.query(statement: query) else {
             Log.error(message: "Failure: \(self.error)")
             return .failure(.tableCreation)
@@ -121,6 +121,43 @@ public class Database {
     
     public class func date(_ date: String, fromFormat format:MySQLDateFormat) -> Date? {
         return getDateFormatter(format: format).date(from: date)
+    }
+    
+    /* References on mySQL transactions, locks, and blocking
+        http://www.informit.com/articles/article.aspx?p=2036581&seqNum=12
+        https://dev.mysql.com/doc/refman/5.5/en/innodb-information-schema-understanding-innodb-locking.html
+    */
+    func startTransaction() -> Bool {
+        let query = "START TRANSACTION;"
+        if connection.query(statement: query) {
+            return true
+        }
+        else {
+            Log.error(message: "Could not start transaction: \(self.error)")
+            return false
+        }
+    }
+    
+    func commit() -> Bool {
+        let query = "COMMIT;"
+        if connection.query(statement: query) {
+            return true
+        }
+        else {
+            Log.error(message: "Could not commit transaction: \(self.error)")
+            return false
+        }
+    }
+    
+    func rollback() -> Bool {
+        let query = "ROLLBACK;"
+        if connection.query(statement: query) {
+            return true
+        }
+        else {
+            Log.error(message: "Could not rollback transaction: \(self.error)")
+            return false
+        }
     }
 }
 

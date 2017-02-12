@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		83F37A291E4AD45000479175 /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A271E4AD40500479175 /* Repositories.swift */; };
+		83F37A2B1E4EDBF200479175 /* DatabaseTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A2A1E4EDBF200479175 /* DatabaseTransactionTests.swift */; };
 		89EAE9CA00FE241B5E778122 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6B4B7301148E46627DD9341D /* Server.json */; };
 		OBJ_284 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_285 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
@@ -1060,6 +1061,7 @@
 /* Begin PBXFileReference section */
 		6B4B7301148E46627DD9341D /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		83F37A271E4AD40500479175 /* Repositories.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Repositories.swift; sourceTree = "<group>"; };
+		83F37A2A1E4EDBF200479175 /* DatabaseTransactionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseTransactionTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1852,6 +1854,7 @@
 		OBJ_244 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83F37A2A1E4EDBF200479175 /* DatabaseTransactionTests.swift */,
 				OBJ_245 /* DatabaseTests.swift */,
 				OBJ_246 /* FileControllerTests.swift */,
 				OBJ_247 /* GeneralAuthTests.swift */,
@@ -2971,6 +2974,7 @@
 				OBJ_770 /* DatabaseTests.swift in Sources */,
 				OBJ_771 /* FileControllerTests.swift in Sources */,
 				OBJ_772 /* GeneralAuthTests.swift in Sources */,
+				83F37A2B1E4EDBF200479175 /* DatabaseTransactionTests.swift in Sources */,
 				OBJ_773 /* GoogleAuthenticationTests.swift in Sources */,
 				OBJ_774 /* GoogleDriveTests.swift in Sources */,
 				OBJ_775 /* KituraTest.swift in Sources */,

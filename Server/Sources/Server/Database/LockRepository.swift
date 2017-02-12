@@ -55,7 +55,7 @@ class LockRepository : Repository {
 
             "expiry \(dateFormat.rawValue), " +
             
-            "UNIQUE (userId));"
+            "UNIQUE (userId))"
         
         return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }

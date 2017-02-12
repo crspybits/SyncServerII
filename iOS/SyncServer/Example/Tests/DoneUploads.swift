@@ -92,6 +92,7 @@ class ServerAPI_DoneUploads: TestCase {
         testLockSync = 5
         deviceUUIDCalled = false
         
+        // A lock will be obtained by this first request.
         ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) {
             doneUploadsResult, error in
             
@@ -110,8 +111,9 @@ class ServerAPI_DoneUploads: TestCase {
         }
 
         // Let above `doneUploads` request get started -- by delaying the 2nd request.
-        TimedCallback.withDuration(1.0) { 
-            // The first request should have started
+        TimedCallback.withDuration(1.0) {
+        
+            // The first request should have started, and obtained the lock. This second request will block until the first is done, because of the transactional implementation of the server.
             XCTAssert(self.deviceUUIDCalled)
 
             self.deviceUUID = deviceUUID2
@@ -121,7 +123,7 @@ class ServerAPI_DoneUploads: TestCase {
                 doneUploadsResult, error in
                             
                 XCTAssert(error == nil)
-                if case .lockHeld = doneUploadsResult! {
+                if case .serverMasterVersionUpdate(_) = doneUploadsResult! {
                 }
                 else {
                     XCTFail()
@@ -129,13 +131,16 @@ class ServerAPI_DoneUploads: TestCase {
                 
                 Log.special("Finished doneUploads2")
                 
-                XCTAssert(!doneRequest1)
+                XCTAssert(doneRequest1)
                 expectation2.fulfill()
             }
         }
         
         waitForExpectations(timeout: 30.0, handler: nil)
     }
+    
+    // TODO: I would like a test where there are concurrent DoneUploads operations-- across two users. e.g., users A and B each upload a file, and then concurrently do DoneUpload operatons-- this should not result in a lock/blocking situation, even with the transactional support because InnoDB does row level locking. (I'm not sure how to support access within a single iOS app by two Google users.)
+    // This should be pretty much exactly like the above test, except (a) it should not result in locking/blocking, and (b) it should use two users not 1.
 }
 
 

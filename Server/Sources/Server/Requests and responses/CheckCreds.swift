@@ -13,7 +13,8 @@ import Gloss
 import Kitura
 #endif
 
-// Check to see if both primary and secondary authentication succeed.
+// Check to see if both primary and secondary authentication succeed. i.e., check to see if a user exists.
+
 class CheckCredsRequest : NSObject, RequestMessage {
     required init?(json: JSON) {
         super.init()

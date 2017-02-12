@@ -13,7 +13,7 @@ import Gloss
 import Kitura
 #endif
 
-// Request an index of all files owned by the user-- queries the meta data on the sync server.
+// Request an index of all files that have been uploaded with UploadFile and committed using DoneUploads by the user-- queries the meta data on the sync server.
 
 class FileIndexRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.

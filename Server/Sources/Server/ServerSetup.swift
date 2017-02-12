@@ -171,17 +171,21 @@ private class RequestHandler {
             return
         }
         
-        func doTheRequestProcessing(creds:Creds?) {
+        func doTheRequestProcessing(creds:Creds?) -> Bool {
+            var success = true
+            
             let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories) { responseObject in
             
                 if nil == responseObject {
                     self.failWithError(message: "Could not create response object from request object")
+                    success = false
                     return
                 }
                 
                 let jsonDict = responseObject!.toJSON()
                 if nil == jsonDict {
                     self.failWithError(message: "Could not convert response object to json dictionary")
+                    success = false
                     return
                 }
                 
@@ -189,16 +193,29 @@ private class RequestHandler {
             }
             
             processRequest(params)
+            return success
         }
 
-        // TODO: Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
-        func dbTransaction(dbOperations:()->()) {
-            dbOperations()
+        // Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
+        func dbTransaction(dbOperations:()->(Bool)) {
+            if !db.startTransaction() {
+                self.failWithError(message: "Could not start a transaction!")
+                return
+            }
+            
+            if dbOperations() {
+                // Already finished the operation. Can't report an error if it happens here.
+                _ = db.commit()
+            }
+            else {
+                // We already had an error. What's the point in checking for an error on the rollback?
+                _ = db.rollback()
+            }
         }
         
         if profile == nil {
             dbTransaction() {
-                doTheRequestProcessing(creds: nil)
+                return doTheRequestProcessing(creds: nil)
             }
         }
         else {
@@ -219,7 +236,9 @@ private class RequestHandler {
                             }
                         }
                         
-                        doTheRequestProcessing(creds: creds)
+                        let result = doTheRequestProcessing(creds: creds)
+                        Log.debug(message: "doTheRequestProcessing: \(result)")
+                        return result
                     }
                 }
                 else {
