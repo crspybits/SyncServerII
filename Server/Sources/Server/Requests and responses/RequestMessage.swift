@@ -49,7 +49,9 @@ public extension RequestMessage {
                     result += escapedNewKeyValue
                 }
                 else {
+#if SERVER
                     Log.critical(message: "Failed on escaping new key value!")
+#endif
 #if DEBUG
                     assert(false)
 #endif

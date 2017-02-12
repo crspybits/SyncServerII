@@ -1,0 +1,13 @@
+rm serverconstants.swift
+rm responsemessage.swift
+rm uploadfile.swift
+rm fileindex.swift	
+rm requestmessage.swift
+rm doneuploads.swift
+
+ln -s ../../../../../Server/Sources/Server/ServerConstants.swift
+ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/ResponseMessage.swift
+ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/UploadFile.swift
+ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/FileIndex.swift
+ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/RequestMessage.swift
+ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/DoneUploads.swift
