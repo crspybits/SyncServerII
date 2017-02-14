@@ -20,26 +20,6 @@ class ServerAPI_DoneUploads: TestCase {
         super.tearDown()
     }
     
-    func doneUploads(masterVersion: MasterVersionInt, expectedNumberUploads:Int64) {
-        let expectation = self.expectation(description: "doneUploads")
-
-        ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) {
-            doneUploadsResult, error in
-            
-            XCTAssert(error == nil)
-            if case .success(let numberUploads) = doneUploadsResult! {
-                XCTAssert(numberUploads == expectedNumberUploads)
-            }
-            else {
-                XCTFail()
-            }
-            
-            expectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: 10.0, handler: nil)
-    }
-    
     func testDoneUploadsWorksWithOneFile() {
         let masterVersion = getMasterVersion()
         

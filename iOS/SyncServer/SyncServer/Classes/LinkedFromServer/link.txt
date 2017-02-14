@@ -11,3 +11,4 @@ ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/UploadFile.s
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/FileIndex.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/RequestMessage.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/DoneUploads.swift
+ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/DownloadFile.swift

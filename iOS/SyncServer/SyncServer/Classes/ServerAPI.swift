@@ -278,6 +278,119 @@ public class ServerAPI {
             }
         }
     }
+        
+    public struct FileToDownload {
+        let fileUUID:String!
+        let cloudFolderName:String!
+        let fileVersion:FileVersionInt!
+    }
+    
+    public enum DownloadFileResult {
+    case success(url: SMRelativeLocalURL, fileSizeBytes:Int64, appMetaData:String?)
+    case serverMasterVersionUpdate(Int64)
+    }
+    
+    public enum DownloadFileError : Error {
+    case couldNotCreateDownloadFileRequest
+    case obtainedAppMetaDataButWasNotString
+    case noExpectedResultKey
+    case nilResponse
+    case couldNotObtainHeaderParameters
+    case resultURLObtainedWasNil
+    }
+    
+    public func downloadFile(file: FileToDownload, serverMasterVersion:MasterVersionInt!, completion:((DownloadFileResult?, Error?)->(Void))?) {
+        let endpoint = ServerEndpoints.downloadFile
+        
+        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
+
+        var params = [String : Any]()
+        params[DownloadFileRequest.deviceUUIDKey] = deviceUUID
+        params[DownloadFileRequest.masterVersionKey] = serverMasterVersion
+        params[DownloadFileRequest.fileUUIDKey] = file.fileUUID
+        params[DownloadFileRequest.cloudFolderNameKey] = file.cloudFolderName
+        params[DownloadFileRequest.fileVersionKey] = file.fileVersion
+
+        guard let downloadFileRequest = DownloadFileRequest(json: params) else {
+            completion?(nil, DownloadFileError.couldNotCreateDownloadFileRequest)
+            return
+        }
+
+        let parameters = downloadFileRequest.urlParameters()!
+        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+
+        ServerNetworking.session.downloadFrom(serverURL, method: endpoint.method) { (resultURL, response, error) in
+        
+            guard response != nil else {
+                let resultError = error ?? DownloadFileError.nilResponse
+                completion?(nil, resultError)
+                return
+            }
+            
+            let resultError = self.checkForError(statusCode: response!.statusCode, error: error)
+
+            if resultError == nil {
+                if let parms = response!.allHeaderFields[ServerConstants.httpResponseMessageParams] as? String,
+                    let jsonDict = self.toJSONDictionary(jsonString: parms) {
+                    Log.msg("jsonDict: \(jsonDict)")
+
+                    if let fileSizeBytes = jsonDict[DownloadFileResponse.fileSizeBytesKey] as? Int64 {
+                        var appMetaDataString:String?
+                        var appMetaData = jsonDict[DownloadFileResponse.appMetaDataKey]
+                        if appMetaData != nil {
+                            if appMetaData is String {
+                                appMetaDataString = appMetaData as! String
+                            }
+                            else {
+                                completion?(nil, DownloadFileError.obtainedAppMetaDataButWasNotString)
+                                return
+                            }
+                        }
+                        
+                        guard resultURL != nil else {
+                            completion?(nil, DownloadFileError.resultURLObtainedWasNil)
+                            return
+                        }
+                        
+                        completion?(.success(url: resultURL!, fileSizeBytes:fileSizeBytes, appMetaData:appMetaDataString), nil)
+                    }
+                    else if let masterVersionUpdate = jsonDict[DownloadFileResponse.masterVersionUpdateKey] as? Int64 {
+                        completion?(DownloadFileResult.serverMasterVersionUpdate(masterVersionUpdate), nil)
+                    } else {
+                        completion?(nil, DownloadFileError.noExpectedResultKey)
+                    }
+                }
+                else {
+                    completion?(nil, DownloadFileError.couldNotObtainHeaderParameters)
+                }
+            }
+            else {
+                completion?(nil, resultError)
+            }
+        }
+    }
+    
+    private func toJSONDictionary(jsonString:String) -> [String:Any]? {
+        guard let data = jsonString.data(using: String.Encoding.utf8) else {
+            return nil
+        }
+        
+        var json:Any?
+        
+        do {
+            try json = JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: UInt(0)))
+        } catch (let error) {
+            Log.error("Error in JSON conversion: \(error)")
+            return nil
+        }
+        
+        guard let jsonDict = json as? [String:Any] else {
+            Log.error("Could not convert json to json Dict")
+            return nil
+        }
+        
+        return jsonDict
+    }
 }
 
 extension ServerAPI : ServerNetworkingAuthentication {

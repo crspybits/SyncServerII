@@ -448,5 +448,7 @@ class FileControllerTests: ServerTestCase {
         downloadTextFile(masterVersionExpectedWithDownload: 1,
             appMetaData:"{ \"foo\": \"bar\" }")
     }
+    
+    // TODO: *0* Attempt to download version 1 when you uploaded version 0.
 }
 

@@ -171,6 +171,64 @@ class ServerNetworking {
         uploadTask.resume()
     }
     
+    enum DownloadFromError : Error {
+    case couldNotGetHTTPURLResponse
+    case didNotGetURL
+    case couldNotMoveFile
+    case couldNotCreateNewFile
+    }
+    
+    func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ error:Error?)->())?) {
+    
+        let sessionConfiguration = URLSessionConfiguration.default
+        sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
+        
+        let session = URLSession(configuration: sessionConfiguration)
+
+        var request = URLRequest(url: serverURL)
+        request.httpMethod = method.rawValue.uppercased()
+        
+        Log.special("serverURL: \(serverURL)")
+        
+        let downloadTask:URLSessionDownloadTask = session.downloadTask(with: request) { (url, urlResponse, error) in
+        
+            if error == nil {
+                // With an HTTP or HTTPS request, we get HTTPURLResponse back. See https://developer.apple.com/reference/foundation/urlsession/1407613-datatask
+                guard let response = urlResponse as? HTTPURLResponse else {
+                    completion?(nil, nil, DownloadFromError.couldNotGetHTTPURLResponse)
+                    return
+                }
+                
+                guard url != nil else {
+                    completion?(nil, nil, DownloadFromError.didNotGetURL)
+                    return
+                }
+                
+                // Transfer the temporary file to a more permanent location.
+                if let newTempURL = FilesMisc.createTemporaryRelativeFile() {
+                    do {
+                        try FileManager.default.replaceItemAt(newTempURL as URL, withItemAt: url!)                        
+                    }
+                    catch (let error) {
+                        Log.error("Could not move file: \(error)")
+                        completion?(nil, nil, DownloadFromError.couldNotMoveFile)
+                        return
+                    }
+                    
+                    completion?(newTempURL, response, nil)
+                }
+                else {
+                    completion?(nil, nil, DownloadFromError.couldNotCreateNewFile)
+                }
+            }
+            else {
+                completion?(nil, nil, error)
+            }
+        }
+
+        downloadTask.resume()
+    }
+    
     private func sendRequestTo(_ serverURL: URL, method: ServerHTTPMethod, dataToUpload:Data? = nil, completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
     
         let sessionConfiguration = URLSessionConfiguration.default

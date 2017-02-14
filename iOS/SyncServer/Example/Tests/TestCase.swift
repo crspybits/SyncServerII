@@ -89,11 +89,11 @@ class TestCase: XCTestCase {
     }
     
     // Returns the file size uploaded
-    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false) -> Int64? {
+    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> Int64? {
     
         let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
 
-        let file = ServerAPI.File(localURL: fileURL, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: appMetaData, fileVersion: 0)
         
         // Just to get the size-- this is redundant with the file read in ServerAPI.session.uploadFile
         guard let fileData = try? Data(contentsOf: file.localURL) else {
@@ -153,6 +153,26 @@ class TestCase: XCTestCase {
             
             expectation.fulfill()
         }
+    }
+    
+    func doneUploads(masterVersion: MasterVersionInt, expectedNumberUploads:Int64) {
+        let expectation = self.expectation(description: "doneUploads")
+
+        ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) {
+            doneUploadsResult, error in
+            
+            XCTAssert(error == nil)
+            if case .success(let numberUploads) = doneUploadsResult! {
+                XCTAssert(numberUploads == expectedNumberUploads)
+            }
+            else {
+                XCTFail()
+            }
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
     }
 }
 

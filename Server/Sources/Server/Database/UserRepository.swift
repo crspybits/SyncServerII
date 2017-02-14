@@ -184,7 +184,7 @@ class UserRepository : Repository {
         let oldCreds = user.credsObject!
         oldCreds.merge(withNewerCreds: newCreds)
         
-        let query = "UPDATE \(tableName) SET creds = '\(oldCreds.toJSON())' WHERE " +
+        let query = "UPDATE \(tableName) SET creds = '\(oldCreds.toJSON()!)' WHERE " +
             lookupConstraint(key: .userId(user.userId))
         
         if db.connection.query(statement: query) {

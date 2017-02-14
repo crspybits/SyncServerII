@@ -36,7 +36,7 @@ class GoogleCreds : Creds {
     
     override static func fromJSON(s:String) -> Creds? {
         guard let jsonDict = s.toJSONDictionary() as? [String:String] else {
-            Log.error(message: "Could not convert string to JSON [String:String]")
+            Log.error(message: "Could not convert string to JSON [String:String]: \(s)")
             return nil
         }
         
