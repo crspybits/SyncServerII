@@ -28,6 +28,8 @@ class SepecificDatabaseTests: ServerTestCase {
         _ = LockRepository(db).create()
         _ = FileIndexRepository(db).remove()
         _ = FileIndexRepository(db).create()
+        _ = DeviceUUIDRepository(db).remove()
+        _ = DeviceUUIDRepository(db).create()
     }
     
     override func tearDown() {
@@ -395,6 +397,62 @@ class SepecificDatabaseTests: ServerTestCase {
             XCTAssert(fileIndexInserted.deleted == fileIndex[0].deleted)
             XCTAssert(fileIndexInserted.fileSizeBytes == fileIndex[0].fileSizeBytes)
         case .error(_):
+            XCTFail()
+        }
+    }
+    
+    func doAddDeviceUUID(userId:UserId = 1, repo:DeviceUUIDRepository) -> DeviceUUID? {
+        let du = DeviceUUID(userId: userId, deviceUUID: PerfectLib.UUID().string)
+        let result = repo.add(deviceUUID: du)
+        
+        switch result {
+        case .error(_), .exceededMaximumUUIDsPerUser:
+            return nil
+        case .success:
+            return du
+        }
+    }
+    
+    func testAddDeviceUUID() {
+        XCTAssert(doAddDeviceUUID(repo:DeviceUUIDRepository(db)) != nil)
+    }
+    
+    func testAddDeviceUUIDFailsAfterMax() {
+        let repo = DeviceUUIDRepository(db)
+        let number = repo.maximumNumberOfDeviceUUIDsPerUser! + 1
+        for curr in 1...number {
+            if curr < number {
+                XCTAssert(doAddDeviceUUID(repo: repo) != nil)
+            }
+            else {
+                XCTAssert(doAddDeviceUUID(repo: repo) == nil)
+            }
+        }
+    }
+    
+    func testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax() {
+        let repo = DeviceUUIDRepository(db)
+        let number = repo.maximumNumberOfDeviceUUIDsPerUser! + 1
+        repo.maximumNumberOfDeviceUUIDsPerUser = nil
+        
+        for _ in 1...number {
+            XCTAssert(doAddDeviceUUID(repo: repo) != nil)
+        }
+    }
+    
+    func testLookupFromDeviceUUID() {
+        let repo = DeviceUUIDRepository(db)
+        let result = doAddDeviceUUID(repo:repo)
+        XCTAssert(result != nil)
+        let key = DeviceUUIDRepository.LookupKey.deviceUUID(result!.deviceUUID)
+        let lookupResult = repo.lookup(key: key, modelInit: DeviceUUID.init)
+        
+        if case .found(let model) = lookupResult,
+            let du = model as? DeviceUUID {
+            XCTAssert(du.deviceUUID == result!.deviceUUID)
+            XCTAssert(du.userId == result!.userId)
+        }
+        else {
             XCTFail()
         }
     }

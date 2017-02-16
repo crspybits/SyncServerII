@@ -22,9 +22,9 @@ class ServerTestCase : XCTestCase {
         self.db = Database()
     }
     
-    func addNewUser() {
+    func addNewUser(deviceUUID:String) {
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request")

@@ -61,7 +61,6 @@ class ServerAPI_DownloadFile: TestCase {
         downloadTextFile()
     }
     
-    // TODO: *0* Download including non-nil appMetaData
     func testDownloadTextFileWithAppMetaData() {
         downloadTextFile(appMetaData: "foobar was here")
     }

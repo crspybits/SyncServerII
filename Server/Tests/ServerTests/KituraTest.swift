@@ -144,10 +144,11 @@ extension KituraTest {
         return jsonDict
     }
     
-    func setupHeaders(accessToken: String) -> [String: String] {
+    func setupHeaders(accessToken: String, deviceUUID:String) -> [String: String] {
         var headers = [String: String]()
         headers[CredentialsGoogleToken.xTokenTypeKey] = ServerConstants.AuthTokenType.GoogleToken.rawValue
         headers[CredentialsGoogleToken.accessTokenKey] = accessToken
+        headers[ServerConstants.httpRequestDeviceUUID] = deviceUUID
         return headers
     }
 }

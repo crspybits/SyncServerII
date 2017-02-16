@@ -1,9 +1,12 @@
-rm serverconstants.swift
 rm responsemessage.swift
-rm uploadfile.swift
-rm fileindex.swift	
 rm requestmessage.swift
 rm doneuploads.swift
+rm filenaming.swift
+
+rm uploadfile.swift
+rm fileindex.swift	
+rm serverconstants.swift
+rm downloadfile.swift
 
 ln -s ../../../../../Server/Sources/Server/ServerConstants.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/ResponseMessage.swift
@@ -12,3 +15,4 @@ ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/FileIndex.sw
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/RequestMessage.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/DoneUploads.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/DownloadFile.swift
+ln -s ../../../../../Server/Sources/Server/Account\ Specifics/Filenaming.swift

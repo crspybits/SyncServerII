@@ -24,13 +24,11 @@ class MessageTests: ServerTestCase {
     
     func testIntConversions() {
         let uuidString1 = PerfectLib.UUID().string
-        let uuidString2 = PerfectLib.UUID().string
 
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.deviceUUIDKey: uuidString2,
             UploadFileRequest.fileVersionKey: 1,
             UploadFileRequest.masterVersionKey: 42
         ])
@@ -44,49 +42,42 @@ class MessageTests: ServerTestCase {
 
     func testURLParameters() {
         let uuidString1 = PerfectLib.UUID().string
-        let uuidString2 = PerfectLib.UUID().string
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.deviceUUIDKey: uuidString2,
             UploadFileRequest.fileVersionKey: 1,
             UploadFileRequest.masterVersionKey: 42
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
     }
     
     func testURLParametersWithIntegersAsStrings() {
         let uuidString1 = PerfectLib.UUID().string
-        let uuidString2 = PerfectLib.UUID().string
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.deviceUUIDKey: uuidString2,
             UploadFileRequest.fileVersionKey: "1",
             UploadFileRequest.masterVersionKey: "42"
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.deviceUUIDKey)=\(uuidString2)&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(result)")
     }
     
     func testBadUUIDForFileName() {
-        let uuidString2 = PerfectLib.UUID().string
-
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: 1,
-            UploadFileRequest.deviceUUIDKey: uuidString2,
             UploadFileRequest.masterVersionKey: 42
         ])
         XCTAssert(uploadRequest == nil)
@@ -94,13 +85,11 @@ class MessageTests: ServerTestCase {
     
     func testPropertyHasValue() {
         let uuidString1 = PerfectLib.UUID().string
-        let uuidString2 = PerfectLib.UUID().string
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.deviceUUIDKey: uuidString2,
             UploadFileRequest.fileVersionKey: 1,
             UploadFileRequest.masterVersionKey: 42
         ])
@@ -108,7 +97,6 @@ class MessageTests: ServerTestCase {
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileUUIDKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.mimeTypeKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.cloudFolderNameKey))
-        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.deviceUUIDKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileVersionKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.masterVersionKey))
     }

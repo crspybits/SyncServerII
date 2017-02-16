@@ -17,9 +17,6 @@ import PerfectLib
 class DoneUploadsRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.
     
-    static let deviceUUIDKey = "deviceUUID"
-    var deviceUUID:String!
-    
     // Overall version for files for the specific user; assigned by the server.
     static let masterVersionKey = "masterVersion"
     var masterVersion:MasterVersionInt!
@@ -31,7 +28,7 @@ class DoneUploadsRequest : NSObject, RequestMessage {
 #endif
     
     func nonNilKeys() -> [String] {
-        return [DoneUploadsRequest.masterVersionKey, DoneUploadsRequest.deviceUUIDKey]
+        return [DoneUploadsRequest.masterVersionKey]
     }
     
     func allKeys() -> [String] {
@@ -46,7 +43,6 @@ class DoneUploadsRequest : NSObject, RequestMessage {
         super.init()
         
         self.masterVersion = DoneUploadsRequest.masterVersionKey <~~ json
-        self.deviceUUID = DoneUploadsRequest.deviceUUIDKey <~~ json
 #if DEBUG
         self.testLockSync = DoneUploadsRequest.testLockSyncKey <~~ json
 #endif
@@ -67,8 +63,7 @@ class DoneUploadsRequest : NSObject, RequestMessage {
     
     func toJSON() -> JSON? {
         var result = [
-            DoneUploadsRequest.masterVersionKey ~~> self.masterVersion,
-            DoneUploadsRequest.deviceUUIDKey ~~> self.deviceUUID
+            DoneUploadsRequest.masterVersionKey ~~> self.masterVersion
         ]
         
 #if DEBUG

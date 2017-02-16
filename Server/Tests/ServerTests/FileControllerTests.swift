@@ -28,6 +28,8 @@ class FileControllerTests: ServerTestCase {
         _ = FileIndexRepository(db).create()
         _ = LockRepository(db).remove()
         _ = LockRepository(db).create()
+        _ = DeviceUUIDRepository(db).remove()
+        _ = DeviceUUIDRepository(db).create()
     }
     
     override func tearDown() {
@@ -35,9 +37,9 @@ class FileControllerTests: ServerTestCase {
         super.tearDown()
     }
 
-    func runUploadTest(data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil) {
+    func runUploadTest(data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String) {
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
             XCTAssert(ServerEndpoints.uploadFile.method == .post)
@@ -87,7 +89,7 @@ class FileControllerTests: ServerTestCase {
     
     func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:Int64 = 0, masterVersion:Int64 = 0, cloudFolderName:String = "CloudFolder", appMetaData:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
-            self.addNewUser()
+            self.addNewUser(deviceUUID:deviceUUID)
         }
         
         var fileUUIDToSend = ""
@@ -105,14 +107,13 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : fileUUIDToSend,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: cloudFolderName,
-            UploadFileRequest.deviceUUIDKey: deviceUUID,
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.masterVersionKey: masterVersion
         ])!
         
         uploadRequest.appMetaData = appMetaData
         
-        runUploadTest(data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected)
+        runUploadTest(data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID)
         
         return (request:uploadRequest, fileSize: Int64(stringToUpload.characters.count))
     }
@@ -124,7 +125,7 @@ class FileControllerTests: ServerTestCase {
     func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:Int64 = 0) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
-            self.addNewUser()
+            self.addNewUser(deviceUUID:deviceUUID)
         }
         
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
@@ -136,11 +137,10 @@ class FileControllerTests: ServerTestCase {
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.deviceUUIDKey: deviceUUID,
             UploadFileRequest.masterVersionKey: 0
         ])
         
-        runUploadTest(data:data, uploadRequest:uploadRequest!, expectedUploadSize:sizeOfCatFileInBytes)
+        runUploadTest(data:data, uploadRequest:uploadRequest!, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID)
         
         return (uploadRequest!, sizeOfCatFileInBytes)
     }
@@ -165,10 +165,9 @@ class FileControllerTests: ServerTestCase {
     
     func sendDoneUploads(expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0) {
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
-                DoneUploadsRequest.deviceUUIDKey: deviceUUID,
                 DoneUploadsRequest.masterVersionKey : "\(masterVersion)"
             ])
             
@@ -216,74 +215,11 @@ class FileControllerTests: ServerTestCase {
         self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1)
     }
 
-#if false
-    func testLockOnDoneUploadsWorks() {
-        let deviceUUID1 = PerfectLib.UUID().string
-        _ = uploadTextFile(deviceUUID:deviceUUID1)
-        
-        let deviceUUID2 = PerfectLib.UUID().string
-        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
-        
-        let expectation2 = self.expectation(description: "Second")
-
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
-            
-            let doneUploadsRequest1 = DoneUploadsRequest(json: [
-                DoneUploadsRequest.deviceUUIDKey: deviceUUID1,
-                DoneUploadsRequest.masterVersionKey : "0"
-            ])
-            
-            doneUploadsRequest1!.testLockSync = 5 // seconds
-        
-            var doneRequest1 = false
-            
-            DispatchQueue.global(qos: .userInitiated).async {
-                // This request will be delayed for 5 seconds because of testLockSync.a`
-                self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest1!.urlParameters()!, body:nil) { response, dict in
-                    Log.info("Done Request1: Status code: \(response!.statusCode)")
-                    XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
-                    XCTAssert(dict != nil)
-                    
-                    doneRequest1 = true
-                    
-                    if let doneUploadsResponse = DoneUploadsResponse(json: dict!) {
-                        XCTAssert(doneUploadsResponse.masterVersionUpdate == nil)
-                        XCTAssert(doneUploadsResponse.numberUploadsTransferred == 1)
-                    }
-                    else {
-                        XCTFail()
-                    }
-                    
-                    expectation.fulfill()
-                }
-            }
-
-            // Let above request get started.
-            Thread.sleep(forTimeInterval: 1)
-            
-            let doneUploadsRequest2 = DoneUploadsRequest(json: [
-                DoneUploadsRequest.deviceUUIDKey: deviceUUID2,
-                DoneUploadsRequest.masterVersionKey : "0"
-            ])
-
-            self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest2!.urlParameters()!, body:nil) { response, dict in
-                Log.info("Done Request2: Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode != .OK, "doneUploadsRequest request succeeded!")
-                
-                // We should complete this request *before* the first request.
-                XCTAssert(!doneRequest1)
-                
-                expectation2.fulfill()
-            }
-        }
-    }
-#endif
-
     // MARK: DoneUploads tests
     
     func testDoneUploadsWithNoUploads() {
-        self.addNewUser()
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
         self.sendDoneUploads(expectedNumberOfUploads: 0)
     }
     
@@ -316,13 +252,9 @@ class FileControllerTests: ServerTestCase {
         XCTAssert(expectedFiles.count == expectedFileSizes.count)
         
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
-            let fileIndexRequest = FileIndexRequest(json: [
-                FileIndexRequest.deviceUUIDKey: deviceUUID
-            ])
-        
-            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, urlParameters: "?" + fileIndexRequest!.urlParameters()!, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
                 XCTAssert(dict != nil)
@@ -360,7 +292,9 @@ class FileControllerTests: ServerTestCase {
     }
     
     func testFileIndexWithNoFiles() {
-        self.addNewUser()
+        let deviceUUID = PerfectLib.UUID().string
+
+        self.addNewUser(deviceUUID:deviceUUID)
         self.getFileIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:])
     }
     
@@ -368,7 +302,7 @@ class FileControllerTests: ServerTestCase {
         let deviceUUID = PerfectLib.UUID().string
         let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID)
         
-        // Have to a DoneUploads to transfer the files into the FileIndex
+        // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
 
         let expectedSizes = [
@@ -391,44 +325,50 @@ class FileControllerTests: ServerTestCase {
             uploadRequest2.fileUUID: fileSize2
         ]
         
-        self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2], masterVersionExpected: 1, expectedFileSizes: expectedSizes)
+        self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2],masterVersionExpected: 1, expectedFileSizes: expectedSizes)
     }
     
-    func downloadTextFile(masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil) {
+    func downloadTextFile(masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:Int64 = 0, downloadFileVersion:Int64 = 0, expectedError: Bool = false) {
     
-            let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = PerfectLib.UUID().string
         let masterVersion:Int64 = 0
-        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, cloudFolderName: self.testFolder, appMetaData:appMetaData)
+        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: self.testFolder, appMetaData:appMetaData)
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
         
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             let downloadFileRequest = DownloadFileRequest(json: [
-                DownloadFileRequest.deviceUUIDKey: deviceUUID,
                 DownloadFileRequest.fileUUIDKey: uploadRequest.fileUUID,
                 DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadFileRequest.fileVersionKey : uploadRequest.fileVersion,
+                DownloadFileRequest.fileVersionKey : downloadFileVersion,
                 DownloadFileRequest.cloudFolderNameKey : self.testFolder
             ])
             
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on downloadFileRequest request")
-                XCTAssert(dict != nil)
                 
-                if let downloadFileResponse = DownloadFileResponse(json: dict!) {
-                    if expectUpdatedMasterUpdate {
-                        XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
-                    }
-                    else {
-                        XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
-                        XCTAssert(downloadFileResponse.fileSizeBytes == fileSize)
-                        XCTAssert(downloadFileResponse.appMetaData == appMetaData)
-                    }
+                if expectedError {
+                    XCTAssert(response!.statusCode != .OK, "Did not work on failing downloadFileRequest request")
+                    XCTAssert(dict == nil)
                 }
                 else {
-                    XCTFail()
+                    XCTAssert(response!.statusCode == .OK, "Did not work on downloadFileRequest request")
+                    XCTAssert(dict != nil)
+                    
+                    if let downloadFileResponse = DownloadFileResponse(json: dict!) {
+                        if expectUpdatedMasterUpdate {
+                            XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
+                        }
+                        else {
+                            XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
+                            XCTAssert(downloadFileResponse.fileSizeBytes == fileSize)
+                            XCTAssert(downloadFileResponse.appMetaData == appMetaData)
+                        }
+                    }
+                    else {
+                        XCTFail()
+                    }
                 }
                 
                 expectation.fulfill()
@@ -449,6 +389,8 @@ class FileControllerTests: ServerTestCase {
             appMetaData:"{ \"foo\": \"bar\" }")
     }
     
-    // TODO: *0* Attempt to download version 1 when you uploaded version 0.
+    func testDownloadFileTextWithDifferentDownloadVersion() {
+        downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
+    }
 }
 

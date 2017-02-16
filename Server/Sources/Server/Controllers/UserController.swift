@@ -20,6 +20,10 @@ class UserController : ControllerProtocol {
         if case .failure(_) = MasterVersionRepository(db).create() {
             return false
         }
+        
+        if case .failure(_) = DeviceUUIDRepository(db).create() {
+            return false
+        }
 
         return true
     }

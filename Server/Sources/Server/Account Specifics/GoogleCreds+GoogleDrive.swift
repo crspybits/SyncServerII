@@ -312,7 +312,7 @@ extension GoogleCreds {
     }
     
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
-    func uploadSmallFile(request:UploadFileRequest,
+    func uploadSmallFile(deviceUUID:String, request:UploadFileRequest,
         completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
         
         // See https://developers.google.com/drive/v3/web/manage-uploads
@@ -326,10 +326,10 @@ extension GoogleCreds {
             let searchType = SearchType.file(mimeType: request.mimeType, parentFolderId: folderId)
             
             // I'm going to do this before I attempt the upload-- because I don't want to upload the same file twice. This results in google drive doing odd things with the file names. E.g., 5200B98F-8CD8-4248-B41E-4DA44087AC3C.950DBB91-B152-4D5C-B344-9BAFF49021B7 (1).0
-            self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
+            self.searchFor(searchType, itemName: request.cloudFileName(deviceUUID:deviceUUID)) { (result, error) in
                 if error == nil {
                     if result == nil {
-                        self.completeSmallFileUpload(folderId: folderId!, searchType:searchType, request: request, completion: completion)
+                        self.completeSmallFileUpload(deviceUUID:deviceUUID, folderId: folderId!, searchType:searchType, request: request, completion: completion)
                     }
                     else {
                         completion(nil, UploadError.fileAlreadyExists)
@@ -342,7 +342,7 @@ extension GoogleCreds {
         }
     }
     
-    private func completeSmallFileUpload(folderId:String, searchType:SearchType, request:UploadFileRequest,
+    private func completeSmallFileUpload(deviceUUID:String, folderId:String, searchType:SearchType, request:UploadFileRequest,
         completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
         
         let boundary = PerfectLib.UUID().string
@@ -359,7 +359,7 @@ extension GoogleCreds {
             "Content-Type: application/json; charset=UTF-8\r\n" +
             "\r\n" +
             "{\r\n" +
-                "\"name\": \"\(request.cloudFileName())\",\r\n" +
+                "\"name\": \"\(request.cloudFileName(deviceUUID:deviceUUID))\",\r\n" +
                 "\"parents\": [\r\n" +
                     "\"\(folderId)\"\r\n" +
                 "]\r\n" +
@@ -385,7 +385,7 @@ extension GoogleCreds {
             else {
                 // TODO: *4* This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
 
-                self.searchFor(searchType, itemName: request.cloudFileName()) { (result, error) in
+                self.searchFor(searchType, itemName: request.cloudFileName(deviceUUID:deviceUUID)) { (result, error) in
                     if error == nil {
                         if let sizeString = result?.json["size"]?.string,
                             let size = Int(sizeString) {

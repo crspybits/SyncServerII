@@ -37,6 +37,7 @@ class Constants {
     
     var googleClientId:String = ""
     var googleClientSecret:String = ""
+    var maxNumberDeviceUUIDPerUser:Int?
 
     static var session = Constants()
 
@@ -65,5 +66,8 @@ class Constants {
         db.user = try! config.getString(varName: "mySQL.user")
         db.password = try! config.getString(varName: "mySQL.password")
         db.database = try! config.getString(varName: "mySQL.database")
+        
+        maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
+        print("maxNumberDeviceUUIDPerUser: \(maxNumberDeviceUUIDPerUser)")
     }
 }

@@ -30,10 +30,6 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName:String!
     
-    // Assigned by client.
-    static let deviceUUIDKey = "deviceUUID"
-    var deviceUUID:String!
-    
     static let appMetaDataKey = "appMetaData"
     var appMetaData:String!
     
@@ -50,7 +46,7 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     var sizeOfDataInBytes:Int!
     
     func nonNilKeys() -> [String] {
-        return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.deviceUUIDKey, UploadFileRequest.fileVersionKey, UploadFileRequest.masterVersionKey]
+        return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.fileVersionKey, UploadFileRequest.masterVersionKey]
     }
     
     func allKeys() -> [String] {
@@ -63,7 +59,6 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
         self.fileUUID = UploadFileRequest.fileUUIDKey <~~ json
         self.mimeType = UploadFileRequest.mimeTypeKey <~~ json
         self.cloudFolderName = UploadFileRequest.cloudFolderNameKey <~~ json
-        self.deviceUUID = UploadFileRequest.deviceUUIDKey <~~ json
         self.fileVersion = UploadFileRequest.fileVersionKey <~~ json
         self.masterVersion = UploadFileRequest.masterVersionKey <~~ json
         self.appMetaData = UploadFileRequest.appMetaDataKey <~~ json
@@ -74,8 +69,7 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
         }
 #endif
 
-        guard let _ = NSUUID(uuidString: self.fileUUID),
-            let _ = NSUUID(uuidString: self.deviceUUID) else {
+        guard let _ = NSUUID(uuidString: self.fileUUID) else {
             return nil
         }
     }
@@ -98,7 +92,6 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
             UploadFileRequest.fileUUIDKey ~~> self.fileUUID,
             UploadFileRequest.mimeTypeKey ~~> self.mimeType,
             UploadFileRequest.cloudFolderNameKey ~~> self.cloudFolderName,
-            UploadFileRequest.deviceUUIDKey ~~> self.deviceUUID,
             UploadFileRequest.fileVersionKey ~~> self.fileVersion,
             UploadFileRequest.masterVersionKey ~~> self.masterVersion,
             UploadFileRequest.appMetaDataKey ~~> self.appMetaData

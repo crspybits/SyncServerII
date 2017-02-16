@@ -66,9 +66,15 @@ private class RequestHandler {
     private var request:RouterRequest!
     private var response:RouterResponse!
     
-    init(request:RouterRequest, response:RouterResponse) {
+    private var repositories:Repositories!
+    private var authenticationLevel:AuthenticationLevel!
+    private var currentSignedInUser:User?
+    private var deviceUUID:String?
+    
+    init(request:RouterRequest, response:RouterResponse, authenticationLevel:AuthenticationLevel = .secondary) {
         self.request = request
         self.response = response
+        self.authenticationLevel = authenticationLevel
     }
 
     public func failWithError(message:String,
@@ -132,8 +138,7 @@ private class RequestHandler {
         self.response.headers["Content-Type"] = "application/json"
     }
 
-    func doRequest(authenticationLevel:AuthenticationLevel = .secondary,
-        createRequest: @escaping (RouterRequest) -> RequestMessage?,
+    func doRequest(createRequest: @escaping (RouterRequest) -> RequestMessage?,
         processRequest: @escaping ProcessRequest) {
         
         Log.info(message: "Processing Request: \(request.urlURL.path)")
@@ -149,7 +154,7 @@ private class RequestHandler {
         }
 #endif
 
-        switch authenticationLevel {
+        switch authenticationLevel! {
         case .none:
             break
         case .primary, .secondary:
@@ -162,10 +167,8 @@ private class RequestHandler {
             }
         }
         
-        var currentSignedInUser:User?
-        
         let db = Database()
-        let repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db))
+        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db))
         
         if authenticationLevel == .secondary {
             let userExists = UserController.userExists(userProfile: profile!, userRepository: repositories.user)
@@ -189,10 +192,14 @@ private class RequestHandler {
             return
         }
         
+        self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
+        
+        Log.info(message: "self.deviceUUID: \(self.deviceUUID)")
+        
         func doTheRequestProcessing(creds:Creds?) -> Bool {
             var success = true
             
-            let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response) { responseObject in
+            let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
             
                 if nil == responseObject {
                     self.failWithError(message: "Could not create response object from request object")
@@ -238,6 +245,12 @@ private class RequestHandler {
                 return
             }
             
+            let result = checkDeviceUUID()
+            if result != nil && !result! {
+                _ = db.rollback()
+                return
+            }
+            
             if dbOperations() {
                 // Already finished the operation. Can't report an error if it happens here.
                 _ = db.commit()
@@ -264,9 +277,9 @@ private class RequestHandler {
             creds.generateTokens() { successGeneratingTokens, error in
                 if error == nil {
                     dbTransaction() {
-                        if successGeneratingTokens! && authenticationLevel == .secondary {
+                        if successGeneratingTokens! && self.authenticationLevel == .secondary {
                             // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
-                            if !repositories.user.updateCreds(creds: creds, forUser: currentSignedInUser!) {
+                            if !self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!) {
                                 self.failWithError(message: "Could not update creds")
                             }
                         }
@@ -278,6 +291,47 @@ private class RequestHandler {
                 }
                 else {
                     self.failWithError(message: "Failed attempting to generate tokens")
+                }
+            }
+        }
+    }
+    
+    // Returns true success, nil if a UUID is not needed, and false if failure.
+    private func checkDeviceUUID() -> Bool? {
+        switch authenticationLevel! {
+        case .none:
+            return nil
+            
+        case .primary, .secondary:
+            if self.deviceUUID == nil {
+                self.failWithError(message: "Did not provide a Device UUID with header \(ServerConstants.httpRequestDeviceUUID)")
+                return false
+            }
+            else if currentSignedInUser == nil && authenticationLevel == .primary {
+                // If we don't have a signed in user, we can't search for existing deviceUUID's. But that's not an error.
+                return true
+            }
+            else {
+                let key = DeviceUUIDRepository.LookupKey.userId(currentSignedInUser!.userId)
+                let result = repositories.deviceUUID.lookup(key: key, modelInit: DeviceUUID.init)
+                switch result {
+                case .error(let error):
+                    failWithError(message: "Error looking up device UUID: \(error)")
+                    return false
+                    
+                case .found(_):
+                    return true
+                    
+                case .noObjectFound:
+                    let newDeviceUUID = DeviceUUID(userId: currentSignedInUser!.userId, deviceUUID: self.deviceUUID!)
+                    let addResult = repositories.deviceUUID.add(deviceUUID: newDeviceUUID)
+                    switch addResult {
+                    case .error(_), .exceededMaximumUUIDsPerUser:
+                        return false
+                        
+                    case .success:
+                        return true
+                    }
                 }
             }
         }
@@ -297,9 +351,8 @@ public class CreateRoutes {
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info(message: "parsedURL: \(routerRequest.parsedURL)")
             
-            let handler = RequestHandler(request: routerRequest, response: routerResponse)
-            handler.doRequest(authenticationLevel: ep.authenticationLevel,
-                createRequest: createRequest, processRequest: processRequest)
+            let handler = RequestHandler(request: routerRequest, response: routerResponse, authenticationLevel:ep.authenticationLevel)
+            handler.doRequest(createRequest: createRequest, processRequest: processRequest)
         }
         
         switch (ep.method) {

@@ -14,4 +14,5 @@ struct Repositories {
     let masterVersion:MasterVersionRepository!
     let fileIndex:FileIndexRepository!
     let upload:UploadRepository!
+    let deviceUUID:DeviceUUIDRepository!
 }

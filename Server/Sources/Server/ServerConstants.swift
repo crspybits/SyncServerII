@@ -18,6 +18,10 @@ public class ServerConstants {
     public static let GoogleHTTPAccessTokenKey = "Kitura-access-token"
     public static let GoogleHTTPServerAuthCodeKey = "Kitura-server-auth-code"
     
+    // HTTP: request header key
+    // Since the Device-UUID is a somewhat secure identifier, I'm passing it in the HTTP header. Plus, it makes the device UUID available early in request processing.
+    public static let httpRequestDeviceUUID = "SyncServer-Device-UUID"
+    
     // HTTP response header keys
     public static let httpResponseMessageParams = "SyncServer-Message-Params"
     

@@ -9,6 +9,7 @@
 import XCTest
 @testable import Server
 import LoggerAPI
+import PerfectLib
 
 class UserControllerTests: ServerTestCase {
 
@@ -16,17 +17,21 @@ class UserControllerTests: ServerTestCase {
         super.setUp()        
         _ = UserRepository(db).remove()
         _ = UserRepository(db).create()
+        _ = DeviceUUIDRepository(db).remove()
+        _ = DeviceUUIDRepository(db).create()
     }
     
     func testAddUserSucceedsWhenAddingNewUser() {
-        self.addNewUser()
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
     }
     
     func testAddUserFailsWhenAddingExistingUser() {
-        self.addNewUser()
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
             
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .internalServerError, "Worked on addUser request")
@@ -36,10 +41,11 @@ class UserControllerTests: ServerTestCase {
     }
     
     func testCheckCredsWhenUserDoesExist() {
-        self.addNewUser()
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
             
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -50,8 +56,10 @@ class UserControllerTests: ServerTestCase {
     }
     
     func testCheckCredsWhenUserDoesNotExist() {
+        let deviceUUID = PerfectLib.UUID().string
+
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -62,8 +70,10 @@ class UserControllerTests: ServerTestCase {
     }
     
     func testCheckCredsWithBadAccessToken() {
+        let deviceUUID = PerfectLib.UUID().string
+
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: "Some junk for access token")
+            let headers = self.setupHeaders(accessToken: "Some junk for access token", deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -74,9 +84,11 @@ class UserControllerTests: ServerTestCase {
     }
     
     func testRemoveUserFailsWithNonExistingUser() {
+        let deviceUUID = PerfectLib.UUID().string
+
         // Don't create the user first.
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -87,10 +99,11 @@ class UserControllerTests: ServerTestCase {
     }
     
     func testRemoveUserSucceedsWithExistingUser() {
-        self.addNewUser()
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
 
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken)
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

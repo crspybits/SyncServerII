@@ -80,12 +80,12 @@ class FileController : ControllerProtocol {
             
             // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
             
-            Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName())")
+            Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
             
             // I'm going to create the entry in the Upload repo first because otherwise, there's a race condition-- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload table entry will be the gatekeeper.
             
             let upload = Upload()
-            upload.deviceUUID = uploadRequest.deviceUUID
+            upload.deviceUUID = params.deviceUUID
             upload.fileUpload = true
             upload.fileUUID = uploadRequest.fileUUID
             upload.fileVersion = uploadRequest.fileVersion
@@ -95,7 +95,7 @@ class FileController : ControllerProtocol {
             upload.appMetaData = uploadRequest.appMetaData
             
             if let uploadId = params.repos.upload.add(upload: upload) {
-                googleCreds.uploadSmallFile(request: uploadRequest) { fileSize, error in
+                googleCreds.uploadSmallFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
                     if error == nil {
                         upload.fileSizeBytes = Int64(fileSize!)
                         upload.state = .uploaded
@@ -134,7 +134,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:doneUploadsRequest.deviceUUID!)
+        let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             Log.info(message: "Sucessfully obtained lock!!")
@@ -193,7 +193,7 @@ class FileController : ControllerProtocol {
             let numberTransferred =
                 params.repos.fileIndex.transferUploads(
                     userId: params.currentSignedInUser!.userId,
-                    deviceUUID: doneUploadsRequest.deviceUUID!,
+                    deviceUUID: params.deviceUUID!,
                     upload: params.repos.upload)
             
             if numberTransferred == nil  {
@@ -204,7 +204,7 @@ class FileController : ControllerProtocol {
             }
             
             // Second, remove the corresponding records from the Upload repo.
-            let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: doneUploadsRequest.deviceUUID!)
+            let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
             
             switch params.repos.upload.remove(key: filesForUserDevice) {
             case .removed(let numberRows):
@@ -220,7 +220,6 @@ class FileController : ControllerProtocol {
                 return
             }
             
-            // TODO: *1* Why don't I have a check for errors here?
             _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
             Log.info(message: "Unlocked lock.")
 
@@ -232,19 +231,39 @@ class FileController : ControllerProtocol {
     }
     
     func fileIndex(params:RequestProcessingParameters) {
-        
         guard params.request is FileIndexRequest else {
             Log.error(message: "Did not receive FileIndexRequest")
             params.completion(nil)
             return
         }
         
-        // TODO: *1* Should make sure that the device UUID in the FileIndexRequest is actually associated with the user. (But, need DeviceUUIDRepository for that.).
+        // The FileIndex serves as a kind of snapshot of the files on the server for the calling apps. So, we hold the lock while we take the snapshot-- to make sure we're not getting a cross section of changes imposed by other apps.
+                
+        let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
+        switch params.repos.lock.lock(lock: lock) {
+        case .success:
+            Log.info(message: "Sucessfully obtained lock!!")
+            break
+
+        case .lockAlreadyHeld:
+            Log.error(message: "Error: Lock already held.")
+            params.completion(nil)
+            return
         
-        // TODO: *1* The FileIndex serves as a kind of snapshot of the files on the server for the calling apps. We ought to hold the lock while we take the snapshot-- to make sure we're not getting a cross section of changes imposed by other apps.
+        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+            Log.error(message: "Error obtaining lock!")
+            params.completion(nil)
+            return
+        }
         
-        getMasterVersion(params:params, completion: params.completion) { masterVersion in
+        getMasterVersion(params:params, completion: { response in
+            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+            params.completion(nil)
+        },
+        carryOn: { masterVersion in
             let fileIndexResult = params.repos.fileIndex.fileIndex(forUserId: params.currentSignedInUser!.userId)
+            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+
             switch fileIndexResult {
             case .fileIndex(let fileIndex):
                 let response = FileIndexResponse()!
@@ -252,10 +271,12 @@ class FileController : ControllerProtocol {
                 response.masterVersion = masterVersion
                 params.completion(response)
                 
-            case .error(_):
+            case .error(let error):
+                Log.error(message: "Error: \(error)")
                 params.completion(nil)
+                return
             }
-        }
+        })
     }
     
     func downloadFile(params:RequestProcessingParameters) {
@@ -264,8 +285,6 @@ class FileController : ControllerProtocol {
             params.completion(nil)
             return
         }
-        
-        // TODO: *1* Should make sure that the device UUID in the FileIndexRequest is actually associated with the user. (But, need DeviceUUIDRepository for that.).
 
         getMasterVersion(params:params, completion: params.completion) { masterVersion in
             // Verify that downloadRequest.masterVersion is still the same as that stored in the database for this user. If not, inform the caller.
@@ -312,11 +331,17 @@ class FileController : ControllerProtocol {
                 return
             }
             
+            guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
+                Log.error(message: "Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)")
+                params.completion(nil)
+                return
+            }
+            
             // TODO: *5*: Eventually, this should bypass the middle man and stream from the cloud storage service directly to the client.
             
-            // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex.
+            // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex. This is because the file, once stored, is really in a specific place in cloud storage.
             
-            googleCreds.downloadSmallFile(cloudFolderName: downloadRequest.cloudFolderName, cloudFileName: fileIndexObj!.cloudFileName(), mimeType: fileIndexObj!.mimeType) { (data, error) in
+            googleCreds.downloadSmallFile(cloudFolderName: downloadRequest.cloudFolderName, cloudFileName: fileIndexObj!.cloudFileName(deviceUUID:params.deviceUUID!), mimeType: fileIndexObj!.mimeType) { (data, error) in
                 if error == nil {
                     if Int64(data!.count) != fileIndexObj!.fileSizeBytes {
                         Log.error(message: "Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")

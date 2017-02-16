@@ -18,11 +18,8 @@ import Kitura
 class FileIndexRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.
     
-    static let deviceUUIDKey = "deviceUUID"
-    var deviceUUID:String!
-    
     func nonNilKeys() -> [String] {
-        return [FileIndexRequest.deviceUUIDKey]
+        return []
     }
     
     func allKeys() -> [String] {
@@ -32,8 +29,6 @@ class FileIndexRequest : NSObject, RequestMessage {
     required init?(json: JSON) {
         super.init()
         
-        self.deviceUUID = FileIndexRequest.deviceUUIDKey <~~ json
-
 #if SERVER
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
@@ -49,7 +44,6 @@ class FileIndexRequest : NSObject, RequestMessage {
 
     func toJSON() -> JSON? {
         return jsonify([
-            FileIndexRequest.deviceUUIDKey ~~> self.deviceUUID
         ])
     }
 }
