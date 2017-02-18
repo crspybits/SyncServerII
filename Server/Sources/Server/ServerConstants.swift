@@ -93,12 +93,14 @@ public class ServerEndpoints {
     public static let doneUploads = ServerEndpoint("DoneUploads", method: .post)
     public static let downloadFile = ServerEndpoint("DownloadFile", method: .get)
     
-    // TODO: *3* Need a new endpoint that is analogous to FileIndex but is `GetUploads`-- which returns the collection of files that have been Upload'ed. See also [1] in FileControllerTests.swift.
-    // Relatedly: Need a new endpoint that enables clients to flush (i.e., delete) files in the Uploads table which are in the `uploaded` state.
+    // TODO: *0* See also [1] in FileControllerTests.swift.
+    public static let getUploads = ServerEndpoint("GetUploads", method: .get)
+
+    // TODO: *3* Need a new endpoint that enables clients to flush (i.e., delete) files in the Uploads table which are in the `uploaded` state.
 
     public static let session = ServerEndpoints()
     
     private init() {
-        all.append(contentsOf: [ServerEndpoints.healthCheck, ServerEndpoints.addUser, ServerEndpoints.checkCreds, ServerEndpoints.removeUser, ServerEndpoints.fileIndex, ServerEndpoints.uploadFile, ServerEndpoints.doneUploads])
+        all.append(contentsOf: [ServerEndpoints.healthCheck, ServerEndpoints.addUser, ServerEndpoints.checkCreds, ServerEndpoints.removeUser, ServerEndpoints.fileIndex, ServerEndpoints.uploadFile, ServerEndpoints.doneUploads, ServerEndpoints.getUploads])
     }
 }

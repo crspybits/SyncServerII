@@ -13,16 +13,6 @@ class DatabaseTransactionTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()
-        _ = UserRepository(db).remove()
-        _ = UserRepository(db).create()
-        _ = UploadRepository(db).remove()
-        _ = UploadRepository(db).create()
-        _ = MasterVersionRepository(db).remove()
-        _ = MasterVersionRepository(db).create()
-        _ = LockRepository(db).remove()
-        _ = LockRepository(db).create()
-        _ = FileIndexRepository(db).remove()
-        _ = FileIndexRepository(db).create()
     }
     
     override func tearDown() {

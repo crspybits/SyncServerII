@@ -70,7 +70,8 @@ class Upload : NSObject, Model, Filenaming {
     var deviceUUID: String!
     var mimeType: String!
     var appMetaData: String!
-    
+    var deleted:Bool! = false
+
     let fileUploadKey = "fileUpload"
     var fileUpload:Bool!
     
@@ -124,6 +125,8 @@ class UploadRepository : Repository {
         
             // reference into User table
             "userId BIGINT NOT NULL, " +
+            
+            // TODO: *2* Add `deleted` attribute-- to support upload deletion.
             
             // identifies a specific mobile device (assigned by app)
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
@@ -265,5 +268,37 @@ class UploadRepository : Repository {
     func select(forUserId userId: UserId, deviceUUID:String, andState state:UploadState) -> Select {
         let query = "select * from \(tableName) where userId=\(userId) and deviceUUID='\(deviceUUID)' and state='\(state.rawValue)'"
         return Select(db:db, query: query, modelInit: Upload.init, ignoreErrors:false)
+    }
+    
+    enum UploadedFilesResult {
+    case uploads([FileInfo])
+    case error(Swift.Error)
+    }
+     
+    func uploadedFiles(forUserId userId: UserId, andDeviceUUID deviceUUID: String) -> UploadedFilesResult {
+        let selectUploadedFiles = select(forUserId: userId, deviceUUID: deviceUUID, andState: .uploaded)
+
+        var fileInfoResult:[FileInfo] = []
+        
+        selectUploadedFiles.forEachRow { rowModel in
+            let rowModel = rowModel as! Upload
+
+            let fileInfo = FileInfo()!
+            fileInfo.fileUUID = rowModel.fileUUID
+            fileInfo.appMetaData = rowModel.appMetaData
+            fileInfo.fileVersion = rowModel.fileVersion
+            fileInfo.deleted = rowModel.deleted
+            fileInfo.fileSizeBytes = rowModel.fileSizeBytes
+            fileInfo.mimeType = rowModel.mimeType
+            
+            fileInfoResult.append(fileInfo)
+        }
+        
+        if selectUploadedFiles.forEachRowStatus == nil {
+            return .uploads(fileInfoResult)
+        }
+        else {
+            return .error(selectUploadedFiles.forEachRowStatus!)
+        }
     }
 }

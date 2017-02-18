@@ -106,6 +106,9 @@ class LockRepository : Repository {
         
         let expiry = Database.date(lock.expiry, toFormat: dateFormat)
         
+        // TODO: *2* It would be good to specify the expiry time dynamically if possible-- this insert can block. e.g., NOW() + INTERVAL 15 DAY
+        // It is conceptually possible for the block to wake up and the lock already to be expired.
+        
         let query = "INSERT INTO \(tableName) (userId, deviceUUID, expiry) VALUES(\(lock.userId!), '\(lock.deviceUUID!)', '\(expiry)');"
         
         if db.connection.query(statement: query) {

@@ -15,12 +15,6 @@ class UserControllerTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()        
-        _ = UserRepository(db).remove()
-        _ = UserRepository(db).create()
-        _ = DeviceUUIDRepository(db).remove()
-        _ = DeviceUUIDRepository(db).create()
-        _ = MasterVersionRepository(db).remove()
-        _ = MasterVersionRepository(db).create()
     }
     
     func testAddUserSucceedsWhenAddingNewUser() {

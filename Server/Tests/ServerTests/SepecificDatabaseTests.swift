@@ -14,22 +14,10 @@ import Credentials
 import CredentialsGoogle
 import PerfectLib
 
-class SepecificDatabaseTests: ServerTestCase {
+class SpecificDatabaseTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()
-        _ = UserRepository(db).remove()
-        _ = UserRepository(db).create()
-        _ = UploadRepository(db).remove()
-        _ = UploadRepository(db).create()
-        _ = MasterVersionRepository(db).remove()
-        _ = MasterVersionRepository(db).create()
-        _ = LockRepository(db).remove()
-        _ = LockRepository(db).create()
-        _ = FileIndexRepository(db).remove()
-        _ = FileIndexRepository(db).create()
-        _ = DeviceUUIDRepository(db).remove()
-        _ = DeviceUUIDRepository(db).create()
     }
     
     override func tearDown() {
@@ -121,77 +109,7 @@ class SepecificDatabaseTests: ServerTestCase {
             XCTFail("No User Found")
         }
     }
-    
-    func doAddUpload(fileSizeBytes:Int64?=100) -> Upload {
-        let upload = Upload()
-        upload.deviceUUID = PerfectLib.UUID().string
-        upload.fileSizeBytes = fileSizeBytes
-        upload.fileUpload = true
-        upload.fileUUID = PerfectLib.UUID().string
-        upload.fileVersion = 1
-        upload.mimeType = "text/plain"
-        upload.state = .uploaded
-        upload.userId = 1
-        upload.appMetaData = "{ \"foo\": \"bar\" }"
         
-        let result1 = UploadRepository(db).add(upload: upload)
-        XCTAssert(result1 == 1, "Bad uploadId!")
-        
-        upload.uploadId = result1
-        
-        return upload
-    }
-    
-    func testAddUpload() {
-        _ = doAddUpload()
-    }
-    
-    func testAddUploadSucceedsWithNilFileSizeBytes() {
-        _ = doAddUpload(fileSizeBytes:nil)
-    }
-    
-    func testUpdateUpload() {
-        let upload = doAddUpload()
-        XCTAssert(UploadRepository(db).update(upload: upload))
-    }
-    
-    func testUpdateUploadFailsWithoutUploadId() {
-        let upload = doAddUpload()
-        upload.uploadId = nil
-        XCTAssert(!UploadRepository(db).update(upload: upload))
-    }
-    
-    func testUpdateUploadSucceedsWithNilFileSize() {
-        let upload = doAddUpload()
-        upload.fileSizeBytes = nil
-        XCTAssert(UploadRepository(db).update(upload: upload))
-    }
-    
-    func testLookupFromUpload() {
-        let upload1 = doAddUpload()
-        
-        let result = UploadRepository(db).lookup(key: .uploadId(1), modelInit: Upload.init)
-        switch result {
-        case .error(let error):
-            XCTFail("\(error)")
-            
-        case .found(let object):
-            let upload2 = object as! Upload
-            XCTAssert(upload1.deviceUUID != nil && upload1.deviceUUID == upload2.deviceUUID)
-            XCTAssert(upload1.fileSizeBytes != nil && upload1.fileSizeBytes == upload2.fileSizeBytes)
-            XCTAssert(upload1.fileUpload != nil && upload1.fileUpload == upload2.fileUpload)
-            XCTAssert(upload1.fileUUID != nil && upload1.fileUUID == upload2.fileUUID)
-            XCTAssert(upload1.fileVersion != nil && upload1.fileVersion == upload2.fileVersion)
-            XCTAssert(upload1.mimeType != nil && upload1.mimeType == upload2.mimeType)
-            XCTAssert(upload1.state != nil && upload1.state == upload2.state)
-            XCTAssert(upload1.userId != nil && upload1.userId == upload2.userId)
-            XCTAssert(upload1.appMetaData != nil && upload1.appMetaData == upload2.appMetaData)
-
-        case .noObjectFound:
-            XCTFail("No Upload Found")
-        }
-    }
-    
     func checkMasterVersion(userId:UserId, version:Int64) {
         let result = MasterVersionRepository(db).lookup(key: .userId(userId), modelInit: MasterVersion.init)
         switch result {

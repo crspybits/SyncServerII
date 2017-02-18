@@ -1,8 +1,8 @@
 //
-//  FileIndex.swift
+//  GetUploads.swift
 //  Server
 //
-//  Created by Christopher Prince on 1/28/17.
+//  Created by Christopher Prince on 2/18/17.
 //
 //
 
@@ -13,9 +13,9 @@ import Gloss
 import Kitura
 #endif
 
-// Request an index of all files that have been uploaded with UploadFile and committed using DoneUploads by the user-- queries the meta data on the sync server.
+// Request an index of all files that have been uploaded with UploadFile -- queries the meta data on the sync server. The uploads are specific both to the user and the deviceUUID of the user.
 
-class FileIndexRequest : NSObject, RequestMessage {
+class GetUploadsRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.
     
     func nonNilKeys() -> [String] {
@@ -48,20 +48,16 @@ class FileIndexRequest : NSObject, RequestMessage {
     }
 }
 
-class FileIndexResponse : ResponseMessage {
+class GetUploadsResponse : ResponseMessage {
     public var responseType: ResponseType {
         return .json
     }
     
-    static let masterVersionKey = "masterVersion"
-    var masterVersion:MasterVersionInt!
-    
-    static let fileIndexKey = "fileIndex"
-    var fileIndex:[FileInfo]?
+    static let uploadsKey = "uploads"
+    var uploads:[FileInfo]?
     
     required init?(json: JSON) {
-        self.masterVersion = FileIndexResponse.masterVersionKey <~~ json
-        self.fileIndex = FileIndexResponse.fileIndexKey <~~ json
+        self.uploads = GetUploadsResponse.uploadsKey <~~ json
     }
     
     convenience init?() {
@@ -71,8 +67,7 @@ class FileIndexResponse : ResponseMessage {
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
-            FileIndexResponse.masterVersionKey ~~> self.masterVersion,
-            FileIndexResponse.fileIndexKey ~~> self.fileIndex
+            GetUploadsResponse.uploadsKey ~~> self.uploads
         ])
     }
 }

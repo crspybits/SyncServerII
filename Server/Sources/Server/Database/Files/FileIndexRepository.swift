@@ -271,7 +271,7 @@ class FileIndexRepository : Repository {
     case fileIndex([FileInfo])
     case error(Swift.Error)
     }
-    
+     
     func fileIndex(forUserId userId: UserId) -> FileIndexResult {
         let query = "select * from \(tableName) where userId = \(userId)"
         let select = Select(db:db, query: query, modelInit: FileIndex.init, ignoreErrors:false)

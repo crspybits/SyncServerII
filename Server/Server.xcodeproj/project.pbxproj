@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		44233C2FFA6A240E0F12C709 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 96DF434808F3CBABFA08AC02 /* Server.json */; };
 		58F3214D2F6328058A7D2032 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 57D58651D36513DE161986FA /* ServerTests.json */; };
+		83F55F781E58C07100759578 /* FileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F761E58C02200759578 /* FileInfo.swift */; };
+		83F55F7B1E58C43100759578 /* GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F791E58C2CB00759578 /* GetUploads.swift */; };
+		83F55F7D1E58C70E00759578 /* FileControllerTests_GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */; };
+		83F55F7F1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */; };
 		OBJ_285 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_286 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
 		OBJ_287 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* File.swift */; };
@@ -1064,6 +1068,10 @@
 
 /* Begin PBXFileReference section */
 		57D58651D36513DE161986FA /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		83F55F761E58C02200759578 /* FileInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileInfo.swift; sourceTree = "<group>"; };
+		83F55F791E58C2CB00759578 /* GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUploads.swift; sourceTree = "<group>"; };
+		83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileControllerTests_GetUploads.swift; sourceTree = "<group>"; };
+		83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_Uploads.swift; sourceTree = "<group>"; };
 		96DF434808F3CBABFA08AC02 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
@@ -1810,6 +1818,7 @@
 			children = (
 				OBJ_226 /* FileIndexRepository.swift */,
 				OBJ_227 /* UploadRepository.swift */,
+				83F55F761E58C02200759578 /* FileInfo.swift */,
 			);
 			path = Files;
 			sourceTree = "<group>";
@@ -1820,6 +1829,7 @@
 				OBJ_229 /* AddUser.swift */,
 				OBJ_230 /* CheckCreds.swift */,
 				OBJ_231 /* CheckPrimaryCreds.swift */,
+				83F55F791E58C2CB00759578 /* GetUploads.swift */,
 				OBJ_232 /* DoneUploads.swift */,
 				OBJ_233 /* DownloadFile.swift */,
 				OBJ_234 /* FileIndex.swift */,
@@ -1863,6 +1873,8 @@
 		OBJ_244 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */,
+				83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */,
 				OBJ_245 /* DatabaseTests.swift */,
 				OBJ_246 /* DatabaseTransactionTests.swift */,
 				OBJ_247 /* FileControllerTests.swift */,
@@ -2942,9 +2954,11 @@
 				OBJ_693 /* ServerConstants.swift in Sources */,
 				OBJ_694 /* ServerMain.swift in Sources */,
 				OBJ_695 /* ServerRoutes.swift in Sources */,
+				83F55F781E58C07100759578 /* FileInfo.swift in Sources */,
 				OBJ_696 /* ServerSetup.swift in Sources */,
 				OBJ_697 /* Creds.swift in Sources */,
 				OBJ_698 /* Filenaming.swift in Sources */,
+				83F55F7B1E58C43100759578 /* GetUploads.swift in Sources */,
 				OBJ_699 /* GoogleCreds+GoogleDrive.swift in Sources */,
 				OBJ_700 /* GoogleCreds.swift in Sources */,
 				OBJ_701 /* Constants.swift in Sources */,
@@ -2986,6 +3000,7 @@
 				OBJ_772 /* DatabaseTests.swift in Sources */,
 				OBJ_773 /* DatabaseTransactionTests.swift in Sources */,
 				OBJ_774 /* FileControllerTests.swift in Sources */,
+				83F55F7F1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift in Sources */,
 				OBJ_775 /* GeneralAuthTests.swift in Sources */,
 				OBJ_776 /* GoogleAuthenticationTests.swift in Sources */,
 				OBJ_777 /* GoogleDriveTests.swift in Sources */,
@@ -2994,6 +3009,7 @@
 				OBJ_780 /* SepecificDatabaseTests.swift in Sources */,
 				OBJ_781 /* ServerTestCase.swift in Sources */,
 				OBJ_782 /* UserController.swift in Sources */,
+				83F55F7D1E58C70E00759578 /* FileControllerTests_GetUploads.swift in Sources */,
 				OBJ_783 /* UtilsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

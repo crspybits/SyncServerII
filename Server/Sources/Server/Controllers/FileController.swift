@@ -245,7 +245,7 @@ class FileController : ControllerProtocol {
                 return
             }
             
-            // Second, remove the corresponding records from the Upload repo.
+            // Second, remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
             let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
             
             switch params.repos.upload.remove(key: filesForUserDevice) {
@@ -299,7 +299,6 @@ class FileController : ControllerProtocol {
             params.completion(nil)
             return
         }
-        
         
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
@@ -414,6 +413,48 @@ class FileController : ControllerProtocol {
                     return
                 }
             }            
+        }
+    }
+    
+    func getUploads(params:RequestProcessingParameters) {
+        guard params.request is GetUploadsRequest else {
+            Log.error(message: "Did not receive GetUploadsRequest")
+            params.completion(nil)
+            return
+        }
+        
+        // Seems unlikely that the collection of uploads will change while we are getting them (because they are specific to the userId and the deviceUUID), but grab the lock just in case.
+                
+        let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
+        switch params.repos.lock.lock(lock: lock) {
+        case .success:
+            Log.info(message: "Sucessfully obtained lock!!")
+            break
+
+        case .lockAlreadyHeld:
+            Log.error(message: "Error: Lock already held.")
+            params.completion(nil)
+            return
+        
+        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+            Log.error(message: "Error obtaining lock!")
+            params.completion(nil)
+            return
+        }
+        
+        let uploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, andDeviceUUID: params.deviceUUID!)
+        _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+
+        switch uploadsResult {
+        case .uploads(let uploads):
+            let response = GetUploadsResponse()!
+            response.uploads = uploads
+            params.completion(response)
+            
+        case .error(let error):
+            Log.error(message: "Error: \(error)")
+            params.completion(nil)
+            return
         }
     }
 }
