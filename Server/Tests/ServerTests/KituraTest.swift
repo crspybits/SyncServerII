@@ -38,6 +38,7 @@ case header
 
 extension KituraTest {    
     func refreshToken() -> String {
+        // I've put this use of the GoogleRefreshToken here (instead of in Constants) because it's just a part of testing, not part of the full-blown server.
         let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "Server.json", forConfigType: .jsonDictionary)
         
         let refreshToken = try! config.getString(varName: "GoogleRefreshToken")

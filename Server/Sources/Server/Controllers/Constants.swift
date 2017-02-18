@@ -11,6 +11,8 @@ import SMServerLib
 
 // Server-internal constants
 
+// TODO: *0* This should be renamed to something like ServerConfig. They are not exactly "constants".
+
 protocol ConstantsDelegate {
 func configFilePath(forConstants:Constants) -> String
 }
@@ -39,24 +41,30 @@ class Constants {
     var googleClientSecret:String = ""
     var maxNumberDeviceUUIDPerUser:Int?
 
-    static var session = Constants()
+    static var session:Constants!
 
     // If there is a delegate, then use this to get the config file path. This is purely a hack for testing-- because I've not been able to get access to the Server.config file otherwise.
     static var delegate:ConstantsDelegate?
     
-    fileprivate init() {
+    class func setup(configFileName:String) {
+        session = Constants(configFileName:configFileName)
+    }
+    
+    fileprivate init(configFileName:String) {
+        print("loading config file: \(configFileName)")
+
         var config:ConfigLoader
         
         if Constants.delegate == nil {
 #if os(macOS)
-            config = try! ConfigLoader(fileNameInBundle: Constants.serverConfigFile, forConfigType: .jsonDictionary)
+            config = try! ConfigLoader(fileNameInBundle: configFileName, forConfigType: .jsonDictionary)
 #else
-            config = try! ConfigLoader(usingPath: Constants.serverConfigFilePathOnLinux, andFileName: Constants.serverConfigFile, forConfigType: .jsonDictionary)
+            config = try! ConfigLoader(usingPath: Constants.serverConfigFilePathOnLinux, andFileName: configFileName, forConfigType: .jsonDictionary)
 #endif
         }
         else {
             let path = Constants.delegate!.configFilePath(forConstants: self)
-            config = try! ConfigLoader(usingPath: path, andFileName: Constants.serverConfigFile, forConfigType: .jsonDictionary)
+            config = try! ConfigLoader(usingPath: path, andFileName: configFileName, forConfigType: .jsonDictionary)
         }
         
         googleClientId = try! config.getString(varName: "GoogleServerClientId")
@@ -66,7 +74,7 @@ class Constants {
         db.user = try! config.getString(varName: "mySQL.user")
         db.password = try! config.getString(varName: "mySQL.password")
         db.database = try! config.getString(varName: "mySQL.database")
-        
+                
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
         print("maxNumberDeviceUUIDPerUser: \(maxNumberDeviceUUIDPerUser)")
     }

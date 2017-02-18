@@ -83,7 +83,7 @@ class UserController : ControllerProtocol {
             return
         }
         
-        if !params.repos.masterVersion.upsert(userId:userId!) {
+        if !params.repos.masterVersion.initialize(userId:userId!) {
             Log.error(message: "Failed on creating MasterVersion record for user!")
             params.completion(nil)
             return

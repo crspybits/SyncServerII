@@ -125,15 +125,8 @@ public class ServerAPI {
     public func fileIndex(completion:((_ fileIndex: [FileInfo]?, _ masterVersion:MasterVersionInt?, Error?)->(Void))?) {
     
         let endpoint = ServerEndpoints.fileIndex
-        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
-        let params = [FileIndexRequest.deviceUUIDKey : deviceUUID]
         
-        guard let fileIndexRequest = FileIndexRequest(json: params) else {
-            completion?(nil, nil, FileIndexError.couldNotCreateFileIndexRequest);
-            return;
-        }
-        
-        let url = URL(string: baseURL + endpoint.path + "/?" + fileIndexRequest.urlParameters()!)!
+        let url = URL(string: baseURL + endpoint.path)!
         
         ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
@@ -176,15 +169,12 @@ public class ServerAPI {
     public func uploadFile(file:File, serverMasterVersion:MasterVersionInt, completion:((UploadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadFile
 
-        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
-
         Log.special("file.fileUUID: \(file.fileUUID)")
         
         let params:[String : Any] = [
             UploadFileRequest.fileUUIDKey: file.fileUUID,
             UploadFileRequest.mimeTypeKey: file.mimeType,
             UploadFileRequest.cloudFolderNameKey: file.cloudFolderName,
-            UploadFileRequest.deviceUUIDKey: deviceUUID,
             UploadFileRequest.appMetaDataKey: file.appMetaData,
             UploadFileRequest.fileVersionKey: file.fileVersion,
             UploadFileRequest.masterVersionKey: serverMasterVersion
@@ -242,7 +232,6 @@ public class ServerAPI {
         let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
 
         var params = [String : Any]()
-        params[DoneUploadsRequest.deviceUUIDKey] = deviceUUID
         params[DoneUploadsRequest.masterVersionKey] = serverMasterVersion
         
 #if DEBUG
@@ -305,7 +294,6 @@ public class ServerAPI {
         let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
 
         var params = [String : Any]()
-        params[DownloadFileRequest.deviceUUIDKey] = deviceUUID
         params[DownloadFileRequest.masterVersionKey] = serverMasterVersion
         params[DownloadFileRequest.fileUUIDKey] = file.fileUUID
         params[DownloadFileRequest.cloudFolderNameKey] = file.cloudFolderName
@@ -395,6 +383,15 @@ public class ServerAPI {
 
 extension ServerAPI : ServerNetworkingAuthentication {
     func headerAuthentication(forServerNetworking: ServerNetworking) -> [String:String]? {
-        return self.authTokens
+        var result = [String:String]()
+        if self.authTokens != nil {
+            for (key, value) in self.authTokens! {
+                result[key] = value
+            }
+        }
+        
+        result[ServerConstants.httpRequestDeviceUUID] = self.delegate.deviceUUID(forServerAPI: self).uuidString
+        
+        return result
     }
 }

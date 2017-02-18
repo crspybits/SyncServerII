@@ -51,7 +51,9 @@ extension ViewController : SignInDelegate {
     func signIntoServer(creds:GoogleSignInCreds, completion:@escaping (Error?) ->()) {
         Log.msg("Google access token: \(creds.accessToken)")
         
+        ServerAPI.session.delegate = self
         ServerAPI.session.creds = creds
+        
         ServerAPI.session.checkCreds { (success, error) in
             if success != nil && success! {
                 Log.msg("ServerAPI.session.checkCreds: Succesfully signed in.")
@@ -70,5 +72,18 @@ extension ViewController : SignInDelegate {
             }
         }
     }
+}
+
+// TODO: *2* Need to return actual device UUID
+extension ViewController : ServerAPIDelegate {
+    func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
+        return Foundation.UUID()
+    }
+    
+#if DEBUG
+    func doneUploadsRequestTestLockSync() -> TimeInterval? {
+        return nil
+    }
+#endif
 }
 

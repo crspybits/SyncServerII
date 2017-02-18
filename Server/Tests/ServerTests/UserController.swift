@@ -19,6 +19,8 @@ class UserControllerTests: ServerTestCase {
         _ = UserRepository(db).create()
         _ = DeviceUUIDRepository(db).remove()
         _ = DeviceUUIDRepository(db).create()
+        _ = MasterVersionRepository(db).remove()
+        _ = MasterVersionRepository(db).create()
     }
     
     func testAddUserSucceedsWhenAddingNewUser() {

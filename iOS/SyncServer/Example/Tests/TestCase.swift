@@ -178,7 +178,14 @@ class TestCase: XCTestCase {
 
 extension TestCase : ServerNetworkingAuthentication {
     func headerAuthentication(forServerNetworking: ServerNetworking) -> [String:String]? {
-        return self.authTokens
+        var result = [String:String]()
+        for (key, value) in self.authTokens {
+            result[key] = value
+        }
+        
+        result[ServerConstants.httpRequestDeviceUUID] = self.deviceUUID.uuidString
+        
+        return result
     }
 }
 

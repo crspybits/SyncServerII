@@ -25,16 +25,19 @@ phase = target.new_copy_files_build_phase()
 # Contrary to the docs (see http://www.rubydoc.info/github/CocoaPods/Xcodeproj/Xcodeproj/Project/Object/PBXCopyFilesBuildPhase) I believe this is not a path, but rather a code, e.g., 16 indicates to copy the file to the Products Directory.
 phase.dst_subfolder_spec = "16"
 
-fileRef = project.new(Xcodeproj::Project::Object::PBXFileReference)
-fileRef.path = 'Server.json'
+fileRef1 = project.new(Xcodeproj::Project::Object::PBXFileReference)
+fileRef1.path = 'Server.json'
+phase.add_file_reference(fileRef1)	
 
-phase.add_file_reference(fileRef)	
+fileRef2 = project.new(Xcodeproj::Project::Object::PBXFileReference)
+fileRef2.path = 'ServerTests.json'
+phase.add_file_reference(fileRef2)	
 
 # 2) Add in script phase for testing target-- because I haven't figured out to get access to the Products directory at test-run time.
 target = project.targets.select { |target| target.name == 'ServerTests' }.first
 puts "Add Script Phase to #{target}"
 phase = target.new_shell_script_build_phase()
-phase.shell_script = "cp Server.json /tmp; cp Resources/Cat.jpg /tmp"
+phase.shell_script = "cp Server.json /tmp; cp ServerTests.json /tmp; cp Resources/Cat.jpg /tmp"
 
 # 3) Add in DEBUG and SERVER flags
 	

@@ -312,7 +312,7 @@ private class RequestHandler {
                 return true
             }
             else {
-                let key = DeviceUUIDRepository.LookupKey.userId(currentSignedInUser!.userId)
+                let key = DeviceUUIDRepository.LookupKey.deviceUUID(self.deviceUUID!)
                 let result = repositories.deviceUUID.lookup(key: key, modelInit: DeviceUUID.init)
                 switch result {
                 case .error(let error):
@@ -326,7 +326,12 @@ private class RequestHandler {
                     let newDeviceUUID = DeviceUUID(userId: currentSignedInUser!.userId, deviceUUID: self.deviceUUID!)
                     let addResult = repositories.deviceUUID.add(deviceUUID: newDeviceUUID)
                     switch addResult {
-                    case .error(_), .exceededMaximumUUIDsPerUser:
+                    case .error(let error):
+                        failWithError(message: "Error adding new device UUID: \(error)")
+                        return false
+                        
+                    case .exceededMaximumUUIDsPerUser:
+                        failWithError(message: "Exceeded maximum UUIDs per user: \(repositories.deviceUUID.maximumNumberOfDeviceUUIDsPerUser)")
                         return false
                         
                     case .success:

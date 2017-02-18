@@ -19,6 +19,7 @@ class ServerTestCase : XCTestCase {
     override func setUp() {
         super.setUp()
         Constants.delegate = self
+        Constants.setup(configFileName: "ServerTests.json")
         self.db = Database()
     }
     

@@ -32,25 +32,62 @@ class FileController : ControllerProtocol {
     init() {
     }
     
-    private func getMasterVersion(params:RequestProcessingParameters, completion:@escaping (ResponseMessage?)->(), carryOn:(_ masterVersion:MasterVersionInt)->()) {
-        var errorMessage:String?
+    enum UpdateMasterVersionResult : Error {
+    case success
+    case error(String)
+    case masterVersionUpdate(MasterVersionInt)
+    }
+    
+    private func updateMasterVersion(currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters, completion:(UpdateMasterVersionResult)->()) {
 
-        let result = params.repos.masterVersion.lookup(key: .userId(params.currentSignedInUser!.userId), modelInit: MasterVersion.init)
+        let currentMasterVersionObj = MasterVersion()
+        currentMasterVersionObj.userId = params.currentSignedInUser!.userId
+        currentMasterVersionObj.masterVersion = currentMasterVersion
+        let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
+        
+        switch updateMasterVersionResult {
+        case .success:
+            completion(UpdateMasterVersionResult.success)
+            
+        case .error(let error):
+            let message = "Failed lookup in MasterVersionRepository: \(error)"
+            Log.error(message: message)
+            completion(UpdateMasterVersionResult.error(message))
+            
+        case .didNotMatchCurrentMasterVersion:
+            getMasterVersion(params: params) { (error, masterVersion) in
+                if error == nil {
+                    completion(UpdateMasterVersionResult.masterVersionUpdate(masterVersion!))
+                }
+                else {
+                    completion(UpdateMasterVersionResult.error("\(error!)"))
+                }
+            }
+        }
+    }
+    
+    enum GetMasterVersionError : Error {
+    case error(String)
+    case noObjectFound
+    }
+    
+    private func getMasterVersion(params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
+        let key = MasterVersionRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
+        
         switch result {
         case .error(let error):
-            errorMessage = "Failed lookup in MasterVersionRepository: \(error)"
+            completion(GetMasterVersionError.error(error), nil)
             
-        case .found(let object):
-            let masterVersionObj = object as! MasterVersion
-            carryOn(masterVersionObj.masterVersion)
-            return
+        case .found(let model):
+            let masterVersionObj = model as! MasterVersion
+            completion(nil, masterVersionObj.masterVersion)
             
         case .noObjectFound:
-            errorMessage = "Could not find MasterVersion"
+            let errorMessage = "Master version record not found for userId: \(params.currentSignedInUser!.userId)"
+            Log.error(message: errorMessage)
+            completion(GetMasterVersionError.noObjectFound, nil)
         }
-
-        Log.error(message: errorMessage!)
-        completion(nil)
     }
     
     func upload(params:RequestProcessingParameters) {
@@ -61,9 +98,14 @@ class FileController : ControllerProtocol {
             return
         }
         
-        getMasterVersion(params:params, completion: params.completion) { masterVersion in
-            // Verify that uploadRequest.masterVersion is still the same as that stored in the database for this user. If not, inform the caller.
-            if masterVersion != Int64(uploadRequest.masterVersion) {
+        getMasterVersion(params: params) { error, masterVersion in
+            if error != nil {
+                Log.error(message: "Error: \(error)")
+                params.completion(nil)
+                return
+            }
+
+            if masterVersion != uploadRequest.masterVersion {
                 let response = UploadFileResponse()!
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
@@ -106,20 +148,20 @@ class FileController : ControllerProtocol {
                             params.completion(response)
                         }
                         else {
-                            // TODO: *1* Need to remove the entry from the Upload repo. And remove the file from the cloud server.
+                            // TODO: *0* Need to remove the entry from the Upload repo. And remove the file from the cloud server.
                             Log.error(message: "Could not update UploadRepository: \(error)")
                             params.completion(nil)
                         }
                     }
                     else {
-                        // TODO: *1* Need to remove the entry from the Upload repo. And could be useful to remove the file from the cloud server. It might be there.
+                        // TODO: *0* Need to remove the entry from the Upload repo. And could be useful to remove the file from the cloud server. It might be there.
                         Log.error(message: "Could not uploadSmallFile: error: \(error)")
                         params.completion(nil)
                     }
                 }
             }
             else {
-                // TODO: *1* It could be useful to attempt to remove the entry from the Upload repo. Just in case it's actually there.
+                // TODO: *0* It could be useful to attempt to remove the entry from the Upload repo. Just in case it's actually there.
                 Log.error(message: "Could not add to UploadRepository")
                 params.completion(nil)
             }
@@ -163,27 +205,27 @@ class FileController : ControllerProtocol {
         
         var response:DoneUploadsResponse?
         
-        getMasterVersion(params:params, completion: { response in
-            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-            params.completion(nil)
-        },
-        carryOn: { masterVersion in
-            if masterVersion != Int64(doneUploadsRequest.masterVersion) {
+        updateMasterVersion(currentMasterVersion: doneUploadsRequest.masterVersion, params: params) { result in
+
+            switch result {
+            case .success:
+                break
+                
+            case .masterVersionUpdate(let updatedMasterVersion):
                 _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
                 
                 // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
 
                 response = DoneUploadsResponse()
-                response!.masterVersionUpdate = masterVersion
+                response!.masterVersionUpdate = updatedMasterVersion
                 params.completion(response)
                 return
-            }
-
-            // We've got the lock. Update the master version-- will help other devices avoid further uploading.
-            if !params.repos.masterVersion.upsert(userId: params.currentSignedInUser!.userId) {
+                
+            case .error(let error):
                 _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-                Log.error(message: "Failed updating master version!")
-                params.completion(response)
+                Log.error(message: "Failed on updateMasterVersion: \(error)")
+
+                params.completion(nil)
                 return
             }
             
@@ -209,12 +251,14 @@ class FileController : ControllerProtocol {
             switch params.repos.upload.remove(key: filesForUserDevice) {
             case .removed(let numberRows):
                 if numberRows != numberTransferred {
+                    _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
                     Log.error(message: "Number rows removed from Upload was \(numberRows) but should have been \(numberTransferred)!")
                     params.completion(nil)
                     return
                 }
                 
             case .error(_):
+                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
                 Log.error(message: "Failed removing rows from Upload!")
                 params.completion(nil)
                 return
@@ -227,7 +271,7 @@ class FileController : ControllerProtocol {
             response!.numberUploadsTransferred = numberTransferred
             Log.debug(message: "doneUploads.numberUploadsTransferred: \(numberTransferred)")
             params.completion(response)
-        })
+        }
     }
     
     func fileIndex(params:RequestProcessingParameters) {
@@ -256,11 +300,14 @@ class FileController : ControllerProtocol {
             return
         }
         
-        getMasterVersion(params:params, completion: { response in
-            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-            params.completion(nil)
-        },
-        carryOn: { masterVersion in
+        
+        getMasterVersion(params: params) { (error, masterVersion) in
+            if error != nil {
+                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+                params.completion(nil)
+                return
+            }
+            
             let fileIndexResult = params.repos.fileIndex.fileIndex(forUserId: params.currentSignedInUser!.userId)
             _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
 
@@ -276,7 +323,7 @@ class FileController : ControllerProtocol {
                 params.completion(nil)
                 return
             }
-        })
+        }
     }
     
     func downloadFile(params:RequestProcessingParameters) {
@@ -286,9 +333,13 @@ class FileController : ControllerProtocol {
             return
         }
 
-        getMasterVersion(params:params, completion: params.completion) { masterVersion in
-            // Verify that downloadRequest.masterVersion is still the same as that stored in the database for this user. If not, inform the caller.
-            if masterVersion != Int64(downloadRequest.masterVersion) {
+        getMasterVersion(params: params) { (error, masterVersion) in
+            if error != nil {
+                params.completion(nil)
+                return
+            }
+
+            if masterVersion != downloadRequest.masterVersion {
                 let response = DownloadFileResponse()!
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)

@@ -23,6 +23,10 @@ public class ServerMain {
     }
     
     public class func startup(type:ServerStartup = .blocking) {
+        if type == .blocking {
+            Constants.setup(configFileName: Constants.serverConfigFile)
+        }
+        
         Log.logger = HeliumLogger()
         
         if !Controllers.setup() {

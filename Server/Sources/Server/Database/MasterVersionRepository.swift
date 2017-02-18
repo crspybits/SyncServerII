@@ -58,20 +58,44 @@ class MasterVersionRepository : Repository {
         }
     }
 
-    // For a new record, gives the version: initialMasterVersion
-    // For existing records, adds 1 to the version.
-    func upsert(userId:UserId) -> Bool {
+    func initialize(userId:UserId) -> Bool {
         let query = "INSERT INTO \(tableName) (userId, masterVersion) " +
-            "VALUES(\(userId), \(initialMasterVersion)) " +
-            "ON DUPLICATE KEY UPDATE masterVersion = masterVersion + 1 "
+            "VALUES(\(userId), \(initialMasterVersion)) "
         
         if db.connection.query(statement: query) {
             return true
         }
         else {
             let error = db.error
-            Log.error(message: "Could not upsert MasterVersion: \(error)")
+            Log.error(message: "Could not initialize MasterVersion: \(error)")
             return false
+        }
+    }
+    
+    enum UpdateToNextResult {
+    case error(String)
+    case didNotMatchCurrentMasterVersion
+    case success
+    }
+    
+    func updateToNext(current:MasterVersion) -> UpdateToNextResult {
+    
+        let query = "UPDATE \(tableName) SET masterVersion = masterVersion + 1 " +
+            "WHERE userId = \(current.userId!) and " +
+            "masterVersion = \(current.masterVersion!)"
+        
+        if db.connection.query(statement: query) {
+            if db.connection.numberAffectedRows() == 1 {
+                return UpdateToNextResult.success
+            }
+            else {
+                return UpdateToNextResult.didNotMatchCurrentMasterVersion
+            }
+        }
+        else {
+            let message = "Could not updateToNext MasterVersion: \(db.error)"
+            Log.error(message: message)
+            return UpdateToNextResult.error(message)
         }
     }
 }

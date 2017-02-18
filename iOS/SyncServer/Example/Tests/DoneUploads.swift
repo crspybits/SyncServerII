@@ -109,7 +109,7 @@ class ServerAPI_DoneUploads: TestCase {
                     XCTFail()
                 }
                 
-                Log.special("Finished doneUploads2")
+                Log.special("Finished doneUploads2: \(doneUploadsResult)")
                 
                 XCTAssert(doneRequest1)
                 expectation2.fulfill()

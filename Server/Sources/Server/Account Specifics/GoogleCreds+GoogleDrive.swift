@@ -311,6 +311,7 @@ extension GoogleCreds {
     case fileAlreadyExists
     }
     
+    // TODO: *1* It would be good to put some retry logic in here. With a timed fallback as well. e.g., if an upload fails the first time around, retry after a period of time. OR, do this when I generalize this scheme to use other cloud storage services-- thus the retry logic could work across each scheme.
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
     func uploadSmallFile(deviceUUID:String, request:UploadFileRequest,
         completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
@@ -336,6 +337,7 @@ extension GoogleCreds {
                     }
                 }
                 else {
+                    Log.error(message: "Error in searchFor: \(error)")
                     completion(nil, error)
                 }
             }
@@ -379,6 +381,7 @@ extension GoogleCreds {
             var resultError:Swift.Error?
 
             if statusCode != HTTPStatusCode.OK {
+                Log.error(message: "Error in completeSmallFileUpload: statusCode=\(statusCode)")
                 resultError = UploadError.badStatusCode(statusCode)
                 completion(nil, resultError)
             }
@@ -396,6 +399,7 @@ extension GoogleCreds {
                         }
                     }
                     else {
+                        Log.error(message: "Error in completeSmallFileUpload.searchFor: statusCode=\(error)")
                         completion(nil, error)
                     }
                 }

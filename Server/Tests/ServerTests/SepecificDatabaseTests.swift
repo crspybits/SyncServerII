@@ -209,21 +209,48 @@ class SepecificDatabaseTests: ServerTestCase {
     
     let userId:UserId = 1
 
-    func doUpsertMasterVersion() {
-        if !MasterVersionRepository(db).upsert(userId:userId) {
-            XCTFail()
+    func doUpdateToNextMasterVersion(currentMasterVersion:MasterVersionInt, expectedError: Bool = false) {
+        
+        let current = MasterVersion()
+        current.userId = userId
+        current.masterVersion = currentMasterVersion
+        
+        let result = MasterVersionRepository(db).updateToNext(current: current)
+        
+        if case .success = result {
+            if expectedError {
+                XCTFail()
+            }
+            else {
+                XCTAssert(true)
+            }
+        }
+        else {
+            if expectedError {
+                XCTAssert(true)
+            }
+            else {
+                XCTFail()
+            }
         }
     }
     
-    func testAddMasterVersion() {
-        doUpsertMasterVersion()
-        checkMasterVersion(userId: userId, version: 0)
+    func testUpdateToNextMasterVersion() {
+        XCTAssert(MasterVersionRepository(db).initialize(userId: userId))
+        doUpdateToNextMasterVersion(currentMasterVersion: 0)
+        checkMasterVersion(userId: userId, version: 1)
+    }
+
+    func testUpdateToNextTwiceMasterVersion() {
+        XCTAssert(MasterVersionRepository(db).initialize(userId: userId))
+        doUpdateToNextMasterVersion(currentMasterVersion: 0)
+        doUpdateToNextMasterVersion(currentMasterVersion: 1)
+        checkMasterVersion(userId: userId, version: 2)
     }
     
-    func testUpdateMasterVersion() {
-        doUpsertMasterVersion()
-        doUpsertMasterVersion()
-        checkMasterVersion(userId: userId, version: 1)
+    func testUpdateToNextFailsWithWrongExpectedMasterVersion() {
+        XCTAssert(MasterVersionRepository(db).initialize(userId: userId))
+        doUpdateToNextMasterVersion(currentMasterVersion: 1, expectedError: true)
     }
     
     func lockIt(lock:Lock, removeStale:Bool = true) -> Bool {
