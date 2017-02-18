@@ -179,7 +179,6 @@ class FileController : ControllerProtocol {
         let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
-            Log.info(message: "Sucessfully obtained lock!!")
             break
         
         // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
@@ -286,7 +285,6 @@ class FileController : ControllerProtocol {
         let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
-            Log.info(message: "Sucessfully obtained lock!!")
             break
 
         case .lockAlreadyHeld:
@@ -428,7 +426,6 @@ class FileController : ControllerProtocol {
         let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
-            Log.info(message: "Sucessfully obtained lock!!")
             break
 
         case .lockAlreadyHeld:

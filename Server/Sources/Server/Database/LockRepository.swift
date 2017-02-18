@@ -112,6 +112,7 @@ class LockRepository : Repository {
         let query = "INSERT INTO \(tableName) (userId, deviceUUID, expiry) VALUES(\(lock.userId!), '\(lock.deviceUUID!)', '\(expiry)');"
         
         if db.connection.query(statement: query) {
+            Log.info(message: "Sucessfully obtained lock!!")
             return .success
         }
         else if db.connection.errorCode() == Database.duplicateEntryForKey {
@@ -138,7 +139,7 @@ class LockRepository : Repository {
         
         if db.connection.query(statement: query) {
             let numberLocksRemoved = Int(db.connection.numberAffectedRows())
-            Log.info(message: "Number of locks removed: \(numberLocksRemoved)")
+            Log.info(message: "Number of stale locks removed: \(numberLocksRemoved)")
             return numberLocksRemoved
         }
         else {
@@ -152,6 +153,7 @@ class LockRepository : Repository {
         let query = "DELETE FROM \(tableName) WHERE userId = \(userId)"
         
         if db.connection.query(statement: query) {
+            Log.info(message: "Sucessfully released lock!!")
             return true
         }
         else {

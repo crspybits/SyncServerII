@@ -39,7 +39,6 @@
 		1CAD2D19B6043B494770E9DC585D276D /* GTMMIMEDocument.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B34CF8BC7CB24DE383A4BD1E865ACB3 /* GTMMIMEDocument.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1CF2EB638DD4C754EC910219B5697C2E /* SMImageTextView+JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99E2EF38E9E645BB5FC6CF00C70F66C /* SMImageTextView+JSON.swift */; };
 		1D2A26E5C7B9418C35ED225FF6483838 /* Reachability.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C8577CC4FDEB27A6D433B3896A43C1F /* Reachability.framework */; };
-		1D7BC7A3D3D4ED873CB025538A0795EB /* fileindex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B96D97DF320B6277AD17CFEC359F7A /* fileindex.swift */; };
 		1E2A6D057E20BE8F5ED3E594F7B8C286 /* AFNetworking-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 1FAD30D2D8195632D9AF82667D8D710F /* AFNetworking-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1E9A9911B932A29A3C05C5300375F891 /* SMUIMessages.m in Sources */ = {isa = PBXBuildFile; fileRef = 500BB1D134953A378B322BC45D8A213C /* SMUIMessages.m */; };
 		1EE4BBFE7FEF56128DA77EEA4FE00380 /* SMEdgeInsetLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F2960FE8071A4E8A6A52CA217C00C73 /* SMEdgeInsetLabel.m */; };
@@ -176,6 +175,9 @@
 		83F37A321E51156600479175 /* DownloadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A311E51156600479175 /* DownloadFile.swift */; };
 		83F37A341E51321200479175 /* FilesMisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A331E51321200479175 /* FilesMisc.swift */; };
 		83F37A361E51326500479175 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A351E51326500479175 /* Constants.swift */; };
+		83F55F831E58D5F600759578 /* GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F821E58D5F600759578 /* GetUploads.swift */; };
+		83F55F851E58D6BC00759578 /* FileIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F841E58D6BC00759578 /* FileIndex.swift */; };
+		83F55F871E58D6F900759578 /* FileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F861E58D6F900759578 /* FileInfo.swift */; };
 		8658F3349A081CDEA084C17ECCA83A2E /* NSDate+Extras.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A641AE8BF5DE01737FC75D1F4E6F7A6 /* NSDate+Extras.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		86622496748D10211D7C42D4A3E25C57 /* BaseDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555AC7EB146C555A017529F46062973C /* BaseDestination.swift */; };
 		86EC080613D0AA3D5F9E8F1BB9E7B74C /* ServerConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00BF941215973D2EC492AC3641A808E6 /* ServerConstants.swift */; };
@@ -683,6 +685,9 @@
 		83F37A311E51156600479175 /* DownloadFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadFile.swift; sourceTree = "<group>"; };
 		83F37A331E51321200479175 /* FilesMisc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilesMisc.swift; sourceTree = "<group>"; };
 		83F37A351E51326500479175 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		83F55F821E58D5F600759578 /* GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUploads.swift; sourceTree = "<group>"; };
+		83F55F841E58D6BC00759578 /* FileIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileIndex.swift; sourceTree = "<group>"; };
+		83F55F861E58D6F900759578 /* FileInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileInfo.swift; sourceTree = "<group>"; };
 		83FBA8DE39D6AF2C31A0B2CF3A84EC7F /* HPTextViewTapGestureRecognizer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = HPTextViewTapGestureRecognizer.h; path = HPTextViewTapGestureRecognizer/HPTextViewTapGestureRecognizer.h; sourceTree = "<group>"; };
 		8439C8CB215873110393A76C3402D26E /* LazyFrame.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LazyFrame.m; path = SMCoreLib/Classes/Mutables/v1/LazyFrame.m; sourceTree = "<group>"; };
 		84D3F26252760A64864DEAC9D31763F6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -692,7 +697,6 @@
 		855724B187021548CE9C2BE28E5B7BE8 /* HPTextViewTapGestureRecognizer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = HPTextViewTapGestureRecognizer.m; path = HPTextViewTapGestureRecognizer/HPTextViewTapGestureRecognizer.m; sourceTree = "<group>"; };
 		857518AD80FCD7092F101FD780E707C9 /* GTMOAuth2Authentication.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GTMOAuth2Authentication.h; path = Source/GTMOAuth2Authentication.h; sourceTree = "<group>"; };
 		8575357A8923D7177E1E50445CCF8EC1 /* UIImage+RoundedCorner.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+RoundedCorner.m"; path = "SMCoreLib/Classes/Categories/UIImage+RoundedCorner.m"; sourceTree = "<group>"; };
-		85B96D97DF320B6277AD17CFEC359F7A /* fileindex.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = fileindex.swift; sourceTree = "<group>"; };
 		86142A5E4412F1AC34589EC8F0AA2ADB /* AFSecurityPolicy.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = AFSecurityPolicy.h; path = AFNetworking/AFSecurityPolicy.h; sourceTree = "<group>"; };
 		875D729C6A26110A3009174331AFCEF7 /* NominalTypeDescriptor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NominalTypeDescriptor.swift; path = Sources/Reflection/NominalTypeDescriptor.swift; sourceTree = "<group>"; };
 		88150B1F609B0D47FDF3A43F7B966CD3 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1465,9 +1469,11 @@
 		910742535AE56B1013D214C4A0940394 /* LinkedFromServer */ = {
 			isa = PBXGroup;
 			children = (
+				83F55F861E58D6F900759578 /* FileInfo.swift */,
+				83F55F841E58D6BC00759578 /* FileIndex.swift */,
+				83F55F821E58D5F600759578 /* GetUploads.swift */,
 				83F37A311E51156600479175 /* DownloadFile.swift */,
 				66CCB02C98BFE3E3BFBE7A86B63CAD2F /* DoneUploads.swift */,
-				85B96D97DF320B6277AD17CFEC359F7A /* fileindex.swift */,
 				9B280450DB8A1809FCE3DC3CBF5DAD75 /* Filenaming.swift */,
 				E27E90D36D82C0D8D38E8018DC418CED /* RequestMessage.swift */,
 				970D9A9C17A61F7590960A292576D43D /* ResponseMessage.swift */,
@@ -2595,7 +2601,9 @@
 			files = (
 				83F37A321E51156600479175 /* DownloadFile.swift in Sources */,
 				13C806879B24AFCB799B0BD97FB19D1D /* DoneUploads.swift in Sources */,
-				1D7BC7A3D3D4ED873CB025538A0795EB /* fileindex.swift in Sources */,
+				83F55F851E58D6BC00759578 /* FileIndex.swift in Sources */,
+				83F55F871E58D6F900759578 /* FileInfo.swift in Sources */,
+				83F55F831E58D5F600759578 /* GetUploads.swift in Sources */,
 				83F37A341E51321200479175 /* FilesMisc.swift in Sources */,
 				321600038E13D530E84B41AE2BE5C5C7 /* Filenaming.swift in Sources */,
 				83F37A361E51326500479175 /* Constants.swift in Sources */,

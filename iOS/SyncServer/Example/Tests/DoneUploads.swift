@@ -27,11 +27,17 @@ class ServerAPI_DoneUploads: TestCase {
         
         let fileSize = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion)
         
+        getUploads(expectedFiles: [
+            (fileUUID: fileUUID, fileSize: fileSize!)
+        ])
+        
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
         
         getFileIndex(expectedFiles: [
             (fileUUID: fileUUID, fileSize: fileSize!)
         ])
+        
+        getUploads(expectedFiles: [])
     }
     
     func testDoneUploadsWorksWithTwoFiles() {
@@ -42,6 +48,11 @@ class ServerAPI_DoneUploads: TestCase {
 
         let fileSize1 = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion)
         let fileSize2 = uploadFile(fileName: "Cat", fileExtension: "jpg", mimeType: "image/jpeg", fileUUID: fileUUID2, serverMasterVersion: masterVersion)
+
+        getUploads(expectedFiles: [
+            (fileUUID: fileUUID1, fileSize: fileSize1!),
+            (fileUUID: fileUUID2, fileSize: fileSize2!)
+        ])
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
         
@@ -49,6 +60,8 @@ class ServerAPI_DoneUploads: TestCase {
             (fileUUID: fileUUID1, fileSize: fileSize1!),
             (fileUUID: fileUUID2, fileSize: fileSize2!)
         ])
+        
+        getUploads(expectedFiles: [])
     }
     
     func testDoneUploadsConflict() {

@@ -45,13 +45,13 @@ extension Repository {
         let query = "delete from \(tableName) where " + lookupConstraint(key: key)
         
         if db.connection.query(statement: query) {
-            Log.info(message: "Successfully removed row(s): \(key)")
+            Log.info(message: "Successfully removed row(s) from \(tableName): \(key)")
             return .removed(
                 numberRows:Int32(db.connection.numberAffectedRows()))
         }
         else {
             let error = db.error
-            Log.error(message: "Could not remove rows: \(error)")
+            Log.error(message: "Could not remove rows from \(tableName): \(error)")
             return .error("\(error)")
         }
     }

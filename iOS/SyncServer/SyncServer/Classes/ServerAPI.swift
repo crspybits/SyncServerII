@@ -379,6 +379,34 @@ public class ServerAPI {
         
         return jsonDict
     }
+    
+    public enum GetUploadsError : Error {
+    case getUploadsResponseConversionError
+    case couldNotCreateFileIndexRequest
+    }
+        
+    public func getUploads(completion:((_ fileIndex: [FileInfo]?, Error?)->(Void))?) {
+    
+        let endpoint = ServerEndpoints.getUploads
+        
+        let url = URL(string: baseURL + endpoint.path)!
+        
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+            let resultError = self.checkForError(statusCode: httpStatus, error: error)
+            
+            if resultError == nil {
+                if let getUploadsResponse = GetUploadsResponse(json: response!) {
+                    completion?(getUploadsResponse.uploads, nil)
+                }
+                else {
+                    completion?(nil, GetUploadsError.getUploadsResponseConversionError)
+                }
+            }
+            else {
+                completion?(nil, resultError)
+            }
+        }
+    }
 }
 
 extension ServerAPI : ServerNetworkingAuthentication {

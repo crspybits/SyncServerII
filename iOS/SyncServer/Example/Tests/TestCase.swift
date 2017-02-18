@@ -88,6 +88,29 @@ class TestCase: XCTestCase {
         waitForExpectations(timeout: 10.0, handler: nil)
     }
     
+    func getUploads(expectedFiles:[(fileUUID:String, fileSize:Int64)]) {
+        let expectation1 = self.expectation(description: "getUploads")
+        
+        ServerAPI.session.getUploads { (uploads, error) in
+            XCTAssert(error == nil)
+            
+            XCTAssert(expectedFiles.count == uploads?.count)
+            
+            for (fileUUID, fileSize) in expectedFiles {
+                let result = uploads?.filter { file in
+                    file.fileUUID == fileUUID
+                }
+                
+                XCTAssert(result!.count == 1)
+                XCTAssert(result![0].fileSizeBytes == fileSize)
+            }
+            
+            expectation1.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
+    
     // Returns the file size uploaded
     func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> Int64? {
     
