@@ -102,50 +102,6 @@ class FileControllerTests: ServerTestCase {
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1)
     }
     
-    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = PerfectLib.UUID().string, masterVersionExpected:Int64, expectedFileSizes: [String: Int64]) {
-    
-        XCTAssert(expectedFiles.count == expectedFileSizes.count)
-        
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            
-            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
-                XCTAssert(dict != nil)
-                
-                if let fileIndexResponse = FileIndexResponse(json: dict!) {
-                    XCTAssert(fileIndexResponse.masterVersion == masterVersionExpected)
-                    XCTAssert(fileIndexResponse.fileIndex!.count == expectedFiles.count)
-                    
-                    _ = fileIndexResponse.fileIndex!.map { fileInfo in
-                        Log.info("fileInfo: \(fileInfo)")
-                        
-                        let filterResult = expectedFiles.filter { uploadFileRequest in
-                            uploadFileRequest.fileUUID == fileInfo.fileUUID
-                        }
-                        
-                        XCTAssert(filterResult.count == 1)
-                        let expectedFile = filterResult[0]
-                        
-                        XCTAssert(expectedFile.appMetaData == fileInfo.appMetaData)
-                        XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
-                        XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
-                        XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
-                        XCTAssert(fileInfo.deleted == false)
-                        
-                        XCTAssert(expectedFileSizes[fileInfo.fileUUID] == fileInfo.fileSizeBytes)
-                    }
-                }
-                else {
-                    XCTFail()
-                }
-                
-                expectation.fulfill()
-            }
-        }
-    }
-    
     func testFileIndexWithNoFiles() {
         let deviceUUID = PerfectLib.UUID().string
 
@@ -196,8 +152,7 @@ class FileControllerTests: ServerTestCase {
             let downloadFileRequest = DownloadFileRequest(json: [
                 DownloadFileRequest.fileUUIDKey: uploadRequest.fileUUID,
                 DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadFileRequest.fileVersionKey : downloadFileVersion,
-                DownloadFileRequest.cloudFolderNameKey : self.testFolder
+                DownloadFileRequest.fileVersionKey : downloadFileVersion
             ])
             
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
@@ -247,5 +202,7 @@ class FileControllerTests: ServerTestCase {
     func testDownloadFileTextWithDifferentDownloadVersion() {
         downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
     }
+    
+    // TODO: *0* Make sure its an error for a different user to download our file even if they have the fileUUID and fileVersion.
 }
 

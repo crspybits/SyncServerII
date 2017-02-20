@@ -407,11 +407,35 @@ extension GoogleCreds {
         }
     }
     
-    enum DownloadSmallFileError : Swift.Error {
+    enum SearchForFileError : Swift.Error {
     case cloudFolderDoesNotExist
-    case failedInSearchForCloudFile
     case cloudFileDoesNotExist
-    case failedInDownloadingCloudFile
+    }
+    
+    private func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
+        
+        self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in
+            if result == nil {
+                // Folder doesn't exist. Yikes!
+                completion(nil, SearchForFileError.cloudFolderDoesNotExist)
+            }
+            else {
+                // Folder exists. Next need to find the id of our file within this folder.
+                
+                let searchType = SearchType.file(mimeType: mimeType, parentFolderId: result!.itemId)
+                self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
+                    if result == nil {
+                        completion(nil, SearchForFileError.cloudFileDoesNotExist)
+                    }
+                    else {
+                        completion(result!.itemId, nil)
+                    }
+                }
+            }
+        }
+    }
+    
+    enum DownloadSmallFileError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case nilAPIResult
     case noDataInAPIResult
@@ -419,41 +443,16 @@ extension GoogleCreds {
     
     func downloadSmallFile(cloudFolderName:String, cloudFileName:String, mimeType:String,
         completion:@escaping (_ fileData:Data?, Swift.Error?)->()) {
-
-        // Get the folderId for the folder where we're downloading from.
         
-        self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: mimeType) { (cloudFileId, error) in
             if error == nil {
-                if result == nil {
-                    // Folder doesn't exist. Yikes!
-                    completion(nil, DownloadSmallFileError.cloudFolderDoesNotExist)
-                }
-                else {
-                    // Folder exists. Next need to find the id of our file within this folder.
-                    
-                    let searchType = SearchType.file(mimeType: mimeType, parentFolderId: result!.itemId)
-                    self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
-                        if error == nil {
-                            if result == nil {
-                                completion(nil, DownloadSmallFileError.cloudFileDoesNotExist)
-                            }
-                            else {
-                                // File was found! Need to download it now.
-                                
-                                self.completeSmallFileDownload(fileId: result!.itemId) { (data, error) in
-                                    if error == nil {
-                                        completion(data, nil)
-                                    }
-                                    else {
-                                        completion(nil,
-                                            DownloadSmallFileError.failedInDownloadingCloudFile)
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            completion(nil, DownloadSmallFileError.failedInSearchForCloudFile)
-                        }
+                // File was found! Need to download it now.
+                self.completeSmallFileDownload(fileId: cloudFileId!) { (data, error) in
+                    if error == nil {
+                        completion(data, nil)
+                    }
+                    else {
+                        completion(nil, error)
                     }
                 }
             }
@@ -494,6 +493,27 @@ extension GoogleCreds {
             }
             
             completion(data, nil)
+        }
+    }
+    
+    func deleteFile(cloudFolderName:String, cloudFileName:String, mimeType:String,
+        completion:@escaping (Swift.Error?)->()) {
+        
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: mimeType) { (cloudFileId, error) in
+            if error == nil {
+                // File was found! Need to delete it now.
+                self.deleteFile(fileId: cloudFileId!) { error in
+                    if error == nil {
+                        completion(nil)
+                    }
+                    else {
+                        completion(error)
+                    }
+                }
+            }
+            else {
+                completion(error)
+            }
         }
     }
 }

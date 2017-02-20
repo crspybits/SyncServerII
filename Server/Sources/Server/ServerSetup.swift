@@ -70,11 +70,18 @@ private class RequestHandler {
     private var authenticationLevel:AuthenticationLevel!
     private var currentSignedInUser:User?
     private var deviceUUID:String?
+    private var endpoint:ServerEndpoint!
     
-    init(request:RouterRequest, response:RouterResponse, authenticationLevel:AuthenticationLevel = .secondary) {
+    init(request:RouterRequest, response:RouterResponse, endpoint:ServerEndpoint? = nil) {
         self.request = request
         self.response = response
-        self.authenticationLevel = authenticationLevel
+        if endpoint == nil {
+            self.authenticationLevel = .secondary
+        }
+        else {
+            self.authenticationLevel = endpoint!.authenticationLevel
+        }
+        self.endpoint = endpoint
     }
 
     public func failWithError(message:String,
@@ -234,7 +241,31 @@ private class RequestHandler {
                 }
             }
             
-            processRequest(params)
+            if self.endpoint.needsLock {
+                let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
+                switch params.repos.lock.lock(lock: lock) {
+                case .success:
+                    break
+                
+                // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
+                case .lockAlreadyHeld:
+                    self.failWithError(message: "Could not obtain lock!!")
+                    success = false
+                
+                case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+                    self.failWithError(message: "Error obtaining lock!")
+                    success = false
+                }
+            }
+            
+            if success {
+                processRequest(params)
+            }
+            
+            if success && self.endpoint.needsLock {
+                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+            }
+            
             return success
         }
 
@@ -252,12 +283,14 @@ private class RequestHandler {
             }
             
             if dbOperations() {
-                // Already finished the operation. Can't report an error if it happens here.
-                _ = db.commit()
+                if !db.commit() {
+                    Log.error(message: "Erorr during COMMIT operation!")
+                }
             }
             else {
-                // We already had an error. What's the point in checking for an error on the rollback?
-                _ = db.rollback()
+                if !db.rollback() {
+                    Log.error(message: "Erorr during ROLLBACK operation!")
+                }
             }
         }
         
@@ -355,8 +388,7 @@ public class CreateRoutes {
         
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info(message: "parsedURL: \(routerRequest.parsedURL)")
-            
-            let handler = RequestHandler(request: routerRequest, response: routerResponse, authenticationLevel:ep.authenticationLevel)
+            let handler = RequestHandler(request: routerRequest, response: routerResponse, endpoint:ep)
             handler.doRequest(createRequest: createRequest, processRequest: processRequest)
         }
         
@@ -368,6 +400,11 @@ public class CreateRoutes {
             
         case .post:
             self.router.post(ep.path) { routerRequest, routerResponse, _ in
+                handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
+            }
+        
+        case .delete:
+            self.router.delete(ep.path) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         }

@@ -6,6 +6,8 @@
 //
 //
 
+// This tracks an overall version of the fileIndex per userId.
+
 import Foundation
 import PerfectLib
 

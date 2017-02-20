@@ -61,38 +61,35 @@ import PerfectLib
 enum UploadState : String {
 case uploading
 case uploaded
+case toDeleteFromFileIndex
+
+static func maxCharacterLength() -> Int { return 22 }
 }
 
 class Upload : NSObject, Model, Filenaming {
     var uploadId: Int64!
     var fileUUID: String!
     var userId: UserId!
-    var deviceUUID: String!
-    var mimeType: String!
-    var appMetaData: String!
-    var deleted:Bool! = false
-
-    let fileUploadKey = "fileUpload"
-    var fileUpload:Bool!
-    
     var fileVersion: FileVersionInt!
+    var deviceUUID: String!
     
     let stateKey = "state"
     var state:UploadState!
     
+    var appMetaData: String?
+    
     // Making this optional to give flexibility about when we create the Upload entry in the repo (e.g., before or after the upload to cloud storage).
     var fileSizeBytes: Int64?
     
+    // These two are not present in upload deletions.
+    var mimeType: String?
+    var cloudFolderName: String?
+
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
             case stateKey:
                 return {(x:Any) -> Any? in
                     return UploadState(rawValue: x as! String)
-                }
-            
-            case fileUploadKey:
-                return {(x:Any) -> Any? in
-                    return (x as! Int8) == 1
                 }
             
             default:
@@ -112,8 +109,6 @@ class UploadRepository : Repository {
         return "Upload"
     }
     
-    let stateMaxLength = 20
-
     func create() -> Database.TableCreationResult {
         let createColumns =
             "(uploadId BIGINT NOT NULL AUTO_INCREMENT, " +
@@ -125,23 +120,21 @@ class UploadRepository : Repository {
         
             // reference into User table
             "userId BIGINT NOT NULL, " +
-            
-            // TODO: *2* Add `deleted` attribute-- to support upload deletion.
-            
+                
             // identifies a specific mobile device (assigned by app)
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
                 
-            // MIME type of the file
-            "mimeType VARCHAR(\(Database.maxMimeTypeLength)) NOT NULL, " +
+            // MIME type of the file; will be nil for UploadDeletion's.
+            "mimeType VARCHAR(\(Database.maxMimeTypeLength)), " +
+            
+            // Cloud folder name; will be nil for UploadDeletion's.
+            "cloudFolderName VARCHAR(\(Database.maxCloudFolderNameLength)), " +
 
-            // App-specific meta data
+            // Optional app-specific meta data
             "appMetaData TEXT, " +
-
-            // true if file-upload, false if upload-deletion.
-            "fileUpload BOOL NOT NULL, " +
             
             "fileVersion INT NOT NULL, " +
-            "state VARCHAR(\(stateMaxLength)) NOT NULL, " +
+            "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
             // Can be null if we create the Upload entry before actually uploading the file.
             "fileSizeBytes BIGINT, " +
@@ -153,7 +146,25 @@ class UploadRepository : Repository {
     }
     
     private func haveNilField(upload:Upload) -> Bool {
-        return upload.fileUUID == nil || upload.userId == nil || upload.deviceUUID == nil || upload.mimeType == nil || upload.fileUpload == nil || upload.fileVersion == nil || upload.state == nil
+        return upload.fileUUID == nil || upload.userId == nil || upload.fileVersion == nil || upload.state == nil
+    }
+    
+    private func getInsertFieldValueAndName(fieldValue: Any?, fieldName:String, fieldIsString:Bool = true) -> (queryFieldValue:String, queryFieldName:String) {
+        
+        var queryFieldName = ""
+        var queryFieldValue = ""
+        if fieldValue != nil {
+            queryFieldName = ", \(fieldName) "
+
+            if fieldIsString {
+                queryFieldValue = ", '\(fieldValue!)' "
+            }
+            else {
+                queryFieldValue = ", \(fieldValue!) "
+            }
+        }
+        
+        return (queryFieldValue, queryFieldName)
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
@@ -163,25 +174,16 @@ class UploadRepository : Repository {
             return nil
         }
     
-        var appMetaDataFieldName = ""
-        var appMetaDataFieldValue = ""
-        if upload.appMetaData != nil {
-            appMetaDataFieldName = " appMetaData, "
-            
-            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-            appMetaDataFieldValue = ", '\(upload.appMetaData!)'"
-        }
+        // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
+        let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaData, fieldName: "appMetaData")
+
+        let (fileSizeFieldValue, fileSizeFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileSizeBytes, fieldName: "fileSizeBytes", fieldIsString:false)
+ 
+        let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: "mimeType")
         
-        var fileSizeFieldName = ""
-        var fileSizeFieldValue = ""
-        if upload.fileSizeBytes != nil {
-            fileSizeFieldName = ", fileSizeBytes"
-            fileSizeFieldValue = ", \(upload.fileSizeBytes!)"
-        }
+        let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: upload.cloudFolderName, fieldName: "cloudFolderName")
         
-        let fileUploadValue = upload.fileUpload == true ? 1 : 0
-        
-        let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) fileUpload, fileVersion, state \(fileSizeFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.mimeType!)' \(appMetaDataFieldValue), \(fileUploadValue), \(upload.fileVersion!), '\(upload.state!.rawValue)' \(fileSizeFieldValue));"
+        let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, fileVersion, state \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(cloudFolderNameFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', \(upload.fileVersion!), '\(upload.state!.rawValue)' \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(cloudFolderNameFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -200,20 +202,16 @@ class UploadRepository : Repository {
             return false
         }
     
-        var appMetaDataField = ""
-        if upload.appMetaData != nil {
-            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-            appMetaDataField = ", appMetaData='\(upload.appMetaData!)'"
-        }
+        // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
+        let appMetaDataField = getUpdateFieldSetter(fieldValue: upload.appMetaData, fieldName: "appMetaData")
+
+        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: upload.fileSizeBytes, fieldName: "fileSizeBytes", fieldIsString: false)
         
-        var fileSizeBytesField = ""
-        if upload.fileSizeBytes != nil {
-            fileSizeBytesField = ", fileSizeBytes=\(upload.fileSizeBytes!)"
-        }
+        let mimeTypeField = getUpdateFieldSetter(fieldValue: upload.mimeType, fieldName: "mimeType")
         
-        let fileUploadValue = upload.fileUpload == true ? 1 : 0
+        let cloudFolderNameField = getUpdateFieldSetter(fieldValue: upload.cloudFolderName, fieldName: "cloudFolderName")
         
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), deviceUUID='\(upload.deviceUUID!)', mimeType='\(upload.mimeType!)', fileUpload=\(fileUploadValue), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)' \(fileSizeBytesField) \(appMetaDataField) WHERE uploadId=\(upload.uploadId!)"
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(fileSizeBytesField) \(appMetaDataField) \(mimeTypeField) \(cloudFolderNameField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -265,8 +263,14 @@ class UploadRepository : Repository {
         }
     }
     
-    func select(forUserId userId: UserId, deviceUUID:String, andState state:UploadState) -> Select {
-        let query = "select * from \(tableName) where userId=\(userId) and deviceUUID='\(deviceUUID)' and state='\(state.rawValue)'"
+    func select(forUserId userId: UserId, deviceUUID:String, andState state:UploadState? = nil) -> Select {
+    
+        var query = "select * from \(tableName) where userId=\(userId) and deviceUUID='\(deviceUUID)'"
+        
+        if state != nil {
+            query += " and state='\(state!.rawValue)'"
+        }
+        
         return Select(db:db, query: query, modelInit: Upload.init, ignoreErrors:false)
     }
     
@@ -274,9 +278,10 @@ class UploadRepository : Repository {
     case uploads([FileInfo])
     case error(Swift.Error)
     }
-     
-    func uploadedFiles(forUserId userId: UserId, andDeviceUUID deviceUUID: String) -> UploadedFilesResult {
-        let selectUploadedFiles = select(forUserId: userId, deviceUUID: deviceUUID, andState: .uploaded)
+    
+    // With nil `andState` parameter value, returns both file uploads and upload deletions.
+    func uploadedFiles(forUserId userId: UserId, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
+        let selectUploadedFiles = select(forUserId: userId, deviceUUID: deviceUUID, andState: state)
 
         var fileInfoResult:[FileInfo] = []
         
@@ -287,9 +292,10 @@ class UploadRepository : Repository {
             fileInfo.fileUUID = rowModel.fileUUID
             fileInfo.appMetaData = rowModel.appMetaData
             fileInfo.fileVersion = rowModel.fileVersion
-            fileInfo.deleted = rowModel.deleted
+            fileInfo.deleted = rowModel.state == .toDeleteFromFileIndex
             fileInfo.fileSizeBytes = rowModel.fileSizeBytes
             fileInfo.mimeType = rowModel.mimeType
+            fileInfo.cloudFolderName = rowModel.cloudFolderName
             
             fileInfoResult.append(fileInfo)
         }

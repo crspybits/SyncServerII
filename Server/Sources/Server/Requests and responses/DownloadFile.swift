@@ -19,10 +19,6 @@ class DownloadFileRequest : NSObject, RequestMessage {
     static let fileUUIDKey = "fileUUID"
     var fileUUID:String!
     
-    // A root-level folder in the cloud file service.
-    static let cloudFolderNameKey = "cloudFolderName"
-    var cloudFolderName:String!
-    
     // This must indicate the current version of the file in the FileIndex.
     static let fileVersionKey = "fileVersion"
     var fileVersion:FileVersionInt!
@@ -32,7 +28,7 @@ class DownloadFileRequest : NSObject, RequestMessage {
     var masterVersion:MasterVersionInt!
     
     func nonNilKeys() -> [String] {
-        return [DownloadFileRequest.fileUUIDKey, DownloadFileRequest.cloudFolderNameKey, DownloadFileRequest.fileVersionKey, DownloadFileRequest.masterVersionKey]
+        return [DownloadFileRequest.fileUUIDKey, DownloadFileRequest.fileVersionKey, DownloadFileRequest.masterVersionKey]
     }
     
     func allKeys() -> [String] {
@@ -45,7 +41,6 @@ class DownloadFileRequest : NSObject, RequestMessage {
         self.fileUUID = DownloadFileRequest.fileUUIDKey <~~ json
         self.masterVersion = DownloadFileRequest.masterVersionKey <~~ json
         self.fileVersion = DownloadFileRequest.fileVersionKey <~~ json
-        self.cloudFolderName = DownloadFileRequest.cloudFolderNameKey <~~ json
         
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
@@ -66,8 +61,7 @@ class DownloadFileRequest : NSObject, RequestMessage {
         return jsonify([
             DownloadFileRequest.fileUUIDKey ~~> self.fileUUID,
             DownloadFileRequest.masterVersionKey ~~> self.masterVersion,
-            DownloadFileRequest.fileVersionKey ~~> self.fileVersion,
-            DownloadFileRequest.cloudFolderNameKey ~~> self.cloudFolderName
+            DownloadFileRequest.fileVersionKey ~~> self.fileVersion
         ])
     }
 }

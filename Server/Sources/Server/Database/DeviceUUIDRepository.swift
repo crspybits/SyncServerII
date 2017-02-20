@@ -6,6 +6,8 @@
 //
 //
 
+// Tracks deviceUUID's and their userId's. This is important for security. Also can enable limitations about number of devices per userId.
+
 import Foundation
 
 import Foundation

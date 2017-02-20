@@ -22,55 +22,6 @@ class FileControllerTests_GetUploads: ServerTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-
-    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = PerfectLib.UUID().string,expectedFileSizes: [String: Int64]) {
-    
-        XCTAssert(expectedFiles.count == expectedFileSizes.count)
-        
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            
-            self.performRequest(route: ServerEndpoints.getUploads, headers: headers, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on getUploadsRequest request")
-                XCTAssert(dict != nil)
-                
-                if let getUploadsResponse = GetUploadsResponse(json: dict!) {
-                    if getUploadsResponse.uploads == nil {
-                        XCTAssert(expectedFiles.count == 0)
-                        XCTAssert(expectedFileSizes.count == 0)
-                    }
-                    else {
-                        XCTAssert(getUploadsResponse.uploads!.count == expectedFiles.count)
-                        
-                        _ = getUploadsResponse.uploads!.map { fileInfo in
-                            Log.info("fileInfo: \(fileInfo)")
-                            
-                            let filterResult = expectedFiles.filter { uploadFileRequest in
-                                uploadFileRequest.fileUUID == fileInfo.fileUUID
-                            }
-                            
-                            XCTAssert(filterResult.count == 1)
-                            let expectedFile = filterResult[0]
-                            
-                            XCTAssert(expectedFile.appMetaData == fileInfo.appMetaData)
-                            XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
-                            XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
-                            XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
-                            XCTAssert(fileInfo.deleted == false)
-                            
-                            XCTAssert(expectedFileSizes[fileInfo.fileUUID] == fileInfo.fileSizeBytes)
-                        }
-                    }
-                }
-                else {
-                    XCTFail()
-                }
-                
-                expectation.fulfill()
-            }
-        }
-    }
     
     func testForZeroUploads() {
         let deviceUUID = PerfectLib.UUID().string

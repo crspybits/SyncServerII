@@ -38,32 +38,37 @@ class FileController : ControllerProtocol {
     case masterVersionUpdate(MasterVersionInt)
     }
     
-    private func updateMasterVersion(currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters, completion:(UpdateMasterVersionResult)->()) {
+    private func updateMasterVersion(currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
 
         let currentMasterVersionObj = MasterVersion()
         currentMasterVersionObj.userId = params.currentSignedInUser!.userId
         currentMasterVersionObj.masterVersion = currentMasterVersion
         let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
         
+        var result:UpdateMasterVersionResult!
+        
         switch updateMasterVersionResult {
         case .success:
-            completion(UpdateMasterVersionResult.success)
+            result = UpdateMasterVersionResult.success
             
         case .error(let error):
             let message = "Failed lookup in MasterVersionRepository: \(error)"
             Log.error(message: message)
-            completion(UpdateMasterVersionResult.error(message))
+            result = UpdateMasterVersionResult.error(message)
             
         case .didNotMatchCurrentMasterVersion:
+            
             getMasterVersion(params: params) { (error, masterVersion) in
                 if error == nil {
-                    completion(UpdateMasterVersionResult.masterVersionUpdate(masterVersion!))
+                    result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
                 }
                 else {
-                    completion(UpdateMasterVersionResult.error("\(error!)"))
+                    result = UpdateMasterVersionResult.error("\(error!)")
                 }
             }
         }
+        
+        return result
     }
     
     enum GetMasterVersionError : Error {
@@ -71,6 +76,7 @@ class FileController : ControllerProtocol {
     case noObjectFound
     }
     
+    // Synchronous callback.
     private func getMasterVersion(params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
         let key = MasterVersionRepository.LookupKey.userId(params.currentSignedInUser!.userId)
         let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
@@ -128,13 +134,13 @@ class FileController : ControllerProtocol {
             
             let upload = Upload()
             upload.deviceUUID = params.deviceUUID
-            upload.fileUpload = true
             upload.fileUUID = uploadRequest.fileUUID
             upload.fileVersion = uploadRequest.fileVersion
             upload.mimeType = uploadRequest.mimeType
             upload.state = .uploading
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadRequest.appMetaData
+            upload.cloudFolderName = uploadRequest.cloudFolderName
             
             if let uploadId = params.repos.upload.add(upload: upload) {
                 googleCreds.uploadSmallFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
@@ -169,108 +175,193 @@ class FileController : ControllerProtocol {
     }
     
     func doneUploads(params:RequestProcessingParameters) {
-        
-        guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
-            Log.error(message: "Did not receive DoneUploadsRequest")
-            params.completion(nil)
-            return
-        }
-        
         let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             break
         
-        // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
         case .lockAlreadyHeld:
-            Log.error(message: "Error: Lock already held.")
+            Log.debug(message: "Error: Lock already held!")
             params.completion(nil)
             return
         
         case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-            Log.error(message: "Error obtaining lock!")
+            Log.debug(message: "Error removing locks!")
             params.completion(nil)
             return
+        }
+        
+        let result = doInitialDoneUploads(params: params)
+        
+        if !params.repos.lock.unlock(userId: params.currentSignedInUser!.userId) {
+            Log.debug(message: "Error in unlock!")
+            params.completion(nil)
+            return
+        }
+
+        guard let (numberTransferred, uploadDeletions) = result else {
+            Log.debug(message: "Error in doInitialDoneUploads!")
+            // Don't do `params.completion(nil)` because we may not be passing back nil, i.e., for a master version update. The params.completion call was made in doInitialDoneUploads if needed.
+            return
+        }
+        
+        // Next: If there are any upload deletions, we need to actually do the file deletions. We are doing this *without* the lock held. I'm assuming it takes far longer to contact the cloud storage service than the other operations we are doing (e.g., mySQL operations).
+        
+        guard let googleCreds = params.creds as? GoogleCreds else {
+            Log.error(message: "Could not obtain Google Creds")
+            params.completion(nil)
+            return
+        }
+        
+        finishDoneUploads(uploadDeletions: uploadDeletions, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred)
+    }
+    
+    // This operates recursively so that we are not spinning off multiple threads when deleting > 1 file. This may make our processing dependent on stack depth. It does seem Swift makes use of tail recursion optimizations-- though not sure if this applies in the case of callbacks.
+    private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, googleCreds:GoogleCreds, numberTransferred:Int32, numberErrorsDeletingFiles:Int32 = 0) {
+    
+        // Base case.
+        guard uploadDeletions != nil && uploadDeletions!.count > 0 else {
+            let response = DoneUploadsResponse()!
+            
+            if numberErrorsDeletingFiles > 0 {
+                response.numberDeletionErrors = numberErrorsDeletingFiles
+                Log.debug(message: "doneUploads.numberDeletionErrors: \(numberErrorsDeletingFiles)")
+            }
+            
+            response.numberUploadsTransferred = numberTransferred
+            Log.debug(message: "doneUploads.numberUploadsTransferred: \(numberTransferred)")
+            
+            params.completion(response)
+            return
+        }
+        
+        // Recursive case.
+        let uploadDeletion = uploadDeletions![0]
+        let cloudFileName = uploadDeletion.cloudFileName(deviceUUID: uploadDeletion.deviceUUID!)
+
+        googleCreds.deleteFile(cloudFolderName: uploadDeletion.cloudFolderName!, cloudFileName: cloudFileName, mimeType: uploadDeletion.mimeType!) { error in
+        
+            let tail = (uploadDeletions!.count > 0) ?
+                Array(uploadDeletions![1..<uploadDeletions!.count]) : nil
+            var numberAdditionalErrors = 0
+            
+            if error != nil {
+                // We could get into some odd situations here if we actually report an error by failing. Failing will cause a db transaction rollback. Which could mean we had some files deleted, but *all* of the entries would still be present in the FileIndex/Uploads directory. So, I'm not going to fail, but forge on. I'll report the errors in the DoneUploadsResponse message though.
+                // TODO: *1* A better way to deal with this situation could be to use transactions at a finer grained level. Each deletion we do from Upload and FileIndex for an UploadDeletion could be in a transaction that we don't commit until the deletion succeeds with cloud storage.
+                Log.warning(message: "Error occurred while deleting Google file: \(error!)")
+                numberAdditionalErrors = 1
+            }
+            
+            self.finishDoneUploads(uploadDeletions: tail, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+        }
+    }
+    
+    private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?)? {
+        
+        guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
+            Log.error(message: "Did not receive DoneUploadsRequest")
+            params.completion(nil)
+            return nil
         }
         
 #if DEBUG
         if doneUploadsRequest.testLockSync != nil {
             Log.info(message: "Starting sleep (testLockSync= \(doneUploadsRequest.testLockSync)).")
             Thread.sleep(forTimeInterval: TimeInterval(doneUploadsRequest.testLockSync!))
+            Log.info(message: "Finished sleep (testLockSync= \(doneUploadsRequest.testLockSync)).")
         }
 #endif
 
-        Log.info(message: "Finished locking (testLockSync= \(doneUploadsRequest.testLockSync)).")
-        
         var response:DoneUploadsResponse?
         
-        updateMasterVersion(currentMasterVersion: doneUploadsRequest.masterVersion, params: params) { result in
-
-            switch result {
-            case .success:
-                break
-                
-            case .masterVersionUpdate(let updatedMasterVersion):
-                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-                
-                // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
-
-                response = DoneUploadsResponse()
-                response!.masterVersionUpdate = updatedMasterVersion
-                params.completion(response)
-                return
-                
-            case .error(let error):
-                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-                Log.error(message: "Failed on updateMasterVersion: \(error)")
-
-                params.completion(nil)
-                return
-            }
+        let updateResult = updateMasterVersion(currentMasterVersion: doneUploadsRequest.masterVersion, params: params)
+        switch updateResult {
+        case .success:
+            break
             
-            // Now, do the heavy lifting.
-            
-            // First, transfer info to the FileIndex repository from Upload.
-            let numberTransferred =
-                params.repos.fileIndex.transferUploads(
-                    userId: params.currentSignedInUser!.userId,
-                    deviceUUID: params.deviceUUID!,
-                    upload: params.repos.upload)
-            
-            if numberTransferred == nil  {
-                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-                Log.error(message: "Failed on transfer to FileIndex!")
-                params.completion(nil)
-                return
-            }
-            
-            // Second, remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
-            let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
-            
-            switch params.repos.upload.remove(key: filesForUserDevice) {
-            case .removed(let numberRows):
-                if numberRows != numberTransferred {
-                    _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-                    Log.error(message: "Number rows removed from Upload was \(numberRows) but should have been \(numberTransferred)!")
-                    params.completion(nil)
-                    return
-                }
-                
-            case .error(_):
-                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-                Log.error(message: "Failed removing rows from Upload!")
-                params.completion(nil)
-                return
-            }
-            
-            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-            Log.info(message: "Unlocked lock.")
+        case .masterVersionUpdate(let updatedMasterVersion):
+            // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
 
             response = DoneUploadsResponse()
-            response!.numberUploadsTransferred = numberTransferred
-            Log.debug(message: "doneUploads.numberUploadsTransferred: \(numberTransferred)")
+            response!.masterVersionUpdate = updatedMasterVersion
             params.completion(response)
+            return nil
+            
+        case .error(let error):
+            Log.error(message: "Failed on updateMasterVersion: \(error)")
+            params.completion(nil)
+            return nil
         }
+        
+        // Now, start the heavy lifting. This has to accomodate both file uploads, and upload deletions-- because these both need to alter the masterVersion (i.e., they change the file index).
+        
+        // 1) Transfer info to the FileIndex repository from Upload.
+        let numberTransferred =
+            params.repos.fileIndex.transferUploads(
+                userId: params.currentSignedInUser!.userId,
+                deviceUUID: params.deviceUUID!,
+                upload: params.repos.upload)
+        
+        if numberTransferred == nil  {
+            Log.error(message: "Failed on transfer to FileIndex!")
+            params.completion(nil)
+            return nil
+        }
+        
+        // 2) Get the upload deletions, if any. This is somewhat tricky. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
+        
+        var uploadDeletions:[FileInfo]
+        
+        let uploadDeletionsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!, andState: .toDeleteFromFileIndex)
+        switch uploadDeletionsResult {
+        case .uploads(let fileInfoArray):
+            uploadDeletions = fileInfoArray
+
+        case .error(let error):
+            Log.error(message: "Failed to get upload deletions: \(error)")
+            params.completion(nil)
+            return nil
+        }
+        
+        var primaryFileIndexKeys:[FileIndexRepository.LookupKey] = []
+        
+        for uploadDeletion in uploadDeletions {
+            primaryFileIndexKeys += [.primaryKeys(userId: "\(params.currentSignedInUser!.userId!)", fileUUID: uploadDeletion.fileUUID)]
+        }
+        
+        var fileIndexDeletions:[FileInfo]?
+        
+        if primaryFileIndexKeys.count > 0 {
+            let fileIndexResult = params.repos.fileIndex.fileIndex(forKeys: primaryFileIndexKeys)
+            switch fileIndexResult {
+            case .fileIndex(let fileIndex):
+                fileIndexDeletions = fileIndex
+                
+            case .error(let error):
+                Log.error(message: "Failed to get fileIndex: \(error)")
+                params.completion(nil)
+                return nil
+            }
+        }
+        
+        // 3) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
+        let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        
+        switch params.repos.upload.remove(key: filesForUserDevice) {
+        case .removed(let numberRows):
+            if numberRows != numberTransferred {
+                Log.error(message: "Number rows removed from Upload was \(numberRows) but should have been \(numberTransferred)!")
+                params.completion(nil)
+                return nil
+            }
+            
+        case .error(_):
+            Log.error(message: "Failed removing rows from Upload!")
+            params.completion(nil)
+            return nil
+        }
+        
+        return (numberTransferred!, fileIndexDeletions)
     }
     
     func fileIndex(params:RequestProcessingParameters) {
@@ -280,33 +371,13 @@ class FileController : ControllerProtocol {
             return
         }
         
-        // The FileIndex serves as a kind of snapshot of the files on the server for the calling apps. So, we hold the lock while we take the snapshot-- to make sure we're not getting a cross section of changes imposed by other apps.
-                
-        let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
-        switch params.repos.lock.lock(lock: lock) {
-        case .success:
-            break
-
-        case .lockAlreadyHeld:
-            Log.error(message: "Error: Lock already held.")
-            params.completion(nil)
-            return
-        
-        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-            Log.error(message: "Error obtaining lock!")
-            params.completion(nil)
-            return
-        }
-        
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
-                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
                 params.completion(nil)
                 return
             }
             
             let fileIndexResult = params.repos.fileIndex.fileIndex(forUserId: params.currentSignedInUser!.userId)
-            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
 
             switch fileIndexResult {
             case .fileIndex(let fileIndex):
@@ -329,6 +400,10 @@ class FileController : ControllerProtocol {
             params.completion(nil)
             return
         }
+        
+        // TODO: *0* What would happen if someone else deletes the file as we we're downloading it? It seems a shame to hold a lock for the entire duration of the download, however.
+        
+        // Related question: With transactions, if we just select from a particular row (i.e., for the master version for this user, as immediately below) does this result in a lock for the duration of the transaction? We could test for this by sleeping in the middle of the download below, and seeing if another request could delete the file at the same time. This should make a good test case for any mechanism that I come up with.
 
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
@@ -352,7 +427,7 @@ class FileController : ControllerProtocol {
             
             // Need to get the file from the cloud storage service:
             
-            // First, lookup the file in the FileIndex
+            // First, lookup the file in the FileIndex. This does an important security check too-- makes sure our userId corresponds to the fileUUID.
             let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.userId!)", fileUUID: downloadRequest.fileUUID)
             
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
@@ -379,6 +454,8 @@ class FileController : ControllerProtocol {
                 return
             }
             
+            
+            
             guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
                 Log.error(message: "Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)")
                 params.completion(nil)
@@ -389,7 +466,8 @@ class FileController : ControllerProtocol {
             
             // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex. This is because the file, once stored, is really in a specific place in cloud storage.
             
-            googleCreds.downloadSmallFile(cloudFolderName: downloadRequest.cloudFolderName, cloudFileName: fileIndexObj!.cloudFileName(deviceUUID:params.deviceUUID!), mimeType: fileIndexObj!.mimeType) { (data, error) in
+            googleCreds.downloadSmallFile(
+                cloudFolderName: fileIndexObj!.cloudFolderName, cloudFileName: fileIndexObj!.cloudFileName(deviceUUID:params.deviceUUID!), mimeType: fileIndexObj!.mimeType) { (data, error) in
                 if error == nil {
                     if Int64(data!.count) != fileIndexObj!.fileSizeBytes {
                         Log.error(message: "Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
@@ -421,26 +499,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        // Seems unlikely that the collection of uploads will change while we are getting them (because they are specific to the userId and the deviceUUID), but grab the lock just in case.
-                
-        let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
-        switch params.repos.lock.lock(lock: lock) {
-        case .success:
-            break
-
-        case .lockAlreadyHeld:
-            Log.error(message: "Error: Lock already held.")
-            params.completion(nil)
-            return
-        
-        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-            Log.error(message: "Error obtaining lock!")
-            params.completion(nil)
-            return
-        }
-        
-        let uploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, andDeviceUUID: params.deviceUUID!)
-        _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+        let uploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
 
         switch uploadsResult {
         case .uploads(let uploads):
@@ -452,6 +511,83 @@ class FileController : ControllerProtocol {
             Log.error(message: "Error: \(error)")
             params.completion(nil)
             return
+        }
+    }
+    
+    func uploadDeletion(params:RequestProcessingParameters) {
+        guard let uploadDeletionRequest = params.request as? UploadDeletionRequest else {
+            Log.error(message: "Did not receive UploadDeletionRequest")
+            params.completion(nil)
+            return
+        }
+        
+        getMasterVersion(params: params) { (error, masterVersion) in
+            if error != nil {
+                Log.error(message: "Error: \(error)")
+                params.completion(nil)
+                return
+            }
+
+            if masterVersion != uploadDeletionRequest.masterVersion {
+                let response = UploadDeletionResponse()!
+                response.masterVersionUpdate = masterVersion
+                params.completion(response)
+                return
+            }
+            
+            // Check whether this fileUUID exists in the FileIndex.
+            // Note that we don't explicitly need to additionally check if our userId matches that in the FileIndex-- the following lookup does that security check for us.
+
+            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.userId!)", fileUUID: uploadDeletionRequest.fileUUID)
+            
+            let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
+            
+            var fileIndexObj:FileIndex!
+            
+            switch lookupResult {
+            case .found(let modelObj):
+                fileIndexObj = modelObj as? FileIndex
+                if fileIndexObj == nil {
+                    Log.error(message: "Could not convert model object to FileIndex")
+                    params.completion(nil)
+                    return
+                }
+                
+            case .noObjectFound:
+                Log.error(message: "Could not find file to delete in FileIndex")
+                params.completion(nil)
+                return
+                
+            case .error(let error):
+                Log.error(message: "Error looking up file in FileIndex: \(error)")
+                params.completion(nil)
+                return
+            }
+            
+            if fileIndexObj.fileVersion != uploadDeletionRequest.fileVersion {
+                Log.error(message: "File index version is: \(fileIndexObj.fileVersion), but you asked to delete version: \(uploadDeletionRequest.fileVersion)")
+                params.completion(nil)
+                return
+            }
+            
+            // Create entry in Upload table.
+            let upload = Upload()
+            upload.fileUUID = uploadDeletionRequest.fileUUID
+            upload.deviceUUID = params.deviceUUID
+            upload.fileVersion = uploadDeletionRequest.fileVersion
+            upload.state = .toDeleteFromFileIndex
+            upload.userId = params.currentSignedInUser!.userId
+            
+            if let _ = params.repos.upload.add(upload: upload) {
+                let response = UploadDeletionResponse()!
+                params.completion(response)
+                return
+            }
+            else {
+                Log.error(message: "Unable to add UploadDeletion to Upload table")
+                params.completion(nil)
+                return
+            }
         }
     }
 }

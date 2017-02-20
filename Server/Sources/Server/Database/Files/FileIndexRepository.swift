@@ -19,7 +19,8 @@ class FileIndex : NSObject, Model, Filenaming {
     var deviceUUID:String!
     var userId: UserId!
     var mimeType: String!
-    var appMetaData: String!
+    var cloudFolderName: String!
+    var appMetaData: String?
     
     let deletedKey = "deleted"
     var deleted:Bool!
@@ -27,6 +28,10 @@ class FileIndex : NSObject, Model, Filenaming {
     var fileVersion: FileVersionInt!
     
     var fileSizeBytes: Int64!
+    
+    override init() {
+        super.init()
+    }
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
@@ -38,6 +43,10 @@ class FileIndex : NSObject, Model, Filenaming {
             default:
                 return nil
         }
+    }
+    
+    override var description : String {
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(appMetaData); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
     }
 }
 
@@ -69,6 +78,8 @@ class FileIndexRepository : Repository {
             // MIME type of the file
             "mimeType VARCHAR(\(Database.maxMimeTypeLength)) NOT NULL, " +
 
+            "cloudFolderName VARCHAR(\(Database.maxCloudFolderNameLength)) NOT NULL, " +
+
             // App-specific meta data
             "appMetaData TEXT, " +
 
@@ -86,17 +97,17 @@ class FileIndexRepository : Repository {
     }
     
     private func columnNames(appMetaDataFieldName:String = "appMetaData,") -> String {
-        return "fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes"
+        return "fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes, cloudFolderName"
     }
     
-    private func haveNilField(fileIndex:FileIndex) -> Bool {
-        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil
+    private func haveNilFieldForAdd(fileIndex:FileIndex) -> Bool {
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil || fileIndex.cloudFolderName == nil
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     func add(fileIndex:FileIndex) -> Int64? {
-        if haveNilField(fileIndex: fileIndex) {
-            Log.error(message: "One of the model values was nil!")
+        if haveNilFieldForAdd(fileIndex: fileIndex) {
+            Log.error(message: "One of the model values was nil: \(fileIndex)")
             return nil
         }
     
@@ -112,7 +123,7 @@ class FileIndexRepository : Repository {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
-        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!));"
+        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), '\(fileIndex.cloudFolderName!)');"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -124,22 +135,30 @@ class FileIndexRepository : Repository {
         }
     }
     
+    private func haveNilFieldForUpdate(fileIndex:FileIndex) -> Bool {
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil
+    }
+    
     // The FileIndex model *must* have an fileIndexId
     func update(fileIndex:FileIndex) -> Bool {
-        if fileIndex.fileIndexId == nil || haveNilField(fileIndex: fileIndex) {
-            Log.error(message: "One of the model values was nil!")
+        if fileIndex.fileIndexId == nil ||
+            haveNilFieldForUpdate(fileIndex: fileIndex) {
+            Log.error(message: "One of the model values was nil: \(fileIndex)")
             return false
         }
-    
-        var appMetaDataField = ""
-        if fileIndex.appMetaData != nil {
-            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-            appMetaDataField = " appMetaData='\(fileIndex.appMetaData!)', "
-        }
+        
+        // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
+        let appMetaDataField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaData, fieldName: "appMetaData")
+
+        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: fileIndex.fileSizeBytes, fieldName: "fileSizeBytes", fieldIsString: false)
+        
+        let mimeTypeField = getUpdateFieldSetter(fieldValue: fileIndex.mimeType, fieldName: "mimeType")
+        
+        let cloudFolderNameField = getUpdateFieldSetter(fieldValue: fileIndex.cloudFolderName, fieldName: "cloudFolderName")
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deviceUUID='\(fileIndex.deviceUUID!)', mimeType='\(fileIndex.mimeType!)', \(appMetaDataField) deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!), fileSizeBytes=\(fileIndex.fileSizeBytes!) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deviceUUID='\(fileIndex.deviceUUID!)', deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(cloudFolderNameField) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -178,9 +197,9 @@ class FileIndexRepository : Repository {
     func lookupConstraint(key:LookupKey) -> String {
         switch key {
         case .fileIndexId(let fileIndexId):
-            return "fileIndexId = '\(fileIndexId)'"
+            return "fileIndexId = \(fileIndexId)"
         case .userId(let userId):
-            return "userId = '\(userId)'"
+            return "userId = \(userId)"
         case .primaryKeys(let userId, let fileUUID):
             return "userId = \(userId) and fileUUID = '\(fileUUID)'"
         }
@@ -197,25 +216,29 @@ class FileIndexRepository : Repository {
         var error = false
         var numberTransferred:Int32 = 0
         
-        let uploadSelect = upload.select(forUserId: userId, deviceUUID: deviceUUID, andState:.uploaded)
+        let uploadSelect = upload.select(forUserId: userId, deviceUUID: deviceUUID)
         uploadSelect.forEachRow { rowModel in
             if error {
                 return
             }
             
             let upload = rowModel as! Upload
+            
+            let uploadDeletion = upload.state == .toDeleteFromFileIndex
 
             let fileIndex = FileIndex()
             fileIndex.fileSizeBytes = upload.fileSizeBytes
-            fileIndex.deleted = false
+            fileIndex.deleted = uploadDeletion
             fileIndex.fileUUID = upload.fileUUID
             fileIndex.deviceUUID = deviceUUID
             fileIndex.fileVersion = upload.fileVersion
             fileIndex.mimeType = upload.mimeType
             fileIndex.userId = userId
             fileIndex.appMetaData = upload.appMetaData
+            fileIndex.cloudFolderName = upload.cloudFolderName
             
-            let result = self.lookup(key: .primaryKeys(userId: "\(userId)", fileUUID: upload.fileUUID), modelInit: FileIndex.init)
+            let key = LookupKey.primaryKeys(userId: "\(userId)", fileUUID: upload.fileUUID)
+            let result = self.lookup(key: key, modelInit: FileIndex.init)
             
             switch result {
             case .error(_):
@@ -224,10 +247,20 @@ class FileIndexRepository : Repository {
                 
             case .found(let object):
                 let existingFileIndex = object as! FileIndex
-                guard upload.fileVersion == existingFileIndex.fileVersion + 1 else {
-                    Log.error(message: "Did not have next version of file!")
-                    error = true
-                    return
+
+                if uploadDeletion {
+                    guard upload.fileVersion == existingFileIndex.fileVersion else {
+                        Log.error(message: "Did not specify current version of file in upload deletion!")
+                        error = true
+                        return
+                    }
+                }
+                else {
+                    guard upload.fileVersion == existingFileIndex.fileVersion + 1 else {
+                        Log.error(message: "Did not have next version of file!")
+                        error = true
+                        return
+                    }
                 }
                 
                 fileIndex.fileIndexId = existingFileIndex.fileIndexId
@@ -238,17 +271,24 @@ class FileIndexRepository : Repository {
                 }
                 
             case .noObjectFound:
-                guard upload.fileVersion == 0 else {
-                    Log.error(message: "Did not have version 0 of file!")
+                if uploadDeletion {
+                    Log.error(message: "Attempting to delete a file not present in the file index: \(key)!")
                     error = true
                     return
                 }
-                
-                let fileIndexId = self.add(fileIndex: fileIndex)
-                if fileIndexId == nil {
-                    Log.error(message: "Could not add new FileIndex!")
-                    error = true
-                    return
+                else {
+                    guard upload.fileVersion == 0 else {
+                        Log.error(message: "Did not have version 0 of file!")
+                        error = true
+                        return
+                    }
+                    
+                    let fileIndexId = self.add(fileIndex: fileIndex)
+                    if fileIndexId == nil {
+                        Log.error(message: "Could not add new FileIndex!")
+                        error = true
+                        return
+                    }
                 }
             }
             
@@ -269,12 +309,16 @@ class FileIndexRepository : Repository {
     
     enum FileIndexResult {
     case fileIndex([FileInfo])
-    case error(Swift.Error)
+    case error(String)
     }
      
     func fileIndex(forUserId userId: UserId) -> FileIndexResult {
         let query = "select * from \(tableName) where userId = \(userId)"
-        let select = Select(db:db, query: query, modelInit: FileIndex.init, ignoreErrors:false)
+        return fileIndex(forSelectQuery: query)
+    }
+    
+    private func fileIndex(forSelectQuery selectQuery: String) -> FileIndexResult {
+        let select = Select(db:db, query: selectQuery, modelInit: FileIndex.init, ignoreErrors:false)
         
         var result:[FileInfo] = []
         
@@ -283,11 +327,13 @@ class FileIndexRepository : Repository {
 
             let fileInfo = FileInfo()!
             fileInfo.fileUUID = rowModel.fileUUID
+            fileInfo.deviceUUID = rowModel.deviceUUID
             fileInfo.appMetaData = rowModel.appMetaData
             fileInfo.fileVersion = rowModel.fileVersion
             fileInfo.deleted = rowModel.deleted
             fileInfo.fileSizeBytes = rowModel.fileSizeBytes
             fileInfo.mimeType = rowModel.mimeType
+            fileInfo.cloudFolderName = rowModel.cloudFolderName
             
             result.append(fileInfo)
         }
@@ -296,7 +342,27 @@ class FileIndexRepository : Repository {
             return .fileIndex(result)
         }
         else {
-            return .error(select.forEachRowStatus!)
+            return .error("\(select.forEachRowStatus!)")
         }
+    }
+    
+    func fileIndex(forKeys keys: [LookupKey]) -> FileIndexResult {
+        if keys.count == 0 {
+            return .error("Can't give 0 keys!")
+        }
+        
+        var query = "select * from \(tableName) where "
+        var numberValues = 0
+        for key in keys {
+            if numberValues > 0 {
+                query += " or "
+            }
+            
+            query += " (\(lookupConstraint(key: key))) "
+            
+            numberValues += 1
+        }
+        
+        return fileIndex(forSelectQuery: query)
     }
 }

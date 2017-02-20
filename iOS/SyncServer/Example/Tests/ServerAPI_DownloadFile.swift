@@ -33,7 +33,7 @@ class ServerAPI_DownloadFile: TestCase {
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
         
-        let file = ServerAPI.FileToDownload(fileUUID: fileUUID, cloudFolderName: cloudFolderName, fileVersion: 0)
+        let file = ServerAPI.FileToDownload(fileUUID: fileUUID, fileVersion: 0)
         
         let expectation = self.expectation(description: "doneUploads")
 

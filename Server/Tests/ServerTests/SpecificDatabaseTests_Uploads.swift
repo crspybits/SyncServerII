@@ -26,17 +26,16 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         super.tearDown()
     }
 
-    func doAddUpload(fileSizeBytes:Int64?=100, userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string) -> Upload {
+    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:String? = "{ \"foo\": \"bar\" }", userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string) -> Upload {
         let upload = Upload()
         upload.deviceUUID = deviceUUID
         upload.fileSizeBytes = fileSizeBytes
-        upload.fileUpload = true
         upload.fileUUID = PerfectLib.UUID().string
         upload.fileVersion = 1
-        upload.mimeType = "text/plain"
+        upload.mimeType = mimeType
         upload.state = .uploaded
         upload.userId = userId
-        upload.appMetaData = "{ \"foo\": \"bar\" }"
+        upload.appMetaData = appMetaData
         
         let result1 = UploadRepository(db).add(upload: upload)
         XCTAssert(result1 == 1, "Bad uploadId!")
@@ -52,6 +51,14 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
     
     func testAddUploadSucceedsWithNilFileSizeBytes() {
         _ = doAddUpload(fileSizeBytes:nil)
+    }
+    
+    func testAddUploadSucceedsWithNilAppMetaData() {
+        _ = doAddUpload(appMetaData:nil)
+    }
+    
+    func testAddUploadSucceedsWithNilMimeType() {
+        _ = doAddUpload(mimeType:nil)
     }
     
     func testUpdateUpload() {
@@ -71,6 +78,18 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         XCTAssert(UploadRepository(db).update(upload: upload))
     }
     
+    func testUpdateUploadSucceedsWithNilAppMetaData() {
+        let upload = doAddUpload()
+        upload.appMetaData = nil
+        XCTAssert(UploadRepository(db).update(upload: upload))
+    }
+    
+    func testUpdateUploadSucceedsWithNilMimeType() {
+        let upload = doAddUpload()
+        upload.mimeType = nil
+        XCTAssert(UploadRepository(db).update(upload: upload))
+    }
+    
     func testLookupFromUpload() {
         let upload1 = doAddUpload()
         
@@ -83,7 +102,6 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             let upload2 = object as! Upload
             XCTAssert(upload1.deviceUUID != nil && upload1.deviceUUID == upload2.deviceUUID)
             XCTAssert(upload1.fileSizeBytes != nil && upload1.fileSizeBytes == upload2.fileSizeBytes)
-            XCTAssert(upload1.fileUpload != nil && upload1.fileUpload == upload2.fileUpload)
             XCTAssert(upload1.fileUUID != nil && upload1.fileUUID == upload2.fileUUID)
             XCTAssert(upload1.fileVersion != nil && upload1.fileVersion == upload2.fileVersion)
             XCTAssert(upload1.mimeType != nil && upload1.mimeType == upload2.mimeType)
@@ -106,7 +124,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == 1, "Bad credentialsId!")
         
-        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, andDeviceUUID: PerfectLib.UUID().string)
+        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, deviceUUID: PerfectLib.UUID().string)
         switch uploadedFilesResult {
         case .uploads(let uploads):
             XCTAssert(uploads.count == 0)
@@ -115,7 +133,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         }
     }
 
-    func testFileIndexWithOneFile() {
+    func testUploadedIndexWithOneFile() {
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = .Google
@@ -128,7 +146,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         let deviceUUID = PerfectLib.UUID().string
         let upload1 = doAddUpload(userId:userId!, deviceUUID:deviceUUID)
 
-        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, andDeviceUUID: deviceUUID)
+        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, deviceUUID: deviceUUID)
         switch uploadedFilesResult {
         case .uploads(let uploads):
             XCTAssert(uploads.count == 1)
@@ -136,7 +154,6 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             XCTAssert(upload1.fileUUID == uploads[0].fileUUID)
             XCTAssert(upload1.fileVersion == uploads[0].fileVersion)
             XCTAssert(upload1.mimeType == uploads[0].mimeType)
-            XCTAssert(upload1.deleted == uploads[0].deleted)
             XCTAssert(upload1.fileSizeBytes == uploads[0].fileSizeBytes)
         case .error(_):
             XCTFail()

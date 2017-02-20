@@ -13,6 +13,8 @@
 		83F55F7B1E58C43100759578 /* GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F791E58C2CB00759578 /* GetUploads.swift */; };
 		83F55F7D1E58C70E00759578 /* FileControllerTests_GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */; };
 		83F55F7F1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */; };
+		83F55F891E59158C00759578 /* UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F881E59158C00759578 /* UploadDeletion.swift */; };
+		83F55F8B1E59220400759578 /* FileControllerTests_DeleteFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F8A1E59220400759578 /* FileControllerTests_DeleteFile.swift */; };
 		OBJ_285 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_286 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
 		OBJ_287 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* File.swift */; };
@@ -1072,6 +1074,8 @@
 		83F55F791E58C2CB00759578 /* GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUploads.swift; sourceTree = "<group>"; };
 		83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileControllerTests_GetUploads.swift; sourceTree = "<group>"; };
 		83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_Uploads.swift; sourceTree = "<group>"; };
+		83F55F881E59158C00759578 /* UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadDeletion.swift; sourceTree = "<group>"; };
+		83F55F8A1E59220400759578 /* FileControllerTests_DeleteFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileControllerTests_DeleteFile.swift; sourceTree = "<group>"; };
 		96DF434808F3CBABFA08AC02 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
@@ -1837,6 +1841,7 @@
 				OBJ_236 /* RemoveUser.swift */,
 				OBJ_237 /* RequestMessage.swift */,
 				OBJ_238 /* ResponseMessage.swift */,
+				83F55F881E59158C00759578 /* UploadDeletion.swift */,
 				OBJ_239 /* UploadFile.swift */,
 			);
 			path = "Requests and responses";
@@ -1873,6 +1878,7 @@
 		OBJ_244 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83F55F8A1E59220400759578 /* FileControllerTests_DeleteFile.swift */,
 				83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */,
 				83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */,
 				OBJ_245 /* DatabaseTests.swift */,
@@ -1976,7 +1982,7 @@
 			path = "Packages/Kitura-net-1.4.3/Sources/KituraNet";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -1985,7 +1991,6 @@
 				OBJ_257 /* Resources */,
 				OBJ_258 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* FastCGI */ = {
@@ -2597,7 +2602,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_258 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2973,6 +2978,7 @@
 				OBJ_710 /* MasterVersionRepository.swift in Sources */,
 				OBJ_711 /* Model.swift in Sources */,
 				OBJ_712 /* Repositories.swift in Sources */,
+				83F55F891E59158C00759578 /* UploadDeletion.swift in Sources */,
 				OBJ_713 /* Repository.swift in Sources */,
 				OBJ_714 /* UserRepository.swift in Sources */,
 				OBJ_715 /* AddUser.swift in Sources */,
@@ -2997,6 +3003,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				83F55F8B1E59220400759578 /* FileControllerTests_DeleteFile.swift in Sources */,
 				OBJ_772 /* DatabaseTests.swift in Sources */,
 				OBJ_773 /* DatabaseTransactionTests.swift in Sources */,
 				OBJ_774 /* FileControllerTests.swift in Sources */,

@@ -89,6 +89,10 @@ class DoneUploadsResponse : ResponseMessage {
     static let masterVersionUpdateKey = "masterVersionUpdate"
     var masterVersionUpdate:MasterVersionInt?
     
+    // If present, this reports an error situation on the server. Can only occur if there were pending UploadDeletion's.
+    static let numberDeletionErrorsKey = "numberDeletionErrors"
+    var numberDeletionErrors:Int32?
+    
     required init?(json: JSON) {
         self.numberUploadsTransferred = DoneUploadsResponse.numberUploadsTransferredKey <~~ json
         self.masterVersionUpdate = DoneUploadsResponse.masterVersionUpdateKey <~~ json

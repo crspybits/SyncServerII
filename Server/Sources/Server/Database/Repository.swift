@@ -84,4 +84,20 @@ extension Repository {
             return .error(error)
         }
     }
+    
+    func getUpdateFieldSetter(fieldValue: Any?, fieldName:String, fieldIsString:Bool = true) -> String {
+        
+        var fieldSetter = ""
+        if fieldValue != nil {
+            fieldSetter = ", \(fieldName) = "
+            if fieldIsString {
+                fieldSetter += "'\(fieldValue!)' "
+            }
+            else {
+                fieldSetter += "\(fieldValue!) "
+            }
+        }
+        
+        return fieldSetter
+    }
 }

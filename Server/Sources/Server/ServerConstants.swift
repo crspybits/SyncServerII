@@ -33,6 +33,7 @@ public class ServerConstants {
 public enum ServerHTTPMethod : String {
     case get
     case post
+    case delete
 }
 
 public enum HTTPStatus : Int {
@@ -51,14 +52,18 @@ public struct ServerEndpoint {
     public let method:ServerHTTPMethod
     public let authenticationLevel:AuthenticationLevel
     
+    // This specifies the need for a short duration lock on the operation.
+    public let needsLock:Bool
+    
     // Don't put a trailing "/" on the pathName.
-    public init(_ pathName:String, method:ServerHTTPMethod, authenticationLevel:AuthenticationLevel = .secondary) {
+    public init(_ pathName:String, method:ServerHTTPMethod, authenticationLevel:AuthenticationLevel = .secondary, needsLock:Bool = false) {
         
         assert(pathName.characters.count > 0 && pathName.characters.last != "/")
         
         self.pathName = pathName
         self.method = method
         self.authenticationLevel = authenticationLevel
+        self.needsLock = needsLock
     }
     
     public var path:String { // With preceding "/"
@@ -88,19 +93,28 @@ public class ServerEndpoints {
     // public static let redeemSharingInvitation = "RedeemSharingInvitation"
     // public static let getLinkedAccountsForSharingUser = "GetLinkedAccountsForSharingUser"
     
-    public static let fileIndex = ServerEndpoint("FileIndex", method: .get)
+    // The FileIndex serves as a kind of snapshot of the files on the server for the calling apps. So, we hold the lock while we take the snapshot-- to make sure we're not getting a cross section of changes imposed by other apps.
+    public static let fileIndex = ServerEndpoint("FileIndex", method: .get, needsLock:true)
+    
     public static let uploadFile = ServerEndpoint("UploadFile", method: .post)
+    
+    // Not using `needsLock` property here-- but doing the locking internally to the method: Because we have to access cloud storage to deal with upload deletions.
     public static let doneUploads = ServerEndpoint("DoneUploads", method: .post)
+    
     public static let downloadFile = ServerEndpoint("DownloadFile", method: .get)
     
+    // Any time we're doing an operation constrained to the current masterVersion, getting the lock seems like a good idea.
+    public static let uploadDeletion = ServerEndpoint("UploadDeletion", method: .delete, needsLock:true)
+
     // TODO: *0* See also [1] in FileControllerTests.swift.
-    public static let getUploads = ServerEndpoint("GetUploads", method: .get)
+    // Seems unlikely that the collection of uploads will change while we are getting them (because they are specific to the userId and the deviceUUID), but grab the lock just in case.
+    public static let getUploads = ServerEndpoint("GetUploads", method: .get, needsLock:true)
 
     // TODO: *3* Need a new endpoint that enables clients to flush (i.e., delete) files in the Uploads table which are in the `uploaded` state.
 
     public static let session = ServerEndpoints()
     
     private init() {
-        all.append(contentsOf: [ServerEndpoints.healthCheck, ServerEndpoints.addUser, ServerEndpoints.checkCreds, ServerEndpoints.removeUser, ServerEndpoints.fileIndex, ServerEndpoints.uploadFile, ServerEndpoints.doneUploads, ServerEndpoints.getUploads])
+        all.append(contentsOf: [ServerEndpoints.healthCheck, ServerEndpoints.addUser, ServerEndpoints.checkCreds, ServerEndpoints.removeUser, ServerEndpoints.fileIndex, ServerEndpoints.uploadFile, ServerEndpoints.doneUploads, ServerEndpoints.getUploads, ServerEndpoints.uploadDeletion])
     }
 }

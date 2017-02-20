@@ -13,7 +13,7 @@ import Gloss
 import Kitura
 #endif
 
-// Request an index of all files that have been uploaded with UploadFile -- queries the meta data on the sync server. The uploads are specific both to the user and the deviceUUID of the user.
+// Request an index of file uploads (UploadFile) and upload deletions (UploadDeleletion) -- queries the meta data on the sync server. The uploads are specific both to the user and the deviceUUID of the user.
 
 class GetUploadsRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.

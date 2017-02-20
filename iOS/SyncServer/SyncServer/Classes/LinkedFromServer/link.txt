@@ -7,6 +7,7 @@ rm fileindex.swift
 rm serverconstants.swift
 rm downloadfile.swift
 rm getuploads.swift
+rm fileinfo.swift
 
 ln -s ../../../../../Server/Sources/Server/ServerConstants.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/ResponseMessage.swift

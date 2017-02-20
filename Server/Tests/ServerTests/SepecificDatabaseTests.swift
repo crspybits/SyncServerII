@@ -240,6 +240,7 @@ class SpecificDatabaseTests: ServerTestCase {
         fileIndex.mimeType = "text/plain"
         fileIndex.userId = userId
         fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
+        fileIndex.cloudFolderName = "Test.Folder"
         
         let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
         XCTAssert(result1 == 1, "Bad fileIndexId!")

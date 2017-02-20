@@ -270,7 +270,6 @@ public class ServerAPI {
         
     public struct FileToDownload {
         let fileUUID:String!
-        let cloudFolderName:String!
         let fileVersion:FileVersionInt!
     }
     
@@ -296,7 +295,6 @@ public class ServerAPI {
         var params = [String : Any]()
         params[DownloadFileRequest.masterVersionKey] = serverMasterVersion
         params[DownloadFileRequest.fileUUIDKey] = file.fileUUID
-        params[DownloadFileRequest.cloudFolderNameKey] = file.cloudFolderName
         params[DownloadFileRequest.fileVersionKey] = file.fileVersion
 
         guard let downloadFileRequest = DownloadFileRequest(json: params) else {

@@ -19,6 +19,8 @@ public class Database {
     static let uuidLength = 36
     
     static let maxMimeTypeLength = 100
+    
+    static let maxCloudFolderNameLength = 256
 
     // E.g.,[ERR] Could not insert into ShortLocks: Failure: 1062 Duplicate entry '1' for key 'userId'
     static let duplicateEntryForKey = UInt32(1062)
