@@ -405,6 +405,56 @@ public class ServerAPI {
             }
         }
     }
+    
+    public enum UploadDeletionResult {
+    case success
+    case serverMasterVersionUpdate(Int64)
+    }
+    
+    public struct FileToDelete {
+        let fileUUID:String!
+        let fileVersion:FileVersionInt!
+    }
+    
+    public enum UploadDeletionError : Error {
+    case getUploadDeletionResponseConversionError
+    }
+    
+    public func uploadDeletion(file: FileToDelete, serverMasterVersion:MasterVersionInt!, completion:((UploadDeletionResult?, Error?)->(Void))?) {
+        let endpoint = ServerEndpoints.uploadDeletion
+        
+        let url = URL(string: baseURL + endpoint.path)!
+        
+        let uploadDeletion = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: file.fileUUID,
+            UploadDeletionRequest.fileVersionKey: file.fileVersion,
+            UploadDeletionRequest.masterVersionKey: serverMasterVersion
+        ])!
+        
+        let parameters = uploadDeletion.urlParameters()!
+        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        
+        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
+            let resultError = self.checkForError(statusCode: httpStatus, error: error)
+            
+            if resultError == nil {
+                if let uploadDeletionResponse = UploadDeletionResponse(json: response!) {
+                    if let masterVersionUpdate = uploadDeletionResponse.masterVersionUpdate {
+                        completion?(UploadDeletionResult.serverMasterVersionUpdate(masterVersionUpdate), nil)
+                    }
+                    else {
+                        completion?(UploadDeletionResult.success, nil)
+                    }
+                }
+                else {
+                    completion?(nil, UploadDeletionError.getUploadDeletionResponseConversionError)
+                }
+            }
+            else {
+                completion?(nil, resultError)
+            }
+        }
+    }
 }
 
 extension ServerAPI : ServerNetworkingAuthentication {

@@ -172,6 +172,7 @@
 		814732EDECC42E17BAFB2484A0F495EB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27637F4EBDCFC87002770A01F44BAB35 /* Foundation.framework */; };
 		81A5F798FDF1F4A441C92E7D333AA282 /* HPTextViewTapGestureRecognizer-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E902212C8697E1EBDA0E5E336823E11A /* HPTextViewTapGestureRecognizer-dummy.m */; };
 		81D9829FF1C99AF9EFE5FC949BA6BB4A /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7496330C336699861A5ECC18EE3A20F /* Metadata.swift */; };
+		8344CC231E5FC77200BEB263 /* UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8344CC221E5FC77200BEB263 /* UploadDeletion.swift */; };
 		83F37A321E51156600479175 /* DownloadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A311E51156600479175 /* DownloadFile.swift */; };
 		83F37A341E51321200479175 /* FilesMisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A331E51321200479175 /* FilesMisc.swift */; };
 		83F37A361E51326500479175 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A351E51326500479175 /* Constants.swift */; };
@@ -680,6 +681,7 @@
 		82E548AAE0317B5C0443793254D98063 /* CLPlacemark+Extras.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "CLPlacemark+Extras.m"; path = "SMCoreLib/Classes/Categories/CLPlacemark+Extras.m"; sourceTree = "<group>"; };
 		82ECC2ADC75B1DB56BC220BB3E4AAFBF /* AFURLResponseSerialization.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = AFURLResponseSerialization.h; path = AFNetworking/AFURLResponseSerialization.h; sourceTree = "<group>"; };
 		83017C73A352F1028B43BE5169A35E86 /* Reachability-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Reachability-umbrella.h"; sourceTree = "<group>"; };
+		8344CC221E5FC77200BEB263 /* UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadDeletion.swift; sourceTree = "<group>"; };
 		8395F2E4CC9D3EB23E06116EA90666F6 /* UITableViewCell+Extras.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UITableViewCell+Extras.m"; path = "SMCoreLib/Classes/Categories/UITableViewCell+Extras.m"; sourceTree = "<group>"; };
 		83C5E79A6A3A91A7D672726EF2F0AF4A /* NSDate+Extras.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSDate+Extras.m"; path = "SMCoreLib/Classes/Categories/NSDate+Extras.m"; sourceTree = "<group>"; };
 		83F37A311E51156600479175 /* DownloadFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadFile.swift; sourceTree = "<group>"; };
@@ -1479,6 +1481,7 @@
 				970D9A9C17A61F7590960A292576D43D /* ResponseMessage.swift */,
 				00BF941215973D2EC492AC3641A808E6 /* ServerConstants.swift */,
 				AD0A6EB77D963D8ABD88CF3F64A5B4C1 /* Types.swift */,
+				8344CC221E5FC77200BEB263 /* UploadDeletion.swift */,
 				408320DBB9A564AFBC0814F27F03312E /* UploadFile.swift */,
 			);
 			path = LinkedFromServer;
@@ -2613,6 +2616,7 @@
 				86EC080613D0AA3D5F9E8F1BB9E7B74C /* ServerConstants.swift in Sources */,
 				7C2979FD67921EBFA69043157E30D548 /* ServerNetworking.swift in Sources */,
 				27D37CDC6B7D1C9532FAF8EF033C86EF /* SyncServer-dummy.m in Sources */,
+				8344CC231E5FC77200BEB263 /* UploadDeletion.swift in Sources */,
 				37C75BF4A8C65EC9B6A9951969DA9B2C /* Types.swift in Sources */,
 				A5858E5302BE6DBF4FF97E8259BE1317 /* UploadFile.swift in Sources */,
 				EE0BB32DE3059BBC593CF4559DCF8591 /* UserSignIn.swift in Sources */,

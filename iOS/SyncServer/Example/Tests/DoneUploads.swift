@@ -3,7 +3,7 @@
 //  SyncServer
 //
 //  Created by Christopher Prince on 1/31/17.
-//  Copyright © 2017 CocoaPods. All rights reserved.
+//  Copyright © 2017 Spastic Muffin, LLC. All rights reserved.
 //
 
 import XCTest
@@ -25,16 +25,18 @@ class ServerAPI_DoneUploads: TestCase {
         
         let fileUUID = UUID().uuidString
         
-        let fileSize = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion)
+        guard let (fileSize, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return
+        }
         
         getUploads(expectedFiles: [
-            (fileUUID: fileUUID, fileSize: fileSize!)
+            (fileUUID: fileUUID, fileSize: fileSize)
         ])
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
         
         getFileIndex(expectedFiles: [
-            (fileUUID: fileUUID, fileSize: fileSize!)
+            (fileUUID: fileUUID, fileSize: fileSize)
         ])
         
         getUploads(expectedFiles: [])
@@ -46,19 +48,24 @@ class ServerAPI_DoneUploads: TestCase {
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
 
-        let fileSize1 = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion)
-        let fileSize2 = uploadFile(fileName: "Cat", fileExtension: "jpg", mimeType: "image/jpeg", fileUUID: fileUUID2, serverMasterVersion: masterVersion)
+        guard let (fileSize1, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion) else {
+            return
+        }
+        
+        guard let (fileSize2, _) = uploadFile(fileName: "Cat", fileExtension: "jpg", mimeType: "image/jpeg", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
+            return
+        }
 
         getUploads(expectedFiles: [
-            (fileUUID: fileUUID1, fileSize: fileSize1!),
-            (fileUUID: fileUUID2, fileSize: fileSize2!)
+            (fileUUID: fileUUID1, fileSize: fileSize1),
+            (fileUUID: fileUUID2, fileSize: fileSize2)
         ])
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
         
         getFileIndex(expectedFiles: [
-            (fileUUID: fileUUID1, fileSize: fileSize1!),
-            (fileUUID: fileUUID2, fileSize: fileSize2!)
+            (fileUUID: fileUUID1, fileSize: fileSize1),
+            (fileUUID: fileUUID2, fileSize: fileSize2)
         ])
         
         getUploads(expectedFiles: [])

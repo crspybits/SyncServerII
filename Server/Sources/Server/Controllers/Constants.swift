@@ -11,7 +11,7 @@ import SMServerLib
 
 // Server-internal constants
 
-// TODO: *0* This should be renamed to something like ServerConfig. They are not exactly "constants".
+// TODO: *1* This should be renamed to something like ServerConfig. They are not exactly "constants".
 
 protocol ConstantsDelegate {
 func configFilePath(forConstants:Constants) -> String

@@ -3,7 +3,7 @@
 //  SyncServer
 //
 //  Created by Christopher Prince on 2/12/17.
-//  Copyright © 2017 CocoaPods. All rights reserved.
+//  Copyright © 2017 Spastic Muffin, LLC. All rights reserved.
 //
 
 import XCTest
@@ -29,7 +29,9 @@ class ServerAPI_DownloadFile: TestCase {
         let uploadFileURL = Bundle(for: ServerAPI_DownloadFile.self).url(forResource: "UploadMe", withExtension: "txt")
         XCTAssert(uploadFileURL != nil)
         
-        let fileSize = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, appMetaData:appMetaData)
+        guard let (fileSize, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, appMetaData:appMetaData) else {
+            return
+        }
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
         

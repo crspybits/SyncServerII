@@ -3,7 +3,7 @@
 //  SyncServer
 //
 //  Created by Christopher Prince on 1/31/17.
-//  Copyright © 2017 CocoaPods. All rights reserved.
+//  Copyright © 2017 Spastic Muffin, LLC. All rights reserved.
 //
 
 import XCTest
@@ -88,7 +88,7 @@ class TestCase: XCTestCase {
         waitForExpectations(timeout: 10.0, handler: nil)
     }
     
-    func getUploads(expectedFiles:[(fileUUID:String, fileSize:Int64)]) {
+    func getUploads(expectedFiles:[(fileUUID:String, fileSize:Int64?)], callback:((FileInfo)->())? = nil) {
         let expectation1 = self.expectation(description: "getUploads")
         
         ServerAPI.session.getUploads { (uploads, error) in
@@ -96,13 +96,20 @@ class TestCase: XCTestCase {
             
             XCTAssert(expectedFiles.count == uploads?.count)
             
+            var curr = 0
             for (fileUUID, fileSize) in expectedFiles {
                 let result = uploads?.filter { file in
                     file.fileUUID == fileUUID
                 }
                 
                 XCTAssert(result!.count == 1)
-                XCTAssert(result![0].fileSizeBytes == fileSize)
+                if fileSize != nil {
+                    XCTAssert(result![0].fileSizeBytes == fileSize)
+                }
+                
+                callback?(uploads![curr])
+                
+                curr += 1
             }
             
             expectation1.fulfill()
@@ -112,7 +119,7 @@ class TestCase: XCTestCase {
     }
     
     // Returns the file size uploaded
-    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> Int64? {
+    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> (fileSize: Int64, ServerAPI.File)? {
     
         let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
 
@@ -147,7 +154,12 @@ class TestCase: XCTestCase {
         
         waitForExpectations(timeout: 30.0, handler: nil)
         
-        return fileSize
+        if fileSize == nil {
+            return nil
+        }
+        else {
+            return (fileSize!, file)
+        }
     }
     
     func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, withExpectation expectation:XCTestExpectation) {

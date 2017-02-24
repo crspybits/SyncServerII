@@ -15,6 +15,7 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		833729861E0F6BC0002CA164 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833729841E0F6BAE002CA164 /* Authentication.swift */; };
+		8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8344CC201E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift */; };
 		836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BD51E10728D005209F2 /* HealthCheck.swift */; };
 		836D4BE01E11AC9D005209F2 /* SMGoogleUserSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BDF1E11AC9D005209F2 /* SMGoogleUserSignIn.swift */; };
 		836D4BE21E11AF8C005209F2 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BE11E11AF8C005209F2 /* SignIn.swift */; };
@@ -58,6 +59,7 @@
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		758A92084EE224EB7F786904 /* Pods-SyncServer_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SyncServer_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SyncServer_Tests/Pods-SyncServer_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		833729841E0F6BAE002CA164 /* Authentication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
+		8344CC201E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_UploadDeletion.swift; sourceTree = "<group>"; };
 		836D4BD51E10728D005209F2 /* HealthCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthCheck.swift; sourceTree = "<group>"; };
 		836D4BDF1E11AC9D005209F2 /* SMGoogleUserSignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SMGoogleUserSignIn.swift; path = ../../../SignIn/SMGoogleUserSignIn.swift; sourceTree = "<group>"; };
 		836D4BE11E11AF8C005209F2 /* SignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				8344CC201E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift */,
 				83F55F801E58D59D00759578 /* ServerAPI_GetUploads.swift */,
 				83F37A2F1E51120B00479175 /* ServerAPI_DownloadFile.swift */,
 				83F37A231E46E8C700479175 /* Cat.jpg */,
@@ -436,6 +439,7 @@
 				836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */,
 				83F37A1A1E44478100479175 /* FileIndex.swift in Sources */,
 				837244561E419EE600155E89 /* TestCase.swift in Sources */,
+				8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */,
 				83F37A201E46D40500479175 /* UploadFile.swift in Sources */,
 				837244541E419E7B00155E89 /* DoneUploads.swift in Sources */,
 				83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */,

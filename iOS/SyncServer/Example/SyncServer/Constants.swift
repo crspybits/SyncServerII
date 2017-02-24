@@ -3,7 +3,7 @@
 //  SyncServer
 //
 //  Created by Christopher Prince on 12/26/16.
-//  Copyright © 2016 CocoaPods. All rights reserved.
+//  Copyright © 2016 Spastic Muffin, LLC. All rights reserved.
 //
 
 import Foundation

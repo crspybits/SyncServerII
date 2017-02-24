@@ -189,7 +189,6 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
     
     // TODO: *0* Make sure a deviceUUID from a different user cannot do an UploadDeletion for our file.
     
-    // TODO: *0* Below:
     func testThatDeletionFailsWhenMasterVersionDoesNotMatch() {
         let deviceUUID = PerfectLib.UUID().string
         

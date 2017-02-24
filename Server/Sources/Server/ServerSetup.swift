@@ -138,6 +138,8 @@ private class RequestHandler {
             return false
         }
         
+        Log.info(message: "REQUEST COMPLETED: \(request.urlURL.path)")
+        
         return true
     }
     
@@ -148,7 +150,7 @@ private class RequestHandler {
     func doRequest(createRequest: @escaping (RouterRequest) -> RequestMessage?,
         processRequest: @escaping ProcessRequest) {
         
-        Log.info(message: "Processing Request: \(request.urlURL.path)")
+        // Log.info(message: "Processing Request: \(request.urlURL.path)")
         setJsonResponseHeaders()
         
         let profile = request.userProfile
@@ -318,7 +320,7 @@ private class RequestHandler {
                         }
                         
                         let result = doTheRequestProcessing(creds: creds)
-                        Log.debug(message: "doTheRequestProcessing: \(result)")
+                        //Log.debug(message: "doTheRequestProcessing: \(result)")
                         return result
                     }
                 }

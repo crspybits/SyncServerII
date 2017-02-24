@@ -8,6 +8,7 @@ rm serverconstants.swift
 rm downloadfile.swift
 rm getuploads.swift
 rm fileinfo.swift
+rm uploaddeletion.swift
 
 ln -s ../../../../../Server/Sources/Server/ServerConstants.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/ResponseMessage.swift
@@ -19,3 +20,4 @@ ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/DownloadFile
 ln -s ../../../../../Server/Sources/Server/Account\ Specifics/Filenaming.swift
 ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/GetUploads.swift
 ln -s ../../../../../Server/Sources/Server/Database/Files/FileInfo.swift
+ln -s ../../../../../Server/Sources/Server/Requests\ and\ responses/UploadDeletion.swift
