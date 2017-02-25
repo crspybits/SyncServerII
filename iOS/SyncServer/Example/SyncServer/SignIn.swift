@@ -17,7 +17,7 @@ class SignIn {
         var serverClientId:String!
         var appClientId:String!
         
-        let plist = try! PlistDictLoader(plistFileNameInBundle: Constants.serverPlistFile)
+        let plist = try! PlistDictLoader(plistFileNameInBundle: Consts.serverPlistFile)
         
         if case .stringValue(let value) = try! plist.getRequired(varName: "GoogleClientId") {
             appClientId = value

@@ -23,7 +23,7 @@ class TestCase: XCTestCase {
 
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {
-        let plist = try! PlistDictLoader(plistFileNameInBundle: Constants.serverPlistFile)
+        let plist = try! PlistDictLoader(plistFileNameInBundle: Consts.serverPlistFile)
         
         if case .stringValue(let value) = try! plist.getRequired(varName: "GoogleAccessToken") {
             return value

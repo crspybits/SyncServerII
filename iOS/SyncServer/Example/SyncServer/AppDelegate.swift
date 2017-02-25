@@ -17,10 +17,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        let plist = try! PlistDictLoader(plistFileNameInBundle: Constants.serverPlistFile)
+        var serverURL:URL!
+        let plist = try! PlistDictLoader(plistFileNameInBundle: Consts.serverPlistFile)
         if case .stringValue(let strValue) = try! plist.getRequired(varName: "ServerURL") {
-            ServerAPI.session.baseURL = strValue
+            serverURL = URL(string: strValue)!
         }
+        
+        SyncServer.session.appLaunchSetup(withServerURL: serverURL)
         
         return true
     }
