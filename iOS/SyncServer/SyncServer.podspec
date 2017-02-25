@@ -36,6 +36,10 @@ TODO: Add long description of the pod here.
 
   s.source_files = 'SyncServer/Classes/**/*'
   
+  s.resources = 'SyncServer/Assets/*.xcdatamodeld'
+  
+  s.preserve_paths = 'SyncServer/Assets/Client.xcdatamodeld'
+    
   # s.resource_bundles = {
   #   'SyncServer' => ['SyncServer/Assets/*.png']
   # }

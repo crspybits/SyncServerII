@@ -381,6 +381,7 @@ class FileController : ControllerProtocol {
 
             switch fileIndexResult {
             case .fileIndex(let fileIndex):
+                Log.info(message: "Number of entries in FileIndex: \(fileIndex.count)")
                 let response = FileIndexResponse()!
                 response.fileIndex = fileIndex
                 response.masterVersion = masterVersion
@@ -453,8 +454,6 @@ class FileController : ControllerProtocol {
                 params.completion(nil)
                 return
             }
-            
-            
             
             guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
                 Log.error(message: "Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)")

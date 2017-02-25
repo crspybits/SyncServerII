@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11759" systemVersion="16B2555" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="DirectoryEntry" representedClassName="DirectoryEntry" syncable="YES">
+        <attribute name="fileUUID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fileVersion" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+    </entity>
+    <entity name="DownloadFileTracker" representedClassName="DownloadFileTracker" syncable="YES">
+        <attribute name="fileUUID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fileVersion" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+    </entity>
+    <entity name="MasterVersion" representedClassName="MasterVersion" syncable="YES">
+        <attribute name="version" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="DirectoryEntry" positionX="-63" positionY="-18" width="128" height="75"/>
+        <element name="DownloadFileTracker" positionX="-36" positionY="27" width="128" height="75"/>
+        <element name="MasterVersion" positionX="-54" positionY="18" width="128" height="60"/>
+    </elements>
+</model>

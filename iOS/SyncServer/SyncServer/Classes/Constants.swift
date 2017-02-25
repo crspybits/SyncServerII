@@ -7,7 +7,9 @@
 
 import Foundation
 
-internal class Constants {
+class Constants {
     // Subdirectory of the app /Documents directory.
-    internal static let tempDirectory = "Temporary"
+    static let tempDirectory = "Temporary"
+    
+    static let coreDataName = "SyncServer.CoreData"
 }
