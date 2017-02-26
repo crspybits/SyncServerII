@@ -26,6 +26,12 @@ public class SyncServer {
     }
     
     public func appLaunchSetup(withServerURL serverURL: URL) {
+        Network.session().detect { connected in
+            if connected {
+                self.networkReconnected()
+            }
+        }
+        
         Network.session().appStartup()
 
         ServerAPI.session.baseURL = serverURL.absoluteString
@@ -42,5 +48,16 @@ public class SyncServer {
         ]);
         
         CoreData.registerSession(coreDataSession, forName: Constants.coreDataName)
+    }
+    
+    func networkReconnected() {
+        let dfts = DownloadFileTracker.fetchAll()
+        dfts.map { dft in
+            if dft.status == .downloading {
+                dft.status = .notStarted
+            }
+        }
+        
+        CoreData.sessionNamed(Constants.coreDataName).saveContext()
     }
 }

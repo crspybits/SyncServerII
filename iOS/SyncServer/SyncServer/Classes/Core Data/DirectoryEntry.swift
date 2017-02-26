@@ -28,6 +28,19 @@ public class DirectoryEntry: NSManagedObject, CoreDataModel {
         return managedObject as? DirectoryEntry
     }
     
+    public class func fetchAll() -> [DirectoryEntry] {
+        var entries:[DirectoryEntry]!
+
+        do {
+            entries = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: self.entityName()) as? [DirectoryEntry]
+         } catch (let error) {
+            Log.error("Error: \(error)")
+            assert(false)
+         }
+        
+         return entries
+    }
+    
     public class func removeAll() {
         do {
             let entries = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: self.entityName()) as? [DirectoryEntry]

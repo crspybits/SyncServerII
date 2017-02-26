@@ -213,7 +213,7 @@ class TestCase: XCTestCase {
         waitForExpectations(timeout: 10.0, handler: nil)
     }
     
-    func removeAllServerFiles() {
+    func removeAllServerFilesInFileIndex() {
         let masterVersion = getMasterVersion()
         
         var filesToDelete:[FileInfo]?

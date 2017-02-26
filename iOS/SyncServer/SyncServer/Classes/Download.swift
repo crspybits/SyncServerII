@@ -15,21 +15,8 @@ class Download {
     private init() {
     }
     
-    /* A download consists of:
-        a) Doing a FileIndex
-        b) Checking that FileIndex against our local directory of files to see
-            if we need to do any downloads
-        c) If yes, then creating persistent Core Data objects for each of those
-            files-to-be-downloaded so that if we lose power etc. we can restart downloads.
-        d) We also need to record the masterVersion on the server persistently.
-        e) Next, download each file.
-            On each download, if the masterVersion gets updated, we need to restart
-            the process.
-        f) With all files downloaded and masterVersion unchanged, we can
-            call the client's delegate method.
-    */
-    
     // TODO: *0* while this check is occuring, we want to make sure we don't have a concurrent check operation.
+    // Creates DirectoryEntry's as neeed to represent files in FileIndex on server, but not known about locally. Creates DownloadFileTracker's to represent files that need downloading. Updates MasterVersion with the master version on the server.
     func check(completion:((Error?)->())? = nil) {
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
             guard error == nil else {
@@ -60,7 +47,91 @@ class Download {
             completion?(nil)
         }
     }
+
+    /* A download consists of:
+
+        e) Next, download each file.
+            On each download, if the masterVersion gets updated, we need to restart
+            the process.
+        f) With all files downloaded and masterVersion unchanged, we can
+            call the client's delegate method.
+    */
+    enum NextResult {
+    case startedDownload
+    case noDownloads
+    case allDownloadsCompleted
+    case error(String)
+    }
     
-    func next() {
+    enum NextCompletion {
+    case downloaded
+    case masterVersionUpdate
+    case error(String)
+    }
+    
+    // Starts download of next file, if there is one. There should be no files downloading already. Only if .startedDownload is the NextResult will the completion handler be called.
+    func next(completion:((NextCompletion)->())?) -> NextResult {
+        let dfts = DownloadFileTracker.fetchAll()
+        if dfts.count == 0 {
+            return .noDownloads
+        }
+
+        let alreadyDownloading = dfts.filter {$0.status == .downloading}
+        if alreadyDownloading.count != 0 {
+            return .error("Already downloading a file!")
+        }
+        
+        let notStarted = dfts.filter {$0.status == .notStarted}
+        if notStarted.count == 0 {
+            return .allDownloadsCompleted
+        }
+        
+        let nextToDownload = notStarted[0]
+
+        let masterVersion = MasterVersion.get().version
+        ServerAPI.session.downloadFile(file: nextToDownload as! Filenaming, serverMasterVersion: masterVersion) { (result, error)  in
+            guard error == nil else {
+                Synchronized.block(nextToDownload) {
+                    nextToDownload.status = .notStarted
+                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                }
+                
+                let message = "Error: \(error)"
+                Log.error(message)
+                completion?(.error(message))
+                return
+            }
+            
+            switch result! {
+            case .success(let downloadedFile):
+                Synchronized.block(nextToDownload) {
+                    nextToDownload.status = .downloaded
+                    nextToDownload.appMetaData = downloadedFile.appMetaData
+                    nextToDownload.fileSizeBytes = downloadedFile.fileSizeBytes
+                    nextToDownload.localURL = downloadedFile.url
+                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                }
+                completion?(.downloaded)
+                
+            case .serverMasterVersionUpdate(let masterVersionUpdate):
+                Synchronized.block(nextToDownload) {
+                    // The simplest method to deal with this is to restart all downloads. 
+                    // TODO: *2* A more efficient method is to get the file index, giving us the new masterVersion, and see which files that we have already downloaded have the same version as we expect.
+                    dfts.map { dft in
+                        dft.reset()
+                    }
+                    MasterVersion.get().version = masterVersionUpdate
+                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                }
+                completion?(.masterVersionUpdate)
+            }
+        }
+        
+        Synchronized.block(nextToDownload) {
+            nextToDownload.status = .downloading
+            CoreData.sessionNamed(Constants.coreDataName).saveContext()
+        }
+        
+        return .startedDownload
     }
 }

@@ -107,7 +107,7 @@ class ServerAPI_UploadDeletion: TestCase {
         // for the file upload
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
         
-        removeAllServerFiles()
+        removeAllServerFilesInFileIndex()
         
         getFileIndex(expectedFiles: []) { fileInfo in
             XCTFail()

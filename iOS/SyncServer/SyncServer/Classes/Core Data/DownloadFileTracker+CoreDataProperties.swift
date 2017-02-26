@@ -2,9 +2,8 @@
 //  DownloadFileTracker+CoreDataProperties.swift
 //  Pods
 //
-//  Created by Christopher Prince on 2/24/17.
+//  Created by Christopher Prince on 2/25/17.
 //
-//  This file was automatically generated and should not be edited.
 //
 
 import Foundation
@@ -17,7 +16,11 @@ extension DownloadFileTracker {
         return NSFetchRequest<DownloadFileTracker>(entityName: "DownloadFileTracker");
     }
 
-    @NSManaged public var fileUUID: String?
-    @NSManaged public var fileVersion: Int32
+    @NSManaged public var fileUUIDInternal: String?
+    @NSManaged public var fileVersionInternal: Int32
+    @NSManaged public var statusRaw: String?
+    @NSManaged public var localURLData: NSData?
+    @NSManaged public var fileSizeBytes: Int64
+    @NSManaged public var appMetaData: String?
 
 }

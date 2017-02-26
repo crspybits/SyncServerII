@@ -19,12 +19,12 @@ public protocol ServerAPIDelegate : class {
 
 public class ServerAPI {
     // These need to be set by user of this class.
-    public var baseURL:String!
+    var baseURL:String!
     public weak var delegate:ServerAPIDelegate!
     
     fileprivate var authTokens:[String:String]?
     
-    public enum ServerAPIError : Error {
+    enum ServerAPIError : Error {
     case non200StatusCode(Int)
     case badStatusCode(Int)
     }
@@ -49,7 +49,7 @@ public class ServerAPI {
     
     // MARK: Health check
 
-    private func checkForError(statusCode:Int?, error:Error?) -> Error? {
+    func checkForError(statusCode:Int?, error:Error?) -> Error? {
         if statusCode == HTTPStatus.ok.rawValue || statusCode == nil {
             return error
         }
@@ -58,7 +58,7 @@ public class ServerAPI {
         }
     }
     
-    public func healthCheck(completion:((Error?)->(Void))?) {
+    func healthCheck(completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.healthCheck
         let url = URL(string: baseURL + endpoint.path)!
         
@@ -106,7 +106,7 @@ public class ServerAPI {
         }
     }
     
-    public func removeUser(completion:((Error?)->(Void))?) {
+    func removeUser(completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.removeUser
         let url = URL(string: baseURL + endpoint.path)!
         
@@ -117,12 +117,12 @@ public class ServerAPI {
     
     // MARK: Files
     
-    public enum FileIndexError : Error {
+    enum FileIndexError : Error {
     case fileIndexResponseConversionError
     case couldNotCreateFileIndexRequest
     }
         
-    public func fileIndex(completion:((_ fileIndex: [FileInfo]?, _ masterVersion:MasterVersionInt?, Error?)->(Void))?) {
+    func fileIndex(completion:((_ fileIndex: [FileInfo]?, _ masterVersion:MasterVersionInt?, Error?)->(Void))?) {
     
         let endpoint = ServerEndpoints.fileIndex
         
@@ -145,7 +145,7 @@ public class ServerAPI {
         }
     }
     
-    public struct File {
+    struct File {
         let localURL:URL!
         let fileUUID:String!
         let mimeType:String!
@@ -155,18 +155,18 @@ public class ServerAPI {
         let fileVersion:FileVersionInt!
     }
     
-    public enum UploadFileError : Error {
+    enum UploadFileError : Error {
     case couldNotCreateUploadFileRequest
     case couldNotReadUploadFile
     case noExpectedResultKey
     }
     
-    public enum UploadFileResult {
+    enum UploadFileResult {
     case success(sizeInBytes:Int64)
     case serverMasterVersionUpdate(Int64)
     }
     
-    public func uploadFile(file:File, serverMasterVersion:MasterVersionInt, completion:((UploadFileResult?, Error?)->(Void))?) {
+    func uploadFile(file:File, serverMasterVersion:MasterVersionInt, completion:((UploadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadFile
 
         Log.special("file.fileUUID: \(file.fileUUID)")
@@ -216,17 +216,17 @@ public class ServerAPI {
         }
     }
     
-    public enum DoneUploadsError : Error {
+    enum DoneUploadsError : Error {
     case noExpectedResultKey
     case couldNotCreateDoneUploadsRequest
     }
     
-    public enum DoneUploadsResult {
+    enum DoneUploadsResult {
     case success(numberUploadsTransferred:Int64)
     case serverMasterVersionUpdate(Int64)
     }
     
-    public func doneUploads(serverMasterVersion:MasterVersionInt!, completion:((DoneUploadsResult?, Error?)->(Void))?) {
+    func doneUploads(serverMasterVersion:MasterVersionInt!, completion:((DoneUploadsResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.doneUploads
         
         let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
@@ -267,18 +267,19 @@ public class ServerAPI {
             }
         }
     }
-        
-    public struct FileToDownload {
-        let fileUUID:String!
-        let fileVersion:FileVersionInt!
+    
+    struct DownloadedFile {
+    let url: SMRelativeLocalURL
+    let fileSizeBytes:Int64
+    let appMetaData:String?
     }
     
-    public enum DownloadFileResult {
-    case success(url: SMRelativeLocalURL, fileSizeBytes:Int64, appMetaData:String?)
+    enum DownloadFileResult {
+    case success(DownloadedFile)
     case serverMasterVersionUpdate(Int64)
     }
     
-    public enum DownloadFileError : Error {
+    enum DownloadFileError : Error {
     case couldNotCreateDownloadFileRequest
     case obtainedAppMetaDataButWasNotString
     case noExpectedResultKey
@@ -287,7 +288,7 @@ public class ServerAPI {
     case resultURLObtainedWasNil
     }
     
-    public func downloadFile(file: FileToDownload, serverMasterVersion:MasterVersionInt!, completion:((DownloadFileResult?, Error?)->(Void))?) {
+    func downloadFile(file: Filenaming, serverMasterVersion:MasterVersionInt!, completion:((DownloadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.downloadFile
         
         let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
@@ -338,7 +339,8 @@ public class ServerAPI {
                             return
                         }
                         
-                        completion?(.success(url: resultURL!, fileSizeBytes:fileSizeBytes, appMetaData:appMetaDataString), nil)
+                        let downloadedFile = DownloadedFile(url: resultURL!, fileSizeBytes: fileSizeBytes, appMetaData: appMetaDataString)
+                        completion?(.success(downloadedFile), nil)
                     }
                     else if let masterVersionUpdate = jsonDict[DownloadFileResponse.masterVersionUpdateKey] as? Int64 {
                         completion?(DownloadFileResult.serverMasterVersionUpdate(masterVersionUpdate), nil)
@@ -378,12 +380,12 @@ public class ServerAPI {
         return jsonDict
     }
     
-    public enum GetUploadsError : Error {
+    enum GetUploadsError : Error {
     case getUploadsResponseConversionError
     case couldNotCreateFileIndexRequest
     }
         
-    public func getUploads(completion:((_ fileIndex: [FileInfo]?, Error?)->(Void))?) {
+    func getUploads(completion:((_ fileIndex: [FileInfo]?, Error?)->(Void))?) {
     
         let endpoint = ServerEndpoints.getUploads
         
@@ -406,12 +408,12 @@ public class ServerAPI {
         }
     }
     
-    public enum UploadDeletionResult {
+    enum UploadDeletionResult {
     case success
     case serverMasterVersionUpdate(Int64)
     }
     
-    public struct FileToDelete {
+    struct FileToDelete {
         let fileUUID:String!
         let fileVersion:FileVersionInt!
         
@@ -425,11 +427,11 @@ public class ServerAPI {
         }
     }
     
-    public enum UploadDeletionError : Error {
+    enum UploadDeletionError : Error {
     case getUploadDeletionResponseConversionError
     }
     
-    public func uploadDeletion(file: FileToDelete, serverMasterVersion:MasterVersionInt!, completion:((UploadDeletionResult?, Error?)->(Void))?) {
+    func uploadDeletion(file: FileToDelete, serverMasterVersion:MasterVersionInt!, completion:((UploadDeletionResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadDeletion
         
         let url = URL(string: baseURL + endpoint.path)!

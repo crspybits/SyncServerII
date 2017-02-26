@@ -203,6 +203,8 @@ class FileControllerTests: ServerTestCase {
         downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
     }
     
-    // TODO: *0* Make sure its an error for a different user to download our file even if they have the fileUUID and fileVersion.
+    // TODO: *1* Make sure its an error for a different user to download our file even if they have the fileUUID and fileVersion.
+    
+    // TODO: *1* Test that two concurrent downloads work.
 }
 

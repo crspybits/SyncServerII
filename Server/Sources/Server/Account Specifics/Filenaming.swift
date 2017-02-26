@@ -9,10 +9,10 @@
 import Foundation
 
 protocol Filenaming {
-#if SERVER
     var fileUUID:String! {get}
     var fileVersion:Int32! {get}
-    
+
+#if SERVER
     func cloudFileName(deviceUUID:String) -> String
 #endif
 }

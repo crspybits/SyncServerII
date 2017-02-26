@@ -29,25 +29,23 @@ class ServerAPI_DownloadFile: TestCase {
         let uploadFileURL = Bundle(for: ServerAPI_DownloadFile.self).url(forResource: "UploadMe", withExtension: "txt")
         XCTAssert(uploadFileURL != nil)
         
-        guard let (fileSize, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, appMetaData:appMetaData) else {
+        guard let (fileSize, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, appMetaData:appMetaData) else {
             return
         }
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
         
-        let file = ServerAPI.FileToDownload(fileUUID: fileUUID, fileVersion: 0)
-        
         let expectation = self.expectation(description: "doneUploads")
 
-        ServerAPI.session.downloadFile(file: file, serverMasterVersion: masterVersion + 1) { (result, error) in
+        ServerAPI.session.downloadFile(file: file as! Filenaming, serverMasterVersion: masterVersion + 1) { (result, error) in
         
             XCTAssert(error == nil)
             XCTAssert(result != nil)
             
-            if case .success(let url, let resultFileSize, let resultAppMetaData) = result! {
-                XCTAssert(FilesMisc.compareFiles(file1: uploadFileURL!, file2: url as URL))
-                XCTAssert(resultAppMetaData == appMetaData)
-                XCTAssert(fileSize == resultFileSize)
+            if case .success(let downloadedFile) = result! {
+                XCTAssert(FilesMisc.compareFiles(file1: uploadFileURL!, file2: downloadedFile.url as URL))
+                XCTAssert(downloadedFile.appMetaData == appMetaData)
+                XCTAssert(fileSize == downloadedFile.fileSizeBytes)
             }
             else {
                 XCTFail()
@@ -66,4 +64,6 @@ class ServerAPI_DownloadFile: TestCase {
     func testDownloadTextFileWithAppMetaData() {
         downloadTextFile(appMetaData: "foobar was here")
     }
+    
+    // TODO: *1* Test that two concurrent downloads work.
 }
