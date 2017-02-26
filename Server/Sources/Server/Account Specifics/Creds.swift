@@ -90,10 +90,20 @@ public class Creds {
         requestOptions.append(.headers(headers))
  
         let req = HTTP.request(requestOptions) { response in
-            if let response = response {
+            if let response:KituraNet.ClientResponse = response {
                 let statusCode = response.statusCode
-                Log.debug(message: "HTTP status code: \(statusCode)")
+                Log.debug(message: "HTTP status code: \(statusCode); raw: \(statusCode.rawValue)")
                 if statusCode != HTTPStatusCode.OK {
+                    for header in response.headers {
+                        Log.debug(message: "Header: \(header)")
+                    }
+                    let result = try? response.readString()
+                    Log.debug(message: "Response data as string: \(result)")
+                    
+                    // TODO: *1* 2/26/17; I just got a non-200 result and the body of the response is: Optional("{\n \"error\": \"invalid_grant\",\n \"error_description\": \"Bad Request\"\n}\n"). My hypothesis is this that means the refresh token has expired. See also http://stackoverflow.com/questions/26724003/using-refresh-token-exception-error-invalid-grant
+                    // I just created a new refresh token, and this works again. My hypothesis above seems correct on this basis.
+                    // I suspect the "expiration" of the refresh token comes about here because of the method I'm using to authenticate on the client side-- I sign in again from the client, and generate a new access token, which also causes the server to generate a new refresh token (which is stored in the db, not in the Server.json file used in unit tests). And I believe there's a limit on the number of active refresh tokens.
+                    // The actual `TODO` item here is to respond to the client in such a way so the client can prompt the user to re-sign in to generate an updated refresh token.
                     completion(nil, statusCode)
                     return
                 }

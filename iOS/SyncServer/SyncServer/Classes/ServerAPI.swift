@@ -145,7 +145,7 @@ public class ServerAPI {
         }
     }
     
-    struct File {
+    struct File : Filenaming {
         let localURL:URL!
         let fileUUID:String!
         let mimeType:String!

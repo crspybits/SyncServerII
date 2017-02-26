@@ -11,7 +11,7 @@ import KituraNet
 import SwiftyJSON
 import Foundation
 
-// TODO: *0* Need automatic refreshing of the access token-- this should make client side testing easier: There should be no need to create a new access token every 1/2 hour.
+// TODO: *0* Need automatic refreshing of the access token-- this should make client side testing easier: There should be no need to create a new access token every hour.
 
 private let folderMimeType = "application/vnd.google-apps.folder"
 

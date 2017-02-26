@@ -37,7 +37,7 @@ class ServerAPI_DownloadFile: TestCase {
         
         let expectation = self.expectation(description: "doneUploads")
 
-        ServerAPI.session.downloadFile(file: file as! Filenaming, serverMasterVersion: masterVersion + 1) { (result, error) in
+        ServerAPI.session.downloadFile(file: file, serverMasterVersion: masterVersion + 1) { (result, error) in
         
             XCTAssert(error == nil)
             XCTAssert(result != nil)

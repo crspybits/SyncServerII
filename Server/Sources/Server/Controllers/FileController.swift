@@ -404,7 +404,7 @@ class FileController : ControllerProtocol {
         
         // TODO: *0* What would happen if someone else deletes the file as we we're downloading it? It seems a shame to hold a lock for the entire duration of the download, however.
         
-        // Related question: With transactions, if we just select from a particular row (i.e., for the master version for this user, as immediately below) does this result in a lock for the duration of the transaction? We could test for this by sleeping in the middle of the download below, and seeing if another request could delete the file at the same time. This should make a good test case for any mechanism that I come up with.
+        // TODO: *0* Related question: With transactions, if we just select from a particular row (i.e., for the master version for this user, as immediately below) does this result in a lock for the duration of the transaction? We could test for this by sleeping in the middle of the download below, and seeing if another request could delete the file at the same time. This should make a good test case for any mechanism that I come up with.
 
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
@@ -457,6 +457,12 @@ class FileController : ControllerProtocol {
             
             guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
                 Log.error(message: "Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)")
+                params.completion(nil)
+                return
+            }
+            
+            if fileIndexObj!.deleted! {
+                Log.error(message: "The file you are trying to download has been deleted!")
                 params.completion(nil)
                 return
             }

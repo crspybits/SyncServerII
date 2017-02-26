@@ -157,9 +157,114 @@ class Client_Downloads: TestCase {
         waitForExpectations(timeout: 30.0, handler: nil)
     }
     
-    // TODO: *0* Test with masterVersion update.
+    func testDownloadNextWithMasterVersionUpdate() {
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        
+        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        checkForDownloads(expectedMasterVersion: masterVersion + 1, expectedFiles: [file])
+        
+        // Fake an incorrect master version.
+        MasterVersion.get().version = masterVersion
+        CoreData.sessionNamed(Constants.coreDataName).saveContext()
+
+        let expectation = self.expectation(description: "next")
+
+        let result = Download.session.next() { completionResult in
+            guard case .masterVersionUpdate = completionResult else {
+                XCTFail()
+                return
+            }
+            
+            expectation.fulfill()
+        }
+        
+        guard case .startedDownload = result else {
+            XCTFail()
+            return
+        }
+        
+        let dfts = DownloadFileTracker.fetchAll()
+        XCTAssert(dfts[0].status == .downloading)
+        
+        waitForExpectations(timeout: 30.0, handler: nil)
+    }
     
-    // TODO: *0* allDownloadsCompleted
+    func testThatTwoNextsWithOneFileGivesAllDownloadsCompleted() {
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        
+        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        checkForDownloads(expectedMasterVersion: masterVersion + 1, expectedFiles: [file])
+
+        // First next should work as usual
+        let expectation1 = self.expectation(description: "next1")
+        let _ = Download.session.next() { completionResult in
+            guard case .downloaded = completionResult else {
+                XCTFail()
+                return
+            }
+            
+            expectation1.fulfill()
+        }
+        waitForExpectations(timeout: 30.0, handler: nil)
+        
+        // Second next should indicate `allDownloadsCompleted`
+        let result = Download.session.next() { completionResult in
+            XCTFail()
+        }
+        
+        guard case .allDownloadsCompleted = result else {
+            XCTFail()
+            return
+        }
+    }
     
-    // TODO: *0* Try a .next followed by a .next-- the second should indicate that there is a download already occurring.
+    func testNextImmediatelyFollowedByNextIndicatesDownloadAlreadyOccurring() {
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        
+        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        checkForDownloads(expectedMasterVersion: masterVersion + 1, expectedFiles: [file])
+
+        let expectation = self.expectation(description: "next")
+
+        let _ = Download.session.next() { completionResult in
+            guard case .downloaded = completionResult else {
+                XCTFail()
+                return
+            }
+            
+            expectation.fulfill()
+        }
+        
+        // This second `next` should fail: We already have a download occurring.
+        let result = Download.session.next() { completionResult in
+            XCTFail()
+        }
+        guard case .error(_) = result else {
+            XCTFail()
+            return
+        }
+        
+        waitForExpectations(timeout: 30.0, handler: nil)
+    }
 }

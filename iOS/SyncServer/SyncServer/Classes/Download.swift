@@ -69,7 +69,7 @@ class Download {
     case error(String)
     }
     
-    // Starts download of next file, if there is one. There should be no files downloading already. Only if .startedDownload is the NextResult will the completion handler be called.
+    // Starts download of next file, if there is one. There should be no files downloading already. Only if .startedDownload is the NextResult will the completion handler be called. With a masterVersionUpdate response for NextCompletion, the MasterVersion Core Data object is updated by this method.
     func next(completion:((NextCompletion)->())?) -> NextResult {
         let dfts = DownloadFileTracker.fetchAll()
         if dfts.count == 0 {
@@ -78,7 +78,9 @@ class Download {
 
         let alreadyDownloading = dfts.filter {$0.status == .downloading}
         if alreadyDownloading.count != 0 {
-            return .error("Already downloading a file!")
+            let message = "Already downloading a file!"
+            Log.error(message)
+            return .error(message)
         }
         
         let notStarted = dfts.filter {$0.status == .notStarted}
