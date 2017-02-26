@@ -37,6 +37,7 @@ class Download {
                 return
             }
 
+            // TODO: *1* Deal with download deletions.
             let (fileDownloads, _) = Directory.session.checkFileIndex(fileIndex: fileIndex!)
             
             if fileDownloads != nil {

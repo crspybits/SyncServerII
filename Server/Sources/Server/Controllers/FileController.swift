@@ -568,7 +568,14 @@ class FileController : ControllerProtocol {
                 params.completion(nil)
                 return
             }
-            
+
+#if DEBUG
+            if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion != 0 {
+                actuallyDeleteFileFromServer(key:key, uploadDeletionRequest:uploadDeletionRequest, fileIndexObj:fileIndexObj, params:params)
+                return
+            }
+#endif
+
             // Create entry in Upload table.
             let upload = Upload()
             upload.fileUUID = uploadDeletionRequest.fileUUID
@@ -589,4 +596,44 @@ class FileController : ControllerProtocol {
             }
         }
     }
+    
+#if DEBUG
+    func actuallyDeleteFileFromServer(key:FileIndexRepository.LookupKey, uploadDeletionRequest: Filenaming, fileIndexObj:FileIndex, params:RequestProcessingParameters) {
+    
+        let result = params.repos.fileIndex.remove(key: key)
+        switch result {
+        case .removed(numberRows: let numberRows):
+            if numberRows != 1 {
+                Log.error(message: "Number of rows deleted \(numberRows) != 1")
+                params.completion(nil)
+                return
+            }
+            
+        case .error(let error):
+            Log.error(message: "Error deleting from FileIndex: \(error)")
+            params.completion(nil)
+            return
+        }
+        
+        guard let googleCreds = params.creds as? GoogleCreds else {
+            Log.error(message: "Error converting to GoogleCreds!")
+            params.completion(nil)
+            return
+        }
+
+        let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: fileIndexObj.deviceUUID!)
+
+        googleCreds.deleteFile(cloudFolderName: fileIndexObj.cloudFolderName!, cloudFileName: cloudFileName, mimeType: fileIndexObj.mimeType!) { error in
+            guard error == nil else {
+                Log.error(message: "Error deleting file from cloud storage: \(error!)!")
+                params.completion(nil)
+                return
+            }
+            
+            let response = UploadDeletionResponse()!
+            params.completion(response)
+            return
+        }
+    }
+#endif
 }

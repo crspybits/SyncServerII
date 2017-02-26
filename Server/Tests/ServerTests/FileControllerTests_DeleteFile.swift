@@ -187,7 +187,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
     }
     
-    // TODO: *0* Make sure a deviceUUID from a different user cannot do an UploadDeletion for our file.
+    // TODO: *1* Make sure a deviceUUID from a different user cannot do an UploadDeletion for our file.
     
     func testThatDeletionFailsWhenMasterVersionDoesNotMatch() {
         let deviceUUID = PerfectLib.UUID().string
@@ -203,5 +203,37 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, updatedMasterVersionExpected: 1)
+    }
+    
+    func testThatDebugDeletionFromServerWorks() {
+        let deviceUUID = PerfectLib.UUID().string
+        
+        let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1,
+            UploadDeletionRequest.actualDeletionKey: 1
+        ])!
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
+        
+        // Make sure deletion actually occurred!
+        
+        self.getFileIndex(expectedFiles: [], masterVersionExpected: uploadRequest1.masterVersion + 1, expectedFileSizes: [:], expectedDeletionState:[:])
+        
+        self.performServerTest { expectation, googleCreds in
+            let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID)
+            
+            googleCreds.searchFor(cloudFileName: cloudFileName, inCloudFolder: uploadRequest1.cloudFolderName, fileMimeType: uploadRequest1.mimeType) { (cloudFileId, error) in
+                XCTAssert(error != nil)
+                XCTAssert(error as! GoogleCreds.SearchForFileError == GoogleCreds.SearchForFileError.cloudFileDoesNotExist)
+                XCTAssert(cloudFileId == nil)
+                expectation.fulfill()
+            }
+        }
     }
 }

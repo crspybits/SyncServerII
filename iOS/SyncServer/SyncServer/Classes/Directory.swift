@@ -21,11 +21,17 @@ class Directory {
     func checkFileIndex(fileIndex:[FileInfo]) -> (downloadFiles:[FileInfo]?, downloadDeletions:[FileInfo]?)  {
     
         var downloadFiles = [FileInfo]()
+        // var downloadDeletions = [FileInfo]()
+
         for file in fileIndex {
+            var needToDownload = false
+            
             if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: file.fileUUID) {
+                // Have the file in client directory.
+                
                 if entry.fileVersion != file.fileVersion {
-                    // Not same version here locally as on server: Need to download.
-                    downloadFiles += [file]
+                    // Not same version here locally as on server:
+                    needToDownload = true
                 }
                 // Else: No need to download.
             }
@@ -34,8 +40,14 @@ class Directory {
                 let entry = DirectoryEntry.newObject() as! DirectoryEntry
                 entry.fileUUID = file.fileUUID
                 entry.fileVersion = file.fileVersion
-                
-                // And need to download.
+
+                needToDownload = true
+            }
+            
+            // if file.deleted! {
+            // }
+            
+            if needToDownload {
                 downloadFiles += [file]
             }
         }

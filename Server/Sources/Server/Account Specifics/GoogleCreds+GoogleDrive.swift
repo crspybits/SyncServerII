@@ -11,6 +11,8 @@ import KituraNet
 import SwiftyJSON
 import Foundation
 
+// TODO: *0* Need automatic refreshing of the access token-- this should make client side testing easier: There should be no need to create a new access token every 1/2 hour.
+
 private let folderMimeType = "application/vnd.google-apps.folder"
 
 extension GoogleCreds {    
@@ -412,7 +414,7 @@ extension GoogleCreds {
     case cloudFileDoesNotExist
     }
     
-    private func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
+    func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
         
         self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in
             if result == nil {

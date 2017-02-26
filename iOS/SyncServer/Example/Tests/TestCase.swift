@@ -66,7 +66,7 @@ class TestCase: XCTestCase {
         return serverMasterVersion
     }
     
-    func getFileIndex(expectedFiles:[(fileUUID:String, fileSize:Int64)]) {
+    func getFileIndex(expectedFiles:[(fileUUID:String, fileSize:Int64)], callback:((FileInfo)->())? = nil) {
         let expectation1 = self.expectation(description: "fileIndex")
         
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
@@ -80,6 +80,10 @@ class TestCase: XCTestCase {
                 
                 XCTAssert(result!.count == 1)
                 XCTAssert(result![0].fileSizeBytes == fileSize)
+            }
+            
+            for curr in 0..<fileIndex!.count {
+                callback?(fileIndex![curr])
             }
             
             expectation1.fulfill()
@@ -96,7 +100,6 @@ class TestCase: XCTestCase {
             
             XCTAssert(expectedFiles.count == uploads?.count)
             
-            var curr = 0
             for (fileUUID, fileSize) in expectedFiles {
                 let result = uploads?.filter { file in
                     file.fileUUID == fileUUID
@@ -106,10 +109,10 @@ class TestCase: XCTestCase {
                 if fileSize != nil {
                     XCTAssert(result![0].fileSizeBytes == fileSize)
                 }
-                
+            }
+            
+            for curr in 0..<uploads!.count {
                 callback?(uploads![curr])
-                
-                curr += 1
             }
             
             expectation1.fulfill()
@@ -205,6 +208,44 @@ class TestCase: XCTestCase {
             }
             
             expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
+    
+    func removeAllServerFiles() {
+        let masterVersion = getMasterVersion()
+        
+        var filesToDelete:[FileInfo]?
+        let uploadDeletion = self.expectation(description: "uploadDeletion")
+
+        func recursiveRemoval(indexToRemove:Int) {
+            if indexToRemove >= filesToDelete!.count {
+                uploadDeletion.fulfill()
+                return
+            }
+            
+            let fileIndexObj = filesToDelete![indexToRemove]
+            var fileToDelete = ServerAPI.FileToDelete(fileUUID: fileIndexObj.fileUUID, fileVersion: fileIndexObj.fileVersion)
+            fileToDelete.actualDeletion = true
+            
+            ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (result, error) in
+                XCTAssert(error == nil)
+                guard case .success = result! else {
+                    XCTFail()
+                    return
+                }
+                
+                recursiveRemoval(indexToRemove: indexToRemove + 1)
+            }
+        }
+        
+        ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
+            XCTAssert(error == nil)
+            XCTAssert(masterVersion! >= 0)
+            
+            filesToDelete = fileIndex
+            recursiveRemoval(indexToRemove: 0)
         }
         
         waitForExpectations(timeout: 10.0, handler: nil)

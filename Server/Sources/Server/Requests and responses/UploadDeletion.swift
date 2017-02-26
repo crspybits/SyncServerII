@@ -15,7 +15,9 @@ import Kitura
 
 // This places a deletion request in the Upload table on the server. A DoneUploads request is subsequently required to actually perform the deletion in cloud storage.
 
-class UploadDeletionRequest : NSObject, RequestMessage {
+class UploadDeletionRequest : NSObject, RequestMessage, Filenaming {
+    // The use of the Filenaming protocol here is to support the DEBUG `actualDeletion` parameter.
+    
     // MARK: Properties for use in request message.
     
     static let fileUUIDKey = "fileUUID"
@@ -28,13 +30,24 @@ class UploadDeletionRequest : NSObject, RequestMessage {
     // Overall version for files for the specific user; assigned by the server.
     static let masterVersionKey = "masterVersion"
     var masterVersion:MasterVersionInt!
+
+#if DEBUG
+    // Enable the client to actually delete files-- for testing purposes. The UploadDeletionRequest will not queue the request, but instead deletes from both the FileIndex and from cloud storage.
+    static let actualDeletionKey = "actualDeletion"
+    var actualDeletion:Int32? // Should be 0 or non-0; I haven't been able to get Bool to work with Gloss
+#endif
     
     func nonNilKeys() -> [String] {
         return [UploadDeletionRequest.fileUUIDKey, UploadDeletionRequest.fileVersionKey, UploadDeletionRequest.masterVersionKey]
     }
     
     func allKeys() -> [String] {
-        return self.nonNilKeys()
+        var keys = [String]()
+        keys += self.nonNilKeys()
+#if DEBUG
+        keys += [UploadDeletionRequest.actualDeletionKey]
+#endif
+        return keys
     }
     
     required init?(json: JSON) {
@@ -43,6 +56,10 @@ class UploadDeletionRequest : NSObject, RequestMessage {
         self.fileUUID = UploadDeletionRequest.fileUUIDKey <~~ json
         self.masterVersion = UploadDeletionRequest.masterVersionKey <~~ json
         self.fileVersion = UploadDeletionRequest.fileVersionKey <~~ json
+        
+#if DEBUG
+        self.actualDeletion = UploadDeletionRequest.actualDeletionKey <~~ json
+#endif
         
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
@@ -60,11 +77,21 @@ class UploadDeletionRequest : NSObject, RequestMessage {
 #endif
     
     func toJSON() -> JSON? {
-        return jsonify([
+        var param:[JSON?] = []
+        
+        param += [
             UploadDeletionRequest.fileUUIDKey ~~> self.fileUUID,
             UploadDeletionRequest.masterVersionKey ~~> self.masterVersion,
             UploadDeletionRequest.fileVersionKey ~~> self.fileVersion
-        ])
+        ]
+        
+#if DEBUG
+        param += [
+            UploadDeletionRequest.actualDeletionKey ~~> self.actualDeletion
+        ]
+#endif
+        
+        return jsonify(param)
     }
 }
 

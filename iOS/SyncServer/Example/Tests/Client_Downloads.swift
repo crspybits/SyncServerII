@@ -16,7 +16,7 @@ class Client_Downloads: TestCase {
         super.setUp()
         DownloadFileTracker.removeAll()
         DirectoryEntry.removeAll()
-        // TODO: *0* Need to remove all files from sync server.
+        removeAllServerFiles()
     }
     
     override func tearDown() {
@@ -29,7 +29,7 @@ class Client_Downloads: TestCase {
         
         let fileUUID = UUID().uuidString
         
-        guard let (fileSize, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
             return
         }
         
@@ -44,7 +44,15 @@ class Client_Downloads: TestCase {
             do {
                 let dfts = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: DownloadFileTracker.entityName()) as? [DownloadFileTracker]
                 XCTAssert(dfts!.count == 1)
-                // TODO: *0* Make sure the contents of the `dfts` are the same as expected.
+                XCTAssert(dfts![0].fileUUID == fileUUID)
+                XCTAssert(dfts![0].fileVersion == file.fileVersion)
+                
+                XCTAssert(MasterVersion.get().version == masterVersion + 1)
+                
+                let entries = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: DirectoryEntry.entityName()) as? [DirectoryEntry]
+                XCTAssert(entries!.count == 1)
+                XCTAssert(entries![0].fileUUID == fileUUID)
+                XCTAssert(entries![0].fileVersion == file.fileVersion)
             } catch {
                 XCTAssert(false)
             }
@@ -55,6 +63,7 @@ class Client_Downloads: TestCase {
         waitForExpectations(timeout: 30.0, handler: nil)
     }
 
+/*
     func testDownload() {
         let masterVersion = getMasterVersion()
         
@@ -69,4 +78,5 @@ class Client_Downloads: TestCase {
         // We've manually uploaded a file: Our local directory doesn't know about it. Next: trigger a client-level download.
 
     }
+*/
 }

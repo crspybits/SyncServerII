@@ -414,6 +414,15 @@ public class ServerAPI {
     public struct FileToDelete {
         let fileUUID:String!
         let fileVersion:FileVersionInt!
+        
+#if DEBUG
+        var actualDeletion:Bool = false
+#endif
+
+        init(fileUUID:String, fileVersion:FileVersionInt) {
+            self.fileUUID = fileUUID
+            self.fileVersion = fileVersion
+        }
     }
     
     public enum UploadDeletionError : Error {
@@ -425,11 +434,18 @@ public class ServerAPI {
         
         let url = URL(string: baseURL + endpoint.path)!
         
-        let uploadDeletion = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: file.fileUUID,
-            UploadDeletionRequest.fileVersionKey: file.fileVersion,
-            UploadDeletionRequest.masterVersionKey: serverMasterVersion
-        ])!
+        var paramsForRequest:[String:Any] = [:]
+        paramsForRequest[UploadDeletionRequest.fileUUIDKey] = file.fileUUID
+        paramsForRequest[UploadDeletionRequest.fileVersionKey] = file.fileVersion
+        paramsForRequest[UploadDeletionRequest.masterVersionKey] = serverMasterVersion
+        
+#if DEBUG
+        if file.actualDeletion {
+            paramsForRequest[UploadDeletionRequest.actualDeletionKey] = 1
+        }
+#endif
+        
+        let uploadDeletion = UploadDeletionRequest(json: paramsForRequest)!
         
         let parameters = uploadDeletion.urlParameters()!
         let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
