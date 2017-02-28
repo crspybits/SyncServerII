@@ -47,9 +47,7 @@ public class DirectoryEntry: NSManagedObject, CoreDataModel {
             
             for entry in entries! {
                 CoreData.sessionNamed(Constants.coreDataName).remove(entry)
-            }
-            
-            CoreData.sessionNamed(Constants.coreDataName).saveContext()
+            }            
         } catch (let error) {
             Log.error("Error: \(error)")
             assert(false)

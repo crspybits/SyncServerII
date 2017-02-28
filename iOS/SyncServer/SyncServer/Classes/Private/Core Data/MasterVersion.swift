@@ -17,8 +17,9 @@ class MasterVersion: NSManagedObject {
     }
     
     class func newObject() -> NSManagedObject {
-        let masterVersion = CoreData.sessionNamed(Constants.coreDataName).newObject(withEntityName: self.entityName())
-        return masterVersion!
+        let masterVersion = CoreData.sessionNamed(Constants.coreDataName).newObject(withEntityName: self.entityName()) as! MasterVersion
+        masterVersion.version = 0
+        return masterVersion
     }
     
     // Get the singleton.

@@ -15,19 +15,31 @@ class Download {
     private init() {
     }
     
+    enum CheckCompletion {
+    case noDownloadsAvailable
+    case downloadsAvailable(numberOfDownloads:Int32)
+    case error(Error)
+    }
+    
     // TODO: *0* while this check is occuring, we want to make sure we don't have a concurrent check operation.
     // Creates DirectoryEntry's as neeed to represent files in FileIndex on server, but not known about locally. Creates DownloadFileTracker's to represent files that need downloading. Updates MasterVersion with the master version on the server.
-    func check(completion:((Error?)->())? = nil) {
+    func check(completion:((CheckCompletion)->())? = nil) {
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
             guard error == nil else {
-                completion?(error)
+                completion?(.error(error!))
                 return
             }
 
             // TODO: *1* Deal with download deletions.
             let (fileDownloads, _) = Directory.session.checkFileIndex(fileIndex: fileIndex!)
+
+            MasterVersion.get().version = masterVersion!
             
-            if fileDownloads != nil {
+            if fileDownloads == nil || fileDownloads!.count == 0 {
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                completion?(.noDownloadsAvailable)
+            }
+            else {
                 for file in fileDownloads! {
                     if file.fileVersion != 0 {
                         // TODO: *5* We're considering this an error currently because we're not yet supporting multiple file versions.
@@ -39,37 +51,27 @@ class Download {
                     dft.fileVersion = file.fileVersion
                 }
                 
-                MasterVersion.get().version = masterVersion!
-                
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
+
+                completion?(.downloadsAvailable(numberOfDownloads: Int32(fileDownloads!.count)))
             }
-            
-            completion?(nil)
         }
     }
 
-    /* A download consists of:
-
-        e) Next, download each file.
-            On each download, if the masterVersion gets updated, we need to restart
-            the process.
-        f) With all files downloaded and masterVersion unchanged, we can
-            call the client's delegate method.
-    */
     enum NextResult {
-    case startedDownload
+    case started
     case noDownloads
     case allDownloadsCompleted
     case error(String)
     }
     
     enum NextCompletion {
-    case downloaded
+    case downloaded(DownloadFileTracker)
     case masterVersionUpdate
     case error(String)
     }
     
-    // Starts download of next file, if there is one. There should be no files downloading already. Only if .startedDownload is the NextResult will the completion handler be called. With a masterVersionUpdate response for NextCompletion, the MasterVersion Core Data object is updated by this method.
+    // Starts download of next file, if there is one. There should be no files downloading already. Only if .startedDownload is the NextResult will the completion handler be called. With a masterVersionUpdate response for NextCompletion, the MasterVersion Core Data object is updated by this method, and all the DownloadFileTracker objects have been reset.
     func next(completion:((NextCompletion)->())?) -> NextResult {
         let dfts = DownloadFileTracker.fetchAll()
         if dfts.count == 0 {
@@ -113,15 +115,14 @@ class Download {
                     nextToDownload.localURL = downloadedFile.url
                     CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 }
-                completion?(.downloaded)
+                completion?(.downloaded(nextToDownload))
                 
             case .serverMasterVersionUpdate(let masterVersionUpdate):
                 Synchronized.block(nextToDownload) {
-                    // The simplest method to deal with this is to restart all downloads. 
-                    // TODO: *2* A more efficient method is to get the file index, giving us the new masterVersion, and see which files that we have already downloaded have the same version as we expect.
-                    dfts.map { dft in
-                        dft.reset()
-                    }
+                    // TODO: *2* A more efficient method (than in place here) is to get the file index, giving us the new masterVersion, and see which files that we have already downloaded have the same version as we expect.
+                    // The simplest method to deal with this is to restart all downloads. It is insufficient to just reset all of the DownloadFileTracker objects: Because some of the files we're wanting to download could have been marked as deleted in the FileIndex on the server. Thus, I'm going to remove all DownloadFileTracker objects.
+
+                    DownloadFileTracker.removeAll()
                     MasterVersion.get().version = masterVersionUpdate
                     CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 }
@@ -134,6 +135,6 @@ class Download {
             CoreData.sessionNamed(Constants.coreDataName).saveContext()
         }
         
-        return .startedDownload
+        return .started
     }
 }

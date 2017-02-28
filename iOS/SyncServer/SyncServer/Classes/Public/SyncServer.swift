@@ -11,18 +11,31 @@ import SMCoreLib
 
 // TODO: *1* These delegate methods are called on the main thread.
 
-public protocol SMSyncServerDelegate : class {
+public protocol SyncServerDelegate : class {
     /* Called at the end of all downloads, on non-error conditions. Only called when there was at least one download.
     The client owns the files referenced by the NSURL's after this call completes. These files are temporary in the sense that they will not be backed up to iCloud, could be removed when the device or app is restarted, and should be moved to a more permanent location. This is received/called in an atomic manner: This reflects the current state of files on the server.
-    The recommended action is for the client to replace their existing data with that from the files.
+    Client should replace their existing data with that from the files. Clients *must* call the next callback when they have finished with handling these files.
     */
-    func syncServerShouldSaveDownloads(downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)])
+    func syncServerShouldSaveDownloads(downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)], next:()->())
+    
+    // Reports events. Useful for testing and UI.
+    func syncServerEventOccurred(event:SyncEvent)
 }
 
 public class SyncServer {
     public static let session = SyncServer()
     
     private init() {
+    }
+    
+    public weak var delegate:SyncServerDelegate? {
+        set {
+            SyncManager.session.delegate = newValue
+        }
+        
+        get {
+            return SyncManager.session.delegate
+        }
     }
     
     public func appLaunchSetup(withServerURL serverURL: URL) {

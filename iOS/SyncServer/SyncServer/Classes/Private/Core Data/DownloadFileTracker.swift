@@ -93,22 +93,14 @@ class DownloadFileTracker: NSManagedObject, Filenaming {
          return dfts
     }
     
-    func reset() {
-        status = .notStarted
-        appMetaData = nil
-        localURL = nil
-        fileSizeBytes = 0
-    }
-    
     class func removeAll() {
         do {
             let dfts = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: self.entityName()) as? [DownloadFileTracker]
             
             for dft in dfts! {
+                // TODO: *1* If there is a localURL associated with this, I should remove that file before removing the core data object.
                 CoreData.sessionNamed(Constants.coreDataName).remove(dft)
             }
-            
-            CoreData.sessionNamed(Constants.coreDataName).saveContext()
         } catch (let error) {
             Log.error("Error: \(error)")
             assert(false)

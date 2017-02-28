@@ -17,7 +17,7 @@ class Directory {
     private init() {
     }
     
-    // Compares the passed fileIndex to the current DirecotoryEntry objects, and returns just the FileInfo objects we need to download, if any.
+    // Compares the passed fileIndex to the current DirecotoryEntry objects, and returns just the FileInfo objects we need to download, if any. The directory is not changed as a result of this call.
     func checkFileIndex(fileIndex:[FileInfo]) -> (downloadFiles:[FileInfo]?, downloadDeletions:[FileInfo]?)  {
     
         var downloadFiles = [FileInfo]()
@@ -36,11 +36,8 @@ class Directory {
                 // Else: No need to download.
             }
             else {
-                // File unknown to the client: Need to create DirectoryEntry.
-                let entry = DirectoryEntry.newObject() as! DirectoryEntry
-                entry.fileUUID = file.fileUUID
-                entry.fileVersion = file.fileVersion
-
+                // File unknown to the client: Need to create DirectoryEntry-- later.
+                // Not going to create directory entry now because then this state looks identical to having downloaded the file/version previously.
                 needToDownload = true
             }
             
@@ -53,5 +50,19 @@ class Directory {
         }
 
         return (downloadFiles, nil)
+    }
+    
+    func updateAfterDownloadingFiles(dfts:[DownloadFileTracker]) {
+        dfts.map { dft in
+            if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: dft.fileUUID) {
+                assert(entry.fileVersion < dft.fileVersion)
+                entry.fileVersion = dft.fileVersion
+            }
+            else {
+                let newEntry = DirectoryEntry.newObject() as! DirectoryEntry
+                newEntry.fileUUID = dft.fileUUID
+                newEntry.fileVersion = dft.fileVersion
+            }
+        }
     }
 }

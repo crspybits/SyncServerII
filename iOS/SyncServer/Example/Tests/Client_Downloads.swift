@@ -14,8 +14,11 @@ class Client_Downloads: TestCase {
     
     override func setUp() {
         super.setUp()
+        
         DownloadFileTracker.removeAll()
         DirectoryEntry.removeAll()
+        CoreData.sessionNamed(Constants.coreDataName).saveContext()
+
         removeAllServerFilesInFileIndex()
     }
     
@@ -28,28 +31,32 @@ class Client_Downloads: TestCase {
         
         let expectation = self.expectation(description: "check")
 
-        Download.session.check() { error in
-            XCTAssert(error == nil)
+        Download.session.check() { checkCompletion in
+            switch checkCompletion {
+            case .noDownloadsAvailable:
+                XCTAssert(expectedFiles.count == 0)
+                
+            case .downloadsAvailable(numberOfDownloads: let numDownloads):
+                XCTAssert(Int32(expectedFiles.count) == numDownloads)
+                
+            case .error(_):
+                XCTFail()
+            }
             
             XCTAssert(MasterVersion.get().version == expectedMasterVersion)
 
             let dfts = DownloadFileTracker.fetchAll()
-            let entries = DirectoryEntry.fetchAll()
-
             XCTAssert(dfts.count == expectedFiles.count)
-            XCTAssert(entries.count == expectedFiles.count)
 
             for file in expectedFiles {
                 let dftsResult = dfts.filter { $0.fileUUID == file.fileUUID &&
                     $0.fileVersion == file.fileVersion
                 }
                 XCTAssert(dftsResult.count == 1)
-
-                let entriesResult = entries.filter { $0.fileUUID == file.fileUUID &&
-                    $0.fileVersion == file.fileVersion
-                }
-                XCTAssert(entriesResult.count == 1)
             }
+            
+            let entries = DirectoryEntry.fetchAll()
+            XCTAssert(entries.count == 0)
             
             expectation.fulfill()
         }
@@ -136,17 +143,13 @@ class Client_Downloads: TestCase {
             XCTAssert(dfts[0].status == .downloaded)
 
             let fileData1 = try? Data(contentsOf: file.localURL)
-            let fileData2 = try? Data(contentsOf: dfts[0].localURL! as URL)
-            
-            XCTAssert(fileData1 != nil)
-            XCTAssert(fileData2 != nil)
-            XCTAssert(fileData1! == fileData2!)
             XCTAssert(Int64(fileData1!.count) == dfts[0].fileSizeBytes)
+            XCTAssert(self.filesHaveSameContents(url1: file.localURL, url2: dfts[0].localURL! as URL))
             
             expectation.fulfill()
         }
         
-        guard case .startedDownload = result else {
+        guard case .started = result else {
             XCTFail()
             return
         }
@@ -185,7 +188,7 @@ class Client_Downloads: TestCase {
             expectation.fulfill()
         }
         
-        guard case .startedDownload = result else {
+        guard case .started = result else {
             XCTFail()
             return
         }

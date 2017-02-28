@@ -248,7 +248,19 @@ class TestCase: XCTestCase {
             recursiveRemoval(indexToRemove: 0)
         }
         
-        waitForExpectations(timeout: 10.0, handler: nil)
+        waitForExpectations(timeout: 30.0, handler: nil)
+    }
+    
+    func filesHaveSameContents(url1: URL, url2: URL) -> Bool {
+        
+        let fileData1 = try? Data(contentsOf: url1 as URL)
+        let fileData2 = try? Data(contentsOf: url2 as URL)
+        
+        if fileData1 == nil || fileData2 == nil {
+            return false
+        }
+        
+        return fileData1! == fileData2!
     }
 }
 
