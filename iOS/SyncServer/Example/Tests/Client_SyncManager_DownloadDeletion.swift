@@ -3,7 +3,7 @@
 //  SyncServer
 //
 //  Created by Christopher Prince on 2/27/17.
-//  Copyright © 2017 CocoaPods. All rights reserved.
+//  Copyright © 2017 Spastic Muffin, LLC. All rights reserved.
 //
 
 import XCTest
@@ -27,7 +27,7 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         super.tearDown()
     }
 
-    func testStartWithOneDownloadDeletion() {
+    func startWithOneDownloadDeletion() {
         // Uses SyncManager.session.start so we have the file in our local Directory after download.
         guard let (file, masterVersion) = uploadAndDownloadOneFile() else {
             XCTFail()
@@ -67,6 +67,10 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         }
         
         waitForExpectations(timeout: 30.0, handler: nil)
+    }
+
+    func testStartWithOneDownloadDeletion() {
+        startWithOneDownloadDeletion()
     }
 
     func testStartWithTwoDownloadDeletions() {
@@ -124,9 +128,113 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         waitForExpectations(timeout: 30.0, handler: nil)
     }
     
-    // TODO: Start with 1 download deletion, and one file download on server.
+    func testStartWithOneDownloadDeletionAndOneFileDownload() {
+        // Uses SyncManager.session.start so we have the file in our local Directory after download.
+        guard let (file1, masterVersion) = uploadAndDownloadOneFile() else {
+            XCTFail()
+            return
+        }
+        
+        // Simulate another device deleting the file.
+        let fileToDelete = ServerAPI.FileToDelete(fileUUID: file1.fileUUID, fileVersion: file1.fileVersion)
+        uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion)
+        
+        let fileUUID2 = UUID().uuidString
+        
+        guard let (_, file2) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
+        
+        // Now, see if `SyncManager.session.start` finds the download  and deletion...
+        
+        var calledShouldDoDeletions = false
+        var calledShouldSaveDownloads = false
+        
+        shouldDoDeletions = { (downloadDeletions:[SyncAttributes]) in
+            XCTAssert(downloadDeletions.count == 1)
+            XCTAssert(downloadDeletions[0].fileUUID == file1.fileUUID)
+            XCTAssert(downloadDeletions[0].fileVersion == file1.fileVersion)
+            calledShouldDoDeletions = true
+        }
+        
+        shouldSaveDownloads = { downloads in
+            XCTAssert(downloads.count == 1)
+            XCTAssert(downloads[0].downloadedFileAttributes.fileUUID == file2.fileUUID)
+            calledShouldSaveDownloads = true
+        }
+        
+        let expectation2 = self.expectation(description: "start")
+
+        SyncManager.session.start { (result, error) in
+            guard case .downloadDelegatesCalled(numberDownloadFiles: let numFileDownloads, numberDownloadDeletions: let numberDownloadDeletions) = result! else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(numberDownloadDeletions == 1)
+            XCTAssert(numFileDownloads == 1)
+            
+            XCTAssert(calledShouldDoDeletions)
+            XCTAssert(calledShouldSaveDownloads)
+
+            expectation2.fulfill()
+        }
+        
+        waitForExpectations(timeout: 30.0, handler: nil)
+    }
+
+    func testDownloadDeletionWithKnownDeletedFile() {
+        startWithOneDownloadDeletion()
+        
+        // We now have an entry in the local directory which is known to be deleted.
+        
+        var calledShouldDoDeletions = false
+        
+        shouldDoDeletions = { (downloadDeletions:[SyncAttributes]) in            
+            calledShouldDoDeletions = true
+        }
+        
+        let expectation = self.expectation(description: "start")
+
+        SyncManager.session.start { (result, error) in
+            guard case .noDownloadsOrDeletionsAvailable = result! else {
+                XCTFail()
+                return
+            }
+
+            XCTAssert(!calledShouldDoDeletions)
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 30.0, handler: nil)
+    }
     
-    // TODO: *0* Download deletion where file is in local directory already and is known to be deleted.
-    
-    // TODO: *0* Download deletion where the file wasn't in the directory previously.
+    func testDownloadDeletionWhereFileWasNotInDirectoryPreviously() {
+        uploadDeletionOfOneFileWithDoneUploads()
+        
+        var calledShouldDoDeletions = false
+        
+        shouldDoDeletions = { (downloadDeletions:[SyncAttributes]) in            
+            calledShouldDoDeletions = true
+        }
+        
+        let expectation = self.expectation(description: "start")
+
+        SyncManager.session.start { (result, error) in
+            guard case .noDownloadsOrDeletionsAvailable = result! else {
+                XCTFail()
+                return
+            }
+
+            XCTAssert(!calledShouldDoDeletions)
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 30.0, handler: nil)
+    }
 }

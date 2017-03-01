@@ -26,6 +26,7 @@ class ServerAPI_DoneUploads: TestCase {
         let fileUUID = UUID().uuidString
         
         guard let (fileSize, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            XCTFail()
             return
         }
         
@@ -49,10 +50,12 @@ class ServerAPI_DoneUploads: TestCase {
         let fileUUID2 = UUID().uuidString
 
         guard let (fileSize1, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion) else {
+            XCTFail()
             return
         }
         
         guard let (fileSize2, _) = uploadFile(fileName: "Cat", fileExtension: "jpg", mimeType: "image/jpeg", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
+            XCTFail()
             return
         }
 
@@ -72,29 +75,7 @@ class ServerAPI_DoneUploads: TestCase {
     }
     
     func testThatUploadDeletionOfOneFileWithDoneUploadsActuallyDeletes() {
-        guard let (fileUUID, masterVersion) = uploadDeletion() else {
-            XCTFail()
-            return
-        }
-
-        self.doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
-        
-        self.getUploads(expectedFiles: []) { file in
-            XCTAssert(file.fileUUID != fileUUID)
-        }
-        
-        var foundFile = false
-        
-        getFileIndex(expectedFiles: [
-            (fileUUID: fileUUID, fileSize: nil)
-        ]) { file in
-            if file.fileUUID == fileUUID {
-                foundFile = true
-                XCTAssert(file.deleted)
-            }
-        }
-        
-        XCTAssert(foundFile)
+        uploadDeletionOfOneFileWithDoneUploads()
     }
     
     func testDoneUploadsWith1FileUploadAnd1UploadDeletion() {
@@ -107,6 +88,7 @@ class ServerAPI_DoneUploads: TestCase {
         let fileUUIDUpload = UUID().uuidString
 
         guard let (fileSizeUpload, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUIDUpload, serverMasterVersion: masterVersion) else {
+            XCTFail()
             return
         }
 
@@ -179,10 +161,9 @@ class ServerAPI_DoneUploads: TestCase {
                 doneUploadsResult, error in
                             
                 XCTAssert(error == nil)
-                if case .serverMasterVersionUpdate(_) = doneUploadsResult! {
-                }
-                else {
+                guard case .serverMasterVersionUpdate(_) = doneUploadsResult! else {
                     XCTFail()
+                    return
                 }
                 
                 Log.special("Finished doneUploads2: \(doneUploadsResult)")

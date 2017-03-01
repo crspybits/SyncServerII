@@ -363,6 +363,32 @@ class TestCase: XCTestCase {
         
         waitForExpectations(timeout: 10.0, handler: nil)
     }
+
+    func uploadDeletionOfOneFileWithDoneUploads() {
+        guard let (fileUUID, masterVersion) = uploadDeletion() else {
+            XCTFail()
+            return
+        }
+
+        self.doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        self.getUploads(expectedFiles: []) { file in
+            XCTAssert(file.fileUUID != fileUUID)
+        }
+        
+        var foundDeletedFile = false
+        
+        getFileIndex(expectedFiles: [
+            (fileUUID: fileUUID, fileSize: nil)
+        ]) { file in
+            if file.fileUUID == fileUUID {
+                foundDeletedFile = true
+                XCTAssert(file.deleted)
+            }
+        }
+        
+        XCTAssert(foundDeletedFile)
+    }
 }
 
 extension TestCase : ServerNetworkingAuthentication {
