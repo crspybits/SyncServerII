@@ -2,9 +2,8 @@
 //  DirectoryEntry+CoreDataProperties.swift
 //  Pods
 //
-//  Created by Christopher Prince on 2/24/17.
+//  Created by Christopher Prince on 2/27/17.
 //
-//  This file was automatically generated and should not be edited.
 //
 
 import Foundation
@@ -19,5 +18,6 @@ extension DirectoryEntry {
 
     @NSManaged public var fileUUID: String?
     @NSManaged public var fileVersion: Int32
+    @NSManaged public var deletedOnServer: Bool
 
 }

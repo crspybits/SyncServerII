@@ -21,41 +21,12 @@ class ServerAPI_UploadDeletion: TestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-
+    
     func testThatUploadDeletionActuallyUploadsTheDeletion() {
-        let masterVersion = getMasterVersion()
-        
-        let fileUUID = UUID().uuidString
-        
-        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
-            return
-        }
-        
-        // for the file upload
-        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
-
-        let fileToDelete = ServerAPI.FileToDelete(fileUUID: file.fileUUID, fileVersion: file.fileVersion)
-        
-        
-        let uploadDeletion = self.expectation(description: "getUploads")
-
-        ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion+1) { (result, error) in
-            XCTAssert(error == nil)
-            guard case .success = result! else {
-                XCTFail()
-                return
-            }
-            uploadDeletion.fulfill()
-        }
-        
-        waitForExpectations(timeout: 10.0, handler: nil)
-        
-        getUploads(expectedFiles: [
-            (fileUUID: fileUUID, fileSize: nil)
-        ]) { fileInfo in
-            XCTAssert(fileInfo.deleted)
-        }
+        uploadDeletion()
     }
+    
+    // TODO: *0* Do an upload deletion, then a second upload deletion with the same file-- make sure the 2nd one fails.
     
     func testThatActualDeletionInDebugWorks() {
         let masterVersion = getMasterVersion()
@@ -71,19 +42,7 @@ class ServerAPI_UploadDeletion: TestCase {
 
         var fileToDelete = ServerAPI.FileToDelete(fileUUID: file.fileUUID, fileVersion: file.fileVersion)
         fileToDelete.actualDeletion = true
-        
-        let uploadDeletion = self.expectation(description: "uploadDeletion")
-
-        ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion+1) { (result, error) in
-            XCTAssert(error == nil)
-            guard case .success = result! else {
-                XCTFail()
-                return
-            }
-            uploadDeletion.fulfill()
-        }
-        
-        waitForExpectations(timeout: 10.0, handler: nil)
+        uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion+1)
         
         getFileIndex(expectedFiles: []) { fileInfo in
             XCTAssert(fileInfo.fileUUID != fileUUID)

@@ -17,43 +17,73 @@ class Directory {
     private init() {
     }
     
-    // Compares the passed fileIndex to the current DirecotoryEntry objects, and returns just the FileInfo objects we need to download, if any. The directory is not changed as a result of this call.
-    func checkFileIndex(fileIndex:[FileInfo]) -> (downloadFiles:[FileInfo]?, downloadDeletions:[FileInfo]?)  {
+    // Compares the passed fileIndex to the current DirecotoryEntry objects, and returns just the FileInfo objects we need to download/delete, if any. The directory is not changed as a result of this call, except for the case where the file isn't in the directory already, but has been deleted on the server.
+    func checkFileIndex(fileIndex:[FileInfo]) ->
+        (downloadFiles:[FileInfo]?, downloadDeletions:[FileInfo]?)  {
     
         var downloadFiles = [FileInfo]()
-        // var downloadDeletions = [FileInfo]()
+        var downloadDeletions = [FileInfo]()
 
+        enum Action {
+        case needToDownload
+        case needToDelete
+        case none
+        }
+        
         for file in fileIndex {
-            var needToDownload = false
+            var action:Action = .none
             
             if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: file.fileUUID) {
                 // Have the file in client directory.
                 
-                if entry.fileVersion != file.fileVersion {
-                    // Not same version here locally as on server:
-                    needToDownload = true
+                // If we already know the file is deleted on the server, then don't need to worry about it.
+                if !entry.deletedOnServer {
+                    
+                    if file.deleted! {
+                        action = .needToDelete
+                    }
+                    else if entry.fileVersion != file.fileVersion {
+                        // Not same version here locally as on server:
+                        action = .needToDownload
+                    }
                 }
-                // Else: No need to download.
             }
             else {
-                // File unknown to the client: Need to create DirectoryEntry-- later.
-                // Not going to create directory entry now because then this state looks identical to having downloaded the file/version previously.
-                needToDownload = true
+                // File is unknown to the client
+                
+                if file.deleted! {
+                    // The file is unknown to the client, plus it's deleted on the server. No need to inform the client, but for consistency I'm going to create an entry in the directory.
+                    let entry = DirectoryEntry.newObject() as! DirectoryEntry
+                    entry.deletedOnServer = true
+                    entry.fileUUID = file.fileUUID
+                    entry.fileVersion = file.fileVersion
+                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                }
+                else {
+                    action = .needToDownload
+                }
             }
             
-            // if file.deleted! {
-            // }
+            // For these actions, we need to create or modify DirectoryEntry, but do this later. Not going to do these changes right now because then this state looks identical to having downloaded/deleted the file/version previously.
             
-            if needToDownload {
+            switch action {
+            case .needToDownload:
                 downloadFiles += [file]
+                
+            case .needToDelete:
+                downloadDeletions += [file]
+                
+            case .none:
+                break
             }
         }
 
-        return (downloadFiles, nil)
+        return (downloadFiles.count == 0 ? nil : downloadFiles,
+            downloadDeletions.count == 0 ? nil : downloadDeletions)
     }
     
-    func updateAfterDownloadingFiles(dfts:[DownloadFileTracker]) {
-        dfts.map { dft in
+    func updateAfterDownloadingFiles(downloads:[DownloadFileTracker]) {
+        downloads.map { dft in
             if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: dft.fileUUID) {
                 assert(entry.fileVersion < dft.fileVersion)
                 entry.fileVersion = dft.fileVersion
@@ -63,6 +93,18 @@ class Directory {
                 newEntry.fileUUID = dft.fileUUID
                 newEntry.fileVersion = dft.fileVersion
             }
+        }
+    }
+    
+    func updateAfterDownloadDeletingFiles(deletions:[DownloadFileTracker]) {
+        deletions.map { dft in
+            // Have already dealt with case where we didn't know about this file locally and were download deleting it.
+            guard let entry = DirectoryEntry.fetchObjectWithUUID(uuid: dft.fileUUID) else {
+                assert(false)
+                return
+            }
+            
+            entry.deletedOnServer = true
         }
     }
 }

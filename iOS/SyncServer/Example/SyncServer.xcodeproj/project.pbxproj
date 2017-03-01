@@ -19,6 +19,8 @@
 		8344CC2B1E5FDD1800BEB263 /* Client_Downloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8344CC2A1E5FDD1800BEB263 /* Client_Downloads.swift */; };
 		835C60AC1E62ABF3003E9AF8 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C60AB1E62ABF3003E9AF8 /* CoreDataTests.swift */; };
 		835C60B21E6369DE003E9AF8 /* Client_SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C60B11E6369DE003E9AF8 /* Client_SyncManager.swift */; };
+		835C610C1E6504D4003E9AF8 /* Client_NetworkLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */; };
+		835C61121E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C61111E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift */; };
 		836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BD51E10728D005209F2 /* HealthCheck.swift */; };
 		836D4BE01E11AC9D005209F2 /* SMGoogleUserSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BDF1E11AC9D005209F2 /* SMGoogleUserSignIn.swift */; };
 		836D4BE21E11AF8C005209F2 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BE11E11AF8C005209F2 /* SignIn.swift */; };
@@ -66,6 +68,8 @@
 		8344CC2A1E5FDD1800BEB263 /* Client_Downloads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_Downloads.swift; sourceTree = "<group>"; };
 		835C60AB1E62ABF3003E9AF8 /* CoreDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
 		835C60B11E6369DE003E9AF8 /* Client_SyncManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager.swift; sourceTree = "<group>"; };
+		835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_NetworkLoss.swift; sourceTree = "<group>"; };
+		835C61111E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager_DownloadDeletion.swift; sourceTree = "<group>"; };
 		836D4BD51E10728D005209F2 /* HealthCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthCheck.swift; sourceTree = "<group>"; };
 		836D4BDF1E11AC9D005209F2 /* SMGoogleUserSignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SMGoogleUserSignIn.swift; path = ../../../SignIn/SMGoogleUserSignIn.swift; sourceTree = "<group>"; };
 		836D4BE11E11AF8C005209F2 /* SignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
@@ -167,6 +171,8 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				835C61111E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift */,
+				835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */,
 				835C60B11E6369DE003E9AF8 /* Client_SyncManager.swift */,
 				835C60AB1E62ABF3003E9AF8 /* CoreDataTests.swift */,
 				8344CC2A1E5FDD1800BEB263 /* Client_Downloads.swift */,
@@ -446,6 +452,8 @@
 			files = (
 				83F37A181E4445E500479175 /* Consts.swift in Sources */,
 				836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */,
+				835C61121E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift in Sources */,
+				835C610C1E6504D4003E9AF8 /* Client_NetworkLoss.swift in Sources */,
 				83F37A1A1E44478100479175 /* FileIndex.swift in Sources */,
 				837244561E419EE600155E89 /* TestCase.swift in Sources */,
 				8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */,

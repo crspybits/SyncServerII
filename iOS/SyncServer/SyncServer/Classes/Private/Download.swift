@@ -1,6 +1,6 @@
 //
 //  Download.swift
-//  Pods
+//  SyncServer
 //
 //  Created by Christopher Prince on 2/23/17.
 //
@@ -16,13 +16,13 @@ class Download {
     }
     
     enum CheckCompletion {
-    case noDownloadsAvailable
-    case downloadsAvailable(numberOfDownloads:Int32)
+    case noDownloadsOrDeletionsAvailable
+    case downloadsOrDeletionsAvailable(numberOfFiles:Int32)
     case error(Error)
     }
     
     // TODO: *0* while this check is occuring, we want to make sure we don't have a concurrent check operation.
-    // Creates DirectoryEntry's as neeed to represent files in FileIndex on server, but not known about locally. Creates DownloadFileTracker's to represent files that need downloading. Updates MasterVersion with the master version on the server.
+    // Creates DownloadFileTracker's to represent files that need downloading/download deleting. Updates MasterVersion with the master version on the server.
     func check(completion:((CheckCompletion)->())? = nil) {
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
             guard error == nil else {
@@ -30,17 +30,17 @@ class Download {
                 return
             }
 
-            // TODO: *1* Deal with download deletions.
-            let (fileDownloads, _) = Directory.session.checkFileIndex(fileIndex: fileIndex!)
+            let (fileDownloads, downloadDeletions) = Directory.session.checkFileIndex(fileIndex: fileIndex!)
 
             MasterVersion.get().version = masterVersion!
             
-            if fileDownloads == nil || fileDownloads!.count == 0 {
+            if fileDownloads == nil && downloadDeletions == nil {
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                completion?(.noDownloadsAvailable)
+                completion?(.noDownloadsOrDeletionsAvailable)
             }
             else {
-                for file in fileDownloads! {
+                let allFiles = (fileDownloads ?? []) + (downloadDeletions ?? [])
+                for file in allFiles {
                     if file.fileVersion != 0 {
                         // TODO: *5* We're considering this an error currently because we're not yet supporting multiple file versions.
                         assert(false, "Not Yet Implemented: Multiple File Versions")
@@ -49,18 +49,19 @@ class Download {
                     let dft = DownloadFileTracker.newObject() as! DownloadFileTracker
                     dft.fileUUID = file.fileUUID
                     dft.fileVersion = file.fileVersion
+                    dft.deletedOnServer = file.deleted!
                 }
                 
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
 
-                completion?(.downloadsAvailable(numberOfDownloads: Int32(fileDownloads!.count)))
+                completion?(.downloadsOrDeletionsAvailable(numberOfFiles: Int32(allFiles.count)))
             }
         }
     }
 
     enum NextResult {
     case started
-    case noDownloads
+    case noDownloadsOrDeletions
     case allDownloadsCompleted
     case error(String)
     }
@@ -75,7 +76,7 @@ class Download {
     func next(completion:((NextCompletion)->())?) -> NextResult {
         let dfts = DownloadFileTracker.fetchAll()
         if dfts.count == 0 {
-            return .noDownloads
+            return .noDownloadsOrDeletions
         }
 
         let alreadyDownloading = dfts.filter {$0.status == .downloading}
@@ -85,7 +86,7 @@ class Download {
             return .error(message)
         }
         
-        let notStarted = dfts.filter {$0.status == .notStarted}
+        let notStarted = dfts.filter {$0.status == .notStarted && $0.deletedOnServer == false}
         if notStarted.count == 0 {
             return .allDownloadsCompleted
         }

@@ -14,9 +14,12 @@ import SMCoreLib
 public protocol SyncServerDelegate : class {
     /* Called at the end of all downloads, on non-error conditions. Only called when there was at least one download.
     The client owns the files referenced by the NSURL's after this call completes. These files are temporary in the sense that they will not be backed up to iCloud, could be removed when the device or app is restarted, and should be moved to a more permanent location. This is received/called in an atomic manner: This reflects the current state of files on the server.
-    Client should replace their existing data with that from the files. Clients *must* call the next callback when they have finished with handling these files.
+    Client should replace their existing data with that from the files.
     */
-    func syncServerShouldSaveDownloads(downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)], next:()->())
+    func shouldSaveDownloads(downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)])
+
+    // Called when deletions have been received from the server. I.e., these files have been deleted on the server. This is received/called in an atomic manner: This reflects a snapshot state of files on the server. Clients should delete the files referenced by the SMSyncAttributes's (i.e., the UUID's).
+    func shouldDoDeletions(downloadDeletions downloadDeletions:[SyncAttributes])
     
     // Reports events. Useful for testing and UI.
     func syncServerEventOccurred(event:SyncEvent)

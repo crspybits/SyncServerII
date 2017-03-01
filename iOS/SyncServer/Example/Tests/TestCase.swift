@@ -20,7 +20,11 @@ class TestCase: XCTestCase {
     
     var testLockSync: TimeInterval?
     var testLockSyncCalled:Bool = false
-
+    
+    var shouldSaveDownloads: ((_ downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]) -> ())!
+    var syncServerEventOccurred: (SyncEvent) -> () = {event in }
+    var shouldDoDeletions: (_ downloadDeletions: [SyncAttributes]) -> () = { downloadDeletions in }
+    
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {
         let plist = try! PlistDictLoader(plistFileNameInBundle: Consts.serverPlistFile)
@@ -42,6 +46,8 @@ class TestCase: XCTestCase {
             ServerConstants.XTokenTypeKey: ServerConstants.AuthTokenType.GoogleToken.rawValue,
             ServerConstants.GoogleHTTPAccessTokenKey: TestCase.accessToken
         ]
+        
+        SyncManager.session.delegate = self
     }
     
     override func tearDown() {
@@ -66,7 +72,7 @@ class TestCase: XCTestCase {
         return serverMasterVersion
     }
     
-    func getFileIndex(expectedFiles:[(fileUUID:String, fileSize:Int64)], callback:((FileInfo)->())? = nil) {
+    func getFileIndex(expectedFiles:[(fileUUID:String, fileSize:Int64?)], callback:((FileInfo)->())? = nil) {
         let expectation1 = self.expectation(description: "fileIndex")
         
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
@@ -79,7 +85,10 @@ class TestCase: XCTestCase {
                 }
                 
                 XCTAssert(result!.count == 1)
-                XCTAssert(result![0].fileSizeBytes == fileSize)
+                
+                if fileSize != nil {
+                    XCTAssert(result![0].fileSizeBytes == fileSize)
+                }
             }
             
             for curr in 0..<fileIndex!.count {
@@ -262,6 +271,98 @@ class TestCase: XCTestCase {
         
         return fileData1! == fileData2!
     }
+
+    @discardableResult
+    // Uses SyncManager.session.start
+    func uploadAndDownloadOneFile() -> (ServerAPI.File, MasterVersionInt)? {
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        
+        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return nil
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        let expectedFiles = [file]
+        
+        shouldSaveDownloads = { downloads in
+            XCTAssert(downloads.count == 1)
+            XCTAssert(self.filesHaveSameContents(url1: file.localURL, url2: downloads[0].downloadedFile as URL))
+        }
+        
+        let expectation = self.expectation(description: "start")
+
+        SyncManager.session.start { (result, error) in
+            XCTAssert(error == nil)
+            if case .downloadDelegatesCalled(let numDownloads, let numDownloadDeletions) = result! {
+                XCTAssert(numDownloads == 1)
+                XCTAssert(numDownloadDeletions == 0)
+            }
+            else {
+                XCTFail()
+            }
+            
+            let entries = DirectoryEntry.fetchAll()
+            
+            // There may be more directory entries than just accounted for in this single function call, so don't do this:
+            //XCTAssert(entries.count == expectedFiles.count)
+
+            for file in expectedFiles {
+                let entriesResult = entries.filter { $0.fileUUID == file.fileUUID &&
+                    $0.fileVersion == file.fileVersion
+                }
+                XCTAssert(entriesResult.count == 1)
+            }
+
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 30.0, handler: nil)
+        
+        return (file, masterVersion + 1)
+    }
+
+    @discardableResult
+    func uploadDeletion() -> (fileUUID:String, MasterVersionInt)? {
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        
+        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return nil
+        }
+        
+        // for the file upload
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+
+        let fileToDelete = ServerAPI.FileToDelete(fileUUID: file.fileUUID, fileVersion: file.fileVersion)
+        uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion+1)
+        
+        getUploads(expectedFiles: [
+            (fileUUID: fileUUID, fileSize: nil)
+        ]) { fileInfo in
+            XCTAssert(fileInfo.deleted)
+        }
+        
+        return (fileUUID, masterVersion+1)
+    }
+    
+    func uploadDeletion(fileToDelete:ServerAPI.FileToDelete, masterVersion:MasterVersionInt) {
+        let uploadDeletion = self.expectation(description: "uploadDeletion")
+
+        ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (result, error) in
+            XCTAssert(error == nil)
+            guard case .success = result! else {
+                XCTFail()
+                return
+            }
+            uploadDeletion.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
 }
 
 extension TestCase : ServerNetworkingAuthentication {
@@ -286,5 +387,19 @@ extension TestCase : ServerAPIDelegate {
     func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
         deviceUUIDCalled = true
         return deviceUUID
+    }
+}
+
+extension TestCase : SyncServerDelegate {
+    func shouldSaveDownloads(downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]) {
+        shouldSaveDownloads(downloads)
+    }
+    
+    func syncServerEventOccurred(event: SyncEvent) {
+        syncServerEventOccurred(event)
+    }
+    
+    func shouldDoDeletions(downloadDeletions: [SyncAttributes]) {
+        shouldDoDeletions(downloadDeletions)
     }
 }

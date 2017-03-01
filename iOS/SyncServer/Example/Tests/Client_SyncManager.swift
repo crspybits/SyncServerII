@@ -10,10 +10,7 @@ import XCTest
 @testable import SyncServer
 import SMCoreLib
 
-class Client_SyncManager: TestCase {
-    var shouldSaveDownloads: ((_ downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)], _ next:()->()) -> ())!
-    var syncServerEventOccurred: (SyncEvent) -> () = {event in }
-    
+class Client_SyncManager: TestCase {    
     override func setUp() {
         super.setUp()
         
@@ -21,8 +18,6 @@ class Client_SyncManager: TestCase {
         DirectoryEntry.removeAll()
         CoreData.sessionNamed(Constants.coreDataName).saveContext()
         
-        SyncManager.session.delegate = self
-
         removeAllServerFilesInFileIndex()
     }
     
@@ -36,7 +31,7 @@ class Client_SyncManager: TestCase {
 
         SyncManager.session.start { (result, error) in
             XCTAssert(error == nil)
-            guard case .noDownloadsAvailable = result! else {
+            guard case .noDownloadsOrDeletionsAvailable = result! else {
                 XCTFail()
                 return
             }
@@ -47,51 +42,8 @@ class Client_SyncManager: TestCase {
         waitForExpectations(timeout: 30.0, handler: nil)
     }
     
-    func testStartWithOneFileOnServer() {
-        let masterVersion = getMasterVersion()
-        
-        let fileUUID = UUID().uuidString
-        
-        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
-            return
-        }
-        
-        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
-        
-        let expectedFiles = [file]
-        
-        shouldSaveDownloads = { (downloads, next) in
-            XCTAssert(downloads.count == 1)
-            XCTAssert(self.filesHaveSameContents(url1: file.localURL, url2: downloads[0].downloadedFile as URL))
-            
-            next()
-        }
-        
-        let expectation = self.expectation(description: "start")
-
-        SyncManager.session.start { (result, error) in
-            XCTAssert(error == nil)
-            if case .shouldSaveDownloadsCalled(let numberDownloads) = result! {
-                XCTAssert(numberDownloads == 1)
-            }
-            else {
-                XCTFail()
-            }
-            
-            let entries = DirectoryEntry.fetchAll()
-            XCTAssert(entries.count == expectedFiles.count)
-
-            for file in expectedFiles {
-                let entriesResult = entries.filter { $0.fileUUID == file.fileUUID &&
-                    $0.fileVersion == file.fileVersion
-                }
-                XCTAssert(entriesResult.count == 1)
-            }
-            
-            expectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: 30.0, handler: nil)
+    func testStartWithOneUploadedFileOnServer() {
+        uploadAndDownloadOneFile()
     }
     
     func downloadTwoFiles(file1: ServerAPI.File, file2: ServerAPI.File, masterVersion:MasterVersionInt, completion:(()->())? = nil) {
@@ -99,7 +51,7 @@ class Client_SyncManager: TestCase {
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
         
-        shouldSaveDownloads = { (downloads, next) in
+        shouldSaveDownloads = { downloads in
             XCTAssert(downloads.count == 2)
             
             let result1 = downloads.filter {$0.downloadedFileAttributes.fileUUID == file1.fileUUID}
@@ -107,16 +59,15 @@ class Client_SyncManager: TestCase {
 
             let result2 = downloads.filter {$0.downloadedFileAttributes.fileUUID == file2.fileUUID}
             XCTAssert(self.filesHaveSameContents(url1: file2.localURL, url2: result2[0].downloadedFile as URL))
-            
-            next()
         }
         
         let expectation = self.expectation(description: "start")
 
         SyncManager.session.start { (result, error) in
             XCTAssert(error == nil)
-            if case .shouldSaveDownloadsCalled(let numberDownloads) = result! {
-                XCTAssert(numberDownloads == 2)
+            if case .downloadDelegatesCalled(let numDownloads, let numDownloadDeletions) = result! {
+                XCTAssert(numDownloads == 2)
+                XCTAssert(numDownloadDeletions == 0)
             }
             else {
                 XCTFail()
@@ -157,7 +108,7 @@ class Client_SyncManager: TestCase {
         return (file1, file2, masterVersion)
     }
     
-    func testStartWithTwoFilesOnServer() {
+    func testStartWithTwoUploadedFilesOnServer() {
         guard let (file1, file2, masterVersion) = uploadTwoFiles() else {
             XCTFail()
             return
@@ -199,14 +150,5 @@ class Client_SyncManager: TestCase {
             XCTAssert(numberEvents == 3, "numberEvents was \(numberEvents)")
         }
     }
-}
 
-extension Client_SyncManager : SyncServerDelegate {
-    func syncServerShouldSaveDownloads(downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)], next:()->()) {
-        shouldSaveDownloads(downloads, next)
-    }
-    
-    func syncServerEventOccurred(event: SyncEvent) {
-        syncServerEventOccurred(event)
-    }
 }

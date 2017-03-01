@@ -33,10 +33,10 @@ class Client_Downloads: TestCase {
 
         Download.session.check() { checkCompletion in
             switch checkCompletion {
-            case .noDownloadsAvailable:
+            case .noDownloadsOrDeletionsAvailable:
                 XCTAssert(expectedFiles.count == 0)
                 
-            case .downloadsAvailable(numberOfDownloads: let numDownloads):
+            case .downloadsOrDeletionsAvailable(numberOfFiles: let numDownloads):
                 XCTAssert(Int32(expectedFiles.count) == numDownloads)
                 
             case .error(_):
@@ -110,7 +110,7 @@ class Client_Downloads: TestCase {
             XCTFail()
         }
         
-        guard case .noDownloads = result else {
+        guard case .noDownloadsOrDeletions = result else {
             XCTFail()
             return
         }

@@ -2,7 +2,7 @@
 //  DownloadFileTracker+CoreDataProperties.swift
 //  Pods
 //
-//  Created by Christopher Prince on 2/25/17.
+//  Created by Christopher Prince on 2/27/17.
 //
 //
 
@@ -22,5 +22,6 @@ extension DownloadFileTracker {
     @NSManaged public var localURLData: NSData?
     @NSManaged public var fileSizeBytes: Int64
     @NSManaged public var appMetaData: String?
+    @NSManaged public var deletedOnServer: Bool
 
 }

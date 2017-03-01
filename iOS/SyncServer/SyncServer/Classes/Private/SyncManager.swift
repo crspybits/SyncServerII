@@ -23,8 +23,8 @@ class SyncManager {
     
     // This is just informative; for testing purposes.
     enum StartResult {
-    case shouldSaveDownloadsCalled(numberFiles: Int)
-    case noDownloadsAvailable
+    case downloadDelegatesCalled(numberDownloadFiles: Int, numberDownloadDeletions: Int)
+    case noDownloadsOrDeletionsAvailable
     }
     
     func start(_ callback:((StartResult?, Error?)->())? = nil) {
@@ -58,36 +58,51 @@ class SyncManager {
             return
             
         case .allDownloadsCompleted:
-            // Inform client via delegate of downloads.
+            // Inform client via delegate of file downloads and/or download deletions.
             
             let dfts = DownloadFileTracker.fetchAll()
             let numberDfts = dfts.count
             assert(numberDfts > 0)
             
-            var downloads = [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]()
-            dfts.map { dft in
-                let attr = SyncAttributes(fileUUID: dft.fileUUID, fileVersion: dft.fileVersion)
-                downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
+            let fileDownloadDfts = dfts.filter {$0.deletedOnServer == false}
+            let downloadDeletionDfts = dfts.filter {$0.deletedOnServer == true}
+            
+            if fileDownloadDfts.count > 0 {
+                var downloads = [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]()
+                fileDownloadDfts.map { dft in
+                    let attr = SyncAttributes(fileUUID: dft.fileUUID, fileVersion: dft.fileVersion)
+                    downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
+                }
+            
+                delegate?.shouldSaveDownloads(downloads: downloads)
+                Directory.session.updateAfterDownloadingFiles(downloads: fileDownloadDfts)
             }
             
-            delegate?.syncServerShouldSaveDownloads(downloads: downloads, next: {
-                // Client has saved the files-- we can update Core Data to reflect these downloads.
+            if downloadDeletionDfts.count > 0 {
+                var deletions = [SyncAttributes]()
+                downloadDeletionDfts.map { dft in
+                    let attr = SyncAttributes(fileUUID: dft.fileUUID, fileVersion: dft.fileVersion)
+                    deletions += [attr]
+                }
                 
-                Directory.session.updateAfterDownloadingFiles(dfts: dfts)
-                DownloadFileTracker.removeAll()
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                
-                callback?(.shouldSaveDownloadsCalled(numberFiles: numberDfts), nil)
-            })
+                delegate?.shouldDoDeletions(downloadDeletions: deletions)
+                Directory.session.updateAfterDownloadDeletingFiles(deletions: downloadDeletionDfts)
+            }
             
-        case .noDownloads:
+            DownloadFileTracker.removeAll()
+            CoreData.sessionNamed(Constants.coreDataName).saveContext()
+            
+            callback?(.downloadDelegatesCalled(numberDownloadFiles: fileDownloadDfts.count, numberDownloadDeletions: downloadDeletionDfts.count), nil)
+            
+        case .noDownloadsOrDeletions:
+            // No DownloadFileTracker's queued up. Check the FileIndex to see if there are pending downloads on the server.
             Download.session.check() { checkCompletion in
                 switch checkCompletion {
-                case .noDownloadsAvailable:
+                case .noDownloadsOrDeletionsAvailable:
                     // TODO: *3* Later, when we're dealing with uploads, this will go on to check to see if we have pending uploads.
-                    callback?(.noDownloadsAvailable, nil)
+                    callback?(.noDownloadsOrDeletionsAvailable, nil)
                     
-                case .downloadsAvailable(numberOfDownloads: let numDownloads):
+                case .downloadsOrDeletionsAvailable(numberOfFiles: let numDownloads):
                     self.start(callback)
                     return
                     

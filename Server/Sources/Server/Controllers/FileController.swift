@@ -220,7 +220,7 @@ class FileController : ControllerProtocol {
     private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, googleCreds:GoogleCreds, numberTransferred:Int32, numberErrorsDeletingFiles:Int32 = 0) {
     
         // Base case.
-        guard uploadDeletions != nil && uploadDeletions!.count > 0 else {
+        if uploadDeletions == nil || uploadDeletions!.count == 0 {
             let response = DoneUploadsResponse()!
             
             if numberErrorsDeletingFiles > 0 {
@@ -630,10 +630,9 @@ class FileController : ControllerProtocol {
         let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: fileIndexObj.deviceUUID!)
 
         googleCreds.deleteFile(cloudFolderName: fileIndexObj.cloudFolderName!, cloudFileName: cloudFileName, mimeType: fileIndexObj.mimeType!) { error in
-            guard error == nil else {
-                Log.error(message: "Error deleting file from cloud storage: \(error!)!")
-                params.completion(nil)
-                return
+            if error != nil  {
+                Log.warning(message: "Error deleting file from cloud storage: \(error!)!")
+                // I'm not going to fail if this fails-- this is for debugging and it's not a big deal. Drop through and report success.
             }
             
             let response = UploadDeletionResponse()!

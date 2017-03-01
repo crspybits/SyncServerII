@@ -19,6 +19,6 @@ public struct SyncAttributes {
 
 // This information is for testing purposes and for UI (e.g., for displaying download progress).
 public enum SyncEvent {
-    // The url/attr here may not be consistent with the results from syncServerShouldSaveDownloads in the SyncServerDelegate.
+    // The url/attr here may not be consistent with the results from shouldSaveDownloads in the SyncServerDelegate.
     case singleDownloadComplete(url:SMRelativeLocalURL, attr: SyncAttributes)
 }

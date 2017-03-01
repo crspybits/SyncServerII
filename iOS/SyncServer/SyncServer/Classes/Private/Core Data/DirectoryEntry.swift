@@ -19,8 +19,9 @@ public class DirectoryEntry: NSManagedObject, CoreDataModel {
     }
     
     public class func newObject() -> NSManagedObject {
-        let directoryEntry = CoreData.sessionNamed(Constants.coreDataName).newObject(withEntityName: self.entityName())
-        return directoryEntry!
+        let directoryEntry = CoreData.sessionNamed(Constants.coreDataName).newObject(withEntityName: self.entityName()) as! DirectoryEntry
+        directoryEntry.deletedOnServer = false
+        return directoryEntry
     }
     
     class func fetchObjectWithUUID(uuid:String) -> DirectoryEntry? {

@@ -71,6 +71,62 @@ class ServerAPI_DoneUploads: TestCase {
         getUploads(expectedFiles: [])
     }
     
+    func testThatUploadDeletionOfOneFileWithDoneUploadsActuallyDeletes() {
+        guard let (fileUUID, masterVersion) = uploadDeletion() else {
+            XCTFail()
+            return
+        }
+
+        self.doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        self.getUploads(expectedFiles: []) { file in
+            XCTAssert(file.fileUUID != fileUUID)
+        }
+        
+        var foundFile = false
+        
+        getFileIndex(expectedFiles: [
+            (fileUUID: fileUUID, fileSize: nil)
+        ]) { file in
+            if file.fileUUID == fileUUID {
+                foundFile = true
+                XCTAssert(file.deleted)
+            }
+        }
+        
+        XCTAssert(foundFile)
+    }
+    
+    func testDoneUploadsWith1FileUploadAnd1UploadDeletion() {
+        // This upload deletion has to happen 1st because it does a doneUploads, and we don't want `fileUUIDUpload` to be subject to doneUploads yet.
+        guard let (fileUUIDDelete, masterVersion) = uploadDeletion() else {
+            XCTFail()
+            return
+        }
+        
+        let fileUUIDUpload = UUID().uuidString
+
+        guard let (fileSizeUpload, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUIDUpload, serverMasterVersion: masterVersion) else {
+            return
+        }
+
+        self.doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
+        
+        var foundDeletedFile = false
+        
+        getFileIndex(expectedFiles: [
+            (fileUUID: fileUUIDUpload, fileSize: fileSizeUpload),
+            (fileUUID: fileUUIDDelete, fileSize: nil)
+        ]) { file in
+            if file.fileUUID == fileUUIDDelete {
+                foundDeletedFile = true
+                XCTAssert(file.deleted)
+            }
+        }
+        
+        XCTAssert(foundDeletedFile)
+    }
+    
     func testDoneUploadsConflict() {
         let masterVersion = getMasterVersion()
         
