@@ -294,15 +294,25 @@ class TestCase: XCTestCase {
         
         let expectation = self.expectation(description: "start")
 
-        SyncManager.session.start { (result, error) in
-            XCTAssert(error == nil)
-            if case .downloadDelegatesCalled(let numDownloads, let numDownloadDeletions) = result! {
-                XCTAssert(numDownloads == 1)
-                XCTAssert(numDownloadDeletions == 0)
-            }
-            else {
+        var eventsOccurred = 0
+        var downloadsOccurred = 0
+        
+        syncServerEventOccurred = { event in
+            switch event {
+            case .fileDownloadsCompleted(numberOfFiles: let downloads):
+                XCTAssert(downloads == 1)
+                eventsOccurred += 1
+            
+            case .singleDownloadComplete(_):
+                downloadsOccurred += 1
+                
+            default:
                 XCTFail()
             }
+        }
+
+        SyncManager.session.start { (error) in
+            XCTAssert(error == nil)
             
             let entries = DirectoryEntry.fetchAll()
             
@@ -315,7 +325,9 @@ class TestCase: XCTestCase {
                 }
                 XCTAssert(entriesResult.count == 1)
             }
-
+            
+            XCTAssert(downloadsOccurred == 1)
+            XCTAssert(eventsOccurred == 1)
             expectation.fulfill()
         }
         

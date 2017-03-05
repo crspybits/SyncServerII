@@ -14,6 +14,7 @@ import Kitura
 #endif
 
 // This places a deletion request in the Upload table on the server. A DoneUploads request is subsequently required to actually perform the deletion in cloud storage.
+// TODO: *4* Allow upload deletions to be repeated for the same file-- without causing an error.
 
 class UploadDeletionRequest : NSObject, RequestMessage, Filenaming {
     // The use of the Filenaming protocol here is to support the DEBUG `actualDeletion` parameter.

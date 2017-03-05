@@ -29,6 +29,9 @@
 		837244561E419EE600155E89 /* TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837244551E419EE600155E89 /* TestCase.swift */; };
 		83CD30831E15880000A0C7AD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CD30811E15880000A0C7AD /* GoogleService-Info.plist */; };
 		83CD30841E15880000A0C7AD /* Server.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CD30821E15880000A0C7AD /* Server.plist */; };
+		83D95C9E1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */; };
+		83D95CA01E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D95C9F1E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift */; };
+		83D95CA41E6B546500DF3BF3 /* UploadMe2.txt in Resources */ = {isa = PBXBuildFile; fileRef = 83D95CA31E6B546500DF3BF3 /* UploadMe2.txt */; };
 		83F37A171E4445CB00479175 /* Server.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CD30821E15880000A0C7AD /* Server.plist */; };
 		83F37A181E4445E500479175 /* Consts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BEF1E1205CF005209F2 /* Consts.swift */; };
 		83F37A1A1E44478100479175 /* FileIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A191E44478100479175 /* FileIndex.swift */; };
@@ -78,6 +81,9 @@
 		837244551E419EE600155E89 /* TestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCase.swift; sourceTree = "<group>"; };
 		83CD30811E15880000A0C7AD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		83CD30821E15880000A0C7AD /* Server.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Server.plist; sourceTree = "<group>"; };
+		83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager_MasterVersionChange.swift; sourceTree = "<group>"; };
+		83D95C9F1E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager_FileUpload.swift; sourceTree = "<group>"; };
+		83D95CA31E6B546500DF3BF3 /* UploadMe2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = UploadMe2.txt; sourceTree = "<group>"; };
 		83F37A191E44478100479175 /* FileIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileIndex.swift; sourceTree = "<group>"; };
 		83F37A1F1E46D40500479175 /* UploadFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadFile.swift; sourceTree = "<group>"; };
 		83F37A211E46D52500479175 /* UploadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = UploadMe.txt; sourceTree = "<group>"; };
@@ -161,6 +167,7 @@
 		607FACD31AFB9204008FA782 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				83D95CA31E6B546500DF3BF3 /* UploadMe2.txt */,
 				607FACD41AFB9204008FA782 /* Info.plist */,
 				83CD30811E15880000A0C7AD /* GoogleService-Info.plist */,
 				83CD30821E15880000A0C7AD /* Server.plist */,
@@ -171,6 +178,8 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				83D95C9F1E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift */,
+				83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */,
 				835C61111E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift */,
 				835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */,
 				835C60B11E6369DE003E9AF8 /* Client_SyncManager.swift */,
@@ -320,6 +329,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83D95CA41E6B546500DF3BF3 /* UploadMe2.txt in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				83CD30841E15880000A0C7AD /* Server.plist in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
@@ -454,6 +464,7 @@
 				836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */,
 				835C61121E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift in Sources */,
 				835C610C1E6504D4003E9AF8 /* Client_NetworkLoss.swift in Sources */,
+				83D95C9E1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift in Sources */,
 				83F37A1A1E44478100479175 /* FileIndex.swift in Sources */,
 				837244561E419EE600155E89 /* TestCase.swift in Sources */,
 				8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */,
@@ -461,6 +472,7 @@
 				837244541E419E7B00155E89 /* DoneUploads.swift in Sources */,
 				83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */,
 				835C60AC1E62ABF3003E9AF8 /* CoreDataTests.swift in Sources */,
+				83D95CA01E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift in Sources */,
 				833729861E0F6BC0002CA164 /* Authentication.swift in Sources */,
 				8344CC2B1E5FDD1800BEB263 /* Client_Downloads.swift in Sources */,
 				83F37A301E51120B00479175 /* ServerAPI_DownloadFile.swift in Sources */,

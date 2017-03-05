@@ -51,7 +51,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:Int64 = 0, masterVersion:Int64 = 0, cloudFolderName:String = "CloudFolder", appMetaData:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String = "CloudFolder", appMetaData:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
         }

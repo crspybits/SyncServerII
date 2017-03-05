@@ -36,6 +36,16 @@ class FileControllerTests: ServerTestCase {
         _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
     }
     
+    // TODO: *0* Test uploading the same file twice.
+    // This is commented out right now because this test fails currently-- i.e., we're not allowing upload of the same file more than once.
+#if false
+    func testUploadingSameFileTwiceWorks() {
+        let deviceUUID = PerfectLib.UUID().string
+        let (request, _) = uploadTextFile(deviceUUID:deviceUUID)
+        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: request.fileUUID, addUser: false, fileVersion: request.fileVersion, masterVersion: request.masterVersion, cloudFolderName: request.cloudFolderName, appMetaData: request.appMetaData)
+    }
+#endif
+
     func testUploadTextFileWithStringWithSpacesAppMetaData() {
         _ = uploadTextFile(appMetaData:"A Simple String")
     }
@@ -139,7 +149,7 @@ class FileControllerTests: ServerTestCase {
         self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2],masterVersionExpected: 1, expectedFileSizes: expectedSizes)
     }
     
-    func downloadTextFile(masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:Int64 = 0, downloadFileVersion:Int64 = 0, expectedError: Bool = false) {
+    func downloadTextFile(masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:Int64 = 0, expectedError: Bool = false) {
     
         let deviceUUID = PerfectLib.UUID().string
         let masterVersion:Int64 = 0

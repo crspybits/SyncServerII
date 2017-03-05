@@ -17,13 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        var serverURL:URL!
         let plist = try! PlistDictLoader(plistFileNameInBundle: Consts.serverPlistFile)
-        if case .stringValue(let strValue) = try! plist.getRequired(varName: "ServerURL") {
-            serverURL = URL(string: strValue)!
-        }
+        let urlString = try! plist.getString(varName: "ServerURL")
+        let serverURL = URL(string: urlString)!
+        let cloudFolderName = try! plist.getString(varName: "CloudFolderName")
         
-        SyncServer.session.appLaunchSetup(withServerURL: serverURL)
+        SyncServer.session.appLaunchSetup(withServerURL: serverURL, cloudFolderName:cloudFolderName)
         
         return true
     }

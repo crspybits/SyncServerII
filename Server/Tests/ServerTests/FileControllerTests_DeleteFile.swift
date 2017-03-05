@@ -115,6 +115,9 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
         self.getFileIndex(expectedFiles: [uploadRequest], masterVersionExpected: uploadRequest.masterVersion + 2, expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
     
+    func testThatUploadDeletionTwiceOfSameFileWorks() {
+    }
+    
     func testThatUploadDeletionFollowedByDoneUploadsActuallyDeletes() {
         let deviceUUID = PerfectLib.UUID().string
         

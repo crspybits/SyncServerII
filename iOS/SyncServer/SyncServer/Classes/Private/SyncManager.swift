@@ -11,31 +11,34 @@ import SMCoreLib
 
 class SyncManager {
     static let session = SyncManager()
-    
     public weak var delegate:SyncServerDelegate?
+
+    private var fileDownloadDfts:[DownloadFileTracker]?
+    private var downloadDeletionDfts:[DownloadFileTracker]?
+    private var numberFileDownloads = 0
+    private var numberDownloadDeletions = 0
+    private var callback:((Error?)->())?
+    var desiredEvents:EventDesired = .defaults
 
     private init() {
     }
     
-    enum ProcessError : Error {
-    case nextError(String)
+    enum StartError : Error {
+    case error(String)
     }
     
-    // This is just informative; for testing purposes.
-    enum StartResult {
-    case downloadDelegatesCalled(numberDownloadFiles: Int, numberDownloadDeletions: Int)
-    case noDownloadsOrDeletionsAvailable
-    }
-    
-    func start(_ callback:((StartResult?, Error?)->())? = nil) {
+    // TODO: *1* If we get an app restart when we call this method, and an upload was previously in progress, and we now have download(s) available, we need to reset those uploads prior to doing the downloads.
+    func start(_ callback:((Error?)->())? = nil) {
+        self.callback = callback
+        
         // TODO: *1* This is probably the level at which we should ensure that multiple download operations are not taking place concurrently. E.g., some locking mechanism?
         
         // First: Do we have previously queued downloads that need to be downloaded?
         let nextResult = Download.session.next() { nextCompletionResult in
             switch nextCompletionResult {
             case .downloaded(let dft):
-                let attr = SyncAttributes(fileUUID: dft.fileUUID, fileVersion: dft.fileVersion)
-                self.delegate?.syncServerEventOccurred(event: .singleDownloadComplete(url:dft.localURL!, attr:attr))
+                let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType:dft.mimeType!)
+                EventDesired.reportEvent(.singleDownloadComplete(url:dft.localURL!, attr:attr), mask: self.desiredEvents, delegate: self.delegate)
             
                 // Recursively (hopefully, this is tail recursion with optimization) check for any next download.
                 self.start(callback)
@@ -47,7 +50,7 @@ class SyncManager {
                 return
                 
             case .error(let error):
-                callback?(nil, ProcessError.nextError(error))
+                callback?(StartError.error(error))
                 return
             }
         }
@@ -64,55 +67,122 @@ class SyncManager {
             let numberDfts = dfts.count
             assert(numberDfts > 0)
             
-            let fileDownloadDfts = dfts.filter {$0.deletedOnServer == false}
-            let downloadDeletionDfts = dfts.filter {$0.deletedOnServer == true}
+            fileDownloadDfts = dfts.filter {$0.deletedOnServer == false}
+            downloadDeletionDfts = dfts.filter {$0.deletedOnServer == true}
             
-            if fileDownloadDfts.count > 0 {
+            if fileDownloadDfts!.count > 0 {
                 var downloads = [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]()
-                fileDownloadDfts.map { dft in
-                    let attr = SyncAttributes(fileUUID: dft.fileUUID, fileVersion: dft.fileVersion)
+                fileDownloadDfts!.map { dft in
+                    let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
                     downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
                 }
             
                 delegate?.shouldSaveDownloads(downloads: downloads)
-                Directory.session.updateAfterDownloadingFiles(downloads: fileDownloadDfts)
+                Directory.session.updateAfterDownloadingFiles(downloads: fileDownloadDfts!)
+                EventDesired.reportEvent(.fileDownloadsCompleted(numberOfFiles: fileDownloadDfts!.count), mask: self.desiredEvents, delegate: self.delegate)
             }
             
-            if downloadDeletionDfts.count > 0 {
+            if downloadDeletionDfts!.count > 0 {
                 var deletions = [SyncAttributes]()
-                downloadDeletionDfts.map { dft in
-                    let attr = SyncAttributes(fileUUID: dft.fileUUID, fileVersion: dft.fileVersion)
+                downloadDeletionDfts!.map { dft in
+                    let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
                     deletions += [attr]
                 }
                 
+                Log.msg("Deletions: count: \(deletions.count)")
+                
                 delegate?.shouldDoDeletions(downloadDeletions: deletions)
-                Directory.session.updateAfterDownloadDeletingFiles(deletions: downloadDeletionDfts)
+                Directory.session.updateAfterDownloadDeletingFiles(deletions: downloadDeletionDfts!)
+                EventDesired.reportEvent(.downloadDeletionsCompleted(numberOfFiles: downloadDeletionDfts!.count), mask: self.desiredEvents, delegate: self.delegate)
+                // TODO: *0* Next, if we have any pending deletions in upload queue for any of these just obtained download deletions, we should remove those pending deletions.
             }
+            
+            numberFileDownloads = fileDownloadDfts == nil ? 0 : fileDownloadDfts!.count
+            numberDownloadDeletions = downloadDeletionDfts == nil ? 0 : downloadDeletionDfts!.count
             
             DownloadFileTracker.removeAll()
             CoreData.sessionNamed(Constants.coreDataName).saveContext()
-            
-            callback?(.downloadDelegatesCalled(numberDownloadFiles: fileDownloadDfts.count, numberDownloadDeletions: downloadDeletionDfts.count), nil)
+            self.checkForPendingUploads()
             
         case .noDownloadsOrDeletions:
-            // No DownloadFileTracker's queued up. Check the FileIndex to see if there are pending downloads on the server.
-            Download.session.check() { checkCompletion in
-                switch checkCompletion {
-                case .noDownloadsOrDeletionsAvailable:
-                    // TODO: *3* Later, when we're dealing with uploads, this will go on to check to see if we have pending uploads.
-                    callback?(.noDownloadsOrDeletionsAvailable, nil)
-                    
-                case .downloadsOrDeletionsAvailable(numberOfFiles: let numDownloads):
-                    self.start(callback)
-                    return
-                    
-                case .error(let error):
-                    callback?(nil, error)
-                }
-            }
+            checkForDownloads()
 
         case .error(let error):
-            callback?(nil, ProcessError.nextError(error))
+            callback?(StartError.error(error))
+        }
+    }
+
+    // No DownloadFileTracker's queued up. Check the FileIndex to see if there are pending downloads on the server.
+    private func checkForDownloads() {
+        Download.session.check() { checkCompletion in
+            switch checkCompletion {
+            case .noDownloadsOrDeletionsAvailable:
+                self.checkForPendingUploads()
+                
+            case .downloadsOrDeletionsAvailable(numberOfFiles: let numDownloads):
+                // We've got DownloadFileTracker's queued up now. Go deal with them!
+                self.start(self.callback)
+                
+            case .error(let error):
+                self.callback?(error)
+            }
+        }
+    }
+    
+    private func checkForPendingUploads() {
+        let nextResult = Upload.session.next { nextCompletion in
+            switch nextCompletion {
+            case .uploaded(let uft):
+                // Recursively see if there is a next upload to do.
+                self.checkForPendingUploads()
+
+            case .masterVersionUpdate:
+                // Things have changed on the server. Check for downloads again. Don't go all the way back to `start` because we know that we don't have queued downloads.
+                self.checkForDownloads()
+                
+            case .error(let error):
+                self.callback?(StartError.error(error))
+            }
+        }
+        
+        switch nextResult {
+        case .started:
+            // Don't do anything. `next` completion will invoke callback.
+            break
+            
+        case .noUploads:
+            callback?(nil)
+            
+        case .allUploadsCompleted:
+            self.doneUploads()
+            
+        case .error(let error):
+            callback?(StartError.error(error))
+        }
+    }
+    
+    private func doneUploads() {
+        Upload.session.doneUploads { completionResult in
+            switch completionResult {
+            case .doneUploads(numberTransferred: let numTransferred):
+                let uploadQueue = Upload.getHeadSyncQueue()!
+                
+                let fileUploads = uploadQueue.uploadFileTrackers.filter {!$0.deleteOnServer}
+                if fileUploads.count > 0 {
+                    EventDesired.reportEvent(.fileUploadsCompleted(numberOfFiles: fileUploads.count), mask: self.desiredEvents, delegate: self.delegate)
+                }
+                
+                CoreData.sessionNamed(Constants.coreDataName).remove(uploadQueue)
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                self.callback?(nil)
+                
+            case .masterVersionUpdate:
+                self.checkForDownloads()
+                
+            case .error(let error):
+                self.callback?(StartError.error(error))
+            }
         }
     }
 }
+

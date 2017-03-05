@@ -47,22 +47,27 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         shouldDoDeletions = { (downloadDeletions:[SyncAttributes]) in
             XCTAssert(downloadDeletions.count == 1)
             XCTAssert(downloadDeletions[0].fileUUID == file.fileUUID)
-            XCTAssert(downloadDeletions[0].fileVersion == file.fileVersion)
             calledShouldDoDeletions = true
         }
         
         let expectation2 = self.expectation(description: "start")
 
-        SyncManager.session.start { (result, error) in
-            guard case .downloadDelegatesCalled(numberDownloadFiles: let numFileDownloads, numberDownloadDeletions: let numberDownloadDeletions) = result! else {
+        var eventsOccurred = 0
+        
+        syncServerEventOccurred = { event in
+            switch event {
+            case .downloadDeletionsCompleted(numberOfFiles: let deletions):
+                XCTAssert(deletions == 1, "Wrong number of deletions: \(deletions)")
+                eventsOccurred += 1
+                
+            default:
                 XCTFail()
-                return
             }
-            
-            XCTAssert(numberDownloadDeletions == 1)
-            XCTAssert(numFileDownloads == 0)
+        }
+        
+        SyncManager.session.start { (error) in
             XCTAssert(calledShouldDoDeletions)
-            
+            XCTAssert(eventsOccurred == 1)
             expectation2.fulfill()
         }
         
@@ -112,14 +117,20 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         
         let expectation2 = self.expectation(description: "start")
 
-        SyncManager.session.start { (result, error) in
-            guard case .downloadDelegatesCalled(numberDownloadFiles: let numFileDownloads, numberDownloadDeletions: let numberDownloadDeletions) = result! else {
+        var eventsOccurred = 0
+        syncServerEventOccurred = { event in
+            switch event {
+            case .downloadDeletionsCompleted(numberOfFiles: let deletions):
+                XCTAssert(deletions == 2)
+                eventsOccurred += 1
+                
+            default:
                 XCTFail()
-                return
             }
-            
-            XCTAssert(numberDownloadDeletions == 2)
-            XCTAssert(numFileDownloads == 0)
+        }
+        
+        SyncManager.session.start { (error) in
+            XCTAssert(eventsOccurred == 1)
             XCTAssert(calledShouldDoDeletions)
             
             expectation2.fulfill()
@@ -156,7 +167,6 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         shouldDoDeletions = { (downloadDeletions:[SyncAttributes]) in
             XCTAssert(downloadDeletions.count == 1)
             XCTAssert(downloadDeletions[0].fileUUID == file1.fileUUID)
-            XCTAssert(downloadDeletions[0].fileVersion == file1.fileVersion)
             calledShouldDoDeletions = true
         }
         
@@ -168,18 +178,33 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         
         let expectation2 = self.expectation(description: "start")
 
-        SyncManager.session.start { (result, error) in
-            guard case .downloadDelegatesCalled(numberDownloadFiles: let numFileDownloads, numberDownloadDeletions: let numberDownloadDeletions) = result! else {
+        var eventsOccurred = 0
+        var downloadsCompleted = 0
+        
+        syncServerEventOccurred = { event in
+            switch event {
+            case .fileDownloadsCompleted(numberOfFiles: let downloads):
+                XCTAssert(downloads == 1)
+                eventsOccurred += 1
+                
+            case .downloadDeletionsCompleted(numberOfFiles: let deletions):
+                XCTAssert(deletions == 1)
+                eventsOccurred += 1
+                
+            case .singleDownloadComplete(url: _, attr: _):
+                downloadsCompleted += 1
+
+            default:
                 XCTFail()
-                return
             }
-            
-            XCTAssert(numberDownloadDeletions == 1)
-            XCTAssert(numFileDownloads == 1)
-            
+        }
+        
+        SyncManager.session.start { (error) in
             XCTAssert(calledShouldDoDeletions)
             XCTAssert(calledShouldSaveDownloads)
-
+            
+            XCTAssert(downloadsCompleted == 1)
+            XCTAssert(eventsOccurred == 2)
             expectation2.fulfill()
         }
         
@@ -199,14 +224,12 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         
         let expectation = self.expectation(description: "start")
 
-        SyncManager.session.start { (result, error) in
-            guard case .noDownloadsOrDeletionsAvailable = result! else {
-                XCTFail()
-                return
-            }
+        syncServerEventOccurred = { event in
+            XCTFail()
+        }
 
+        SyncManager.session.start { (error) in
             XCTAssert(!calledShouldDoDeletions)
-            
             expectation.fulfill()
         }
         
@@ -224,14 +247,12 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         
         let expectation = self.expectation(description: "start")
 
-        SyncManager.session.start { (result, error) in
-            guard case .noDownloadsOrDeletionsAvailable = result! else {
-                XCTFail()
-                return
-            }
-
+        syncServerEventOccurred = { event in
+            XCTFail()
+        }
+        
+        SyncManager.session.start { (error) in
             XCTAssert(!calledShouldDoDeletions)
-            
             expectation.fulfill()
         }
         

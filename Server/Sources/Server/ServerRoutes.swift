@@ -21,7 +21,7 @@ public class ServerRoutes {
         
         let fileController = FileController()
         proxyRouter.addRoute(ep: ServerEndpoints.fileIndex, createRequest: FileIndexRequest.init, processRequest: fileController.fileIndex)
-        proxyRouter.addRoute(ep: ServerEndpoints.uploadFile, createRequest: UploadFileRequest.init, processRequest: fileController.upload)
+        proxyRouter.addRoute(ep: ServerEndpoints.uploadFile, createRequest: UploadFileRequest.init, processRequest: fileController.uploadFile)
         proxyRouter.addRoute(ep: ServerEndpoints.doneUploads, createRequest: DoneUploadsRequest.init, processRequest: fileController.doneUploads)
         proxyRouter.addRoute(ep: ServerEndpoints.downloadFile, createRequest: DownloadFileRequest.init, processRequest: fileController.downloadFile)
         proxyRouter.addRoute(ep: ServerEndpoints.getUploads, createRequest: GetUploadsRequest.init, processRequest: fileController.getUploads)

@@ -43,7 +43,7 @@ class Client_Downloads: TestCase {
                 XCTFail()
             }
             
-            XCTAssert(MasterVersion.get().version == expectedMasterVersion)
+            XCTAssert(Singleton.get().masterVersion == expectedMasterVersion)
 
             let dfts = DownloadFileTracker.fetchAll()
             XCTAssert(dfts.count == expectedFiles.count)
@@ -174,7 +174,7 @@ class Client_Downloads: TestCase {
         checkForDownloads(expectedMasterVersion: masterVersion + 1, expectedFiles: [file])
         
         // Fake an incorrect master version.
-        MasterVersion.get().version = masterVersion
+        Singleton.get().masterVersion = masterVersion
         CoreData.sessionNamed(Constants.coreDataName).saveContext()
 
         let expectation = self.expectation(description: "next")

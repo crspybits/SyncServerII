@@ -32,7 +32,7 @@ class Download {
 
             let (fileDownloads, downloadDeletions) = Directory.session.checkFileIndex(fileIndex: fileIndex!)
 
-            MasterVersion.get().version = masterVersion!
+            Singleton.get().masterVersion = masterVersion!
             
             if fileDownloads == nil && downloadDeletions == nil {
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
@@ -46,9 +46,10 @@ class Download {
                         assert(false, "Not Yet Implemented: Multiple File Versions")
                     }
                     
-                    let dft = DownloadFileTracker.newObject() as! DownloadFileTracker
+                    var dft = DownloadFileTracker.newObject() as! DownloadFileTracker
                     dft.fileUUID = file.fileUUID
                     dft.fileVersion = file.fileVersion
+                    dft.mimeType = file.mimeType
                     dft.deletedOnServer = file.deleted!
                 }
                 
@@ -72,7 +73,7 @@ class Download {
     case error(String)
     }
     
-    // Starts download of next file, if there is one. There should be no files downloading already. Only if .startedDownload is the NextResult will the completion handler be called. With a masterVersionUpdate response for NextCompletion, the MasterVersion Core Data object is updated by this method, and all the DownloadFileTracker objects have been reset.
+    // Starts download of next file, if there is one. There should be no files downloading already. Only if .started is the NextResult will the completion handler be called. With a masterVersionUpdate response for NextCompletion, the MasterVersion Core Data object is updated by this method, and all the DownloadFileTracker objects have been reset.
     func next(completion:((NextCompletion)->())?) -> NextResult {
         let dfts = DownloadFileTracker.fetchAll()
         if dfts.count == 0 {
@@ -86,20 +87,21 @@ class Download {
             return .error(message)
         }
         
-        let notStarted = dfts.filter {$0.status == .notStarted && $0.deletedOnServer == false}
+        let notStarted = dfts.filter {$0.status == .notStarted && !$0.deletedOnServer}
         if notStarted.count == 0 {
             return .allDownloadsCompleted
         }
         
-        let nextToDownload = notStarted[0]
+        var nextToDownload = notStarted[0]
+        let masterVersion = Singleton.get().masterVersion
 
-        let masterVersion = MasterVersion.get().version
+        nextToDownload.status = .downloading
+        CoreData.sessionNamed(Constants.coreDataName).saveContext()
+
         ServerAPI.session.downloadFile(file: nextToDownload as! Filenaming, serverMasterVersion: masterVersion) { (result, error)  in
             guard error == nil else {
-                Synchronized.block(nextToDownload) {
-                    nextToDownload.status = .notStarted
-                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                }
+                nextToDownload.status = .notStarted
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 
                 let message = "Error: \(error)"
                 Log.error(message)
@@ -109,31 +111,22 @@ class Download {
             
             switch result! {
             case .success(let downloadedFile):
-                Synchronized.block(nextToDownload) {
-                    nextToDownload.status = .downloaded
-                    nextToDownload.appMetaData = downloadedFile.appMetaData
-                    nextToDownload.fileSizeBytes = downloadedFile.fileSizeBytes
-                    nextToDownload.localURL = downloadedFile.url
-                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                }
+                nextToDownload.status = .downloaded
+                nextToDownload.appMetaData = downloadedFile.appMetaData
+                nextToDownload.fileSizeBytes = downloadedFile.fileSizeBytes
+                nextToDownload.localURL = downloadedFile.url
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 completion?(.downloaded(nextToDownload))
                 
             case .serverMasterVersionUpdate(let masterVersionUpdate):
-                Synchronized.block(nextToDownload) {
-                    // TODO: *2* A more efficient method (than in place here) is to get the file index, giving us the new masterVersion, and see which files that we have already downloaded have the same version as we expect.
-                    // The simplest method to deal with this is to restart all downloads. It is insufficient to just reset all of the DownloadFileTracker objects: Because some of the files we're wanting to download could have been marked as deleted in the FileIndex on the server. Thus, I'm going to remove all DownloadFileTracker objects.
+                // TODO: *2* A more efficient method (than in place here) is to get the file index, giving us the new masterVersion, and see which files that we have already downloaded have the same version as we expect.
+                // The simplest method to deal with this is to restart all downloads. It is insufficient to just reset all of the DownloadFileTracker objects: Because some of the files we're wanting to download could have been marked as deleted in the FileIndex on the server. Thus, I'm going to remove all DownloadFileTracker objects.
 
-                    DownloadFileTracker.removeAll()
-                    MasterVersion.get().version = masterVersionUpdate
-                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                }
+                DownloadFileTracker.removeAll()
+                Singleton.get().masterVersion = masterVersionUpdate
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 completion?(.masterVersionUpdate)
             }
-        }
-        
-        Synchronized.block(nextToDownload) {
-            nextToDownload.status = .downloading
-            CoreData.sessionNamed(Constants.coreDataName).saveContext()
         }
         
         return .started

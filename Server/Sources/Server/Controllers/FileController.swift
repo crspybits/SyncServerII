@@ -96,8 +96,7 @@ class FileController : ControllerProtocol {
         }
     }
     
-    func upload(params:RequestProcessingParameters) {
-    
+    func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
             Log.error(message: "Did not receive UploadFileRequest")
             params.completion(nil)

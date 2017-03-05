@@ -29,13 +29,12 @@ class Client_SyncManager: TestCase {
     func testStartWithNoFilesOnServer() {
         let expectation = self.expectation(description: "next")
 
-        SyncManager.session.start { (result, error) in
+        syncServerEventOccurred = { event in
+            XCTFail()
+        }
+        
+        SyncManager.session.start { (error) in
             XCTAssert(error == nil)
-            guard case .noDownloadsOrDeletionsAvailable = result! else {
-                XCTFail()
-                return
-            }
-            
             expectation.fulfill()
         }
         
@@ -46,7 +45,7 @@ class Client_SyncManager: TestCase {
         uploadAndDownloadOneFile()
     }
     
-    func downloadTwoFiles(file1: ServerAPI.File, file2: ServerAPI.File, masterVersion:MasterVersionInt, completion:(()->())? = nil) {
+    func downloadTwoFiles(file1: ServerAPI.File, file2: ServerAPI.File, masterVersion:MasterVersionInt, useOwnSyncServerEventOccurred:Bool=true, completion:(()->())? = nil) {
         let expectedFiles = [file1, file2]
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
@@ -62,16 +61,28 @@ class Client_SyncManager: TestCase {
         }
         
         let expectation = self.expectation(description: "start")
-
-        SyncManager.session.start { (result, error) in
+        
+        var eventsOccurred = 0
+        var downloadsCompleted = 0
+        
+        if useOwnSyncServerEventOccurred {
+            syncServerEventOccurred = { event in
+                switch event {
+                case .fileDownloadsCompleted(numberOfFiles: let downloads):
+                    XCTAssert(downloads == 2)
+                    eventsOccurred += 1
+                
+                case .singleDownloadComplete(_):
+                    downloadsCompleted += 1
+                    
+                default:
+                    XCTFail()
+                }
+            }
+        }
+        
+        SyncManager.session.start { (error) in
             XCTAssert(error == nil)
-            if case .downloadDelegatesCalled(let numDownloads, let numDownloadDeletions) = result! {
-                XCTAssert(numDownloads == 2)
-                XCTAssert(numDownloadDeletions == 0)
-            }
-            else {
-                XCTFail()
-            }
             
             let entries = DirectoryEntry.fetchAll()
             XCTAssert(entries.count == expectedFiles.count)
@@ -81,6 +92,11 @@ class Client_SyncManager: TestCase {
                     $0.fileVersion == file.fileVersion
                 }
                 XCTAssert(entriesResult.count == 1)
+            }
+            
+            if useOwnSyncServerEventOccurred {
+                XCTAssert(downloadsCompleted == 2)
+                XCTAssert(eventsOccurred == 1)
             }
             
             completion?()
@@ -125,29 +141,39 @@ class Client_SyncManager: TestCase {
         }
         
         let expectedFiles = [file1, file2]
-
+        var singleDownloads = 0
+        
         syncServerEventOccurred = { event in
             numberEvents += 1
             
-            guard case .singleDownloadComplete(_, let attr) = event else {
+            switch event {
+            case .singleDownloadComplete(url: _, attr: let attr):
+                let result = expectedFiles.filter {$0.fileUUID == attr.fileUUID}
+                XCTAssert(result.count == 1)
+                let expectedFile = expectedFiles.filter {$0.fileUUID == attr.fileUUID}
+                XCTAssert(expectedFile.count == 1)
+                XCTAssert(expectedFile[0].fileVersion == result[0].fileVersion)
+                singleDownloads += 1
+                
+            case .fileDownloadsCompleted(_):
+                break
+                
+            default:
                 XCTFail()
-                return
             }
-            
-            let result = expectedFiles.filter {$0.fileUUID == attr.fileUUID}
-            XCTAssert(result.count == 1)
-            XCTAssert(attr.fileVersion == result[0].fileVersion)
-            
+
             if numberEvents == 1 {
                 // This is fake: It would be conceptually better to upload a file here but that's a bit of a pain the way I have it setup in testing.
-                MasterVersion.get().version = MasterVersion.get().version - 1
+                Singleton.get().masterVersion = Singleton.get().masterVersion - 1
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
             }
         }
         
-        downloadTwoFiles(file1: file1, file2: file2, masterVersion: masterVersion) {
-            // This will be three because the master version change with 1 download will reset downloads, and will cause the first download to occur a second time.
-            XCTAssert(numberEvents == 3, "numberEvents was \(numberEvents)")
+        downloadTwoFiles(file1: file1, file2: file2, masterVersion: masterVersion, useOwnSyncServerEventOccurred:false) {
+            XCTAssert(singleDownloads == 3, "singleDownloads was \(singleDownloads)")
+
+            // This will be four because the master version change with 1 download will reset downloads, will cause the first download to occur a second time, and there will thus be 2 + 1 downloads.
+            XCTAssert(numberEvents == 4, "numberEvents was \(numberEvents)")
         }
     }
 

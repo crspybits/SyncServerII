@@ -11,26 +11,8 @@ import CoreData
 import SMCoreLib
 
 @objc(DownloadFileTracker)
-class DownloadFileTracker: NSManagedObject, Filenaming {
-    var fileUUID:String! {
-        get {
-            return fileUUIDInternal!
-        }
-        
-        set {
-            fileUUIDInternal = newValue
-        }
-    }
-    
-    var fileVersion:Int32! {
-        get {
-            return fileVersionInternal
-        }
-        
-        set {
-            fileVersionInternal = newValue
-        }
-    }
+class DownloadFileTracker: FileTracker, AllOperations {
+    typealias COREDATAOBJECT = DownloadFileTracker
     
     enum Status : String {
     case notStarted
@@ -48,28 +30,6 @@ class DownloadFileTracker: NSManagedObject, Filenaming {
         }
     }
     
-    var localURL:SMRelativeLocalURL? {
-        get {
-            if localURLData == nil {
-                return nil
-            }
-            else {
-                let url = NSKeyedUnarchiver.unarchiveObject(with: localURLData as! Data) as? SMRelativeLocalURL
-                Assert.If(url == nil, thenPrintThisString: "Yikes: No URL!")
-                return url
-            }
-        }
-        
-        set {
-            if newValue == nil {
-                localURLData = nil
-            }
-            else {
-                localURLData = NSKeyedArchiver.archivedData(withRootObject: newValue!) as! NSData
-            }
-        }
-    }
-    
     class func entityName() -> String {
         return "DownloadFileTracker"
     }
@@ -78,32 +38,5 @@ class DownloadFileTracker: NSManagedObject, Filenaming {
         let dft = CoreData.sessionNamed(Constants.coreDataName).newObject(withEntityName: self.entityName()) as! DownloadFileTracker
         dft.status = .notStarted
         return dft
-    }
-    
-    class func fetchAll() -> [DownloadFileTracker] {
-        var dfts:[DownloadFileTracker]!
-
-        do {
-            dfts = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: self.entityName()) as? [DownloadFileTracker]
-         } catch (let error) {
-            Log.error("Error: \(error)")
-            assert(false)
-         }
-        
-         return dfts
-    }
-    
-    class func removeAll() {
-        do {
-            let dfts = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: self.entityName()) as? [DownloadFileTracker]
-            
-            for dft in dfts! {
-                // TODO: *1* If there is a localURL associated with this, I should remove that file before removing the core data object.
-                CoreData.sessionNamed(Constants.coreDataName).remove(dft)
-            }
-        } catch (let error) {
-            Log.error("Error: \(error)")
-            assert(false)
-        }
     }
 }

@@ -110,7 +110,7 @@ public class ServerEndpoints {
     // Seems unlikely that the collection of uploads will change while we are getting them (because they are specific to the userId and the deviceUUID), but grab the lock just in case.
     public static let getUploads = ServerEndpoint("GetUploads", method: .get, needsLock:true)
 
-    // TODO: *3* Need a new endpoint that enables clients to flush (i.e., delete) files in the Uploads table which are in the `uploaded` state.
+    // TODO: *3* Need a new endpoint that enables clients to flush (i.e., delete) files in the Uploads table which are in the `uploaded` state. If this fails on deleting from cloud storage, then this should not probably cause a failure of the endpoint-- because we may be using as a cleanup and we want it to be robust.
 
     public static let session = ServerEndpoints()
     
