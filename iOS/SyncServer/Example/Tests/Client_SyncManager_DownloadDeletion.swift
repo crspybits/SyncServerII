@@ -29,7 +29,7 @@ class Client_SyncManager_DownloadDeletion: TestCase {
 
     func startWithOneDownloadDeletion() {
         // Uses SyncManager.session.start so we have the file in our local Directory after download.
-        guard let (file, masterVersion) = uploadAndDownloadOneFile() else {
+        guard let (file, masterVersion) = uploadAndDownloadOneFileUsingStart() else {
             XCTFail()
             return
         }
@@ -80,12 +80,12 @@ class Client_SyncManager_DownloadDeletion: TestCase {
 
     func testStartWithTwoDownloadDeletions() {
         // Uses SyncManager.session.start so we have the file in our local Directory after download.
-        guard let (file1, _) = uploadAndDownloadOneFile() else {
+        guard let (file1, _) = uploadAndDownloadOneFileUsingStart() else {
             XCTFail()
             return
         }
         
-        guard let (file2, masterVersion) = uploadAndDownloadOneFile() else {
+        guard let (file2, masterVersion) = uploadAndDownloadOneFileUsingStart() else {
             XCTFail()
             return
         }
@@ -141,7 +141,7 @@ class Client_SyncManager_DownloadDeletion: TestCase {
     
     func testStartWithOneDownloadDeletionAndOneFileDownload() {
         // Uses SyncManager.session.start so we have the file in our local Directory after download.
-        guard let (file1, masterVersion) = uploadAndDownloadOneFile() else {
+        guard let (file1, masterVersion) = uploadAndDownloadOneFileUsingStart() else {
             XCTFail()
             return
         }
@@ -151,8 +151,9 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion)
         
         let fileUUID2 = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
         
-        guard let (_, file2) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
+        guard let (_, file2) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
             XCTFail()
             return
         }

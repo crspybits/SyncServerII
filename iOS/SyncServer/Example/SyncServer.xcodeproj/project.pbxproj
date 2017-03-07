@@ -32,6 +32,7 @@
 		83D95C9E1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */; };
 		83D95CA01E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D95C9F1E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift */; };
 		83D95CA41E6B546500DF3BF3 /* UploadMe2.txt in Resources */ = {isa = PBXBuildFile; fileRef = 83D95CA31E6B546500DF3BF3 /* UploadMe2.txt */; };
+		83D95CA61E6C8EBC00DF3BF3 /* UploadMe3.txt in Resources */ = {isa = PBXBuildFile; fileRef = 83D95CA51E6C8EBC00DF3BF3 /* UploadMe3.txt */; };
 		83F37A171E4445CB00479175 /* Server.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CD30821E15880000A0C7AD /* Server.plist */; };
 		83F37A181E4445E500479175 /* Consts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BEF1E1205CF005209F2 /* Consts.swift */; };
 		83F37A1A1E44478100479175 /* FileIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A191E44478100479175 /* FileIndex.swift */; };
@@ -40,6 +41,8 @@
 		83F37A241E46E8C700479175 /* Cat.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 83F37A231E46E8C700479175 /* Cat.jpg */; };
 		83F37A301E51120B00479175 /* ServerAPI_DownloadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F37A2F1E51120B00479175 /* ServerAPI_DownloadFile.swift */; };
 		83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F801E58D59D00759578 /* ServerAPI_GetUploads.swift */; };
+		83F882111E6CC7C3008F644A /* Client_SyncServer_FileDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882101E6CC7C3008F644A /* Client_SyncServer_FileDownload.swift */; };
+		83F882131E6E5FDD008F644A /* Client_SyncServer_Sync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882121E6E5FDD008F644A /* Client_SyncServer_Sync.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,12 +87,15 @@
 		83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager_MasterVersionChange.swift; sourceTree = "<group>"; };
 		83D95C9F1E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager_FileUpload.swift; sourceTree = "<group>"; };
 		83D95CA31E6B546500DF3BF3 /* UploadMe2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = UploadMe2.txt; sourceTree = "<group>"; };
+		83D95CA51E6C8EBC00DF3BF3 /* UploadMe3.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = UploadMe3.txt; sourceTree = "<group>"; };
 		83F37A191E44478100479175 /* FileIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileIndex.swift; sourceTree = "<group>"; };
 		83F37A1F1E46D40500479175 /* UploadFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadFile.swift; sourceTree = "<group>"; };
 		83F37A211E46D52500479175 /* UploadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = UploadMe.txt; sourceTree = "<group>"; };
 		83F37A231E46E8C700479175 /* Cat.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Cat.jpg; sourceTree = "<group>"; };
 		83F37A2F1E51120B00479175 /* ServerAPI_DownloadFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_DownloadFile.swift; sourceTree = "<group>"; };
 		83F55F801E58D59D00759578 /* ServerAPI_GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_GetUploads.swift; sourceTree = "<group>"; };
+		83F882101E6CC7C3008F644A /* Client_SyncServer_FileDownload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_FileDownload.swift; sourceTree = "<group>"; };
+		83F882121E6E5FDD008F644A /* Client_SyncServer_Sync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_Sync.swift; sourceTree = "<group>"; };
 		950FA6AEF6E79D1648CC8B07 /* Pods-SyncServer_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SyncServer_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-SyncServer_Example/Pods-SyncServer_Example.release.xcconfig"; sourceTree = "<group>"; };
 		99CC8F59D9EBD3C940A50230 /* SyncServer.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SyncServer.podspec; path = ../SyncServer.podspec; sourceTree = "<group>"; };
 		A5DC520778F7EB9A2C2C2CA7 /* Pods-SyncServer_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SyncServer_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SyncServer_Example/Pods-SyncServer_Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -168,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				83D95CA31E6B546500DF3BF3 /* UploadMe2.txt */,
+				83D95CA51E6C8EBC00DF3BF3 /* UploadMe3.txt */,
 				607FACD41AFB9204008FA782 /* Info.plist */,
 				83CD30811E15880000A0C7AD /* GoogleService-Info.plist */,
 				83CD30821E15880000A0C7AD /* Server.plist */,
@@ -178,6 +185,8 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				83F882121E6E5FDD008F644A /* Client_SyncServer_Sync.swift */,
+				83F882101E6CC7C3008F644A /* Client_SyncServer_FileDownload.swift */,
 				83D95C9F1E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift */,
 				83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */,
 				835C61111E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift */,
@@ -329,6 +338,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83D95CA61E6C8EBC00DF3BF3 /* UploadMe3.txt in Resources */,
 				83D95CA41E6B546500DF3BF3 /* UploadMe2.txt in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				83CD30841E15880000A0C7AD /* Server.plist in Resources */,
@@ -468,6 +478,7 @@
 				83F37A1A1E44478100479175 /* FileIndex.swift in Sources */,
 				837244561E419EE600155E89 /* TestCase.swift in Sources */,
 				8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */,
+				83F882111E6CC7C3008F644A /* Client_SyncServer_FileDownload.swift in Sources */,
 				83F37A201E46D40500479175 /* UploadFile.swift in Sources */,
 				837244541E419E7B00155E89 /* DoneUploads.swift in Sources */,
 				83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */,
@@ -475,6 +486,7 @@
 				83D95CA01E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift in Sources */,
 				833729861E0F6BC0002CA164 /* Authentication.swift in Sources */,
 				8344CC2B1E5FDD1800BEB263 /* Client_Downloads.swift in Sources */,
+				83F882131E6E5FDD008F644A /* Client_SyncServer_Sync.swift in Sources */,
 				83F37A301E51120B00479175 /* ServerAPI_DownloadFile.swift in Sources */,
 				835C60B21E6369DE003E9AF8 /* Client_SyncManager.swift in Sources */,
 			);

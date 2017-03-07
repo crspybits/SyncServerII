@@ -42,7 +42,7 @@ class Client_SyncManager: TestCase {
     }
     
     func testStartWithOneUploadedFileOnServer() {
-        uploadAndDownloadOneFile()
+        uploadAndDownloadOneFileUsingStart()
     }
     
     func downloadTwoFiles(file1: ServerAPI.File, file2: ServerAPI.File, masterVersion:MasterVersionInt, useOwnSyncServerEventOccurred:Bool=true, completion:(()->())? = nil) {
@@ -113,11 +113,13 @@ class Client_SyncManager: TestCase {
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
 
-        guard let (_, file1) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion) else {
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        guard let (_, file1) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion) else {
             return nil
         }
         
-        guard let (_, file2) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
+        guard let (_, file2) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
             return nil
         }
         

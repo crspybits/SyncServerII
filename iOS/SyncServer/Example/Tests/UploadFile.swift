@@ -23,25 +23,29 @@ class ServerAPI_UploadFile: TestCase {
     
     func testUploadTextFile() {
         let masterVersion = getMasterVersion()
-        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", serverMasterVersion: masterVersion)
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", serverMasterVersion: masterVersion)
     }
     
     func testUploadJPEGFile() {
         let masterVersion = getMasterVersion()
-        _ = uploadFile(fileName: "Cat", fileExtension: "jpg", mimeType: "image/jpeg", serverMasterVersion: masterVersion)
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "Cat", withExtension: "jpg")!
+        _ = uploadFile(fileURL:fileURL, mimeType: "image/jpeg", serverMasterVersion: masterVersion)
     }
     
     func testUploadTextFileWithNoAuthFails() {
         ServerNetworking.session.authenticationDelegate = nil
-        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", expectError: true)
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", expectError: true)
     }
     
     func testUploadTwoFilesWithSameUUIDFails() {
         let masterVersion = getMasterVersion()
         let fileUUID = UUID().uuidString
-
-        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion)
-        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, expectError: true)
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion)
+        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, expectError: true)
     }
     
     func testParallelUploadsWork() {

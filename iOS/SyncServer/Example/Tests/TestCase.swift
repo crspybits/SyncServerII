@@ -24,6 +24,9 @@ class TestCase: XCTestCase {
     var shouldSaveDownloads: ((_ downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]) -> ())!
     var syncServerEventOccurred: (SyncEvent) -> () = {event in }
     var shouldDoDeletions: (_ downloadDeletions: [SyncAttributes]) -> () = { downloadDeletions in }
+    var syncServerErrorOccurred: (Error) -> () = { error in
+        Log.error("syncServerErrorOccurred: \(error)")
+    }
     
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {
@@ -131,9 +134,7 @@ class TestCase: XCTestCase {
     }
     
     // Returns the file size uploaded
-    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> (fileSize: Int64, ServerAPI.File)? {
-    
-        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
+    func uploadFile(fileURL:URL, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> (fileSize: Int64, ServerAPI.File)? {
 
         let file = ServerAPI.File(localURL: fileURL, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: appMetaData, fileVersion: 0)
         
@@ -274,12 +275,13 @@ class TestCase: XCTestCase {
 
     @discardableResult
     // Uses SyncManager.session.start
-    func uploadAndDownloadOneFile() -> (ServerAPI.File, MasterVersionInt)? {
+    func uploadAndDownloadOneFileUsingStart() -> (ServerAPI.File, MasterVersionInt)? {
         let masterVersion = getMasterVersion()
         
         let fileUUID = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
         
-        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+        guard let (_, file) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
             return nil
         }
         
@@ -341,8 +343,9 @@ class TestCase: XCTestCase {
         let masterVersion = getMasterVersion()
         
         let fileUUID = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
         
-        guard let (_, file) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+        guard let (_, file) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
             return nil
         }
         
@@ -401,6 +404,51 @@ class TestCase: XCTestCase {
         
         XCTAssert(foundDeletedFile)
     }
+    
+    func uploadAndDownloadTextFile(appMetaData:String? = nil, uploadFileURL:URL = Bundle(for: TestCase.self).url(forResource: "UploadMe", withExtension: "txt")!, fileUUID:String? = nil) {
+    
+        let masterVersion = getMasterVersion()
+        
+        var actualFileUUID:String! = fileUUID
+        if fileUUID == nil {
+            actualFileUUID = UUID().uuidString
+        }
+        
+        guard let (fileSize, file) = uploadFile(fileURL:uploadFileURL, mimeType: "text/plain", fileUUID: actualFileUUID, serverMasterVersion: masterVersion, appMetaData:appMetaData) else {
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        onlyDownloadFile(comparisonFileURL: uploadFileURL, file: file, masterVersion: masterVersion + 1, appMetaData: appMetaData, fileSize: fileSize)
+    }
+    
+    func onlyDownloadFile(comparisonFileURL:URL, file:Filenaming, masterVersion:MasterVersionInt, appMetaData:String? = nil, fileSize:Int64? = nil) {
+        let expectation = self.expectation(description: "doneUploads")
+
+        ServerAPI.session.downloadFile(file: file, serverMasterVersion: masterVersion) { (result, error) in
+        
+            XCTAssert(error == nil)
+            XCTAssert(result != nil)
+            
+            if case .success(let downloadedFile) = result! {
+                XCTAssert(FilesMisc.compareFiles(file1: comparisonFileURL, file2: downloadedFile.url as URL))
+                if appMetaData != nil {
+                    XCTAssert(downloadedFile.appMetaData == appMetaData)
+                }
+                if fileSize != nil {
+                    XCTAssert(fileSize == downloadedFile.fileSizeBytes)
+                }
+            }
+            else {
+                XCTFail()
+            }
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
 }
 
 extension TestCase : ServerNetworkingAuthentication {
@@ -439,5 +487,9 @@ extension TestCase : SyncServerDelegate {
     
     func shouldDoDeletions(downloadDeletions: [SyncAttributes]) {
         shouldDoDeletions(downloadDeletions)
+    }
+    
+    func syncServerErrorOccurred(error:Error) {
+        syncServerErrorOccurred(error)
     }
 }

@@ -80,6 +80,7 @@ class MasterVersionRepository : Repository {
     case success
     }
     
+    // Increments master version for specific userId
     func updateToNext(current:MasterVersion) -> UpdateToNextResult {
     
         let query = "UPDATE \(tableName) SET masterVersion = masterVersion + 1 " +

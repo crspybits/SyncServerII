@@ -15,9 +15,10 @@ import SMCoreLib
 public enum SyncEvent {
     // The url/attr here may not be consistent with the results from shouldSaveDownloads in the SyncServerDelegate.
     case singleDownloadComplete(url:SMRelativeLocalURL, attr: SyncAttributes)
-    
     case fileDownloadsCompleted(numberOfFiles:Int)
     case downloadDeletionsCompleted(numberOfFiles:Int)
+    
+    case singleUploadComplete(attr:SyncAttributes)
     case fileUploadsCompleted(numberOfFiles:Int)
     case uploadDeletionsCompleted(numberOfFiles:Int)
     
@@ -31,16 +32,22 @@ public struct EventDesired: OptionSet {
     public static let singleDownloadComplete = EventDesired(rawValue: 1 << 0)
     public static let fileDownloadsCompleted = EventDesired(rawValue: 1 << 1)
     public static let downloadDeletionsCompleted = EventDesired(rawValue: 1 << 2)
+    
+    public static let singleUploadComplete = EventDesired(rawValue: 1 << 4)
     public static let fileUploadsCompleted = EventDesired(rawValue: 1 << 3)
-    public static let uploadDeletionsCompleted = EventDesired(rawValue: 1 << 4)
-    public static let syncDone = EventDesired(rawValue: 1 << 5)
+    public static let uploadDeletionsCompleted = EventDesired(rawValue: 1 << 5)
+    
+    public static let syncDone = EventDesired(rawValue: 1 << 6)
     
     public static let defaults:EventDesired =
         [.singleDownloadComplete, .fileDownloadsCompleted, .downloadDeletionsCompleted,
-        .fileUploadsCompleted, .uploadDeletionsCompleted]
+        .fileUploadsCompleted, .singleUploadComplete, .uploadDeletionsCompleted]
+    public static let all:EventDesired = EventDesired.defaults.union(EventDesired.syncDone)
     
     static func reportEvent(_ event:SyncEvent, mask:EventDesired, delegate:SyncServerDelegate?) {
+    
         var eventIsDesired:EventDesired
+        
         switch event {
         case .downloadDeletionsCompleted(_):
             eventIsDesired = .downloadDeletionsCompleted
@@ -59,6 +66,9 @@ public struct EventDesired: OptionSet {
             
         case .syncDone:
             eventIsDesired = .syncDone
+            
+        case .singleUploadComplete(_):
+            eventIsDesired = .singleUploadComplete
         }
         
         if mask.contains(eventIsDesired) {
@@ -77,12 +87,16 @@ public protocol SyncServerDelegate : class {
     // Called when deletions have been received from the server. I.e., these files have been deleted on the server. This is received/called in an atomic manner: This reflects a snapshot state of files on the server. Clients should delete the files referenced by the SMSyncAttributes's (i.e., the UUID's).
     func shouldDoDeletions(downloadDeletions downloadDeletions:[SyncAttributes])
     
+    func syncServerErrorOccurred(error:Error)
+
     // Reports events. Useful for testing and UI.
     func syncServerEventOccurred(event:SyncEvent)
 }
 
 public class SyncServer {
     public static let session = SyncServer()
+    private var syncOperating = false
+    private var delayedSync = false
     
     private init() {
     }
@@ -155,14 +169,13 @@ public class SyncServer {
             entry = DirectoryEntry.newObject() as! DirectoryEntry
             entry!.fileUUID = attr.fileUUID
             entry!.mimeType = attr.mimeType
-            
-            // Just created for upload -- it must have version == 0.
-            entry!.fileVersion = 0
         }
         else {
-            // Right now, we're not allowing uploads of multiple version files, so this is not allowed.
-            // When we can do upload deletions, we'll enable this too, but still you will only be able to delete version 0 of the file.
-            assert(false)
+            if entry!.fileVersion != nil {
+                // Right now, we're not allowing uploads of multiple version files, so this is not allowed.
+                // When we can do upload deletions, we'll enable this too, but still you will only be able to delete version 0 of the file.
+                assert(false)
+            }
             
             if attr.mimeType != entry!.mimeType {
                 throw SyncClientAPIError.mimeTypeOfFileChanged
@@ -179,8 +192,12 @@ public class SyncServer {
         newUft.fileUUID = attr.fileUUID
         newUft.mimeType = attr.mimeType
         
-        // TODO: This will work now just because we're just dealing with version 0 of files.
-        newUft.fileVersion = entry!.fileVersion
+        if entry!.fileVersion == nil {
+            newUft.fileVersion = 0
+        }
+        else {
+            newUft.fileVersion = entry!.fileVersion! + 1
+        }
         
         // Has this file UUID been added to `pendingSync` already? i.e., Has the client called `uploadImmutable`, then a little later called `uploadImmutable` again, with the same uuid, all without calling `sync`-- so, we don't have a new file version because new file versions only occur once the upload hits the server.
         let result = Upload.pendingSync().uploadFileTrackers.filter {$0.fileUUID == attr.fileUUID}
@@ -194,19 +211,53 @@ public class SyncServer {
         CoreData.sessionNamed(Constants.coreDataName).saveContext()
     }
     
+    // If no other `sync` is taking place, this will asynchronously do pending downloads and uploads. If there is a `sync` currently taking place, this will wait until after that is done, and try again.
     public func sync() {
-        if Singleton.get().pendingSync!.uploadFileTrackers.count > 0  {
-            Upload.movePendingSyncToSynced()
-            CoreData.sessionNamed(Constants.coreDataName).saveContext()
+        var doStart = true
+        
+        Synchronized.block(self) {
+            if Upload.pendingSync().uploadFileTrackers.count > 0  {
+                Upload.movePendingSyncToSynced()
+            }
+            
+            if syncOperating {
+                delayedSync = true
+                doStart = false
+            }
+            else {
+                syncOperating = true
+            }
         }
+        
+        if doStart {
+            start()
+        }
+    }
     
+    private func start() {
+        Log.msg("SyncServer.start")
         SyncManager.session.start { error in
-            // TODO: *0* What to do with an error?
             if error != nil {
-                Log.error("\(error!)")
+                self.delegate?.syncServerErrorOccurred(error: error!)
             }
             
             EventDesired.reportEvent(.syncDone, mask: self.eventsDesired, delegate: self.delegate)
+
+            var doStart = false
+            
+            Synchronized.block(self) {
+                if Upload.haveSyncQueue()  || self.delayedSync {
+                    self.delayedSync = false
+                    doStart = true
+                }
+                else {
+                    self.syncOperating = false
+                }
+            }
+            
+            if doStart {
+                self.start()
+            }
         }
     }
     
@@ -218,7 +269,11 @@ public class SyncServer {
             }
         }
         
-        // TODO: *0* Do the same thing with uploading files.
+        Upload.pendingSync().uploadFileTrackers.map { uft in
+            if uft.status == .uploading {
+                uft.status = .notStarted
+            }
+        }
         
         CoreData.sessionNamed(Constants.coreDataName).saveContext()
     }

@@ -14,6 +14,8 @@ import Kitura
 import PerfectLib
 #endif
 
+// As part of normal processing, increments the current master version for the user.
+
 class DoneUploadsRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.
     
@@ -85,10 +87,11 @@ class DoneUploadsResponse : ResponseMessage {
     static let numberUploadsTransferredKey = "numberUploadsTransferred"
     var numberUploadsTransferred:Int32?
     
-    // 2) If the master version for the user on the server has been incremented, this key will be present in the response-- with the new value of the master version. The doneUploads operation was not attempted in this case.
+    // 2) If the master version for the user on the server had been previously incremented to a value different than the masterVersion value in the request, this key will be present in the response-- with the new value of the master version. The doneUploads operation was not attempted in this case.
     static let masterVersionUpdateKey = "masterVersionUpdate"
     var masterVersionUpdate:MasterVersionInt?
     
+    // TODO: *1* Make sure we're using this on the client.
     // If present, this reports an error situation on the server. Can only occur if there were pending UploadDeletion's.
     static let numberDeletionErrorsKey = "numberDeletionErrors"
     var numberDeletionErrors:Int32?

@@ -16,6 +16,17 @@ public class DirectoryEntry: NSManagedObject, CoreDataModel, AllOperations {
 
     public static let UUID_KEY = "fileUUID"
     
+    // File's don't get updated with their version until an upload or download occurs. This means that when a DirectoryEntry is created for an upload of a new file, the fileVersion is initially nil.
+    public var fileVersion:FileVersionInt? {
+        get {
+            return fileVersionInternal?.int32Value
+        }
+        
+        set {
+            fileVersionInternal = newValue == nil ? nil : NSNumber(value: newValue!)
+        }
+    }
+    
     public class func entityName() -> String {
         return "DirectoryEntry"
     }

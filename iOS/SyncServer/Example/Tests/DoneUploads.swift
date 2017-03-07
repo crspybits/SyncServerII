@@ -24,8 +24,9 @@ class ServerAPI_DoneUploads: TestCase {
         let masterVersion = getMasterVersion()
         
         let fileUUID = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
         
-        guard let (fileSize, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+        guard let (fileSize, _) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
             XCTFail()
             return
         }
@@ -48,13 +49,15 @@ class ServerAPI_DoneUploads: TestCase {
         
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
-
-        guard let (fileSize1, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion) else {
+        let fileURL1 = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        guard let (fileSize1, _) = uploadFile(fileURL:fileURL1, mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion) else {
             XCTFail()
             return
         }
         
-        guard let (fileSize2, _) = uploadFile(fileName: "Cat", fileExtension: "jpg", mimeType: "image/jpeg", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
+        let fileURL2 = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "Cat", withExtension: "jpg")!
+        guard let (fileSize2, _) = uploadFile(fileURL:fileURL2, mimeType: "image/jpeg", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
             XCTFail()
             return
         }
@@ -86,8 +89,9 @@ class ServerAPI_DoneUploads: TestCase {
         }
         
         let fileUUIDUpload = UUID().uuidString
-
-        guard let (fileSizeUpload, _) = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", fileUUID: fileUUIDUpload, serverMasterVersion: masterVersion) else {
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        guard let (fileSizeUpload, _) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUIDUpload, serverMasterVersion: masterVersion) else {
             XCTFail()
             return
         }
@@ -114,12 +118,13 @@ class ServerAPI_DoneUploads: TestCase {
         
         let deviceUUID1 = Foundation.UUID()
         let deviceUUID2 = Foundation.UUID()
-
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
         deviceUUID = deviceUUID1
-        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", serverMasterVersion: masterVersion)
+        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", serverMasterVersion: masterVersion)
         
         deviceUUID = deviceUUID2
-        _ = uploadFile(fileName: "UploadMe", fileExtension: "txt", mimeType: "text/plain", serverMasterVersion: masterVersion)
+        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", serverMasterVersion: masterVersion)
         
         let expectation1 = self.expectation(description: "doneUploads1")
         let expectation2 = self.expectation(description: "doneUploads2")

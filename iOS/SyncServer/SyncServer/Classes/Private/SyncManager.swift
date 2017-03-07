@@ -133,6 +133,8 @@ class SyncManager {
         let nextResult = Upload.session.next { nextCompletion in
             switch nextCompletion {
             case .uploaded(let uft):
+                let attr = SyncAttributes(fileUUID: uft.fileUUID, mimeType:uft.mimeType!)
+                EventDesired.reportEvent(.singleUploadComplete(attr: attr), mask: self.desiredEvents, delegate: self.delegate)
                 // Recursively see if there is a next upload to do.
                 self.checkForPendingUploads()
 
@@ -170,6 +172,15 @@ class SyncManager {
                 let fileUploads = uploadQueue.uploadFileTrackers.filter {!$0.deleteOnServer}
                 if fileUploads.count > 0 {
                     EventDesired.reportEvent(.fileUploadsCompleted(numberOfFiles: fileUploads.count), mask: self.desiredEvents, delegate: self.delegate)
+                    
+                    // Each of the DirectoryEntry's for the uploads needs to now be given its version, as uploaded.
+                    fileUploads.map {uft in
+                        guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
+                            assert(false)
+                        }
+
+                        uploadedEntry.fileVersion = uft.fileVersion
+                    }
                 }
                 
                 CoreData.sessionNamed(Constants.coreDataName).remove(uploadQueue)

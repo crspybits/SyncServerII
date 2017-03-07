@@ -104,6 +104,10 @@ class Upload {
             
             switch result! {
             case .success(numberUploadsTransferred: let numberTransferred):
+                // Master version was incremented on the server as part of normal doneUploads operation. Update ours locally.
+                Singleton.get().masterVersion = masterVersion + 1
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                
                 completion?(.doneUploads(numberTransferred: numberTransferred))
                 
             case .serverMasterVersionUpdate(let masterVersionUpdate):

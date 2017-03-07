@@ -3,7 +3,7 @@
     <entity name="DirectoryEntry" representedClassName="DirectoryEntry" syncable="YES">
         <attribute name="deletedOnServer" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="fileUUID" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="fileVersion" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="fileVersionInternal" optional="YES" attributeType="Integer 32" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="mimeType" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="DownloadFileTracker" representedClassName="DownloadFileTracker" parentEntity="FileTracker" syncable="YES">

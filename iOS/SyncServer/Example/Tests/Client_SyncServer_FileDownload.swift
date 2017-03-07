@@ -1,14 +1,14 @@
 //
-//  Client_NetworkLoss.swift
+//  Client_SyncServer_FileDownload.swift
 //  SyncServer
 //
-//  Created by Christopher Prince on 2/27/17.
+//  Created by Christopher Prince on 3/5/17.
 //  Copyright © 2017 CocoaPods. All rights reserved.
 //
 
 import XCTest
 
-class Client_NetworkLoss: TestCase {
+class Client_SyncServer_FileDownload: TestCase {
     
     override func setUp() {
         super.setUp()
@@ -20,15 +20,5 @@ class Client_NetworkLoss: TestCase {
         super.tearDown()
     }
     
-    // TODO: *1* Code functionality and test cases for dealing with network loss.
-    /*
-    func testExample() {
-    }
-
-    // See testWhereMasterVersionChangesMidwayThroughTwoDownloads
-    func testNetworkLossMidwayBetweenDownloads() {
-    }
-    */
-    
-    // TODO: *1* Similar tests for uploading.
+    // TODO: *0* Do a sync with no uploads pending, but pending downloads.    
 }

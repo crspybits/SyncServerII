@@ -85,7 +85,7 @@ class Directory {
     func updateAfterDownloadingFiles(downloads:[DownloadFileTracker]) {
         downloads.map { dft in
             if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: dft.fileUUID) {
-                assert(entry.fileVersion < dft.fileVersion)
+                assert(entry.fileVersion! < dft.fileVersion)
                 entry.fileVersion = dft.fileVersion
             }
             else {

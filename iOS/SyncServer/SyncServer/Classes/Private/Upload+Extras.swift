@@ -23,7 +23,7 @@ extension Upload {
         return Singleton.get().pendingSync!
     }
     
-    // Must have uploads in `pendingSync`
+    // Must have uploads in `pendingSync`. This does a `saveContext`.
     class func movePendingSyncToSynced() {
         assert(Singleton.get().pendingSync != nil)
         assert(Singleton.get().pendingSync!.uploads!.count > 0)

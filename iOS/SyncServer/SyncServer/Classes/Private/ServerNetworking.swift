@@ -57,10 +57,10 @@ class ServerNetworking {
         request.httpMethod = "POST"
         request.httpBody = dataToUpload
         
-        Log.special("serverURL: \(serverURL)")
+        Log.msg("postUploadDataTo: serverURL: \(serverURL)")
         
         let uploadTask:URLSessionUploadTask = session.uploadTask(with: request, from: dataToUpload) { (data, urlResponse, error) in
-            Log.special("request.url: \(request.url)")
+            Log.msg("request.url: \(request.url)")
             
             self.processResponse(data: data, urlResponse: urlResponse, error: error, completion: completion)
         }
@@ -85,7 +85,7 @@ class ServerNetworking {
         var request = URLRequest(url: serverURL)
         request.httpMethod = method.rawValue.uppercased()
         
-        Log.special("serverURL: \(serverURL)")
+        Log.msg("downloadFrom: serverURL: \(serverURL)")
         
         let downloadTask:URLSessionDownloadTask = session.downloadTask(with: request) { (url, urlResponse, error) in
         
@@ -140,7 +140,7 @@ class ServerNetworking {
         request.httpMethod = method.rawValue.uppercased()
         request.httpBody = dataToUpload
         
-        Log.special("serverURL: \(serverURL)")
+        Log.msg("sendRequestTo: serverURL: \(serverURL)")
         
         let uploadTask:URLSessionDataTask = session.dataTask(with: request) { (data, urlResponse, error) in
             self.processResponse(data: data, urlResponse: urlResponse, error: error, completion: completion)

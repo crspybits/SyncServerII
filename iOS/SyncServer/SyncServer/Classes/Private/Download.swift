@@ -24,6 +24,8 @@ class Download {
     // TODO: *0* while this check is occuring, we want to make sure we don't have a concurrent check operation.
     // Creates DownloadFileTracker's to represent files that need downloading/download deleting. Updates MasterVersion with the master version on the server.
     func check(completion:((CheckCompletion)->())? = nil) {
+        Log.msg("Download.check")
+        
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
             guard error == nil else {
                 completion?(.error(error!))
