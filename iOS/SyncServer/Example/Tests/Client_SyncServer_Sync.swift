@@ -88,4 +88,6 @@ class Client_SyncServer_Sync: TestCase {
         
         getFileIndex(expectedFiles: [])
     }
+    
+    // TODO: *0* Do a sync with no uploads pending, but pending downloads.
 }

@@ -13,6 +13,7 @@ class Upload {
     static let session = Upload()
     var cloudFolderName:String!
     var deviceUUID:String!
+    private var completion:((NextCompletion)->())?
     
     private init() {
     }
@@ -25,13 +26,16 @@ class Upload {
     }
     
     enum NextCompletion {
-    case uploaded(UploadFileTracker)
+    case fileUploaded(UploadFileTracker)
+    case uploadDeletion(UploadFileTracker)
     case masterVersionUpdate
     case error(String)
     }
     
     // Starts upload of next file, if there is one. There should be no files uploading already. Only if .started is the NextResult will the completion handler be called. With a masterVersionUpdate response for NextCompletion, the MasterVersion Core Data object is updated by this method, and all the UploadFileTracker objects have been reset.
     func next(completion:((NextCompletion)->())?) -> NextResult {
+        self.completion = completion
+        
         guard let uploadQueue = Upload.getHeadSyncQueue() else {
             return .noUploads
         }
@@ -50,27 +54,39 @@ class Upload {
 
         let masterVersion = Singleton.get().masterVersion
 
-        let file = ServerAPI.File(localURL: nextToUpload.localURL! as URL!, fileUUID: nextToUpload.fileUUID, mimeType: nextToUpload.mimeType, cloudFolderName: cloudFolderName, deviceUUID:deviceUUID, appMetaData: nextToUpload.appMetaData, fileVersion: nextToUpload.fileVersion)
-
         nextToUpload.status = .uploading
         CoreData.sessionNamed(Constants.coreDataName).saveContext()
         
-        ServerAPI.session.uploadFile(file: file, serverMasterVersion: masterVersion) { (uploadResult, error) in
+        if nextToUpload.deleteOnServer {
+            uploadDeletion(nextToUpload:nextToUpload, uploadQueue:uploadQueue, masterVersion:masterVersion)
+        }
+        else {
+            uploadFile(nextToUpload: nextToUpload, uploadQueue: uploadQueue, masterVersion: masterVersion)
+        }
+        
+        return .started
+    }
+    
+    private func uploadDeletion(nextToUpload:UploadFileTracker, uploadQueue:UploadQueue, masterVersion:MasterVersionInt) {
+    
+        let fileToDelete = ServerAPI.FileToDelete(fileUUID: nextToUpload.fileUUID, fileVersion: nextToUpload.fileVersion)
+        
+        ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (uploadDeletionResult, error) in
             guard error == nil else {
                 nextToUpload.status = .notStarted
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 
                 let message = "Error: \(error)"
                 Log.error(message)
-                completion?(.error(message))
+                self.completion?(.error(message))
                 return
             }
- 
-            switch uploadResult! {
-            case .success(sizeInBytes: let sizeInBytes):
+            
+            switch uploadDeletionResult! {
+            case .success:
                 nextToUpload.status = .uploaded
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                completion?(.uploaded(nextToUpload))
+                self.completion?(.uploadDeletion(nextToUpload))
                 
             case .serverMasterVersionUpdate(let masterVersionUpdate):
                 // Simplest method for now: Mark all uft's as .notStarted
@@ -81,11 +97,44 @@ class Upload {
 
                 Singleton.get().masterVersion = masterVersionUpdate
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                completion?(.masterVersionUpdate)
+                self.completion?(.masterVersionUpdate)
             }
         }
+    }
+    
+    private func uploadFile(nextToUpload:UploadFileTracker, uploadQueue:UploadQueue,masterVersion:MasterVersionInt) {
+    
+        let file = ServerAPI.File(localURL: nextToUpload.localURL! as URL!, fileUUID: nextToUpload.fileUUID, mimeType: nextToUpload.mimeType, cloudFolderName: cloudFolderName, deviceUUID:deviceUUID, appMetaData: nextToUpload.appMetaData, fileVersion: nextToUpload.fileVersion)
         
-        return .started
+        ServerAPI.session.uploadFile(file: file, serverMasterVersion: masterVersion) { (uploadResult, error) in
+            guard error == nil else {
+                nextToUpload.status = .notStarted
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                
+                let message = "Error: \(error)"
+                Log.error(message)
+                self.completion?(.error(message))
+                return
+            }
+ 
+            switch uploadResult! {
+            case .success(sizeInBytes: let sizeInBytes):
+                nextToUpload.status = .uploaded
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                self.completion?(.fileUploaded(nextToUpload))
+                
+            case .serverMasterVersionUpdate(let masterVersionUpdate):
+                // Simplest method for now: Mark all uft's as .notStarted
+                // TODO: *4* This could be better-- performance-wise, it doesn't make sense to do all the uploads over again.
+                uploadQueue.uploadFileTrackers.map { uft in
+                    uft.status = .notStarted
+                }
+
+                Singleton.get().masterVersion = masterVersionUpdate
+                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                self.completion?(.masterVersionUpdate)
+            }
+        }
     }
     
     enum DoneUploadsCompletion {

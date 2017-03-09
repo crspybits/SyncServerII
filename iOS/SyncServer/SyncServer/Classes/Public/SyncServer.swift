@@ -14,11 +14,12 @@ import SMCoreLib
 // This information is for testing purposes and for UI (e.g., for displaying download progress).
 public enum SyncEvent {
     // The url/attr here may not be consistent with the results from shouldSaveDownloads in the SyncServerDelegate.
-    case singleDownloadComplete(url:SMRelativeLocalURL, attr: SyncAttributes)
+    case singleFileDownloadComplete(url:SMRelativeLocalURL, attr: SyncAttributes)
     case fileDownloadsCompleted(numberOfFiles:Int)
     case downloadDeletionsCompleted(numberOfFiles:Int)
     
-    case singleUploadComplete(attr:SyncAttributes)
+    case singleFileUploadComplete(attr:SyncAttributes)
+    case singleUploadDeletionComplete(fileUUID:String)
     case fileUploadsCompleted(numberOfFiles:Int)
     case uploadDeletionsCompleted(numberOfFiles:Int)
     
@@ -29,19 +30,20 @@ public struct EventDesired: OptionSet {
     public let rawValue: Int
     public init(rawValue:Int){ self.rawValue = rawValue}
 
-    public static let singleDownloadComplete = EventDesired(rawValue: 1 << 0)
+    public static let singleFileDownloadComplete = EventDesired(rawValue: 1 << 0)
     public static let fileDownloadsCompleted = EventDesired(rawValue: 1 << 1)
     public static let downloadDeletionsCompleted = EventDesired(rawValue: 1 << 2)
     
-    public static let singleUploadComplete = EventDesired(rawValue: 1 << 4)
-    public static let fileUploadsCompleted = EventDesired(rawValue: 1 << 3)
-    public static let uploadDeletionsCompleted = EventDesired(rawValue: 1 << 5)
+    public static let singleFileUploadComplete = EventDesired(rawValue: 1 << 3)
+    public static let singleUploadDeletionComplete = EventDesired(rawValue: 1 << 4)
+    public static let fileUploadsCompleted = EventDesired(rawValue: 1 << 5)
+    public static let uploadDeletionsCompleted = EventDesired(rawValue: 1 << 6)
     
-    public static let syncDone = EventDesired(rawValue: 1 << 6)
+    public static let syncDone = EventDesired(rawValue: 1 << 7)
     
     public static let defaults:EventDesired =
-        [.singleDownloadComplete, .fileDownloadsCompleted, .downloadDeletionsCompleted,
-        .fileUploadsCompleted, .singleUploadComplete, .uploadDeletionsCompleted]
+        [.singleFileDownloadComplete, .fileDownloadsCompleted, .downloadDeletionsCompleted,
+        .singleFileUploadComplete, .singleUploadDeletionComplete, .fileUploadsCompleted, .uploadDeletionsCompleted]
     public static let all:EventDesired = EventDesired.defaults.union(EventDesired.syncDone)
     
     static func reportEvent(_ event:SyncEvent, mask:EventDesired, delegate:SyncServerDelegate?) {
@@ -58,8 +60,8 @@ public struct EventDesired: OptionSet {
         case .fileUploadsCompleted(_):
             eventIsDesired = .fileUploadsCompleted
             
-        case .singleDownloadComplete(_):
-            eventIsDesired = .singleDownloadComplete
+        case .singleFileDownloadComplete(_):
+            eventIsDesired = .singleFileDownloadComplete
             
         case .uploadDeletionsCompleted(_):
             eventIsDesired = .uploadDeletionsCompleted
@@ -67,8 +69,11 @@ public struct EventDesired: OptionSet {
         case .syncDone:
             eventIsDesired = .syncDone
             
-        case .singleUploadComplete(_):
-            eventIsDesired = .singleUploadComplete
+        case .singleFileUploadComplete(_):
+            eventIsDesired = .singleFileUploadComplete
+            
+        case .singleUploadDeletionComplete(_):
+            eventIsDesired = .singleUploadDeletionComplete
         }
         
         if mask.contains(eventIsDesired) {
@@ -152,6 +157,8 @@ public class SyncServer {
     public enum SyncClientAPIError: Error {
     case mimeTypeOfFileChanged
     case fileAlreadyDeleted
+    case fileQueuedForDeletion
+    case deletingUnknownFile
     }
     
     // Enqueue a local immutable file for subsequent upload. Immutable files are assumed to not change (at least until after the upload has completed). This immutable characteristic is not enforced by this class but needs to be enforced by the caller of this class.
@@ -199,16 +206,54 @@ public class SyncServer {
             newUft.fileVersion = entry!.fileVersion! + 1
         }
         
-        // Has this file UUID been added to `pendingSync` already? i.e., Has the client called `uploadImmutable`, then a little later called `uploadImmutable` again, with the same uuid, all without calling `sync`-- so, we don't have a new file version because new file versions only occur once the upload hits the server.
-        let result = Upload.pendingSync().uploadFileTrackers.filter {$0.fileUUID == attr.fileUUID}
-        if result.count > 0 {
-            result.map { uft in
-                CoreData.sessionNamed(Constants.coreDataName).remove(uft)
+        Synchronized.block(self) {
+            // Has this file UUID been added to `pendingSync` already? i.e., Has the client called `uploadImmutable`, then a little later called `uploadImmutable` again, with the same uuid, all without calling `sync`-- so, we don't have a new file version because new file versions only occur once the upload hits the server.
+            let result = Upload.pendingSync().uploadFileTrackers.filter {$0.fileUUID == attr.fileUUID}
+            if result.count > 0 {
+                result.map { uft in
+                    CoreData.sessionNamed(Constants.coreDataName).remove(uft)
+                }
             }
+            
+            Upload.pendingSync().addToUploads(newUft)
+            CoreData.sessionNamed(Constants.coreDataName).saveContext()
+        }
+    }
+    
+    // Enqueue a file deletion operation. The operation persists across app launches. It is an error to try again later to upload, or delete the file referenced by this UUID. You can only delete files that are already known to the SyncServer (e.g., that you've uploaded).
+    // If there is a file with the same uuid, which has been enqueued for upload but not yet `sync`'ed, it will be removed.
+    public func delete(fileUUID uuid:String) throws {
+        // We must already know about this file in our local Directory.
+        guard let entry = DirectoryEntry.fetchObjectWithUUID(uuid: uuid) else {
+            throw SyncClientAPIError.deletingUnknownFile
+        }
+
+        guard !entry.deletedOnServer else {
+            throw SyncClientAPIError.fileAlreadyDeleted
+        }
+            
+        // Check to see if there is a pending upload deletion with this UUID.
+        let pendingUploadDeletions = UploadFileTracker.fetchAll().filter {$0.fileUUID == uuid && $0.deleteOnServer }
+        if pendingUploadDeletions.count > 0 {
+            throw SyncClientAPIError.fileQueuedForDeletion
         }
         
-        Upload.pendingSync().addToUploads(newUft)
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
+        Synchronized.block(self) {
+            // Remove any upload for this UUID from the pendingSync queue.
+            let pendingSync = Upload.pendingSync().uploadFileTrackers.filter {$0.fileUUID == uuid }
+            pendingSync.map { uft in
+                CoreData.sessionNamed(Constants.coreDataName).remove(uft)
+            }
+            
+            let newUft = UploadFileTracker.newObject() as! UploadFileTracker
+            newUft.deleteOnServer = true
+            newUft.fileUUID = uuid
+            newUft.fileVersion = entry.fileVersion
+            
+            Upload.pendingSync().addToUploads(newUft)
+            
+            CoreData.sessionNamed(Constants.coreDataName).saveContext()
+        }
     }
     
     // If no other `sync` is taking place, this will asynchronously do pending downloads and uploads. If there is a `sync` currently taking place, this will wait until after that is done, and try again.

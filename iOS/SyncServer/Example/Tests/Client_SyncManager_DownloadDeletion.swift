@@ -192,7 +192,7 @@ class Client_SyncManager_DownloadDeletion: TestCase {
                 XCTAssert(deletions == 1)
                 eventsOccurred += 1
                 
-            case .singleDownloadComplete(url: _, attr: _):
+            case .singleFileDownloadComplete(url: _, attr: _):
                 downloadsCompleted += 1
 
             default:

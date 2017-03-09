@@ -135,7 +135,7 @@ class Client_Downloads: TestCase {
         let expectation = self.expectation(description: "next")
 
         let result = Download.session.next() { completionResult in
-            guard case .downloaded = completionResult else {
+            guard case .fileDownloaded = completionResult else {
                 XCTFail()
                 return
             }
@@ -220,7 +220,7 @@ class Client_Downloads: TestCase {
         // First next should work as usual
         let expectation1 = self.expectation(description: "next1")
         let _ = Download.session.next() { completionResult in
-            guard case .downloaded = completionResult else {
+            guard case .fileDownloaded = completionResult else {
                 XCTFail()
                 return
             }
@@ -257,7 +257,7 @@ class Client_Downloads: TestCase {
         let expectation = self.expectation(description: "next")
 
         let _ = Download.session.next() { completionResult in
-            guard case .downloaded = completionResult else {
+            guard case .fileDownloaded = completionResult else {
                 XCTFail()
                 return
             }

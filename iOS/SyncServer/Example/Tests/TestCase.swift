@@ -75,12 +75,17 @@ class TestCase: XCTestCase {
         return serverMasterVersion
     }
     
-    func getFileIndex(expectedFiles:[(fileUUID:String, fileSize:Int64?)], callback:((FileInfo)->())? = nil) {
+    @discardableResult
+    func getFileIndex(expectedFiles:[(fileUUID:String, fileSize:Int64?)], callback:((FileInfo)->())? = nil) -> [FileInfo] {
         let expectation1 = self.expectation(description: "fileIndex")
+        
+        var result: [FileInfo]?
         
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
             XCTAssert(error == nil)
             XCTAssert(masterVersion! >= 0)
+            
+            result = fileIndex
             
             for (fileUUID, fileSize) in expectedFiles {
                 let result = fileIndex?.filter { file in
@@ -102,6 +107,8 @@ class TestCase: XCTestCase {
         }
         
         waitForExpectations(timeout: 10.0, handler: nil)
+        
+        return result!
     }
     
     func getUploads(expectedFiles:[(fileUUID:String, fileSize:Int64?)], callback:((FileInfo)->())? = nil) {
@@ -305,7 +312,7 @@ class TestCase: XCTestCase {
                 XCTAssert(downloads == 1)
                 eventsOccurred += 1
             
-            case .singleDownloadComplete(_):
+            case .singleFileDownloadComplete(_):
                 downloadsOccurred += 1
                 
             default:
@@ -448,6 +455,43 @@ class TestCase: XCTestCase {
         }
         
         waitForExpectations(timeout: 10.0, handler: nil)
+    }
+    
+    func uploadSingleFileUsingSync() -> (URL, SyncAttributes) {
+        let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
+        let fileUUID = UUID().uuidString
+        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
+        let expectation1 = self.expectation(description: "test1")
+        let expectation2 = self.expectation(description: "test2")
+        let expectation3 = self.expectation(description: "test3")
+        
+        syncServerEventOccurred = {event in
+            switch event {
+            case .syncDone:
+                expectation1.fulfill()
+                
+            case .fileUploadsCompleted(numberOfFiles: let number):
+                XCTAssert(number == 1)
+                expectation2.fulfill()
+                
+            case .singleFileUploadComplete(attr: let attr):
+                XCTAssert(attr.fileUUID == fileUUID)
+                XCTAssert(attr.mimeType == "text/plain")
+                expectation3.fulfill()
+                
+            default:
+                XCTFail()
+            }
+        }
+        
+        try! SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr)
+        SyncServer.session.sync()
+        
+        waitForExpectations(timeout: 20.0, handler: nil)
+        
+        return (url as URL, attr)
     }
 }
 

@@ -32,44 +32,13 @@ class Client_SyncServer_FileUpload: TestCase {
     }
 
     func testThatUploadingASingleFileWorks() {
-        let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
-        let fileUUID = UUID().uuidString
-        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        let (url, attr) = uploadSingleFileUsingSync()
         
-        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleUploadComplete]
-        let expectation1 = self.expectation(description: "test1")
-        let expectation2 = self.expectation(description: "test2")
-        let expectation3 = self.expectation(description: "test3")
-        
-        syncServerEventOccurred = {event in
-            switch event {
-            case .syncDone:
-                expectation1.fulfill()
-                
-            case .fileUploadsCompleted(numberOfFiles: let number):
-                XCTAssert(number == 1)
-                expectation2.fulfill()
-                
-            case .singleUploadComplete(attr: let attr):
-                XCTAssert(attr.fileUUID == fileUUID)
-                XCTAssert(attr.mimeType == "text/plain")
-                expectation3.fulfill()
-                
-            default:
-                XCTFail()
-            }
-        }
-        
-        try! SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr)
-        SyncServer.session.sync()
-        
-        waitForExpectations(timeout: 20.0, handler: nil)
-        
-        getFileIndex(expectedFiles: [(fileUUID: fileUUID, fileSize: nil)])
+        getFileIndex(expectedFiles: [(fileUUID: attr.fileUUID, fileSize: nil)])
         
         let masterVersion = Singleton.get().masterVersion
-        let file = ServerAPI.File(localURL: nil, fileUUID: fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
-        onlyDownloadFile(comparisonFileURL: url as URL, file: file, masterVersion: masterVersion)
+        let file = ServerAPI.File(localURL: nil, fileUUID: attr.fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        onlyDownloadFile(comparisonFileURL: url, file: file, masterVersion: masterVersion)
     }
     
     func testThatUploadingTwoSeparateFilesWorks() {
@@ -80,7 +49,7 @@ class Client_SyncServer_FileUpload: TestCase {
         let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
         let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
 
-        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleUploadComplete]
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let expectation1 = self.expectation(description: "test1")
         let expectation2 = self.expectation(description: "test2")
         
@@ -96,7 +65,7 @@ class Client_SyncServer_FileUpload: TestCase {
                 XCTAssert(uploadsCompleted == 2)
                 expectation2.fulfill()
                 
-            case .singleUploadComplete(_):
+            case .singleFileUploadComplete(_):
                 uploadsCompleted += 1
                 
             default:
@@ -137,7 +106,7 @@ class Client_SyncServer_FileUpload: TestCase {
         let fileUUID = UUID().uuidString
         let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
         
-        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleUploadComplete]
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let expectation1 = self.expectation(description: "test1")
         let expectation2 = self.expectation(description: "test2")
         let expectation3 = self.expectation(description: "test3")
@@ -152,7 +121,7 @@ class Client_SyncServer_FileUpload: TestCase {
                 XCTAssert(number == 1)
                 expectation2.fulfill()
             
-            case .singleUploadComplete(_):
+            case .singleFileUploadComplete(_):
                 expectation3.fulfill()
                 
             default:
@@ -201,7 +170,7 @@ class Client_SyncServer_FileUpload: TestCase {
         let fileUUID = UUID().uuidString
         let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
         
-        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleUploadComplete]
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let syncDone1 = self.expectation(description: "test1")
         let syncDone2 = self.expectation(description: "test2")
 
@@ -229,7 +198,7 @@ class Client_SyncServer_FileUpload: TestCase {
                 XCTAssert(number == 1)
                 expectation3.fulfill()
                 
-            case .singleUploadComplete(attr: let attr):
+            case .singleFileUploadComplete(attr: let attr):
                 XCTAssert(attr.fileUUID == fileUUID, "FileUUID was: \(fileUUID)")
                 XCTAssert(attr.mimeType == "text/plain")
                 expectation4.fulfill()
@@ -262,7 +231,7 @@ class Client_SyncServer_FileUpload: TestCase {
         let fileUUID2 = UUID().uuidString
         let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
         
-        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleUploadComplete]
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let expectSyncDone1 = self.expectation(description: "test1")
         let expectSyncDone2 = self.expectation(description: "test2")
         let expectFileUploadsCompleted1 = self.expectation(description: "test3")
@@ -304,7 +273,7 @@ class Client_SyncServer_FileUpload: TestCase {
                     XCTFail()
                 }
             
-            case .singleUploadComplete(_):
+            case .singleFileUploadComplete(_):
                 singleUploadCompleteCount += 1
                 switch singleUploadCompleteCount {
                 case 1:
@@ -345,8 +314,6 @@ class Client_SyncServer_FileUpload: TestCase {
         onlyDownloadFile(comparisonFileURL: url2 as URL, file: file2, masterVersion: masterVersion)
     }
     
-    
     // TODO: *3* Test of upload file1, sync, upload file1, sync-- uploads both files.
     //      Needs to wait until we have version support.
-    //      NOTE: This is going to require additional, `locking`, functionality that doesn't do a second sync while the first is running.
 }

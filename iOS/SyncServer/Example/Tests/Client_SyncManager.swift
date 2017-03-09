@@ -72,7 +72,7 @@ class Client_SyncManager: TestCase {
                     XCTAssert(downloads == 2)
                     eventsOccurred += 1
                 
-                case .singleDownloadComplete(_):
+                case .singleFileDownloadComplete(_):
                     downloadsCompleted += 1
                     
                 default:
@@ -149,7 +149,7 @@ class Client_SyncManager: TestCase {
             numberEvents += 1
             
             switch event {
-            case .singleDownloadComplete(url: _, attr: let attr):
+            case .singleFileDownloadComplete(url: _, attr: let attr):
                 let result = expectedFiles.filter {$0.fileUUID == attr.fileUUID}
                 XCTAssert(result.count == 1)
                 let expectedFile = expectedFiles.filter {$0.fileUUID == attr.fileUUID}

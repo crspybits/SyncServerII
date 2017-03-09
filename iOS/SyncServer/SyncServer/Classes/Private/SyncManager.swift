@@ -36,9 +36,9 @@ class SyncManager {
         // First: Do we have previously queued downloads that need to be downloaded?
         let nextResult = Download.session.next() { nextCompletionResult in
             switch nextCompletionResult {
-            case .downloaded(let dft):
+            case .fileDownloaded(let dft):
                 let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType:dft.mimeType!)
-                EventDesired.reportEvent(.singleDownloadComplete(url:dft.localURL!, attr:attr), mask: self.desiredEvents, delegate: self.delegate)
+                EventDesired.reportEvent(.singleFileDownloadComplete(url:dft.localURL!, attr:attr), mask: self.desiredEvents, delegate: self.delegate)
             
                 // Recursively (hopefully, this is tail recursion with optimization) check for any next download.
                 self.start(callback)
@@ -132,12 +132,17 @@ class SyncManager {
     private func checkForPendingUploads() {
         let nextResult = Upload.session.next { nextCompletion in
             switch nextCompletion {
-            case .uploaded(let uft):
+            case .fileUploaded(let uft):
                 let attr = SyncAttributes(fileUUID: uft.fileUUID, mimeType:uft.mimeType!)
-                EventDesired.reportEvent(.singleUploadComplete(attr: attr), mask: self.desiredEvents, delegate: self.delegate)
+                EventDesired.reportEvent(.singleFileUploadComplete(attr: attr), mask: self.desiredEvents, delegate: self.delegate)
                 // Recursively see if there is a next upload to do.
                 self.checkForPendingUploads()
 
+            case .uploadDeletion(let uft):
+                EventDesired.reportEvent(.singleUploadDeletionComplete(fileUUID: uft.fileUUID), mask: self.desiredEvents, delegate: self.delegate)
+                // Recursively see if there is a next upload to do.
+                self.checkForPendingUploads()
+                
             case .masterVersionUpdate:
                 // Things have changed on the server. Check for downloads again. Don't go all the way back to `start` because we know that we don't have queued downloads.
                 self.checkForDownloads()
@@ -180,6 +185,20 @@ class SyncManager {
                         }
 
                         uploadedEntry.fileVersion = uft.fileVersion
+                    }
+                }
+                
+                let uploadDeletions = uploadQueue.uploadFileTrackers.filter {$0.deleteOnServer}
+                if uploadDeletions.count > 0 {
+                    EventDesired.reportEvent(.uploadDeletionsCompleted(numberOfFiles: uploadDeletions.count), mask: self.desiredEvents, delegate: self.delegate)
+                    
+                    // Each of the DirectoryEntry's for the uploads needs to now be marked as deleted.
+                    uploadDeletions.map { uft in
+                        guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
+                            assert(false)
+                        }
+
+                        uploadedEntry.deletedOnServer = true
                     }
                 }
                 

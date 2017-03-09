@@ -70,7 +70,7 @@ class Download {
     }
     
     enum NextCompletion {
-    case downloaded(DownloadFileTracker)
+    case fileDownloaded(DownloadFileTracker)
     case masterVersionUpdate
     case error(String)
     }
@@ -118,7 +118,7 @@ class Download {
                 nextToDownload.fileSizeBytes = downloadedFile.fileSizeBytes
                 nextToDownload.localURL = downloadedFile.url
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                completion?(.downloaded(nextToDownload))
+                completion?(.fileDownloaded(nextToDownload))
                 
             case .serverMasterVersionUpdate(let masterVersionUpdate):
                 // TODO: *2* A more efficient method (than in place here) is to get the file index, giving us the new masterVersion, and see which files that we have already downloaded have the same version as we expect.
