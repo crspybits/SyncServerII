@@ -222,7 +222,7 @@ public class SyncServer {
     
     // Enqueue a file deletion operation. The operation persists across app launches. It is an error to try again later to upload, or delete the file referenced by this UUID. You can only delete files that are already known to the SyncServer (e.g., that you've uploaded).
     // If there is a file with the same uuid, which has been enqueued for upload but not yet `sync`'ed, it will be removed.
-    public func delete(fileUUID uuid:String) throws {
+    public func delete(fileWithUUID uuid:String) throws {
         // We must already know about this file in our local Directory.
         guard let entry = DirectoryEntry.fetchObjectWithUUID(uuid: uuid) else {
             throw SyncClientAPIError.deletingUnknownFile
@@ -231,7 +231,7 @@ public class SyncServer {
         guard !entry.deletedOnServer else {
             throw SyncClientAPIError.fileAlreadyDeleted
         }
-            
+
         // Check to see if there is a pending upload deletion with this UUID.
         let pendingUploadDeletions = UploadFileTracker.fetchAll().filter {$0.fileUUID == uuid && $0.deleteOnServer }
         if pendingUploadDeletions.count > 0 {
@@ -245,10 +245,25 @@ public class SyncServer {
                 CoreData.sessionNamed(Constants.coreDataName).remove(uft)
             }
             
+            // If we just removed any references to a new file, by removing the reference from pendingSync, then we're done.
+            if entry.fileVersion == nil {
+                let results = UploadFileTracker.fetchAll().filter {$0.fileUUID == uuid}
+                if results.count == 0 {
+                    // This is a slight mis-representation of terms. The file never actually made it to the server.
+                    entry.deletedOnServer = true
+                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                    return
+                }
+            }
+            
             let newUft = UploadFileTracker.newObject() as! UploadFileTracker
             newUft.deleteOnServer = true
             newUft.fileUUID = uuid
-            newUft.fileVersion = entry.fileVersion
+            
+            /* [1]: `entry.fileVersion` will be nil if we are in the process of uploading a new file. Which causes the following to fail:
+                    newUft.fileVersion = entry.fileVersion
+                AND: In general, there can be any number of uploads queued and sync'ed prior to this upload deletion, which would mean we can't simply determine the version to delete at this point in time. It seems easiest to wait until the last possible moment to determine the file version we are deleting.
+            */
             
             Upload.pendingSync().addToUploads(newUft)
             

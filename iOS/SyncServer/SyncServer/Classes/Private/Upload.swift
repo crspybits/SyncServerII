@@ -68,8 +68,20 @@ class Upload {
     }
     
     private func uploadDeletion(nextToUpload:UploadFileTracker, uploadQueue:UploadQueue, masterVersion:MasterVersionInt) {
-    
-        let fileToDelete = ServerAPI.FileToDelete(fileUUID: nextToUpload.fileUUID, fileVersion: nextToUpload.fileVersion)
+
+        // We need to figure out the current file version for the file we are deleting: Because, as explained in [1] in SyncServer.swift, we didn't establish the file version we were deleting earlier.
+        
+        guard let entry = DirectoryEntry.fetchObjectWithUUID(uuid: nextToUpload.fileUUID) else {
+            self.completion?(.error("Could not find fileUUID: \(nextToUpload.fileUUID)"))
+            return
+        }
+        
+        guard entry.fileVersion != nil else {
+            self.completion?(.error("File version for fileUUID: \(nextToUpload.fileUUID) was nil!"))
+            return
+        }
+        
+        let fileToDelete = ServerAPI.FileToDelete(fileUUID: nextToUpload.fileUUID, fileVersion: entry.fileVersion!)
         
         ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (uploadDeletionResult, error) in
             guard error == nil else {
