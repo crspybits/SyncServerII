@@ -4,9 +4,9 @@ source 'https://github.com/crspybits/Specs.git'
 use_frameworks!
 
 target 'SyncServer_Example' do
-	pod 'SyncServer', :path => '../'
+	pod 'SyncServer', :path => '../Client/'
 	pod 'SMCoreLib'
-    pod 'Google/SignIn'
+	pod 'Google/SignIn'
 
 	target 'SyncServer_Tests' do
     	inherit! :search_paths

@@ -67,11 +67,11 @@ PODS:
 DEPENDENCIES:
   - Google/SignIn
   - SMCoreLib
-  - SyncServer (from `../`)
+  - SyncServer (from `../Client/`)
 
 EXTERNAL SOURCES:
   SyncServer:
-    :path: ../
+    :path: ../Client/
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
@@ -91,6 +91,6 @@ SPEC CHECKSUMS:
   SwiftyBeaver: 949aa1439b8fa3667f68555cfef65de46a70ccde
   SyncServer: ca7d76d87cdc430da5c47138ab66519bca456b4d
 
-PODFILE CHECKSUM: 1fa70343c85cb18c0a69a5585e5b2c711ccdb6d1
+PODFILE CHECKSUM: 07568c6736e57bebd9025f9af4fa850b0bae8845
 
 COCOAPODS: 1.2.0

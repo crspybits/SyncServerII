@@ -1,0 +1,10 @@
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/crspybits/Specs.git'
+
+use_frameworks!
+
+target 'SharedImages' do
+	pod 'SyncServer', :path => '../Client/'
+	pod 'SMCoreLib'
+    pod 'Google/SignIn'
+end
