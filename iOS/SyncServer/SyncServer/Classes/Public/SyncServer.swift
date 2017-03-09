@@ -199,6 +199,7 @@ public class SyncServer {
         newUft.fileUUID = attr.fileUUID
         newUft.mimeType = attr.mimeType
         
+        // TODO: *1* I think this mechanism for setting the file version of the UploadFileTracker is not correct. Analogous to the deletion case, where we wait until the last moment prior to the upload deletion, I think we have to wait until the last moment of file upload to figure out the file version of the upload. The issue comes in with a series of upload/sync/upload/sync's, where we won't get all of the file version's correct.
         if entry!.fileVersion == nil {
             newUft.fileVersion = 0
         }
@@ -246,6 +247,7 @@ public class SyncServer {
             }
             
             // If we just removed any references to a new file, by removing the reference from pendingSync, then we're done.
+            // TODO: *1* We need a little better locking of data here. I think it's possible an upload is concurrently happening, and we'll mess up here. i.e., I think there could be a race condition between uploads and this deletion process, and we haven't locked out the Core Data info sufficiently. We could end up in a situation with a recently uploaded file, and a file marked only-locally as deleted.
             if entry.fileVersion == nil {
                 let results = UploadFileTracker.fetchAll().filter {$0.fileUUID == uuid}
                 if results.count == 0 {

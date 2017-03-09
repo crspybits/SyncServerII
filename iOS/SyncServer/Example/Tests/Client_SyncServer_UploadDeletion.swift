@@ -31,7 +31,8 @@ class Client_SyncServer_UploadDeletion: TestCase {
         super.tearDown()
     }
     
-    func testThatUploadDeletionWorksWhenWaitUntilAfterUpload() {
+    @discardableResult
+    func uploadDeletionWorksWhenWaitUntilAfterUpload() -> String {
         let (_, attr) = uploadSingleFileUsingSync()
         
         SyncServer.session.eventsDesired = [.syncDone, .uploadDeletionsCompleted, .singleUploadDeletionComplete]
@@ -66,6 +67,15 @@ class Client_SyncServer_UploadDeletion: TestCase {
         // Need to make sure the file is marked as deleted on the server.
         let fileIndex = getFileIndex(expectedFiles: [(fileUUID: attr.fileUUID, fileSize: nil)])
         XCTAssert(fileIndex[0].deleted)
+        
+        let result = DirectoryEntry.fetchObjectWithUUID(uuid: attr.fileUUID)
+        XCTAssert(result!.deletedOnServer)
+        
+        return attr.fileUUID
+    }
+    
+    func testThatUploadDeletionWorksWhenWaitUntilAfterUpload() {
+        uploadDeletionWorksWhenWaitUntilAfterUpload()
     }
     
     func testThatUploadDeletionWorksWhenYouDoNotWaitUntilAfterUpload() {
@@ -132,6 +142,9 @@ class Client_SyncServer_UploadDeletion: TestCase {
         // Need to make sure the file is marked as deleted on the server.
         let fileIndex = getFileIndex(expectedFiles: [(fileUUID: attr.fileUUID, fileSize: nil)])
         XCTAssert(fileIndex[0].deleted)
+        
+        let result = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
+        XCTAssert(result!.deletedOnServer)
     }
 
     func testUploadImmediatelyFollowedByDeletionWorks() {
@@ -163,17 +176,29 @@ class Client_SyncServer_UploadDeletion: TestCase {
         
         let fileIndex = getFileIndex(expectedFiles: [])
         XCTAssert(fileIndex.count == 0)
+    
+        let result = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
+        XCTAssert(result!.deletedOnServer)
     }
-
-    // TODO: Make sure that, after the upload deletion, the directory entry for the file is marked as deleted
     
-    // TODO: Attempt to delete an unknown UUID.
+    func testDeletionOfFileWithBadUUIDFails() {
+        let uuid = UUID().uuidString
+        do {
+            try SyncServer.session.delete(fileWithUUID: uuid)
+            XCTFail()
+        } catch {
+        }
+    }
     
-    // TODO: Attempt to delete a file that was already deleted on the server.
+    func testDeletionAttemptOfAFileAlreadyDeletedOnServerFails() {
+        let uuid = uploadDeletionWorksWhenWaitUntilAfterUpload()
+        
+        do {
+            try SyncServer.session.delete(fileWithUUID: uuid)
+            XCTFail()
+        } catch {
+        }
+    }
     
-    // TODO: Attempt to delete a file that has a queued upload deletion.
-    
-    // TODO: Delete a file that has a queued (but not yet synced) file upload-- that queued file upload should be removed.
-    
-    // TODO: Attempt to delete a file with a version different than on the server. i.e., the local directory version is V1, but the server version is V2, V2 != V1. (This will have to wait until we have multi-version file support).
+    // TODO: *2* Attempt to delete a file with a version different than on the server. i.e., the local directory version is V1, but the server version is V2, V2 != V1. (This will have to wait until we have multi-version file support).
 }

@@ -29,5 +29,48 @@ class ServerAPI_DownloadFile: TestCase {
         uploadAndDownloadTextFile(appMetaData: "foobar was here")
     }
     
-    // TODO: *1* Test that two concurrent downloads work.
+    func testThatParallelDownloadsWork() {
+        let masterVersion = getMasterVersion()
+
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "Cat", withExtension: "jpg")!
+        let (_, file1) = uploadFile(fileURL:fileURL, mimeType: "image/jpeg", serverMasterVersion: masterVersion)!
+        let (_, file2) = uploadFile(fileURL:fileURL, mimeType: "image/jpeg", serverMasterVersion: masterVersion)!
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
+
+        let expectation1 = self.expectation(description: "downloadFile1")
+        let expectation2 = self.expectation(description: "downloadFile2")
+
+        ServerAPI.session.downloadFile(file: file1, serverMasterVersion: masterVersion + 1) { (result, error) in
+        
+            XCTAssert(error == nil)
+            XCTAssert(result != nil)
+            
+            if case .success(let downloadedFile) = result! {
+                XCTAssert(FilesMisc.compareFiles(file1: fileURL, file2: downloadedFile.url as URL))
+            }
+            else {
+                XCTFail()
+            }
+            
+            expectation1.fulfill()
+        }
+        
+        ServerAPI.session.downloadFile(file: file2, serverMasterVersion: masterVersion + 1) { (result, error) in
+        
+            XCTAssert(error == nil)
+            XCTAssert(result != nil)
+            
+            if case .success(let downloadedFile) = result! {
+                XCTAssert(FilesMisc.compareFiles(file1: fileURL, file2: downloadedFile.url as URL))
+            }
+            else {
+                XCTFail()
+            }
+            
+            expectation2.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
 }
