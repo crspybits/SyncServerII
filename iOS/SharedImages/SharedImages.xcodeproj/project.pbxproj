@@ -14,6 +14,10 @@
 		83F882491E711FC6008F644A /* SharedImages.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 83F882431E711FC6008F644A /* SharedImages.xcdatamodeld */; };
 		83F8824D1E712004008F644A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8824B1E712004008F644A /* AppDelegate.swift */; };
 		83F8824E1E712004008F644A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8824C1E712004008F644A /* ViewController.swift */; };
+		83F882501E73A6F6008F644A /* IconCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8824F1E73A6F6008F644A /* IconCollectionVC.swift */; };
+		83F882531E73B172008F644A /* CoreDataExtras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882521E73B172008F644A /* CoreDataExtras.swift */; };
+		83F882561E73B2DC008F644A /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882541E73B2DC008F644A /* Image.swift */; };
+		83F882571E73B2DC008F644A /* Image+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882551E73B2DC008F644A /* Image+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +29,10 @@
 		83F882441E711FC6008F644A /* SharedImages.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SharedImages.xcdatamodel; sourceTree = "<group>"; };
 		83F8824B1E712004008F644A /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		83F8824C1E712004008F644A /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		83F8824F1E73A6F6008F644A /* IconCollectionVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IconCollectionVC.swift; sourceTree = "<group>"; };
+		83F882521E73B172008F644A /* CoreDataExtras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataExtras.swift; path = "Core Data/CoreDataExtras.swift"; sourceTree = "<group>"; };
+		83F882541E73B2DC008F644A /* Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Image.swift; path = "Core Data/Image.swift"; sourceTree = "<group>"; };
+		83F882551E73B2DC008F644A /* Image+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Image+CoreDataProperties.swift"; path = "Core Data/Image+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		A1A9F2364274678096FAE708 /* Pods-SharedImages.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedImages.release.xcconfig"; path = "Pods/Target Support Files/Pods-SharedImages/Pods-SharedImages.release.xcconfig"; sourceTree = "<group>"; };
 		B908205C67FEB8F896E15398 /* Pods_SharedImages.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SharedImages.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6274CDA252B1BF2F84D7D7D /* Pods-SharedImages.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedImages.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SharedImages/Pods-SharedImages.debug.xcconfig"; sourceTree = "<group>"; };
@@ -95,8 +103,20 @@
 			children = (
 				83F8824B1E712004008F644A /* AppDelegate.swift */,
 				83F8824C1E712004008F644A /* ViewController.swift */,
+				83F8824F1E73A6F6008F644A /* IconCollectionVC.swift */,
+				83F882511E73B156008F644A /* Core Data */,
 			);
 			path = Code;
+			sourceTree = "<group>";
+		};
+		83F882511E73B156008F644A /* Core Data */ = {
+			isa = PBXGroup;
+			children = (
+				83F882541E73B2DC008F644A /* Image.swift */,
+				83F882551E73B2DC008F644A /* Image+CoreDataProperties.swift */,
+				83F882521E73B172008F644A /* CoreDataExtras.swift */,
+			);
+			name = "Core Data";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -225,7 +245,11 @@
 			files = (
 				83F8824E1E712004008F644A /* ViewController.swift in Sources */,
 				83F8824D1E712004008F644A /* AppDelegate.swift in Sources */,
+				83F882531E73B172008F644A /* CoreDataExtras.swift in Sources */,
+				83F882561E73B2DC008F644A /* Image.swift in Sources */,
 				83F882491E711FC6008F644A /* SharedImages.xcdatamodeld in Sources */,
+				83F882501E73A6F6008F644A /* IconCollectionVC.swift in Sources */,
+				83F882571E73B2DC008F644A /* Image+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
