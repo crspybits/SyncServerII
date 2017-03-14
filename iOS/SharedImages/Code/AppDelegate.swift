@@ -51,12 +51,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    func pushToToImagesVC() {
-        let imagesVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ImagesVC")
-        let navController = UINavigationController(rootViewController: imagesVC)
-        window!.rootViewController = navController
-    }
-    
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         return SignIn.session.googleSignIn.application(app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject)
     }

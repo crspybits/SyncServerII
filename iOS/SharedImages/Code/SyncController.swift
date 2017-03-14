@@ -29,6 +29,10 @@ class SyncController {
     
     weak var delegate:SyncControllerDelegate!
     
+    func sync() {
+        SyncServer.session.sync()
+    }
+    
     func add(image:Image) {
         let attr = SyncAttributes(fileUUID:image.uuid!, mimeType:image.mimeType!)
         
@@ -55,6 +59,7 @@ extension SyncController : SyncServerDelegate {
         for download in downloads {
             let url = FileExtras().newURLForImage()
             
+            // The files we get back from the SyncServer are in a temporary location.
             do {
                 try FileManager.default.moveItem(at: download.downloadedFile as URL, to: url as URL)
             } catch (let error) {
@@ -75,7 +80,6 @@ extension SyncController : SyncServerDelegate {
         Log.error("Server error occurred: \(error)")
     }
 
-    // Reports events. Useful for testing and UI.
     func syncServerEventOccurred(event:SyncEvent) {
         Log.msg("Server event occurred: \(event)")
         

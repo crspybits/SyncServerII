@@ -8,7 +8,6 @@
 
 import UIKit
 import SMCoreLib
-import SyncServer
 
 class ImagesVC: UIViewController {
     let reuseIdentifier = "ImageIcon"
@@ -61,7 +60,7 @@ class ImagesVC: UIViewController {
     
     @objc private func refresh() {
         self.refreshControl.endRefreshing()
-        SyncServer.session.sync()
+        syncController.sync()
     }
     
     // Enable a reset from error when needed.
@@ -127,6 +126,8 @@ extension ImagesVC : SMAcquireImageDelegate {
     // Called after the image is acquired.
     func smAcquireImage(_ acquireImage:SMAcquireImage, newImageURL: SMRelativeLocalURL, mimeType:String) {
         let newImage = addLocalImage(newImageURL:newImageURL, mimeType:mimeType)
+        
+        // Sync this new image with the server.
         syncController.add(image: newImage)
     }
 }

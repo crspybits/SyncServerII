@@ -12,6 +12,7 @@ import UIKit
 class TabControllerDelegate : NSObject, UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
 
+        // Only allow a transition to the Images screen if the user has signed in.
         if viewController.restorationIdentifier == "ImagesNavController" {
             return SignIn.session.googleSignIn.userIsSignedIn
         }
