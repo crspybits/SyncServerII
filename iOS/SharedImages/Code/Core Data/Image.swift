@@ -13,6 +13,7 @@ import SMCoreLib
 @objc(Image)
 public class Image: NSManagedObject {
     static let CREATION_DATE_KEY = "creationDate"
+    static let UUID_KEY = "uuid"
     
     var url:SMRelativeLocalURL? {
         get {
@@ -35,7 +36,6 @@ public class Image: NSManagedObject {
             }
         }
     }
-    
     
     class func entityName() -> String {
         return "Image"
@@ -68,5 +68,10 @@ public class Image: NSManagedObject {
         }
         
         return fetchRequest
+    }
+    
+    class func fetchObjectWithUUID(uuid:String) -> Image? {
+        let managedObject = CoreData.fetchObjectWithUUID(uuid, usingUUIDKey: UUID_KEY, fromEntityName: self.entityName(), coreDataSession: CoreData.sessionNamed(CoreDataExtras.sessionName))
+        return managedObject as? Image
     }
 }

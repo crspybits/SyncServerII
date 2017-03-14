@@ -21,7 +21,7 @@ public struct SyncAttributes {
     
     public var appMetaData:String?
     
-    init(fileUUID:String, mimeType:String) {
+    public init(fileUUID:String, mimeType:String) {
         self.fileUUID = fileUUID
         self.mimeType = mimeType
     }

@@ -9,12 +9,14 @@
 import UIKit
 import CoreData
 import SMCoreLib
+import SyncServer
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    var tabBarDelegate = TabControllerDelegate()
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
         let coreDataSession = CoreData(namesDictionary: [
@@ -25,7 +27,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         CoreData.registerSession(coreDataSession, forName: CoreDataExtras.sessionName)
         
+        let plist = try! PlistDictLoader(plistFileNameInBundle: Consts.serverPlistFile)
+        let urlString = try! plist.getString(varName: "ServerURL")
+        let serverURL = URL(string: urlString)!
+        let cloudFolderName = try! plist.getString(varName: "CloudFolderName")
+        
+        SyncServer.session.appLaunchSetup(withServerURL: serverURL, cloudFolderName:cloudFolderName)
+        
+        let tabBarController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TabBarController") as! UITabBarController
+        tabBarController.delegate = tabBarDelegate
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window!.rootViewController = tabBarController
+        
+        enum Tabs : Int {
+            case signIn = 0
+            case images = 1
+        }
+        
+        if SignIn.session.googleSignIn.userIsSignedIn {
+            tabBarController.selectedIndex = Tabs.images.rawValue
+        }
+
         return true
+    }
+    
+    func pushToToImagesVC() {
+        let imagesVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ImagesVC")
+        let navController = UINavigationController(rootViewController: imagesVC)
+        window!.rootViewController = navController
+    }
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        return SignIn.session.googleSignIn.application(app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

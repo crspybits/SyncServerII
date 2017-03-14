@@ -9,7 +9,7 @@
 import Foundation
 import SMCoreLib
 
-public protocol ServerAPIDelegate : class {
+protocol ServerAPIDelegate : class {
     func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID
     
 #if DEBUG
@@ -17,7 +17,7 @@ public protocol ServerAPIDelegate : class {
 #endif
 }
 
-public class ServerAPI {
+class ServerAPI {
     // These need to be set by user of this class.
     var baseURL:String!
     public weak var delegate:ServerAPIDelegate!

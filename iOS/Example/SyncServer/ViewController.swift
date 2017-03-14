@@ -8,82 +8,17 @@
 
 import UIKit
 import SMCoreLib
-import AFNetworking
-import SyncServer
 
-fileprivate let HTTP_SUCCESS = 200
-
-class ViewController: SMGoogleUserSignInViewController {
-    var task:URLSessionDataTask!
-    
+class ViewController: SMGoogleUserSignInViewController {    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        SignIn.session.googleSignIn.delegate = self
-        
+                
         let googleSignInButton = SignIn.session.googleSignIn.signInButton(delegate: self)
-        googleSignInButton.frameOrigin = CGPoint(x: 50, y: 100)
-        self.view.addSubview(googleSignInButton)
+        googleSignInButton.frameY = 100
+        view.addSubview(googleSignInButton)
+        googleSignInButton.centerHorizontallyInSuperview()
     }
 }
 
-extension ViewController : SignInDelegate {
-    // MARK: SignInDelegate methods
 
-    func userDidSignIn(signIn:UserSignIn, credentials:SignInCreds) {
-        self.signIntoServer(creds: credentials as! GoogleSignInCreds) { error in
-            if nil == error {
-                Log.msg("Success signing in!")
-            }
-            else {
-                Log.error("*** Error signing in: \(error)")
-            }
-        }
-    }
-    
-    func userFailedSignIn(signIn:UserSignIn, error: Error) {
-        Log.error("*** Error signing in: \(error)")
-        ServerAPI.session.creds = nil
-    }
-    
-    // Helper method
-    
-    func signIntoServer(creds:GoogleSignInCreds, completion:@escaping (Error?) ->()) {
-        Log.msg("Google access token: \(creds.accessToken)")
-        
-        ServerAPI.session.delegate = self
-        ServerAPI.session.creds = creds
-        
-        ServerAPI.session.checkCreds { (success, error) in
-            if success != nil && success! {
-                Log.msg("ServerAPI.session.checkCreds: Succesfully signed in.")
-                completion(nil)
-            }
-            else {
-                ServerAPI.session.addUser { error in
-                    if error != nil {
-                        Log.error("Error: \(error)")
-                        // So the UI doesn't show the user as being signed in-- which just looks odd given we had a failure of signing in with the server.
-                        SignIn.session.googleSignIn.signUserOut()
-                    }
-                    
-                    completion(error)
-                }
-            }
-        }
-    }
-}
-
-// TODO: *2* Need to return actual device UUID
-extension ViewController : ServerAPIDelegate {
-    func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
-        return Foundation.UUID()
-    }
-    
-#if DEBUG
-    func doneUploadsRequestTestLockSync() -> TimeInterval? {
-        return nil
-    }
-#endif
-}
 

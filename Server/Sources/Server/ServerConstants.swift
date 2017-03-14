@@ -55,8 +55,11 @@ public struct ServerEndpoint {
     // This specifies the need for a short duration lock on the operation.
     public let needsLock:Bool
     
+    // An authentication operation requires that token generation take place.
+    public let generateTokens:Bool
+    
     // Don't put a trailing "/" on the pathName.
-    public init(_ pathName:String, method:ServerHTTPMethod, authenticationLevel:AuthenticationLevel = .secondary, needsLock:Bool = false) {
+    public init(_ pathName:String, method:ServerHTTPMethod, authenticationLevel:AuthenticationLevel = .secondary, needsLock:Bool = false, generateTokens:Bool = false) {
         
         assert(pathName.characters.count > 0 && pathName.characters.last != "/")
         
@@ -64,6 +67,7 @@ public struct ServerEndpoint {
         self.method = method
         self.authenticationLevel = authenticationLevel
         self.needsLock = needsLock
+        self.generateTokens = generateTokens
     }
     
     public var path:String { // With preceding "/"
@@ -83,7 +87,7 @@ public class ServerEndpoints {
 #endif
 
     // Only primary authentication because this method is used to add a user into the database (i.e., it creates secondary authentication).
-    public static let addUser = ServerEndpoint("AddUser", method: .post, authenticationLevel: .primary)
+    public static let addUser = ServerEndpoint("AddUser", method: .post, authenticationLevel: .primary, generateTokens: true)
     
     public static let checkCreds = ServerEndpoint("CheckCreds", method: .get)
     public static let removeUser = ServerEndpoint("RemoveUser", method: .post)

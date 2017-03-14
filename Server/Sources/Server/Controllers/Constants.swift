@@ -50,14 +50,25 @@ class Constants {
         session = Constants(configFileName:configFileName)
     }
     
-    fileprivate init(configFileName:String) {
+    class func setup(configFileFullPath:String) {
+        session = Constants(configFileName:configFileFullPath, fileNameHasPath: true)
+    }
+    
+    fileprivate init(configFileName:String, fileNameHasPath:Bool = false) {
         print("loading config file: \(configFileName)")
 
         var config:ConfigLoader
         
         if Constants.delegate == nil {
 #if os(macOS)
-            config = try! ConfigLoader(fileNameInBundle: configFileName, forConfigType: .jsonDictionary)
+            if fileNameHasPath {
+                let filename = (configFileName as NSString).lastPathComponent
+                let path = (configFileName as NSString).deletingLastPathComponent
+                config = try! ConfigLoader(usingPath: path, andFileName: filename, forConfigType: .jsonDictionary)
+            }
+            else {
+                config = try! ConfigLoader(fileNameInBundle: configFileName, forConfigType: .jsonDictionary)
+            }
 #else
             config = try! ConfigLoader(usingPath: Constants.serverConfigFilePathOnLinux, andFileName: configFileName, forConfigType: .jsonDictionary)
 #endif

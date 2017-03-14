@@ -307,25 +307,30 @@ private class RequestHandler {
                 return
             }
             
-            // It is not an error at this point to *not* have a server auth code. With most endpoints we won't have it.
-            
-            creds.generateTokens() { successGeneratingTokens, error in
-                if error == nil {
-                    dbTransaction() {
-                        if successGeneratingTokens! && self.authenticationLevel == .secondary {
-                            // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
-                            if !self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!) {
-                                self.failWithError(message: "Could not update creds")
+            if self.endpoint.generateTokens {
+                creds.generateTokens() { successGeneratingTokens, error in
+                    if error == nil {
+                        dbTransaction() {
+                            if successGeneratingTokens! && self.authenticationLevel == .secondary {
+                                // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
+                                if !self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!) {
+                                    self.failWithError(message: "Could not update creds")
+                                }
                             }
+                            
+                            let result = doTheRequestProcessing(creds: creds)
+                            //Log.debug(message: "doTheRequestProcessing: \(result)")
+                            return result
                         }
-                        
-                        let result = doTheRequestProcessing(creds: creds)
-                        //Log.debug(message: "doTheRequestProcessing: \(result)")
-                        return result
+                    }
+                    else {
+                        self.failWithError(message: "Failed attempting to generate tokens")
                     }
                 }
-                else {
-                    self.failWithError(message: "Failed attempting to generate tokens")
+            }
+            else {
+                dbTransaction() {
+                    return doTheRequestProcessing(creds: creds)
                 }
             }
         }

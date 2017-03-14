@@ -25,7 +25,7 @@ so, it's possible this issue has been resolved.
 
 // 7/7/16. Just solved a problem linking with the new Google SignIn. The resolution amounted to . See https://stackoverflow.com/questions/37715067/pods-headers-public-google-google-signin-h19-gglcore-gglcore-h-file-not-fo
 
-class GoogleSignInCreds : SignInCreds {
+class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
     var idToken: String?
     var accessToken: String?
     
@@ -39,6 +39,10 @@ class GoogleSignInCreds : SignInCreds {
         result[ServerConstants.GoogleHTTPServerAuthCodeKey] = self.serverAuthCode
         return result
     }
+    
+    public var debugDescription: String {
+        return "Google Access Token: \(accessToken)"
+    }
 }
 
 // The class that you used to enable sign-in to Google should subclass this VC class.
@@ -46,7 +50,7 @@ open class SMGoogleUserSignInViewController : UIViewController, GIDSignInUIDeleg
 }
 
 // See https://developers.google.com/identity/sign-in/ios/sign-in
-open class SMGoogleUserSignIn : NSObject, UserSignIn {
+open class SMGoogleUserSignIn : NSObject {
     // Specific to Google Credentials. I'm not sure it's needed really (i.e., could it be obtained each time the app launches on sign in-- since to be signed in really assumes we're connected to the network?), but I'll store this in the Keychain since it's credential info.
     // Hmmmm. I may be making incorrect assumptions about the longevity of these IdTokens. See https://github.com/google/google-auth-library-nodejs/issues/46 Does silently signing the user in generate a new IdToken?
     fileprivate static let IdToken = SMPersistItemString(name: "SMGoogleUserSignIn.IdToken", initialStringValue: "", persistType: .keyChain)
@@ -80,22 +84,6 @@ open class SMGoogleUserSignIn : NSObject, UserSignIn {
     }
     
     fileprivate let signInOutButton = GoogleSignInOutButton()
-    
-    /*
-    override open static var displayNameS: String? {
-        get {
-            return SMServerConstants.accountTypeGoogle
-        }
-    }
-    
-    override open var displayNameI: String? {
-        get {
-            return SMGoogleUserSignIn.displayNameS
-        }
-    }
-    */
-    
-    weak public var delegate:SignInDelegate?
    
     public init(serverClientId:String, appClientId:String) {
         self.serverClientId = serverClientId
@@ -104,7 +92,7 @@ open class SMGoogleUserSignIn : NSObject, UserSignIn {
         self.signInOutButton.signOutButton.addTarget(self, action: #selector(signUserOut), for: .touchUpInside)
     }
     
-    /* override */ open func syncServerAppLaunchSetup(silentSignIn: Bool, launchOptions:[AnyHashable: Any]?) {
+    open func appLaunchSetup(silentSignIn: Bool) {
     
         var configureError: NSError?
         GGLContext.sharedInstance().configureWithError(&configureError)
@@ -137,7 +125,7 @@ open class SMGoogleUserSignIn : NSObject, UserSignIn {
         }
     }
 
-    /* override */ open func application(_ application: UIApplication!, openURL url: URL!, sourceApplication: String!, annotation: AnyObject!) -> Bool {
+    open func application(_ application: UIApplication!, openURL url: URL!, sourceApplication: String!, annotation: AnyObject!) -> Bool {
         return GIDSignIn.sharedInstance().handle(url, sourceApplication: sourceApplication,
             annotation: annotation)
     }
@@ -163,13 +151,40 @@ open class SMGoogleUserSignIn : NSObject, UserSignIn {
     */
     // See https://cocoapods.org/pods/GoogleSignIn for current version of GoogleSignIn
     
-    /*
-    override open var syncServerUserIsSignedIn: Bool {
-        get {
-            return GIDSignIn.sharedInstance().hasAuthInKeychain()
-        }
+
+    var userIsSignedIn: Bool {
+        Log.msg("GIDSignIn.sharedInstance().currentUser: \(GIDSignIn.sharedInstance().currentUser)")
+        return GIDSignIn.sharedInstance().hasAuthInKeychain()
     }
     
+    var signedInUser: GoogleSignInCreds {
+        return signedInUser(forUser: GIDSignIn.sharedInstance().currentUser)
+    }
+    
+    func signedInUser(forUser user:GIDGoogleUser) -> GoogleSignInCreds {
+        // let userId = user.userID     // For client-side use only!
+        let name = user.profile.name
+        let email = user.profile.email
+        
+        if email != nil {
+            self.googleUserName = email
+        }
+        else {
+            self.googleUserName = name
+        }
+
+        let creds = GoogleSignInCreds()
+        creds.email = email
+        creds.username = name
+        creds.idToken = user.authentication.idToken
+        creds.accessToken = user.authentication.accessToken
+        Log.msg("user.serverAuthCode: \(user.serverAuthCode)")
+        creds.serverAuthCode = user.serverAuthCode
+        
+        return creds
+    }
+    
+    /*
     override open var syncServerSignedInUser:SMUserCredentials? {
         get {
             if self.syncServerUserIsSignedIn {
@@ -245,19 +260,7 @@ Error signing in: Error Domain=com.google.HTTPStatus Code=500 "(null)" UserInfo=
 extension SMGoogleUserSignIn : GIDSignInDelegate {
     public func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error!)
     {
-        if (error == nil) {
-            // Perform any operations on signed in user here.
-            // let userId = user.userID     // For client-side use only!
-            let name = user.profile.name
-            let email = user.profile.email
-            
-            if email != nil {
-                self.googleUserName = email
-            }
-            else {
-                self.googleUserName = name
-            }
-            
+        if (error == nil) {            
             // user.serverAuthCode can be nil if the user didn't do a "fresh" signin. i.e., if we silently signed in the user.
             /* We're going to handle this in two cases:
             a) user.serverAuthCode is present: Try to create a new user
@@ -266,18 +269,30 @@ extension SMGoogleUserSignIn : GIDSignInDelegate {
 
             self.signInOutButton.buttonShowing = .signOut
             self.googleUser = user
+            let creds = signedInUser(forUser: user)
             
-            let creds = GoogleSignInCreds()
-            creds.email = email
-            creds.username = name
-            creds.idToken = user.authentication.idToken
-            creds.accessToken = user.authentication.accessToken
-            Log.msg("user.serverAuthCode: \(user.serverAuthCode)")
-            creds.serverAuthCode = user.serverAuthCode
-            self.delegate?.userDidSignIn(signIn: self, credentials: creds)
+            SyncServerUser.session.checkForExistingUser(creds: creds) { (foundUser, error) in
+                if error == nil {
+                    if !foundUser! {
+                        SyncServerUser.session.addUser(creds: creds) { error in
+                            if error == nil {
+                            }
+                            else {
+                                self.signUserOut()
+                            }
+                        }
+                    }
+                }
+                else {
+                    Log.error("Error checking for existing user: \(error)")
+                    self.signUserOut()
+                }
+            }
         }
         else {
-            self.delegate?.userFailedSignIn(signIn: self, error:error)
+            Log.error("Error signing into Google: \(error)")
+            // So we don't have the UI saying we're signed in, but we're actually not.
+            signUserOut()
         }
     }
     

@@ -77,7 +77,10 @@ class SyncManager {
                     downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
                 }
             
-                delegate?.shouldSaveDownloads(downloads: downloads)
+                Thread.runSync(onMainThread: {
+                    self.delegate?.shouldSaveDownloads(downloads: downloads)
+                })
+                
                 Directory.session.updateAfterDownloadingFiles(downloads: fileDownloadDfts!)
                 EventDesired.reportEvent(.fileDownloadsCompleted(numberOfFiles: fileDownloadDfts!.count), mask: self.desiredEvents, delegate: self.delegate)
             }
@@ -91,7 +94,10 @@ class SyncManager {
                 
                 Log.msg("Deletions: count: \(deletions.count)")
                 
-                delegate?.shouldDoDeletions(downloadDeletions: deletions)
+                Thread.runSync(onMainThread: {
+                    self.delegate?.shouldDoDeletions(downloadDeletions: deletions)
+                })
+
                 Directory.session.updateAfterDownloadDeletingFiles(deletions: downloadDeletionDfts!)
                 EventDesired.reportEvent(.downloadDeletionsCompleted(numberOfFiles: downloadDeletionDfts!.count), mask: self.desiredEvents, delegate: self.delegate)
                 // TODO: *0* Next, if we have any pending deletions in upload queue for any of these just obtained download deletions, we should remove those pending deletions.

@@ -9,8 +9,6 @@
 import Foundation
 import SMCoreLib
 
-// TODO: *1* These delegate methods are called on the main thread.
-
 // This information is for testing purposes and for UI (e.g., for displaying download progress).
 public enum SyncEvent {
     // The url/attr here may not be consistent with the results from shouldSaveDownloads in the SyncServerDelegate.
@@ -23,6 +21,7 @@ public enum SyncEvent {
     case fileUploadsCompleted(numberOfFiles:Int)
     case uploadDeletionsCompleted(numberOfFiles:Int)
     
+    case syncStarted
     case syncDone
 }
 
@@ -39,12 +38,13 @@ public struct EventDesired: OptionSet {
     public static let fileUploadsCompleted = EventDesired(rawValue: 1 << 5)
     public static let uploadDeletionsCompleted = EventDesired(rawValue: 1 << 6)
     
-    public static let syncDone = EventDesired(rawValue: 1 << 7)
+    public static let syncStarted = EventDesired(rawValue: 1 << 7)
+    public static let syncDone = EventDesired(rawValue: 1 << 8)
     
     public static let defaults:EventDesired =
         [.singleFileDownloadComplete, .fileDownloadsCompleted, .downloadDeletionsCompleted,
         .singleFileUploadComplete, .singleUploadDeletionComplete, .fileUploadsCompleted, .uploadDeletionsCompleted]
-    public static let all:EventDesired = EventDesired.defaults.union(EventDesired.syncDone)
+    public static let all:EventDesired = EventDesired.defaults.union([EventDesired.syncStarted, EventDesired.syncDone])
     
     static func reportEvent(_ event:SyncEvent, mask:EventDesired, delegate:SyncServerDelegate?) {
     
@@ -65,6 +65,9 @@ public struct EventDesired: OptionSet {
             
         case .uploadDeletionsCompleted(_):
             eventIsDesired = .uploadDeletionsCompleted
+        
+        case .syncStarted:
+            eventIsDesired = .syncStarted
             
         case .syncDone:
             eventIsDesired = .syncDone
@@ -77,10 +80,14 @@ public struct EventDesired: OptionSet {
         }
         
         if mask.contains(eventIsDesired) {
-            delegate?.syncServerEventOccurred(event: event)
+            Thread.runSync(onMainThread: {
+                delegate?.syncServerEventOccurred(event: event)
+            })
         }
     }
 }
+
+// These delegate methods are called on the main thread.
 
 public protocol SyncServerDelegate : class {
     /* Called at the end of all downloads, on non-error conditions. Only called when there was at least one download.
@@ -90,7 +97,7 @@ public protocol SyncServerDelegate : class {
     func shouldSaveDownloads(downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)])
 
     // Called when deletions have been received from the server. I.e., these files have been deleted on the server. This is received/called in an atomic manner: This reflects a snapshot state of files on the server. Clients should delete the files referenced by the SMSyncAttributes's (i.e., the UUID's).
-    func shouldDoDeletions(downloadDeletions downloadDeletions:[SyncAttributes])
+    func shouldDoDeletions(downloadDeletions:[SyncAttributes])
     
     func syncServerErrorOccurred(error:Error)
 
@@ -125,7 +132,7 @@ public class SyncServer {
             return SyncManager.session.delegate
         }
     }
-    
+        
     public func appLaunchSetup(withServerURL serverURL: URL, cloudFolderName:String) {
     
         Upload.session.cloudFolderName = cloudFolderName
@@ -221,8 +228,9 @@ public class SyncServer {
         }
     }
     
-    // Enqueue a file deletion operation. The operation persists across app launches. It is an error to try again later to upload, or delete the file referenced by this UUID. You can only delete files that are already known to the SyncServer (e.g., that you've uploaded).
+    // Enqueue a upload deletion operation. The operation persists across app launches. It is an error to try again later to upload, or delete the file referenced by this UUID. You can only delete files that are already known to the SyncServer (e.g., that you've uploaded).
     // If there is a file with the same uuid, which has been enqueued for upload but not yet `sync`'ed, it will be removed.
+    // This operation does not access the server, and thus runs quickly and synchronously.
     public func delete(fileWithUUID uuid:String) throws {
         // We must already know about this file in our local Directory.
         guard let entry = DirectoryEntry.fetchObjectWithUUID(uuid: uuid) else {
@@ -273,7 +281,7 @@ public class SyncServer {
         }
     }
     
-    // If no other `sync` is taking place, this will asynchronously do pending downloads and uploads. If there is a `sync` currently taking place, this will wait until after that is done, and try again.
+    // If no other `sync` is taking place, this will asynchronously do pending downloads, file uploads, and upload deletions. If there is a `sync` currently taking place, this will wait until after that is done, and try again.
     public func sync() {
         var doStart = true
         
@@ -297,10 +305,14 @@ public class SyncServer {
     }
     
     private func start() {
+        EventDesired.reportEvent(.syncStarted, mask: self.eventsDesired, delegate: self.delegate)
         Log.msg("SyncServer.start")
+        
         SyncManager.session.start { error in
             if error != nil {
-                self.delegate?.syncServerErrorOccurred(error: error!)
+                Thread.runSync(onMainThread: {
+                    self.delegate?.syncServerErrorOccurred(error: error!)
+                })
             }
             
             EventDesired.reportEvent(.syncDone, mask: self.eventsDesired, delegate: self.delegate)

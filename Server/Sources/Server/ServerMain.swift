@@ -12,6 +12,8 @@ import LoggerAPI
 import PerfectLib
 import Kitura
 
+// If given, the single command line argument to the server is expected to be a full path to the server config file.
+
 public class ServerMain {
     // If server fails to start, try looking for a process using the port:
     //      sudo lsof -i -n -P | grep TCP | grep 8181
@@ -24,7 +26,14 @@ public class ServerMain {
     
     public class func startup(type:ServerStartup = .blocking) {
         if type == .blocking {
-            Constants.setup(configFileName: Constants.serverConfigFile)
+            if CommandLine.arguments.count == 0 {
+                Constants.setup(configFileName: Constants.serverConfigFile)
+            }
+            else {
+                let configFile = CommandLine.arguments[1]
+                Log.info("Loading server config file from: \(configFile)")
+                Constants.setup(configFileFullPath: configFile)
+            }
         }
         
         Log.logger = HeliumLogger()
