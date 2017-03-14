@@ -36,7 +36,7 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
 
 1. The SyncServer iOS client API is used as a Cocoapod, and because it hasn't been released yet, you will need to access the project files directly. E.g., the example apps supplied with the project use the following `Podfile`. Google SignIn is the only option currently for cloud storage, and thus the Google SignIn Cocoapod is required.
 
-```
+    ```
     source 'https://github.com/CocoaPods/Specs.git'
     source 'https://github.com/crspybits/Specs.git'
 
@@ -47,7 +47,7 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
         pod 'SMCoreLib'
         pod 'Google/SignIn'
     end
-```
+    ```
 
 1. Call the following when your app first starts (e.g., in `didFinishLaunchingWithOptions`):
 
