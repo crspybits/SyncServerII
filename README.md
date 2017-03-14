@@ -34,7 +34,9 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
 
 # Installation in a new iOS app
 
-1. The SyncServer iOS client API is used as a Cocoapod, and because it hasn't been released yet, you will need to access the project files directly. E.g., the example apps supplied with the project use the following `Podfile`. Google SignIn is the only option currently for cloud storage, and thus the Google SignIn Cocoapod is required.
+1. Setup your `Podfile`. 
+
+    The SyncServer iOS client API is used as a Cocoapod, and because it hasn't been released yet, you will need to access the project files directly. E.g., the example apps supplied with the project use the following `Podfile`. Google SignIn is the only option currently for cloud storage, and thus the Google SignIn Cocoapod is required.
 
     ```
     source 'https://github.com/CocoaPods/Specs.git'
@@ -55,14 +57,14 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
     SyncServer.session.appLaunchSetup(withServerURL: serverURL, cloudFolderName:cloudFolderName)
     ```
 
-`serverURL` is the URL of your SyncServer server.
-`cloudFolderName` is the folder (i.e., directory) that you want your app's files to be stored in your cloud storage service (i.e., Google Drive at this point)
+    `serverURL` is the URL of your SyncServer server.
+    `cloudFolderName` is the folder (i.e., directory) that you want your app's files to be stored in your cloud storage service (i.e., Google Drive at this point)
 
 1. Enable your app to work with Google Drive
 
   1. Create Google App/Developer Credentials
   
-   To enable access to user Google Drive accounts, you must create Google Developer credentials for your iOS app using the SyncServer Framework and server. These credentials need to be installed in your app making use of the Framework. See https://developers.google.com/identity/sign-in/ios/start and click on `GET A CONFIGURATION FILE`. You need to generate a configuration file-- this will typically be named: `GoogleService-Info.plist`, and add that file to your Xcode project.
+  To enable access to user Google Drive accounts, you must create Google Developer credentials for your iOS app using the SyncServer Framework and server. These credentials need to be installed in your app making use of the Framework. See https://developers.google.com/identity/sign-in/ios/start and click on `GET A CONFIGURATION FILE`. You need to generate a configuration file-- this will typically be named: `GoogleService-Info.plist`, and add that file to your Xcode project.
    
    Amongst other information, this .plist file contains your Google `CLIENT_ID` for your iOS app.
    
