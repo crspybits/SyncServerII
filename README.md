@@ -51,9 +51,9 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
 
 1. Call the following when your app first starts (e.g., in `didFinishLaunchingWithOptions`):
 
-```
+    ```
     SyncServer.session.appLaunchSetup(withServerURL: serverURL, cloudFolderName:cloudFolderName)
-```
+    ```
 
 `serverURL` is the URL of your SyncServer server.
 `cloudFolderName` is the folder (i.e., directory) that you want your app's files to be stored in your cloud storage service (i.e., Google Drive at this point)
@@ -89,17 +89,17 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
     
     Additionally, add the following into your AppDelegate:
     
-```
+    ```
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         return googleSignIn.application(app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject)
     }
-```
+    ```
 
   1. Enable sign in to Google Drive
 
     In an initial view controller in your app, add a Google sign-in button:
 
-```
+    ```
     import UIKit
     import SMCoreLib
     
@@ -113,4 +113,4 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
             googleSignInButton.centerHorizontallyInSuperview()
         }
     }
-```
+    ```
