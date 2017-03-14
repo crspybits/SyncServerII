@@ -64,13 +64,13 @@ Contact: <chris@SpasticMuffin.biz> (primary developer)
 
   1. Create Google App/Developer Credentials
   
-  To enable access to user Google Drive accounts, you must create Google Developer credentials for your iOS app using the SyncServer Framework and server. These credentials need to be installed in your app making use of the Framework. See https://developers.google.com/identity/sign-in/ios/start and click on `GET A CONFIGURATION FILE`. You need to generate a configuration file-- this will typically be named: `GoogleService-Info.plist`, and add that file to your Xcode project.
+    To enable access to user Google Drive accounts, you must create Google Developer credentials for your iOS app using the SyncServer Framework and server. These credentials need to be installed in your app making use of the Framework. See https://developers.google.com/identity/sign-in/ios/start and click on `GET A CONFIGURATION FILE`. You need to generate a configuration file-- this will typically be named: `GoogleService-Info.plist`, and add that file to your Xcode project.
    
-   Amongst other information, this .plist file contains your Google `CLIENT_ID` for your iOS app.
+    Amongst other information, this .plist file contains your Google `CLIENT_ID` for your iOS app.
    
-   You also need to make sure you enable the Google Drive API for your Google project. You can do this by going to https://console.developers.google.com, and look for `ENABLE API`, and within that `Drive API`.
+    You also need to make sure you enable the Google Drive API for your Google project. You can do this by going to https://console.developers.google.com, and look for `ENABLE API`, and within that `Drive API`.
    
-   Within https://console.developers.google.com, you also need to obtain your `OAuth 2.0 client IDs` for your `Web client` (see under "Credentials). I call this the `GoogleServerClientId`. You will need both the `CLIENT_ID` (for your iOS app) and the `GoogleServerClientId` in order to sign in to Google Drive from your iOS app.
+    Within https://console.developers.google.com, you also need to obtain your `OAuth 2.0 client IDs` for your `Web client` (see under "Credentials). I call this the `GoogleServerClientId`. You will need both the `CLIENT_ID` (for your iOS app) and the `GoogleServerClientId` in order to sign in to Google Drive from your iOS app.
 
   1. Add URL scheme for Google Sign in to your app.
 
