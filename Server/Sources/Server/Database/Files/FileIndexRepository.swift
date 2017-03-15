@@ -17,6 +17,7 @@ class FileIndex : NSObject, Model, Filenaming {
     var fileIndexId: FileIndexId!
     var fileUUID: String!
     var deviceUUID:String!
+    var creationDate:Date!
     var userId: UserId!
     var mimeType: String!
     var cloudFolderName: String!

@@ -72,6 +72,7 @@ class Upload : NSObject, Model, Filenaming {
     var userId: UserId!
     var fileVersion: FileVersionInt!
     var deviceUUID: String!
+    var creationDate:Date!
     
     let stateKey = "state"
     var state:UploadState!

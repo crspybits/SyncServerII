@@ -17,7 +17,7 @@ public enum SyncEvent {
     case downloadDeletionsCompleted(numberOfFiles:Int)
     
     case singleFileUploadComplete(attr:SyncAttributes)
-    case singleUploadDeletionComplete(fileUUID:String)
+    case singleUploadDeletionComplete(fileUUID:UUIDString)
     case fileUploadsCompleted(numberOfFiles:Int)
     case uploadDeletionsCompleted(numberOfFiles:Int)
     
@@ -231,7 +231,7 @@ public class SyncServer {
     // Enqueue a upload deletion operation. The operation persists across app launches. It is an error to try again later to upload, or delete the file referenced by this UUID. You can only delete files that are already known to the SyncServer (e.g., that you've uploaded).
     // If there is a file with the same uuid, which has been enqueued for upload but not yet `sync`'ed, it will be removed.
     // This operation does not access the server, and thus runs quickly and synchronously.
-    public func delete(fileWithUUID uuid:String) throws {
+    public func delete(fileWithUUID uuid:UUIDString) throws {
         // We must already know about this file in our local Directory.
         guard let entry = DirectoryEntry.fetchObjectWithUUID(uuid: uuid) else {
             throw SyncClientAPIError.deletingUnknownFile
@@ -283,6 +283,10 @@ public class SyncServer {
     
     // If no other `sync` is taking place, this will asynchronously do pending downloads, file uploads, and upload deletions. If there is a `sync` currently taking place, this will wait until after that is done, and try again.
     public func sync() {
+        sync(syncDone:nil)
+    }
+    
+    func sync(syncDone:(()->())?) {
         var doStart = true
         
         Synchronized.block(self) {
@@ -300,11 +304,11 @@ public class SyncServer {
         }
         
         if doStart {
-            start()
+            start(syncDone: syncDone)
         }
     }
     
-    private func start() {
+    private func start(syncDone:(()->())?) {
         EventDesired.reportEvent(.syncStarted, mask: self.eventsDesired, delegate: self.delegate)
         Log.msg("SyncServer.start")
         
@@ -315,6 +319,7 @@ public class SyncServer {
                 })
             }
             
+            syncDone?()
             EventDesired.reportEvent(.syncDone, mask: self.eventsDesired, delegate: self.delegate)
 
             var doStart = false
@@ -330,7 +335,7 @@ public class SyncServer {
             }
             
             if doStart {
-                self.start()
+                self.start(syncDone:syncDone)
             }
         }
     }
@@ -350,5 +355,13 @@ public class SyncServer {
         }
         
         CoreData.sessionNamed(Constants.coreDataName).saveContext()
+    }
+
+    // This is intended for development/debug only. This enables you do a consistency check between your local files and SyncServer meta data. Does a sync first to ensure files are synchronized.
+    public func consistencyCheck(localFiles:[UUIDString], repair:Bool = false, completion:((Error?)->())?) {
+        sync { 
+            // TODO: *2* Check for errors in sync.
+            Consistency.check(localFiles: localFiles, repair: repair, callback: completion)
+        }
     }
 }

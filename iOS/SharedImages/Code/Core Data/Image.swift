@@ -74,4 +74,17 @@ public class Image: NSManagedObject {
         let managedObject = CoreData.fetchObjectWithUUID(uuid, usingUUIDKey: UUID_KEY, fromEntityName: self.entityName(), coreDataSession: CoreData.sessionNamed(CoreDataExtras.sessionName))
         return managedObject as? Image
     }
+    
+    static func fetchAll() -> [Image] {
+        var images:[Image]!
+
+        do {
+            images = try CoreData.sessionNamed(CoreDataExtras.sessionName).fetchAllObjects(withEntityName: self.entityName()) as? [Image]
+        } catch (let error) {
+            Log.error("Error: \(error)")
+            assert(false)
+        }
+        
+        return images
+    }
 }
