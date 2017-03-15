@@ -11,6 +11,9 @@ import KituraNet
 import SwiftyJSON
 import Foundation
 
+// TODO: *5* MD5 checksums can be obtained from Google Drive: http://stackoverflow.com/questions/23462168/google-drive-md5-checksum-for-files 
+// At least for Google Drive this ought to enable us to deal with issues of users modifying files and messing us up. i.e., we should drop the byte count support we have and go with a checksum validation.
+
 // TODO: *0* Need automatic refreshing of the access token-- this should make client side testing easier: There should be no need to create a new access token every hour.
 
 private let folderMimeType = "application/vnd.google-apps.folder"

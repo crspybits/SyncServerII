@@ -1,7 +1,7 @@
 Contents:  
 [Introduction](#introduction)  
 [Development Status](#development-status)  
-[Standing up a Server](#standing-up-a-server)
+[Standing up a Server](#standing-up-a-server)  
 [Installation in a new iOS app](#installation-in-a-new-ios-app)
 
 # Introduction
