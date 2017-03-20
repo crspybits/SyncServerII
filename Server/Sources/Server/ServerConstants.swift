@@ -14,7 +14,7 @@ public class ServerConstants {
     public static let httpEmailKey = "Kitura-email"
     public static let XTokenTypeKey = "X-token-type"
 
-    // HTTP request header Keys specific to Google
+    // HTTP request header keys specific to Google
     public static let GoogleHTTPAccessTokenKey = "Kitura-access-token"
     public static let GoogleHTTPServerAuthCodeKey = "Kitura-server-auth-code"
     
@@ -23,6 +23,7 @@ public class ServerConstants {
     public static let httpRequestDeviceUUID = "SyncServer-Device-UUID"
     
     // HTTP response header keys
+    // Used when downloading a file to return parameters (as a HTTP header response header).
     public static let httpResponseMessageParams = "SyncServer-Message-Params"
     
     public enum AuthTokenType : String {
@@ -55,7 +56,7 @@ public struct ServerEndpoint {
     // This specifies the need for a short duration lock on the operation.
     public let needsLock:Bool
     
-    // An authentication operation requires that token generation take place.
+    // An authentication operation requires that token generation take place. e.g., for Google Sign In, the endpoint is giving a serverAuthCode.
     public let generateTokens:Bool
     
     // Don't put a trailing "/" on the pathName.
@@ -86,10 +87,12 @@ public class ServerEndpoints {
     public static let checkPrimaryCreds = ServerEndpoint("CheckPrimaryCreds", method: .get, authenticationLevel: .primary)
 #endif
 
+    // Both `checkCreds` and `addUser` have generateTokens == true because (a) the first token generation (with Google Sign In, so far) is when creating a new user, and (b) we will need to subsequently do a generate tokens when checking creds if the original refresh token (again, with Google Sign In) expires.
+    public static let checkCreds = ServerEndpoint("CheckCreds", method: .get, generateTokens: true)
+    
     // Only primary authentication because this method is used to add a user into the database (i.e., it creates secondary authentication).
     public static let addUser = ServerEndpoint("AddUser", method: .post, authenticationLevel: .primary, generateTokens: true)
-    
-    public static let checkCreds = ServerEndpoint("CheckCreds", method: .get)
+
     public static let removeUser = ServerEndpoint("RemoveUser", method: .post)
     
     // public static let createSharingInvitation = "CreateSharingInvitation"

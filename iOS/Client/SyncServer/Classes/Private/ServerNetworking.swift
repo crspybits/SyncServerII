@@ -75,7 +75,7 @@ class ServerNetworking {
     case couldNotCreateNewFile
     }
     
-    func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ error:Error?)->())?) {
+    func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?)->())?) {
     
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
@@ -92,12 +92,12 @@ class ServerNetworking {
             if error == nil {
                 // With an HTTP or HTTPS request, we get HTTPURLResponse back. See https://developer.apple.com/reference/foundation/urlsession/1407613-datatask
                 guard let response = urlResponse as? HTTPURLResponse else {
-                    completion?(nil, nil, DownloadFromError.couldNotGetHTTPURLResponse)
+                    completion?(nil, nil, nil, DownloadFromError.couldNotGetHTTPURLResponse)
                     return
                 }
                 
                 guard url != nil else {
-                    completion?(nil, nil, DownloadFromError.didNotGetURL)
+                    completion?(nil, nil, response.statusCode, DownloadFromError.didNotGetURL)
                     return
                 }
                 
@@ -108,18 +108,18 @@ class ServerNetworking {
                     }
                     catch (let error) {
                         Log.error("Could not move file: \(error)")
-                        completion?(nil, nil, DownloadFromError.couldNotMoveFile)
+                        completion?(nil, nil, response.statusCode, DownloadFromError.couldNotMoveFile)
                         return
                     }
                     
-                    completion?(newTempURL, response, nil)
+                    completion?(newTempURL, response, response.statusCode, nil)
                 }
                 else {
-                    completion?(nil, nil, DownloadFromError.couldNotCreateNewFile)
+                    completion?(nil, nil, response.statusCode, DownloadFromError.couldNotCreateNewFile)
                 }
             }
             else {
-                completion?(nil, nil, error)
+                completion?(nil, nil, nil, error)
             }
         }
 

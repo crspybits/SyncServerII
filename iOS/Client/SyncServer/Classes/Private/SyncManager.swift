@@ -11,7 +11,7 @@ import SMCoreLib
 
 class SyncManager {
     static let session = SyncManager()
-    public weak var delegate:SyncServerDelegate?
+    weak var delegate:SyncServerDelegate?
 
     private var fileDownloadDfts:[DownloadFileTracker]?
     private var downloadDeletionDfts:[DownloadFileTracker]?

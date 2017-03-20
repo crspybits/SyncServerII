@@ -1,7 +1,7 @@
 
 //
 //  SMGoogleUserSignIn.swift
-//  NetDb
+//  SyncServer
 //
 //  Created by Christopher Prince on 11/26/15.
 //  Copyright © 2015 Christopher Prince. All rights reserved.
@@ -26,6 +26,9 @@ so, it's possible this issue has been resolved.
 // 7/7/16. Just solved a problem linking with the new Google SignIn. The resolution amounted to . See https://stackoverflow.com/questions/37715067/pods-headers-public-google-google-signin-h19-gglcore-gglcore-h-file-not-fo
 
 class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
+    fileprivate var currentlyRefreshing = false
+    fileprivate var googleUser:GIDGoogleUser?
+
     var idToken: String?
     var accessToken: String?
     
@@ -42,6 +45,39 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
     
     public var debugDescription: String {
         return "Google Access Token: \(accessToken)"
+    }
+    
+    override open func refreshCredentials(completion: @escaping (Error?) ->()) {
+        // See also this on refreshing of idTokens: http://stackoverflow.com/questions/33279485/how-to-refresh-authentication-idtoken-with-gidsignin-or-gidauthentication
+        
+        guard self.googleUser != nil
+        else {
+            return
+        }
+        
+        Synchronized.block(self) {
+            if self.currentlyRefreshing {
+                return
+            }
+            
+            self.currentlyRefreshing = true
+        }
+        
+        Log.special("refreshTokensWithHandler")
+        
+        self.googleUser!.authentication.refreshTokens() { auth, error in
+            self.currentlyRefreshing = false
+            
+            if error == nil {
+                Log.special("refreshTokensWithHandler: Success")
+                self.idToken = auth?.idToken
+            }
+            else {
+                Log.error("Error refreshing tokens: \(error)")
+            }
+            
+            completion(error)
+        }
     }
 }
 
@@ -69,9 +105,6 @@ open class SMGoogleUserSignIn : NSObject {
     
     fileprivate let serverClientId:String!
     fileprivate let appClientId:String!
-
-    fileprivate var googleUser:GIDGoogleUser?
-    fileprivate var currentlyRefreshing = false
     
     fileprivate var idToken:String! {
         set {
@@ -180,6 +213,7 @@ open class SMGoogleUserSignIn : NSObject {
         creds.accessToken = user.authentication.accessToken
         Log.msg("user.serverAuthCode: \(user.serverAuthCode)")
         creds.serverAuthCode = user.serverAuthCode
+        creds.googleUser = user
         
         return creds
     }
@@ -192,38 +226,6 @@ open class SMGoogleUserSignIn : NSObject {
             }
             else {
                 return nil
-            }
-        }
-    }
-    
-    // 5/23/16; I just added this to deal with the case where the app has been in the foreground for a period of time, and the IdToken has expired.
-    override open func syncServerRefreshUserCredentials() {
-        // See also this on refreshing of idTokens: http://stackoverflow.com/questions/33279485/how-to-refresh-authentication-idtoken-with-gidsignin-or-gidauthentication
-        
-        guard self.googleUser != nil
-        else {
-            return
-        }
-        
-        Synchronized.block(self) {
-            if self.currentlyRefreshing {
-                return
-            }
-            
-            self.currentlyRefreshing = true
-        }
-        
-        Log.special("refreshTokensWithHandler")
-        
-        self.googleUser!.authentication.refreshTokensWithHandler() { auth, error in
-            self.currentlyRefreshing = false
-            
-            if error == nil {
-                Log.special("refreshTokensWithHandler: Success")
-                self.idToken = auth.idToken;
-            }
-            else {
-                Log.error("Error refreshing tokens: \(error)")
             }
         }
     }
@@ -268,7 +270,6 @@ extension SMGoogleUserSignIn : GIDSignInDelegate {
             */
 
             self.signInOutButton.buttonShowing = .signOut
-            self.googleUser = user
             let creds = signedInUser(forUser: user)
             
             SyncServerUser.session.checkForExistingUser(creds: creds) { (foundUser, error) in

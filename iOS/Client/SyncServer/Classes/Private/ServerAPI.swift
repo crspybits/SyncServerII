@@ -13,23 +13,25 @@ protocol ServerAPIDelegate : class {
     func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID
     
 #if DEBUG
-    func doneUploadsRequestTestLockSync() -> TimeInterval?
+    func doneUploadsRequestTestLockSync(forServerAPI: ServerAPI) -> TimeInterval?
 #endif
 }
 
 class ServerAPI {
     // These need to be set by user of this class.
     var baseURL:String!
-    public weak var delegate:ServerAPIDelegate!
+    weak var delegate:ServerAPIDelegate!
     
     fileprivate var authTokens:[String:String]?
+    
+    let httpUnauthorizedError = 401
     
     enum ServerAPIError : Error {
     case non200StatusCode(Int)
     case badStatusCode(Int)
     }
     
-    // If this is nil, you must use the ServerNetworking authenticationDelegate to provide credentials.
+    // If this is nil, you must use the ServerNetworking authenticationDelegate to provide credentials. Direct use of authenticationDelegate is for internal testing.
     public var creds:SignInCreds? {
         didSet {
             if creds == nil {
@@ -62,7 +64,7 @@ class ServerAPI {
         let endpoint = ServerEndpoints.healthCheck
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             completion?(self.checkForError(statusCode: httpStatus, error: error))
         }
     }
@@ -74,7 +76,7 @@ class ServerAPI {
         let endpoint = ServerEndpoints.addUser
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method,
+        sendRequestUsing(method: endpoint.method,
             toURL: url) { (response,  httpStatus, error) in
             completion?(self.checkForError(statusCode: httpStatus, error: error))
         }
@@ -84,7 +86,7 @@ class ServerAPI {
         let endpoint = ServerEndpoints.checkCreds
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method,
+        sendRequestUsing(method: endpoint.method,
             toURL: url) { (response, httpStatus, error) in
             
             var userExists:Bool?
@@ -110,7 +112,7 @@ class ServerAPI {
         let endpoint = ServerEndpoints.removeUser
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             completion?(self.checkForError(statusCode: httpStatus, error: error))
         }
     }
@@ -128,7 +130,7 @@ class ServerAPI {
         
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
             
             if resultError == nil {
@@ -169,6 +171,8 @@ class ServerAPI {
     func uploadFile(file:File, serverMasterVersion:MasterVersionInt, completion:((UploadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadFile
 
+        Log.msg("ServerNetworking.session.authenticationDelegate2: \(ServerNetworking.session.authenticationDelegate)")
+        
         Log.special("file.fileUUID: \(file.fileUUID)")
         
         let params:[String : Any] = [
@@ -188,14 +192,16 @@ class ServerAPI {
         assert(endpoint.method == .post)
         
         guard let fileData = try? Data(contentsOf: file.localURL) else {
-            completion?(nil, UploadFileError.couldNotReadUploadFile);
-            return;
+            let message = UploadFileError.couldNotReadUploadFile
+            Log.error("\(message)")
+            completion?(nil, message);
+            return
         }
         
         let parameters = uploadRequest.urlParameters()!
         let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
         
-        ServerNetworking.session.postUploadDataTo(url, dataToUpload: fileData) { (resultDict, httpStatus, error) in
+        postUploadDataTo(url, dataToUpload: fileData) { (resultDict, httpStatus, error) in
         
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
 
@@ -204,13 +210,18 @@ class ServerAPI {
                     completion?(UploadFileResult.success(sizeInBytes:size), nil)
                 }
                 else if let versionUpdate = resultDict?[UploadFileResponse.masterVersionUpdateKey] as? Int64 {
-                    completion?(UploadFileResult.serverMasterVersionUpdate(versionUpdate), nil)
+                    let message = UploadFileResult.serverMasterVersionUpdate(versionUpdate)
+                    Log.msg("\(message)")
+                    completion?(message, nil)
                 }
                 else {
+                    let message = UploadFileError.noExpectedResultKey
+                    Log.error("\(message)")
                     completion?(nil, UploadFileError.noExpectedResultKey)
                 }
             }
             else {
+                Log.error("\(resultError!)")
                 completion?(nil, resultError)
             }
         }
@@ -235,7 +246,7 @@ class ServerAPI {
         params[DoneUploadsRequest.masterVersionKey] = serverMasterVersion
         
 #if DEBUG
-        if let testLockSync = delegate.doneUploadsRequestTestLockSync() {
+        if let testLockSync = delegate.doneUploadsRequestTestLockSync(forServerAPI: self) {
             params[DoneUploadsRequest.testLockSyncKey] = Int32(testLockSync)
         }
 #endif
@@ -248,7 +259,7 @@ class ServerAPI {
         let parameters = doneUploadsRequest.urlParameters()!
         let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
 
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
         
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
 
@@ -306,7 +317,7 @@ class ServerAPI {
         let parameters = downloadFileRequest.urlParameters()!
         let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
 
-        ServerNetworking.session.downloadFrom(serverURL, method: endpoint.method) { (resultURL, response, error) in
+        downloadFrom(serverURL, method: endpoint.method) { (resultURL, response, statusCode, error) in
         
             guard response != nil else {
                 let resultError = error ?? DownloadFileError.nilResponse
@@ -314,7 +325,7 @@ class ServerAPI {
                 return
             }
             
-            let resultError = self.checkForError(statusCode: response!.statusCode, error: error)
+            let resultError = self.checkForError(statusCode: statusCode, error: error)
 
             if resultError == nil {
                 if let parms = response!.allHeaderFields[ServerConstants.httpResponseMessageParams] as? String,
@@ -391,7 +402,7 @@ class ServerAPI {
         
         let url = URL(string: baseURL + endpoint.path)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
             
             if resultError == nil {
@@ -452,7 +463,7 @@ class ServerAPI {
         let parameters = uploadDeletion.urlParameters()!
         let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
         
-        ServerNetworking.session.sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
             
             if resultError == nil {
@@ -470,6 +481,57 @@ class ServerAPI {
             }
             else {
                 completion?(nil, resultError)
+            }
+        }
+    }
+}
+
+// MARK: Wrapper over ServerNetworking calls to provide for credentials refresh.
+extension ServerAPI {
+    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL,
+        completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
+        
+        ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL) { (serverResponse, statusCode, error) in
+            if statusCode == self.httpUnauthorizedError && self.creds != nil {
+                self.creds!.refreshCredentials() { error in
+                    // Only try refresh once!
+                    ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL, completion: completion)
+                }
+            }
+            else {
+                completion?(serverResponse, statusCode, error)
+            }
+        }
+    }
+    
+    func postUploadDataTo(_ serverURL: URL, dataToUpload:Data, completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
+        
+        Log.msg("ServerNetworking.session.authenticationDelegate3: \(ServerNetworking.session.authenticationDelegate)")
+        
+        ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload) { (serverResponse, statusCode, error) in
+            if statusCode == self.httpUnauthorizedError && self.creds != nil {
+                self.creds!.refreshCredentials() { error in
+                    // Only try refresh once!
+                    // TODO: *0* Check the error
+                    ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload, completion:completion)
+                }
+            }
+            else {
+                completion?(serverResponse, statusCode, error)
+            }
+        }
+    }
+    
+    func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?)->())?) {
+        ServerNetworking.session.downloadFrom(serverURL, method: method) { (localURL, urlResponse, statusCode, error) in
+            if statusCode == self.httpUnauthorizedError && self.creds != nil {
+                self.creds!.refreshCredentials() { error in
+                    // Only try refresh once!
+                    ServerNetworking.session.downloadFrom(serverURL, method: method, completion: completion)
+                }
+            }
+            else {
+                completion?(localURL, urlResponse, statusCode, error)
             }
         }
     }

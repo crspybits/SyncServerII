@@ -32,6 +32,11 @@ public class Creds {
         return nil
     }
     
+    // Given existing creds stored in the database, decide if we need to generate tokens.
+    func needToGenerateTokens(dbCreds:Creds) -> Bool {
+        return false
+    }
+    
     // Some Creds (e.g., Google) need to generate internal tokens (a refresh token) in some circumstances (e.g., when having a serverAuthCode). If error == nil, then success will have a non-nil value.
     func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->()) {
     }

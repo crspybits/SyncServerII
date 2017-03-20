@@ -23,21 +23,25 @@ open class SignInCreds {
         result[ServerConstants.httpEmailKey] = self.email
         return result
     }
+    
+    // Override this if your credentials scheme enables a refresh.
+    open func refreshCredentials(completion: @escaping (Error?) ->()) {
+    }
 }
-
-/*
-public protocol SignInDelegate : class {
-    func userDidSignIn(signIn:UserSignIn, credentials:SignInCreds)
-    func userFailedSignIn(signIn:UserSignIn, error:Error)
-}
-
-public protocol UserSignIn {
-    weak var delegate:SignInDelegate? {get set}
-    func signUserOut()
-}
-*/
 
 public class SyncServerUser {
+    private var _creds:SignInCreds?
+    fileprivate var creds:SignInCreds? {
+        set {
+            ServerAPI.session.creds = newValue
+            _creds = newValue
+        }
+        
+        get {
+            return _creds
+        }
+    }
+    
     public static let session = SyncServerUser()
 
     // A distinct UUID for this user mobile device.
@@ -57,7 +61,7 @@ public class SyncServerUser {
         Log.msg("SignInCreds: \(creds)")
         
         ServerAPI.session.delegate = self
-        ServerAPI.session.creds = creds
+        self.creds = creds
         
         ServerAPI.session.checkCreds { (success, error) in
             if success != nil && success! {
@@ -65,7 +69,7 @@ public class SyncServerUser {
                 completion(true, nil)
             }
             else {
-                ServerAPI.session.creds = nil
+                self.creds = nil
                 if error == nil {
                     Log.msg("Did not find user!")
                     completion(false, nil)
@@ -82,11 +86,11 @@ public class SyncServerUser {
         Log.msg("SignInCreds: \(creds)")
 
         ServerAPI.session.delegate = self
-        ServerAPI.session.creds = creds
+        self.creds = creds
         
         ServerAPI.session.addUser { error in
             if error != nil {
-                ServerAPI.session.creds = nil
+                self.creds = nil
                 Log.error("Error: \(error)")
             }
             
@@ -101,7 +105,7 @@ extension SyncServerUser : ServerAPIDelegate {
     }
     
 #if DEBUG
-    func doneUploadsRequestTestLockSync() -> TimeInterval? {
+    func doneUploadsRequestTestLockSync(forServerAPI: ServerAPI) -> TimeInterval? {
         return nil
     }
 #endif

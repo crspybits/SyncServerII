@@ -141,9 +141,16 @@ class TestCase: XCTestCase {
     }
     
     // Returns the file size uploaded
-    func uploadFile(fileURL:URL, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> (fileSize: Int64, ServerAPI.File)? {
+    func uploadFile(fileURL:URL, mimeType:String, fileUUID:String? = nil, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> (fileSize: Int64, ServerAPI.File)? {
 
-        let file = ServerAPI.File(localURL: fileURL, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: appMetaData, fileVersion: 0)
+        var uploadFileUUID:String
+        if fileUUID == nil {
+            uploadFileUUID = UUID().uuidString
+        } else {
+            uploadFileUUID = fileUUID!
+        }
+        
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: appMetaData, fileVersion: 0)
         
         // Just to get the size-- this is redundant with the file read in ServerAPI.session.uploadFile
         guard let fileData = try? Data(contentsOf: file.localURL) else {
@@ -182,11 +189,19 @@ class TestCase: XCTestCase {
         }
     }
     
-    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String = UUID().uuidString, serverMasterVersion:MasterVersionInt = 0, withExpectation expectation:XCTestExpectation) {
+    func uploadFile(fileName:String, fileExtension:String, mimeType:String, fileUUID:String? = nil, serverMasterVersion:MasterVersionInt = 0, withExpectation expectation:XCTestExpectation) {
     
+        var uploadFileUUID:String
+        if fileUUID == nil {
+            uploadFileUUID = UUID().uuidString
+        }
+        else {
+            uploadFileUUID = fileUUID!
+        }
+        
         let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
 
-        let file = ServerAPI.File(localURL: fileURL, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
         
         // Just to get the size-- this is redundant with the file read in ServerAPI.session.uploadFile
         guard let fileData = try? Data(contentsOf: file.localURL) else {
@@ -509,7 +524,7 @@ extension TestCase : ServerNetworkingAuthentication {
 }
 
 extension TestCase : ServerAPIDelegate {
-    func doneUploadsRequestTestLockSync() -> TimeInterval? {
+    func doneUploadsRequestTestLockSync(forServerAPI: ServerAPI) -> TimeInterval? {
         testLockSyncCalled = true
         return testLockSync
     }

@@ -28,6 +28,6 @@ class SignIn {
         }
     
         self.googleSignIn =  SMGoogleUserSignIn(serverClientId: serverClientId, appClientId: appClientId)
-        self.googleSignIn.appLaunchSetup(silentSignIn: false, launchOptions: nil)
+        self.googleSignIn.appLaunchSetup(silentSignIn: false)
     }
 }

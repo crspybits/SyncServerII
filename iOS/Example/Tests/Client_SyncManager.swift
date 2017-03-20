@@ -45,7 +45,7 @@ class Client_SyncManager: TestCase {
         uploadAndDownloadOneFileUsingStart()
     }
     
-    func downloadTwoFiles(file1: ServerAPI.File, file2: ServerAPI.File, masterVersion:MasterVersionInt, useOwnSyncServerEventOccurred:Bool=true, completion:(()->())? = nil) {
+    func downloadTwoFilesUsingStart(file1: ServerAPI.File, file2: ServerAPI.File, masterVersion:MasterVersionInt, useOwnSyncServerEventOccurred:Bool=true, completion:(()->())? = nil) {
         let expectedFiles = [file1, file2]
         
         doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
@@ -131,7 +131,7 @@ class Client_SyncManager: TestCase {
             XCTFail()
             return
         }
-        downloadTwoFiles(file1: file1, file2: file2, masterVersion: masterVersion)
+        downloadTwoFilesUsingStart(file1: file1, file2: file2, masterVersion: masterVersion)
     }
     
     func testWhereMasterVersionChangesMidwayThroughTwoDownloads() {
@@ -171,12 +171,11 @@ class Client_SyncManager: TestCase {
             }
         }
         
-        downloadTwoFiles(file1: file1, file2: file2, masterVersion: masterVersion, useOwnSyncServerEventOccurred:false) {
+        downloadTwoFilesUsingStart(file1: file1, file2: file2, masterVersion: masterVersion, useOwnSyncServerEventOccurred:false) {
             XCTAssert(singleDownloads == 3, "singleDownloads was \(singleDownloads)")
 
             // This will be four because the master version change with 1 download will reset downloads, will cause the first download to occur a second time, and there will thus be 2 + 1 downloads.
             XCTAssert(numberEvents == 4, "numberEvents was \(numberEvents)")
         }
     }
-
 }

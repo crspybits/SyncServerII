@@ -15,6 +15,26 @@ import SwiftyJSON
 
 // Credentials basis for making Google endpoint calls.
 
+/* Analysis of credential usage for Google SignIn:
+
+a) Upon first usage by a specific client app instance, the client will do a `checkCreds`, which will find that the user is not present on the system. It will then do an `addUser` to create the user, which will give us (the server) a serverAuthCode, which we use to generate a refreshToken and access token. Both of these are stored in the SyncServer on the database. (Note that this access token, generated from the serverAuthCode, is distinct from the access token sent from the client to the SyncServer).
+
+    Only the `addUser` SyncServer endpoint is sent the serverAuthCode.
+
+b) Subsequent operations pass in an access token from the client app. That client-generated access token is sent to the server for a single purpose:
+    It enables primary authentication-- it is sent to Google to verify that we have an actual Google user. The lifetime of the access token when used purely in this way is uncertain. Definitely longer than 60 minutes. It might not expire. See also my comment at http://stackoverflow.com/questions/13851157/oauth2-and-google-api-access-token-expiration-time/42878810#42878810
+    If primary authentication with Google fails using this access token, then a 401 HTTP status code is returned to the client app, which is its signal to, on the client-side, refresh that access token.
+    
+c) If the SyncServer endpoint needs to use Google Drive endpoints, the SyncServer utilizes the refresh-token based access token. (Note that not all SyncServer endpoints, e.g., /FileIndex, connect to Google Drive).
+
+    These refresh-token based access token's expire every 60 minutes, and we observe such expiration purely on the basis of specific failures of Google Drive endpoints-- in which case, we initiate a refresh of the access token using the refresh token, and store the refreshed access token in our SyncServer database.
+
+d) The rationale for the two kinds of access tokens (client-side, and server-side refresh-token based) are as follows:
+
+    i) I don't want a situation where I have to always use the client to refresh access tokens. I think this would be awkward. Operations using Google Drive would have to fail part-way through their operation when an access token expires, send an HTTP code back to the client, and then restart. This seems awkward and could make for more complicated than needed algorithms on the server.
+    ii) The pattern of client-based primary authentication and server-side tokens that access cloud services is the general pattern by which the server needs to be structured. For example, for shared account authorization where Google Drive user X wants to allow a Facebook user Y to make use of their files, primary authentication will take place using Facebook credentials for Y, and server-side use of Google Drive will make use of X's stored refresh token/access token's.
+*/
+
 class GoogleCreds : Creds {
     // The following keys are for conversion <-> JSON (e.g., to store this into a database).
     
@@ -25,6 +45,8 @@ class GoogleCreds : Creds {
     // This is obtained via the serverAuthCode
     var refreshToken: String?
     
+    // Storing the serverAuthCode in the database so that I don't try to generate a refresh token from the same serverAuthCode twice.
+    static let serverAuthCodeKey = "refreshToken"
     // Only present transiently.
     var serverAuthCode:String?
     
@@ -95,6 +117,11 @@ class GoogleCreds : Creds {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainParameterFromJSON
     case nilAPIResult
+    }
+    
+    override func needToGenerateTokens(dbCreds:Creds) -> Bool {
+        let dbGoogleCreds = dbCreds as! GoogleCreds
+        return serverAuthCode != nil && serverAuthCode != dbGoogleCreds.serverAuthCode
     }
     
     // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is returned with true or false depending on whether the generation occurred successfully.

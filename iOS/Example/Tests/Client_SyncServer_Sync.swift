@@ -27,19 +27,23 @@ class Client_SyncServer_Sync: TestCase {
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        SyncServer.session.eventsDesired = .defaults
         super.tearDown()
     }
 
     func testThatSyncWithNoFilesResultsInSyncDone() {
         SyncServer.session.eventsDesired = .all
 
-        let expectation1 = self.expectation(description: "test1")
+        let syncStarted = self.expectation(description: "test1")
+        let syncDone = self.expectation(description: "test2")
         
         syncServerEventOccurred = {event in
             switch event {
+            case .syncStarted:
+                syncStarted.fulfill()
+                
             case .syncDone:
-                expectation1.fulfill()
+                syncDone.fulfill()
                 
             default:
                 XCTFail()
@@ -56,21 +60,37 @@ class Client_SyncServer_Sync: TestCase {
     func testThatDoingSyncTwiceWithNoFilesResultsInTwoSyncDones() {
         SyncServer.session.eventsDesired = .all
 
-        let expectation1 = self.expectation(description: "test1")
-        let expectation2 = self.expectation(description: "test2")
+        let syncStarted1 = self.expectation(description: "test1")
+        let syncStarted2 = self.expectation(description: "test2")
+        let syncDone1 = self.expectation(description: "test3")
+        let syncDone2 = self.expectation(description: "test4")
         
-        var count = 0
-        
+        var syncDoneCount = 0
+        var syncStartedCount = 0
+
         syncServerEventOccurred = {event in
             switch event {
-            case .syncDone:
-                count += 1
-                switch count {
+            case .syncStarted:
+                syncStartedCount += 1
+                switch syncStartedCount {
                 case 1:
-                    expectation1.fulfill()
+                    syncStarted1.fulfill()
                     
                 case 2:
-                    expectation2.fulfill()
+                    syncStarted2.fulfill()
+                    
+                default:
+                    XCTFail()
+                }
+                
+            case .syncDone:
+                syncDoneCount += 1
+                switch syncDoneCount {
+                case 1:
+                    syncDone1.fulfill()
+                    
+                case 2:
+                    syncDone2.fulfill()
                     
                 default:
                     XCTFail()

@@ -147,6 +147,97 @@ private class RequestHandler {
         self.response.headers["Content-Type"] = "application/json"
     }
 
+    private func doTheRequestProcessing(creds:Creds?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> Bool {
+        var success = true
+        
+        let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
+        
+            if nil == responseObject {
+                self.failWithError(message: "Could not create response object from request object")
+                success = false
+                return
+            }
+            
+            let jsonDict = responseObject!.toJSON()
+            if nil == jsonDict {
+                self.failWithError(message: "Could not convert response object to json dictionary")
+                success = false
+                return
+            }
+            
+            switch responseObject!.responseType {
+            case .json:
+                self.endWith(clientResponse: .json(jsonDict!))
+
+            case .data(let data):
+                var jsonString:String?
+                
+                do {
+                    jsonString = try jsonDict!.jsonEncodedString()
+                } catch (let error) {
+                    success = false
+                    self.failWithError(message: "Could not convert json dict to string: \(error)")
+                    return
+                }
+                
+                self.endWith(clientResponse:
+                    .data(data:data, headers:[ServerConstants.httpResponseMessageParams:jsonString!]))
+            }
+        }
+        
+        if self.endpoint.needsLock {
+            let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
+            switch params.repos.lock.lock(lock: lock) {
+            case .success:
+                break
+            
+            // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
+            case .lockAlreadyHeld:
+                self.failWithError(message: "Could not obtain lock!!")
+                success = false
+            
+            case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+                self.failWithError(message: "Error obtaining lock!")
+                success = false
+            }
+        }
+        
+        if success {
+            processRequest(params)
+        }
+        
+        if success && self.endpoint.needsLock {
+            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+        }
+        
+        return success
+    }
+    
+    // Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
+    private func dbTransaction(_ db:Database, dbOperations:()->(Bool)) {
+        if !db.startTransaction() {
+            self.failWithError(message: "Could not start a transaction!")
+            return
+        }
+        
+        let result = checkDeviceUUID()
+        if result != nil && !result! {
+            _ = db.rollback()
+            return
+        }
+        
+        if dbOperations() {
+            if !db.commit() {
+                Log.error(message: "Erorr during COMMIT operation!")
+            }
+        }
+        else {
+            if !db.rollback() {
+                Log.error(message: "Erorr during ROLLBACK operation!")
+            }
+        }
+    }
+    
     func doRequest(createRequest: @escaping (RouterRequest) -> RequestMessage?,
         processRequest: @escaping ProcessRequest) {
         
@@ -205,122 +296,56 @@ private class RequestHandler {
         
         Log.info(message: "self.deviceUUID: \(self.deviceUUID)")
         
-        func doTheRequestProcessing(creds:Creds?) -> Bool {
-            var success = true
-            
-            let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
-            
-                if nil == responseObject {
-                    self.failWithError(message: "Could not create response object from request object")
-                    success = false
-                    return
-                }
-                
-                let jsonDict = responseObject!.toJSON()
-                if nil == jsonDict {
-                    self.failWithError(message: "Could not convert response object to json dictionary")
-                    success = false
-                    return
-                }
-                
-                switch responseObject!.responseType {
-                case .json:
-                    self.endWith(clientResponse: .json(jsonDict!))
-
-                case .data(let data):
-                    var jsonString:String?
-                    
-                    do {
-                        jsonString = try jsonDict!.jsonEncodedString()
-                    } catch (let error) {
-                        success = false
-                        self.failWithError(message: "Could not convert json dict to string: \(error)")
-                        return
-                    }
-                    
-                    self.endWith(clientResponse:
-                        .data(data:data, headers:[ServerConstants.httpResponseMessageParams:jsonString!]))
-                }
-            }
-            
-            if self.endpoint.needsLock {
-                let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
-                switch params.repos.lock.lock(lock: lock) {
-                case .success:
-                    break
-                
-                // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
-                case .lockAlreadyHeld:
-                    self.failWithError(message: "Could not obtain lock!!")
-                    success = false
-                
-                case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-                    self.failWithError(message: "Error obtaining lock!")
-                    success = false
-                }
-            }
-            
-            if success {
-                processRequest(params)
-            }
-            
-            if success && self.endpoint.needsLock {
-                _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
-            }
-            
-            return success
-        }
-
-        // Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
-        func dbTransaction(dbOperations:()->(Bool)) {
-            if !db.startTransaction() {
-                self.failWithError(message: "Could not start a transaction!")
-                return
-            }
-            
-            let result = checkDeviceUUID()
-            if result != nil && !result! {
-                _ = db.rollback()
-                return
-            }
-            
-            if dbOperations() {
-                if !db.commit() {
-                    Log.error(message: "Erorr during COMMIT operation!")
-                }
-            }
-            else {
-                if !db.rollback() {
-                    Log.error(message: "Erorr during ROLLBACK operation!")
-                }
-            }
-        }
-        
         if profile == nil {
-            dbTransaction() {
-                return doTheRequestProcessing(creds: nil)
+            dbTransaction(db) {
+                return doTheRequestProcessing(creds: nil, requestObject: requestObject, db: db, profile: nil, processRequest: processRequest)
             }
         }
         else {
-            guard let creds = Creds.toCreds(fromProfile: profile!) else {
+            guard let newCreds = Creds.toCreds(fromProfile: profile!) else {
                 failWithError(message: "Failed converting to Creds from profile", statusCode: .unauthorized)
                 return
             }
             
-            if self.endpoint.generateTokens {
-                creds.generateTokens() { successGeneratingTokens, error in
+            var generateTokens = self.endpoint.generateTokens
+
+            if generateTokens && self.authenticationLevel == .secondary {
+                // The user credentials stored in the database may indicate we don't actually have to generate tokens.
+                let key = UserRepository.LookupKey.userId(currentSignedInUser!.userId!)
+                let userLookup = self.repositories.user.lookup(key: key, modelInit: User.init)
+                switch userLookup {
+                case .found(let model):
+                    let userModel = model as! User
+                    guard let creds = Creds.toCreds(accountType: userModel.accountType, fromJSON: userModel.creds) else {
+                        self.failWithError(message: "Could not convert Creds of type: \(userModel.accountType) from JSON: \(userModel.creds)")
+                        return
+                    }
+                    
+                    generateTokens = newCreds.needToGenerateTokens(dbCreds: creds)
+                    
+                case .noObjectFound:
+                    // Presumably, user is not on system yet. Should indeed generate tokens.
+                    break
+                    
+                case .error(let error):
+                    self.failWithError(message: "Could not lookup user: \(key): \(error)")
+                    return
+                }
+            }
+            
+            if generateTokens {
+                newCreds.generateTokens() { successGeneratingTokens, error in
                     if error == nil {
-                        dbTransaction() {
+                        self.dbTransaction(db) {
                             if successGeneratingTokens! && self.authenticationLevel == .secondary {
                                 // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
-                                if !self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!) {
+                                guard self.repositories.user.updateCreds(creds: newCreds, forUser: self.currentSignedInUser!) else {
                                     self.failWithError(message: "Could not update creds")
+                                    return false
                                 }
                             }
                             
-                            let result = doTheRequestProcessing(creds: creds)
-                            //Log.debug(message: "doTheRequestProcessing: \(result)")
-                            return result
+                            return self.doTheRequestProcessing(creds: newCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
                         }
                     }
                     else {
@@ -329,8 +354,8 @@ private class RequestHandler {
                 }
             }
             else {
-                dbTransaction() {
-                    return doTheRequestProcessing(creds: creds)
+                dbTransaction(db) {
+                    return doTheRequestProcessing(creds: newCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
                 }
             }
         }
