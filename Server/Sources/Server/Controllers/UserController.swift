@@ -59,7 +59,8 @@ class UserController : ControllerProtocol {
     }
     
     func addUser(params:RequestProcessingParameters) {
-        
+        assert(ServerEndpoints.checkCreds.generateTokens)
+
         let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
@@ -70,11 +71,13 @@ class UserController : ControllerProtocol {
             return
         }
         
+        // No database creds because this is a new user-- so use params.profileCreds
+        
         let user = User()
         user.username = params.userProfile!.displayName
-        user.accountType = params.creds!.accountType
+        user.accountType = params.profileCreds!.accountType
         user.credsId = params.userProfile!.id
-        user.creds = params.creds!.toJSON()
+        user.creds = params.profileCreds!.toJSON()
         
         let userId = params.repos.user.add(user: user)
         if userId == nil {
@@ -83,19 +86,53 @@ class UserController : ControllerProtocol {
             return
         }
         
+        user.userId = userId
+        
         if !params.repos.masterVersion.initialize(userId:userId!) {
             Log.error(message: "Failed on creating MasterVersion record for user!")
             params.completion(nil)
             return
         }
         
-        let response = AddUserResponse()!
-        params.completion(response)
+        params.profileCreds!.generateTokens() { successGeneratingTokens, error in
+            guard error == nil else {
+                Log.error(message: "Failed attempting to generate tokens: \(error)")
+                params.completion(nil)
+                return
+            }
+            
+            // Not going to worry about success generating tokens because this may be done later by a CheckCreds, and this makes testing easier too.
+            if successGeneratingTokens! {
+                guard params.repos.user.updateCreds(creds: params.profileCreds!, forUser: user) else {
+                    Log.error(message: "Failed attempting to save generated tokens.")
+                    params.completion(nil)
+                    return
+                }
+            }
+            
+            let response = AddUserResponse()!
+            params.completion(response)
+        }
     }
     
     func checkCreds(params:RequestProcessingParameters) {
-        // We don't have to do anything here. It was already done prior to checkCreds being called because of:
         assert(ServerEndpoints.checkCreds.authenticationLevel == .secondary)
+
+        // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
+        assert(ServerEndpoints.checkCreds.generateTokens)
+        
+        if params.profileCreds!.needToGenerateTokens(dbCreds: params.creds!) {
+            params.profileCreds!.generateTokens() { successGeneratingTokens, error in
+                if error == nil {
+                    let response = CheckCredsResponse()!
+                    params.completion(response)
+                }
+                else {
+                    Log.error(message: "Failed attempting to generate tokens: \(error)")
+                    params.completion(nil)
+                }
+            }
+        }
         
         let response = CheckCredsResponse()!
         params.completion(response)

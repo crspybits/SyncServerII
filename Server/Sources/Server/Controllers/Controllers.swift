@@ -17,7 +17,12 @@ protocol ControllerProtocol {
 
 public struct RequestProcessingParameters {
     let request: RequestMessage!
+    
+    // For secondary authenticated endpoints, these are the creds read from the database. It's nil otherwise.
     let creds: Creds?
+
+    let profileCreds: Creds?
+    
     let userProfile: UserProfile?
     let currentSignedInUser:User?
     let db:Database!

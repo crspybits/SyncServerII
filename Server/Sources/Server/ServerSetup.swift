@@ -146,11 +146,137 @@ private class RequestHandler : CredsDelegate {
     func setJsonResponseHeaders() {
         self.response.headers["Content-Type"] = "application/json"
     }
-
-    private func doTheRequestProcessing(creds:Creds?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> Bool {
-        var success = true
+    
+    // Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
+    private func dbTransaction(_ db:Database, dbOperations:()->(Bool)) {
+        if !db.startTransaction() {
+            self.failWithError(message: "Could not start a transaction!")
+            return
+        }
         
-        let params = RequestProcessingParameters(request: requestObject!, creds: creds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
+        let result = checkDeviceUUID()
+        if result != nil && !result! {
+            _ = db.rollback()
+            return
+        }
+        
+        if dbOperations() {
+            if !db.commit() {
+                Log.error(message: "Erorr during COMMIT operation!")
+            }
+        }
+        else {
+            if !db.rollback() {
+                Log.error(message: "Erorr during ROLLBACK operation!")
+            }
+        }
+    }
+    
+    func doRequest(createRequest: @escaping (RouterRequest) -> RequestMessage?,
+        processRequest: @escaping ProcessRequest) {
+        
+        setJsonResponseHeaders()
+        let profile = request.userProfile
+        self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
+        Log.info(message: "self.deviceUUID: \(self.deviceUUID)")
+        
+#if DEBUG
+        if profile != nil {
+            let userId = profile!.id
+            let userName = profile!.displayName
+            Log.info(message: "Profile: \(profile); userId: \(userId); userName: \(userName)")
+        }
+#endif
+
+        let db = Database()
+        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db))
+        
+        switch authenticationLevel! {
+        case .none:
+            break
+            
+        case .primary, .secondary:
+            if profile == nil {
+                // We should really never get here. Credentials security check should make sure of that. This is a double check.
+                let message = "YIKES: Should have had a user profile!"
+                Log.critical(message: message)
+                failWithError(message: message)
+                return
+            }
+        }
+        
+        var dbCreds:Creds?
+
+        if authenticationLevel! == .secondary {
+            // We have .secondary authentication-- i.e., we should have the user recorded in the database already.
+
+            guard let accountType = AccountType.fromSpecificCredsType(specificCreds: profile!.accountSpecificCreds!) else {
+                self.failWithError(message: "Could not convert fromSpecificCredsType.")
+                return
+            }
+            
+            let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountType, credsId: profile!.id)
+            let userLookup = self.repositories.user.lookup(key: key, modelInit: User.init)
+        
+            switch userLookup {
+            case .found(let model):
+                currentSignedInUser = (model as? User)!
+                var errorString:String?
+                
+                do {
+                    dbCreds = try Creds.toCreds(accountType: currentSignedInUser!.accountType, fromJSON: currentSignedInUser!.creds)
+                } catch (let error) {
+                    errorString = "\(error)"
+                }
+                
+                if errorString != nil || dbCreds == nil {
+                    self.failWithError(message: "Could not convert Creds of type: \(currentSignedInUser!.accountType) from JSON: \(currentSignedInUser!.creds); error: \(errorString)")
+                    return
+                }
+                
+                dbCreds!.delegate = self
+                
+            case .noObjectFound:
+                failWithError(message: "Failed on secondary authentication", statusCode: .unauthorized)
+                return
+                
+            case .error(let error):
+                self.failWithError(message: "Failed looking up user: \(key): \(error)", statusCode: .internalServerError)
+                return
+            }
+        }
+        
+        let requestObject:RequestMessage? = createRequest(request)
+        if nil == requestObject {
+            self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
+            return
+        }
+        
+        if profile == nil {
+            assert(authenticationLevel! == .none)
+            
+            dbTransaction(db) {
+                return doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, processRequest: processRequest)
+            }
+        }
+        else {
+            assert(authenticationLevel! == .primary || authenticationLevel! == .secondary)
+
+            guard let profileCreds = Creds.toCreds(fromProfile: profile!) else {
+                failWithError(message: "Failed converting to Creds from profile", statusCode: .unauthorized)
+                return
+            }
+                        
+            dbTransaction(db) {
+                return doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
+            }
+        }
+    }
+    
+    private func doRemainingRequestProcessing(dbCreds:Creds?, profileCreds:Creds?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> Bool {
+        var success = true
+                
+        let params = RequestProcessingParameters(request: requestObject!, creds: dbCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
         
             if nil == responseObject {
                 self.failWithError(message: "Could not create response object from request object")
@@ -211,163 +337,6 @@ private class RequestHandler : CredsDelegate {
         }
         
         return success
-    }
-    
-    // Starts a transaction, and calls the closure. If the closure returns true, then commits the transaction. Otherwise, rolls it back.
-    private func dbTransaction(_ db:Database, dbOperations:()->(Bool)) {
-        if !db.startTransaction() {
-            self.failWithError(message: "Could not start a transaction!")
-            return
-        }
-        
-        let result = checkDeviceUUID()
-        if result != nil && !result! {
-            _ = db.rollback()
-            return
-        }
-        
-        if dbOperations() {
-            if !db.commit() {
-                Log.error(message: "Erorr during COMMIT operation!")
-            }
-        }
-        else {
-            if !db.rollback() {
-                Log.error(message: "Erorr during ROLLBACK operation!")
-            }
-        }
-    }
-    
-    func doRequest(createRequest: @escaping (RouterRequest) -> RequestMessage?,
-        processRequest: @escaping ProcessRequest) {
-        
-        // Log.info(message: "Processing Request: \(request.urlURL.path)")
-        setJsonResponseHeaders()
-        
-        let profile = request.userProfile
-
-#if DEBUG
-        if profile != nil {
-            let userId = profile!.id
-            let userName = profile!.displayName
-            Log.info(message: "Profile: \(profile); userId: \(userId); userName: \(userName)")
-        }
-#endif
-
-        switch authenticationLevel! {
-        case .none:
-            break
-        case .primary, .secondary:
-            if profile == nil {
-                // We should really never get here. Credentials security check should make sure of that. This is a double check.
-                let message = "YIKES: Should have had a user profile!"
-                Log.critical(message: message)
-                failWithError(message: message)
-                return
-            }
-        }
-        
-        let db = Database()
-        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db))
-        
-        if authenticationLevel == .secondary {
-            let userExists = UserController.userExists(userProfile: profile!, userRepository: repositories.user)
-            switch userExists {
-            case .error:
-                failWithError(message: "Failed on secondary authentication", statusCode: .internalServerError)
-                return
-                
-            case .doesNotExist:
-                failWithError(message: "Failed on secondary authentication", statusCode: .unauthorized)
-                return
-                
-            case .exists(let user):
-                currentSignedInUser = user
-            }
-        }
-        
-        let requestObject:RequestMessage? = createRequest(request)
-        if nil == requestObject {
-            self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
-            return
-        }
-        
-        // TODO: *0* Make sure we're now going to use Google access token from the database, not from the client creds. This is because we're only using the client creds for primary authentication.
-        
-        self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
-        
-        Log.info(message: "self.deviceUUID: \(self.deviceUUID)")
-        
-        if profile == nil {
-            // Authentication level will be .none
-            dbTransaction(db) {
-                return doTheRequestProcessing(creds: nil, requestObject: requestObject, db: db, profile: nil, processRequest: processRequest)
-            }
-        }
-        else {
-            // Authentication level will be .primary or .secondary
-            guard let newCreds = Creds.toCreds(fromProfile: profile!) else {
-                failWithError(message: "Failed converting to Creds from profile", statusCode: .unauthorized)
-                return
-            }
-            
-            var generateTokens = self.endpoint.generateTokens
-
-            if generateTokens && self.authenticationLevel == .secondary {
-                // The user credentials stored in the database may indicate we don't actually have to generate tokens.
-                let key = UserRepository.LookupKey.userId(currentSignedInUser!.userId!)
-                let userLookup = self.repositories.user.lookup(key: key, modelInit: User.init)
-                switch userLookup {
-                case .found(let model):
-                    let userModel = model as! User
-                    guard let creds = try? Creds.toCreds(accountType: userModel.accountType, fromJSON: userModel.creds), creds != nil else {
-                        self.failWithError(message: "Could not convert Creds of type: \(userModel.accountType) from JSON: \(userModel.creds)")
-                        return
-                    }
-                    
-                    if !newCreds.needToGenerateTokens(dbCreds: creds!) {
-                        generateTokens = false
-                    }
-                    
-                case .noObjectFound:
-                    // Presumably, user is not on system yet. Should indeed generate tokens.
-                    break
-                    
-                case .error(let error):
-                    self.failWithError(message: "Could not lookup user: \(key): \(error)")
-                    return
-                }
-            }
-            
-            if generateTokens {
-                // Not using delegate of creds to saveToDatabase because we need to wrap that in a transaction, and because of conditions below.
-                newCreds.generateTokens() { successGeneratingTokens, error in
-                    if error == nil {
-                        self.dbTransaction(db) {
-                            if successGeneratingTokens! && self.authenticationLevel == .secondary {
-                                // Only update the creds on a secondary auth level, because only then do we know that we know about the user already, and thus have a user to update.
-                                guard self.saveToDatabase(creds: newCreds) else {
-                                    self.failWithError(message: "Could not update creds")
-                                    return false
-                                }
-                            }
-                            
-                            newCreds.delegate = self
-                            return self.doTheRequestProcessing(creds: newCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
-                        }
-                    }
-                    else {
-                        self.failWithError(message: "Failed attempting to generate tokens")
-                    }
-                }
-            }
-            else {
-                dbTransaction(db) {
-                    newCreds.delegate = self
-                    return doTheRequestProcessing(creds: newCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
-                }
-            }
-        }
     }
     
     // MARK: CredsDelegate
