@@ -62,7 +62,7 @@ public class ServerSetup {
 
 public typealias ProcessRequest = (RequestProcessingParameters)->()
 
-private class RequestHandler {
+private class RequestHandler : CredsDelegate {
     private var request:RouterRequest!
     private var response:RouterResponse!
     
@@ -292,16 +292,20 @@ private class RequestHandler {
             return
         }
         
+        // TODO: *0* Make sure we're now going to use Google access token from the database, not from the client creds. This is because we're only using the client creds for primary authentication.
+        
         self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
         
         Log.info(message: "self.deviceUUID: \(self.deviceUUID)")
         
         if profile == nil {
+            // Authentication level will be .none
             dbTransaction(db) {
                 return doTheRequestProcessing(creds: nil, requestObject: requestObject, db: db, profile: nil, processRequest: processRequest)
             }
         }
         else {
+            // Authentication level will be .primary or .secondary
             guard let newCreds = Creds.toCreds(fromProfile: profile!) else {
                 failWithError(message: "Failed converting to Creds from profile", statusCode: .unauthorized)
                 return
@@ -316,12 +320,14 @@ private class RequestHandler {
                 switch userLookup {
                 case .found(let model):
                     let userModel = model as! User
-                    guard let creds = Creds.toCreds(accountType: userModel.accountType, fromJSON: userModel.creds) else {
+                    guard let creds = try? Creds.toCreds(accountType: userModel.accountType, fromJSON: userModel.creds), creds != nil else {
                         self.failWithError(message: "Could not convert Creds of type: \(userModel.accountType) from JSON: \(userModel.creds)")
                         return
                     }
                     
-                    generateTokens = newCreds.needToGenerateTokens(dbCreds: creds)
+                    if !newCreds.needToGenerateTokens(dbCreds: creds!) {
+                        generateTokens = false
+                    }
                     
                 case .noObjectFound:
                     // Presumably, user is not on system yet. Should indeed generate tokens.
@@ -334,17 +340,19 @@ private class RequestHandler {
             }
             
             if generateTokens {
+                // Not using delegate of creds to saveToDatabase because we need to wrap that in a transaction, and because of conditions below.
                 newCreds.generateTokens() { successGeneratingTokens, error in
                     if error == nil {
                         self.dbTransaction(db) {
                             if successGeneratingTokens! && self.authenticationLevel == .secondary {
-                                // Only update the creds on a secondary auth level, because only then do we know that we know about the user already.
-                                guard self.repositories.user.updateCreds(creds: newCreds, forUser: self.currentSignedInUser!) else {
+                                // Only update the creds on a secondary auth level, because only then do we know that we know about the user already, and thus have a user to update.
+                                guard self.saveToDatabase(creds: newCreds) else {
                                     self.failWithError(message: "Could not update creds")
                                     return false
                                 }
                             }
                             
+                            newCreds.delegate = self
                             return self.doTheRequestProcessing(creds: newCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
                         }
                     }
@@ -355,11 +363,20 @@ private class RequestHandler {
             }
             else {
                 dbTransaction(db) {
+                    newCreds.delegate = self
                     return doTheRequestProcessing(creds: newCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
                 }
             }
         }
     }
+    
+    // MARK: CredsDelegate
+    
+    func saveToDatabase(creds:Creds) -> Bool {
+        return self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!)
+    }
+    
+    // MARK:
     
     // Returns true success, nil if a UUID is not needed, and false if failure.
     private func checkDeviceUUID() -> Bool? {

@@ -75,9 +75,16 @@ class User : NSObject, Model {
     let credsKey = "credsKey"
     var creds:String! // Stored as JSON
     
-    // Converts from the current creds JSON and accountType
+    // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
     var credsObject:Creds? {
-        return Creds.toCreds(accountType: accountType, fromJSON: creds)
+        do {
+            let credsObj = try Creds.toCreds(accountType: accountType, fromJSON: creds)
+            return credsObj
+        }
+        catch (let error) {
+            Log.error(message: "\(error)")
+            return nil
+        }
     }
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
@@ -159,7 +166,7 @@ class UserRepository : Repository {
         }
         
         // Validate the JSON before we insert it. Can't really do it in the setter for creds because it's
-        guard let _ = Creds.toCreds(accountType: user.accountType, fromJSON: user.creds) else {
+        guard let _ = try? Creds.toCreds(accountType: user.accountType, fromJSON: user.creds) else {
             Log.error(message: "Invalid creds JSON: \(user.creds)")
             return nil
         }
@@ -179,6 +186,7 @@ class UserRepository : Repository {
     func updateCreds(creds newCreds:Creds, forUser user:User) -> Bool {
         // First need to merge creds-- otherwise, we might override part of the creds with our update.
     
+        // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
         let oldCreds = user.credsObject!
         oldCreds.merge(withNewerCreds: newCreds)
         

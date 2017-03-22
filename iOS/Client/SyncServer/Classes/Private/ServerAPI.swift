@@ -495,7 +495,12 @@ extension ServerAPI {
             if statusCode == self.httpUnauthorizedError && self.creds != nil {
                 self.creds!.refreshCredentials() { error in
                     // Only try refresh once!
-                    ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL, completion: completion)
+                    if error == nil {
+                        ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL, completion: completion)
+                    }
+                    else {
+                        completion?(nil, nil, error)
+                    }
                 }
             }
             else {
@@ -512,8 +517,12 @@ extension ServerAPI {
             if statusCode == self.httpUnauthorizedError && self.creds != nil {
                 self.creds!.refreshCredentials() { error in
                     // Only try refresh once!
-                    // TODO: *0* Check the error
-                    ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload, completion:completion)
+                    if error == nil {
+                        ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload, completion:completion)
+                    }
+                    else {
+                        completion?(nil, nil, error)
+                    }
                 }
             }
             else {
@@ -527,7 +536,12 @@ extension ServerAPI {
             if statusCode == self.httpUnauthorizedError && self.creds != nil {
                 self.creds!.refreshCredentials() { error in
                     // Only try refresh once!
-                    ServerNetworking.session.downloadFrom(serverURL, method: method, completion: completion)
+                    if error == nil {
+                        ServerNetworking.session.downloadFrom(serverURL, method: method, completion: completion)
+                    }
+                    else {
+                        completion?(nil, nil, nil, error)
+                    }
                 }
             }
             else {

@@ -123,6 +123,11 @@ class Upload {
                 nextToUpload.status = .notStarted
                 CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 
+                /* TODO: *0* Need to deal with this error:
+                    1) Do retry(s)
+                    2) Fail if retries don't work and put the SyncServer client interface into an error state.
+                    3) Deal with other, similar, errors too, in a similar way.
+                */
                 let message = "Error: \(error)"
                 Log.error(message)
                 self.completion?(.error(message))

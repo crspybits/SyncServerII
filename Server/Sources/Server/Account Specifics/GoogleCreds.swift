@@ -19,7 +19,7 @@ import SwiftyJSON
 
 a) Upon first usage by a specific client app instance, the client will do a `checkCreds`, which will find that the user is not present on the system. It will then do an `addUser` to create the user, which will give us (the server) a serverAuthCode, which we use to generate a refreshToken and access token. Both of these are stored in the SyncServer on the database. (Note that this access token, generated from the serverAuthCode, is distinct from the access token sent from the client to the SyncServer).
 
-    Only the `addUser` SyncServer endpoint is sent the serverAuthCode.
+    Only the `addUser` and `checkCreds` SyncServer endpoints make use of the serverAuthCode (though it is sent to all endpoints).
 
 b) Subsequent operations pass in an access token from the client app. That client-generated access token is sent to the server for a single purpose:
     It enables primary authentication-- it is sent to Google to verify that we have an actual Google user. The lifetime of the access token when used purely in this way is uncertain. Definitely longer than 60 minutes. It might not expire. See also my comment at http://stackoverflow.com/questions/13851157/oauth2-and-google-api-access-token-expiration-time/42878810#42878810
@@ -43,12 +43,17 @@ class GoogleCreds : Creds {
     
     static let refreshTokenKey = "refreshToken"
     // This is obtained via the serverAuthCode
-    var refreshToken: String?
+    var refreshToken: String!
     
     // Storing the serverAuthCode in the database so that I don't try to generate a refresh token from the same serverAuthCode twice.
-    static let serverAuthCodeKey = "refreshToken"
+    static let serverAuthCodeKey = "serverAuthCode"
     // Only present transiently.
     var serverAuthCode:String?
+    
+    let expiredAccessTokenHTTPCode = HTTPStatusCode.unauthorized
+    
+    // This is to ensure that some error doesn't cause us to attempt to refresh the access token multiple times in a row. I'm assuming that for any one endpoint invocation, we'll at most need to refresh the access token a single time.
+    private var alreadyRefreshed = false
     
     override init() {
         super.init()
@@ -56,24 +61,47 @@ class GoogleCreds : Creds {
         self.baseURL = "www.googleapis.com"
     }
     
-    override static func fromJSON(s:String) -> Creds? {
+    enum FromJSONError : Swift.Error {
+    case noRequiredKeyValue
+    }
+    
+    override static func fromJSON(s:String) throws -> Creds? {
         guard let jsonDict = s.toJSONDictionary() as? [String:String] else {
             Log.error(message: "Could not convert string to JSON [String:String]: \(s)")
             return nil
         }
         
+        func setProperty(key:String, required:Bool=true, setWithValue:(String)->()) throws {
+            let keyValue = jsonDict[key]
+            if keyValue == nil {
+                if required {
+                    Log.error(message: "No \(key) value present.")
+                    throw FromJSONError.noRequiredKeyValue
+                }
+                else {
+                    Log.warning(message: "No \(key) value present.")
+                }
+            }
+            else {
+                setWithValue(keyValue!)
+            }
+        }
+        
         let result = GoogleCreds()
         
-        if jsonDict[accessTokenKey] == nil {
-            Log.error(message: "No \(accessTokenKey) present.")
-            return nil
-        }
-        else {
-            result.accessToken = jsonDict[accessTokenKey]
+        try setProperty(key: accessTokenKey) { value in
+            result.accessToken = value
         }
         
-        // Allowing the refresh token to be optional-- because when creating a user account, we don't have it from the client.
-        result.refreshToken = jsonDict[refreshTokenKey]
+        // Considering the refresh token and serverAuthCode as optional because (a) I think I don't always get these from the client, and (b) during testing, I don't always have these.
+        
+        try setProperty(key: refreshTokenKey, required:false) { value in
+            result.refreshToken = value
+        }
+        
+        try setProperty(key: serverAuthCodeKey, required:false) { value in
+            result.serverAuthCode = value
+        }
         
         return result
     }
@@ -95,6 +123,7 @@ class GoogleCreds : Creds {
         var jsonDict = [String:String]()
         jsonDict[GoogleCreds.accessTokenKey] = self.accessToken
         jsonDict[GoogleCreds.refreshTokenKey] = self.refreshToken
+        jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode
         return dictionaryToJSONString(dict: jsonDict)
     }
     
@@ -117,6 +146,7 @@ class GoogleCreds : Creds {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainParameterFromJSON
     case nilAPIResult
+    case errorSavingCredsToDatabase
     }
     
     override func needToGenerateTokens(dbCreds:Creds) -> Bool {
@@ -124,7 +154,7 @@ class GoogleCreds : Creds {
         return serverAuthCode != nil && serverAuthCode != dbGoogleCreds.serverAuthCode
     }
     
-    // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is returned with true or false depending on whether the generation occurred successfully.
+    // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is true iff the generation occurred successfully.
     override func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->()) {
         if self.serverAuthCode == nil {
             Log.info(message: "No serverAuthCode from client.")
@@ -155,7 +185,13 @@ class GoogleCreds : Creds {
                 self.accessToken = accessToken
                 self.refreshToken = refreshToken
                 Log.debug(message: "Obtained tokens: accessToken: \(accessToken)\n refreshToken: \(refreshToken)")
-                completion(true, nil)
+                
+                if self.delegate == nil || self.delegate!.saveToDatabase(creds: self) {
+                    completion(true, nil)
+                    return
+                }
+                
+                completion(nil, GenerateTokensError.errorSavingCredsToDatabase)
                 return
             }
             
@@ -171,6 +207,10 @@ class GoogleCreds : Creds {
             self.refreshToken = newerGoogleCreds.refreshToken
         }
         
+        if newerGoogleCreds.serverAuthCode != nil {
+            self.serverAuthCode = newerGoogleCreds.serverAuthCode
+        }
+        
         self.accessToken = newerGoogleCreds.accessToken
     }
     
@@ -179,10 +219,11 @@ class GoogleCreds : Creds {
     case couldNotObtainParameterFromJSON
     case nilAPIResult
     case badJSONResult
+    case errorSavingCredsToDatabase
     }
     
     // Use the refresh token to generate a new access token.
-    // If error is nil when the completion handler is called, then the accessToken of this object has been refreshed. It hasn't yet been persistently stored on this server.
+    // If error is nil when the completion handler is called, then the accessToken of this object has been refreshed. It hasn't yet been persistently stored on this server. Uses delegate, if one is defined, to save refreshed creds to database.
     func refresh(completion:@escaping (Swift.Error?)->()) {
         // See "Using a refresh token" at https://developers.google.com/identity/protocols/OAuth2WebServer
 
@@ -211,11 +252,42 @@ class GoogleCreds : Creds {
                 jsonResult[GoogleCreds.googleAPIAccessTokenKey].string {
                 self.accessToken = accessToken
                 Log.debug(message: "Refreshed access token: \(accessToken)")
-                completion(nil)
+                
+                if self.delegate == nil || self.delegate!.saveToDatabase(creds: self) {
+                    completion(nil)
+                    return
+                }
+                
+                completion(RefreshError.errorSavingCredsToDatabase)
                 return
             }
             
             completion(RefreshError.couldNotObtainParameterFromJSON)
+        }
+    }
+    
+    override func apiCall(method:String, baseURL:String? = nil, path:String,
+        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:Body? = nil,
+        completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
+        
+        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: additionalHeaders, urlParameters: urlParameters, body: body) { (apiCallResult, statusCode) in
+        
+            if statusCode == self.expiredAccessTokenHTTPCode && !self.alreadyRefreshed {
+                self.alreadyRefreshed = true
+                self.refresh() { error in
+                    if error == nil {
+                        // Refresh was successful, try the operation again.
+                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: additionalHeaders, urlParameters: urlParameters, body: body, completion: completion)
+                    }
+                    else {
+                        Log.error(message: "Failed to refresh access token: \(error)")
+                        completion(nil, .internalServerError)
+                    }
+                }
+            }
+            else {
+                completion(apiCallResult, statusCode)
+            }
         }
     }
 }

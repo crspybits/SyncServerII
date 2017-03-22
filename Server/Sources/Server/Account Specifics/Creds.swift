@@ -13,9 +13,15 @@ import PerfectLib
 import KituraNet
 import SwiftyJSON
 
+public protocol CredsDelegate : class {
+// This is delegated because (a) it enables me to only sometimes allow Creds to save to the database, and (b) because knowledge of how to save to a database seems outside of the responsibilities of `Creds`. Returns false iff an error occurred on database save.
+func saveToDatabase(creds:Creds) -> Bool
+}
+
 public class Creds {
     var accountType:AccountType!
     var baseURL:String?
+    weak var delegate:CredsDelegate?
     
     func toJSON() -> String? {
         assert(false, "Unimplemented")
@@ -27,7 +33,7 @@ public class Creds {
         return nil
     }
     
-    class func fromJSON(s:String) -> Creds? {
+    class func fromJSON(s:String) throws -> Creds? {
         assert(false, "Unimplemented")
         return nil
     }
@@ -37,7 +43,7 @@ public class Creds {
         return false
     }
     
-    // Some Creds (e.g., Google) need to generate internal tokens (a refresh token) in some circumstances (e.g., when having a serverAuthCode). If error == nil, then success will have a non-nil value.
+    // Some Creds (e.g., Google) need to generate internal tokens (a refresh token) in some circumstances (e.g., when having a serverAuthCode). If error == nil, then success will have a non-nil value. Uses delegate, if one is defined, to save creds to database.
     func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->()) {
     }
     
@@ -150,10 +156,10 @@ public class Creds {
 }
 
 extension Creds {
-    static func toCreds(accountType:AccountType, fromJSON json:String) -> Creds? {
+    static func toCreds(accountType:AccountType, fromJSON json:String) throws -> Creds? {
         switch accountType {
         case .Google:
-            return GoogleCreds.fromJSON(s: json)
+            return try GoogleCreds.fromJSON(s: json)
         }
     }
     

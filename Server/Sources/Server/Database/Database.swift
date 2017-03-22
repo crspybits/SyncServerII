@@ -33,12 +33,14 @@ public class Database {
     
     public init() {
         self.connection = MySQL()
+        Log.info(message: "Connecting to database with host: \(Constants.session.db.host)...")
         guard self.connection.connect(host: Constants.session.db.host, user: Constants.session.db.user, password: Constants.session.db.password ) else {
             Log.error(message:
                 "Failure connecting to mySQL server \(Constants.session.db.host): \(self.error)")
             return
         }
 
+        Log.info(message: "Connecting to database named: \(Constants.session.db.database)...")
         guard self.connection.selectDatabase(named: Constants.session.db.database) else {
             Log.error(message: "Failure: \(self.error)")
             return
