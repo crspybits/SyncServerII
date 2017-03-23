@@ -25,6 +25,10 @@ so, it's possible this issue has been resolved.
 
 // 7/7/16. Just solved a problem linking with the new Google SignIn. The resolution amounted to . See https://stackoverflow.com/questions/37715067/pods-headers-public-google-google-signin-h19-gglcore-gglcore-h-file-not-fo
 
+protocol GoogleSignInCredsDelegate : class {
+func signUserOutUsing(creds:GoogleSignInCreds)
+}
+
 class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
     fileprivate var currentlyRefreshing = false
     fileprivate var googleUser:GIDGoogleUser?
@@ -34,6 +38,8 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
     
     // Used on the server to obtain a refresh code and an access token. The refresh token obtained on signin in the app can't be transferred to the server and used there.
     var serverAuthCode: String?
+    
+    weak var delegate:GoogleSignInCredsDelegate?
     
     override public func authDict() -> [String:String] {
         var result = super.authDict()
@@ -63,17 +69,19 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
             self.currentlyRefreshing = true
         }
         
-        Log.special("refreshTokensWithHandler")
+        Log.special("refreshCredentials")
         
         self.googleUser!.authentication.refreshTokens() { auth, error in
             self.currentlyRefreshing = false
             
             if error == nil {
-                Log.special("refreshTokensWithHandler: Success")
-                self.idToken = auth?.idToken
+                Log.special("refreshCredentials: Success")
+                self.idToken = auth!.idToken
+                self.accessToken = auth!.accessToken
             }
             else {
                 Log.error("Error refreshing tokens: \(error)")
+                self.delegate?.signUserOutUsing(creds: self)
             }
             
             completion(error)
@@ -83,6 +91,10 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
 
 // The class that you used to enable sign-in to Google should subclass this VC class.
 open class SMGoogleUserSignInViewController : UIViewController, GIDSignInUIDelegate {
+}
+
+protocol SMGoogleUserSignInDelegate : class {
+func userWasSignedOut(googleUserSignIn:SMGoogleUserSignIn)
 }
 
 // See https://developers.google.com/identity/sign-in/ios/sign-in
@@ -117,6 +129,8 @@ open class SMGoogleUserSignIn : NSObject {
     }
     
     fileprivate let signInOutButton = GoogleSignInOutButton()
+    
+    weak var delegate:SMGoogleUserSignInDelegate?
    
     public init(serverClientId:String, appClientId:String) {
         self.serverClientId = serverClientId
@@ -215,6 +229,8 @@ open class SMGoogleUserSignIn : NSObject {
         creds.serverAuthCode = user.serverAuthCode
         creds.googleUser = user
         
+        creds.delegate = self
+        
         return creds
     }
     
@@ -244,11 +260,18 @@ open class SMGoogleUserSignIn : NSObject {
     }
 }
 
+extension SMGoogleUserSignIn : GoogleSignInCredsDelegate {
+    func signUserOutUsing(creds:GoogleSignInCreds) {
+        self.signUserOut()
+    }
+}
+
 // // MARK: UserSignIn methods.
 extension SMGoogleUserSignIn {
     @objc public func signUserOut() {
         GIDSignIn.sharedInstance().signOut()
         self.signInOutButton.buttonShowing = .signIn
+        self.delegate?.userWasSignedOut(googleUserSignIn: self)
     }
 }
 

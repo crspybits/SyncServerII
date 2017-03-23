@@ -170,11 +170,18 @@ class UploadRepository : Repository {
         return (queryFieldValue, queryFieldName)
     }
     
+    enum AddResult {
+    case success(uploadId:Int64)
+    case duplicateEntry
+    case aModelValueWasNil
+    case otherError(String)
+    }
+    
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
-    func add(upload:Upload) -> Int64? {
+    func add(upload:Upload) -> AddResult {
         if haveNilField(upload: upload) {
             Log.error(message: "One of the model values was nil!")
-            return nil
+            return .aModelValueWasNil
         }
     
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
@@ -189,12 +196,16 @@ class UploadRepository : Repository {
         let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, fileVersion, state \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(cloudFolderNameFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', \(upload.fileVersion!), '\(upload.state!.rawValue)' \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(cloudFolderNameFieldValue));"
         
         if db.connection.query(statement: query) {
-            return db.connection.lastInsertId()
+            return .success(uploadId: db.connection.lastInsertId())
+        }
+        else if db.connection.errorCode() == Database.duplicateEntryForKey {
+            return .duplicateEntry
         }
         else {
             let error = db.error
-            Log.error(message: "Could not insert into \(tableName): \(error)")
-            return nil
+            let message = "Could not insert into \(tableName): \(error)"
+            Log.error(message: message)
+            return .otherError(message)
         }
     }
     
@@ -238,6 +249,7 @@ class UploadRepository : Repository {
         case fileUUID(String)
         case userId(UserId)
         case filesForUserDevice(userId:UserId, deviceUUID:String)
+        case primaryKey(fileUUID:String, userId:UserId, deviceUUID:String)
         
         var description : String {
             switch self {
@@ -248,7 +260,9 @@ class UploadRepository : Repository {
             case .userId(let userId):
                 return "userId(\(userId))"
             case .filesForUserDevice(let userId, let deviceUUID):
-                return "userId(\(userId)); deviceUUID(\(deviceUUID)); "
+                return "userId(\(userId)); deviceUUID(\(deviceUUID))"
+            case .primaryKey(let fileUUID, let userId, let deviceUUID):
+                return "fileUUID(\(fileUUID)); userId(\(userId)); deviceUUID(\(deviceUUID))"
             }
         }
     }
@@ -263,6 +277,8 @@ class UploadRepository : Repository {
             return "userId = '\(userId)'"
         case .filesForUserDevice(let userId, let deviceUUID):
             return "userId = \(userId) and deviceUUID = '\(deviceUUID)'"
+        case .primaryKey(let fileUUID, let userId, let deviceUUID):
+            return "fileUUID = '\(fileUUID)' and userId = \(userId) and deviceUUID = '\(deviceUUID)'"
         }
     }
     

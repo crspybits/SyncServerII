@@ -37,10 +37,20 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         upload.userId = userId
         upload.appMetaData = appMetaData
         
-        let result1 = UploadRepository(db).add(upload: upload)
-        XCTAssert(result1 == 1, "Bad uploadId!")
+        let result = UploadRepository(db).add(upload: upload)
         
-        upload.uploadId = result1
+        var uploadId:Int64!
+        switch result {
+        case .success(uploadId: let id):
+            uploadId = id
+        
+        default:
+            XCTFail()
+        }
+        
+        XCTAssert(uploadId == 1, "Bad uploadId!")
+        
+        upload.uploadId = uploadId
         
         return upload
     }

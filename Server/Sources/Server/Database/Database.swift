@@ -31,16 +31,20 @@ public class Database {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
     }
     
-    public init() {
+    public init(showStartupInfo:Bool = false) {
         self.connection = MySQL()
-        Log.info(message: "Connecting to database with host: \(Constants.session.db.host)...")
+        if showStartupInfo {
+            Log.info(message: "Connecting to database with host: \(Constants.session.db.host)...")
+        }
         guard self.connection.connect(host: Constants.session.db.host, user: Constants.session.db.user, password: Constants.session.db.password ) else {
             Log.error(message:
                 "Failure connecting to mySQL server \(Constants.session.db.host): \(self.error)")
             return
         }
 
-        Log.info(message: "Connecting to database named: \(Constants.session.db.database)...")
+        if showStartupInfo {
+            Log.info(message: "Connecting to database named: \(Constants.session.db.database)...")
+        }
         guard self.connection.selectDatabase(named: Constants.session.db.database) else {
             Log.error(message: "Failure: \(self.error)")
             return

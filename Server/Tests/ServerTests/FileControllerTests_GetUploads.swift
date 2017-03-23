@@ -40,6 +40,20 @@ class FileControllerTests_GetUploads: ServerTestCase {
         self.getUploads(expectedFiles: [uploadRequest1], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes)
     }
     
+    func testForOneUploadButDoneTwice() {
+        let deviceUUID = PerfectLib.UUID().string
+        let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
+
+        // Second upload-- shouldn't result in second entries in Upload table.
+        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest1.fileUUID, addUser: false, fileVersion: uploadRequest1.fileVersion, masterVersion: uploadRequest1.masterVersion, cloudFolderName: uploadRequest1.cloudFolderName, appMetaData: uploadRequest1.appMetaData)
+        
+        let expectedSizes = [
+            uploadRequest1.fileUUID: fileSize1,
+        ]
+        
+        self.getUploads(expectedFiles: [uploadRequest1], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes)
+    }
+    
     func testForOneUploadButFromWrongDeviceUUID() {
         let deviceUUID = PerfectLib.UUID().string
         _ = uploadTextFile(deviceUUID:deviceUUID)

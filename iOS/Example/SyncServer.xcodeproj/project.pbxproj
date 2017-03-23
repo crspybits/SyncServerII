@@ -14,6 +14,8 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
+		8324EE5A1E83675F000656AF /* Client_SyncServer_Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE591E83675E000656AF /* Client_SyncServer_Download.swift */; };
+		8324EE5C1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE5B1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift */; };
 		833729861E0F6BC0002CA164 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833729841E0F6BAE002CA164 /* Authentication.swift */; };
 		8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8344CC201E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift */; };
 		8344CC2B1E5FDD1800BEB263 /* Client_Downloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8344CC2A1E5FDD1800BEB263 /* Client_Downloads.swift */; };
@@ -69,6 +71,8 @@
 		607FACE51AFB9204008FA782 /* SyncServer_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SyncServer_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		758A92084EE224EB7F786904 /* Pods-SyncServer_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SyncServer_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SyncServer_Tests/Pods-SyncServer_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		8324EE591E83675E000656AF /* Client_SyncServer_Download.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_Download.swift; sourceTree = "<group>"; };
+		8324EE5B1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_DownloadDeletion.swift; sourceTree = "<group>"; };
 		833729841E0F6BAE002CA164 /* Authentication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
 		8344CC201E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_UploadDeletion.swift; sourceTree = "<group>"; };
 		8344CC2A1E5FDD1800BEB263 /* Client_Downloads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_Downloads.swift; sourceTree = "<group>"; };
@@ -185,6 +189,8 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				8324EE5B1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift */,
+				8324EE591E83675E000656AF /* Client_SyncServer_Download.swift */,
 				83F882141E6FB03D008F644A /* Client_SyncServer_UploadDeletion.swift */,
 				83F882121E6E5FDD008F644A /* Client_SyncServer_Sync.swift */,
 				83D95C9F1E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift */,
@@ -468,12 +474,14 @@
 				835C610C1E6504D4003E9AF8 /* Client_NetworkLoss.swift in Sources */,
 				83D95C9E1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift in Sources */,
 				83F37A1A1E44478100479175 /* FileIndex.swift in Sources */,
+				8324EE5C1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift in Sources */,
 				837244561E419EE600155E89 /* TestCase.swift in Sources */,
 				8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */,
 				83F37A201E46D40500479175 /* UploadFile.swift in Sources */,
 				83F882151E6FB03D008F644A /* Client_SyncServer_UploadDeletion.swift in Sources */,
 				837244541E419E7B00155E89 /* DoneUploads.swift in Sources */,
 				83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */,
+				8324EE5A1E83675F000656AF /* Client_SyncServer_Download.swift in Sources */,
 				835C60AC1E62ABF3003E9AF8 /* CoreDataTests.swift in Sources */,
 				83D95CA01E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift in Sources */,
 				833729861E0F6BC0002CA164 /* Authentication.swift in Sources */,

@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var tabBarDelegate = TabControllerDelegate()
+    var tabBarController:UITabBarController!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
@@ -34,21 +35,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         SyncServer.session.appLaunchSetup(withServerURL: serverURL, cloudFolderName:cloudFolderName)
         
-        let tabBarController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TabBarController") as! UITabBarController
+        tabBarController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TabBarController") as! UITabBarController
         tabBarController.delegate = tabBarDelegate
         window = UIWindow(frame: UIScreen.main.bounds)
         window!.rootViewController = tabBarController
         
-        enum Tabs : Int {
-            case signIn = 0
-            case images = 1
-        }
+        SignIn.session.googleSignIn.delegate = tabBarDelegate
         
         if SignIn.session.googleSignIn.userIsSignedIn {
-            tabBarController.selectedIndex = Tabs.images.rawValue
+            selectTabInController(tab: .images)
         }
 
         return true
+    }
+    
+    enum Tab : Int {
+        case signIn = 0
+        case images = 1
+    }
+    
+    func selectTabInController(tab:Tab) {
+        tabBarController.selectedIndex = tab.rawValue
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {

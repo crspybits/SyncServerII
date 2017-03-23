@@ -37,7 +37,6 @@ extension GoogleCreds {
         See also see http://stackoverflow.com/questions/35143283/google-drive-api-v3-migration
     */
     func listFiles(query:String? = nil, fieldsReturned:String? = nil, completion:@escaping (_ fileListing:JSON?, Swift.Error?)->()) {
-        let additionalHeaders = ["Authorization" : "Bearer \(self.accessToken!)"]
         
         var urlParameters = ""
 
@@ -58,7 +57,7 @@ extension GoogleCreds {
             urlParams = nil
         }
         
-        self.apiCall(method: "GET", path: "/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParams) { (apiResult, statusCode) in
+        self.apiCall(method: "GET", path: "/drive/v3/files", urlParameters:urlParams) { (apiResult, statusCode) in
             
             var error:ListFilesError?
             if statusCode != HTTPStatusCode.OK {
@@ -183,7 +182,6 @@ extension GoogleCreds {
         // It's not obvious from the docs, but you use the /drive/v3/files endpoint (metadata only) for creating folders. Also not clear from the docs, you need to give the Content-Type in the headers. See https://developers.google.com/drive/v3/web/manage-uploads
 
         let additionalHeaders = [
-            "Authorization" : "Bearer \(self.accessToken!)",
             "Content-Type": "application/json; charset=UTF-8"
         ]
     
@@ -274,7 +272,6 @@ extension GoogleCreds {
         
         let additionalHeaders = [
             "Content-Type": "application/json; charset=UTF-8",
-            "Authorization" : "Bearer \(self.accessToken!)"
         ]
         
         self.googleAPICall(method: "PATCH", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders, body: jsonString) { (json, error) in
@@ -296,7 +293,6 @@ extension GoogleCreds {
         
         let additionalHeaders = [
             "Content-Type": "application/json; charset=UTF-8",
-            "Authorization" : "Bearer \(self.accessToken!)"
         ]
         
         self.apiCall(method: "DELETE", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders) { (json, statusCode) in
@@ -355,7 +351,6 @@ extension GoogleCreds {
         let boundary = PerfectLib.UUID().string
 
         let additionalHeaders = [
-            "Authorization" : "Bearer \(self.accessToken!)",
             "Content-Type" : "multipart/related; boundary=\(boundary)"
         ]
         
@@ -476,11 +471,7 @@ extension GoogleCreds {
         
         let path = "/drive/v3/files/\(fileId)?alt=media"
         
-        let additionalHeaders = [
-            "Authorization" : "Bearer \(self.accessToken!)"
-        ]
-        
-        self.apiCall(method: "GET", path: path, additionalHeaders:additionalHeaders) { (apiResult, statusCode) in
+        self.apiCall(method: "GET", path: path) { (apiResult, statusCode) in
         
             if statusCode != HTTPStatusCode.OK {
                 completion(nil, DownloadSmallFileError.badStatusCode(statusCode))

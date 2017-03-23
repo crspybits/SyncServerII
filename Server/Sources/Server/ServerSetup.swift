@@ -342,7 +342,9 @@ private class RequestHandler : CredsDelegate {
     // MARK: CredsDelegate
     
     func saveToDatabase(creds:Creds) -> Bool {
-        return self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!)
+        let result = self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!)
+        Log.debug(message: "saveToDatabase: result: \(result)")
+        return result
     }
     
     // MARK:

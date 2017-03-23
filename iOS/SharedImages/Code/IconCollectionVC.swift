@@ -23,7 +23,6 @@ class IconCollectionVC : UICollectionViewCell {
         super.layoutSubviews()
         let uiImage = UIImage(contentsOfFile: image.url!.path!)
         self.imageView.image = uiImage
-
     }
     
     func remove() {

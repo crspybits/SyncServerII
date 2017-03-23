@@ -234,16 +234,19 @@ class GoogleCreds : Creds {
         
         self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
+                Log.error(message: "Bad status code: \(statusCode)")
                 completion(RefreshError.badStatusCode(statusCode))
                 return
             }
             
             guard apiResult != nil else {
+                Log.error(message: "API result was nil!")
                 completion(RefreshError.nilAPIResult)
                 return
             }
             
             guard case .json(let jsonResult) = apiResult! else {
+                Log.error(message: "Bad JSON result: \(apiResult)")
                 completion(RefreshError.badJSONResult)
                 return
             }
@@ -262,6 +265,7 @@ class GoogleCreds : Creds {
                 return
             }
             
+            Log.error(message: "Could not obtain parameter from JSON!")
             completion(RefreshError.couldNotObtainParameterFromJSON)
         }
     }
@@ -270,14 +274,27 @@ class GoogleCreds : Creds {
         additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:Body? = nil,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
-        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: additionalHeaders, urlParameters: urlParameters, body: body) { (apiCallResult, statusCode) in
+        var headers:[String:String] = additionalHeaders ?? [:]
+        
+        // We use this for some cases where we don't have an accessToken
+        if self.accessToken != nil {
+            headers["Authorization"] = "Bearer \(self.accessToken!)"
+        }
+
+        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body) { (apiCallResult, statusCode) in
         
             if statusCode == self.expiredAccessTokenHTTPCode && !self.alreadyRefreshed {
                 self.alreadyRefreshed = true
+                Log.info(message: "Attempting to refresh access token...")
+                
                 self.refresh() { error in
                     if error == nil {
-                        // Refresh was successful, try the operation again.
-                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: additionalHeaders, urlParameters: urlParameters, body: body, completion: completion)
+                        Log.info(message: "Successfully refreshed access token!")
+
+                        // Refresh was successful, update the authorization header and try the operation again.
+                        headers["Authorization" ] = "Bearer \(self.accessToken!)"
+
+                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, completion: completion)
                     }
                     else {
                         Log.error(message: "Failed to refresh access token: \(error)")

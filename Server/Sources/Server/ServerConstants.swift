@@ -105,17 +105,17 @@ public class ServerEndpoints {
     
     public static let uploadFile = ServerEndpoint("UploadFile", method: .post)
     
-    // Not using `needsLock` property here-- but doing the locking internally to the method: Because we have to access cloud storage to deal with upload deletions.
-    public static let doneUploads = ServerEndpoint("DoneUploads", method: .post)
-    
-    public static let downloadFile = ServerEndpoint("DownloadFile", method: .get)
-    
-    // Any time we're doing an operation constrained to the current masterVersion, getting the lock seems like a good idea.
+    // Any time we're doing an operation constrained to the current masterVersion, holding the lock seems like a good idea.
     public static let uploadDeletion = ServerEndpoint("UploadDeletion", method: .delete, needsLock:true)
 
     // TODO: *0* See also [1] in FileControllerTests.swift.
     // Seems unlikely that the collection of uploads will change while we are getting them (because they are specific to the userId and the deviceUUID), but grab the lock just in case.
     public static let getUploads = ServerEndpoint("GetUploads", method: .get, needsLock:true)
+    
+    // Not using `needsLock` property here-- but doing the locking internally to the method: Because we have to access cloud storage to deal with upload deletions.
+    public static let doneUploads = ServerEndpoint("DoneUploads", method: .post)
+
+    public static let downloadFile = ServerEndpoint("DownloadFile", method: .get)
 
     // TODO: *3* Need a new endpoint that enables clients to flush (i.e., delete) files in the Uploads table which are in the `uploaded` state. If this fails on deleting from cloud storage, then this should not probably cause a failure of the endpoint-- because we may be using as a cleanup and we want it to be robust.
 

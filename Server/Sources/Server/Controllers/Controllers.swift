@@ -40,7 +40,7 @@ public class Controllers {
         [UserController.self, UtilController.self, FileController.self]
     
     static func setup() -> Bool {
-        let db = Database()
+        let db = Database(showStartupInfo: true)
         for controller in list {
             if !controller.setup(db:db) {
                 Log.error("Could not setup controller: \(controller)")

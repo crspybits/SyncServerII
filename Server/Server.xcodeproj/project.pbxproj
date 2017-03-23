@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		44233C2FFA6A240E0F12C709 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 96DF434808F3CBABFA08AC02 /* Server.json */; };
 		58F3214D2F6328058A7D2032 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 57D58651D36513DE161986FA /* ServerTests.json */; };
+		8324EE601E837A6C000656AF /* FileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE5F1E837A6C000656AF /* FileController.swift */; };
+		8324EE621E837AA3000656AF /* FileController+UploadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE611E837AA3000656AF /* FileController+UploadFile.swift */; };
+		8324EE641E837B77000656AF /* FileController+UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE631E837B77000656AF /* FileController+UploadDeletion.swift */; };
+		8324EE661E837BE0000656AF /* FileController+DoneUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE651E837BE0000656AF /* FileController+DoneUploads.swift */; };
+		8324EE681E837CC1000656AF /* FileController+DownloadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE671E837CC1000656AF /* FileController+DownloadFile.swift */; };
+		8324EE6A1E837D6A000656AF /* FileController_UploadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE691E837D6A000656AF /* FileController_UploadTests.swift */; };
 		83F55F781E58C07100759578 /* FileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F761E58C02200759578 /* FileInfo.swift */; };
 		83F55F7B1E58C43100759578 /* GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F791E58C2CB00759578 /* GetUploads.swift */; };
 		83F55F7D1E58C70E00759578 /* FileControllerTests_GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */; };
@@ -252,7 +258,6 @@
 		OBJ_700 /* GoogleCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_208 /* GoogleCreds.swift */; };
 		OBJ_701 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_210 /* Constants.swift */; };
 		OBJ_702 /* Controllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_211 /* Controllers.swift */; };
-		OBJ_703 /* FileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_212 /* FileController.swift */; };
 		OBJ_704 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_213 /* Types.swift */; };
 		OBJ_705 /* UserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_214 /* UserController.swift */; };
 		OBJ_706 /* UtilController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_215 /* UtilController.swift */; };
@@ -1070,6 +1075,12 @@
 
 /* Begin PBXFileReference section */
 		57D58651D36513DE161986FA /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		8324EE5F1E837A6C000656AF /* FileController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileController.swift; sourceTree = "<group>"; };
+		8324EE611E837AA3000656AF /* FileController+UploadFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileController+UploadFile.swift"; sourceTree = "<group>"; };
+		8324EE631E837B77000656AF /* FileController+UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileController+UploadDeletion.swift"; sourceTree = "<group>"; };
+		8324EE651E837BE0000656AF /* FileController+DoneUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileController+DoneUploads.swift"; sourceTree = "<group>"; };
+		8324EE671E837CC1000656AF /* FileController+DownloadFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileController+DownloadFile.swift"; sourceTree = "<group>"; };
+		8324EE691E837D6A000656AF /* FileController_UploadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileController_UploadTests.swift; sourceTree = "<group>"; };
 		83F55F761E58C02200759578 /* FileInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileInfo.swift; sourceTree = "<group>"; };
 		83F55F791E58C2CB00759578 /* GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUploads.swift; sourceTree = "<group>"; };
 		83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileControllerTests_GetUploads.swift; sourceTree = "<group>"; };
@@ -1184,7 +1195,6 @@
 		OBJ_208 /* GoogleCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCreds.swift; sourceTree = "<group>"; };
 		OBJ_210 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_211 /* Controllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controllers.swift; sourceTree = "<group>"; };
-		OBJ_212 /* FileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController.swift; sourceTree = "<group>"; };
 		OBJ_213 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		OBJ_214 /* UserController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserController.swift; sourceTree = "<group>"; };
 		OBJ_215 /* UtilController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilController.swift; sourceTree = "<group>"; };
@@ -1569,6 +1579,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8324EE5E1E837A6C000656AF /* FileController */ = {
+			isa = PBXGroup;
+			children = (
+				8324EE5F1E837A6C000656AF /* FileController.swift */,
+				8324EE611E837AA3000656AF /* FileController+UploadFile.swift */,
+				8324EE631E837B77000656AF /* FileController+UploadDeletion.swift */,
+				8324EE651E837BE0000656AF /* FileController+DoneUploads.swift */,
+				8324EE671E837CC1000656AF /* FileController+DownloadFile.swift */,
+			);
+			path = FileController;
+			sourceTree = "<group>";
+		};
 		OBJ_107 /* bodyParser */ = {
 			isa = PBXGroup;
 			children = (
@@ -1784,10 +1806,10 @@
 			children = (
 				OBJ_210 /* Constants.swift */,
 				OBJ_211 /* Controllers.swift */,
-				OBJ_212 /* FileController.swift */,
 				OBJ_213 /* Types.swift */,
 				OBJ_214 /* UserController.swift */,
 				OBJ_215 /* UtilController.swift */,
+				8324EE5E1E837A6C000656AF /* FileController */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -1878,6 +1900,7 @@
 		OBJ_244 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				8324EE691E837D6A000656AF /* FileController_UploadTests.swift */,
 				83F55F8A1E59220400759578 /* FileControllerTests_DeleteFile.swift */,
 				83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */,
 				83F55F7C1E58C70E00759578 /* FileControllerTests_GetUploads.swift */,
@@ -2959,16 +2982,18 @@
 				OBJ_693 /* ServerConstants.swift in Sources */,
 				OBJ_694 /* ServerMain.swift in Sources */,
 				OBJ_695 /* ServerRoutes.swift in Sources */,
+				8324EE601E837A6C000656AF /* FileController.swift in Sources */,
 				83F55F781E58C07100759578 /* FileInfo.swift in Sources */,
 				OBJ_696 /* ServerSetup.swift in Sources */,
 				OBJ_697 /* Creds.swift in Sources */,
 				OBJ_698 /* Filenaming.swift in Sources */,
 				83F55F7B1E58C43100759578 /* GetUploads.swift in Sources */,
+				8324EE681E837CC1000656AF /* FileController+DownloadFile.swift in Sources */,
 				OBJ_699 /* GoogleCreds+GoogleDrive.swift in Sources */,
 				OBJ_700 /* GoogleCreds.swift in Sources */,
 				OBJ_701 /* Constants.swift in Sources */,
+				8324EE661E837BE0000656AF /* FileController+DoneUploads.swift in Sources */,
 				OBJ_702 /* Controllers.swift in Sources */,
-				OBJ_703 /* FileController.swift in Sources */,
 				OBJ_704 /* Types.swift in Sources */,
 				OBJ_705 /* UserController.swift in Sources */,
 				OBJ_706 /* UtilController.swift in Sources */,
@@ -2984,6 +3009,7 @@
 				OBJ_715 /* AddUser.swift in Sources */,
 				OBJ_716 /* CheckCreds.swift in Sources */,
 				OBJ_717 /* CheckPrimaryCreds.swift in Sources */,
+				8324EE641E837B77000656AF /* FileController+UploadDeletion.swift in Sources */,
 				OBJ_718 /* DoneUploads.swift in Sources */,
 				OBJ_719 /* DownloadFile.swift in Sources */,
 				OBJ_720 /* FileIndex.swift in Sources */,
@@ -2991,6 +3017,7 @@
 				OBJ_722 /* RemoveUser.swift in Sources */,
 				OBJ_723 /* RequestMessage.swift in Sources */,
 				OBJ_724 /* ResponseMessage.swift in Sources */,
+				8324EE621E837AA3000656AF /* FileController+UploadFile.swift in Sources */,
 				OBJ_725 /* UploadFile.swift in Sources */,
 				OBJ_726 /* NSObject+Extras.swift in Sources */,
 				OBJ_727 /* String+Extras.swift in Sources */,
@@ -3015,6 +3042,7 @@
 				OBJ_779 /* MessageTests.swift in Sources */,
 				OBJ_780 /* SepecificDatabaseTests.swift in Sources */,
 				OBJ_781 /* ServerTestCase.swift in Sources */,
+				8324EE6A1E837D6A000656AF /* FileController_UploadTests.swift in Sources */,
 				OBJ_782 /* UserController.swift in Sources */,
 				83F55F7D1E58C70E00759578 /* FileControllerTests_GetUploads.swift in Sources */,
 				OBJ_783 /* UtilsTests.swift in Sources */,

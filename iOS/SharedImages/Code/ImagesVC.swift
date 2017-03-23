@@ -157,7 +157,6 @@ extension ImagesVC : UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! IconCollectionVC
         cell.syncController = syncController
         cell.image = self.coreDataSource.object(at: indexPath) as! Image

@@ -21,39 +21,7 @@ class FileControllerTests: ServerTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    func testUploadTextFile() {
-        _ = uploadTextFile()
-    }
-    
-    func testUploadJPEGFile() {
-        _ = uploadJPEGFile()
-    }
-    
-    func testUploadTextAndJPEGFile() {
-        let deviceUUID = PerfectLib.UUID().string
-        _ = uploadTextFile(deviceUUID:deviceUUID)
-        _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
-    }
-    
-    // TODO: *0* Test uploading the same file twice.
-    // This is commented out right now because this test fails currently-- i.e., we're not allowing upload of the same file more than once.
-#if false
-    func testUploadingSameFileTwiceWorks() {
-        let deviceUUID = PerfectLib.UUID().string
-        let (request, _) = uploadTextFile(deviceUUID:deviceUUID)
-        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: request.fileUUID, addUser: false, fileVersion: request.fileVersion, masterVersion: request.masterVersion, cloudFolderName: request.cloudFolderName, appMetaData: request.appMetaData)
-    }
-#endif
-
-    func testUploadTextFileWithStringWithSpacesAppMetaData() {
-        _ = uploadTextFile(appMetaData:"A Simple String")
-    }
-    
-    func testUploadTextFileWithJSONAppMetaData() {
-        _ = uploadTextFile(appMetaData:"{ \"foo\": \"bar\" }")
-    }
-        
+      
     // A test that causes a conflict with the master version on the server. Presumably this needs to take the form of (a) device1 uploading a file to the server, (b) device2 uploading a file, and finishing that upload (`DoneUploads` endpoint), and (c) device1 uploading a second file using its original master version.
     func testMasterVersionConflict1() {
         let deviceUUID1 = PerfectLib.UUID().string
