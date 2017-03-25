@@ -103,6 +103,10 @@ public protocol SyncServerDelegate : class {
 
     // Reports events. Useful for testing and UI.
     func syncServerEventOccurred(event:SyncEvent)
+    
+#if DEBUG
+    func syncServerEventSingleUploadCompleted(next:()->())
+#endif
 }
 
 public class SyncServer {

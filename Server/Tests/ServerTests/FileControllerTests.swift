@@ -48,38 +48,6 @@ class FileControllerTests: ServerTestCase {
         self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1)
     }
 
-    // MARK: DoneUploads tests
-    
-    func testDoneUploadsWithNoUploads() {
-        let deviceUUID = PerfectLib.UUID().string
-        self.addNewUser(deviceUUID:deviceUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 0)
-    }
-    
-    func testDoneUploadsWithSingleUpload() {
-        let deviceUUID = PerfectLib.UUID().string
-        _ = uploadTextFile(deviceUUID:deviceUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
-    }
-    
-    func testDoneUploadsWithTwoUploads() {
-        let deviceUUID = PerfectLib.UUID().string
-        _ = uploadTextFile(deviceUUID:deviceUUID)
-        _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
-    }
-    
-    func testDoneUploadsThatUpdatesFileVersion() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileUUID = PerfectLib.UUID().string
-        
-        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
-        
-        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:false, fileVersion:1, masterVersion: 1)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1)
-    }
-    
     func testFileIndexWithNoFiles() {
         let deviceUUID = PerfectLib.UUID().string
 

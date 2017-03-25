@@ -21,6 +21,7 @@
 		83F55F7F1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */; };
 		83F55F891E59158C00759578 /* UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F881E59158C00759578 /* UploadDeletion.swift */; };
 		83F55F8B1E59220400759578 /* FileControllerTests_DeleteFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F8A1E59220400759578 /* FileControllerTests_DeleteFile.swift */; };
+		83FA448D1E84BD61002A9BAB /* FileController_DoneUploadsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FA448C1E84BD61002A9BAB /* FileController_DoneUploadsTests.swift */; };
 		OBJ_285 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_286 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
 		OBJ_287 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* File.swift */; };
@@ -1087,6 +1088,7 @@
 		83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_Uploads.swift; sourceTree = "<group>"; };
 		83F55F881E59158C00759578 /* UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadDeletion.swift; sourceTree = "<group>"; };
 		83F55F8A1E59220400759578 /* FileControllerTests_DeleteFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileControllerTests_DeleteFile.swift; sourceTree = "<group>"; };
+		83FA448C1E84BD61002A9BAB /* FileController_DoneUploadsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileController_DoneUploadsTests.swift; sourceTree = "<group>"; };
 		96DF434808F3CBABFA08AC02 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
@@ -1900,6 +1902,7 @@
 		OBJ_244 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83FA448C1E84BD61002A9BAB /* FileController_DoneUploadsTests.swift */,
 				8324EE691E837D6A000656AF /* FileController_UploadTests.swift */,
 				83F55F8A1E59220400759578 /* FileControllerTests_DeleteFile.swift */,
 				83F55F7E1E58C7E600759578 /* SpecificDatabaseTests_Uploads.swift */,
@@ -3046,6 +3049,7 @@
 				OBJ_782 /* UserController.swift in Sources */,
 				83F55F7D1E58C70E00759578 /* FileControllerTests_GetUploads.swift in Sources */,
 				OBJ_783 /* UtilsTests.swift in Sources */,
+				83FA448D1E84BD61002A9BAB /* FileController_DoneUploadsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,7 +14,7 @@ import Kitura
 import PerfectLib
 #endif
 
-// As part of normal processing, increments the current master version for the user.
+// As part of normal processing, increments the current master version for the user. Calling DoneUploads a second time (immediately after the first) results in 0 files being transferred. i.e., `numberUploadsTransferred` will be 0 for the result of the second operation. This is not considered an error, and the masterVersion is still incremented in this case.
 
 class DoneUploadsRequest : NSObject, RequestMessage {
     // MARK: Properties for use in request message.

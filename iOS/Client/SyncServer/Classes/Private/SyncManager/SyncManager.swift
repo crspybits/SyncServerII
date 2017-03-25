@@ -141,9 +141,17 @@ class SyncManager {
             case .fileUploaded(let uft):
                 let attr = SyncAttributes(fileUUID: uft.fileUUID, mimeType:uft.mimeType!)
                 EventDesired.reportEvent(.singleFileUploadComplete(attr: attr), mask: self.desiredEvents, delegate: self.delegate)
+                
                 // Recursively see if there is a next upload to do.
-                self.checkForPendingUploads()
-
+                if self.delegate == nil {
+                    self.checkForPendingUploads()
+                }
+                else {
+                    self.delegate!.syncServerEventSingleUploadCompleted(next: {
+                        self.checkForPendingUploads()
+                    })
+                }
+                
             case .uploadDeletion(let uft):
                 EventDesired.reportEvent(.singleUploadDeletionComplete(fileUUID: uft.fileUUID), mask: self.desiredEvents, delegate: self.delegate)
                 // Recursively see if there is a next upload to do.
@@ -177,6 +185,7 @@ class SyncManager {
     private func doneUploads() {
         Upload.session.doneUploads { completionResult in
             switch completionResult {
+            // `numTransferred` may not be accurrate in the case of retries/recovery.
             case .doneUploads(numberTransferred: let numTransferred):
                 let uploadQueue = Upload.getHeadSyncQueue()!
                 

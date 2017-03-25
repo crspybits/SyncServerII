@@ -39,13 +39,15 @@ class ServerAPI_UploadFile: TestCase {
         _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", expectError: true)
     }
     
+    // This should not fail because the second attempt doesn't add a second upload deletion-- the second attempt is to allow for recovery/retries.
     func testUploadTwoFilesWithSameUUIDFails() {
         let masterVersion = getMasterVersion()
         let fileUUID = UUID().uuidString
         let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
         
         _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion)
-        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion, expectError: true)
+        
+        _ = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion)
     }
     
     func testParallelUploadsWork() {

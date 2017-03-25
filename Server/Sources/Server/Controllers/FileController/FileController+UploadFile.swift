@@ -41,8 +41,6 @@ extension FileController {
             
             // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
             
-            Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
-            
             // I'm going to create the entry in the Upload repo first because otherwise, there's a (albeit unlikely) race condition-- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload table entry will be the gatekeeper.
             
             let upload = Upload()
@@ -74,6 +72,7 @@ extension FileController {
                 
                 switch lookupResult {
                 case .found(let model):
+                    Log.info(message: "File was already present: Not uploading again.")
                     let upload = model as! Upload
                     let response = UploadFileResponse()!
                     response.size = Int64(upload.fileSizeBytes!)
@@ -99,6 +98,8 @@ extension FileController {
                 params.completion(nil)
                 return
             }
+            
+            Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
             
             googleCreds.uploadSmallFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
                 if error == nil {

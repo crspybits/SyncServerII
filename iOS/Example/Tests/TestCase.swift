@@ -28,6 +28,8 @@ class TestCase: XCTestCase {
         Log.error("syncServerErrorOccurred: \(error)")
     }
     
+    var syncServerEventSingleUploadCompleted:((_ next:()->())->())?
+    
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {
         let plist = try! PlistDictLoader(plistFileNameInBundle: Consts.serverPlistFile)
@@ -141,7 +143,7 @@ class TestCase: XCTestCase {
     }
     
     // Returns the file size uploaded
-    func uploadFile(fileURL:URL, mimeType:String, fileUUID:String? = nil, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil) -> (fileSize: Int64, ServerAPI.File)? {
+    func uploadFile(fileURL:URL, mimeType:String, fileUUID:String? = nil, serverMasterVersion:MasterVersionInt = 0, expectError:Bool = false, appMetaData:String? = nil, theDeviceUUID:String? = nil) -> (fileSize: Int64, ServerAPI.File)? {
 
         var uploadFileUUID:String
         if fileUUID == nil {
@@ -150,7 +152,15 @@ class TestCase: XCTestCase {
             uploadFileUUID = fileUUID!
         }
         
-        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: appMetaData, fileVersion: 0)
+        var finalDeviceUUID:String
+        if theDeviceUUID == nil {
+            finalDeviceUUID = deviceUUID.uuidString
+        }
+        else {
+            finalDeviceUUID = theDeviceUUID!
+        }
+        
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: finalDeviceUUID, appMetaData: appMetaData, fileVersion: 0)
         
         // Just to get the size-- this is redundant with the file read in ServerAPI.session.uploadFile
         guard let fileData = try? Data(contentsOf: file.localURL) else {
@@ -550,5 +560,9 @@ extension TestCase : SyncServerDelegate {
     
     func syncServerErrorOccurred(error:Error) {
         syncServerErrorOccurred(error)
+    }
+    
+    func syncServerEventSingleUploadCompleted(next:()->()) {
+        syncServerEventSingleUploadCompleted?(next)
     }
 }

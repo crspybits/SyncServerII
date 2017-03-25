@@ -26,6 +26,32 @@ class ServerAPI_UploadDeletion: TestCase {
         uploadDeletion()
     }
     
+    func testThatTwoUploadDeletionsOfTheSameFileWork() {
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        guard let (_, file) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        // for the file upload
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+
+        let fileToDelete = ServerAPI.FileToDelete(fileUUID: file.fileUUID, fileVersion: file.fileVersion)
+        uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion+1)
+
+        uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion+1)
+
+        getUploads(expectedFiles: [
+            (fileUUID: fileUUID, fileSize: nil)
+        ]) { fileInfo in
+            XCTAssert(fileInfo.deleted)
+        }
+    }
+    
     // TODO: *0* Do an upload deletion, then a second upload deletion with the same file-- make sure the 2nd one fails.
     
     func testThatActualDeletionInDebugWorks() {

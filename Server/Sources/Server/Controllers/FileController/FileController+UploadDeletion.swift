@@ -73,6 +73,8 @@ extension FileController {
             }
 #endif
 
+            var errorString:String?
+            
             // Create entry in Upload table.
             let upload = Upload()
             upload.fileUUID = uploadDeletionRequest.fileUUID
@@ -81,16 +83,30 @@ extension FileController {
             upload.state = .toDeleteFromFileIndex
             upload.userId = params.currentSignedInUser!.userId
             
-            if case .success(_) = params.repos.upload.add(upload: upload) {
+            let uploadAddResult = params.repos.upload.add(upload: upload)
+            
+            switch uploadAddResult {
+            case .success(_):
                 let response = UploadDeletionResponse()!
                 params.completion(response)
                 return
-            }
-            else {
-                Log.error(message: "Unable to add UploadDeletion to Upload table")
-                params.completion(nil)
+                
+            case .duplicateEntry:
+                Log.info(message: "File was already marked for deletion: Not adding again.")
+                let response = UploadDeletionResponse()!
+                params.completion(response)
                 return
+                
+            case .aModelValueWasNil:
+                errorString = "A model value was nil!"
+                
+            case .otherError(let error):
+                errorString = error
             }
+
+            Log.error(message: errorString!)
+            params.completion(nil)
+            return
         }
     }
     

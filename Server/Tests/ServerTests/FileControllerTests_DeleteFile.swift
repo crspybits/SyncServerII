@@ -116,6 +116,26 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
     }
     
     func testThatUploadDeletionTwiceOfSameFileWorks() {
+        let deviceUUID = PerfectLib.UUID().string
+        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + 1
+        ])!
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
+
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
+
+        let expectedDeletionState = [
+            uploadRequest.fileUUID: true,
+        ]
+        
+        self.getUploads(expectedFiles: [uploadRequest], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
     }
     
     func testThatUploadDeletionFollowedByDoneUploadsActuallyDeletes() {

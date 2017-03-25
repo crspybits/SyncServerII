@@ -240,8 +240,6 @@ class ServerAPI {
     func doneUploads(serverMasterVersion:MasterVersionInt!, completion:((DoneUploadsResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.doneUploads
         
-        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
-
         var params = [String : Any]()
         params[DoneUploadsRequest.masterVersionKey] = serverMasterVersion
         
@@ -302,8 +300,6 @@ class ServerAPI {
     func downloadFile(file: Filenaming, serverMasterVersion:MasterVersionInt!, completion:((DownloadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.downloadFile
         
-        let deviceUUID = delegate.deviceUUID(forServerAPI: self).uuidString
-
         var params = [String : Any]()
         params[DownloadFileRequest.masterVersionKey] = serverMasterVersion
         params[DownloadFileRequest.fileUUIDKey] = file.fileUUID

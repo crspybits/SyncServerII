@@ -45,9 +45,18 @@ extension Repository {
         let query = "delete from \(tableName) where " + lookupConstraint(key: key)
         
         if db.connection.query(statement: query) {
-            Log.info(message: "Successfully removed row(s) from \(tableName): \(key)")
-            return .removed(
-                numberRows:Int32(db.connection.numberAffectedRows()))
+            let numberRows = db.connection.numberAffectedRows()
+            
+            var initialMessage:String
+            if numberRows == 0 {
+                initialMessage = "Did not remove any rows"
+            }
+            else {
+                initialMessage = "Successfully removed \(numberRows) row(s)"
+            }
+            Log.info(message: "\(initialMessage) from \(tableName): \(key)")
+            
+            return .removed(numberRows:Int32(numberRows))
         }
         else {
             let error = db.error

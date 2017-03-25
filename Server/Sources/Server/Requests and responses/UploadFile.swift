@@ -14,11 +14,9 @@ import PerfectLib
 import Kitura
 #endif
 
-// TODO
-// If an attempt is made to upload the same file more than once, the second (or third etc.) attempts don't actually upload the file to cloud storage-- if we have an entry in the Uploads repository. 
-// We don't consider this an error to help in error recovery.
-// We don't actually upload the file more than once to the cloud service because Google Drive doesn't play well with uploading the same named file more than once, and to help in error recovery, plus the design of the server only makes an Uploads entry if we have successfully uploaded the file to the cloud service.
-
+/* If an attempt is made to upload the same file more than once, the second (or third etc.) attempts don't actually upload the file to cloud storage-- if we have an entry in the Uploads repository. The effect from the POV of the caller is same as if the file was uploaded. We don't consider this an error to help in error recovery.
+(We don't actually upload the file more than once to the cloud service because Google Drive doesn't play well with uploading the same named file more than once, and to help in error recovery, plus the design of the server only makes an Uploads entry if we have successfully uploaded the file to the cloud service.)
+*/
 class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     // MARK: Properties for use in request message.
     
