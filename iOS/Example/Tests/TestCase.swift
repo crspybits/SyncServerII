@@ -16,7 +16,7 @@ class TestCase: XCTestCase {
     var authTokens = [String:String]()
     
     var deviceUUID = Foundation.UUID()
-    var deviceUUIDCalled:Bool = false
+    var deviceUUIDUsed:Bool = false
     
     var testLockSync: TimeInterval?
     var testLockSyncCalled:Bool = false
@@ -528,6 +528,7 @@ extension TestCase : ServerNetworkingAuthentication {
         }
         
         result[ServerConstants.httpRequestDeviceUUID] = self.deviceUUID.uuidString
+        deviceUUIDUsed = true
         
         return result
     }
@@ -540,7 +541,6 @@ extension TestCase : ServerAPIDelegate {
     }
     
     func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {
-        deviceUUIDCalled = true
         return deviceUUID
     }
 }

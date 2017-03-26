@@ -133,7 +133,7 @@ class ServerAPI_DoneUploads: TestCase {
         
         deviceUUID = deviceUUID1 // for ServerAPIDelegate
         testLockSync = 5
-        deviceUUIDCalled = false
+        deviceUUIDUsed = false
         
         // A lock will be obtained by this first request.
         ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) {
@@ -157,7 +157,7 @@ class ServerAPI_DoneUploads: TestCase {
         TimedCallback.withDuration(1.0) {
         
             // The first request should have started, and obtained the lock. This second request will block until the first is done, because of the transactional implementation of the server.
-            XCTAssert(self.deviceUUIDCalled)
+            XCTAssert(self.deviceUUIDUsed)
 
             self.deviceUUID = deviceUUID2
             self.testLockSync = nil

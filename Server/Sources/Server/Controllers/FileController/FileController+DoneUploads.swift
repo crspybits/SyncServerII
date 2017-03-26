@@ -35,7 +35,7 @@ extension FileController {
             
         case .masterVersionUpdate(let updatedMasterVersion):
             // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
-
+            Log.warning(message: "Master version update: \(updatedMasterVersion)")
             response = DoneUploadsResponse()
             response!.masterVersionUpdate = updatedMasterVersion
             params.completion(response)
