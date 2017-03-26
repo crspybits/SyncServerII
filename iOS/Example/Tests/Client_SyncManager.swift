@@ -134,6 +134,7 @@ class Client_SyncManager: TestCase {
         downloadTwoFilesUsingStart(file1: file1, file2: file2, masterVersion: masterVersion)
     }
     
+    // Simulation of master version change on server-- by changing it locally.
     func testWhereMasterVersionChangesMidwayThroughTwoDownloads() {
         var numberEvents = 0
  

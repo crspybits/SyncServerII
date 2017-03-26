@@ -86,8 +86,11 @@ extension FileController {
             
             // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex. This is because the file, once stored, is really in a specific place in cloud storage.
             
+            // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
+            let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:fileIndexObj!.deviceUUID)
+            
             googleCreds.downloadSmallFile(
-                cloudFolderName: fileIndexObj!.cloudFolderName, cloudFileName: fileIndexObj!.cloudFileName(deviceUUID:params.deviceUUID!), mimeType: fileIndexObj!.mimeType) { (data, error) in
+                cloudFolderName: fileIndexObj!.cloudFolderName, cloudFileName: cloudFileName, mimeType: fileIndexObj!.mimeType) { (data, error) in
                 if error == nil {
                     if Int64(data!.count) != fileIndexObj!.fileSizeBytes {
                         Log.error(message: "Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")

@@ -147,8 +147,10 @@ class SyncManager {
                     self.checkForPendingUploads()
                 }
                 else {
-                    self.delegate!.syncServerEventSingleUploadCompleted(next: {
-                        self.checkForPendingUploads()
+                    Thread.runSync(onMainThread: {
+                        self.delegate!.syncServerEventSingleUploadCompleted(next: {
+                            self.checkForPendingUploads()
+                        })
                     })
                 }
                 

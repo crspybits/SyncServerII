@@ -409,7 +409,7 @@ extension GoogleCreds {
     
     enum SearchForFileError : Swift.Error {
     case cloudFolderDoesNotExist
-    case cloudFileDoesNotExist
+    case cloudFileDoesNotExist(cloudFileName:String)
     }
     
     func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
@@ -425,7 +425,7 @@ extension GoogleCreds {
                 let searchType = SearchType.file(mimeType: mimeType, parentFolderId: result!.itemId)
                 self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
                     if result == nil {
-                        completion(nil, SearchForFileError.cloudFileDoesNotExist)
+                        completion(nil, SearchForFileError.cloudFileDoesNotExist(cloudFileName: cloudFileName))
                     }
                     else {
                         completion(result!.itemId, nil)

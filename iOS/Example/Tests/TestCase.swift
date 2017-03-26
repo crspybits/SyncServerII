@@ -28,7 +28,7 @@ class TestCase: XCTestCase {
         Log.error("syncServerErrorOccurred: \(error)")
     }
     
-    var syncServerEventSingleUploadCompleted:((_ next:()->())->())?
+    var syncServerEventSingleUploadCompleted:((_ next: @escaping ()->())->())?
     
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {
@@ -562,7 +562,7 @@ extension TestCase : SyncServerDelegate {
         syncServerErrorOccurred(error)
     }
     
-    func syncServerEventSingleUploadCompleted(next:()->()) {
+    func syncServerEventSingleUploadCompleted(next: @escaping ()->()) {
         if syncServerEventSingleUploadCompleted == nil {
             next()
         }

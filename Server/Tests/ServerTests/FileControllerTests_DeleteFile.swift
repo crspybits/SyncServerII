@@ -253,7 +253,12 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
             
             googleCreds.searchFor(cloudFileName: cloudFileName, inCloudFolder: uploadRequest1.cloudFolderName, fileMimeType: uploadRequest1.mimeType) { (cloudFileId, error) in
                 XCTAssert(error != nil)
-                XCTAssert(error as! GoogleCreds.SearchForFileError == GoogleCreds.SearchForFileError.cloudFileDoesNotExist)
+                
+                guard case GoogleCreds.SearchForFileError.cloudFileDoesNotExist(_) = error as! GoogleCreds.SearchForFileError else {
+                    XCTFail()
+                    return
+                }
+                
                 XCTAssert(cloudFileId == nil)
                 expectation.fulfill()
             }
