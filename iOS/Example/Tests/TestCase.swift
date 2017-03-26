@@ -563,6 +563,11 @@ extension TestCase : SyncServerDelegate {
     }
     
     func syncServerEventSingleUploadCompleted(next:()->()) {
-        syncServerEventSingleUploadCompleted?(next)
+        if syncServerEventSingleUploadCompleted == nil {
+            next()
+        }
+        else {
+            syncServerEventSingleUploadCompleted!(next)
+        }
     }
 }

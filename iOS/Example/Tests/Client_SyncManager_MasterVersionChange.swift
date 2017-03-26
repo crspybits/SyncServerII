@@ -66,7 +66,9 @@ class Client_SyncManager_MasterVersionChange: TestCase {
                 XCTFail()
             }
         }
-        
+    
+        let previousSyncServerEventSingleUploadCompleted = self.syncServerEventSingleUploadCompleted
+    
         syncServerEventSingleUploadCompleted = {next in
             // A single upload was completed. Let's upload another file by "another" client. 
             // TODO: This is actually going to force a download by our client. What do we have to do here to accomodate that?
@@ -93,7 +95,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             
             self.deviceUUID = previousDeviceUUID
             
-            self.syncServerEventSingleUploadCompleted = nil
+            self.syncServerEventSingleUploadCompleted = previousSyncServerEventSingleUploadCompleted
             next()
         }
         
