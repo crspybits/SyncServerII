@@ -224,7 +224,7 @@ private class RequestHandler : CredsDelegate {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try Creds.toCreds(accountType: currentSignedInUser!.accountType, fromJSON: currentSignedInUser!.creds, delegate:self)
+                    dbCreds = try Creds.toCreds(accountType: currentSignedInUser!.accountType, fromJSON: currentSignedInUser!.creds, user: .user(currentSignedInUser!), delegate:self)
                 } catch (let error) {
                     errorString = "\(error)"
                 }
@@ -258,9 +258,20 @@ private class RequestHandler : CredsDelegate {
             }
         }
         else {
-            assert(authenticationLevel! == .primary || authenticationLevel! == .secondary)
-
-            guard let profileCreds = Creds.toCreds(fromProfile: profile!, delegate:self) else {
+            var credsUser:CredsUser?
+            switch authenticationLevel! {
+            case .primary:
+                // We don't have a userId yet for this user.
+                break
+                
+            case .secondary:
+                credsUser = .user(self.currentSignedInUser!)
+                
+            case .none:
+                assertionFailure("Should never get here with authenticationLevel == .none!")
+            }
+            
+            guard let profileCreds = Creds.toCreds(fromProfile: profile!, user:credsUser, delegate:self) else {
                 failWithError(message: "Failed converting to Creds from profile", statusCode: .unauthorized)
                 return
             }
@@ -339,8 +350,8 @@ private class RequestHandler : CredsDelegate {
     
     // MARK: CredsDelegate
     
-    func saveToDatabase(creds:Creds) -> Bool {
-        let result = self.repositories.user.updateCreds(creds: creds, forUser: self.currentSignedInUser!)
+    func saveToDatabase(creds:Creds, user:CredsUser) -> Bool {
+        let result = self.repositories.user.updateCreds(creds: creds, forUser: user)
         Log.debug(message: "saveToDatabase: result: \(result)")
         return result
     }

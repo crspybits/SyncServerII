@@ -1,5 +1,5 @@
 //
-//  Google.swift
+//  Creds.swift
 //  Server
 //
 //  Created by Christopher Prince on 12/22/16.
@@ -13,27 +13,33 @@ import PerfectLib
 import KituraNet
 import SwiftyJSON
 
-public protocol CredsDelegate : class {
+protocol CredsDelegate : class {
 // This is delegated because (a) it enables me to only sometimes allow Creds to save to the database, and (b) because knowledge of how to save to a database seems outside of the responsibilities of `Creds`. Returns false iff an error occurred on database save.
-func saveToDatabase(creds:Creds) -> Bool
+func saveToDatabase(creds:Creds, user:CredsUser) -> Bool
+}
+    
+enum CredsUser {
+case user(User) // use this if we have it.
+case userId(UserId) // and this if we don't.
 }
 
 public class Creds {
     var accountType:AccountType!
     var baseURL:String?
     weak var delegate:CredsDelegate?
+    var user:CredsUser!
     
     func toJSON() -> String? {
         assert(false, "Unimplemented")
         return nil
     }
     
-    class func fromProfile(profile:UserProfile, delegate:CredsDelegate?) -> Creds? {
+    class func fromProfile(profile:UserProfile, user:CredsUser?, delegate:CredsDelegate?) -> Creds? {
         assert(false, "Unimplemented")
         return nil
     }
     
-    class func fromJSON(s:String, delegate:CredsDelegate?) throws -> Creds? {
+    class func fromJSON(s:String, user:CredsUser?, delegate:CredsDelegate?) throws -> Creds? {
         assert(false, "Unimplemented")
         return nil
     }
@@ -156,10 +162,10 @@ public class Creds {
 }
 
 extension Creds {
-    static func toCreds(accountType:AccountType, fromJSON json:String, delegate:CredsDelegate?) throws -> Creds? {
+    static func toCreds(accountType:AccountType, fromJSON json:String, user:CredsUser?, delegate:CredsDelegate?) throws -> Creds? {
         switch accountType {
         case .Google:
-            return try GoogleCreds.fromJSON(s: json, delegate:delegate)
+            return try GoogleCreds.fromJSON(s: json, user:user, delegate:delegate)
         }
     }
     
@@ -170,7 +176,7 @@ extension Creds {
         
         switch accountType {
         case .Google:
-            if let creds = GoogleCreds.fromProfile(profile: profile, delegate:nil) {
+            if let creds = GoogleCreds.fromProfile(profile: profile, user:nil, delegate:nil) {
                 return creds.toJSON()
             }
             else {
@@ -179,14 +185,14 @@ extension Creds {
         }
     }
     
-    class func toCreds(fromProfile profile:UserProfile, delegate:CredsDelegate?) -> Creds? {
+    class func toCreds(fromProfile profile:UserProfile, user:CredsUser?, delegate:CredsDelegate?) -> Creds? {
         guard let accountType = AccountType.fromSpecificCredsType(specificCreds: profile.accountSpecificCreds!) else {
             return nil
         }
         
         switch accountType {
         case .Google:
-            if let creds = GoogleCreds.fromProfile(profile: profile, delegate:delegate) {
+            if let creds = GoogleCreds.fromProfile(profile: profile, user:user, delegate:delegate) {
                 return creds
             }
             else {

@@ -94,20 +94,14 @@ class UserController : ControllerProtocol {
             return
         }
         
+        // Previously, we won't have established a CredsUser for these Creds-- because this is a new user.
+        params.profileCreds!.user = .userId(userId!)
+        
         params.profileCreds!.generateTokens() { successGeneratingTokens, error in
             guard error == nil else {
                 Log.error(message: "Failed attempting to generate tokens: \(error)")
                 params.completion(nil)
                 return
-            }
-            
-            // Not going to worry about success generating tokens because this may be done later by a CheckCreds, and this makes testing easier too.
-            if successGeneratingTokens! {
-                guard params.repos.user.updateCreds(creds: params.profileCreds!, forUser: user) else {
-                    Log.error(message: "Failed attempting to save generated tokens.")
-                    params.completion(nil)
-                    return
-                }
             }
             
             let response = AddUserResponse()!

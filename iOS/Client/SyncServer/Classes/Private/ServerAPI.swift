@@ -82,6 +82,7 @@ class ServerAPI {
         }
     }
     
+    // Checks the creds of the user specified by the creds property (or authenticationDelegate in ServerNetworking if that is nil).
     public func checkCreds(completion:((_ userExists:Bool?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.checkCreds
         let url = URL(string: baseURL + endpoint.path)!

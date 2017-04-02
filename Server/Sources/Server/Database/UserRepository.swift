@@ -78,7 +78,7 @@ class User : NSObject, Model {
     // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
     var credsObject:Creds? {
         do {
-            let credsObj = try Creds.toCreds(accountType: accountType, fromJSON: creds, delegate:nil)
+            let credsObj = try Creds.toCreds(accountType: accountType, fromJSON: creds, user: .user(self), delegate:nil)
             return credsObj
         }
         catch (let error) {
@@ -166,7 +166,7 @@ class UserRepository : Repository {
         }
         
         // Validate the JSON before we insert it. Can't really do it in the setter for creds because it's
-        guard let _ = try? Creds.toCreds(accountType: user.accountType, fromJSON: user.creds, delegate:nil) else {
+        guard let _ = try? Creds.toCreds(accountType: user.accountType, fromJSON: user.creds, user: .user(user), delegate:nil) else {
             Log.error(message: "Invalid creds JSON: \(user.creds)")
             return nil
         }
@@ -183,15 +183,26 @@ class UserRepository : Repository {
         }
     }
     
-    func updateCreds(creds newCreds:Creds, forUser user:User) -> Bool {
-        // First need to merge creds-- otherwise, we might override part of the creds with our update.
-    
-        // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
-        let oldCreds = user.credsObject!
-        oldCreds.merge(withNewerCreds: newCreds)
+    func updateCreds(creds newCreds:Creds, forUser updateCredsUser:CredsUser) -> Bool {
+        var credsJSONString:String
+        var userId:UserId
         
-        let query = "UPDATE \(tableName) SET creds = '\(oldCreds.toJSON()!)' WHERE " +
-            lookupConstraint(key: .userId(user.userId))
+        switch updateCredsUser {
+        case .user(let user):
+            // First need to merge creds-- otherwise, we might override part of the creds with our update.
+            // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
+            let oldCreds = user.credsObject!
+            oldCreds.merge(withNewerCreds: newCreds)
+            credsJSONString = oldCreds.toJSON()!
+            userId = user.userId
+            
+        case .userId(let id):
+            credsJSONString = newCreds.toJSON()!
+            userId = id
+        }
+        
+        let query = "UPDATE \(tableName) SET creds = '\(credsJSONString)' WHERE " +
+            lookupConstraint(key: .userId(userId))
         
         if db.connection.query(statement: query) {
             let numberUpdates = db.connection.numberAffectedRows()

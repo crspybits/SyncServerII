@@ -65,7 +65,7 @@ class GoogleCreds : Creds {
     case noRequiredKeyValue
     }
     
-    override static func fromJSON(s:String, delegate:CredsDelegate?) throws -> Creds? {
+    override static func fromJSON(s:String, user:CredsUser?, delegate:CredsDelegate?) throws -> Creds? {
         guard let jsonDict = s.toJSONDictionary() as? [String:String] else {
             Log.error(message: "Could not convert string to JSON [String:String]: \(s)")
             return nil
@@ -89,6 +89,7 @@ class GoogleCreds : Creds {
         
         let result = GoogleCreds()
         result.delegate = delegate
+        result.user = user
 
         try setProperty(key: accessTokenKey) { value in
             result.accessToken = value
@@ -128,13 +129,14 @@ class GoogleCreds : Creds {
         return dictionaryToJSONString(dict: jsonDict)
     }
     
-    override static func fromProfile(profile:UserProfile, delegate:CredsDelegate?) -> Creds? {
+    override static func fromProfile(profile:UserProfile, user:CredsUser?, delegate:CredsDelegate?) -> Creds? {
         guard let googleSpecificCreds = profile.accountSpecificCreds as? GoogleSpecificCreds else {
             Log.error(message: "Account specific creds were not GoogleSpecificCreds")
             return nil
         }
         
         let creds = GoogleCreds()
+        creds.user = user
         creds.delegate = delegate
         creds.accessToken = googleSpecificCreds.accessToken
         creds.serverAuthCode = googleSpecificCreds.serverAuthCode
@@ -194,7 +196,7 @@ class GoogleCreds : Creds {
                     return
                 }
                 
-                if self.delegate!.saveToDatabase(creds: self) {
+                if self.delegate!.saveToDatabase(creds: self, user:self.user) {
                     completion(true, nil)
                     return
                 }
@@ -271,7 +273,7 @@ class GoogleCreds : Creds {
                 self.accessToken = accessToken
                 Log.debug(message: "Refreshed access token: \(accessToken)")
                 
-                if self.delegate == nil || self.delegate!.saveToDatabase(creds: self) {
+                if self.delegate == nil || self.delegate!.saveToDatabase(creds: self, user:self.user) {
                     completion(nil)
                     return
                 }

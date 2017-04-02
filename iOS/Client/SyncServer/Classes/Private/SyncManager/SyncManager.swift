@@ -38,19 +38,32 @@ class SyncManager {
             switch nextCompletionResult {
             case .fileDownloaded(let url, let attr):
                 EventDesired.reportEvent(.singleFileDownloadComplete(url:url, attr:attr), mask: self.desiredEvents, delegate: self.delegate)
-            
-                // Recursively (hopefully, this is tail recursion with optimization) check for any next download.
-                self.start(callback)
-                return
+
+                func after() {
+                    // Recursively (hopefully, this is tail recursion with optimization) check for any next download.
+                    self.start(callback)
+                }
                 
+#if DEBUG
+                if self.delegate == nil {
+                    after()
+                }
+                else {
+                    Thread.runSync(onMainThread: {
+                        self.delegate!.syncServerSingleFileDownloadCompleted(next: {
+                            after()
+                        })
+                    })
+                }
+#else
+                after()
+#endif
             case .masterVersionUpdate:
                 // Need to start all over again.
                 self.start(callback)
-                return
                 
             case .error(let error):
                 callback?(StartError.error(error))
-                return
             }
         }
         
@@ -172,20 +185,24 @@ class SyncManager {
                 let attr = SyncAttributes(fileUUID: uft.fileUUID, mimeType:uft.mimeType!)
                 EventDesired.reportEvent(.singleFileUploadComplete(attr: attr), mask: self.desiredEvents, delegate: self.delegate)
                 
-                // Recursively see if there is a next upload to do.
+                func after() {
+                    // Recursively see if there is a next upload to do.
+                    self.checkForPendingUploads()
+                }
+                
 #if DEBUG
                 if self.delegate == nil {
-                    self.checkForPendingUploads()
+                    after()
                 }
                 else {
                     Thread.runSync(onMainThread: {
-                        self.delegate!.syncServerSingleUploadCompleted(next: {
-                            self.checkForPendingUploads()
+                        self.delegate!.syncServerSingleFileUploadCompleted(next: {
+                            after()
                         })
                     })
                 }
 #else
-                self.checkForPendingUploads()
+                after()
 #endif
             case .uploadDeletion(let fileUUID):
                 EventDesired.reportEvent(.singleUploadDeletionComplete(fileUUID: fileUUID), mask: self.desiredEvents, delegate: self.delegate)

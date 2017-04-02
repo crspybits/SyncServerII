@@ -105,7 +105,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         let expectation1 = self.expectation(description: "test1")
         let expectation2 = self.expectation(description: "test2")
         
-        let syncServerSingleUploadCompletedExp = self.expectation(description: "syncServerSingleUploadCompleted")
+        let syncServerSingleFileUploadCompletedExp = self.expectation(description: "syncServerSingleFileUploadCompleted")
         
         var shouldSaveDownloadsExp:XCTestExpectation?
         
@@ -136,7 +136,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             }
         }
     
-        let previousSyncServerSingleUploadCompleted = self.syncServerSingleUploadCompleted
+        let previousSyncServerSingleFileUploadCompleted = self.syncServerSingleFileUploadCompleted
         
         if !withDeletion {
             shouldSaveDownloads = { downloads in
@@ -145,7 +145,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             }
         }
     
-        syncServerSingleUploadCompleted = {next in
+        syncServerSingleFileUploadCompleted = {next in
             // A single upload was completed. Let's upload another file by "another" client. This code is a little ugly because I can't kick off another `waitForExpectations`.
             
             // TODO: This is actually going to force a download by our client. What do we have to do here to accomodate that?
@@ -164,8 +164,8 @@ class Client_SyncManager_MasterVersionChange: TestCase {
                 
                 func end() {
                     self.deviceUUID = previousDeviceUUID
-                    self.syncServerSingleUploadCompleted = previousSyncServerSingleUploadCompleted
-                    syncServerSingleUploadCompletedExp.fulfill()
+                    self.syncServerSingleFileUploadCompleted = previousSyncServerSingleFileUploadCompleted
+                    syncServerSingleFileUploadCompletedExp.fulfill()
                     next()
                 }
                 
@@ -256,7 +256,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         
         let syncDone2Exp = self.expectation(description: "syncDone2Exp")
         let fileUploadsCompletedExp = self.expectation(description: "fileUploadsCompleted")
-        let syncServerSingleUploadCompletedExp = self.expectation(description: "syncServerSingleUploadCompleted")
+        let syncServerSingleFileUploadCompletedExp = self.expectation(description: "syncServerSingleUploadCompleted")
         let shouldDoDeletionsExp = self.expectation(description: "shouldDoDeletionsExp")
 
         var singleUploadsCompleted = 0
@@ -286,9 +286,9 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             shouldDoDeletionsExp.fulfill()
         }
     
-        let previousSyncServerSingleUploadCompleted = self.syncServerSingleUploadCompleted
+        let previousSyncServerSingleFileUploadCompleted = self.syncServerSingleFileUploadCompleted
     
-        syncServerSingleUploadCompleted = {next in
+        syncServerSingleFileUploadCompleted = {next in
             let previousDeviceUUID = self.deviceUUID
             self.deviceUUID = UUID()
             
@@ -301,8 +301,8 @@ class Client_SyncManager_MasterVersionChange: TestCase {
                 self.deleteFile(file: fileToDelete, masterVersion: masterVersion!) {
                     self.deviceUUID = previousDeviceUUID
                     
-                    self.syncServerSingleUploadCompleted = previousSyncServerSingleUploadCompleted
-                    syncServerSingleUploadCompletedExp.fulfill()
+                    self.syncServerSingleFileUploadCompleted = previousSyncServerSingleFileUploadCompleted
+                    syncServerSingleFileUploadCompletedExp.fulfill()
                     next()
                 }
             }
@@ -403,9 +403,9 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             shouldSaveDownloadsExp.fulfill()
         }
     
-        let previousSyncSingleUploadCompleted = self.syncServerSingleUploadCompleted
+        let previousSyncSingleFileUploadCompleted = self.syncServerSingleFileUploadCompleted
 
-        syncServerSingleUploadCompleted = { next in
+        syncServerSingleFileUploadCompleted = { next in
             // Simulate the Upload of fileUUID2 as a different device
             let previousDeviceUUID = self.deviceUUID
             self.deviceUUID = UUID()
@@ -414,7 +414,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             
                 self.deviceUUID = previousDeviceUUID
                 syncServerSingleUploadCompletedExp.fulfill()
-                self.syncServerSingleUploadCompleted = previousSyncSingleUploadCompleted
+                self.syncServerSingleFileUploadCompleted = previousSyncSingleFileUploadCompleted
                 next()
             }
         }
@@ -431,9 +431,88 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         waitForExpectations(timeout: 20.0, handler: nil)
     }
     
-    // TODO: *0*
-    /*
     func testMasterVersionChangeDuringDownload() {
+        // Algorithm:
+        // Upload two files *not* using the client upload.
+        // Next, use the client interface to sync files.
+        // When a single file has been downloaded, upload another file (*not* using the client upload)
+        // This should trigger the master version update.
+        
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID1 = UUID().uuidString
+        let fileUUID2 = UUID().uuidString
+
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID1, serverMasterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID2, serverMasterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 2)
+        
+        SyncServer.session.eventsDesired = [.syncDone, .fileDownloadsCompleted, .singleFileDownloadComplete]
+        
+        let syncDoneExp = self.expectation(description: "syncDoneExp")
+        let syncServerSingleFileDownloadCompletedExp = self.expectation(description: "syncServerSingleFileDownloadCompletedExp")
+        let shouldSaveDownloadsExp = self.expectation(description: "shouldSaveDownloadsExp")
+        let fileDownloadsCompletedExp = self.expectation(description: "fileDownloadsCompletedExp")
+        
+        var singleDownloadCount = 0
+        
+        syncServerEventOccurred = {event in
+            switch event {
+            case .syncDone:
+                syncDoneExp.fulfill()
+
+            case .fileDownloadsCompleted(numberOfFiles: let number):
+                XCTAssert(number == 3)
+                
+                XCTAssert(singleDownloadCount == 4, "Downloads actually completed: \(singleDownloadCount)")
+                
+                fileDownloadsCompletedExp.fulfill()
+                
+            case .singleFileDownloadComplete(_):
+                singleDownloadCount += 1
+                
+            default:
+                XCTFail()
+            }
+        }
+        
+        shouldSaveDownloads = { downloads in
+            // In the end, the call to `shouldSaveDownloads` should be for 3 files: The two initially uploaded, and the third uploaded after the first download. The master version update will then cause all three to then be downloaded.
+            XCTAssert(downloads.count == 3)
+            
+            shouldSaveDownloadsExp.fulfill()
+        }
+    
+        let previousSyncSingleFileDownloadCompleted = self.syncServerSingleFileDownloadCompleted
+
+        let fileUUID3 = UUID().uuidString
+
+        syncServerSingleFileDownloadCompleted = { next in
+            // Simulate the Upload of fileUUID3 as a different device
+            let previousDeviceUUID = self.deviceUUID
+            self.deviceUUID = UUID()
+            
+            self.fullUploadOfFile(url: fileURL, fileUUID: fileUUID3, mimeType: "text/plain") { masterVersion in
+            
+                self.deviceUUID = previousDeviceUUID
+                syncServerSingleFileDownloadCompletedExp.fulfill()
+                self.syncServerSingleFileDownloadCompleted = previousSyncSingleFileDownloadCompleted
+                next()
+            }
+        }
+        
+        SyncServer.session.sync()
+        
+        waitForExpectations(timeout: 20.0, handler: nil)
     }
-    */
 }

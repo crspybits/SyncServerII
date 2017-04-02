@@ -105,7 +105,8 @@ public protocol SyncServerDelegate : class {
     func syncServerEventOccurred(event:SyncEvent)
     
 #if DEBUG
-    func syncServerSingleUploadCompleted(next: @escaping ()->())
+    func syncServerSingleFileUploadCompleted(next: @escaping ()->())
+    func syncServerSingleFileDownloadCompleted(next: @escaping ()->())
 #endif
 }
 
