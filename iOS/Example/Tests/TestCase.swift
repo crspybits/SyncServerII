@@ -28,7 +28,7 @@ class TestCase: XCTestCase {
         Log.error("syncServerErrorOccurred: \(error)")
     }
     
-    var syncServerEventSingleUploadCompleted:((_ next: @escaping ()->())->())?
+    var syncServerSingleUploadCompleted:((_ next: @escaping ()->())->())?
     
     // This value needs to be refreshed before running these tests.
     static let accessToken:String = {
@@ -94,7 +94,7 @@ class TestCase: XCTestCase {
                     file.fileUUID == fileUUID
                 }
                 
-                XCTAssert(result!.count == 1)
+                XCTAssert(result!.count == 1, "result!.count= \(result!.count)")
                 
                 if fileSize != nil {
                     XCTAssert(result![0].fileSizeBytes == fileSize)
@@ -348,21 +348,23 @@ class TestCase: XCTestCase {
         SyncManager.session.start { (error) in
             XCTAssert(error == nil)
             
-            let entries = DirectoryEntry.fetchAll()
-            
-            // There may be more directory entries than just accounted for in this single function call, so don't do this:
-            //XCTAssert(entries.count == expectedFiles.count)
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                let entries = DirectoryEntry.fetchAll()
+                
+                // There may be more directory entries than just accounted for in this single function call, so don't do this:
+                //XCTAssert(entries.count == expectedFiles.count)
 
-            for file in expectedFiles {
-                let entriesResult = entries.filter { $0.fileUUID == file.fileUUID &&
-                    $0.fileVersion == file.fileVersion
+                for file in expectedFiles {
+                    let entriesResult = entries.filter { $0.fileUUID == file.fileUUID &&
+                        $0.fileVersion == file.fileVersion
+                    }
+                    XCTAssert(entriesResult.count == 1)
                 }
-                XCTAssert(entriesResult.count == 1)
+                
+                XCTAssert(downloadsOccurred == 1)
+                XCTAssert(eventsOccurred == 1)
+                expectation.fulfill()
             }
-            
-            XCTAssert(downloadsOccurred == 1)
-            XCTAssert(eventsOccurred == 1)
-            expectation.fulfill()
         }
         
         waitForExpectations(timeout: 30.0, handler: nil)
@@ -473,7 +475,7 @@ class TestCase: XCTestCase {
                 }
             }
             else {
-                XCTFail()
+                XCTFail("\(result!)")
             }
             
             expectation.fulfill()
@@ -517,6 +519,25 @@ class TestCase: XCTestCase {
         waitForExpectations(timeout: 20.0, handler: nil)
         
         return (url as URL, attr)
+    }
+    
+    func resetFileMetaData() {
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            DownloadFileTracker.removeAll()
+            DirectoryEntry.removeAll()
+            UploadFileTracker.removeAll()
+            UploadQueue.removeAll()
+            UploadQueues.removeAll()
+            Singleton.removeAll()
+            
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch {
+                XCTFail()
+            }
+        }
+
+        removeAllServerFilesInFileIndex()
     }
 }
 
@@ -562,12 +583,12 @@ extension TestCase : SyncServerDelegate {
         syncServerErrorOccurred(error)
     }
     
-    func syncServerEventSingleUploadCompleted(next: @escaping ()->()) {
-        if syncServerEventSingleUploadCompleted == nil {
+    func syncServerSingleUploadCompleted(next: @escaping ()->()) {
+        if syncServerSingleUploadCompleted == nil {
             next()
         }
         else {
-            syncServerEventSingleUploadCompleted!(next)
+            syncServerSingleUploadCompleted!(next)
         }
     }
 }

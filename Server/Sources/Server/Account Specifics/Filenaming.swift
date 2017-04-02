@@ -8,6 +8,14 @@
 
 import Foundation
 
+// In some situations on the client, I need this
+#if !SERVER
+struct FilenamingObject : Filenaming {
+    let fileUUID:String!
+    let fileVersion:Int32!
+}
+#endif
+
 protocol Filenaming {
     var fileUUID:String! {get}
     var fileVersion:Int32! {get}

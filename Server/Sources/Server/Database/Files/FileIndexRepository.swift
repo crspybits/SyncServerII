@@ -215,12 +215,12 @@ class FileIndexRepository : Repository {
         2) If there is already a file in the FileIndex for the userId/deviceUUID, then the version number we have in Uploads should be the version number in the FileIndex + 1 (if not, it is an error). Update the FileIndex with the new info from Upload, if no error.
     */
     // Returns nil on failure, and on success returns the number of uploads transferred.
-    func transferUploads(userId: UserId, deviceUUID:String, upload:UploadRepository) -> Int32? {
+    func transferUploads(userId: UserId, deviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
         
         var error = false
         var numberTransferred:Int32 = 0
         
-        let uploadSelect = upload.select(forUserId: userId, deviceUUID: deviceUUID)
+        let uploadSelect = uploadRepo.select(forUserId: userId, deviceUUID: deviceUUID)
         uploadSelect.forEachRow { rowModel in
             if error {
                 return
@@ -267,7 +267,11 @@ class FileIndexRepository : Repository {
                     }
                 }
                 
+                // The file we are deleting is named in cloud storage by the fileUUID, deviceUUID *currently in the file index*, and the version. So we have to keep the existing deviceUUID.
+                fileIndex.deviceUUID = existingFileIndex.deviceUUID
+                
                 fileIndex.fileIndexId = existingFileIndex.fileIndexId
+                
                 guard self.update(fileIndex: fileIndex) else {
                     Log.error(message: "Could not update FileIndex!")
                     error = true

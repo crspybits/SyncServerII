@@ -26,6 +26,8 @@ class ServerNetworking {
     func appLaunchSetup() {
         // To get "spinner" in status bar when ever we have network activity.
         // See http://cocoadocs.org/docsets/AFNetworking/2.0.0/Classes/AFNetworkActivityIndicatorManager.html
+        
+        // TODO: *3* I think this isn't working any more-- I'm not using AFNetworking.
         AFNetworkActivityIndicatorManager.shared().isEnabled = true
     }
 

@@ -13,7 +13,7 @@
         <attribute name="appMetaData" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="fileSizeBytes" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="fileUUIDInternal" attributeType="String" syncable="YES"/>
-        <attribute name="fileVersionInternal" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="fileVersionInternal" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="localURLData" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="mimeType" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="statusRaw" optional="YES" attributeType="String" syncable="YES"/>

@@ -16,15 +16,7 @@ class Client_SyncServer_Download: TestCase {
     override func setUp() {
         super.setUp()
         super.setUp()
-        DownloadFileTracker.removeAll()
-        DirectoryEntry.removeAll()
-        UploadFileTracker.removeAll()
-        UploadQueue.removeAll()
-        UploadQueues.removeAll()
-        
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
-        removeAllServerFilesInFileIndex()
+        resetFileMetaData()
     }
     
     override func tearDown() {

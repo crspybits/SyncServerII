@@ -16,6 +16,8 @@ import Foundation
 
 // TODO: *0* Need automatic refreshing of the access token-- this should make client side testing easier: There should be no need to create a new access token every hour.
 
+// TODO: *5* It looks like if we give the user a reader-only role on a file, then they will not be able to modify it. Which will help in terms of users potentially modifying SyncServer files and messing things up. See https://developers.google.com/drive/v3/reference/permissions QUESTION: Will the user then be able to delete the file?
+
 private let folderMimeType = "application/vnd.google-apps.folder"
 
 extension GoogleCreds {    

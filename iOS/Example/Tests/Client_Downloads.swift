@@ -15,11 +15,7 @@ class Client_Downloads: TestCase {
     override func setUp() {
         super.setUp()
         
-        DownloadFileTracker.removeAll()
-        DirectoryEntry.removeAll()
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
-        removeAllServerFilesInFileIndex()
+        resetFileMetaData()
     }
     
     override func tearDown() {
@@ -43,20 +39,22 @@ class Client_Downloads: TestCase {
                 XCTFail()
             }
             
-            XCTAssert(Singleton.get().masterVersion == expectedMasterVersion)
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+                XCTAssert(Singleton.get().masterVersion == expectedMasterVersion)
 
-            let dfts = DownloadFileTracker.fetchAll()
-            XCTAssert(dfts.count == expectedFiles.count)
+                let dfts = DownloadFileTracker.fetchAll()
+                XCTAssert(dfts.count == expectedFiles.count)
 
-            for file in expectedFiles {
-                let dftsResult = dfts.filter { $0.fileUUID == file.fileUUID &&
-                    $0.fileVersion == file.fileVersion
+                for file in expectedFiles {
+                    let dftsResult = dfts.filter { $0.fileUUID == file.fileUUID &&
+                        $0.fileVersion == file.fileVersion
+                    }
+                    XCTAssert(dftsResult.count == 1)
                 }
-                XCTAssert(dftsResult.count == 1)
+                
+                let entries = DirectoryEntry.fetchAll()
+                XCTAssert(entries.count == 0)
             }
-            
-            let entries = DirectoryEntry.fetchAll()
-            XCTAssert(entries.count == 0)
             
             expectation.fulfill()
         }
@@ -140,14 +138,16 @@ class Client_Downloads: TestCase {
                 return
             }
             
-            let dfts = DownloadFileTracker.fetchAll()
-            XCTAssert(dfts[0].appMetaData == nil)
-            XCTAssert(dfts[0].fileVersion == file.fileVersion)
-            XCTAssert(dfts[0].status == .downloaded)
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+                let dfts = DownloadFileTracker.fetchAll()
+                XCTAssert(dfts[0].appMetaData == nil)
+                XCTAssert(dfts[0].fileVersion == file.fileVersion)
+                XCTAssert(dfts[0].status == .downloaded)
 
-            let fileData1 = try? Data(contentsOf: file.localURL)
-            XCTAssert(Int64(fileData1!.count) == dfts[0].fileSizeBytes)
-            XCTAssert(self.filesHaveSameContents(url1: file.localURL, url2: dfts[0].localURL! as URL))
+                let fileData1 = try? Data(contentsOf: file.localURL)
+                XCTAssert(Int64(fileData1!.count) == dfts[0].fileSizeBytes)
+                XCTAssert(self.filesHaveSameContents(url1: file.localURL, url2: dfts[0].localURL! as URL))
+            }
             
             expectation.fulfill()
         }
@@ -157,8 +157,10 @@ class Client_Downloads: TestCase {
             return
         }
         
-        let dfts = DownloadFileTracker.fetchAll()
-        XCTAssert(dfts[0].status == .downloading)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            let dfts = DownloadFileTracker.fetchAll()
+            XCTAssert(dfts[0].status == .downloading)
+        }
         
         waitForExpectations(timeout: 30.0, handler: nil)
     }
@@ -177,10 +179,17 @@ class Client_Downloads: TestCase {
         
         checkForDownloads(expectedMasterVersion: masterVersion + 1, expectedFiles: [file])
         
-        // Fake an incorrect master version.
-        Singleton.get().masterVersion = masterVersion
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            // Fake an incorrect master version.
+            Singleton.get().masterVersion = masterVersion
+            
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch {
+                XCTFail()
+            }
+        }
+        
         let expectation = self.expectation(description: "next")
 
         let result = Download.session.next() { completionResult in
@@ -197,8 +206,10 @@ class Client_Downloads: TestCase {
             return
         }
         
-        let dfts = DownloadFileTracker.fetchAll()
-        XCTAssert(dfts[0].status == .downloading)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            let dfts = DownloadFileTracker.fetchAll()
+            XCTAssert(dfts[0].status == .downloading)
+        }
         
         waitForExpectations(timeout: 30.0, handler: nil)
     }

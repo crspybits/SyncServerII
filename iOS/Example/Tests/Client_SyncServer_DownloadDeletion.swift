@@ -21,8 +21,8 @@ class Client_SyncServer_DownloadDeletion: TestCase {
     }
     
     // TODO: *1*
+    /*
     func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
+    */
 }

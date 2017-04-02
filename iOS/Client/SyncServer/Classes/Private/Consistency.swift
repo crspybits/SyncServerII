@@ -40,13 +40,15 @@ class Consistency {
                     }
                 }
                 
-                // We should have *every* entry in the local DirectoryEntry meta data also. These issues should never happen: Our sync should prevent these.
-                let entry = DirectoryEntry.fetchObjectWithUUID(uuid: file.fileUUID)
-                if entry == nil {
-                    messageResult += "Server file: \(file.fileUUID!) not in DirectoryEntry meta data\n"
-                }
-                else if entry!.deletedOnServer != file.deleted {
-                    messageResult += "Server file: \(file.fileUUID!) and DirectoryEntry meta data have inconsistent deletion status: \(file.deleted!) versus \(entry!.deletedOnServer)\n"
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    // We should have *every* entry in the local DirectoryEntry meta data also. These issues should never happen: Our sync should prevent these.
+                    let entry = DirectoryEntry.fetchObjectWithUUID(uuid: file.fileUUID)
+                    if entry == nil {
+                        messageResult += "Server file: \(file.fileUUID!) not in DirectoryEntry meta data\n"
+                    }
+                    else if entry!.deletedOnServer != file.deleted {
+                        messageResult += "Server file: \(file.fileUUID!) and DirectoryEntry meta data have inconsistent deletion status: \(file.deleted!) versus \(entry!.deletedOnServer)\n"
+                    }
                 }
             }
             
@@ -60,22 +62,28 @@ class Consistency {
                     messageResult += "Local file: \(localFile) deleted on server\n"
                 }
                 
-                // And those local files should *all* be in the local meta data.
-                let entry = DirectoryEntry.fetchObjectWithUUID(uuid: localFile)
-                if entry == nil {
-                    messageResult += "Local file: \(localFile) not in DirectoryEntry meta data\n"
-                }
-                else if entry!.deletedOnServer {
-                    messageResult += "Local file: \(localFile) marked as deleted in DirectoryEntry meta data\n"
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    // And those local files should *all* be in the local meta data.
+                    let entry = DirectoryEntry.fetchObjectWithUUID(uuid: localFile)
+                    if entry == nil {
+                        messageResult += "Local file: \(localFile) not in DirectoryEntry meta data\n"
+                    }
+                    else if entry!.deletedOnServer {
+                        messageResult += "Local file: \(localFile) marked as deleted in DirectoryEntry meta data\n"
+                    }
                 }
             }
-            
-            // All the local data should be on the server.
-            let entries = DirectoryEntry.fetchAll()
-            if entries.count != fileInfo!.count {
-                messageResult += "DirectoryEntry meta data different size than on server: \(entries.count) versus \(fileInfo!.count)\n"
+
+            var entries:[DirectoryEntry]!
+
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                // All the local data should be on the server.
+                entries = DirectoryEntry.fetchAll()
+                if entries.count != fileInfo!.count {
+                    messageResult += "DirectoryEntry meta data different size than on server: \(entries.count) versus \(fileInfo!.count)\n"
+                }
             }
-            
+
             if messageResult.characters.count > 0 {
                 messageResult = "\nConsistency check: Results through \(localFiles.count) local files, \(fileInfo!.count) server files, and \(entries.count) DirectoryEntry meta data entries:\n\(messageResult)"
                 Log.warning(messageResult)
@@ -86,8 +94,12 @@ class Consistency {
             }
             
             if repair {
-                repairServerFilesNotPresentLocally(fileUUIDs: serverFilesNotPresentLocally) {
-                    callback?(nil)
+                do {
+                    try repairServerFilesNotPresentLocally(fileUUIDs: serverFilesNotPresentLocally) {
+                        callback?(nil)
+                    }
+                } catch (let error) {
+                    callback?(error)
                 }
             }
             else {
@@ -96,20 +108,33 @@ class Consistency {
         }
     }
     
-    static func repairServerFilesNotPresentLocally(fileUUIDs:[UUIDString], completion:@escaping ()->()) {
+    static func repairServerFilesNotPresentLocally(fileUUIDs:[UUIDString], completion:@escaping ()->()) throws {
         if fileUUIDs.count == 0 {
             completion()
         }
         
-        // The simplest means to deal with this seems to be to remove the associated DirectoryEntry, and then sync again.
-        for fileUUID in fileUUIDs {
-            let entry = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
-            CoreData.sessionNamed(Constants.coreDataName).remove(entry!)
+        var resultError: Error?
+        
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            // The simplest means to deal with this seems to be to remove the associated DirectoryEntry, and then sync again.
+            for fileUUID in fileUUIDs {
+                let entry = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
+                CoreData.sessionNamed(Constants.coreDataName).remove(entry!)
+            }
+            
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch (let error) {
+                resultError = error
+            }
         }
         
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-        
+        guard resultError == nil else {
+            throw resultError!
+        }
+
         // A bit odd calling back up to the SyncServer, but sync will not call back down to us.
+        // TODO: *3* Should use delegation here or a callback. Cleaner.
         SyncServer.session.sync() {
             completion()
         }

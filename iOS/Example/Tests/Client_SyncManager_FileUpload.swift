@@ -15,15 +15,8 @@ class Client_SyncServer_FileUpload: TestCase {
     
     override func setUp() {
         super.setUp()
-        DownloadFileTracker.removeAll()
-        DirectoryEntry.removeAll()
-        UploadFileTracker.removeAll()
-        UploadQueue.removeAll()
-        UploadQueues.removeAll()
-        
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
 
-        removeAllServerFilesInFileIndex()
+        resetFileMetaData()
     }
     
     override func tearDown() {
@@ -36,7 +29,11 @@ class Client_SyncServer_FileUpload: TestCase {
         
         getFileIndex(expectedFiles: [(fileUUID: attr.fileUUID, fileSize: nil)])
         
-        let masterVersion = Singleton.get().masterVersion
+        var masterVersion:MasterVersionInt!
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            masterVersion = Singleton.get().masterVersion
+        }
+        
         let file = ServerAPI.File(localURL: nil, fileUUID: attr.fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
         onlyDownloadFile(comparisonFileURL: url, file: file, masterVersion: masterVersion)
     }
@@ -84,7 +81,10 @@ class Client_SyncServer_FileUpload: TestCase {
             (fileUUID: fileUUID2, fileSize: nil)
         ])
         
-        let masterVersion = Singleton.get().masterVersion
+        var masterVersion:MasterVersionInt!
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            masterVersion = Singleton.get().masterVersion
+        }
         
         let file1 = ServerAPI.File(localURL: nil, fileUUID: fileUUID1, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
         onlyDownloadFile(comparisonFileURL: url as URL, file: file1, masterVersion: masterVersion)
@@ -138,7 +138,11 @@ class Client_SyncServer_FileUpload: TestCase {
         getFileIndex(expectedFiles: [(fileUUID: fileUUID, fileSize: nil)])
         
         // Download the file and make sure it corresponds to url2
-        let masterVersion = Singleton.get().masterVersion
+        var masterVersion:MasterVersionInt!
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            masterVersion = Singleton.get().masterVersion
+        }
+        
         let file = ServerAPI.File(localURL: nil, fileUUID: fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
         onlyDownloadFile(comparisonFileURL: url2 as URL, file: file, masterVersion: masterVersion)
     }
@@ -216,7 +220,11 @@ class Client_SyncServer_FileUpload: TestCase {
         
         getFileIndex(expectedFiles: [(fileUUID: fileUUID, fileSize: nil)])
         
-        let masterVersion = Singleton.get().masterVersion
+        var masterVersion:MasterVersionInt!
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            masterVersion = Singleton.get().masterVersion
+        }
+        
         let file = ServerAPI.File(localURL: nil, fileUUID: fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
         onlyDownloadFile(comparisonFileURL: url as URL, file: file, masterVersion: masterVersion)
     }
@@ -305,7 +313,10 @@ class Client_SyncServer_FileUpload: TestCase {
         ])
         
         // Download and check the files
-        let masterVersion = Singleton.get().masterVersion
+        var masterVersion:MasterVersionInt!
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            masterVersion = Singleton.get().masterVersion
+        }
         
         let file1 = ServerAPI.File(localURL: nil, fileUUID: fileUUID1, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
         onlyDownloadFile(comparisonFileURL: url1 as URL, file: file1, masterVersion: masterVersion)

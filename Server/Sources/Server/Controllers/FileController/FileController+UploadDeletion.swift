@@ -26,6 +26,7 @@ extension FileController {
 
             if masterVersion != uploadDeletionRequest.masterVersion {
                 let response = UploadDeletionResponse()!
+                Log.warning(message: "Master version update: \(masterVersion)")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return

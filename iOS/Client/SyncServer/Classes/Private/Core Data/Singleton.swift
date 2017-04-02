@@ -11,7 +11,7 @@ import CoreData
 import SMCoreLib
 
 @objc(Singleton)
-public class Singleton: NSManagedObject, CoreDataSingleton {
+public class Singleton: NSManagedObject, CoreDataSingleton, AllOperations {
     typealias COREDATAOBJECT = Singleton
     
     public class func entityName() -> String {

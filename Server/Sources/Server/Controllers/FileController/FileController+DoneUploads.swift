@@ -54,7 +54,7 @@ extension FileController {
             params.repos.fileIndex.transferUploads(
                 userId: params.currentSignedInUser!.userId,
                 deviceUUID: params.deviceUUID!,
-                upload: params.repos.upload)
+                uploadRepo: params.repos.upload)
         
         if numberTransferred == nil  {
             Log.error(message: "Failed on transfer to FileIndex!")

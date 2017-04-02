@@ -10,21 +10,21 @@ import Foundation
 import SMCoreLib
 
 extension Upload {
-    private class func createNewPendingSync() {
+    private class func createNewPendingSync() throws {
         Singleton.get().pendingSync = UploadQueue.newObject() as! UploadQueue
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
+        try CoreData.sessionNamed(Constants.coreDataName).context.save()
     }
     
-    class func pendingSync() -> UploadQueue {
+    class func pendingSync() throws -> UploadQueue {
         if Singleton.get().pendingSync == nil {
-            createNewPendingSync()
+            try createNewPendingSync()
         }
         
         return Singleton.get().pendingSync!
     }
     
     // Must have uploads in `pendingSync`. This does a `saveContext`.
-    class func movePendingSyncToSynced() {
+    class func movePendingSyncToSynced() throws {
         assert(Singleton.get().pendingSync != nil)
         assert(Singleton.get().pendingSync!.uploads!.count > 0)
         
@@ -32,7 +32,7 @@ extension Upload {
         uploadQueues.addToQueues(Singleton.get().pendingSync!)
         
         // This does a `saveContext`, so don't need to do that again.
-        createNewPendingSync()        
+        try createNewPendingSync()
     }
     
     class func synced() -> UploadQueues {

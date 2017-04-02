@@ -15,11 +15,7 @@ class Client_SyncManager_DownloadDeletion: TestCase {
     override func setUp() {
         super.setUp()
         
-        DownloadFileTracker.removeAll()
-        DirectoryEntry.removeAll()
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
-        removeAllServerFilesInFileIndex()
+        resetFileMetaData()
     }
     
     override func tearDown() {

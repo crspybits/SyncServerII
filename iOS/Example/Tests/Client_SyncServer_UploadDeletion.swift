@@ -15,15 +15,7 @@ class Client_SyncServer_UploadDeletion: TestCase {
     
     override func setUp() {
         super.setUp()
-        DownloadFileTracker.removeAll()
-        DirectoryEntry.removeAll()
-        UploadFileTracker.removeAll()
-        UploadQueue.removeAll()
-        UploadQueues.removeAll()
-        
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
-        removeAllServerFilesInFileIndex()
+        resetFileMetaData()
     }
     
     override func tearDown() {
@@ -68,9 +60,10 @@ class Client_SyncServer_UploadDeletion: TestCase {
         let fileIndex = getFileIndex(expectedFiles: [(fileUUID: attr.fileUUID, fileSize: nil)])
         XCTAssert(fileIndex[0].deleted)
         
-        let result = DirectoryEntry.fetchObjectWithUUID(uuid: attr.fileUUID)
-        XCTAssert(result!.deletedOnServer)
-        
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            let result = DirectoryEntry.fetchObjectWithUUID(uuid: attr.fileUUID)
+            XCTAssert(result!.deletedOnServer)
+        }
         return attr.fileUUID
     }
     
@@ -143,8 +136,10 @@ class Client_SyncServer_UploadDeletion: TestCase {
         let fileIndex = getFileIndex(expectedFiles: [(fileUUID: attr.fileUUID, fileSize: nil)])
         XCTAssert(fileIndex[0].deleted)
         
-        let result = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
-        XCTAssert(result!.deletedOnServer)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            let result = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
+            XCTAssert(result!.deletedOnServer)
+        }
     }
 
     func testUploadImmediatelyFollowedByDeletionWorks() {
@@ -177,8 +172,10 @@ class Client_SyncServer_UploadDeletion: TestCase {
         let fileIndex = getFileIndex(expectedFiles: [])
         XCTAssert(fileIndex.count == 0)
     
-        let result = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
-        XCTAssert(result!.deletedOnServer)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            let result = DirectoryEntry.fetchObjectWithUUID(uuid: fileUUID)
+            XCTAssert(result!.deletedOnServer)
+        }
     }
     
     func testDeletionOfFileWithBadUUIDFails() {

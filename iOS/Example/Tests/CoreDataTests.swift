@@ -14,12 +14,7 @@ class CoreDataTests: TestCase {
     
     override func setUp() {
         super.setUp()
-        
-        UploadFileTracker.removeAll()
-        UploadQueue.removeAll()
-        UploadQueues.removeAll()
-        
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
+        resetFileMetaData()
     }
     
     override func tearDown() {
@@ -28,62 +23,94 @@ class CoreDataTests: TestCase {
     }
     
     func testLocalURLOnDownloadFileTracker() {
-        let obj = DownloadFileTracker.newObject() as! DownloadFileTracker
-        obj.localURL = SMRelativeLocalURL(withRelativePath: "foobar", toBaseURLType: .documentsDirectory)
-        XCTAssert(obj.localURL != nil)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            let obj = DownloadFileTracker.newObject() as! DownloadFileTracker
+            obj.localURL = SMRelativeLocalURL(withRelativePath: "foobar", toBaseURLType: .documentsDirectory)
+            XCTAssert(obj.localURL != nil)
+        }
     }
     
     func testThatUploadFileTrackersWorks() {
-        let uq = UploadQueue.newObject() as! UploadQueue
-        XCTAssert(uq.uploadFileTrackers.count == 0)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            let uq = UploadQueue.newObject() as! UploadQueue
+            XCTAssert(uq.uploadFileTrackers.count == 0)
+        }
     }
     
     func testThatPendingSyncQueueIsInitiallyEmpty() {
-        XCTAssert(Upload.pendingSync().uploads!.count == 0)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            XCTAssert(try! Upload.pendingSync().uploads!.count == 0)
+        }
     }
     
     func addObjectToPendingSync() {
         let uft = UploadFileTracker.newObject() as! UploadFileTracker
-        Upload.pendingSync().addToUploads(uft)
+        uft.fileUUID = UUID().uuidString
+        try! Upload.pendingSync().addToUploads(uft)
     }
     
     func testThatPendingSyncQueueCanAddObject() {
-        addObjectToPendingSync()
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-        XCTAssert(Upload.pendingSync().uploads!.count == 1)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            self.addObjectToPendingSync()
+
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch {
+                XCTFail()
+            }
+            
+            XCTAssert(try! Upload.pendingSync().uploads!.count == 1)
+        }
     }
     
     func testThatSyncedInitiallyIsEmpty() {
-        XCTAssert(Upload.synced().queues!.count == 0)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            XCTAssert(Upload.synced().queues!.count == 0)
+        }
     }
     
     func testMovePendingSyncToSynced() {
-        addObjectToPendingSync()
-        Upload.movePendingSyncToSynced()
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-        
-        XCTAssert(Upload.synced().queues!.count == 1)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            self.addObjectToPendingSync()
+            try! Upload.movePendingSyncToSynced()
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch {
+                XCTFail()
+            }
+            XCTAssert(Upload.synced().queues!.count == 1)
+        }
     }
     
     func testThatGetHeadSyncQueueWorks() {
-        addObjectToPendingSync()
-        Upload.movePendingSyncToSynced()
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-        
-        guard let uploadQueue = Upload.getHeadSyncQueue() else {
-            XCTFail()
-            return
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            self.addObjectToPendingSync()
+            try! Upload.movePendingSyncToSynced()
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch {
+                XCTFail()
+            }
+            guard let uploadQueue = Upload.getHeadSyncQueue() else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(uploadQueue.uploads!.count == 1)
         }
-        
-        XCTAssert(uploadQueue.uploads!.count == 1)
     }
     
     func testThatRemoveHeadSyncQueueWorks() {
-        addObjectToPendingSync()
-        Upload.movePendingSyncToSynced()
-        Upload.removeHeadSyncQueue()
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-        
-        XCTAssert(Upload.synced().queues!.count == 0)
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            self.addObjectToPendingSync()
+            try! Upload.movePendingSyncToSynced()
+            Upload.removeHeadSyncQueue()
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch {
+                XCTFail()
+            }
+            XCTAssert(Upload.synced().queues!.count == 0)
+        }
     }
 }

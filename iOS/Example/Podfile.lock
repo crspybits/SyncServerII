@@ -18,10 +18,10 @@ PODS:
     - FirebaseCore (~> 3.5)
     - FirebaseInstanceID (~> 1.0)
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseCore (3.5.1):
+  - FirebaseCore (3.5.2):
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
   - FirebaseInstanceID (1.0.9)
-  - Gloss (1.2.1)
+  - Gloss (1.2.2)
   - Google/Core (3.0.3):
     - FirebaseAnalytics (~> 3.2)
   - Google/SignIn (3.0.3):
@@ -44,20 +44,20 @@ PODS:
   - GoogleToolboxForMac/NSString+URLArguments (2.1.1)
   - GTMOAuth2 (1.1.4):
     - GTMSessionFetcher (~> 1.1)
-  - GTMSessionFetcher (1.1.8):
-    - GTMSessionFetcher/Full (= 1.1.8)
-  - GTMSessionFetcher/Core (1.1.8)
-  - GTMSessionFetcher/Full (1.1.8):
-    - GTMSessionFetcher/Core (= 1.1.8)
+  - GTMSessionFetcher (1.1.9):
+    - GTMSessionFetcher/Full (= 1.1.9)
+  - GTMSessionFetcher/Core (1.1.9)
+  - GTMSessionFetcher/Full (1.1.9):
+    - GTMSessionFetcher/Core (= 1.1.9)
   - HPTextViewTapGestureRecognizer (0.1)
   - Reachability (3.2)
   - Reflection (0.14.3)
-  - SMCoreLib (0.0.20):
+  - SMCoreLib (0.0.27):
     - AFNetworking
     - HPTextViewTapGestureRecognizer (~> 0.1)
     - Reachability
     - SwiftyBeaver
-  - SwiftyBeaver (1.1.3)
+  - SwiftyBeaver (1.1.4)
   - SyncServer (0.1.0):
     - AFNetworking
     - Gloss
@@ -76,19 +76,19 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
   FirebaseAnalytics: 0d1b7d81d5021155be37702a94ba1ec16d45365d
-  FirebaseCore: 225d40532489835a034b8f4e2c9c87fbf4f615a2
+  FirebaseCore: a024587e43778508700af8c6b1209f7c4516ba02
   FirebaseInstanceID: 2d0518b1378fe9d685ef40cbdd63d2fdc1125339
-  Gloss: 9ab33b8ede01e4232571d43a6bf9259b85d1de69
+  Gloss: 2888941ffde93ae173da737414ba7193e4347d86
   Google: 813c467362eabc11385f5a5cc9ad0cb651a58f4e
   GoogleSignIn: d7ad83f13480e1f30453471d00d19b5293ac46af
   GoogleToolboxForMac: 8e329f1b599f2512c6b10676d45736bcc2cbbeb0
   GTMOAuth2: 7fc9c10f5c745f4d9850419ea88889fe3baa6b7d
-  GTMSessionFetcher: 6f8d8b28b7e345549ac471071608170b31cb4977
+  GTMSessionFetcher: 5c046c76a1f859bc9c187e918f18e4fc7bb57b5e
   HPTextViewTapGestureRecognizer: 6a73fd09f858e49a2743c3a338dc5c0791b0fae0
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   Reflection: 93327e50981227ac33c18274fcbaed33b1127811
-  SMCoreLib: bc09fc5a9d9cbe5214bfb7b5c819a3a135bc4d9a
-  SwiftyBeaver: 949aa1439b8fa3667f68555cfef65de46a70ccde
+  SMCoreLib: 8319b7a5827a09ed349cba5369c3f1a639848c53
+  SwiftyBeaver: 9216b6e163c145628ccc7c0126df4287880d6e1e
   SyncServer: ca7d76d87cdc430da5c47138ab66519bca456b4d
 
 PODFILE CHECKSUM: 07568c6736e57bebd9025f9af4fa850b0bae8845

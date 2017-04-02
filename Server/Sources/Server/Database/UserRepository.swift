@@ -78,7 +78,7 @@ class User : NSObject, Model {
     // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
     var credsObject:Creds? {
         do {
-            let credsObj = try Creds.toCreds(accountType: accountType, fromJSON: creds)
+            let credsObj = try Creds.toCreds(accountType: accountType, fromJSON: creds, delegate:nil)
             return credsObj
         }
         catch (let error) {
@@ -166,7 +166,7 @@ class UserRepository : Repository {
         }
         
         // Validate the JSON before we insert it. Can't really do it in the setter for creds because it's
-        guard let _ = try? Creds.toCreds(accountType: user.accountType, fromJSON: user.creds) else {
+        guard let _ = try? Creds.toCreds(accountType: user.accountType, fromJSON: user.creds, delegate:nil) else {
             Log.error(message: "Invalid creds JSON: \(user.creds)")
             return nil
         }

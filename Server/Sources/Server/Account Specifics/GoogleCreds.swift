@@ -65,7 +65,7 @@ class GoogleCreds : Creds {
     case noRequiredKeyValue
     }
     
-    override static func fromJSON(s:String) throws -> Creds? {
+    override static func fromJSON(s:String, delegate:CredsDelegate?) throws -> Creds? {
         guard let jsonDict = s.toJSONDictionary() as? [String:String] else {
             Log.error(message: "Could not convert string to JSON [String:String]: \(s)")
             return nil
@@ -88,7 +88,8 @@ class GoogleCreds : Creds {
         }
         
         let result = GoogleCreds()
-        
+        result.delegate = delegate
+
         try setProperty(key: accessTokenKey) { value in
             result.accessToken = value
         }
@@ -127,13 +128,14 @@ class GoogleCreds : Creds {
         return dictionaryToJSONString(dict: jsonDict)
     }
     
-    override static func fromProfile(profile:UserProfile) -> Creds? {
+    override static func fromProfile(profile:UserProfile, delegate:CredsDelegate?) -> Creds? {
         guard let googleSpecificCreds = profile.accountSpecificCreds as? GoogleSpecificCreds else {
             Log.error(message: "Account specific creds were not GoogleSpecificCreds")
             return nil
         }
         
         let creds = GoogleCreds()
+        creds.delegate = delegate
         creds.accessToken = googleSpecificCreds.accessToken
         creds.serverAuthCode = googleSpecificCreds.serverAuthCode
         return creds
@@ -186,7 +188,13 @@ class GoogleCreds : Creds {
                 self.refreshToken = refreshToken
                 Log.debug(message: "Obtained tokens: accessToken: \(accessToken)\n refreshToken: \(refreshToken)")
                 
-                if self.delegate == nil || self.delegate!.saveToDatabase(creds: self) {
+                if self.delegate == nil {
+                    Log.warning(message: "No Google Creds delegate!")
+                    completion(true, nil)
+                    return
+                }
+                
+                if self.delegate!.saveToDatabase(creds: self) {
                     completion(true, nil)
                     return
                 }
@@ -220,6 +228,7 @@ class GoogleCreds : Creds {
     case nilAPIResult
     case badJSONResult
     case errorSavingCredsToDatabase
+    case noRefreshToken
     }
     
     // Use the refresh token to generate a new access token.
@@ -227,6 +236,12 @@ class GoogleCreds : Creds {
     func refresh(completion:@escaping (Swift.Error?)->()) {
         // See "Using a refresh token" at https://developers.google.com/identity/protocols/OAuth2WebServer
 
+        // TODO: *0* Sometimes we've been ending up in a situation where we don't have a refresh token. The database somehow doesn't get the refresh token saveed in certain situations. What are those situations?
+        guard self.refreshToken != nil else {
+            completion(RefreshError.noRefreshToken)
+            return
+        }
+        
         let bodyParameters = "client_id=\(Constants.session.googleClientId)&client_secret=\(Constants.session.googleClientSecret)&refresh_token=\(self.refreshToken!)&grant_type=refresh_token"
         Log.debug(message: "bodyParameters: \(bodyParameters)")
         

@@ -264,4 +264,36 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
             }
         }
     }
+    
+    // Until today, 3/31/17, I had a bug in the server where this didn't work. It would try to delete the file using a name given by the the deviceUUID of the deleting device, not the uploading device.
+    func testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes() {
+        let deviceUUID1 = PerfectLib.UUID().string
+        
+        // This file is going to be deleted.
+        let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID1)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1
+        ])!
+        
+        let deviceUUID2 = PerfectLib.UUID().string
+
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false)
+
+        let expectedDeletionState = [
+            uploadRequest1.fileUUID: true,
+        ]
+
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest1.masterVersion + 1)
+        
+        let expectedSizes = [
+            uploadRequest1.fileUUID: fileSize1,
+        ]
+
+        self.getFileIndex(expectedFiles: [uploadRequest1], masterVersionExpected: uploadRequest1.masterVersion + 2, expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+    }
 }

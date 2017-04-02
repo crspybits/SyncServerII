@@ -11,27 +11,19 @@ import XCTest
 import SMCoreLib
 import Foundation
 
+// Test cases where the master version changes midway through the upload or download and forces a restart of the upload or download.
+
 class Client_SyncManager_MasterVersionChange: TestCase {
     
     override func setUp() {
         super.setUp()
-        DownloadFileTracker.removeAll()
-        DirectoryEntry.removeAll()
-        UploadFileTracker.removeAll()
-        UploadQueue.removeAll()
-        UploadQueues.removeAll()
-        
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
-        removeAllServerFilesInFileIndex()
+        resetFileMetaData()
     }
     
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-
-    // TODO: *0* Test cases where the master version changes midway through the upload or download and forces a restart of the upload or download.
     
     private func deleteFile(file: ServerAPI.FileToDelete, masterVersion:MasterVersionInt, completion:@escaping ()->()) {
 
@@ -53,6 +45,40 @@ class Client_SyncManager_MasterVersionChange: TestCase {
                 XCTAssert(numberUploadsTransferred == 1)
                 
                 completion()
+            }
+        }
+    }
+    
+    private func fullUploadOfFile(url: URL, fileUUID:String, mimeType:String, completion:@escaping (_ masterVersion:MasterVersionInt)->()) {
+        // Get the master version
+        ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
+            XCTAssert(error == nil)
+            XCTAssert(masterVersion! >= 0)
+            
+            let mimeType:String! = "text/plain"
+            let file = ServerAPI.File(localURL: url, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: self.cloudFolderName, deviceUUID: self.deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
+            
+            ServerAPI.session.uploadFile(file: file, serverMasterVersion: masterVersion!) { uploadFileResult, error in
+                XCTAssert(error == nil)
+
+                guard case .success(_) = uploadFileResult! else {
+                    XCTFail()
+                    return
+                }
+
+                ServerAPI.session.doneUploads(serverMasterVersion: masterVersion!) {
+                    doneUploadsResult, error in
+                    
+                    XCTAssert(error == nil)
+                    
+                    guard case .success(let numberUploads) = doneUploadsResult! else {
+                        return
+                    }
+                    
+                    XCTAssert(numberUploads == 1)
+                    
+                    completion(masterVersion!)
+                }
             }
         }
     }
@@ -79,7 +105,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         let expectation1 = self.expectation(description: "test1")
         let expectation2 = self.expectation(description: "test2")
         
-        let syncServerEventSingleUploadCompletedExp = self.expectation(description: "syncServerEventSingleUploadCompleted")
+        let syncServerSingleUploadCompletedExp = self.expectation(description: "syncServerSingleUploadCompleted")
         
         var shouldSaveDownloadsExp:XCTestExpectation?
         
@@ -96,8 +122,10 @@ class Client_SyncManager_MasterVersionChange: TestCase {
                 
             case .fileUploadsCompleted(numberOfFiles: let number):
                 XCTAssert(number == 2)
+                
                 // This is three because one of the uploads is repeated when the master version is updated.
                 XCTAssert(singleUploadsCompleted == 3, "Uploads actually completed: \(singleUploadsCompleted)")
+                
                 expectation2.fulfill()
                 
             case .singleFileUploadComplete(_):
@@ -108,7 +136,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             }
         }
     
-        let previousSyncServerEventSingleUploadCompleted = self.syncServerEventSingleUploadCompleted
+        let previousSyncServerSingleUploadCompleted = self.syncServerSingleUploadCompleted
         
         if !withDeletion {
             shouldSaveDownloads = { downloads in
@@ -117,7 +145,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             }
         }
     
-        syncServerEventSingleUploadCompleted = {next in
+        syncServerSingleUploadCompleted = {next in
             // A single upload was completed. Let's upload another file by "another" client. This code is a little ugly because I can't kick off another `waitForExpectations`.
             
             // TODO: This is actually going to force a download by our client. What do we have to do here to accomodate that?
@@ -132,51 +160,23 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             let fileUUID = UUID().uuidString
             let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
             
-            // Get the master version
-            ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
-                XCTAssert(error == nil)
-                XCTAssert(masterVersion! >= 0)
+            self.fullUploadOfFile(url: fileURL, fileUUID: fileUUID, mimeType: "text/plain") { masterVersion in
                 
-                let mimeType:String! = "text/plain"
-                let file = ServerAPI.File(localURL: fileURL, fileUUID: fileUUID, mimeType: mimeType, cloudFolderName: self.cloudFolderName, deviceUUID: self.deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
+                func end() {
+                    self.deviceUUID = previousDeviceUUID
+                    self.syncServerSingleUploadCompleted = previousSyncServerSingleUploadCompleted
+                    syncServerSingleUploadCompletedExp.fulfill()
+                    next()
+                }
                 
-                ServerAPI.session.uploadFile(file: file, serverMasterVersion: masterVersion!) { uploadFileResult, error in
-                    XCTAssert(error == nil)
-
-                    guard case .success(_) = uploadFileResult! else {
-                        XCTFail()
-                        return
+                if withDeletion {
+                    let fileToDelete = ServerAPI.FileToDelete(fileUUID: fileUUID, fileVersion: 0)
+                    self.deleteFile(file: fileToDelete, masterVersion: masterVersion + 1) {
+                        end()
                     }
-
-                    ServerAPI.session.doneUploads(serverMasterVersion: masterVersion!) {
-                        doneUploadsResult, error in
-                        
-                        XCTAssert(error == nil)
-                        
-                        guard case .success(let numberUploads) = doneUploadsResult! else {
-                            return
-                        }
-                        
-                        XCTAssert(numberUploads == 1)
-                        
-                        func end() {
-                            self.deviceUUID = previousDeviceUUID
-                            
-                            self.syncServerEventSingleUploadCompleted = previousSyncServerEventSingleUploadCompleted
-                            syncServerEventSingleUploadCompletedExp.fulfill()
-                            next()
-                        }
-                        
-                        if withDeletion {
-                            let fileToDelete = ServerAPI.FileToDelete(fileUUID: fileUUID, fileVersion: 0)
-                            self.deleteFile(file: fileToDelete, masterVersion: masterVersion! + 1) {
-                                end()
-                            }
-                        }
-                        else {
-                            end()
-                        }
-                    }
+                }
+                else {
+                    end()
                 }
             }
         }
@@ -184,6 +184,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         try! SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr1)
         
         // The `syncServerEventSingleUploadCompleted` block above will get called after uploading a single file and bumps the master version, without the knowledge of the client. Which will cause a re-do of the already completed upload.
+        // This tests getting the master version update on a file upload.
         
         try! SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr2)
         SyncServer.session.sync()
@@ -195,7 +196,10 @@ class Client_SyncManager_MasterVersionChange: TestCase {
             (fileUUID: fileUUID2, fileSize: nil)
         ])
         
-        let masterVersion = Singleton.get().masterVersion
+        var masterVersion:MasterVersionInt!
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            masterVersion = Singleton.get().masterVersion
+        }
         
         let file1 = ServerAPI.File(localURL: nil, fileUUID: fileUUID1, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
         onlyDownloadFile(comparisonFileURL: url as URL, file: file1, masterVersion: masterVersion)
@@ -211,6 +215,220 @@ class Client_SyncManager_MasterVersionChange: TestCase {
     // Test case where the secondary client does an upload followed by an immediate deletion of that same file. No delegate methods will be called because the primary client never knew about the file in the first place.
     func testMasterVersionChangeDuringUploadWithDeletion() {
         masterVersionChangeDuringUpload(withDeletion:true)
+    }
+    
+    // TODO: *0* First, using .sync(), upload a file. Then proceed as above, but the intervening "other" client does a deletion. So, this will cause a download deletion to interrupt the upload.
+    func testMasterVersionChangeBecauseOfKnownFileDeletion() {
+        let fileUUID1 = UUID().uuidString
+        let fileUUID2 = UUID().uuidString
+
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
+        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
+
+        let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
+    
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted]
+
+        let syncDone1Exp = self.expectation(description: "syncDone1Exp")
+        let file1Exp = self.expectation(description: "file1Exp")
+
+        syncServerEventOccurred = {event in
+            switch event {
+            case .syncDone:
+                syncDone1Exp.fulfill()
+                
+            case .fileUploadsCompleted(numberOfFiles: let number):
+                XCTAssert(number == 1)
+                file1Exp.fulfill()
+                
+            default:
+                XCTFail()
+            }
+        }
+        
+        // 1) Do the upload of the first file.
+        try! SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr1)
+        SyncServer.session.sync()
+        
+        waitForExpectations(timeout: 20.0, handler: nil)
+        
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
+        
+        let syncDone2Exp = self.expectation(description: "syncDone2Exp")
+        let fileUploadsCompletedExp = self.expectation(description: "fileUploadsCompleted")
+        let syncServerSingleUploadCompletedExp = self.expectation(description: "syncServerSingleUploadCompleted")
+        let shouldDoDeletionsExp = self.expectation(description: "shouldDoDeletionsExp")
+
+        var singleUploadsCompleted = 0
+        
+        syncServerEventOccurred = {event in
+            switch event {
+            case .syncDone:
+                syncDone2Exp.fulfill()
+                
+            case .fileUploadsCompleted(numberOfFiles: let number):
+                XCTAssert(number == 1)
+                XCTAssert(singleUploadsCompleted == 2, "Uploads actually completed: \(singleUploadsCompleted)")
+                fileUploadsCompletedExp.fulfill()
+                
+            case .singleFileUploadComplete(_):
+                singleUploadsCompleted += 1
+                
+            default:
+                XCTFail()
+            }
+        }
+        
+        let previousShouldDoDeletions = shouldDoDeletions
+        shouldDoDeletions = {deletions in
+            XCTAssert(deletions.count == 1)
+            self.shouldDoDeletions = previousShouldDoDeletions
+            shouldDoDeletionsExp.fulfill()
+        }
+    
+        let previousSyncServerSingleUploadCompleted = self.syncServerSingleUploadCompleted
+    
+        syncServerSingleUploadCompleted = {next in
+            let previousDeviceUUID = self.deviceUUID
+            self.deviceUUID = UUID()
+            
+            // Get the master version
+            ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
+                XCTAssert(error == nil)
+                XCTAssert(masterVersion! >= 0)
+                
+                let fileToDelete = ServerAPI.FileToDelete(fileUUID: fileUUID1, fileVersion: 0)
+                self.deleteFile(file: fileToDelete, masterVersion: masterVersion!) {
+                    self.deviceUUID = previousDeviceUUID
+                    
+                    self.syncServerSingleUploadCompleted = previousSyncServerSingleUploadCompleted
+                    syncServerSingleUploadCompletedExp.fulfill()
+                    next()
+                }
+            }
+        }
+        
+        // 2) Do the upload of the second file, interrupted by the deletion of the first. This tests getting the master version update on DoneUploads.
+
+        try! SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr2)
+        SyncServer.session.sync()
+        
+        waitForExpectations(timeout: 20.0, handler: nil)
+        
+        getFileIndex(expectedFiles: [
+            (fileUUID: fileUUID2, fileSize: nil),
+        ])
+        
+        var masterVersion:MasterVersionInt!
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+            masterVersion = Singleton.get().masterVersion
+        }
+        
+        let file2 = ServerAPI.File(localURL: nil, fileUUID: fileUUID2, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        onlyDownloadFile(comparisonFileURL: url as URL, file: file2, masterVersion: masterVersion)
+    }
+    
+    // Test getting a master version update an UploadDeletion
+    func testMasterVersionUpdateOnUploadDeletion() {
+        let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
+        let fileUUID1 = UUID().uuidString
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
+
+        // 1) Preparation: Upload a file, identified by UUID1. This is the file we'll delete below. We have to use the SyncServer.session client interface so that it will get recorded in the local meta data for the client.
+
+        SyncServer.session.eventsDesired = [.syncDone]
+
+        let syncDoneExp1 = self.expectation(description: "syncDoneExp1")
+        
+        var singleUploadsCompleted = 0
+        
+        syncServerEventOccurred = {event in
+            switch event {
+            case .syncDone:
+                syncDoneExp1.fulfill()
+                
+            default:
+                XCTFail("\(event)")
+            }
+        }
+        
+        try! SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr1)
+        SyncServer.session.sync()
+
+        waitForExpectations(timeout: 20.0, handler: nil)
+
+        // This file will trigger the master version update
+        let fileUUID2 = UUID().uuidString
+        
+        // File to upload which will cause a SyncServer event which will allow us to upload fileUUID2
+        let fileUUID3 = UUID().uuidString
+        
+        let attr3 = SyncAttributes(fileUUID: fileUUID3, mimeType: "text/plain")
+
+        SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete, .uploadDeletionsCompleted]
+        
+        let syncDoneExp2 = self.expectation(description: "syncDoneExp2")
+        let syncServerSingleUploadCompletedExp = self.expectation(description: "syncServerSingleUploadCompletedExp")
+        let shouldSaveDownloadsExp = self.expectation(description: "shouldSaveDownloadsExp")
+        let fileUploadsCompletedExp = self.expectation(description: "fileUploadsCompletedExp")
+        let uploadDeletionsCompletedExp = self.expectation(description: "uploadDeletionsCompletedExp")
+                
+        syncServerEventOccurred = {event in
+            switch event {
+            case .syncDone:
+                syncDoneExp2.fulfill()
+
+            case .fileUploadsCompleted(numberOfFiles: let number):
+                XCTAssert(number == 1)
+                
+                // This is two because the upload is repeated when the master version is updated.
+                XCTAssert(singleUploadsCompleted == 2, "Uploads actually completed: \(singleUploadsCompleted)")
+                
+                fileUploadsCompletedExp.fulfill()
+                
+            case .uploadDeletionsCompleted(numberOfFiles: let number):
+                XCTAssert(number == 1)
+                uploadDeletionsCompletedExp.fulfill()
+                
+            case .singleFileUploadComplete(_):
+                singleUploadsCompleted += 1
+                
+            default:
+                XCTFail()
+            }
+        }
+        
+        shouldSaveDownloads = { downloads in
+            XCTAssert(downloads.count == 1)
+            shouldSaveDownloadsExp.fulfill()
+        }
+    
+        let previousSyncSingleUploadCompleted = self.syncServerSingleUploadCompleted
+
+        syncServerSingleUploadCompleted = { next in
+            // Simulate the Upload of fileUUID2 as a different device
+            let previousDeviceUUID = self.deviceUUID
+            self.deviceUUID = UUID()
+            
+            self.fullUploadOfFile(url: url as URL, fileUUID: fileUUID2, mimeType: "text/plain") { masterVersion in
+            
+                self.deviceUUID = previousDeviceUUID
+                syncServerSingleUploadCompletedExp.fulfill()
+                self.syncServerSingleUploadCompleted = previousSyncSingleUploadCompleted
+                next()
+            }
+        }
+        
+        do {
+            try SyncServer.session.uploadImmutable(localFile: url, withAttributes: attr3)
+            try SyncServer.session.delete(fileWithUUID: fileUUID1)
+        } catch (let error) {
+            XCTFail("\(error)")
+        }
+        
+        SyncServer.session.sync()
+        
+        waitForExpectations(timeout: 20.0, handler: nil)
     }
     
     // TODO: *0*

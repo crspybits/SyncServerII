@@ -17,8 +17,9 @@ class Directory {
     private init() {
     }
     
+    // Does not do `CoreData.sessionNamed(Constants.coreDataName).performAndWait`
     // Compares the passed fileIndex to the current DirecotoryEntry objects, and returns just the FileInfo objects we need to download/delete, if any. The directory is not changed as a result of this call, except for the case where the file isn't in the directory already, but has been deleted on the server.
-    func checkFileIndex(fileIndex:[FileInfo]) ->
+    func checkFileIndex(fileIndex:[FileInfo]) throws ->
         (downloadFiles:[FileInfo]?, downloadDeletions:[FileInfo]?)  {
     
         var downloadFiles = [FileInfo]()
@@ -32,7 +33,7 @@ class Directory {
         
         for file in fileIndex {
             var action:Action = .none
-            
+
             if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: file.fileUUID) {
                 // Have the file in client directory.
                 
@@ -57,7 +58,7 @@ class Directory {
                     entry.deletedOnServer = true
                     entry.fileUUID = file.fileUUID
                     entry.fileVersion = file.fileVersion
-                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                    try CoreData.sessionNamed(Constants.coreDataName).context.save()
                 }
                 else {
                     action = .needToDownload
@@ -82,6 +83,7 @@ class Directory {
             downloadDeletions.count == 0 ? nil : downloadDeletions)
     }
     
+    // Does not do `CoreData.sessionNamed(Constants.coreDataName).performAndWait`
     func updateAfterDownloadingFiles(downloads:[DownloadFileTracker]) {
         downloads.map { dft in
             if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: dft.fileUUID) {
@@ -96,6 +98,7 @@ class Directory {
         }
     }
     
+    // Does not do `CoreData.sessionNamed(Constants.coreDataName).performAndWait`
     func updateAfterDownloadDeletingFiles(deletions:[DownloadFileTracker]) {
         deletions.map { dft in
             // Have already dealt with case where we didn't know about this file locally and were download deleting it.

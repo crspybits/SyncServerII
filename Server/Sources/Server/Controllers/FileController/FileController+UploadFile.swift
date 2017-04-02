@@ -26,6 +26,7 @@ extension FileController {
 
             if masterVersion != uploadRequest.masterVersion {
                 let response = UploadFileResponse()!
+                Log.warning(message: "Master version update: \(masterVersion)")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return

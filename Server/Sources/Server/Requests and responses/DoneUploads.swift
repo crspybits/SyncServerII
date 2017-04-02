@@ -99,6 +99,7 @@ class DoneUploadsResponse : ResponseMessage {
     required init?(json: JSON) {
         self.numberUploadsTransferred = DoneUploadsResponse.numberUploadsTransferredKey <~~ json
         self.masterVersionUpdate = DoneUploadsResponse.masterVersionUpdateKey <~~ json
+        self.numberDeletionErrors = DoneUploadsResponse.numberDeletionErrorsKey <~~ json
     }
     
     convenience init?() {
@@ -109,7 +110,8 @@ class DoneUploadsResponse : ResponseMessage {
     func toJSON() -> JSON? {
         return jsonify([
             DoneUploadsResponse.masterVersionUpdateKey ~~> self.masterVersionUpdate,
-            DoneUploadsResponse.numberUploadsTransferredKey ~~> self.numberUploadsTransferred
+            DoneUploadsResponse.numberUploadsTransferredKey ~~> self.numberUploadsTransferred,
+            DoneUploadsResponse.numberDeletionErrorsKey ~~> self.numberDeletionErrors
         ])
     }
 }

@@ -32,33 +32,54 @@ class Download {
                 return
             }
 
-            let (fileDownloads, downloadDeletions) = Directory.session.checkFileIndex(fileIndex: fileIndex!)
-
-            Singleton.get().masterVersion = masterVersion!
+            var completionResult:CheckCompletion!
             
-            if fileDownloads == nil && downloadDeletions == nil {
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                completion?(.noDownloadsOrDeletionsAvailable)
-            }
-            else {
-                let allFiles = (fileDownloads ?? []) + (downloadDeletions ?? [])
-                for file in allFiles {
-                    if file.fileVersion != 0 {
-                        // TODO: *5* We're considering this an error currently because we're not yet supporting multiple file versions.
-                        assert(false, "Not Yet Implemented: Multiple File Versions")
-                    }
-                    
-                    var dft = DownloadFileTracker.newObject() as! DownloadFileTracker
-                    dft.fileUUID = file.fileUUID
-                    dft.fileVersion = file.fileVersion
-                    dft.mimeType = file.mimeType
-                    dft.deletedOnServer = file.deleted!
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                var fileDownloads:[FileInfo]!
+                var downloadDeletions:[FileInfo]!
+                
+                do {
+                    let (downloads, deletions) =
+                        try Directory.session.checkFileIndex(fileIndex: fileIndex!)
+                    fileDownloads = downloads
+                    downloadDeletions = deletions
+                } catch (let error) {
+                    completionResult = .error(error)
+                    return
                 }
                 
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
-                completion?(.downloadsOrDeletionsAvailable(numberOfFiles: Int32(allFiles.count)))
-            }
+                Singleton.get().masterVersion = masterVersion!
+                
+                if fileDownloads == nil && downloadDeletions == nil {
+                    completionResult = .noDownloadsOrDeletionsAvailable
+                }
+                else {
+                    let allFiles = (fileDownloads ?? []) + (downloadDeletions ?? [])
+                    for file in allFiles {
+                        if file.fileVersion != 0 {
+                            // TODO: *5* We're considering this an error currently because we're not yet supporting multiple file versions.
+                            assert(false, "Not Yet Implemented: Multiple File Versions")
+                        }
+                        
+                        var dft = DownloadFileTracker.newObject() as! DownloadFileTracker
+                        dft.fileUUID = file.fileUUID
+                        dft.fileVersion = file.fileVersion
+                        dft.mimeType = file.mimeType
+                        dft.deletedOnServer = file.deleted!
+                    }
+                    
+                    completionResult = .downloadsOrDeletionsAvailable(numberOfFiles: Int32(allFiles.count))
+                }
+                
+                do {
+                    try CoreData.sessionNamed(Constants.coreDataName).context.save()
+                } catch (let error) {
+                    completionResult = .error(error)
+                    return
+                }
+            } // End performAndWait
+            
+            completion?(completionResult)
         }
     }
 
@@ -70,40 +91,69 @@ class Download {
     }
     
     enum NextCompletion {
-    case fileDownloaded(DownloadFileTracker)
+    case fileDownloaded(url:SMRelativeLocalURL, attr:SyncAttributes)
     case masterVersionUpdate
     case error(String)
     }
     
     // Starts download of next file, if there is one. There should be no files downloading already. Only if .started is the NextResult will the completion handler be called. With a masterVersionUpdate response for NextCompletion, the MasterVersion Core Data object is updated by this method, and all the DownloadFileTracker objects have been reset.
     func next(completion:((NextCompletion)->())?) -> NextResult {
-        let dfts = DownloadFileTracker.fetchAll()
-        if dfts.count == 0 {
-            return .noDownloadsOrDeletions
-        }
+        var masterVersion:MasterVersionInt!
+        var nextResult:NextResult?
+        var downloadFile:FilenamingObject!
+        var nextToDownload:DownloadFileTracker!
+        
+        CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+            let dfts = DownloadFileTracker.fetchAll()
+            guard dfts.count != 0 else {
+                nextResult = .noDownloadsOrDeletions
+                return
+            }
 
-        let alreadyDownloading = dfts.filter {$0.status == .downloading}
-        if alreadyDownloading.count != 0 {
-            let message = "Already downloading a file!"
-            Log.error(message)
-            return .error(message)
+            let alreadyDownloading = dfts.filter {$0.status == .downloading}
+            guard alreadyDownloading.count == 0 else {
+                let message = "Already downloading a file!"
+                Log.error(message)
+                nextResult = .error(message)
+                return
+            }
+            
+            let notStarted = dfts.filter {$0.status == .notStarted && !$0.deletedOnServer}
+            guard notStarted.count != 0 else {
+                nextResult = .allDownloadsCompleted
+                return
+            }
+            
+            masterVersion = Singleton.get().masterVersion
+
+            nextToDownload = notStarted[0]
+            nextToDownload.status = .downloading
+            
+            do {
+                try CoreData.sessionNamed(Constants.coreDataName).context.save()
+            } catch (let error) {
+                nextResult = .error("\(error)")
+            }
+            
+            // Need this inside the `performAndWait` to bridge the gap without an NSManagedObject
+            downloadFile = FilenamingObject(fileUUID: nextToDownload.fileUUID, fileVersion: nextToDownload.fileVersion)
         }
         
-        let notStarted = dfts.filter {$0.status == .notStarted && !$0.deletedOnServer}
-        if notStarted.count == 0 {
-            return .allDownloadsCompleted
+        guard nextResult == nil else {
+            return nextResult!
         }
+
+        ServerAPI.session.downloadFile(file: downloadFile, serverMasterVersion: masterVersion) { (result, error)  in
         
-        var nextToDownload = notStarted[0]
-        let masterVersion = Singleton.get().masterVersion
-
-        nextToDownload.status = .downloading
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-
-        ServerAPI.session.downloadFile(file: nextToDownload as! Filenaming, serverMasterVersion: masterVersion) { (result, error)  in
+            // Don't hold the performAndWait while we do completion-- easy to get a deadlock!
+        
             guard error == nil else {
-                nextToDownload.status = .notStarted
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    nextToDownload.status = .notStarted
+                    
+                    // Not going to check for exceptions on saveContext; we already have an error.
+                    CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                }
                 
                 let message = "Error: \(error)"
                 Log.error(message)
@@ -113,21 +163,46 @@ class Download {
             
             switch result! {
             case .success(let downloadedFile):
-                nextToDownload.status = .downloaded
-                nextToDownload.appMetaData = downloadedFile.appMetaData
-                nextToDownload.fileSizeBytes = downloadedFile.fileSizeBytes
-                nextToDownload.localURL = downloadedFile.url
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                completion?(.fileDownloaded(nextToDownload))
+                var nextCompletionResult:NextCompletion!
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    nextToDownload.status = .downloaded
+                    nextToDownload.appMetaData = downloadedFile.appMetaData
+                    nextToDownload.fileSizeBytes = downloadedFile.fileSizeBytes
+                    nextToDownload.localURL = downloadedFile.url
+                    
+                    do {
+                        try CoreData.sessionNamed(Constants.coreDataName).context.save()
+                    } catch (let error) {
+                        nextCompletionResult = .error("\(error)")
+                        return
+                    }
+                    
+                    let url = nextToDownload.localURL
+                    let attr = SyncAttributes(fileUUID: nextToDownload.fileUUID, mimeType: nextToDownload.mimeType!)
+                    nextCompletionResult = .fileDownloaded(url:url!, attr:attr)
+                }
+        
+                completion?(nextCompletionResult)
                 
             case .serverMasterVersionUpdate(let masterVersionUpdate):
                 // TODO: *2* A more efficient method (than in place here) is to get the file index, giving us the new masterVersion, and see which files that we have already downloaded have the same version as we expect.
                 // The simplest method to deal with this is to restart all downloads. It is insufficient to just reset all of the DownloadFileTracker objects: Because some of the files we're wanting to download could have been marked as deleted in the FileIndex on the server. Thus, I'm going to remove all DownloadFileTracker objects.
-
-                DownloadFileTracker.removeAll()
-                Singleton.get().masterVersion = masterVersionUpdate
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                completion?(.masterVersionUpdate)
+                var nextCompletionResult:NextCompletion!
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    DownloadFileTracker.removeAll()
+                    Singleton.get().masterVersion = masterVersionUpdate
+                    
+                    do {
+                        try CoreData.sessionNamed(Constants.coreDataName).context.save()
+                    } catch (let error) {
+                        nextCompletionResult = .error("\(error)")
+                        return
+                    }
+                    
+                    nextCompletionResult = .masterVersionUpdate
+                }
+                
+                completion?(nextCompletionResult)
             }
         }
         

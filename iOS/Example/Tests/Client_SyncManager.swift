@@ -14,11 +14,7 @@ class Client_SyncManager: TestCase {
     override func setUp() {
         super.setUp()
         
-        DownloadFileTracker.removeAll()
-        DirectoryEntry.removeAll()
-        CoreData.sessionNamed(Constants.coreDataName).saveContext()
-        
-        removeAllServerFilesInFileIndex()
+        resetFileMetaData()
     }
     
     override func tearDown() {
@@ -84,19 +80,21 @@ class Client_SyncManager: TestCase {
         SyncManager.session.start { (error) in
             XCTAssert(error == nil)
             
-            let entries = DirectoryEntry.fetchAll()
-            XCTAssert(entries.count == expectedFiles.count)
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+                let entries = DirectoryEntry.fetchAll()
+                XCTAssert(entries.count == expectedFiles.count)
 
-            for file in expectedFiles {
-                let entriesResult = entries.filter { $0.fileUUID == file.fileUUID &&
-                    $0.fileVersion == file.fileVersion
+                for file in expectedFiles {
+                    let entriesResult = entries.filter { $0.fileUUID == file.fileUUID &&
+                        $0.fileVersion == file.fileVersion
+                    }
+                    XCTAssert(entriesResult.count == 1)
                 }
-                XCTAssert(entriesResult.count == 1)
-            }
-            
-            if useOwnSyncServerEventOccurred {
-                XCTAssert(downloadsCompleted == 2)
-                XCTAssert(eventsOccurred == 1)
+                
+                if useOwnSyncServerEventOccurred {
+                    XCTAssert(downloadsCompleted == 2)
+                    XCTAssert(eventsOccurred == 1)
+                }
             }
             
             completion?()
@@ -166,9 +164,15 @@ class Client_SyncManager: TestCase {
             }
 
             if numberEvents == 1 {
-                // This is fake: It would be conceptually better to upload a file here but that's a bit of a pain the way I have it setup in testing.
-                Singleton.get().masterVersion = Singleton.get().masterVersion - 1
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait {
+                    // This is fake: It would be conceptually better to upload a file here but that's a bit of a pain the way I have it setup in testing.
+                    Singleton.get().masterVersion = Singleton.get().masterVersion - 1
+                    do {
+                        try CoreData.sessionNamed(Constants.coreDataName).context.save()
+                    } catch {
+                        XCTFail()
+                    }
+                }
             }
         }
         

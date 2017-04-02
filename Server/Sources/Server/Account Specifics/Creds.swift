@@ -28,12 +28,12 @@ public class Creds {
         return nil
     }
     
-    class func fromProfile(profile:UserProfile) -> Creds? {
+    class func fromProfile(profile:UserProfile, delegate:CredsDelegate?) -> Creds? {
         assert(false, "Unimplemented")
         return nil
     }
     
-    class func fromJSON(s:String) throws -> Creds? {
+    class func fromJSON(s:String, delegate:CredsDelegate?) throws -> Creds? {
         assert(false, "Unimplemented")
         return nil
     }
@@ -156,10 +156,10 @@ public class Creds {
 }
 
 extension Creds {
-    static func toCreds(accountType:AccountType, fromJSON json:String) throws -> Creds? {
+    static func toCreds(accountType:AccountType, fromJSON json:String, delegate:CredsDelegate?) throws -> Creds? {
         switch accountType {
         case .Google:
-            return try GoogleCreds.fromJSON(s: json)
+            return try GoogleCreds.fromJSON(s: json, delegate:delegate)
         }
     }
     
@@ -170,7 +170,7 @@ extension Creds {
         
         switch accountType {
         case .Google:
-            if let creds = GoogleCreds.fromProfile(profile: profile) {
+            if let creds = GoogleCreds.fromProfile(profile: profile, delegate:nil) {
                 return creds.toJSON()
             }
             else {
@@ -179,14 +179,14 @@ extension Creds {
         }
     }
     
-    class func toCreds(fromProfile profile:UserProfile) -> Creds? {
+    class func toCreds(fromProfile profile:UserProfile, delegate:CredsDelegate?) -> Creds? {
         guard let accountType = AccountType.fromSpecificCredsType(specificCreds: profile.accountSpecificCreds!) else {
             return nil
         }
         
         switch accountType {
         case .Google:
-            if let creds = GoogleCreds.fromProfile(profile: profile) {
+            if let creds = GoogleCreds.fromProfile(profile: profile, delegate:delegate) {
                 return creds
             }
             else {

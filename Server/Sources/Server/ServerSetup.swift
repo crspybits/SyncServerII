@@ -224,7 +224,7 @@ private class RequestHandler : CredsDelegate {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try Creds.toCreds(accountType: currentSignedInUser!.accountType, fromJSON: currentSignedInUser!.creds)
+                    dbCreds = try Creds.toCreds(accountType: currentSignedInUser!.accountType, fromJSON: currentSignedInUser!.creds, delegate:self)
                 } catch (let error) {
                     errorString = "\(error)"
                 }
@@ -233,8 +233,6 @@ private class RequestHandler : CredsDelegate {
                     self.failWithError(message: "Could not convert Creds of type: \(currentSignedInUser!.accountType) from JSON: \(currentSignedInUser!.creds); error: \(errorString)")
                     return
                 }
-                
-                dbCreds!.delegate = self
                 
             case .noObjectFound:
                 failWithError(message: "Failed on secondary authentication", statusCode: .unauthorized)
@@ -262,7 +260,7 @@ private class RequestHandler : CredsDelegate {
         else {
             assert(authenticationLevel! == .primary || authenticationLevel! == .secondary)
 
-            guard let profileCreds = Creds.toCreds(fromProfile: profile!) else {
+            guard let profileCreds = Creds.toCreds(fromProfile: profile!, delegate:self) else {
                 failWithError(message: "Failed converting to Creds from profile", statusCode: .unauthorized)
                 return
             }

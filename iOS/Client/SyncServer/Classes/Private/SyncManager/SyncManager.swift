@@ -36,9 +36,8 @@ class SyncManager {
         // First: Do we have previously queued downloads that need to be downloaded?
         let nextResult = Download.session.next() { nextCompletionResult in
             switch nextCompletionResult {
-            case .fileDownloaded(let dft):
-                let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType:dft.mimeType!)
-                EventDesired.reportEvent(.singleFileDownloadComplete(url:dft.localURL!, attr:attr), mask: self.desiredEvents, delegate: self.delegate)
+            case .fileDownloaded(let url, let attr):
+                EventDesired.reportEvent(.singleFileDownloadComplete(url:url, attr:attr), mask: self.desiredEvents, delegate: self.delegate)
             
                 // Recursively (hopefully, this is tail recursion with optimization) check for any next download.
                 self.start(callback)
@@ -56,65 +55,96 @@ class SyncManager {
         }
         
         switch nextResult {
+        case .noDownloadsOrDeletions:
+            checkForDownloads()
+
+        case .error(let error):
+            callback?(StartError.error(error))
+            
         case .started:
             // Don't do anything. `next` completion will invoke callback.
             return
             
         case .allDownloadsCompleted:
             // Inform client via delegate of file downloads and/or download deletions.
-            
-            let dfts = DownloadFileTracker.fetchAll()
-            let numberDfts = dfts.count
-            assert(numberDfts > 0)
-            
-            fileDownloadDfts = dfts.filter {$0.deletedOnServer == false}
-            downloadDeletionDfts = dfts.filter {$0.deletedOnServer == true}
-            
-            if fileDownloadDfts!.count > 0 {
-                var downloads = [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]()
-                fileDownloadDfts!.map { dft in
-                    let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
-                    downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
+
+            var downloads = [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]()
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                let dfts = DownloadFileTracker.fetchAll()
+                let numberDfts = dfts.count
+                assert(numberDfts > 0)
+                
+                self.fileDownloadDfts = dfts.filter {$0.deletedOnServer == false}
+                self.downloadDeletionDfts = dfts.filter {$0.deletedOnServer == true}
+                
+                if self.fileDownloadDfts!.count > 0 {
+                    self.fileDownloadDfts!.map { dft in
+                        let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
+                        downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
+                    }
                 }
+            }
             
+            if downloads.count > 0 {
                 Thread.runSync(onMainThread: {
                     self.delegate?.shouldSaveDownloads(downloads: downloads)
                 })
                 
-                Directory.session.updateAfterDownloadingFiles(downloads: fileDownloadDfts!)
-                EventDesired.reportEvent(.fileDownloadsCompleted(numberOfFiles: fileDownloadDfts!.count), mask: self.desiredEvents, delegate: self.delegate)
-            }
-            
-            if downloadDeletionDfts!.count > 0 {
-                var deletions = [SyncAttributes]()
-                downloadDeletionDfts!.map { dft in
-                    let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
-                    deletions += [attr]
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    Directory.session.updateAfterDownloadingFiles(downloads: self.fileDownloadDfts!)
                 }
                 
-                Log.msg("Deletions: count: \(deletions.count)")
-                
+                EventDesired.reportEvent(.fileDownloadsCompleted(numberOfFiles: downloads.count), mask: self.desiredEvents, delegate: self.delegate)
+            }
+            
+            var deletions = [SyncAttributes]()
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                if self.downloadDeletionDfts!.count > 0 {
+                    self.downloadDeletionDfts!.map { dft in
+                        let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
+                        deletions += [attr]
+                    }
+                    
+                    Log.msg("Deletions: count: \(deletions.count)")
+                }
+            }
+            
+            // This is broken out of the above `performAndWait` to not get a deadlock when I do the `Thread.runSync(onMainThread:`.
+            if deletions.count > 0 {
                 Thread.runSync(onMainThread: {
                     self.delegate?.shouldDoDeletions(downloadDeletions: deletions)
                 })
-
-                Directory.session.updateAfterDownloadDeletingFiles(deletions: downloadDeletionDfts!)
-                EventDesired.reportEvent(.downloadDeletionsCompleted(numberOfFiles: downloadDeletionDfts!.count), mask: self.desiredEvents, delegate: self.delegate)
+                
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    Directory.session.updateAfterDownloadDeletingFiles(deletions: self.downloadDeletionDfts!)
+                }
+                
+                EventDesired.reportEvent(.downloadDeletionsCompleted(numberOfFiles: deletions.count), mask: self.desiredEvents, delegate: self.delegate)
+                
                 // TODO: *0* Next, if we have any pending deletions in upload queue for any of these just obtained download deletions, we should remove those pending deletions.
             }
             
-            numberFileDownloads = fileDownloadDfts == nil ? 0 : fileDownloadDfts!.count
-            numberDownloadDeletions = downloadDeletionDfts == nil ? 0 : downloadDeletionDfts!.count
+            var errorResult:Error?
+            CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                self.numberFileDownloads = self.fileDownloadDfts == nil ? 0 : self.fileDownloadDfts!.count
+                self.numberDownloadDeletions = self.downloadDeletionDfts == nil ? 0 : self.downloadDeletionDfts!.count
+                
+                DownloadFileTracker.removeAll()
+                
+                do {
+                    try CoreData.sessionNamed(Constants.coreDataName).context.save()
+                } catch (let error) {
+                    errorResult = error
+                    return
+                }
+            }
             
-            DownloadFileTracker.removeAll()
-            CoreData.sessionNamed(Constants.coreDataName).saveContext()
+            guard errorResult == nil else {
+                callback?(errorResult)
+                return
+            }
+            
             self.checkForPendingUploads()
-            
-        case .noDownloadsOrDeletions:
-            checkForDownloads()
-
-        case .error(let error):
-            callback?(StartError.error(error))
         }
     }
 
@@ -143,19 +173,22 @@ class SyncManager {
                 EventDesired.reportEvent(.singleFileUploadComplete(attr: attr), mask: self.desiredEvents, delegate: self.delegate)
                 
                 // Recursively see if there is a next upload to do.
+#if DEBUG
                 if self.delegate == nil {
                     self.checkForPendingUploads()
                 }
                 else {
                     Thread.runSync(onMainThread: {
-                        self.delegate!.syncServerEventSingleUploadCompleted(next: {
+                        self.delegate!.syncServerSingleUploadCompleted(next: {
                             self.checkForPendingUploads()
                         })
                     })
                 }
-                
-            case .uploadDeletion(let uft):
-                EventDesired.reportEvent(.singleUploadDeletionComplete(fileUUID: uft.fileUUID), mask: self.desiredEvents, delegate: self.delegate)
+#else
+                self.checkForPendingUploads()
+#endif
+            case .uploadDeletion(let fileUUID):
+                EventDesired.reportEvent(.singleUploadDeletionComplete(fileUUID: fileUUID), mask: self.desiredEvents, delegate: self.delegate)
                 // Recursively see if there is a next upload to do.
                 self.checkForPendingUploads()
                 
@@ -187,47 +220,70 @@ class SyncManager {
     private func doneUploads() {
         Upload.session.doneUploads { completionResult in
             switch completionResult {
-            // `numTransferred` may not be accurrate in the case of retries/recovery.
-            case .doneUploads(numberTransferred: let numTransferred):
-                let uploadQueue = Upload.getHeadSyncQueue()!
-                
-                let fileUploads = uploadQueue.uploadFileTrackers.filter {!$0.deleteOnServer}
-                if fileUploads.count > 0 {
-                    EventDesired.reportEvent(.fileUploadsCompleted(numberOfFiles: fileUploads.count), mask: self.desiredEvents, delegate: self.delegate)
-                    
-                    // Each of the DirectoryEntry's for the uploads needs to now be given its version, as uploaded.
-                    fileUploads.map {uft in
-                        guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
-                            assert(false)
-                        }
-
-                        uploadedEntry.fileVersion = uft.fileVersion
-                    }
-                }
-                
-                let uploadDeletions = uploadQueue.uploadFileTrackers.filter {$0.deleteOnServer}
-                if uploadDeletions.count > 0 {
-                    EventDesired.reportEvent(.uploadDeletionsCompleted(numberOfFiles: uploadDeletions.count), mask: self.desiredEvents, delegate: self.delegate)
-                    
-                    // Each of the DirectoryEntry's for the uploads needs to now be marked as deleted.
-                    uploadDeletions.map { uft in
-                        guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
-                            assert(false)
-                        }
-
-                        uploadedEntry.deletedOnServer = true
-                    }
-                }
-                
-                CoreData.sessionNamed(Constants.coreDataName).remove(uploadQueue)
-                CoreData.sessionNamed(Constants.coreDataName).saveContext()
-                self.callback?(nil)
-                
             case .masterVersionUpdate:
                 self.checkForDownloads()
                 
             case .error(let error):
                 self.callback?(StartError.error(error))
+                
+            // `numTransferred` may not be accurrate in the case of retries/recovery.
+            case .doneUploads(numberTransferred: let numTransferred):
+                var uploadQueue:UploadQueue!
+                var fileUploads:[UploadFileTracker]!
+                var uploadDeletions:[UploadFileTracker]!
+                
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    uploadQueue = Upload.getHeadSyncQueue()!
+                    fileUploads = uploadQueue.uploadFileTrackers.filter {!$0.deleteOnServer}
+                }
+                
+                if fileUploads.count > 0 {
+                    EventDesired.reportEvent(.fileUploadsCompleted(numberOfFiles: fileUploads.count), mask: self.desiredEvents, delegate: self.delegate)
+                }
+                
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    if fileUploads.count > 0 {
+                        // Each of the DirectoryEntry's for the uploads needs to now be given its version, as uploaded.
+                        fileUploads.map {uft in
+                            guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
+                                assert(false)
+                            }
+
+                            uploadedEntry.fileVersion = uft.fileVersion
+                        }
+                    }
+                    
+                    uploadDeletions = uploadQueue.uploadFileTrackers.filter {$0.deleteOnServer}
+                }
+
+                if uploadDeletions.count > 0 {
+                    EventDesired.reportEvent(.uploadDeletionsCompleted(numberOfFiles: uploadDeletions.count), mask: self.desiredEvents, delegate: self.delegate)
+                }
+                
+                var errorResult:Error?
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    if uploadDeletions.count > 0 {
+                        // Each of the DirectoryEntry's for the uploads needs to now be marked as deleted.
+                        uploadDeletions.map { uft in
+                            guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
+                                assert(false)
+                            }
+
+                            uploadedEntry.deletedOnServer = true
+                        }
+                    }
+                    
+                    CoreData.sessionNamed(Constants.coreDataName).remove(uploadQueue)
+                    
+                    do {
+                        try CoreData.sessionNamed(Constants.coreDataName).context.save()
+                    } catch (let error) {
+                        errorResult = error
+                        return
+                    }
+                }
+                
+                self.callback?(errorResult)
             }
         }
     }
