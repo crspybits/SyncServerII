@@ -552,6 +552,12 @@ extension TestCase : ServerNetworkingAuthentication {
         result[ServerConstants.httpRequestDeviceUUID] = self.deviceUUID.uuidString
         deviceUUIDUsed = true
         
+#if DEBUG
+        if ServerAPI.session.failNextEndpoint {
+            result[ServerConstants.httpRequestEndpointFailureTestKey] = "true"
+        }
+#endif
+        
         return result
     }
 }

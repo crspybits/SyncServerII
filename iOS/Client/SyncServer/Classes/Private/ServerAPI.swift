@@ -22,6 +22,24 @@ class ServerAPI {
     var baseURL:String!
     weak var delegate:ServerAPIDelegate!
     
+#if DEBUG
+    private var _failNextEndpoint = false
+    
+    // Failure testing.
+    var failNextEndpoint: Bool {
+        // Returns the current value, and resets to false.
+        get {
+            let curr = _failNextEndpoint
+            _failNextEndpoint = false
+            return curr
+        }
+        
+        set {
+            _failNextEndpoint = true
+        }
+    }
+#endif
+    
     fileprivate var authTokens:[String:String]?
     
     let httpUnauthorizedError = 401
@@ -558,6 +576,12 @@ extension ServerAPI : ServerNetworkingAuthentication {
         }
         
         result[ServerConstants.httpRequestDeviceUUID] = self.delegate.deviceUUID(forServerAPI: self).uuidString
+        
+#if DEBUG
+        if failNextEndpoint {
+            result[ServerConstants.httpRequestEndpointFailureTestKey] = "true"
+        }
+#endif
         
         return result
     }

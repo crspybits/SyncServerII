@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
-        let coreDataSession = CoreData(namesDictionary: [
+        let coreDataSession = CoreData(options: [
             CoreDataBundleModelName: "SharedImages",
             CoreDataSqlliteBackupFileName: "~SharedImages.sqlite",
             CoreDataSqlliteFileName: "SharedImages.sqlite"

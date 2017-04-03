@@ -17,6 +17,11 @@ public class ServerConstants {
     // HTTP request header keys specific to Google
     public static let GoogleHTTPAccessTokenKey = "Kitura-access-token"
     public static let GoogleHTTPServerAuthCodeKey = "Kitura-server-auth-code"
+
+#if DEBUG
+    // Give this key any string value to test failing of an endpoint.
+    public static let httpRequestEndpointFailureTestKey = "FailureTest"
+#endif
     
     // HTTP: request header key
     // Since the Device-UUID is a somewhat secure identifier, I'm passing it in the HTTP header. Plus, it makes the device UUID available early in request processing.
@@ -25,7 +30,7 @@ public class ServerConstants {
     // HTTP response header keys
     // Used when downloading a file to return parameters (as a HTTP header response header).
     public static let httpResponseMessageParams = "SyncServer-Message-Params"
-    
+
     public enum AuthTokenType : String {
         case GoogleToken
     }

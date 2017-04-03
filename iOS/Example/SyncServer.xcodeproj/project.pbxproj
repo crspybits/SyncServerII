@@ -28,6 +28,7 @@
 		836D4BF01E1205CF005209F2 /* Consts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BEF1E1205CF005209F2 /* Consts.swift */; };
 		837244541E419E7B00155E89 /* DoneUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837244531E419E7B00155E89 /* DoneUploads.swift */; };
 		837244561E419EE600155E89 /* TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837244551E419EE600155E89 /* TestCase.swift */; };
+		8378D9BE1E91B8F000470D49 /* Client_SyncServer_Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8378D9BD1E91B8F000470D49 /* Client_SyncServer_Error.swift */; };
 		83CD30831E15880000A0C7AD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CD30811E15880000A0C7AD /* GoogleService-Info.plist */; };
 		83CD30841E15880000A0C7AD /* Server.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CD30821E15880000A0C7AD /* Server.plist */; };
 		83D95C9E1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */; };
@@ -85,6 +86,7 @@
 		836D4BEF1E1205CF005209F2 /* Consts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Consts.swift; sourceTree = "<group>"; };
 		837244531E419E7B00155E89 /* DoneUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoneUploads.swift; sourceTree = "<group>"; };
 		837244551E419EE600155E89 /* TestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCase.swift; sourceTree = "<group>"; };
+		8378D9BD1E91B8F000470D49 /* Client_SyncServer_Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_Error.swift; sourceTree = "<group>"; };
 		83CD30811E15880000A0C7AD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		83CD30821E15880000A0C7AD /* Server.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Server.plist; sourceTree = "<group>"; };
 		83D95C9D1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager_MasterVersionChange.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				8378D9BD1E91B8F000470D49 /* Client_SyncServer_Error.swift */,
 				8324EE5B1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift */,
 				8324EE591E83675E000656AF /* Client_SyncServer_Download.swift */,
 				83F882141E6FB03D008F644A /* Client_SyncServer_UploadDeletion.swift */,
@@ -481,6 +484,7 @@
 				83F882151E6FB03D008F644A /* Client_SyncServer_UploadDeletion.swift in Sources */,
 				837244541E419E7B00155E89 /* DoneUploads.swift in Sources */,
 				83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */,
+				8378D9BE1E91B8F000470D49 /* Client_SyncServer_Error.swift in Sources */,
 				8324EE5A1E83675F000656AF /* Client_SyncServer_Download.swift in Sources */,
 				835C60AC1E62ABF3003E9AF8 /* CoreDataTests.swift in Sources */,
 				83D95CA01E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift in Sources */,

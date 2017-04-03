@@ -250,6 +250,14 @@ private class RequestHandler : CredsDelegate {
             return
         }
         
+#if DEBUG
+        // Failure testing.
+        if request.headers[ServerConstants.httpRequestEndpointFailureTestKey] != nil {
+            self.failWithError(message: "Failure test requested by client.")
+            return
+        }
+#endif
+        
         if profile == nil {
             assert(authenticationLevel! == .none)
             
@@ -405,13 +413,13 @@ private class RequestHandler : CredsDelegate {
     }
 }
 
-public class CreateRoutes {
+class CreateRoutes {
     private var router = Router()
 
     init() {
     }
     
-    public func addRoute(ep:ServerEndpoint,
+    func addRoute(ep:ServerEndpoint,
         createRequest: @escaping (RouterRequest) ->(RequestMessage?),
         processRequest: @escaping ProcessRequest) {
         

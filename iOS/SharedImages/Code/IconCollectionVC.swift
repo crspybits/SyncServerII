@@ -12,17 +12,22 @@ import SMCoreLib
 
 class IconCollectionVC : UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
-    var image:Image!
-    weak var syncController:SyncController!
+    private var image:Image!
+    private weak var syncController:SyncController!
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        let uiImage = UIImage(contentsOfFile: image.url!.path!)
+    func setProperties(image:Image, syncController:SyncController) {
+        self.image = image
+        self.syncController = syncController
+        
+        let uiImage = UIImage(contentsOfFile: self.image.url!.path!)
         self.imageView.image = uiImage
+        
+        Log.msg("image.url: \(image.url!.path!)")
+        Log.msg("image.uuid: \(image.uuid)")
     }
     
     func remove() {

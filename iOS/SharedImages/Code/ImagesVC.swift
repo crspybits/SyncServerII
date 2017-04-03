@@ -106,6 +106,7 @@ class ImagesVC: UIViewController {
     // Enable a reset from error when needed.
     @objc private func spinnerTapGestureAction() {
         Log.msg("spinner tapped")
+        refresh()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -158,8 +159,7 @@ extension ImagesVC : UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! IconCollectionVC
-        cell.syncController = syncController
-        cell.image = self.coreDataSource.object(at: indexPath) as! Image
+        cell.setProperties(image: self.coreDataSource.object(at: indexPath) as! Image, syncController: syncController)
         
         return cell
     }
@@ -249,6 +249,9 @@ extension ImagesVC : SyncControllerDelegate {
                     self.spinner.stop()
                 }
             }
+            
+        case .syncError:
+            self.spinner.stop(withBackgroundColor: .red)
         }
         
         self.spinner.setNeedsLayout()

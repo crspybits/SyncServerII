@@ -358,6 +358,9 @@ public class SyncServer {
                 Thread.runSync(onMainThread: {
                     self.delegate?.syncServerErrorOccurred(error: error!)
                 })
+                
+                // There was an error. Not much point in continuing.
+                return
             }
             
             completion?()

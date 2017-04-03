@@ -13,6 +13,7 @@ import SMCoreLib
 enum SyncControllerEvent {
     case syncStarted
     case syncDone
+    case syncError
 }
 
 protocol SyncControllerDelegate : class {
@@ -78,6 +79,7 @@ extension SyncController : SyncServerDelegate {
     
     func syncServerErrorOccurred(error:Error) {
         Log.error("Server error occurred: \(error)")
+        delegate.syncEvent(syncController: self, event: .syncError)
     }
 
     func syncServerEventOccurred(event:SyncEvent) {
@@ -94,4 +96,14 @@ extension SyncController : SyncServerDelegate {
             break
         }
     }
+    
+#if DEBUG
+    public func syncServerSingleFileUploadCompleted(next: @escaping () -> ()) {
+        next()
+    }
+    
+    public func syncServerSingleFileDownloadCompleted(next: @escaping () -> ()) {
+        next()
+    }
+#endif
 }
