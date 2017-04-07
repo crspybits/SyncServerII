@@ -31,19 +31,22 @@ class ServerAPI {
         get {
             let curr = _failNextEndpoint
             _failNextEndpoint = false
-            return curr
+            return curr || failEndpoints
         }
         
         set {
             _failNextEndpoint = true
         }
     }
+    
+    // Fails endpoints until you set this to true.
+    var failEndpoints = false
 #endif
     
     fileprivate var authTokens:[String:String]?
     
-    let httpUnauthorizedError = 401
-    
+    let httpUnauthorizedError = HTTPStatus.unauthorized.rawValue
+
     enum ServerAPIError : Error {
     case non200StatusCode(Int)
     case badStatusCode(Int)
@@ -67,16 +70,17 @@ class ServerAPI {
     fileprivate init() {
     }
     
-    // MARK: Health check
-
     func checkForError(statusCode:Int?, error:Error?) -> Error? {
-        if statusCode == HTTPStatus.ok.rawValue || statusCode == nil {
+        // We don't necessarily want to treat an HTTPStatus.unauthorized as an error: It's a valid response when the user isn't present on the server.
+        if statusCode == HTTPStatus.ok.rawValue || statusCode == HTTPStatus.unauthorized.rawValue || statusCode == nil  {
             return error
         }
         else {
             return ServerAPIError.non200StatusCode(statusCode!)
         }
     }
+    
+    // MARK: Health check
     
     func healthCheck(completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.healthCheck
@@ -100,13 +104,12 @@ class ServerAPI {
         }
     }
     
-    // Checks the creds of the user specified by the creds property (or authenticationDelegate in ServerNetworking if that is nil).
+    // Checks the creds of the user specified by the creds property (or authenticationDelegate in ServerNetworking if that is nil). Because this method uses an unauthorized (401) http status code to indicate that the user doesn't exist, it will not do retries in the case of an error.
     public func checkCreds(completion:((_ userExists:Bool?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.checkCreds
         let url = URL(string: baseURL + endpoint.path)!
         
-        sendRequestUsing(method: endpoint.method,
-            toURL: url) { (response, httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url, retryIfError: false) { (response, httpStatus, error) in
             
             var userExists:Bool?
             if httpStatus == HTTPStatus.ok.rawValue {
@@ -127,11 +130,12 @@ class ServerAPI {
         }
     }
     
-    func removeUser(completion:((Error?)->(Void))?) {
+    func removeUser(retryIfError:Bool=true, completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.removeUser
         let url = URL(string: baseURL + endpoint.path)!
         
-        sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url, retryIfError: retryIfError) {
+            (response,  httpStatus, error) in
             completion?(self.checkForError(statusCode: httpStatus, error: error))
         }
     }
@@ -269,8 +273,8 @@ class ServerAPI {
 #endif
         
         guard let doneUploadsRequest = DoneUploadsRequest(json: params) else {
-            completion?(nil, DoneUploadsError.couldNotCreateDoneUploadsRequest);
-            return;
+            completion?(nil, DoneUploadsError.couldNotCreateDoneUploadsRequest)
+            return
         }
 
         let parameters = doneUploadsRequest.urlParameters()!
@@ -501,67 +505,145 @@ class ServerAPI {
     }
 }
 
-// MARK: Wrapper over ServerNetworking calls to provide for credentials refresh.
+let maximumNumberRetries = 3
+
+// MARK: Wrapper over ServerNetworking calls to provide for error retries and credentials refresh.
 extension ServerAPI {
-    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL,
+    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL, retryIfError retry:Bool=true,
         completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
         
-        ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL) { (serverResponse, statusCode, error) in
-            if statusCode == self.httpUnauthorizedError && self.creds != nil {
-                self.creds!.refreshCredentials() { error in
-                    // Only try refresh once!
-                    if error == nil {
-                        ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL, completion: completion)
-                    }
-                    else {
-                        completion?(nil, nil, error)
-                    }
+        var request:(()->())!
+        var numberOfAttempts = 0
+        
+        func requestCompletion(_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?) {
+            if retry {
+                retryIfError(error, statusCode:statusCode, numberOfAttempts: &numberOfAttempts, request: request) {
+                    completion?(serverResponse, statusCode, error)
                 }
             }
             else {
                 completion?(serverResponse, statusCode, error)
             }
         }
+        
+        request = {
+            ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL) { (serverResponse, statusCode, error) in
+                if statusCode == self.httpUnauthorizedError && self.creds != nil {
+                    self.creds!.refreshCredentials() { error in
+                        // Only try refresh once!
+                        if error == nil {
+                            // Since we're only doing the refresh once, I'm not doing retries here.
+                            ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL, completion: completion)
+                        }
+                        else {
+                            requestCompletion(nil, nil, error)
+                        }
+                    }
+                }
+                else {
+                    requestCompletion(serverResponse, statusCode, error)
+                }
+            }
+        }
+        
+        request()
     }
     
     func postUploadDataTo(_ serverURL: URL, dataToUpload:Data, completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
         
-        Log.msg("ServerNetworking.session.authenticationDelegate3: \(ServerNetworking.session.authenticationDelegate)")
+        var request:(()->())!
+        var numberOfAttempts = 0
         
-        ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload) { (serverResponse, statusCode, error) in
-            if statusCode == self.httpUnauthorizedError && self.creds != nil {
-                self.creds!.refreshCredentials() { error in
-                    // Only try refresh once!
-                    if error == nil {
-                        ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload, completion:completion)
-                    }
-                    else {
-                        completion?(nil, nil, error)
-                    }
-                }
-            }
-            else {
+        func requestCompletion(_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?) {
+            retryIfError(error, statusCode:statusCode, numberOfAttempts: &numberOfAttempts, request: request) {
                 completion?(serverResponse, statusCode, error)
             }
         }
-    }
-    
-    func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?)->())?) {
-        ServerNetworking.session.downloadFrom(serverURL, method: method) { (localURL, urlResponse, statusCode, error) in
-            if statusCode == self.httpUnauthorizedError && self.creds != nil {
-                self.creds!.refreshCredentials() { error in
-                    // Only try refresh once!
-                    if error == nil {
-                        ServerNetworking.session.downloadFrom(serverURL, method: method, completion: completion)
-                    }
-                    else {
-                        completion?(nil, nil, nil, error)
+        
+        request = {
+            ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload) { (serverResponse, statusCode, error) in
+                if statusCode == self.httpUnauthorizedError && self.creds != nil {
+                    self.creds!.refreshCredentials() { error in
+                        // Only try refresh once!
+                        if error == nil {
+                            ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload, completion:completion)
+                        }
+                        else {
+                            requestCompletion(nil, nil, error)
+                        }
                     }
                 }
+                else {
+                    requestCompletion(serverResponse, statusCode, error)
+                }
             }
-            else {
+        }
+        
+        request()
+    }
+    
+    func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ urlResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?)->())?) {
+    
+        var request:(()->())!
+        var numberOfAttempts = 0
+        
+        func requestCompletion(_ localURL:SMRelativeLocalURL?, _ urlResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?) {
+            retryIfError(error, statusCode:statusCode, numberOfAttempts: &numberOfAttempts, request: request) {
                 completion?(localURL, urlResponse, statusCode, error)
             }
+        }
+        
+        request = {
+            ServerNetworking.session.downloadFrom(serverURL, method: method) { (localURL, urlResponse, statusCode, error) in
+                if statusCode == self.httpUnauthorizedError && self.creds != nil {
+                    self.creds!.refreshCredentials() { error in
+                        // Only try refresh once!
+                        if error == nil {
+                            ServerNetworking.session.downloadFrom(serverURL, method: method, completion: completion)
+                        }
+                        else {
+                            requestCompletion(nil, nil, nil, error)
+                        }
+                    }
+                }
+                else {
+                    requestCompletion(localURL, urlResponse, statusCode, error)
+                }
+            }
+        }
+        
+        request()
+    }
+    
+    func retryIfError(_ error:Error?, statusCode:Int?, numberOfAttempts:inout Int, request:@escaping ()->(), completion:()->()) {
+    
+        let errorCheck = checkForError(statusCode:statusCode, error:error)
+        if errorCheck == nil {
+            completion()
+        }
+        else if numberOfAttempts <= maximumNumberRetries {
+            numberOfAttempts += 1
+            self.exponentialFallback(forAttempt: numberOfAttempts) {
+                request()
+            }
+        } else {
+            completion()
+        }
+    }
+    
+    // Returns a duration in seconds.
+    func exponentialFallbackDuration(forAttempt numberTimesTried:Int) -> TimeInterval {
+        let duration = TimeInterval(pow(Float(numberTimesTried), 2.0))
+        Log.msg("Will try operation again in \(duration) seconds")
+        return duration
+    }
+
+    // I'm making this available from SMServerNetworking because the concept of exponential fallback is at the networking level.
+    func exponentialFallback(forAttempt numberTimesTried:Int, completion:@escaping ()->()) {
+        let duration = exponentialFallbackDuration(forAttempt: numberTimesTried)
+
+        TimedCallback.withDuration(Float(duration)) {
+            completion()
         }
     }
 }

@@ -146,7 +146,7 @@ class Download {
         ServerAPI.session.downloadFile(file: downloadFile, serverMasterVersion: masterVersion) { (result, error)  in
         
             // Don't hold the performAndWait while we do completion-- easy to get a deadlock!
-        
+
             guard error == nil else {
                 CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                     nextToDownload.status = .notStarted

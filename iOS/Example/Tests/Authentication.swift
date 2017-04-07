@@ -13,7 +13,7 @@ class ServerAPI_Authentication: TestCase {
         let exp = expectation(description: "\(#function)\(#line)")
 
         // Remove the user in case they already exist-- e.g., from a previous test.
-        ServerAPI.session.removeUser { error in
+        ServerAPI.session.removeUser(retryIfError: false) { error in
             // There will be an error here if the user didn't exist already.
             exp.fulfill()
         }
@@ -35,7 +35,7 @@ class ServerAPI_Authentication: TestCase {
             expectation.fulfill()
         }
         
-        waitForExpectations(timeout: 10.0, handler: nil)
+        waitForExpectations(timeout: 40.0, handler: nil)
     }
     
     func testAddUserWithAuthenticationDelegateWorks() {
@@ -105,10 +105,8 @@ class ServerAPI_Authentication: TestCase {
             }
         }
         
-        waitForExpectations(timeout: 10.0, handler: nil)
+        waitForExpectations(timeout: 40.0, handler: nil)
     }
-    
-    // TODO: *2* Check what happens when network fails. Do we get an error response back from ServerAPI.session.addUser? This issue applies to all ServerAPI calls.
     
     func testRemoveUserSucceeds() {
         let addUserExpectation = self.expectation(description: "addUser")

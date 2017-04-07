@@ -141,15 +141,7 @@ public class SyncServer {
     public func appLaunchSetup(withServerURL serverURL: URL, cloudFolderName:String) {
     
         Upload.session.cloudFolderName = cloudFolderName
-        
-        Network.session().detect { connected in
-            if connected {
-                self.networkReconnected()
-            }
-        }
-        
         Network.session().appStartup()
-
         ServerAPI.session.baseURL = serverURL.absoluteString
 
         // This seems a little hacky, but can't find a better way to get the bundle of the framework containing our model. I.e., "this" framework. Just using a Core Data object contained in this framework to track it down.
@@ -360,6 +352,12 @@ public class SyncServer {
                 })
                 
                 // There was an error. Not much point in continuing.
+                Synchronized.block(self) {
+                    self.delayedSync = false
+                    self.syncOperating = false
+                }
+                
+                self.resetFileTrackers()
                 return
             }
             
@@ -385,8 +383,8 @@ public class SyncServer {
             }
         }
     }
-    
-    private func networkReconnected() {
+
+    private func resetFileTrackers() {
         CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
             let dfts = DownloadFileTracker.fetchAll()
             dfts.map { dft in
@@ -407,7 +405,9 @@ public class SyncServer {
         }
     }
 
+
     // This is intended for development/debug only. This enables you do a consistency check between your local files and SyncServer meta data. Does a sync first to ensure files are synchronized.
+    // TODO: *2* This is incomplete. Needs more work.
     public func consistencyCheck(localFiles:[UUIDString], repair:Bool = false, completion:((Error?)->())?) {
         sync {
             // TODO: *2* Check for errors in sync.

@@ -27,10 +27,14 @@ class ServerNetworking {
         // To get "spinner" in status bar when ever we have network activity.
         // See http://cocoadocs.org/docsets/AFNetworking/2.0.0/Classes/AFNetworkActivityIndicatorManager.html
         
-        // TODO: *3* I think this isn't working any more-- I'm not using AFNetworking.
+        // TODO: *3* I think this isn't working any more-- I'm not using AFNetworking. How can I have a networking spinner in the status bar now?
         AFNetworkActivityIndicatorManager.shared().isEnabled = true
     }
 
+    enum ServerNetworkingError : Error {
+    case noNetworkError
+    }
+    
     func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL,
         completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
         
@@ -46,14 +50,19 @@ class ServerNetworking {
     
     // Data is sent in the body via a POST request (not multipart).
     func postUploadDataTo(_ serverURL: URL, dataToUpload:Data, completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
+
+        guard Network.session().connected() else {
+            completion?(nil, nil, ServerNetworkingError.noNetworkError)
+            return
+        }
         
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
         
-        // If needed, use a delegate here to track upload progress.
+        // COULD DO: Use a delegate here to track upload progress.
         let session = URLSession(configuration: sessionConfiguration)
     
-        // Data uploading task. We could use NSURLSessionUploadTask instead of NSURLSessionDataTask if we needed to support uploads in the background
+        // COULD DO: Data uploading task. We could use NSURLSessionUploadTask instead of NSURLSessionDataTask if we needed to support uploads in the background
         
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
@@ -78,7 +87,12 @@ class ServerNetworking {
     }
     
     func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?)->())?) {
-    
+
+        guard Network.session().connected() else {
+            completion?(nil, nil, nil, ServerNetworkingError.noNetworkError)
+            return
+        }
+        
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
         
@@ -129,6 +143,11 @@ class ServerNetworking {
     }
     
     private func sendRequestTo(_ serverURL: URL, method: ServerHTTPMethod, dataToUpload:Data? = nil, completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
+    
+        guard Network.session().connected() else {
+            completion?(nil, nil, ServerNetworkingError.noNetworkError)
+            return
+        }
     
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
