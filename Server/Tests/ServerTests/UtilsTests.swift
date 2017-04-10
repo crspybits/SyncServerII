@@ -10,6 +10,7 @@ import XCTest
 @testable import Server
 import HeliumLogger
 import LoggerAPI
+import Foundation
 
 public class A : NSObject {
     var p1: String?

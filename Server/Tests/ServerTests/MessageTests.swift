@@ -9,6 +9,7 @@
 import XCTest
 @testable import Server
 import PerfectLib
+import Foundation
 
 class MessageTests: ServerTestCase {
 

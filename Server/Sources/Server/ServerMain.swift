@@ -25,6 +25,10 @@ public class ServerMain {
     }
     
     public class func startup(type:ServerStartup = .blocking) {
+        Log.logger = HeliumLogger()
+        
+        Log.info("Launching server in \(type) mode with \(CommandLine.arguments.count) command line arguments.")
+        
         if type == .blocking {
             // When we launch the server from within Xcode (or just with no explicit arguments), we have 1 "argument" (CommandLine.arguments[0]).
             if CommandLine.arguments.count == 1 {
@@ -36,8 +40,6 @@ public class ServerMain {
                 Constants.setup(configFileFullPath: configFile)
             }
         }
-        
-        Log.logger = HeliumLogger()
         
         if !Controllers.setup() {
             Log.error("Failed during startup: Could not setup controller(s).")

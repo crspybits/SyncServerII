@@ -27,9 +27,13 @@ public class ServerSetup {
         var randomString = ""
 
         for _ in 0 ..< length {
-            let rand = arc4random_uniform(len)
-            var nextChar = letters.character(at: Int(rand))
-            randomString += NSString(characters: &nextChar, length: 1) as String
+            #if os(Linux)
+                let rand = random() % Int(len)
+            #else
+                let rand = arc4random_uniform(len)
+            #endif
+            let nextChar = letters.character(at: Int(rand))
+            randomString += String(UnicodeScalar(nextChar)!)
         }
 
         return randomString
@@ -109,10 +113,12 @@ private class RequestHandler : CredsDelegate {
         
         switch clientResponse {
         case .json(let jsonDict):
+            
             do {
                 jsonString = try jsonDict.jsonEncodedString()
             } catch (let error) {
-                Log.error(message: "Failed on json encode: \(error.localizedDescription)")
+                Log.error(message: "Failed on json encode: \(error.localizedDescription) for jsonDict: \(jsonDict)")
+                // TODO: *2* It may not be such a good idea to not do `self.response.send` here. It may be better to send back an error response. Otherwise, this can hang up a client.
                 return false
             }
             

@@ -10,6 +10,7 @@ import LoggerAPI
 @testable import Server
 import KituraNet
 import XCTest
+import Foundation
 
 class GeneralAuthTests: ServerTestCase {
 

@@ -10,9 +10,9 @@ import LoggerAPI
 @testable import Server
 import KituraNet
 import XCTest
+import Foundation
 
 class FailureTests: ServerTestCase {
-
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -33,5 +33,11 @@ class FailureTests: ServerTestCase {
                 expectation.fulfill()
             }
         }
+    }
+}
+
+extension FailureTests {
+    static var allTests : [(String, (FailureTests) -> () throws -> Void)] {
+        return [("testThatHealthCheckFailsWhenRequested", testThatHealthCheckFailsWhenRequested)]
     }
 }

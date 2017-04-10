@@ -10,6 +10,7 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import PerfectLib
+import Foundation
 
 class FileController_DoneUploadsTests: ServerTestCase {
 
@@ -59,5 +60,17 @@ class FileController_DoneUploadsTests: ServerTestCase {
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
         
         self.sendDoneUploads(expectedNumberOfUploads: 0, masterVersion: 1)
+    }
+}
+
+extension FileController_DoneUploadsTests {
+    static var allTests : [(String, (FileController_DoneUploadsTests) -> () throws -> Void)] {
+        return [
+            ("testDoneUploadsWithNoUploads", testDoneUploadsWithNoUploads),
+            ("testDoneUploadsWithSingleUpload", testDoneUploadsWithSingleUpload),
+            ("testDoneUploadsWithTwoUploads", testDoneUploadsWithTwoUploads),
+            ("testDoneUploadsThatUpdatesFileVersion", testDoneUploadsThatUpdatesFileVersion),
+            ("testDoneUploadsTwiceDoesNothingSecondTime", testDoneUploadsTwiceDoesNothingSecondTime)
+        ]
     }
 }

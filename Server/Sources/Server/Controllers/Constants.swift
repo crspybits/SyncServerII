@@ -27,7 +27,7 @@ class Constants {
     static let serverConfigFile = "Server.json"
     
     // TODO: *3* Don't know what this should be
-    static let serverConfigFilePathOnLinux = ""
+    //static let serverConfigFilePathOnLinux = ""
     
     struct mySQL {
         var host:String = ""
@@ -57,20 +57,23 @@ class Constants {
     fileprivate init(configFileName:String, fileNameHasPath:Bool = false) {
         print("loading config file: \(configFileName)")
 
-        var config:ConfigLoader
+        var config:ConfigLoader!
         
         if Constants.delegate == nil {
-#if os(macOS)
+#if os(Linux)
+            assert(fileNameHasPath, "Config filename must have path on Linux!")
+#endif
             if fileNameHasPath {
-                let filename = (configFileName as NSString).lastPathComponent
-                let path = (configFileName as NSString).deletingLastPathComponent
+                let cfnNSString = NSString(string: configFileName)
+                let filename = cfnNSString.lastPathComponent
+                let path = cfnNSString.deletingLastPathComponent
                 config = try! ConfigLoader(usingPath: path, andFileName: filename, forConfigType: .jsonDictionary)
             }
-            else {
+            
+#if os(macOS)
+            if !fileNameHasPath {
                 config = try! ConfigLoader(fileNameInBundle: configFileName, forConfigType: .jsonDictionary)
             }
-#else
-            config = try! ConfigLoader(usingPath: Constants.serverConfigFilePathOnLinux, andFileName: configFileName, forConfigType: .jsonDictionary)
 #endif
         }
         else {

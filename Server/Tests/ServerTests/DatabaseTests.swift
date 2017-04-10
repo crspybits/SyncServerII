@@ -10,6 +10,7 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import HeliumLogger
+import Foundation
 
 class model : Model {
     var c1: String!

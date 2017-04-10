@@ -8,6 +8,7 @@
 
 import XCTest
 @testable import Server
+import Foundation
 
 class GoogleDriveTests: ServerTestCase {
     // In my Google Drive:

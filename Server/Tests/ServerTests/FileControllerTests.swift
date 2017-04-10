@@ -10,6 +10,7 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import PerfectLib
+import Foundation
 
 class FileControllerTests: ServerTestCase {
 

@@ -1,6 +1,7 @@
 import XCTest
-@testable import AuthenticationTests
+@testable import ServerTests
 
 XCTMain([
-     testCase(AuthenticationTests.allTests),
+    testCase(FailureTests.allTests),
+    testCase(FileController_DoneUploadsTests.allTests)
 ])

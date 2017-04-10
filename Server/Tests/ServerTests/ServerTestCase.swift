@@ -22,8 +22,12 @@ class ServerTestCase : XCTestCase {
     
     override func setUp() {
         super.setUp()
+#if os(macOS)
         Constants.delegate = self
         Constants.setup(configFileName: "ServerTests.json")
+#else // Linux
+        Constants.setup(configFileFullPath: "../../Private/Server/ServerTests.json")
+#endif
         self.db = Database()
         
         _ = UserRepository(db).remove()

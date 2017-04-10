@@ -5,6 +5,7 @@ import KituraNet
 import LoggerAPI
 import CredentialsGoogle
 import PerfectLib
+import Foundation
 
 class GoogleAuthenticationTests: ServerTestCase {    
     let serverResponseTime:TimeInterval = 10
