@@ -8,6 +8,7 @@
 
 import Kitura
 
+// When adding a new controller, you must also add it to the list in Controllers.swift
 public class ServerRoutes {
     class func add(proxyRouter:CreateRoutes) {
         let utilController = UtilController()
@@ -26,5 +27,8 @@ public class ServerRoutes {
         proxyRouter.addRoute(ep: ServerEndpoints.downloadFile, createRequest: DownloadFileRequest.init, processRequest: fileController.downloadFile)
         proxyRouter.addRoute(ep: ServerEndpoints.getUploads, createRequest: GetUploadsRequest.init, processRequest: fileController.getUploads)
         proxyRouter.addRoute(ep: ServerEndpoints.uploadDeletion, createRequest: UploadDeletionRequest.init, processRequest: fileController.uploadDeletion)
+        
+        let sharingAccountsController = SharingAccountsController()
+        proxyRouter.addRoute(ep: ServerEndpoints.createSharingInvitation, createRequest: CreateSharingInvitationRequest.init, processRequest: sharingAccountsController.createSharingInvitation)
     }
 }

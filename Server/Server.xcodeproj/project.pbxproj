@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		790B7D86E95E63DE90256EF4 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1CA249E3A83A3C0858D7D801 /* Server.json */; };
+		8322BE571E9B553C00480D2F /* SharingAccountsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE561E9B553C00480D2F /* SharingAccountsController.swift */; };
+		8322BE591E9B55A800480D2F /* CreateSharingInvitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE581E9B55A800480D2F /* CreateSharingInvitation.swift */; };
+		8322BE5B1E9B58A300480D2F /* SharingInvitationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE5A1E9B58A300480D2F /* SharingInvitationRepository.swift */; };
+		8322BE5D1E9B6AB200480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE5C1E9B6AB100480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift */; };
+		8322BE5F1E9D20BD00480D2F /* SharingAccountsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE5E1E9D20BD00480D2F /* SharingAccountsController.swift */; };
+		8322BE611E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */; };
 		CDE3247BAD7ECAED978F7684 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6AE2CE5749DBDAACD38FE3E3 /* ServerTests.json */; };
 		OBJ_299 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_300 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
@@ -1078,6 +1084,12 @@
 /* Begin PBXFileReference section */
 		1CA249E3A83A3C0858D7D801 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		6AE2CE5749DBDAACD38FE3E3 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		8322BE561E9B553C00480D2F /* SharingAccountsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingAccountsController.swift; sourceTree = "<group>"; };
+		8322BE581E9B55A800480D2F /* CreateSharingInvitation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateSharingInvitation.swift; sourceTree = "<group>"; };
+		8322BE5A1E9B58A300480D2F /* SharingInvitationRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingInvitationRepository.swift; sourceTree = "<group>"; };
+		8322BE5C1E9B6AB100480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_SharedAccountRepository.swift; sourceTree = "<group>"; };
+		8322BE5E1E9D20BD00480D2F /* SharingAccountsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingAccountsController.swift; sourceTree = "<group>"; };
+		8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_UserRepository.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1802,6 +1814,7 @@
 				OBJ_213 /* UserController.swift */,
 				OBJ_214 /* UtilController.swift */,
 				OBJ_215 /* FileController */,
+				8322BE561E9B553C00480D2F /* SharingAccountsController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -1838,6 +1851,7 @@
 				OBJ_227 /* Repositories.swift */,
 				OBJ_228 /* Repository.swift */,
 				OBJ_229 /* UserRepository.swift */,
+				8322BE5A1E9B58A300480D2F /* SharingInvitationRepository.swift */,
 				OBJ_230 /* Files */,
 			);
 			path = Database;
@@ -1880,6 +1894,7 @@
 				OBJ_245 /* ResponseMessage.swift */,
 				OBJ_246 /* UploadDeletion.swift */,
 				OBJ_247 /* UploadFile.swift */,
+				8322BE581E9B55A800480D2F /* CreateSharingInvitation.swift */,
 			);
 			path = "Requests and responses";
 			sourceTree = "<group>";
@@ -1904,6 +1919,9 @@
 		OBJ_252 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */,
+				8322BE5E1E9D20BD00480D2F /* SharingAccountsController.swift */,
+				8322BE5C1E9B6AB100480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift */,
 				OBJ_253 /* DatabaseTests.swift */,
 				OBJ_254 /* DatabaseTransactionTests.swift */,
 				OBJ_255 /* FailureTests.swift */,
@@ -2999,6 +3017,9 @@
 				OBJ_717 /* Types.swift in Sources */,
 				OBJ_718 /* UserController.swift in Sources */,
 				OBJ_719 /* UtilController.swift in Sources */,
+				8322BE591E9B55A800480D2F /* CreateSharingInvitation.swift in Sources */,
+				8322BE5B1E9B58A300480D2F /* SharingInvitationRepository.swift in Sources */,
+				8322BE571E9B553C00480D2F /* SharingAccountsController.swift in Sources */,
 				OBJ_720 /* Database.swift in Sources */,
 				OBJ_721 /* DeviceUUIDRepository.swift in Sources */,
 				OBJ_722 /* LockRepository.swift in Sources */,
@@ -3041,6 +3062,7 @@
 				OBJ_794 /* DatabaseTransactionTests.swift in Sources */,
 				OBJ_795 /* FailureTests.swift in Sources */,
 				OBJ_796 /* FileController_DoneUploadsTests.swift in Sources */,
+				8322BE611E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift in Sources */,
 				OBJ_797 /* FileController_UploadTests.swift in Sources */,
 				OBJ_798 /* FileControllerTests.swift in Sources */,
 				OBJ_799 /* FileControllerTests_DeleteFile.swift in Sources */,
@@ -3052,8 +3074,10 @@
 				OBJ_805 /* MessageTests.swift in Sources */,
 				OBJ_806 /* SepecificDatabaseTests.swift in Sources */,
 				OBJ_807 /* ServerTestCase.swift in Sources */,
+				8322BE5D1E9B6AB200480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift in Sources */,
 				OBJ_808 /* SpecificDatabaseTests_Uploads.swift in Sources */,
 				OBJ_809 /* UserController.swift in Sources */,
+				8322BE5F1E9D20BD00480D2F /* SharingAccountsController.swift in Sources */,
 				OBJ_810 /* UtilsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

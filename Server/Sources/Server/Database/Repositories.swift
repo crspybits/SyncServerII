@@ -15,4 +15,5 @@ struct Repositories {
     let fileIndex:FileIndexRepository!
     let upload:UploadRepository!
     let deviceUUID:DeviceUUIDRepository!
+    let sharing:SharingInvitationRepository!
 }

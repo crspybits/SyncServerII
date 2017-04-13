@@ -108,6 +108,7 @@ public class Database {
     
     private class func getDateFormatter(format:MySQLDateFormat) -> DateFormatter {
         let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
 
         switch format {
         case .DATE:

@@ -17,6 +17,7 @@ protocol ControllerProtocol {
 
 public struct RequestProcessingParameters {
     let request: RequestMessage!
+    let ep: ServerEndpoint!
     
     // For secondary authenticated endpoints, these are the creds read from the database. It's nil otherwise.
     let creds: Creds?
@@ -37,7 +38,7 @@ public struct RequestProcessingParameters {
 public class Controllers {
     // When adding a new controller, you must add it to this list.
     private static let list:[ControllerProtocol.Type] =
-        [UserController.self, UtilController.self, FileController.self]
+        [UserController.self, UtilController.self, FileController.self, SharingAccountsController.self]
     
     static func setup() -> Bool {
         let db = Database(showStartupInfo: true)

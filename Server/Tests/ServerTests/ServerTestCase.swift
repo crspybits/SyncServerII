@@ -42,6 +42,8 @@ class ServerTestCase : XCTestCase {
         _ = LockRepository(db).create()
         _ = DeviceUUIDRepository(db).remove()
         _ = DeviceUUIDRepository(db).create()
+        _ = SharingInvitationRepository(db).remove()
+        _ = SharingInvitationRepository(db).create()
     }
     
     func addNewUser(deviceUUID:String) {

@@ -195,7 +195,7 @@ private class RequestHandler : CredsDelegate {
 #endif
 
         let db = Database()
-        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db))
+        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db), sharing: SharingInvitationRepository(db))
         
         switch authenticationLevel! {
         case .none:
@@ -238,6 +238,14 @@ private class RequestHandler : CredsDelegate {
                 if errorString != nil || dbCreds == nil {
                     self.failWithError(message: "Could not convert Creds of type: \(currentSignedInUser!.accountType) from JSON: \(currentSignedInUser!.creds); error: \(errorString)")
                     return
+                }
+                
+                // This user is on the system. If they are a sharing user, make sure they have the minimum permission to execute this endpoint.
+                if currentSignedInUser!.userType == .sharing {
+                    guard currentSignedInUser!.sharingPermission!.hasMinimumPermission(endpoint.minSharingPermission) else {
+                        self.failWithError(message: "Signed in user has sharing permissions of \(currentSignedInUser!.sharingPermission!) but these don't meet the minimum requirements of \(endpoint.minSharingPermission)")
+                        return
+                    }
                 }
                 
             case .noObjectFound:
@@ -289,7 +297,7 @@ private class RequestHandler : CredsDelegate {
                 failWithError(message: "Failed converting to Creds from profile", statusCode: .unauthorized)
                 return
             }
-                        
+            
             dbTransaction(db) {
                 return doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
             }
@@ -299,7 +307,7 @@ private class RequestHandler : CredsDelegate {
     private func doRemainingRequestProcessing(dbCreds:Creds?, profileCreds:Creds?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> Bool {
         var success = true
                 
-        let params = RequestProcessingParameters(request: requestObject!, creds: dbCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
+        let params = RequestProcessingParameters(request: requestObject!, ep:self.self.endpoint, creds: dbCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
         
             if nil == responseObject {
                 self.failWithError(message: "Could not create response object from request object")

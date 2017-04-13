@@ -152,24 +152,6 @@ class UploadRepository : Repository {
         return upload.fileUUID == nil || upload.userId == nil || upload.fileVersion == nil || upload.state == nil
     }
     
-    private func getInsertFieldValueAndName(fieldValue: Any?, fieldName:String, fieldIsString:Bool = true) -> (queryFieldValue:String, queryFieldName:String) {
-        
-        var queryFieldName = ""
-        var queryFieldValue = ""
-        if fieldValue != nil {
-            queryFieldName = ", \(fieldName) "
-
-            if fieldIsString {
-                queryFieldValue = ", '\(fieldValue!)' "
-            }
-            else {
-                queryFieldValue = ", \(fieldValue!) "
-            }
-        }
-        
-        return (queryFieldValue, queryFieldName)
-    }
-    
     enum AddResult {
     case success(uploadId:Int64)
     case duplicateEntry

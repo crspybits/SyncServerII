@@ -59,7 +59,7 @@ class UserController : ControllerProtocol {
     }
     
     func addUser(params:RequestProcessingParameters) {
-        assert(ServerEndpoints.checkCreds.generateTokens)
+        assert(params.ep.generateTokens)
 
         let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
         switch userExists {
@@ -78,6 +78,15 @@ class UserController : ControllerProtocol {
         user.accountType = params.profileCreds!.accountType
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON()
+        
+        // This necessarily is an owning user-- sharing users are created by the redeemSharingInvitation endpoint. This user must also be using Google creds.
+        user.userType = .owning
+        
+        // TODO: *5* Remove this restriction when we add Dropbox or other cloud storage services.
+        guard params.profileCreds!.accountType == .Google else {
+            Log.error(message: "Owning users must currently be using Google creds!")
+            return
+        }
         
         let userId = params.repos.user.add(user: user)
         if userId == nil {
@@ -110,10 +119,10 @@ class UserController : ControllerProtocol {
     }
     
     func checkCreds(params:RequestProcessingParameters) {
-        assert(ServerEndpoints.checkCreds.authenticationLevel == .secondary)
+        assert(params.ep.authenticationLevel == .secondary)
 
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
-        assert(ServerEndpoints.checkCreds.generateTokens)
+        assert(params.ep.generateTokens)
         
         if params.profileCreds!.needToGenerateTokens(dbCreds: params.creds!) {
             params.profileCreds!.generateTokens() { successGeneratingTokens, error in
@@ -134,7 +143,7 @@ class UserController : ControllerProtocol {
     
     // A user can only remove themselves, not another user-- this policy is enforced because the currently signed in user (with the UserProfile) is the one removed.
     func removeUser(params:RequestProcessingParameters) {
-        assert(ServerEndpoints.removeUser.authenticationLevel == .secondary)
+        assert(params.ep.authenticationLevel == .secondary)
         
         var success = 0
         let expectedSuccess = 5
@@ -169,6 +178,8 @@ class UserController : ControllerProtocol {
         if case .removed(_) = params.repos.fileIndex.remove(key: fileIndexRepoKey) {
             success += 1
         }
+        
+        // TODO: *2* When removing an owning user, check to see if that owning user has users sharing their data. If so, it would seem best to also remove those sharing users-- because why should a user be allowed to share someone's data when that someone is no longer on the system?
         
         if success == expectedSuccess {
             let response = RemoveUserResponse()!

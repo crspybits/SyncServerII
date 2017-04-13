@@ -24,93 +24,7 @@ class SpecificDatabaseTests: ServerTestCase {
     override func tearDown() {
         super.tearDown()
     }
-    
-    func testAddUser() {
-        let user1 = User()
-        user1.username = "Chris"
-        user1.accountType = .Google
-        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
-        user1.credsId = "100"
-        
-        let result1 = UserRepository(db).add(user: user1)
-        XCTAssert(result1 == 1, "Bad credentialsId!")
-
-        let user2 = User()
-        user2.username = "Natasha"
-        user2.accountType = .Google
-        user2.creds = "{\"accessToken\": \"SomeAccessTokenValue2\"}"
-        user2.credsId = "200"
-        
-        let result2 = UserRepository(db).add(user: user2)
-        XCTAssert(result2 == 2, "Bad credentialsId!")
-    }
-    
-    func testUserLookup1() {
-        testAddUser()
-        
-        let result = UserRepository(db).lookup(key: .userId(1), modelInit:User.init)
-        switch result {
-        case .error(let error):
-            XCTFail("\(error)")
             
-        case .found(let object):
-            let user = object as! User
-            XCTAssert(user.accountType == .Google)
-            XCTAssert(user.username == "Chris")
-            XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
-            XCTAssert(user.userId == 1)
-            
-        case .noObjectFound:
-            XCTFail("No User Found")
-        }
-    }
-    
-    func testUserLookup1b() {
-        testAddUser()
-        
-        let result = UserRepository(db).lookup(key: .userId(1), modelInit: User.init)
-        switch result {
-        case .error(let error):
-            XCTFail("\(error)")
-            
-        case .found(let object):
-            let user = object as! User
-            XCTAssert(user.accountType == .Google)
-            XCTAssert(user.username == "Chris")
-            XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
-            XCTAssert(user.userId == 1)
-            
-        case .noObjectFound:
-            XCTFail("No User Found")
-        }
-    }
-    
-    func testUserLookup2() {
-        testAddUser()
-        
-        let result = UserRepository(db).lookup(key: .accountTypeInfo(accountType:.Google, credsId:"100"), modelInit:User.init)
-        switch result {
-        case .error(let error):
-            XCTFail("\(error)")
-            
-        case .found(let object):
-            let user = object as! User
-            XCTAssert(user.accountType == .Google)
-            XCTAssert(user.username == "Chris")
-            XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
-            XCTAssert(user.userId == 1)
-            guard let credsObject = user.credsObject as? GoogleCreds else {
-                XCTFail()
-                return
-            }
-            
-            XCTAssert(credsObject.accessToken == "SomeAccessTokenValue1")
-            
-        case .noObjectFound:
-            XCTFail("No User Found")
-        }
-    }
-        
     func checkMasterVersion(userId:UserId, version:Int64) {
         let result = MasterVersionRepository(db).lookup(key: .userId(userId), modelInit: MasterVersion.init)
         switch result {
@@ -308,6 +222,7 @@ class SpecificDatabaseTests: ServerTestCase {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
+        user1.userType = .owning
         
         let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == 1, "Bad credentialsId!")
@@ -327,6 +242,7 @@ class SpecificDatabaseTests: ServerTestCase {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
+        user1.userType = .owning
         
         let userId = UserRepository(db).add(user: user1)
         XCTAssert(userId == 1, "Bad credentialsId!")

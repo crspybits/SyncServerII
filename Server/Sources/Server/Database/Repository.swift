@@ -109,4 +109,22 @@ extension Repository {
         
         return fieldSetter
     }
+    
+    func getInsertFieldValueAndName(fieldValue: Any?, fieldName:String, fieldIsString:Bool = true) -> (queryFieldValue:String, queryFieldName:String) {
+        
+        var queryFieldName = ""
+        var queryFieldValue = ""
+        if fieldValue != nil {
+            queryFieldName = ", \(fieldName) "
+
+            if fieldIsString {
+                queryFieldValue = ", '\(fieldValue!)' "
+            }
+            else {
+                queryFieldValue = ", \(fieldValue!) "
+            }
+        }
+        
+        return (queryFieldValue, queryFieldName)
+    }
 }

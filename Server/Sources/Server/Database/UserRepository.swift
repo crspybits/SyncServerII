@@ -62,11 +62,31 @@ import CredentialsGoogle
 	}
 */
 
+enum UserType : String {
+    case sharing // user is sharing data
+    case owning // user owns the data
+
+    static func maxStringLength() -> Int {
+        return max(UserType.sharing.rawValue.characters.count, UserType.owning.rawValue.characters.count)
+    }
+}
+
 class User : NSObject, Model {
     var userId: UserId!
     var username: String!
     
-    let accountTypeKey = "accountType"
+    // A given user on the system can only have a single UserType role, i.e., either an owning user or a sharing user.
+    static let userTypeKey = "userType"
+    var userType:UserType!
+    
+    // Only when the current user is a sharing user, this gives the userId that is the owner of the data.
+    var owningUserId:UserId?
+
+    // Only when the current user is a sharing user, this gives the permission that the sharing user has to the owning users data.
+    static let sharingPermissionKey = "sharingPermission"
+    var sharingPermission:SharingPermission?
+    
+    static let accountTypeKey = "accountType"
     var accountType: AccountType!
 
     // Account type specific id. E.g., for Google, this is the "sub".
@@ -89,9 +109,13 @@ class User : NSObject, Model {
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
-            case accountTypeKey:
+            case User.accountTypeKey:
                 return {(x:Any) -> Any? in
                     return AccountType(rawValue: x as! String)
+                }
+            case User.userTypeKey:
+                return {(x:Any) -> Any? in
+                    return UserType(rawValue: x as! String)
                 }
             default:
                 return nil
@@ -117,8 +141,15 @@ class UserRepository : Repository {
     func create() -> Database.TableCreationResult {
         let createColumns =
             "(userId BIGINT NOT NULL AUTO_INCREMENT, " +
-            "username VARCHAR(\(usernameMaxLength)) NOT NULL," +
+            "username VARCHAR(\(usernameMaxLength)) NOT NULL, " +
             
+            "userType VARCHAR(\(UserType.maxStringLength())) NOT NULL, " +
+    
+            // If non-NULL, references a user in the User table.
+            "owningUserId BIGINT, " +
+            
+            "sharingPermission VARCHAR(\(SharingPermission.maxStringLength())), " +
+        
             "accountType VARCHAR(\(accountTypeMaxLength)) NOT NULL, " +
             
             "credsId VARCHAR(\(credsIdMaxLength)) NOT NULL, " +
@@ -160,7 +191,7 @@ class UserRepository : Repository {
     
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
     func add(user:User) -> Int64? {
-        if user.username == nil || user.accountType == nil || user.credsId == nil {
+        if user.username == nil || user.accountType == nil || user.credsId == nil || user.userType == nil {
             Log.error(message: "One of the model values was nil!")
             return nil
         }
@@ -170,8 +201,25 @@ class UserRepository : Repository {
             Log.error(message: "Invalid creds JSON: \(user.creds)")
             return nil
         }
-    
-        let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds) VALUES('\(user.username!)', '\(user.accountType!)', \(user.credsId!), '\(user.creds!)');"
+        
+        switch user.userType! {
+        case .sharing:
+            guard user.owningUserId != nil && user.sharingPermission != nil else {
+                Log.error(message: "Sharing user, but there was no owningUserId or sharingPermission")
+                return nil
+            }
+            
+        case .owning:
+            guard user.owningUserId == nil && user.sharingPermission == nil else {
+                Log.error(message: "Owning user, and there was an owningUserId or sharingPermission")
+                return nil
+            }
+        }
+        
+        let (owningUserIdFieldValue, owningUserIdFieldName) = getInsertFieldValueAndName(fieldValue: user.owningUserId, fieldName: "owningUserId", fieldIsString: false)
+        let (sharingPermissionFieldValue, sharingPermissionFieldName) = getInsertFieldValueAndName(fieldValue: user.sharingPermission, fieldName: User.sharingPermissionKey)
+        
+        let query = "INSERT INTO \(tableName) (username, accountType, userType, credsId, creds \(owningUserIdFieldName) \(sharingPermissionFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.userType.rawValue)', \(user.credsId!), '\(user.creds!)' \(owningUserIdFieldValue) \(sharingPermissionFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
