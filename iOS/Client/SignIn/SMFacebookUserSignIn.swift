@@ -1,15 +1,15 @@
 //
 //  SMFacebookUserSignIn.swift
-//  SMSyncServer
+//  SyncServer
 //
 //  Created by Christopher Prince on 6/11/16.
 //  Copyright © 2016 Spastic Muffin, LLC. All rights reserved.
 //
 
-// Enables you to sign in as a Facebook user to (a) create a new sharing user (must have an invitation from another SMSyncServer user), or (b) sign in as an existing sharing user.
+// Enables you to sign in as a Facebook user to (a) create a new sharing user (must have an invitation from another SyncServer user), or (b) sign in as an existing sharing user.
 
 import Foundation
-//import SMSyncServer
+import SyncServer
 import SMCoreLib
 import FBSDKLoginKit
 

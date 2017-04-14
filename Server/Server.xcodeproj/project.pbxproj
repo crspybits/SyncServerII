@@ -14,6 +14,8 @@
 		8322BE5D1E9B6AB200480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE5C1E9B6AB100480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift */; };
 		8322BE5F1E9D20BD00480D2F /* SharingAccountsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE5E1E9D20BD00480D2F /* SharingAccountsController.swift */; };
 		8322BE611E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */; };
+		83709F721E9F30B500BCDC32 /* RedeemSharingInvitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83709F711E9F30B500BCDC32 /* RedeemSharingInvitation.swift */; };
+		83709F741E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83709F731E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift */; };
 		CDE3247BAD7ECAED978F7684 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6AE2CE5749DBDAACD38FE3E3 /* ServerTests.json */; };
 		OBJ_299 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_300 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
@@ -1090,6 +1092,8 @@
 		8322BE5C1E9B6AB100480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_SharedAccountRepository.swift; sourceTree = "<group>"; };
 		8322BE5E1E9D20BD00480D2F /* SharingAccountsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingAccountsController.swift; sourceTree = "<group>"; };
 		8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_UserRepository.swift; sourceTree = "<group>"; };
+		83709F711E9F30B500BCDC32 /* RedeemSharingInvitation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RedeemSharingInvitation.swift; sourceTree = "<group>"; };
+		83709F731E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingAccountsController_RedeemSharingInvitation.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1895,6 +1899,7 @@
 				OBJ_246 /* UploadDeletion.swift */,
 				OBJ_247 /* UploadFile.swift */,
 				8322BE581E9B55A800480D2F /* CreateSharingInvitation.swift */,
+				83709F711E9F30B500BCDC32 /* RedeemSharingInvitation.swift */,
 			);
 			path = "Requests and responses";
 			sourceTree = "<group>";
@@ -1919,6 +1924,7 @@
 		OBJ_252 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83709F731E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift */,
 				8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */,
 				8322BE5E1E9D20BD00480D2F /* SharingAccountsController.swift */,
 				8322BE5C1E9B6AB100480D2F /* SpecificDatabaseTests_SharedAccountRepository.swift */,
@@ -2029,7 +2035,7 @@
 			path = "Packages/Kitura-net-1.4.3/Sources/KituraNet";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -2038,7 +2044,6 @@
 				OBJ_271 /* Resources */,
 				OBJ_272 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* FastCGI */ = {
@@ -2650,7 +2655,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_272 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -3015,6 +3020,7 @@
 				OBJ_715 /* Constants.swift in Sources */,
 				OBJ_716 /* Controllers.swift in Sources */,
 				OBJ_717 /* Types.swift in Sources */,
+				83709F721E9F30B500BCDC32 /* RedeemSharingInvitation.swift in Sources */,
 				OBJ_718 /* UserController.swift in Sources */,
 				OBJ_719 /* UtilController.swift in Sources */,
 				8322BE591E9B55A800480D2F /* CreateSharingInvitation.swift in Sources */,
@@ -3068,6 +3074,7 @@
 				OBJ_799 /* FileControllerTests_DeleteFile.swift in Sources */,
 				OBJ_800 /* FileControllerTests_GetUploads.swift in Sources */,
 				OBJ_801 /* GeneralAuthTests.swift in Sources */,
+				83709F741E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift in Sources */,
 				OBJ_802 /* GoogleAuthenticationTests.swift in Sources */,
 				OBJ_803 /* GoogleDriveTests.swift in Sources */,
 				OBJ_804 /* KituraTest.swift in Sources */,

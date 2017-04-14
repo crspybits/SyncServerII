@@ -95,6 +95,15 @@ class User : NSObject, Model {
     let credsKey = "credsKey"
     var creds:String! // Stored as JSON
     
+    var effectiveOwningUserId:UserId {
+        if userType == .sharing {
+            return owningUserId!
+        }
+        else {
+            return userId
+        }
+    }
+    
     // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
     var credsObject:Creds? {
         do {
@@ -116,6 +125,10 @@ class User : NSObject, Model {
             case User.userTypeKey:
                 return {(x:Any) -> Any? in
                     return UserType(rawValue: x as! String)
+                }
+            case User.sharingPermissionKey:
+                return {(x:Any) -> Any? in
+                    return SharingPermission(rawValue: x as! String)
                 }
             default:
                 return nil

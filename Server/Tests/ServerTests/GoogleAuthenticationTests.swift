@@ -67,7 +67,7 @@ class GoogleAuthenticationTests: ServerTestCase {
     
     func testRefreshGoogleAccessTokenWorks() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         
         let exp = expectation(description: "\(#function)\(#line)")
 

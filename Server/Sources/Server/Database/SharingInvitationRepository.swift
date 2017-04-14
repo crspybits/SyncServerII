@@ -17,9 +17,6 @@ class SharingInvitation : NSObject, Model {
     
     // 60 seconds/minute * 60 minutes/hour * 24 hours/day == seconds/day
     static let expiryDuration:TimeInterval = 60*60*24
-
-    let redeemedKey = "redeemed"
-    var redeemed:Bool!
     
     var owningUserId:UserId!
     
@@ -36,11 +33,6 @@ class SharingInvitation : NSObject, Model {
             case expiryKey:
                 return {(x:Any) -> Any? in
                     return Database.date(x as! String, fromFormat: .DATETIME)
-                }
-
-            case redeemedKey:
-                return {(x:Any) -> Any? in
-                    return (x as! Int8) == 1
                 }
             
             default:
@@ -70,9 +62,6 @@ class SharingInvitationRepository : Repository {
                 
             // gives time/day that the invitation will expire
             "expiry \(dateFormat.rawValue) NOT NULL, " +
-            
-            // Will get set to true when has been redeemed
-            "redeemed BOOL NOT NULL, " +
 
             // The inited user is being invited to share data owned by the following (owning) user.
             // This is a reference into the User table.
@@ -121,7 +110,7 @@ class SharingInvitationRepository : Repository {
         
         let uuid = UUID().uuidString
         
-        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, redeemed, owningUserId, sharingPermission) VALUES('\(uuid)', '\(expiryDateString)', 0, \(owningUserId), '\(sharingPermission.rawValue)');"
+        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingPermission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(sharingPermission.rawValue)');"
         
         if db.connection.query(statement: query) {
             Log.info(message: "Sucessfully created sharing invitation!")

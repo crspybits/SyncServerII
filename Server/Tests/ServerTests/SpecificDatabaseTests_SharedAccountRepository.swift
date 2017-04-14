@@ -46,7 +46,6 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase {
             return
         }
         
-        XCTAssert(!invitation.redeemed)
         XCTAssert(invitation.owningUserId == userId)
         XCTAssert(invitation.sharingPermission == .read)
         XCTAssert(invitation.sharingInvitationUUID == uuid)
@@ -90,7 +89,6 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase {
                 return
             }
             
-            XCTAssert(!invitation.redeemed)
             XCTAssert(invitation.owningUserId == userId)
             XCTAssert(invitation.sharingPermission == .write)
             XCTAssert(invitation.sharingInvitationUUID == uuid)

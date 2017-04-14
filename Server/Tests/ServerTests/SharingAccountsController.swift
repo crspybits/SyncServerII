@@ -23,74 +23,98 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-
-    func createSharingInvitation(permission: SharingPermission? = nil, deviceUUID:String = PerfectLib.UUID().string, completion:@escaping (_ sharingInvitationUUID:String?)->()) {
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            
-            var request:CreateSharingInvitationRequest!
-            if permission == nil {
-                request = CreateSharingInvitationRequest(json: [:])
-            }
-            else {
-                request = CreateSharingInvitationRequest(json: [
-                    CreateSharingInvitationRequest.sharingPermissionKey : permission!
-                ])
-            }
-            
-            self.performRequest(route: ServerEndpoints.createSharingInvitation, headers: headers, urlParameters: "?" + request!.urlParameters()!, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                if permission == nil {
-                    XCTAssert(response!.statusCode != .OK)
-                    completion(nil)
-                }
-                else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on request")
-                    XCTAssert(dict != nil)
-                    let response = CreateSharingInvitationResponse(json: dict!)
-                    completion(response?.sharingInvitationUUID)
-                }
-                
+    
+    func testSuccessfulReadSharingInvitationCreationByAnOwningUser() {
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
+        self.createSharingInvitation(permission: .read) { expectation, invitationUUID in
+            XCTAssert(invitationUUID != nil)
+            guard let _ = UUID(uuidString: invitationUUID!) else {
+                XCTFail()
                 expectation.fulfill()
+                return
             }
+            
+            expectation.fulfill()
         }
     }
     
-    func testSuccessfulReadSharingInvitationCreationForOwningUser() {
+    func testSuccessfulWriteSharingInvitationCreationByAnOwningUser() {
         let deviceUUID = PerfectLib.UUID().string
-        self.addNewUser(deviceUUID:deviceUUID)
-        self.createSharingInvitation(permission: .read) { invitationUUID in
+        addNewUser(deviceUUID:deviceUUID)
+        createSharingInvitation(permission: .write) { expectation, invitationUUID in
             XCTAssert(invitationUUID != nil)
             guard let _ = UUID(uuidString: invitationUUID!) else {
                 XCTFail()
+                expectation.fulfill()
                 return
             }
-        }
-    }
-    
-    func testSuccessfulWriteSharingInvitationCreationForOwningUser() {
-        let deviceUUID = PerfectLib.UUID().string
-        self.addNewUser(deviceUUID:deviceUUID)
-        self.createSharingInvitation(permission: .write) { invitationUUID in
-            XCTAssert(invitationUUID != nil)
-            guard let _ = UUID(uuidString: invitationUUID!) else {
-                XCTFail()
-                return
-            }
+
+            expectation.fulfill()
         }
     }
 
-    // TODO: *0*
-    func testSuccessfulSharingInvitationCreationForAdminSharingUser() {
-        // Todo this, the current user needs to be an admin sharing user. Thus, I have to be able to create an admin sharing user. This amounts to being able to redeem a sharing invitation. Thus, I need the redeem sharing invitation endpoint to do this test.
+    func testSuccessfulSharingInvitationCreationByAnAdminSharingUser() {
+        createSharingUser(withSharingPermission: .admin)
+
+        // Lookup the userId for the freshly created owning user.
+
+        let googleSub1 = credentialsToken(token: .googleSub1)
+        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: .Google, credsId: googleSub1)
+        let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
+        guard case .found(let model) = userResults,
+            let owningUserId = (model as? User)?.userId else {
+            XCTFail()
+            return
+        }
+        
+        // The sharing user just created is that with googleRefreshToken2
+        
+        var sharingInvitationUUID:String!
+        
+        createSharingInvitation(token: .googleRefreshToken2, permission: .write) { expectation, invitationUUID in
+            XCTAssert(invitationUUID != nil)
+            guard let _ = UUID(uuidString: invitationUUID!) else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
+            
+            sharingInvitationUUID = invitationUUID
+
+            expectation.fulfill()
+        }
+        
+        // Now, who is the owning user? Let's make sure the owning user is passed along transitively. It should *not* be the id of the admin sharing user, it should be the owning user of the admin user.
+        
+        let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
+        let results = SharingInvitationRepository(db).lookup(key: key, modelInit: SharingInvitation.init)
+        
+        guard case .found(let model2) = results,
+            let invitation = model2 as? SharingInvitation else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(invitation.owningUserId == owningUserId)
     }
     
-    // TODO: *0*
-    func testFailureOfSharingInvitationCreationForReadSharingUser() {
+    func testFailureOfSharingInvitationCreationByAReadSharingUser() {
+        createSharingUser(withSharingPermission: .read)
+        
+        // The sharing user just created is that with googleRefreshToken2. The following will fail because we're attempting to create a sharing invitation with a non-admin user. This non-admin (read) user is referenced by the googleRefreshToken2.
+        
+        createSharingInvitation(token: .googleRefreshToken2, permission: .read, errorExpected: true) { expectation, invitationUUID in
+            expectation.fulfill()
+        }
     }
     
-    // TODO: *0*
-    func testFailureOfSharingInvitationCreationForWriteSharingUser() {
+    func testFailureOfSharingInvitationCreationByAWriteSharingUser() {
+        createSharingUser(withSharingPermission: .write)
+        
+        createSharingInvitation(token: .googleRefreshToken2, permission: .read, errorExpected: true) { expectation, invitationUUID in
+            expectation.fulfill()
+        }
     }
     
     func testSharingInvitationCreationFailsWithNoAuthorization() {

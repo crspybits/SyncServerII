@@ -46,8 +46,8 @@ class ServerTestCase : XCTestCase {
         _ = SharingInvitationRepository(db).create()
     }
     
-    func addNewUser(deviceUUID:String) {
-        self.performServerTest { expectation, googleCreds in
+    func addNewUser(token:CredentialsToken = .googleRefreshToken1, deviceUUID:String) {
+        self.performServerTest(token:token) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -302,6 +302,108 @@ class ServerTestCase : XCTestCase {
                 }
                 
                 expectation.fulfill()
+            }
+        }
+    }
+
+    func createSharingInvitation(token:CredentialsToken = .googleRefreshToken1, permission: SharingPermission? = nil, deviceUUID:String = PerfectLib.UUID().string, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+        self.performServerTest(token:token) { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+            var request:CreateSharingInvitationRequest!
+            if permission == nil {
+                request = CreateSharingInvitationRequest(json: [:])
+            }
+            else {
+                request = CreateSharingInvitationRequest(json: [
+                    CreateSharingInvitationRequest.sharingPermissionKey : permission!
+                ])
+            }
+            
+            self.performRequest(route: ServerEndpoints.createSharingInvitation, headers: headers, urlParameters: "?" + request!.urlParameters()!, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                if errorExpected {
+                    XCTAssert(response!.statusCode != .OK)
+                    completion(expectation, nil)
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on request")
+                    XCTAssert(dict != nil)
+                    let response = CreateSharingInvitationResponse(json: dict!)
+                    completion(expectation, response?.sharingInvitationUUID)
+                }
+            }
+        }
+    }
+    
+    // The sharing user will be that with googleRefreshToken2
+    // This also creates the owning user.
+    func createSharingUser(withSharingPermission permission:SharingPermission = .read, completion:((_ newUserId:UserId)->())? = nil) {
+        // a) Create sharing invitation with one Google account.
+        // b) Next, need to "sign out" of that account, and sign into another Google account
+        // c) And, redeem sharing invitation with that new Google account.
+
+        // Create the owning user.
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
+        
+        var sharingInvitationUUID:String!
+        
+        createSharingInvitation(permission: permission) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID: sharingInvitationUUID) { expectation in
+            expectation.fulfill()
+        }
+
+        // Check to make sure we have a new user:
+        let googleSub2 = credentialsToken(token: .googleSub2)
+        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: .Google, credsId: googleSub2)
+        let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
+        guard case .found(let model) = userResults else {
+            XCTFail()
+            return
+        }
+
+        completion?((model as! User).userId)
+        
+        let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
+        let results = SharingInvitationRepository(self.db).lookup(key: key, modelInit: SharingInvitation.init)
+        
+        guard case .noObjectFound = results else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func redeemSharingInvitation(token:CredentialsToken, deviceUUID:String = PerfectLib.UUID().string, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ expectation: XCTestExpectation)->()) {
+
+        self.performServerTest(token: token) { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+            var urlParameters:String?
+            
+            if sharingInvitationUUID != nil {
+                let request = RedeemSharingInvitationRequest(json: [
+                    RedeemSharingInvitationRequest.sharingInvitationUUIDKey : sharingInvitationUUID!
+                ])
+                urlParameters = "?" + request!.urlParameters()!
+            }
+            
+            self.performRequest(route: ServerEndpoints.redeemSharingInvitation, headers: headers, urlParameters: urlParameters, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+
+                if errorExpected {
+                    XCTAssert(response!.statusCode != .OK, "Worked on request!")
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on request")
+                    XCTAssert(dict != nil)
+                }
+                
+                completion(expectation)
             }
         }
     }

@@ -135,6 +135,8 @@ public class Database {
     /* References on mySQL transactions, locks, and blocking
         http://www.informit.com/articles/article.aspx?p=2036581&seqNum=12
         https://dev.mysql.com/doc/refman/5.5/en/innodb-information-schema-understanding-innodb-locking.html
+        The default isolation level for InnoDB is REPEATABLE READ
+        See https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html#isolevel_repeatable-read
     */
     func startTransaction() -> Bool {
         let query = "START TRANSACTION;"

@@ -59,6 +59,7 @@ class UserController : ControllerProtocol {
     }
     
     func addUser(params:RequestProcessingParameters) {
+        // TODO: *0* Should this still be marked as `generateTokens`? We're generating the tokens locally, in this method.
         assert(params.ep.generateTokens)
 
         let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
@@ -180,6 +181,8 @@ class UserController : ControllerProtocol {
         }
         
         // TODO: *2* When removing an owning user, check to see if that owning user has users sharing their data. If so, it would seem best to also remove those sharing users-- because why should a user be allowed to share someone's data when that someone is no longer on the system?
+        
+        // TODO: *2* When removing an owning user: Also remove any sharing invitations that have that owning user in them.
         
         if success == expectedSuccess {
             let response = RemoveUserResponse()!

@@ -32,7 +32,7 @@ class GoogleDriveTests: ServerTestCase {
 
     func testListFiles() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         creds.refresh { error in
@@ -51,7 +51,7 @@ class GoogleDriveTests: ServerTestCase {
     
     func searchForFolder(name:String, presentExpected:Bool) {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         creds.refresh { error in
@@ -75,7 +75,7 @@ class GoogleDriveTests: ServerTestCase {
     
     func searchForFile(name:String, withMimeType mimeType:String, inFolder folderName:String?, presentExpected:Bool) {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         func searchForFile(parentFolderId:String?) {
@@ -138,7 +138,7 @@ class GoogleDriveTests: ServerTestCase {
 #if false
     func testTrashFolder() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         creds.refresh { error in
@@ -163,7 +163,7 @@ class GoogleDriveTests: ServerTestCase {
 
     func testCreateAndDeleteFolder() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         creds.refresh { error in
@@ -186,7 +186,7 @@ class GoogleDriveTests: ServerTestCase {
     
     func testDeleteFolderThatDoesNotExistFailure() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         creds.refresh { error in
@@ -204,7 +204,7 @@ class GoogleDriveTests: ServerTestCase {
     
     func testCreateFolderIfDoesNotExist() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         creds.refresh { error in
@@ -241,7 +241,7 @@ class GoogleDriveTests: ServerTestCase {
     
     func downloadFile(cloudFileName:String, expectError:Bool = false) {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         creds.refresh { error in
@@ -276,7 +276,7 @@ class GoogleDriveTests: ServerTestCase {
     
     func testThatAccessTokenRefreshOccursWithBadToken() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken()
         let exp = expectation(description: "\(#function)\(#line)")
         
         // Use a known incorrect access token. We expect this to generate a 401 unauthorized, and thus cause an access token refresh.

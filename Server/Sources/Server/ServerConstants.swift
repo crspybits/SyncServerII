@@ -68,7 +68,11 @@ public struct ServerEndpoint {
     }
 }
 
-// When adding an endpoint, add it as a `public static let` and in the `all` list in the `init`.
+/* When adding an endpoint:
+    a) add it as a `public static let` 
+    b) add it in the `all` list in the `init`, and
+    c) add it into ServerRoutes.swift
+*/
 public class ServerEndpoints {
     public private(set) var all = [ServerEndpoint]()
     
@@ -82,7 +86,8 @@ public class ServerEndpoints {
     // Both `checkCreds` and `addUser` have generateTokens == true because (a) the first token generation (with Google Sign In, so far) is when creating a new user, and (b) we will need to subsequently do a generate tokens when checking creds if the original refresh token (again, with Google Sign In) expires.
     public static let checkCreds = ServerEndpoint("CheckCreds", method: .get, generateTokens: true)
     
-    // Only primary authentication because this method is used to add a user into the database (i.e., it creates secondary authentication). This creates an owning user, and currently must be using Google credentials.
+    // This creates an owning user account, which currently must be using Google credentials. The user must not exist yet on the system.
+    // Only primary authentication because this method is used to add a user into the database (i.e., it creates secondary authentication).
     public static let addUser = ServerEndpoint("AddUser", method: .post, authenticationLevel: .primary, generateTokens: true)
 
     // Removes the calling user from the system.
@@ -110,18 +115,15 @@ public class ServerEndpoints {
     // MARK: Sharing
     
     public static let createSharingInvitation = ServerEndpoint("CreateSharingInvitation", method: .post, minSharingPermission: .admin)
-
-    // public static let lookupSharingInvitation = "LookupSharingInvitation"
     
-    // This creates a user account. The user must not exist yet on the system.
-    // public static let redeemSharingInvitation = "RedeemSharingInvitation"
-    
-    // public static let getLinkedAccountsForSharingUser = "GetLinkedAccountsForSharingUser"
+    // This creates a sharing user account. The user must not exist yet on the system.
+    // Only primary authentication because this method is used to add a user into the database (i.e., it creates secondary authentication).
+    public static let redeemSharingInvitation = ServerEndpoint("RedeemSharingInvitation", method: .post, authenticationLevel: .primary, generateTokens: true)
 
     public static let session = ServerEndpoints()
     
     private init() {
         all.append(contentsOf: [ServerEndpoints.healthCheck, ServerEndpoints.addUser, ServerEndpoints.checkCreds, ServerEndpoints.removeUser, ServerEndpoints.fileIndex, ServerEndpoints.uploadFile, ServerEndpoints.doneUploads, ServerEndpoints.getUploads, ServerEndpoints.uploadDeletion,
-            ServerEndpoints.createSharingInvitation])
+            ServerEndpoints.createSharingInvitation, ServerEndpoints.redeemSharingInvitation])
     }
 }

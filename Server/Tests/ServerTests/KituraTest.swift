@@ -36,21 +36,36 @@ case body
 case header
 }
 
-extension KituraTest {    
-    func refreshToken() -> String {
-        // I've put this use of the GoogleRefreshToken here (instead of in Constants) because it's just a part of testing, not part of the full-blown server.
+enum CredentialsToken : String {
+case googleRefreshToken1 = "GoogleRefreshToken"
+case googleSub1 = "GoogleSub"
+
+case googleRefreshToken2 = "GoogleRefreshToken2"
+case googleSub2 = "GoogleSub2"
+
+case googleRefreshToken3 = "GoogleRefreshToken3"
+case googleSub3 = "GoogleSub3"
+
+case facebook = "FacebookLongLivedToken"
+}
+
+extension KituraTest {
+    // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
+    func credentialsToken(token:CredentialsToken = .googleRefreshToken1) -> String {
 #if os(macOS)
         let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "Server.json", forConfigType: .jsonDictionary)
 #else // Linux
         let config = try! ConfigLoader(usingPath: "../../Private/Server", andFileName: "Server.json", forConfigType: .jsonDictionary)
 #endif
-        let refreshToken = try! config.getString(varName: "GoogleRefreshToken")
-        return refreshToken
+        let token = try! config.getString(varName: token.rawValue)
+        return token
     }
     
-    func performServerTest(asyncTasks: @escaping (XCTestExpectation, GoogleCreds) -> Void...) {
+    func performServerTest(token:CredentialsToken = .googleRefreshToken1,
+        asyncTasks: @escaping (XCTestExpectation, GoogleCreds) -> Void...) {
+        
         let creds = GoogleCreds()
-        creds.refreshToken = self.refreshToken()
+        creds.refreshToken = self.credentialsToken(token:token)
         creds.refresh { error in
             XCTAssert(error == nil)
             

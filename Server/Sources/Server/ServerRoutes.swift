@@ -13,7 +13,9 @@ public class ServerRoutes {
     class func add(proxyRouter:CreateRoutes) {
         let utilController = UtilController()
         proxyRouter.addRoute(ep: ServerEndpoints.healthCheck, createRequest: HealthCheckRequest.init, processRequest: utilController.healthCheck)
+#if DEBUG
         proxyRouter.addRoute(ep: ServerEndpoints.checkPrimaryCreds, createRequest: CheckPrimaryCredsRequest.init, processRequest: utilController.checkPrimaryCreds)
+#endif
 
         let userController = UserController()
         proxyRouter.addRoute(ep: ServerEndpoints.addUser, createRequest: AddUserRequest.init, processRequest: userController.addUser)
@@ -30,5 +32,6 @@ public class ServerRoutes {
         
         let sharingAccountsController = SharingAccountsController()
         proxyRouter.addRoute(ep: ServerEndpoints.createSharingInvitation, createRequest: CreateSharingInvitationRequest.init, processRequest: sharingAccountsController.createSharingInvitation)
+        proxyRouter.addRoute(ep: ServerEndpoints.redeemSharingInvitation, createRequest: RedeemSharingInvitationRequest.init, processRequest: sharingAccountsController.redeemSharingInvitation)
     }
 }

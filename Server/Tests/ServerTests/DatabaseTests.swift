@@ -261,8 +261,16 @@ class GeneralDatabaseTests: ServerTestCase {
 }*/
 
     func equalDMY(date1:Date, date2:Date) -> Bool {
-        let componentsDate1 = Calendar.current.dateComponents([.day, .month, .year], from: date1)
-        let componentsDate2 = Calendar.current.dateComponents([.day, .month, .year], from: date2)
+        let utc = TimeZone(abbreviation: "UTC")!
+    
+        let componentsDate1 = Calendar.current.dateComponents(in: utc, from: date1)
+        let componentsDate2 = Calendar.current.dateComponents(in: utc, from: date2)
+        
+        print("date1: \(date1); date2: \(date2)")
+        print("componentsDate1.year: \(componentsDate1.year) componentsDate2.year: \(componentsDate2.year)")
+        print("componentsDate1.month: \(componentsDate1.month) componentsDate2.month: \(componentsDate2.month)")
+        print("componentsDate1.day: \(componentsDate1.day) componentsDate2.day: \(componentsDate2.day)")
+        
         return componentsDate1.year == componentsDate2.year &&
             componentsDate1.month == componentsDate2.month &&
             componentsDate1.day == componentsDate2.day
@@ -278,8 +286,9 @@ class GeneralDatabaseTests: ServerTestCase {
             let rowModel = rowModel as! model2
             
             XCTAssert(rowModel.c1 == .TestEnum1, "TestEnum value was wrong")
+            
             XCTAssert(self.equalDMY(date1: rowModel.c2, date2: self.c2Table2Value),
-                "c2 date value was wrong")
+                "c2 date value was wrong: rowModel.c2=\(rowModel.c2); self.c2Table2Value=\(self.c2Table2Value)")
         }
         
         XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(select.forEachRowStatus)")
