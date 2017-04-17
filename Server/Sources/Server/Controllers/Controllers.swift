@@ -19,9 +19,13 @@ public struct RequestProcessingParameters {
     let request: RequestMessage!
     let ep: ServerEndpoint!
     
-    // For secondary authenticated endpoints, these are the creds read from the database. It's nil otherwise.
+    // For secondary authenticated endpoints, these are the immediate user's creds (i.e., they are not the effective user id creds) read from the database. It's nil otherwise.
     let creds: Creds?
+    
+    // These reflect the effectiveOwningUserId of the User.
+    let effectiveOwningUserCreds: Creds?
 
+    // These are used only when we don't yet have database creds-- e.g., for endpoints that are creating users in the database.
     let profileCreds: Creds?
     
     let userProfile: UserProfile?

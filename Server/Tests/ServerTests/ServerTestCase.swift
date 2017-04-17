@@ -57,7 +57,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadTextFile(deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String = "CloudFolder", appMetaData:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(token:CredentialsToken = .googleRefreshToken1, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String = "CloudFolder", appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
         }
@@ -83,34 +83,41 @@ class ServerTestCase : XCTestCase {
         
         uploadRequest.appMetaData = appMetaData
         
-        runUploadTest(data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID)
+        runUploadTest(token:token, data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
         
         return (request:uploadRequest, fileSize: Int64(stringToUpload.characters.count))
     }
     
-    func runUploadTest(data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String) {
-        self.performServerTest { expectation, googleCreds in
+    func runUploadTest(token:CredentialsToken = .googleRefreshToken1, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
+        self.performServerTest(token:token) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
             XCTAssert(ServerEndpoints.uploadFile.method == .post)
             
             self.performRequest(route: ServerEndpoints.uploadFile, headers: headers, urlParameters: "?" + uploadRequest.urlParameters()!, body:data) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request")
-                XCTAssert(dict != nil)
                 
-                if let uploadResponse = UploadFileResponse(json: dict!) {
-                    if updatedMasterVersionExpected == nil {
-                        XCTAssert(uploadResponse.size != nil)
-                        XCTAssert(uploadResponse.size == expectedUploadSize)
-                    }
-                    else {
-                        XCTAssert(uploadResponse.masterVersionUpdate == updatedMasterVersionExpected)
-                    }
+                Log.info("Status code: \(response!.statusCode)")
+
+                if errorExpected {
+                    XCTAssert(response!.statusCode != .OK, "Worked on uploadFile request!")
                 }
                 else {
-                    XCTFail()
+                    XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request")
+                    XCTAssert(dict != nil)
+                    
+                    if let uploadResponse = UploadFileResponse(json: dict!) {
+                        if updatedMasterVersionExpected == nil {
+                            XCTAssert(uploadResponse.size != nil)
+                            XCTAssert(uploadResponse.size == expectedUploadSize)
+                        }
+                        else {
+                            XCTAssert(uploadResponse.masterVersionUpdate == updatedMasterVersionExpected)
+                        }
+                    }
+                    else {
+                        XCTFail()
+                    }
                 }
                 
                 // [1]. 2/11/16. Once I put transaction support into mySQL access, I run into some apparent race conditions with using `UploadRepository(self.db).lookup` here. That is, I fail the following check -- but I don't fail if I put a breakpoint here. This has lead me want to implement a new endpoint-- "GetUploads"-- which will enable (a) testing of the scenario below (i.e., after an upload, making sure that the Upload table has the relevant contents), and (b) recovery in an app when the masterVersion comes back different-- so that some uploaded files might not need to be uploaded again (note that for most purposes this later issue is an optimization).
@@ -161,8 +168,8 @@ class ServerTestCase : XCTestCase {
         return (uploadRequest!, sizeOfCatFileInBytes)
     }
     
-    func sendDoneUploads(expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0) {
-        self.performServerTest { expectation, googleCreds in
+    func sendDoneUploads(token:CredentialsToken = .googleRefreshToken1, expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
+        self.performServerTest(token:token) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
@@ -171,16 +178,22 @@ class ServerTestCase : XCTestCase {
             
             self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
-                XCTAssert(dict != nil)
                 
-                if let doneUploadsResponse = DoneUploadsResponse(json: dict!) {
-                    XCTAssert(doneUploadsResponse.masterVersionUpdate == updatedMasterVersionExpected)
-                    XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads)
-                    XCTAssert(doneUploadsResponse.numberDeletionErrors == nil)
+                if failureExpected {
+                    XCTAssert(response!.statusCode != .OK, "Worked on doneUploadsRequest request!")
                 }
                 else {
-                    XCTFail()
+                    XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
+                    XCTAssert(dict != nil)
+                    
+                    if let doneUploadsResponse = DoneUploadsResponse(json: dict!) {
+                        XCTAssert(doneUploadsResponse.masterVersionUpdate == updatedMasterVersionExpected)
+                        XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads)
+                        XCTAssert(doneUploadsResponse.numberDeletionErrors == nil)
+                    }
+                    else {
+                        XCTFail()
+                    }
                 }
                 
                 expectation.fulfill()
@@ -404,6 +417,97 @@ class ServerTestCase : XCTestCase {
                 }
                 
                 completion(expectation)
+            }
+        }
+    }
+    
+    func uploadDeletion(token:CredentialsToken = .googleRefreshToken1, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
+        if addUser {
+            self.addNewUser(deviceUUID:deviceUUID)
+        }
+
+        self.performServerTest(token:token) { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.uploadDeletion, headers: headers, urlParameters: "?" + uploadDeletionRequest.urlParameters()!) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                if expectError {
+                    XCTAssert(response!.statusCode != .OK, "Did not fail on upload deletion request")
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on upload deletion request")
+                    XCTAssert(dict != nil)
+                    
+                    if let uploadDeletionResponse = UploadDeletionResponse(json: dict!) {
+                        if updatedMasterVersionExpected != nil {
+                            XCTAssert(uploadDeletionResponse.masterVersionUpdate == updatedMasterVersionExpected)
+                        }
+                    }
+                    else {
+                        XCTFail()
+                    }
+                }
+                
+                expectation.fulfill()
+            }
+        }
+    }
+    
+    func downloadTextFile(token:CredentialsToken = .googleRefreshToken1,masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:Int64 = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) {
+    
+        let deviceUUID = PerfectLib.UUID().string
+        let masterVersion:Int64 = 0
+        
+        var actualUploadFileRequest:UploadFileRequest!
+        var actualFileSize:Int64!
+        
+        if uploadFileRequest == nil {
+            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: self.testFolder, appMetaData:appMetaData)
+            actualUploadFileRequest = uploadRequest
+            actualFileSize = size
+            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+        }
+        else {
+            actualUploadFileRequest = uploadFileRequest
+            actualFileSize = fileSize
+        }
+        
+        self.performServerTest(token:token) { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+            let downloadFileRequest = DownloadFileRequest(json: [
+                DownloadFileRequest.fileUUIDKey: actualUploadFileRequest!.fileUUID,
+                DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
+                DownloadFileRequest.fileVersionKey : downloadFileVersion
+            ])
+            
+            self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                
+                if expectedError {
+                    XCTAssert(response!.statusCode != .OK, "Did not work on failing downloadFileRequest request")
+                    XCTAssert(dict == nil)
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on downloadFileRequest request")
+                    XCTAssert(dict != nil)
+                    
+                    if let downloadFileResponse = DownloadFileResponse(json: dict!) {
+                        if expectUpdatedMasterUpdate {
+                            XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
+                        }
+                        else {
+                            XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
+                            XCTAssert(downloadFileResponse.fileSizeBytes == actualFileSize)
+                            XCTAssert(downloadFileResponse.appMetaData == appMetaData)
+                        }
+                    }
+                    else {
+                        XCTFail()
+                    }
+                }
+                
+                expectation.fulfill()
             }
         }
     }

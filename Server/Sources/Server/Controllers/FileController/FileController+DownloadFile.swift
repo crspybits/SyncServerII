@@ -36,7 +36,7 @@ extension FileController {
             }
 
             // TODO: *5* Generalize this to use other cloud storage services.
-            guard let googleCreds = params.creds as? GoogleCreds else {
+            guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
                 Log.error(message: "Could not obtain Google Creds")
                 params.completion(nil)
                 return
@@ -44,8 +44,8 @@ extension FileController {
             
             // Need to get the file from the cloud storage service:
             
-            // First, lookup the file in the FileIndex. This does an important security check too-- makes sure our userId corresponds to the fileUUID.
-            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.userId!)", fileUUID: downloadRequest.fileUUID)
+            // First, lookup the file in the FileIndex. This does an important security check too-- makes sure the owning userId corresponds to the fileUUID.
+            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: downloadRequest.fileUUID)
             
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             

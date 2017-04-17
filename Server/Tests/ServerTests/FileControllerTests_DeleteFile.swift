@@ -23,38 +23,6 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    func uploadDeletion(uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
-        if addUser {
-            self.addNewUser(deviceUUID:deviceUUID)
-        }
-
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            
-            self.performRequest(route: ServerEndpoints.uploadDeletion, headers: headers, urlParameters: "?" + uploadDeletionRequest.urlParameters()!) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                if expectError {
-                    XCTAssert(response!.statusCode != .OK, "Did not fail on upload deletion request")
-                }
-                else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on upload deletion request")
-                    XCTAssert(dict != nil)
-                    
-                    if let uploadDeletionResponse = UploadDeletionResponse(json: dict!) {
-                        if updatedMasterVersionExpected != nil {
-                            XCTAssert(uploadDeletionResponse.masterVersionUpdate == updatedMasterVersionExpected)
-                        }
-                    }
-                    else {
-                        XCTFail()
-                    }
-                }
-                
-                expectation.fulfill()
-            }
-        }
-    }
 
     // TODO: *1* To test these it would be best to have a debugging endpoint or other service where we can test to see if the file is present in cloud storage.
     

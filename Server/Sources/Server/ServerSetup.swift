@@ -88,8 +88,7 @@ private class RequestHandler : CredsDelegate {
         self.endpoint = endpoint
     }
 
-    public func failWithError(message:String,
-        statusCode:HTTPStatusCode = .internalServerError) {
+    public func failWithError(message:String, statusCode:HTTPStatusCode = .internalServerError) {
         
         setJsonResponseHeaders()
         Log.error(message: message)
@@ -243,7 +242,7 @@ private class RequestHandler : CredsDelegate {
                 // This user is on the system. If they are a sharing user, make sure they have the minimum permission to execute this endpoint.
                 if currentSignedInUser!.userType == .sharing {
                     guard currentSignedInUser!.sharingPermission!.hasMinimumPermission(endpoint.minSharingPermission) else {
-                        self.failWithError(message: "Signed in user has sharing permissions of \(currentSignedInUser!.sharingPermission!) but these don't meet the minimum requirements of \(endpoint.minSharingPermission)")
+                        self.failWithError(message: "Signed in user has sharing permissions of \(currentSignedInUser!.sharingPermission!) but these don't meet the minimum requirements of \(endpoint.minSharingPermission)", statusCode: .unauthorized)
                         return
                     }
                 }
@@ -306,8 +305,25 @@ private class RequestHandler : CredsDelegate {
     
     private func doRemainingRequestProcessing(dbCreds:Creds?, profileCreds:Creds?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> Bool {
         var success = true
-                
-        let params = RequestProcessingParameters(request: requestObject!, ep:self.self.endpoint, creds: dbCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
+        
+        var effectiveOwningUserCreds:Creds?
+        if currentSignedInUser != nil {
+            let effectiveOwningUserKey = UserRepository.LookupKey.userId(currentSignedInUser!.effectiveOwningUserId)
+            let userResults = UserRepository(db).lookup(key: effectiveOwningUserKey, modelInit: User.init)
+            guard case .found(let model) = userResults,
+                let effectiveOwningUser = model as? User else {
+                self.failWithError(message: "Could not get effective owning user from database.")
+                return false
+            }
+            
+            effectiveOwningUserCreds = effectiveOwningUser.credsObject
+            guard effectiveOwningUserCreds != nil else {
+                self.failWithError(message: "Could not get effective owning user creds.")
+                return false
+            }
+        }
+
+        let params = RequestProcessingParameters(request: requestObject!, ep:self.self.endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
         
             if nil == responseObject {
                 self.failWithError(message: "Could not create response object from request object")
@@ -343,7 +359,7 @@ private class RequestHandler : CredsDelegate {
         }
         
         if self.endpoint.needsLock {
-            let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
+            let lock = Lock(userId:params.currentSignedInUser!.effectiveOwningUserId, deviceUUID:params.deviceUUID!)
             switch params.repos.lock.lock(lock: lock) {
             case .success:
                 break
@@ -364,7 +380,7 @@ private class RequestHandler : CredsDelegate {
         }
         
         if success && self.endpoint.needsLock {
-            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.userId)
+            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.effectiveOwningUserId)
         }
         
         return success

@@ -16,6 +16,7 @@
 		8322BE611E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */; };
 		83709F721E9F30B500BCDC32 /* RedeemSharingInvitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83709F711E9F30B500BCDC32 /* RedeemSharingInvitation.swift */; };
 		83709F741E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83709F731E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift */; };
+		83709F781EA2A17300BCDC32 /* Sharing_FileManipulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83709F771EA2A17300BCDC32 /* Sharing_FileManipulationTests.swift */; };
 		CDE3247BAD7ECAED978F7684 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6AE2CE5749DBDAACD38FE3E3 /* ServerTests.json */; };
 		OBJ_299 /* Bytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bytes.swift */; };
 		OBJ_300 /* Dir.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Dir.swift */; };
@@ -1094,6 +1095,7 @@
 		8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_UserRepository.swift; sourceTree = "<group>"; };
 		83709F711E9F30B500BCDC32 /* RedeemSharingInvitation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RedeemSharingInvitation.swift; sourceTree = "<group>"; };
 		83709F731E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingAccountsController_RedeemSharingInvitation.swift; sourceTree = "<group>"; };
+		83709F771EA2A17300BCDC32 /* Sharing_FileManipulationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sharing_FileManipulationTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* RouterMiddlewareGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareGenerator.swift; sourceTree = "<group>"; };
 		OBJ_101 /* RouterMiddlewareWalker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterMiddlewareWalker.swift; sourceTree = "<group>"; };
@@ -1924,6 +1926,7 @@
 		OBJ_252 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83709F771EA2A17300BCDC32 /* Sharing_FileManipulationTests.swift */,
 				83709F731E9F331900BCDC32 /* SharingAccountsController_RedeemSharingInvitation.swift */,
 				8322BE601E9D2F2000480D2F /* SpecificDatabaseTests_UserRepository.swift */,
 				8322BE5E1E9D20BD00480D2F /* SharingAccountsController.swift */,
@@ -3078,6 +3081,7 @@
 				OBJ_802 /* GoogleAuthenticationTests.swift in Sources */,
 				OBJ_803 /* GoogleDriveTests.swift in Sources */,
 				OBJ_804 /* KituraTest.swift in Sources */,
+				83709F781EA2A17300BCDC32 /* Sharing_FileManipulationTests.swift in Sources */,
 				OBJ_805 /* MessageTests.swift in Sources */,
 				OBJ_806 /* SepecificDatabaseTests.swift in Sources */,
 				OBJ_807 /* ServerTestCase.swift in Sources */,

@@ -35,7 +35,7 @@ extension FileController {
             // Check whether this fileUUID exists in the FileIndex.
             // Note that we don't explicitly need to additionally check if our userId matches that in the FileIndex-- the following lookup does that security check for us.
 
-            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.userId!)", fileUUID: uploadDeletionRequest.fileUUID)
+            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadDeletionRequest.fileUUID)
             
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
@@ -129,7 +129,7 @@ extension FileController {
             return
         }
         
-        guard let googleCreds = params.creds as? GoogleCreds else {
+        guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
             Log.error(message: "Error converting to GoogleCreds!")
             params.completion(nil)
             return

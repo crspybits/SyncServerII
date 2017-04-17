@@ -85,54 +85,7 @@ class FileControllerTests: ServerTestCase {
         
         self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2],masterVersionExpected: 1, expectedFileSizes: expectedSizes)
     }
-    
-    func downloadTextFile(masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:Int64 = 0, expectedError: Bool = false) {
-    
-        let deviceUUID = PerfectLib.UUID().string
-        let masterVersion:Int64 = 0
-        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: self.testFolder, appMetaData:appMetaData)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
         
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            
-            let downloadFileRequest = DownloadFileRequest(json: [
-                DownloadFileRequest.fileUUIDKey: uploadRequest.fileUUID,
-                DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadFileRequest.fileVersionKey : downloadFileVersion
-            ])
-            
-            self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                
-                if expectedError {
-                    XCTAssert(response!.statusCode != .OK, "Did not work on failing downloadFileRequest request")
-                    XCTAssert(dict == nil)
-                }
-                else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on downloadFileRequest request")
-                    XCTAssert(dict != nil)
-                    
-                    if let downloadFileResponse = DownloadFileResponse(json: dict!) {
-                        if expectUpdatedMasterUpdate {
-                            XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
-                        }
-                        else {
-                            XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
-                            XCTAssert(downloadFileResponse.fileSizeBytes == fileSize)
-                            XCTAssert(downloadFileResponse.appMetaData == appMetaData)
-                        }
-                    }
-                    else {
-                        XCTFail()
-                    }
-                }
-                
-                expectation.fulfill()
-            }
-        }
-    }
-    
     func testDownloadFileTextSucceeds() {
         downloadTextFile(masterVersionExpectedWithDownload: 1)
     }

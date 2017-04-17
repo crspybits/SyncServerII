@@ -39,7 +39,11 @@ class FileController : ControllerProtocol {
     
     // Synchronous callback.
     func getMasterVersion(params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
-        let key = MasterVersionRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+    
+        // We need to get the master version for the effectiveSignedInUser because the master version reflects the version of the data for the owning user, not a sharing user.
+        let effectiveOwningUserId = params.currentSignedInUser!.effectiveOwningUserId
+        
+        let key = MasterVersionRepository.LookupKey.userId(effectiveOwningUserId)
         let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
         
         switch result {
@@ -51,7 +55,7 @@ class FileController : ControllerProtocol {
             completion(nil, masterVersionObj.masterVersion)
             
         case .noObjectFound:
-            let errorMessage = "Master version record not found for userId: \(params.currentSignedInUser!.userId)"
+            let errorMessage = "Master version record not found for: \(key)"
             Log.error(message: errorMessage)
             completion(GetMasterVersionError.noObjectFound, nil)
         }
@@ -70,7 +74,8 @@ class FileController : ControllerProtocol {
                 return
             }
             
-            let fileIndexResult = params.repos.fileIndex.fileIndex(forUserId: params.currentSignedInUser!.userId)
+            // Note that this uses the `effectiveOwningUserId`-- because we are concerned about the owning user's data.
+            let fileIndexResult = params.repos.fileIndex.fileIndex(forUserId: params.currentSignedInUser!.effectiveOwningUserId)
 
             switch fileIndexResult {
             case .fileIndex(let fileIndex):

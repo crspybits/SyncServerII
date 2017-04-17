@@ -32,7 +32,8 @@ extension FileController {
                 return
             }
             
-            guard let googleCreds = params.creds as? GoogleCreds else {
+            // TODO: *3* Needs generalization for multiple cloud services.
+            guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
                 Log.error(message: "Could not obtain Google Creds")
                 params.completion(nil)
                 return

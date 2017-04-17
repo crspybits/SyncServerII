@@ -51,8 +51,7 @@ extension FileController {
         
         // 1) Transfer info to the FileIndex repository from Upload.
         let numberTransferred =
-            params.repos.fileIndex.transferUploads(
-                userId: params.currentSignedInUser!.userId,
+            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: params.currentSignedInUser!.effectiveOwningUserId,
                 deviceUUID: params.deviceUUID!,
                 uploadRepo: params.repos.upload)
         
@@ -127,7 +126,10 @@ extension FileController {
     private func updateMasterVersion(currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
 
         let currentMasterVersionObj = MasterVersion()
-        currentMasterVersionObj.userId = params.currentSignedInUser!.userId
+        
+        // Note the use of `effectiveOwningUserId`: The master version reflects owning user data, not a sharing user.
+        currentMasterVersionObj.userId = params.currentSignedInUser!.effectiveOwningUserId
+        
         currentMasterVersionObj.masterVersion = currentMasterVersion
         let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
         
@@ -158,7 +160,8 @@ extension FileController {
     }
     
     func doneUploads(params:RequestProcessingParameters) {
-        let lock = Lock(userId:params.currentSignedInUser!.userId, deviceUUID:params.deviceUUID!)
+        // We are locking the owning user's collection of data, and so use `effectiveOwningUserId`.
+        let lock = Lock(userId:params.currentSignedInUser!.effectiveOwningUserId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             break
@@ -176,7 +179,7 @@ extension FileController {
         
         let result = doInitialDoneUploads(params: params)
         
-        if !params.repos.lock.unlock(userId: params.currentSignedInUser!.userId) {
+        if !params.repos.lock.unlock(userId: params.currentSignedInUser!.effectiveOwningUserId) {
             Log.debug(message: "Error in unlock!")
             params.completion(nil)
             return
@@ -190,7 +193,7 @@ extension FileController {
         
         // Next: If there are any upload deletions, we need to actually do the file deletions. We are doing this *without* the lock held. I'm assuming it takes far longer to contact the cloud storage service than the other operations we are doing (e.g., mySQL operations).
         
-        guard let googleCreds = params.creds as? GoogleCreds else {
+        guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
             Log.error(message: "Could not obtain Google Creds")
             params.completion(nil)
             return

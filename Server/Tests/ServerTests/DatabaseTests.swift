@@ -244,22 +244,6 @@ class GeneralDatabaseTests: ServerTestCase {
         runSelectTestForEachRow(ignoreErrors: false)
     }
 
-/*
-    - (BOOL) equalDMY: (NSDate *) date2;
-{
-    NSDateComponents *componentsDate1 = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:self];
-    NSDateComponents *componentsDate2 = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:date2];
-    
-    if (componentsDate1.year == componentsDate2.year
-        && componentsDate1.month == componentsDate2.month
-        && componentsDate1.day == componentsDate2.day) {
-        return YES;
-    }
-    else {
-        return NO;
-    }
-}*/
-
     func equalDMY(date1:Date, date2:Date) -> Bool {
         let utc = TimeZone(abbreviation: "UTC")!
     

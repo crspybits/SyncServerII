@@ -124,8 +124,11 @@ class UserController : ControllerProtocol {
 
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
         assert(params.ep.generateTokens)
+
+        // We only need to do token generation if this is an owning user. This is because token generation is used for offline access to owning user data.
+        let owningUser = params.currentSignedInUser!.userType == .owning
         
-        if params.profileCreds!.needToGenerateTokens(dbCreds: params.creds!) {
+        if owningUser && params.profileCreds!.needToGenerateTokens(dbCreds: params.creds!) {
             params.profileCreds!.generateTokens() { successGeneratingTokens, error in
                 if error == nil {
                     let response = CheckCredsResponse()!

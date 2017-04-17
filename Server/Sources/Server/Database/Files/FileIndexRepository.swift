@@ -21,7 +21,9 @@ class FileIndex : NSObject, Model, Filenaming {
     // TODO: *0*
     // var creationDate:Date!
     
+    // The userId of the owning user.
     var userId: UserId!
+    
     var mimeType: String!
     var cloudFolderName: String!
     var appMetaData: String?
@@ -215,12 +217,12 @@ class FileIndexRepository : Repository {
         2) If there is already a file in the FileIndex for the userId/deviceUUID, then the version number we have in Uploads should be the version number in the FileIndex + 1 (if not, it is an error). Update the FileIndex with the new info from Upload, if no error.
     */
     // Returns nil on failure, and on success returns the number of uploads transferred.
-    func transferUploads(userId: UserId, deviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
+    func transferUploads(uploadUserId: UserId, owningUserId: UserId, deviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
         
         var error = false
         var numberTransferred:Int32 = 0
         
-        let uploadSelect = uploadRepo.select(forUserId: userId, deviceUUID: deviceUUID)
+        let uploadSelect = uploadRepo.select(forUserId: uploadUserId, deviceUUID: deviceUUID)
         uploadSelect.forEachRow { rowModel in
             if error {
                 return
@@ -237,11 +239,11 @@ class FileIndexRepository : Repository {
             fileIndex.deviceUUID = deviceUUID
             fileIndex.fileVersion = upload.fileVersion
             fileIndex.mimeType = upload.mimeType
-            fileIndex.userId = userId
+            fileIndex.userId = owningUserId
             fileIndex.appMetaData = upload.appMetaData
             fileIndex.cloudFolderName = upload.cloudFolderName
             
-            let key = LookupKey.primaryKeys(userId: "\(userId)", fileUUID: upload.fileUUID)
+            let key = LookupKey.primaryKeys(userId: "\(owningUserId)", fileUUID: upload.fileUUID)
             let result = self.lookup(key: key, modelInit: FileIndex.init)
             
             switch result {

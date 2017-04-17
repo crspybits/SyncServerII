@@ -44,7 +44,7 @@ public class Creds {
         return nil
     }
     
-    // Given existing creds stored in the database, decide if we need to generate tokens.
+    // Given existing creds stored in the database, decide if we need to generate tokens. The intent of generating tokens is for owning users-- to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
     func needToGenerateTokens(dbCreds:Creds) -> Bool {
         return false
     }

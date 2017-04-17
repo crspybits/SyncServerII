@@ -69,7 +69,10 @@ static func maxCharacterLength() -> Int { return 22 }
 class Upload : NSObject, Model, Filenaming {
     var uploadId: Int64!
     var fileUUID: String!
+    
+    // The userId of the sharing or owning user, i.e., this is not the owning user id.
     var userId: UserId!
+    
     var fileVersion: FileVersionInt!
     var deviceUUID: String!
     
