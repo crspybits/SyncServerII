@@ -503,6 +503,71 @@ class ServerAPI {
             }
         }
     }
+    
+    enum CreateSharingInvitationError: Error {
+    case responseConversionError
+    }
+
+    func createSharingInvitation(withPermission permission:SharingPermission, completion:((_ sharingInvitationUUID:String?, Error?)->(Void))?) {
+    
+        let endpoint = ServerEndpoints.createSharingInvitation
+        let url = URL(string: baseURL + endpoint.path)!
+
+        var paramsForRequest:[String:Any] = [:]
+        paramsForRequest[CreateSharingInvitationRequest.sharingPermissionKey] = permission
+        let invitationRequest = CreateSharingInvitationRequest(json: paramsForRequest)!
+        
+        let parameters = invitationRequest.urlParameters()!
+        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        
+        sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
+            let resultError = self.checkForError(statusCode: httpStatus, error: error)
+            
+            if resultError == nil {
+                if let invitationResponse = CreateSharingInvitationResponse(json: response!) {
+                    completion?(invitationResponse.sharingInvitationUUID, nil)
+                }
+                else {
+                    completion?(nil, CreateSharingInvitationError.responseConversionError)
+                }
+            }
+            else {
+                completion?(nil, resultError)
+            }
+        }
+    }
+
+    enum RedeemSharingInvitationError: Error {
+    case responseConversionError
+    }
+    
+    func redeemSharingInvitation(sharingInvitationUUID:String, completion:((Error?)->(Void))?) {
+        let endpoint = ServerEndpoints.redeemSharingInvitation
+        let url = URL(string: baseURL + endpoint.path)!
+
+        var paramsForRequest:[String:Any] = [:]
+        paramsForRequest[RedeemSharingInvitationRequest.sharingInvitationUUIDKey] = sharingInvitationUUID
+        let redeemRequest = RedeemSharingInvitationRequest(json: paramsForRequest)!
+        
+        let parameters = redeemRequest.urlParameters()!
+        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        
+        sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
+            let resultError = self.checkForError(statusCode: httpStatus, error: error)
+            
+            if resultError == nil {
+                if let redeemResponse = RedeemSharingInvitationResponse(json: response!) {
+                    completion?(nil)
+                }
+                else {
+                    completion?(RedeemSharingInvitationError.responseConversionError)
+                }
+            }
+            else {
+                completion?(resultError)
+            }
+        }
+    }
 }
 
 let maximumNumberRetries = 3

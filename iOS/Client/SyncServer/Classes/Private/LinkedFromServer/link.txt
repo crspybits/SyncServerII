@@ -21,4 +21,7 @@ ln -s ../../../../../../Server/Sources/Server/Account\ Specifics/Filenaming.swif
 ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/GetUploads.swift
 ln -s ../../../../../../Server/Sources/Server/Database/Files/FileInfo.swift
 ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/UploadDeletion.swift
+ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/ResponseMessage.swift
+ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/CreateSharingInvitation.swift
+ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/RedeemSharingInvitation.swift
 ln -s ../../../../../../Server/Sources/Server/Controllers/Types.swift

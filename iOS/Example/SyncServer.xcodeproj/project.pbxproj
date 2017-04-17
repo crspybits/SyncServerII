@@ -26,6 +26,7 @@
 		836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BD51E10728D005209F2 /* HealthCheck.swift */; };
 		836D4BE21E11AF8C005209F2 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BE11E11AF8C005209F2 /* SignIn.swift */; };
 		836D4BF01E1205CF005209F2 /* Consts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BEF1E1205CF005209F2 /* Consts.swift */; };
+		83709F801EA4718F00BCDC32 /* ServerAPI_Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83709F7F1EA4718F00BCDC32 /* ServerAPI_Sharing.swift */; };
 		837244541E419E7B00155E89 /* DoneUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837244531E419E7B00155E89 /* DoneUploads.swift */; };
 		837244561E419EE600155E89 /* TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837244551E419EE600155E89 /* TestCase.swift */; };
 		8378D9BE1E91B8F000470D49 /* Client_SyncServer_Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8378D9BD1E91B8F000470D49 /* Client_SyncServer_Error.swift */; };
@@ -86,6 +87,7 @@
 		836D4BD51E10728D005209F2 /* HealthCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthCheck.swift; sourceTree = "<group>"; };
 		836D4BE11E11AF8C005209F2 /* SignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
 		836D4BEF1E1205CF005209F2 /* Consts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Consts.swift; sourceTree = "<group>"; };
+		83709F7F1EA4718F00BCDC32 /* ServerAPI_Sharing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_Sharing.swift; sourceTree = "<group>"; };
 		837244531E419E7B00155E89 /* DoneUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoneUploads.swift; sourceTree = "<group>"; };
 		837244551E419EE600155E89 /* TestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCase.swift; sourceTree = "<group>"; };
 		8378D9BD1E91B8F000470D49 /* Client_SyncServer_Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_Error.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				83709F7F1EA4718F00BCDC32 /* ServerAPI_Sharing.swift */,
 				83EB63001E9F1A2100B20B9B /* ServerAPI_CreateSharingInvitation.swift */,
 				8378D9C11E95F29700470D49 /* ServerAPI_SingleError.swift */,
 				8378D9BD1E91B8F000470D49 /* Client_SyncServer_Error.swift */,
@@ -480,6 +483,7 @@
 				83F37A181E4445E500479175 /* Consts.swift in Sources */,
 				836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */,
 				835C61121E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift in Sources */,
+				83709F801EA4718F00BCDC32 /* ServerAPI_Sharing.swift in Sources */,
 				835C610C1E6504D4003E9AF8 /* Client_NetworkLoss.swift in Sources */,
 				83D95C9E1E6A923700DF3BF3 /* Client_SyncManager_MasterVersionChange.swift in Sources */,
 				83F37A1A1E44478100479175 /* FileIndex.swift in Sources */,
