@@ -14,13 +14,14 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - FirebaseAnalytics (3.7.0):
-    - FirebaseCore (~> 3.5)
+  - FirebaseAnalytics (3.8.0):
+    - FirebaseCore (~> 3.6)
     - FirebaseInstanceID (~> 1.0)
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseCore (3.5.2):
+  - FirebaseCore (3.6.0):
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseInstanceID (1.0.9)
+  - FirebaseInstanceID (1.0.10):
+    - FirebaseCore (~> 3.6)
   - Gloss (1.2.4)
   - Google/Core (3.0.3):
     - FirebaseAnalytics (~> 3.2)
@@ -57,7 +58,7 @@ PODS:
     - HPTextViewTapGestureRecognizer (~> 0.1)
     - Reachability
     - SwiftyBeaver
-  - SwiftyBeaver (1.1.4)
+  - SwiftyBeaver (1.2.0)
   - SyncServer (0.1.0):
     - AFNetworking
     - Gloss
@@ -75,9 +76,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  FirebaseAnalytics: 0d1b7d81d5021155be37702a94ba1ec16d45365d
-  FirebaseCore: a024587e43778508700af8c6b1209f7c4516ba02
-  FirebaseInstanceID: 2d0518b1378fe9d685ef40cbdd63d2fdc1125339
+  FirebaseAnalytics: 920e46455f27b0a52a80907a6d9b73ee4bd1c635
+  FirebaseCore: 9691ee2ade70c098d7cf92440f4303f16d83ca75
+  FirebaseInstanceID: b9eedd6846fb5e1f0f7279e1deaa7a7e4cf8392e
   Gloss: 4e036074610fdb993abcb958ebcd7332588e2333
   Google: 813c467362eabc11385f5a5cc9ad0cb651a58f4e
   GoogleSignIn: d7ad83f13480e1f30453471d00d19b5293ac46af
@@ -88,7 +89,7 @@ SPEC CHECKSUMS:
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   Reflection: 93327e50981227ac33c18274fcbaed33b1127811
   SMCoreLib: 8319b7a5827a09ed349cba5369c3f1a639848c53
-  SwiftyBeaver: 9216b6e163c145628ccc7c0126df4287880d6e1e
+  SwiftyBeaver: ee865c50ec462ff142f232145057818491c2b344
   SyncServer: ca7d76d87cdc430da5c47138ab66519bca456b4d
 
 PODFILE CHECKSUM: 79e8e64ac81d1cbf88130529cc1dbe51206d710f

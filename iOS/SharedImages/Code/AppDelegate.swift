@@ -39,9 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         tabBarController.delegate = tabBarDelegate
         window = UIWindow(frame: UIScreen.main.bounds)
         window!.rootViewController = tabBarController
-        
-        SignIn.session.googleSignIn.delegate = tabBarDelegate
-        
+                
         if SignIn.session.googleSignIn.userIsSignedIn {
             selectTabInController(tab: .images)
         }
@@ -59,7 +57,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-        return SignIn.session.googleSignIn.application(app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject)
+        return SignIn.session.googleSignIn.application(app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject) ||
+        SharingInvitation.session.application(application: app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

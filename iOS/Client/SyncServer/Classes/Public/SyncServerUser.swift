@@ -64,21 +64,28 @@ public class SyncServerUser {
         self.creds = creds
         
         ServerAPI.session.checkCreds { (success, error) in
+            var foundUserResult:Bool?
+            var errorResult:Error?
+            
             if success != nil && success! {
                 Log.msg("Succesfully signed in.")
-                completion(true, nil)
+                foundUserResult = true
             }
             else {
                 self.creds = nil
                 if error == nil {
                     Log.msg("Did not find user!")
-                    completion(false, nil)
+                    foundUserResult = false
                 }
                 else {
                     Log.error("Had an error: \(error)")
-                    completion(nil, error)
+                    errorResult = error
                 }
             }
+            
+            Thread.runSync(onMainThread: {
+                completion(foundUserResult, errorResult)
+            })
         }
     }
     
@@ -93,8 +100,30 @@ public class SyncServerUser {
                 self.creds = nil
                 Log.error("Error: \(error)")
             }
-            
-            completion(error)
+            Thread.runSync(onMainThread: {
+                completion(error)
+            })
+        }
+    }
+    
+    public func createSharingInvitation(withPermission permission:SharingPermission, completion:((_ invitationCode:String?, Error?)->(Void))?) {
+
+        ServerAPI.session.createSharingInvitation(withPermission: permission) { (sharingInvitationUUID, error) in
+            Thread.runSync(onMainThread: {
+                completion?(sharingInvitationUUID, error)
+            })
+        }
+    }
+    
+    public func redeemSharingInvitation(creds: SignInCreds, invitationCode:String, completion:((Error?)->())?) {
+        
+        ServerAPI.session.delegate = self
+        self.creds = creds
+        
+        ServerAPI.session.redeemSharingInvitation(sharingInvitationUUID: invitationCode) { error in
+            Thread.runSync(onMainThread: {
+                completion?(error)
+            })
         }
     }
 }

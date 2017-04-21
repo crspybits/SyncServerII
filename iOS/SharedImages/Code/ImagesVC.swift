@@ -30,7 +30,7 @@ class ImagesVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.dataSource = self
-        
+                
         // Spinner that shows when syncing
         barButtonSpinner = UIBarButtonItem(customView: spinner)
         navigationItem.leftBarButtonItem = barButtonSpinner
@@ -40,6 +40,8 @@ class ImagesVC: UIViewController {
         // Adding images
         addImageBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addImageAction))
         navigationItem.rightBarButtonItem = addImageBarButton
+        setAddButtonState()
+        
         acquireImage = SMAcquireImage(withParentViewController: self)
         acquireImage.delegate = self
         
@@ -62,6 +64,7 @@ class ImagesVC: UIViewController {
         let imageDeletionLongPress = UILongPressGestureRecognizer(target: self, action: #selector(imageDeletionLongPressAction(gesture:)))
         imageDeletionLongPress.delaysTouchesBegan = true
         collectionView?.addGestureRecognizer(imageDeletionLongPress)
+        collectionView?.delegate = self
         
         // A label and a means to do a consistency check.
         let titleLabel = UILabel()
@@ -71,6 +74,16 @@ class ImagesVC: UIViewController {
         let lp = UILongPressGestureRecognizer(target: self, action: #selector(consistencyCheckAction(gesture:)))
         titleLabel.addGestureRecognizer(lp)
         titleLabel.isUserInteractionEnabled = true
+    }
+    
+    func setAddButtonState() {
+        switch SignInVC.sharingPermission {
+        case .some(.admin), .some(.write), .none: // .none means this is not a sharing user.
+            addImageBarButton.isEnabled = true
+            
+        case .some(.read):
+            addImageBarButton.isEnabled = false
+        }
     }
     
     @objc private func consistencyCheckAction(gesture : UILongPressGestureRecognizer!) {
@@ -90,6 +103,8 @@ class ImagesVC: UIViewController {
         
         let p = gesture.location(in: self.collectionView)
 
+        // TODO: *2* Confirm the deletion with the user.
+        
         if let indexPath = collectionView.indexPathForItem(at: p) {
             let cell = self.collectionView.cellForItem(at: indexPath) as! IconCollectionVC
             cell.remove()
@@ -232,9 +247,6 @@ extension ImagesVC : SyncControllerDelegate {
                 self.spinner.start()
             }
             
-        //case .NonRecoverableError, .InternalError:
-        //    self.spinner.stop(withBackgroundColor: .Red)
-            
         case .syncDone:
             // If we don't let the spinner show for a minimum amount of time, it looks odd.
             let minimumDuration:CFTimeInterval = 2
@@ -255,5 +267,18 @@ extension ImagesVC : SyncControllerDelegate {
         }
         
         self.spinner.setNeedsLayout()
+    }
+}
+
+extension ImagesVC : UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let size = collectionView.frame.width * 0.20
+        return CGSize(width: size, height: size)
+    }
+}
+
+extension ImagesVC : TabControllerNavigation {
+    func tabBarViewControllerWasSelected() {
+        setAddButtonState()
     }
 }

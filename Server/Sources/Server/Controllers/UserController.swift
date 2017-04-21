@@ -140,9 +140,10 @@ class UserController : ControllerProtocol {
                 }
             }
         }
-        
-        let response = CheckCredsResponse()!
-        params.completion(response)
+        else {
+            let response = CheckCredsResponse()!
+            params.completion(response)
+        }
     }
     
     // A user can only remove themselves, not another user-- this policy is enforced because the currently signed in user (with the UserProfile) is the one removed.

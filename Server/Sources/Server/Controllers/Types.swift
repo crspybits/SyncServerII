@@ -54,4 +54,15 @@ public enum SharingPermission : String {
             return true
         }
     }
+    
+    public func userFriendlyText() -> String {
+        switch self {
+        case .read:
+            return "Read-only"
+        case .write:
+            return "Read & Change"
+        case .admin:
+            return "Read, Change, & Invite"
+        }
+    }
 }

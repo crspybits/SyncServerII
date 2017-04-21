@@ -8,15 +8,22 @@
 
 import UIKit
 import SMCoreLib
+import SyncServer
 
-class ViewController: SMGoogleUserSignInViewController {    
+class ViewController: SMGoogleUserSignInViewController {
+    var googleSignInButton:UIView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
                 
-        let googleSignInButton = SignIn.session.googleSignIn.signInButton(delegate: self)
+        googleSignInButton = SignIn.session.googleSignIn.signInButton(delegate: self)
         googleSignInButton.frameY = 100
         view.addSubview(googleSignInButton)
         googleSignInButton.centerHorizontallyInSuperview()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
 }
 

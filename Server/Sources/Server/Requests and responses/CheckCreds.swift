@@ -31,6 +31,8 @@ class CheckCredsRequest : NSObject, RequestMessage {
 }
 
 class CheckCredsResponse : ResponseMessage {
+    // TODO: *2* If this is a sharing user, return back to the caller their sharing permissions-- so the UI can restrict itself accordingly.
+    
     public var responseType: ResponseType {
         return .json
     }

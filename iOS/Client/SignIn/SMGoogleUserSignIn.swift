@@ -95,6 +95,11 @@ open class SMGoogleUserSignInViewController : UIViewController, GIDSignInUIDeleg
 
 protocol SMGoogleUserSignInDelegate : class {
 func userWasSignedOut(googleUserSignIn:SMGoogleUserSignIn)
+func shouldCreateSharingUser(creds:GoogleSignInCreds) -> Bool
+func sharingUserWasCreated(googleUserSignIn:SMGoogleUserSignIn)
+func owningUserWasCreated(googleUserSignIn:SMGoogleUserSignIn)
+
+// TODO: *1* Add a delegate callback for userWasSignedIn-- and add an optional SharingPermission for a sharing user-- so we know, in the client app, what the users permissions are.
 }
 
 // See https://developers.google.com/identity/sign-in/ios/sign-in
@@ -234,20 +239,7 @@ open class SMGoogleUserSignIn : NSObject {
         return creds
     }
     
-    /*
-    override open var syncServerSignedInUser:SMUserCredentials? {
-        get {
-            if self.syncServerUserIsSignedIn {
-                return SMUserCredentials.Google(userType: .OwningUser, idToken: self.idToken, authCode: nil, userName: self.googleUserName)
-            }
-            else {
-                return nil
-            }
-        }
-    }
-    */
-    
-    open func signInButton(delegate: SMGoogleUserSignInViewController) -> UIView {
+    open func signInButton(delegate: SMGoogleUserSignInViewController) -> GoogleSignInOutButton {
     
         // 7/7/16; Prior to Google Sign In 4.0, this delegate was on the signInOutButton button. But now, its on the GIDSignIn. E.g., see https://developers.google.com/identity/sign-in/ios/api/protocol_g_i_d_sign_in_delegate-p
         GIDSignIn.sharedInstance().delegate = self
@@ -275,41 +267,46 @@ extension SMGoogleUserSignIn {
     }
 }
 
-/* 1/24/16; I just got this:
-Error signing in: Error Domain=com.google.HTTPStatus Code=500 "(null)" UserInfo={json={
-    error = "internal_failure";
-    "error_description" = "Backend Error";
-}, data=<7b0a2022 6572726f 72223a20 22696e74 65726e61 6c5f6661 696c7572 65222c0a 20226572 726f725f 64657363 72697074 696f6e22 3a202242 61636b65 6e642045 72726f72 220a7d0a>}
-*/
-
 extension SMGoogleUserSignIn : GIDSignInDelegate {
     public func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error!)
     {
-        if (error == nil) {            
-            // user.serverAuthCode can be nil if the user didn't do a "fresh" signin. i.e., if we silently signed in the user.
-            /* We're going to handle this in two cases:
-            a) user.serverAuthCode is present: Try to create a new user
-            b) user.serverAuthCode is not present: Try to check for an existing user
-            */
-
+        if (error == nil) {
             self.signInOutButton.buttonShowing = .signOut
             let creds = signedInUser(forUser: user)
-            
-            SyncServerUser.session.checkForExistingUser(creds: creds) { (foundUser, error) in
-                if error == nil {
-                    if !foundUser! {
-                        SyncServerUser.session.addUser(creds: creds) { error in
-                            if error == nil {
-                            }
-                            else {
-                                self.signUserOut()
+
+            if let createSharingUser = self.delegate?.shouldCreateSharingUser(creds: self.signedInUser), createSharingUser {
+                
+                // TODO: *0* Put up a spinner-- if we have an error, this takes a while.
+                
+                let invitationCode = SharingInvitation.session.sharingInvitationCode!
+                SyncServerUser.session.redeemSharingInvitation(creds: creds, invitationCode: invitationCode) { error in
+                    if error == nil {
+                        self.delegate?.sharingUserWasCreated(googleUserSignIn: self)
+                    }
+                    else {
+                        // TODO: *0* Give the user an error indication.
+                        self.signUserOut()
+                    }
+                }
+            }
+            else {
+                SyncServerUser.session.checkForExistingUser(creds: creds) { (foundUser, error) in
+                    if error == nil {
+                        if !foundUser! {
+                            SyncServerUser.session.addUser(creds: creds) { error in
+                                if error == nil {
+                                    self.delegate?.owningUserWasCreated(googleUserSignIn: self)
+                                }
+                                else {
+                                    self.signUserOut()
+                                }
                             }
                         }
                     }
-                }
-                else {
-                    Log.error("Error checking for existing user: \(error)")
-                    self.signUserOut()
+                    else {
+                        Log.error("Error checking for existing user: \(error)")
+                        self.signUserOut()
+                    }
                 }
             }
         }
@@ -326,7 +323,7 @@ extension SMGoogleUserSignIn : GIDSignInDelegate {
 }
 
 // Self-sized; cannot be resized.
-private class GoogleSignInOutButton : UIView {
+public class GoogleSignInOutButton : UIView {
     let signInButton = GIDSignInButton()
     
     let signOutButtonContainer = UIView()
@@ -377,11 +374,11 @@ private class GoogleSignInOutButton : UIView {
         self.buttonShowing = .signIn
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
     }
     
@@ -410,6 +407,16 @@ private class GoogleSignInOutButton : UIView {
             }
             
             self.setNeedsDisplay()
+        }
+    }
+    
+    func tap() {
+        switch buttonShowing {
+        case .signIn:
+            self.signInButton.sendActions(for: .touchUpInside)
+            
+        case .signOut:
+            self.signOutButton.sendActions(for: .touchUpInside)
         }
     }
 }

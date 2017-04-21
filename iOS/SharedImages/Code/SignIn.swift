@@ -13,7 +13,7 @@ class SignIn {
     let googleSignIn: SMGoogleUserSignIn!
     static let session = SignIn()
     
-    init() {
+    private init() {
         var serverClientId:String!
         var appClientId:String!
         
