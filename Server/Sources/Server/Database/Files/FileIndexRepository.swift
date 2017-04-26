@@ -52,7 +52,7 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(appMetaData); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
     }
 }
 

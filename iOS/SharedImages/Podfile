@@ -7,6 +7,7 @@ target 'SharedImages' do
 	# Not using this because I made some mods to the ODRefreshControl code.
 	# pod 'ODRefreshControl', '~> 1.2'
 	
+	pod 'SevenSwitch', '~> 2.1'
 	pod 'SyncServer', :path => '../Client/'
 	pod 'SMCoreLib'
     pod 'Google/SignIn'

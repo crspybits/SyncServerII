@@ -95,10 +95,10 @@ class Client_SyncServer_FileUpload: TestCase {
 
     // TODO: *2* file will have deleted flag set in local Directory.
     // This is commented out until we do multi-version files.
-#if false
+/*
     func testThatUploadOfPreviouslyDeletedFileFails() {
     }
-#endif
+*/
 
     func testThatAddingSameFileToUploadQueueTwiceBeforeSyncReplaces() {
         let url1 = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!

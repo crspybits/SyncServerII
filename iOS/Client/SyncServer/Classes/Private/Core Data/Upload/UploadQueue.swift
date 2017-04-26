@@ -34,7 +34,7 @@ public class UploadQueue: NSManagedObject, AllOperations {
             return nil
         }
         
-        return result[0] as! UploadFileTracker
+        return (result[0] as! UploadFileTracker)
     }
     
     var uploadFileTrackers:[UploadFileTracker] {

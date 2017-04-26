@@ -20,9 +20,9 @@ extension FileController {
         
 #if DEBUG
         if doneUploadsRequest.testLockSync != nil {
-            Log.info(message: "Starting sleep (testLockSync= \(doneUploadsRequest.testLockSync)).")
+            Log.info(message: "Starting sleep (testLockSync= \(String(describing: doneUploadsRequest.testLockSync))).")
             Thread.sleep(forTimeInterval: TimeInterval(doneUploadsRequest.testLockSync!))
-            Log.info(message: "Finished sleep (testLockSync= \(doneUploadsRequest.testLockSync)).")
+            Log.info(message: "Finished sleep (testLockSync= \(String(describing: doneUploadsRequest.testLockSync))).")
         }
 #endif
 
@@ -103,7 +103,7 @@ extension FileController {
         switch params.repos.upload.remove(key: filesForUserDevice) {
         case .removed(let numberRows):
             if numberRows != numberTransferred {
-                Log.error(message: "Number rows removed from Upload was \(numberRows) but should have been \(numberTransferred)!")
+                Log.error(message: "Number rows removed from Upload was \(numberRows) but should have been \(String(describing: numberTransferred))!")
                 params.completion(nil)
                 return nil
             }
@@ -229,7 +229,7 @@ extension FileController {
         
             let tail = (uploadDeletions!.count > 0) ?
                 Array(uploadDeletions![1..<uploadDeletions!.count]) : nil
-            var numberAdditionalErrors = 0
+            var numberAdditionalErrors:Int32 = 0
             
             if error != nil {
                 // We could get into some odd situations here if we actually report an error by failing. Failing will cause a db transaction rollback. Which could mean we had some files deleted, but *all* of the entries would still be present in the FileIndex/Uploads directory. So, I'm not going to fail, but forge on. I'll report the errors in the DoneUploadsResponse message though.

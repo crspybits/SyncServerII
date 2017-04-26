@@ -251,7 +251,7 @@ class GoogleCreds : Creds {
         
         self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
-                Log.error(message: "Bad status code: \(statusCode)")
+                Log.error(message: "Bad status code: \(String(describing: statusCode))")
                 completion(RefreshError.badStatusCode(statusCode))
                 return
             }
@@ -263,7 +263,7 @@ class GoogleCreds : Creds {
             }
             
             guard case .json(let jsonResult) = apiResult! else {
-                Log.error(message: "Bad JSON result: \(apiResult)")
+                Log.error(message: "Bad JSON result: \(String(describing: apiResult))")
                 completion(RefreshError.badJSONResult)
                 return
             }
@@ -314,7 +314,7 @@ class GoogleCreds : Creds {
                         super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, completion: completion)
                     }
                     else {
-                        Log.error(message: "Failed to refresh access token: \(error)")
+                        Log.error(message: "Failed to refresh access token: \(String(describing: error))")
                         completion(nil, .internalServerError)
                     }
                 }

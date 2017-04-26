@@ -6,6 +6,7 @@ use_frameworks!
 target 'SyncServer_Example' do
 	pod 'SyncServer', :path => '../Client/'
 	pod 'SMCoreLib'
+    pod 'SevenSwitch', '~> 2.1'
 	pod 'Google/SignIn'
 
 	target 'SyncServer_Tests' do

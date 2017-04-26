@@ -39,7 +39,7 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible, Filenamin
     var fileSizeBytes: Int64!
     
     public var description: String {
-        return "fileUUID: \(fileUUID); deviceUUID: \(deviceUUID); mimeTypeKey: \(mimeType); appMetaData: \(appMetaData); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
+        return "fileUUID: \(fileUUID); deviceUUID: \(String(describing: deviceUUID)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(String(describing: cloudFolderName))"
     }
     
     required public init?(json: JSON) {

@@ -181,7 +181,7 @@ public class SyncServer {
             var entry = DirectoryEntry.fetchObjectWithUUID(uuid: attr.fileUUID)
             
             if nil == entry {
-                entry = DirectoryEntry.newObject() as! DirectoryEntry
+                entry = (DirectoryEntry.newObject() as! DirectoryEntry)
                 entry!.fileUUID = attr.fileUUID
                 entry!.mimeType = attr.mimeType
             }
@@ -224,7 +224,7 @@ public class SyncServer {
                         {$0.fileUUID == attr.fileUUID}
                     
                     if result.count > 0 {
-                        result.map { uft in
+                        _ = result.map { uft in
                             CoreData.sessionNamed(Constants.coreDataName).remove(uft)
                         }
                     }
@@ -272,7 +272,7 @@ public class SyncServer {
                     // Remove any upload for this UUID from the pendingSync queue.
                     let pendingSync = try Upload.pendingSync().uploadFileTrackers.filter
                         {$0.fileUUID == uuid }
-                    pendingSync.map { uft in
+                    _ = pendingSync.map { uft in
                         CoreData.sessionNamed(Constants.coreDataName).remove(uft)
                     }
                     
@@ -387,14 +387,14 @@ public class SyncServer {
     private func resetFileTrackers() {
         CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
             let dfts = DownloadFileTracker.fetchAll()
-            dfts.map { dft in
+            _ = dfts.map { dft in
                 if dft.status == .downloading {
                     dft.status = .notStarted
                 }
             }
             
             // Not sure how to report an error here...
-            try? Upload.pendingSync().uploadFileTrackers.map { uft in
+            _ = try? Upload.pendingSync().uploadFileTrackers.map { uft in
                 if uft.status == .uploading {
                     uft.status = .notStarted
                 }

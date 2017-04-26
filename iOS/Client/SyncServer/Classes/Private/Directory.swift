@@ -85,7 +85,7 @@ class Directory {
     
     // Does not do `CoreData.sessionNamed(Constants.coreDataName).performAndWait`
     func updateAfterDownloadingFiles(downloads:[DownloadFileTracker]) {
-        downloads.map { dft in
+        _ = downloads.map { dft in
             if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: dft.fileUUID) {
                 assert(entry.fileVersion! < dft.fileVersion)
                 entry.fileVersion = dft.fileVersion
@@ -100,7 +100,7 @@ class Directory {
     
     // Does not do `CoreData.sessionNamed(Constants.coreDataName).performAndWait`
     func updateAfterDownloadDeletingFiles(deletions:[DownloadFileTracker]) {
-        deletions.map { dft in
+        _ = deletions.map { dft in
             // Have already dealt with case where we didn't know about this file locally and were download deleting it.
             guard let entry = DirectoryEntry.fetchObjectWithUUID(uuid: dft.fileUUID) else {
                 assert(false)

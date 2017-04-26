@@ -23,7 +23,7 @@ class Consistency {
             var serverFilesNotPresentLocally = [UUIDString]()
             
             // Present in local meta data, but not deleted.
-            var deletedServerFilesButPresentLocally = [UUIDString]()
+            // var deletedServerFilesButPresentLocally = [UUIDString]()
 
             // First, check server files.
             for file in fileInfo! {

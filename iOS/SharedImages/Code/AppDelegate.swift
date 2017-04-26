@@ -19,6 +19,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var tabBarController:UITabBarController!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    
+        // Used by SMEmail in messages where email isn't allowed.
+        SMUIMessages.session().appName = "Shared Images"
 
         let coreDataSession = CoreData(options: [
             CoreDataBundleModelName: "SharedImages",

@@ -104,7 +104,8 @@ extension GoogleCreds {
     }
     
     // Considers it an error for there to be more than one item with the given name.
-    func searchFor(_ searchType: SearchType, itemName:String, completion:@escaping (_ result:SearchResult?, Swift.Error?)->()) {
+    func searchFor(_ searchType: SearchType, itemName:String,
+        completion:@escaping (_ result:SearchResult?, Swift.Error?)->()) {
         
         var query:String = ""
         switch searchType {
@@ -340,7 +341,7 @@ extension GoogleCreds {
                     }
                 }
                 else {
-                    Log.error(message: "Error in searchFor: \(error)")
+                    Log.error(message: "Error in searchFor: \(String(describing: error))")
                     completion(nil, error)
                 }
             }
@@ -383,11 +384,13 @@ extension GoogleCreds {
             var resultError:Swift.Error?
 
             if statusCode != HTTPStatusCode.OK {
-                Log.error(message: "Error in completeSmallFileUpload: statusCode=\(statusCode)")
+                // Error case
+                Log.error(message: "Error in completeSmallFileUpload: statusCode=\(String(describing: statusCode))")
                 resultError = UploadError.badStatusCode(statusCode)
                 completion(nil, resultError)
             }
             else {
+                // Success case
                 // TODO: *4* This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
 
                 self.searchFor(searchType, itemName: request.cloudFileName(deviceUUID:deviceUUID)) { (result, error) in
@@ -401,7 +404,7 @@ extension GoogleCreds {
                         }
                     }
                     else {
-                        Log.error(message: "Error in completeSmallFileUpload.searchFor: statusCode=\(error)")
+                        Log.error(message: "Error in completeSmallFileUpload.searchFor: statusCode=\(String(describing: error))")
                         completion(nil, error)
                     }
                 }

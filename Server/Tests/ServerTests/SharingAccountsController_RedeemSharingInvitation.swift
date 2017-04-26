@@ -122,4 +122,48 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
             expectation.fulfill()
         }
     }
+    
+    func testThatCheckingCredsOnASharingUserGivesSharingPermission() {
+        let perm:SharingPermission = .write
+        createSharingUser(withSharingPermission: perm)
+        
+        let deviceUUID = PerfectLib.UUID().string
+
+        performServerTest(token:.googleRefreshToken2) { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "checkCreds failed")
+                
+                let response = CheckCredsResponse(json: dict!)
+                
+                // This is what we're looking for: Make sure that the check creds response indicates our expected sharing permission.
+                XCTAssert(response!.sharingPermission == perm)
+                
+                expectation.fulfill()
+            }
+        }
+    }
+    
+    func testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission() {
+        let deviceUUID = PerfectLib.UUID().string
+        self.addNewUser(deviceUUID:deviceUUID)
+        
+        performServerTest(token: .googleRefreshToken1) { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "checkCreds failed")
+                
+                let response = CheckCredsResponse(json: dict!)
+                
+                // This is what we're looking for: Make sure that the check creds response gives nil sharing permission-- expected for an owning user.
+                XCTAssert(response!.sharingPermission == nil)
+                
+                expectation.fulfill()
+            }
+        }
+    }
 }

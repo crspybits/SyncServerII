@@ -20,10 +20,12 @@ class CheckCredsRequest : NSObject, RequestMessage {
         super.init()
     }
     
+#if SERVER
     required init?(request: RouterRequest) {
         super.init()
     }
-    
+#endif
+
     func toJSON() -> JSON? {
         return jsonify([
         ])
@@ -31,13 +33,16 @@ class CheckCredsRequest : NSObject, RequestMessage {
 }
 
 class CheckCredsResponse : ResponseMessage {
-    // TODO: *2* If this is a sharing user, return back to the caller their sharing permissions-- so the UI can restrict itself accordingly.
+    // This will be present iff the user is a sharing user. i.e., for an owning user it will be nil.
+    static let sharingPermissionKey = "sharingPermission"
+    var sharingPermission:SharingPermission!
     
     public var responseType: ResponseType {
         return .json
     }
     
     required init?(json: JSON) {
+        self.sharingPermission = Decoder.decodeSharingPermission(key: CheckCredsResponse.sharingPermissionKey, json: json)
     }
     
     convenience init?() {
@@ -47,6 +52,7 @@ class CheckCredsResponse : ResponseMessage {
     // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
+            Encoder.encodeSharingPermission(key: CheckCredsResponse.sharingPermissionKey, value: self.sharingPermission)
         ])
     }
 }

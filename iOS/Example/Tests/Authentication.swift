@@ -58,9 +58,13 @@ class ServerAPI_Authentication: TestCase {
         ServerAPI.session.addUser { error in
             XCTAssert(error == nil)
             addUserExpectation.fulfill()
-            ServerAPI.session.checkCreds { userExists, error in
+            ServerAPI.session.checkCreds { checkCredsResult, error in
                 XCTAssert(error == nil)
-                XCTAssert(userExists!)
+                guard case .owningUser = checkCredsResult! else {
+                    XCTFail()
+                    return
+                }
+                
                 expectation.fulfill()
             }
         }
@@ -78,9 +82,12 @@ class ServerAPI_Authentication: TestCase {
             
             self.authTokens[ServerConstants.GoogleHTTPAccessTokenKey] = "foobar"
             
-            ServerAPI.session.checkCreds { userExists, error in
+            ServerAPI.session.checkCreds { checkCredsResult, error in
                 XCTAssert(error == nil)
-                XCTAssert(!userExists!)
+                guard case .noUser = checkCredsResult! else {
+                    XCTFail()
+                    return
+                }
                 expectation.fulfill()
             }
         }

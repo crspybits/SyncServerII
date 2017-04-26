@@ -124,7 +124,7 @@ class Upload {
                     CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 }
                 
-                let message = "Error: \(error)"
+                let message = "Error: \(String(describing: error))"
                 Log.error(message)
                 self.completion?(.error(message))
                 return
@@ -153,7 +153,7 @@ class Upload {
                 CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                     // Simplest method for now: Mark all uft's as .notStarted
                     // TODO: *4* This could be better-- performance-wise, it doesn't make sense to do all the uploads over again.
-                    uploadQueue.uploadFileTrackers.map { uft in
+                    _ = uploadQueue.uploadFileTrackers.map { uft in
                         uft.status = .notStarted
                     }
 
@@ -198,14 +198,14 @@ class Upload {
                     2) Fail if retries don't work and put the SyncServer client interface into an error state.
                     3) Deal with other, similar, errors too, in a similar way.
                 */
-                let message = "Error: \(error)"
+                let message = "Error: \(String(describing: error))"
                 Log.error(message)
                 self.completion?(.error(message))
                 return
             }
  
             switch uploadResult! {
-            case .success(sizeInBytes: let sizeInBytes):
+            case .success(sizeInBytes: _):
                 var completionResult:NextCompletion?
                 CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                     nextToUpload.status = .uploaded
@@ -228,7 +228,7 @@ class Upload {
                 CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                     // Simplest method for now: Mark all uft's as .notStarted
                     // TODO: *4* This could be better-- performance-wise, it doesn't make sense to do all the uploads over again.
-                    uploadQueue.uploadFileTrackers.map { uft in
+                    _ = uploadQueue.uploadFileTrackers.map { uft in
                         uft.status = .notStarted
                     }
 
@@ -265,7 +265,7 @@ class Upload {
         
         ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) { (result, error) in
             guard error == nil else {
-                completion?(.error("\(error)"))
+                completion?(.error("\(String(describing: error))"))
                 return
             }
 
@@ -298,7 +298,7 @@ class Upload {
                     
                     // Simplest method for now: Mark all uft's as .notStarted
                     // TODO: *4* This could be better-- performance-wise, it doesn't make sense to do all the uploads over again.
-                    uploadQueue.uploadFileTrackers.map { uft in
+                    _ = uploadQueue.uploadFileTrackers.map { uft in
                         uft.status = .notStarted
                     }
 

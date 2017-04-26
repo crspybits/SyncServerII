@@ -109,7 +109,7 @@ class UserController : ControllerProtocol {
         
         params.profileCreds!.generateTokens() { successGeneratingTokens, error in
             guard error == nil else {
-                Log.error(message: "Failed attempting to generate tokens: \(error)")
+                Log.error(message: "Failed attempting to generate tokens: \(String(describing: error))")
                 params.completion(nil)
                 return
             }
@@ -135,13 +135,16 @@ class UserController : ControllerProtocol {
                     params.completion(response)
                 }
                 else {
-                    Log.error(message: "Failed attempting to generate tokens: \(error)")
+                    Log.error(message: "Failed attempting to generate tokens: \(String(describing: error))")
                     params.completion(nil)
                 }
             }
         }
         else {
             let response = CheckCredsResponse()!
+            if !owningUser {
+                response.sharingPermission = params.currentSignedInUser!.sharingPermission
+            }
             params.completion(response)
         }
     }

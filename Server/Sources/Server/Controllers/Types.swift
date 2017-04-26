@@ -66,3 +66,4 @@ public enum SharingPermission : String {
         }
     }
 }
+

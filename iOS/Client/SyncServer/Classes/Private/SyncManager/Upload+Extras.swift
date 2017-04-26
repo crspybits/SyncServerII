@@ -11,7 +11,7 @@ import SMCoreLib
 
 extension Upload {
     private class func createNewPendingSync() throws {
-        Singleton.get().pendingSync = UploadQueue.newObject() as! UploadQueue
+        Singleton.get().pendingSync = (UploadQueue.newObject() as! UploadQueue)
         try CoreData.sessionNamed(Constants.coreDataName).context.save()
     }
     
@@ -48,7 +48,7 @@ extension Upload {
             return nil
         }
         
-        return synced().queues![0] as! UploadQueue
+        return (synced().queues![0] as! UploadQueue)
     }
     
     // There must be a head sync queue.

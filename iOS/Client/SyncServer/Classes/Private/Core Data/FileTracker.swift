@@ -38,7 +38,7 @@ public class FileTracker: NSManagedObject, Filenaming {
                 return nil
             }
             else {
-                let url = NSKeyedUnarchiver.unarchiveObject(with: localURLData as! Data) as? SMRelativeLocalURL
+                let url = NSKeyedUnarchiver.unarchiveObject(with: localURLData! as Data) as? SMRelativeLocalURL
                 Assert.If(url == nil, thenPrintThisString: "Yikes: No URL!")
                 return url
             }
@@ -49,7 +49,7 @@ public class FileTracker: NSManagedObject, Filenaming {
                 localURLData = nil
             }
             else {
-                localURLData = NSKeyedArchiver.archivedData(withRootObject: newValue!) as! NSData
+                localURLData = NSKeyedArchiver.archivedData(withRootObject: newValue!) as NSData
             }
         }
     }

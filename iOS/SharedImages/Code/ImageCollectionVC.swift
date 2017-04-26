@@ -1,5 +1,5 @@
 //
-//  IconCollectionVC.swift
+//  ImageCollectionVC.swift
 //  SharedImages
 //
 //  Created by Christopher Prince on 3/10/17.
@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import SMCoreLib
 
-class IconCollectionVC : UICollectionViewCell {
+class ImageCollectionVC : UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     private var image:Image!
     private weak var syncController:SyncController!

@@ -71,7 +71,7 @@ class ServerNetworking {
         Log.msg("postUploadDataTo: serverURL: \(serverURL)")
         
         let uploadTask:URLSessionUploadTask = session.uploadTask(with: request, from: dataToUpload) { (data, urlResponse, error) in
-            Log.msg("request.url: \(request.url)")
+            Log.msg("request.url: \(String(describing: request.url))")
             
             self.processResponse(data: data, urlResponse: urlResponse, error: error, completion: completion)
         }
@@ -120,7 +120,7 @@ class ServerNetworking {
                 // Transfer the temporary file to a more permanent location.
                 if let newTempURL = FilesMisc.createTemporaryRelativeFile() {
                     do {
-                        try FileManager.default.replaceItemAt(newTempURL as URL, withItemAt: url!)                        
+                        _ = try FileManager.default.replaceItemAt(newTempURL as URL, withItemAt: url!)
                     }
                     catch (let error) {
                         Log.error("Could not move file: \(error)")
@@ -151,6 +151,7 @@ class ServerNetworking {
     
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
+        Log.msg("httpAdditionalHeaders: \(String(describing: sessionConfiguration.httpAdditionalHeaders))")
         
         // If needed, use a delegate here to track upload progress.
         let session = URLSession(configuration: sessionConfiguration)
@@ -182,7 +183,7 @@ class ServerNetworking {
             do {
                 try json = JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions(rawValue: UInt(0)))
             } catch (let error) {
-                Log.error("Error in JSON conversion: \(error)")
+                Log.error("processResponse: Error in JSON conversion: \(error); statusCode= \(response.statusCode)")
                 completion?(nil, response.statusCode, error)
                 return
             }

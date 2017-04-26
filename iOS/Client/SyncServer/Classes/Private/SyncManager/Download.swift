@@ -61,7 +61,7 @@ class Download {
                             assert(false, "Not Yet Implemented: Multiple File Versions")
                         }
                         
-                        var dft = DownloadFileTracker.newObject() as! DownloadFileTracker
+                        let dft = DownloadFileTracker.newObject() as! DownloadFileTracker
                         dft.fileUUID = file.fileUUID
                         dft.fileVersion = file.fileVersion
                         dft.mimeType = file.mimeType
@@ -155,7 +155,7 @@ class Download {
                     CoreData.sessionNamed(Constants.coreDataName).saveContext()
                 }
                 
-                let message = "Error: \(error)"
+                let message = "Error: \(String(describing: error))"
                 Log.error(message)
                 completion?(.error(message))
                 return

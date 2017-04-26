@@ -115,7 +115,7 @@ public class Creds {
                         Log.debug(message: "Header: \(header)")
                     }
                     let result = try? response.readString()
-                    Log.debug(message: "Response data as string: \(result)")
+                    Log.debug(message: "Response data as string: \(String(describing: result))")
                     
                     // TODO: *1* 2/26/17; I just got a non-200 result and the body of the response is: Optional("{\n \"error\": \"invalid_grant\",\n \"error_description\": \"Bad Request\"\n}\n"). My hypothesis is this that means the refresh token has expired. See also http://stackoverflow.com/questions/26724003/using-refresh-token-exception-error-invalid-grant
                     // I just created a new refresh token, and this works again. My hypothesis above seems correct on this basis.

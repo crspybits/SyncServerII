@@ -19,14 +19,14 @@ extension FileController {
         
         getMasterVersion(params: params) { error, masterVersion in
             if error != nil {
-                Log.error(message: "Error: \(error)")
+                Log.error(message: "Error: \(String(describing: error))")
                 params.completion(nil)
                 return
             }
 
             if masterVersion != uploadRequest.masterVersion {
                 let response = UploadFileResponse()!
-                Log.warning(message: "Master version update: \(masterVersion)")
+                Log.warning(message: "Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return
@@ -115,13 +115,13 @@ extension FileController {
                     }
                     else {
                         // TODO: *0* Need to remove the file from the cloud server.
-                        Log.error(message: "Could not update UploadRepository: \(error)")
+                        Log.error(message: "Could not update UploadRepository: \(String(describing: error))")
                         params.completion(nil)
                     }
                 }
                 else {
                     // TODO: *0* It could be useful to remove the file from the cloud server. It might be there.
-                    Log.error(message: "Could not uploadSmallFile: error: \(error)")
+                    Log.error(message: "Could not uploadSmallFile: error: \(String(describing: error))")
                     params.completion(nil)
                 }
             }

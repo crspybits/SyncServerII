@@ -113,7 +113,7 @@ extension KituraTest {
                 dict = self.getResponseDict(response: response!, responseDictFrom:responseDictFrom)
             }
             
-            Log.info("Result: \(dict)")
+            Log.info("Result: \(String(describing: dict))")
             callback(response, dict)
         }
         
@@ -148,7 +148,7 @@ extension KituraTest {
             jsonString = params[0]
         }
         
-        Log.info("Result string: \(jsonString)")
+        Log.info("Result string: \(String(describing: jsonString))")
         
         guard jsonString != nil else {
             Log.error("Empty string obtained")

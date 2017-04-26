@@ -37,7 +37,7 @@ class UtilsTests: ServerTestCase {
         let other: String?
         let propertyType2 = type(of:other)
         XCTAssert(propertyType1 != nil)
-        XCTAssert(propertyType1 == propertyType2, "\(propertyType1) != \(propertyType2)")
+        XCTAssert(propertyType1 == propertyType2, "\(String(describing: propertyType1)) != \(propertyType2)")
     }
     
     func testString() {
@@ -46,7 +46,7 @@ class UtilsTests: ServerTestCase {
         let other: String!
         let propertyType2 = type(of:other)
         XCTAssert(propertyType1 != nil)
-        XCTAssert(propertyType1 == propertyType2, "\(propertyType1) != \(propertyType2)")
+        XCTAssert(propertyType1 == propertyType2, "\(String(describing: propertyType1)) != \(propertyType2)")
     }
     
     func testOptionalInt() {
@@ -55,7 +55,7 @@ class UtilsTests: ServerTestCase {
         let other: Int?
         let propertyType2 = type(of:other)
         XCTAssert(propertyType1 != nil)
-        XCTAssert(propertyType1 == propertyType2, "\(propertyType1) != \(propertyType2)")
+        XCTAssert(propertyType1 == propertyType2, "\(String(describing: propertyType1)) != \(propertyType2)")
     }
     
     func testInt() {
@@ -64,6 +64,6 @@ class UtilsTests: ServerTestCase {
         let other: Int!
         let propertyType2 = type(of:other)
         XCTAssert(propertyType1 != nil)
-        XCTAssert(propertyType1 == propertyType2, "\(propertyType1) != \(propertyType2)")
+        XCTAssert(propertyType1 == propertyType2, "\(String(describing: propertyType1)) != \(propertyType2)")
     }
 }

@@ -52,12 +52,11 @@ public class FilesMisc {
     
 #if DEBUG
     // Returns true iff the files are bytewise identical.
-    public class func compareFiles(file1 file1:URL, file2:URL) -> Bool {
+    public class func compareFiles(file1:URL, file2:URL) -> Bool {
         // Not the best (consumes lots of RAM), but good enough for now.
         do {
             let file1Data = try Data(contentsOf: file1)
             let file2Data = try Data(contentsOf: file2)
-            file1Data
             return file1Data == file2Data
         } catch (let error) {
             Log.error("Error when reading data from file(s): \(error)")
@@ -66,7 +65,7 @@ public class FilesMisc {
     }
     
     // Returns true iff the files are bytewise identical.
-    public class func compareFile(file file:URL, andString string:String) -> Bool {
+    public class func compareFile(file:URL, andString string:String) -> Bool {
         // Not the best (consumes lots of RAM), but good enough for now.
         do {
             let fileData = try Data(contentsOf: file)

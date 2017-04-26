@@ -19,7 +19,7 @@ class GeneralAuthTests: ServerTestCase {
             let badRoute = ServerEndpoint("foobar", method: .post)
             self.performRequest(route:badRoute) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on request")
-                Log.info("response.statusCode: \(response?.statusCode)")
+                Log.info("response.statusCode: \(String(describing: response?.statusCode))")
                 expectation.fulfill()
             }
         }

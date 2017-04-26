@@ -50,7 +50,7 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
     }
     
     public var debugDescription: String {
-        return "Google Access Token: \(accessToken)"
+        return "Google Access Token: \(String(describing: accessToken))"
     }
     
     override open func refreshCredentials(completion: @escaping (Error?) ->()) {
@@ -80,7 +80,7 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
                 self.accessToken = auth!.accessToken
             }
             else {
-                Log.error("Error refreshing tokens: \(error)")
+                Log.error("Error refreshing tokens: \(String(describing: error))")
                 self.delegate?.signUserOutUsing(creds: self)
             }
             
@@ -93,13 +93,23 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
 open class SMGoogleUserSignInViewController : UIViewController, GIDSignInUIDelegate {
 }
 
-protocol SMGoogleUserSignInDelegate : class {
-func userWasSignedOut(googleUserSignIn:SMGoogleUserSignIn)
-func shouldCreateSharingUser(creds:GoogleSignInCreds) -> Bool
-func sharingUserWasCreated(googleUserSignIn:SMGoogleUserSignIn)
-func owningUserWasCreated(googleUserSignIn:SMGoogleUserSignIn)
+public enum UserActionNeeded {
+case createSharingUser(invitationCode:String)
+case createOwningUser
+case signInExistingUser
+}
 
-// TODO: *1* Add a delegate callback for userWasSignedIn-- and add an optional SharingPermission for a sharing user-- so we know, in the client app, what the users permissions are.
+public enum UserActionOccurred {
+case userSignedOut
+case userNotFoundOnSignInAttempt
+case existingUserSignedIn(SharingPermission?)
+case sharingUserCreated
+case owningUserCreated
+}
+
+protocol SMGoogleUserSignInDelegate : class {
+func shouldDoUserAction(creds:GoogleSignInCreds) -> UserActionNeeded
+func userActionOccurred(action:UserActionOccurred, googleUserSignIn:SMGoogleUserSignIn)
 }
 
 // See https://developers.google.com/identity/sign-in/ios/sign-in
@@ -148,7 +158,7 @@ open class SMGoogleUserSignIn : NSObject {
     
         var configureError: NSError?
         GGLContext.sharedInstance().configureWithError(&configureError)
-        assert(configureError == nil, "Error configuring Google services: \(configureError)")
+        assert(configureError == nil, "Error configuring Google services: \(String(describing: configureError))")
         
         GIDSignIn.sharedInstance().delegate = self
         
@@ -170,6 +180,7 @@ open class SMGoogleUserSignIn : NSObject {
         // See also this on refreshing of idTokens: http://stackoverflow.com/questions/33279485/how-to-refresh-authentication-idtoken-with-gidsignin-or-gidauthentication
         if silentSignIn {
             GIDSignIn.sharedInstance().signInSilently()
+            //let creds = signedInUser(forUser: user)
         }
         else {
             // I'm doing this to force a user-signout, so that I get the serverAuthCode. Seems I only get this with the user explicitly signed out before hand.
@@ -263,7 +274,7 @@ extension SMGoogleUserSignIn {
     @objc public func signUserOut() {
         GIDSignIn.sharedInstance().signOut()
         self.signInOutButton.buttonShowing = .signIn
-        self.delegate?.userWasSignedOut(googleUserSignIn: self)
+        self.delegate?.userActionOccurred(action: .userSignedOut, googleUserSignIn: self)
     }
 }
 
@@ -274,37 +285,54 @@ extension SMGoogleUserSignIn : GIDSignInDelegate {
             self.signInOutButton.buttonShowing = .signOut
             let creds = signedInUser(forUser: user)
 
-            if let createSharingUser = self.delegate?.shouldCreateSharingUser(creds: self.signedInUser), createSharingUser {
-                
-                // TODO: *0* Put up a spinner-- if we have an error, this takes a while.
-                
-                let invitationCode = SharingInvitation.session.sharingInvitationCode!
-                SyncServerUser.session.redeemSharingInvitation(creds: creds, invitationCode: invitationCode) { error in
+            guard let userAction = self.delegate?.shouldDoUserAction(creds: self.signedInUser) else {
+                // This occurs if we don't have a delegate (e.g., on a silent sign in). But, we need to set up creds-- because this is what gives us credentials for connecting to the SyncServer.
+                SyncServerUser.session.creds = creds
+                return
+            }
+
+            // TODO: *0* Put up a spinner-- if we have an error, it can take a while.
+            
+            switch userAction {
+            case .signInExistingUser:
+                SyncServerUser.session.checkForExistingUser(creds: creds) {
+                    (checkForUserResult, error) in
                     if error == nil {
-                        self.delegate?.sharingUserWasCreated(googleUserSignIn: self)
+                        switch checkForUserResult! {
+                        case .noUser:
+                            self.delegate?.userActionOccurred(action:
+                                .userNotFoundOnSignInAttempt, googleUserSignIn: self)
+                        case .owningUser:
+                            self.delegate?.userActionOccurred(action: .existingUserSignedIn(nil), googleUserSignIn: self)
+                        case .sharingUser(sharingPermission: let permission):
+                            self.delegate?.userActionOccurred(action: .existingUserSignedIn(permission), googleUserSignIn: self)
+                        }
+                    }
+                    else {
+                        // TODO: *0* Give the user an error indication.
+                        Log.error("Error checking for existing user: \(String(describing: error))")
+                        self.signUserOut()
+                    }
+                }
+                
+            case .createOwningUser:
+                SyncServerUser.session.addUser(creds: creds) { error in
+                    if error == nil {
+                        self.delegate?.userActionOccurred(action: .owningUserCreated, googleUserSignIn: self)
                     }
                     else {
                         // TODO: *0* Give the user an error indication.
                         self.signUserOut()
                     }
                 }
-            }
-            else {
-                SyncServerUser.session.checkForExistingUser(creds: creds) { (foundUser, error) in
+                
+            case .createSharingUser(invitationCode: let invitationCode):
+                SyncServerUser.session.redeemSharingInvitation(creds: creds, invitationCode: invitationCode) { error in
                     if error == nil {
-                        if !foundUser! {
-                            SyncServerUser.session.addUser(creds: creds) { error in
-                                if error == nil {
-                                    self.delegate?.owningUserWasCreated(googleUserSignIn: self)
-                                }
-                                else {
-                                    self.signUserOut()
-                                }
-                            }
-                        }
+                        self.delegate?.userActionOccurred(action: .sharingUserCreated, googleUserSignIn: self)
                     }
                     else {
-                        Log.error("Error checking for existing user: \(error)")
+                        // TODO: *0* Give the user an error indication.
                         self.signUserOut()
                     }
                 }

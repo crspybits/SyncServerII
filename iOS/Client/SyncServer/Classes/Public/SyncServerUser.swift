@@ -31,7 +31,7 @@ open class SignInCreds {
 
 public class SyncServerUser {
     private var _creds:SignInCreds?
-    fileprivate var creds:SignInCreds? {
+    public var creds:SignInCreds? {
         set {
             ServerAPI.session.creds = newValue
             _creds = newValue
@@ -53,38 +53,51 @@ public class SyncServerUser {
         if SyncServerUser.mobileDeviceUUID.stringValue.characters.count == 0 {
             SyncServerUser.mobileDeviceUUID.stringValue = UUID.make()
         }
+        
+        ServerAPI.session.delegate = self
+    }
+    
+    public enum CheckForExistingUserResult {
+    case noUser
+    case owningUser
+    case sharingUser(sharingPermission:SharingPermission)
     }
     
     public func checkForExistingUser(creds: SignInCreds,
-        completion:@escaping (_ foundUser: Bool?, Error?) ->()) {
+        completion:@escaping (_ result: CheckForExistingUserResult?, Error?) ->()) {
         
         Log.msg("SignInCreds: \(creds)")
         
-        ServerAPI.session.delegate = self
         self.creds = creds
         
-        ServerAPI.session.checkCreds { (success, error) in
-            var foundUserResult:Bool?
-            var errorResult:Error?
+        ServerAPI.session.checkCreds { (checkCredsResult, error) in
+            var checkForUserResult:CheckForExistingUserResult?
+            var errorResult:Error? = error
             
-            if success != nil && success! {
-                Log.msg("Succesfully signed in.")
-                foundUserResult = true
-            }
-            else {
+            switch checkCredsResult {
+            case .none:
                 self.creds = nil
                 if error == nil {
                     Log.msg("Did not find user!")
-                    foundUserResult = false
+                    checkForUserResult = .noUser
                 }
                 else {
-                    Log.error("Had an error: \(error)")
+                    Log.error("Had an error: \(String(describing: error))")
                     errorResult = error
                 }
+            
+            case .some(.noUser):
+                checkForUserResult = .noUser
+                
+            case .some(.owningUser):
+                checkForUserResult = .owningUser
+                
+            case .some(.sharingUser(let permission)):
+                checkForUserResult = .sharingUser(sharingPermission: permission)
             }
             
             Thread.runSync(onMainThread: {
-                completion(foundUserResult, errorResult)
+                completion(checkForUserResult, errorResult)
             })
         }
     }
@@ -92,13 +105,12 @@ public class SyncServerUser {
     public func addUser(creds: SignInCreds, completion:@escaping (Error?) ->()) {
         Log.msg("SignInCreds: \(creds)")
 
-        ServerAPI.session.delegate = self
         self.creds = creds
         
         ServerAPI.session.addUser { error in
             if error != nil {
                 self.creds = nil
-                Log.error("Error: \(error)")
+                Log.error("Error: \(String(describing: error))")
             }
             Thread.runSync(onMainThread: {
                 completion(error)
@@ -117,7 +129,6 @@ public class SyncServerUser {
     
     public func redeemSharingInvitation(creds: SignInCreds, invitationCode:String, completion:((Error?)->())?) {
         
-        ServerAPI.session.delegate = self
         self.creds = creds
         
         ServerAPI.session.redeemSharingInvitation(sharingInvitationUUID: invitationCode) { error in

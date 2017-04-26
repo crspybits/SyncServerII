@@ -53,6 +53,7 @@ PODS:
   - HPTextViewTapGestureRecognizer (0.1)
   - Reachability (3.2)
   - Reflection (0.14.3)
+  - SevenSwitch (2.1.0)
   - SMCoreLib (0.0.27):
     - AFNetworking
     - HPTextViewTapGestureRecognizer (~> 0.1)
@@ -67,6 +68,7 @@ PODS:
 
 DEPENDENCIES:
   - Google/SignIn
+  - SevenSwitch (~> 2.1)
   - SMCoreLib
   - SyncServer (from `../Client/`)
 
@@ -88,10 +90,11 @@ SPEC CHECKSUMS:
   HPTextViewTapGestureRecognizer: 6a73fd09f858e49a2743c3a338dc5c0791b0fae0
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   Reflection: 93327e50981227ac33c18274fcbaed33b1127811
+  SevenSwitch: 5543327829b7bec5b29b73bad5f3cc3f92c1736d
   SMCoreLib: 8319b7a5827a09ed349cba5369c3f1a639848c53
   SwiftyBeaver: ee865c50ec462ff142f232145057818491c2b344
   SyncServer: ca7d76d87cdc430da5c47138ab66519bca456b4d
 
-PODFILE CHECKSUM: 79e8e64ac81d1cbf88130529cc1dbe51206d710f
+PODFILE CHECKSUM: f0a6705ab7e42e53fec3bb00b04ba7ddfee62fee
 
 COCOAPODS: 1.2.0

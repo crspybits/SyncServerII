@@ -29,7 +29,7 @@ extension FileController {
 
             if masterVersion != downloadRequest.masterVersion {
                 let response = DownloadFileResponse()!
-                Log.warning(message: "Master version update: \(masterVersion)")
+                Log.warning(message: "Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return
@@ -108,7 +108,7 @@ extension FileController {
                     return
                 }
                 else {
-                    Log.error(message: "Failed downloading file: \(error)")
+                    Log.error(message: "Failed downloading file: \(String(describing: error))")
                     params.completion(nil)
                     return
                 }

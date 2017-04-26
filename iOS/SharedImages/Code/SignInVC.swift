@@ -10,8 +10,11 @@ import Foundation
 import UIKit
 import SMCoreLib
 import SyncServer
+import SevenSwitch
 
 class SignInVC : SMGoogleUserSignInViewController {
+    fileprivate var signinTypeSwitch:SevenSwitch!
+    
     static private var rawSharingPermission:SMPersistItemString = SMPersistItemString(name: "SignInVC.rawSharingPermission", initialStringValue: "", persistType: .userDefaults)
     
     // If user is signed in as a sharing user, this persistently gives their permissions.
@@ -53,7 +56,19 @@ class SignInVC : SMGoogleUserSignInViewController {
         googleSignInButton.frameY = 100
         view.addSubview(googleSignInButton)
         googleSignInButton.centerHorizontallyInSuperview()
-        
+
+        signinTypeSwitch = SevenSwitch()
+        signinTypeSwitch.offLabel.text = "Existing user"
+        signinTypeSwitch.offLabel.textColor = UIColor.black
+        signinTypeSwitch.onLabel.text = "New user"
+        signinTypeSwitch.onLabel.textColor = UIColor.black
+        signinTypeSwitch.frameY = googleSignInButton.frameMaxY + 30
+        signinTypeSwitch.frameWidth = 120
+        signinTypeSwitch.inactiveColor =  UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1)
+        signinTypeSwitch.onTintColor = UIColor(red: 16.0/255.0, green: 125.0/255.0, blue: 247.0/255.0, alpha: 1)
+        view.addSubview(signinTypeSwitch)
+        signinTypeSwitch.centerHorizontallyInSuperview()
+
         sharingBarButton = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(shareAction))
         navigationItem.rightBarButtonItem = sharingBarButton
         
@@ -61,6 +76,7 @@ class SignInVC : SMGoogleUserSignInViewController {
         SignIn.session.googleSignIn.delegate = self
         
         setSharingButtonState()
+        setSignInTypeState()
     }
     
     func setSharingButtonState() {
@@ -71,6 +87,10 @@ class SignInVC : SMGoogleUserSignInViewController {
         case .some(.read), .some(.write):
             sharingBarButton.isEnabled = false
         }
+    }
+    
+    func setSignInTypeState() {
+        signinTypeSwitch?.isHidden = SignIn.session.googleSignIn.userIsSignedIn
     }
     
     func shareAction() {
@@ -149,20 +169,48 @@ extension SignInVC : SharingInvitationDelegate {
 }
 
 extension SignInVC : SMGoogleUserSignInDelegate {
-    func userWasSignedOut(googleUserSignIn:SMGoogleUserSignIn) {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        appDelegate.selectTabInController(tab: .signIn)
+    func shouldDoUserAction(creds:GoogleSignInCreds) -> UserActionNeeded {
+        var result:UserActionNeeded
+        
+        if acceptSharingInvitation {
+            result = .createSharingUser(invitationCode: SharingInvitation.session.sharingInvitationCode!)
+        } else if signinTypeSwitch.isOn() {
+            result = .createOwningUser
+        }
+        else {
+            result = .signInExistingUser
+        }
+        
+        return result
     }
     
-    func shouldCreateSharingUser(creds:GoogleSignInCreds) -> Bool {
-        return acceptSharingInvitation
+    func userActionOccurred(action:UserActionOccurred, googleUserSignIn:SMGoogleUserSignIn) {
+        switch action {
+        case .userSignedOut:
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            appDelegate.selectTabInController(tab: .signIn)
+            
+        case .userNotFoundOnSignInAttempt:
+            // TODO: *2* Need to inform user.
+            break
+            
+        case .existingUserSignedIn(let sharingPermission):
+            self.sharingPermission = sharingPermission
+            
+        case .owningUserCreated:
+            sharingPermission = nil
+            
+        case .sharingUserCreated:
+            self.sharingPermission = SharingInvitation.session.sharingInvitationPermission!
+        }
+        
+        setSharingButtonState()
+        setSignInTypeState()
     }
-    
-    func sharingUserWasCreated(googleUserSignIn:SMGoogleUserSignIn) {
-        sharingPermission = SharingInvitation.session.sharingInvitationPermission
-    }
-    
-    func owningUserWasCreated(googleUserSignIn:SMGoogleUserSignIn) {
-        sharingPermission = nil
+}
+
+extension SignInVC : TabControllerNavigation {
+    func tabBarViewControllerWasSelected() {
+        setSignInTypeState()
     }
 }

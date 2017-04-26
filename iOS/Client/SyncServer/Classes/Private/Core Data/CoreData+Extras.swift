@@ -22,12 +22,12 @@ extension CoreDataSingleton {
         do {
             let objs = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: self.entityName())
             cdos = objs as! [COREDATAOBJECT]
-        } catch (let error) {
+        } catch (_) {
             assert(false)
         }
         
         if cdos.count == 0 {
-            cdo = self.newObject!() as! COREDATAOBJECT
+            cdo = (self.newObject!() as! COREDATAOBJECT)
         }
         else if cdos.count > 1 {
             assert(false)

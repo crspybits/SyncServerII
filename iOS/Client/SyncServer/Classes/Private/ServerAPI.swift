@@ -50,6 +50,8 @@ class ServerAPI {
     enum ServerAPIError : Error {
     case non200StatusCode(Int)
     case badStatusCode(Int)
+    case badCheckCreds
+    case unknownError
     }
     
     // If this is nil, you must use the ServerNetworking authenticationDelegate to provide credentials. Direct use of authenticationDelegate is for internal testing.
@@ -104,28 +106,47 @@ class ServerAPI {
         }
     }
     
+    enum CheckCredsResult {
+    case noUser
+    case owningUser
+    case sharingUser(sharingPermission:SharingPermission)
+    }
+    
     // Checks the creds of the user specified by the creds property (or authenticationDelegate in ServerNetworking if that is nil). Because this method uses an unauthorized (401) http status code to indicate that the user doesn't exist, it will not do retries in the case of an error.
-    public func checkCreds(completion:((_ userExists:Bool?, Error?)->(Void))?) {
+    public func checkCreds(completion:((_ checkCredsResult:CheckCredsResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.checkCreds
         let url = URL(string: baseURL + endpoint.path)!
         
         sendRequestUsing(method: endpoint.method, toURL: url, retryIfError: false) { (response, httpStatus, error) in
-            
-            var userExists:Bool?
-            if httpStatus == HTTPStatus.ok.rawValue {
-                userExists = true
+
+            var result:CheckCredsResult?
+
+            if httpStatus == HTTPStatus.unauthorized.rawValue {
+                result = .noUser
             }
-            else if httpStatus == HTTPStatus.unauthorized.rawValue {
-                userExists = false
+            else if httpStatus == HTTPStatus.ok.rawValue {
+                guard let checkCredsResponse = CheckCredsResponse(json: response!) else {
+                    completion?(nil, ServerAPIError.badCheckCreds)
+                    return
+                }
+                
+                if checkCredsResponse.sharingPermission == nil {
+                    result = .owningUser
+                }
+                else {
+                    result = .sharingUser(sharingPermission: checkCredsResponse.sharingPermission)
+                }
             }
             
-            if userExists == nil {
-                let result = self.checkForError(statusCode: httpStatus, error: error)
-                assert(result != nil)
-                completion?(nil, result)
+            if result == nil {
+                if let errorResult = self.checkForError(statusCode: httpStatus, error: error) {
+                    completion?(nil, errorResult)
+                    return
+                }
+                completion?(nil, ServerAPIError.unknownError)
             }
             else {
-                completion?(userExists, nil)
+                completion?(result, nil)
             }
         }
     }
@@ -194,7 +215,7 @@ class ServerAPI {
     func uploadFile(file:File, serverMasterVersion:MasterVersionInt, completion:((UploadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadFile
 
-        Log.msg("ServerNetworking.session.authenticationDelegate2: \(ServerNetworking.session.authenticationDelegate)")
+        Log.msg("ServerNetworking.session.authenticationDelegate2: \(String(describing: ServerNetworking.session.authenticationDelegate))")
         
         Log.special("file.fileUUID: \(file.fileUUID)")
         
@@ -202,7 +223,7 @@ class ServerAPI {
             UploadFileRequest.fileUUIDKey: file.fileUUID,
             UploadFileRequest.mimeTypeKey: file.mimeType,
             UploadFileRequest.cloudFolderNameKey: file.cloudFolderName,
-            UploadFileRequest.appMetaDataKey: file.appMetaData,
+            UploadFileRequest.appMetaDataKey: file.appMetaData as Any,
             UploadFileRequest.fileVersionKey: file.fileVersion,
             UploadFileRequest.masterVersionKey: serverMasterVersion
         ]
@@ -353,10 +374,10 @@ class ServerAPI {
 
                     if let fileSizeBytes = jsonDict[DownloadFileResponse.fileSizeBytesKey] as? Int64 {
                         var appMetaDataString:String?
-                        var appMetaData = jsonDict[DownloadFileResponse.appMetaDataKey]
+                        let appMetaData = jsonDict[DownloadFileResponse.appMetaDataKey]
                         if appMetaData != nil {
                             if appMetaData is String {
-                                appMetaDataString = appMetaData as! String
+                                appMetaDataString = (appMetaData as! String)
                             }
                             else {
                                 completion?(nil, DownloadFileError.obtainedAppMetaDataButWasNotString)
@@ -398,7 +419,7 @@ class ServerAPI {
         do {
             try json = JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: UInt(0)))
         } catch (let error) {
-            Log.error("Error in JSON conversion: \(error)")
+            Log.error("toJSONDictionary: Error in JSON conversion: \(error)")
             return nil
         }
         
@@ -463,9 +484,7 @@ class ServerAPI {
     
     func uploadDeletion(file: FileToDelete, serverMasterVersion:MasterVersionInt!, completion:((UploadDeletionResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadDeletion
-        
-        let url = URL(string: baseURL + endpoint.path)!
-        
+                
         var paramsForRequest:[String:Any] = [:]
         paramsForRequest[UploadDeletionRequest.fileUUIDKey] = file.fileUUID
         paramsForRequest[UploadDeletionRequest.fileVersionKey] = file.fileVersion
@@ -511,7 +530,6 @@ class ServerAPI {
     func createSharingInvitation(withPermission permission:SharingPermission, completion:((_ sharingInvitationUUID:String?, Error?)->(Void))?) {
     
         let endpoint = ServerEndpoints.createSharingInvitation
-        let url = URL(string: baseURL + endpoint.path)!
 
         var paramsForRequest:[String:Any] = [:]
         paramsForRequest[CreateSharingInvitationRequest.sharingPermissionKey] = permission
@@ -543,7 +561,6 @@ class ServerAPI {
     
     func redeemSharingInvitation(sharingInvitationUUID:String, completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.redeemSharingInvitation
-        let url = URL(string: baseURL + endpoint.path)!
 
         var paramsForRequest:[String:Any] = [:]
         paramsForRequest[RedeemSharingInvitationRequest.sharingInvitationUUIDKey] = sharingInvitationUUID
@@ -556,7 +573,7 @@ class ServerAPI {
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
             
             if resultError == nil {
-                if let redeemResponse = RedeemSharingInvitationResponse(json: response!) {
+                if RedeemSharingInvitationResponse(json: response!) != nil {
                     completion?(nil)
                 }
                 else {

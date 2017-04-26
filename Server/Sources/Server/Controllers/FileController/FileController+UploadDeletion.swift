@@ -19,14 +19,14 @@ extension FileController {
         
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
-                Log.error(message: "Error: \(error)")
+                Log.error(message: "Error: \(String(describing: error))")
                 params.completion(nil)
                 return
             }
 
             if masterVersion != uploadDeletionRequest.masterVersion {
                 let response = UploadDeletionResponse()!
-                Log.warning(message: "Master version update: \(masterVersion)")
+                Log.warning(message: "Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return

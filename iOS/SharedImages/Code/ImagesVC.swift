@@ -30,7 +30,8 @@ class ImagesVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.dataSource = self
-                
+        collectionView.delegate = self
+  
         // Spinner that shows when syncing
         barButtonSpinner = UIBarButtonItem(customView: spinner)
         navigationItem.leftBarButtonItem = barButtonSpinner
@@ -79,10 +80,10 @@ class ImagesVC: UIViewController {
     func setAddButtonState() {
         switch SignInVC.sharingPermission {
         case .some(.admin), .some(.write), .none: // .none means this is not a sharing user.
-            addImageBarButton.isEnabled = true
+            addImageBarButton?.isEnabled = true
             
         case .some(.read):
-            addImageBarButton.isEnabled = false
+            addImageBarButton?.isEnabled = false
         }
     }
     
@@ -106,7 +107,7 @@ class ImagesVC: UIViewController {
         // TODO: *2* Confirm the deletion with the user.
         
         if let indexPath = collectionView.indexPathForItem(at: p) {
-            let cell = self.collectionView.cellForItem(at: indexPath) as! IconCollectionVC
+            let cell = self.collectionView.cellForItem(at: indexPath) as! ImageCollectionVC
             cell.remove()
         } else {
             Log.msg("couldn't find index path")
@@ -162,6 +163,16 @@ class ImagesVC: UIViewController {
     }
 }
 
+extension ImagesVC : UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let largeImages = storyboard!.instantiateViewController(withIdentifier: "LargeImages") as! LargeImages
+        largeImages.startItem = indexPath.item
+        largeImages.syncController = syncController
+        navigationController!.pushViewController(largeImages, animated: true)
+    }
+}
+
+// MARK: UICollectionViewDataSource
 extension ImagesVC : UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -173,7 +184,7 @@ extension ImagesVC : UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! IconCollectionVC
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ImageCollectionVC
         cell.setProperties(image: self.coreDataSource.object(at: indexPath) as! Image, syncController: syncController)
         
         return cell

@@ -232,8 +232,8 @@ class GeneralDatabaseTests: ServerTestCase {
         }
         
         XCTAssert(select.numberResultRows() == row-1, "Got an unexpected number of result rows")
-        Log.info("forEachRowStatus: \(select.forEachRowStatus); rows: \(row-1)")
-        XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(select.forEachRowStatus)")
+        Log.info("forEachRowStatus: \(String(describing: select.forEachRowStatus)); rows: \(row-1)")
+        XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(String(describing: select.forEachRowStatus))")
     }
     
     func testSelectForEachRowIgnoringErrors() {
@@ -251,9 +251,9 @@ class GeneralDatabaseTests: ServerTestCase {
         let componentsDate2 = Calendar.current.dateComponents(in: utc, from: date2)
         
         print("date1: \(date1); date2: \(date2)")
-        print("componentsDate1.year: \(componentsDate1.year) componentsDate2.year: \(componentsDate2.year)")
-        print("componentsDate1.month: \(componentsDate1.month) componentsDate2.month: \(componentsDate2.month)")
-        print("componentsDate1.day: \(componentsDate1.day) componentsDate2.day: \(componentsDate2.day)")
+        print("componentsDate1.year: \(String(describing: componentsDate1.year)) componentsDate2.year: \(String(describing: componentsDate2.year))")
+        print("componentsDate1.month: \(String(describing: componentsDate1.month)) componentsDate2.month: \(String(describing: componentsDate2.month))")
+        print("componentsDate1.day: \(String(describing: componentsDate1.day)) componentsDate2.day: \(String(describing: componentsDate2.day))")
         
         return componentsDate1.year == componentsDate2.year &&
             componentsDate1.month == componentsDate2.month &&
@@ -275,7 +275,7 @@ class GeneralDatabaseTests: ServerTestCase {
                 "c2 date value was wrong: rowModel.c2=\(rowModel.c2); self.c2Table2Value=\(self.c2Table2Value)")
         }
         
-        XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(select.forEachRowStatus)")
+        XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(String(describing: select.forEachRowStatus))")
         XCTAssert(rows == 1, "Didn't find expected number of rows")
 
     }

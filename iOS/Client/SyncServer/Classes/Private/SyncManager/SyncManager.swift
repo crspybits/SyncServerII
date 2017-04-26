@@ -91,7 +91,7 @@ class SyncManager {
                 self.downloadDeletionDfts = dfts.filter {$0.deletedOnServer == true}
                 
                 if self.fileDownloadDfts!.count > 0 {
-                    self.fileDownloadDfts!.map { dft in
+                    _ = self.fileDownloadDfts!.map { dft in
                         let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
                         downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
                     }
@@ -113,7 +113,7 @@ class SyncManager {
             var deletions = [SyncAttributes]()
             CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                 if self.downloadDeletionDfts!.count > 0 {
-                    self.downloadDeletionDfts!.map { dft in
+                    _ = self.downloadDeletionDfts!.map { dft in
                         let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
                         deletions += [attr]
                     }
@@ -168,7 +168,7 @@ class SyncManager {
             case .noDownloadsOrDeletionsAvailable:
                 self.checkForPendingUploads()
                 
-            case .downloadsOrDeletionsAvailable(numberOfFiles: let numDownloads):
+            case .downloadsOrDeletionsAvailable(numberOfFiles: _):
                 // We've got DownloadFileTracker's queued up now. Go deal with them!
                 self.start(self.callback)
                 
@@ -244,7 +244,7 @@ class SyncManager {
                 self.callback?(StartError.error(error))
                 
             // `numTransferred` may not be accurrate in the case of retries/recovery.
-            case .doneUploads(numberTransferred: let numTransferred):
+            case .doneUploads(numberTransferred: _):
                 var uploadQueue:UploadQueue!
                 var fileUploads:[UploadFileTracker]!
                 var uploadDeletions:[UploadFileTracker]!
@@ -261,7 +261,7 @@ class SyncManager {
                 CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                     if fileUploads.count > 0 {
                         // Each of the DirectoryEntry's for the uploads needs to now be given its version, as uploaded.
-                        fileUploads.map {uft in
+                        _ = fileUploads.map {uft in
                             guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
                                 assert(false)
                             }
@@ -281,7 +281,7 @@ class SyncManager {
                 CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                     if uploadDeletions.count > 0 {
                         // Each of the DirectoryEntry's for the uploads needs to now be marked as deleted.
-                        uploadDeletions.map { uft in
+                        _ = uploadDeletions.map { uft in
                             guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
                                 assert(false)
                             }

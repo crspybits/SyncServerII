@@ -183,13 +183,13 @@ private class RequestHandler : CredsDelegate {
         setJsonResponseHeaders()
         let profile = request.userProfile
         self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
-        Log.info(message: "self.deviceUUID: \(self.deviceUUID)")
+        Log.info(message: "self.deviceUUID: \(String(describing: self.deviceUUID))")
         
 #if DEBUG
         if profile != nil {
             let userId = profile!.id
             let userName = profile!.displayName
-            Log.info(message: "Profile: \(profile); userId: \(userId); userName: \(userName)")
+            Log.info(message: "Profile: \(String(describing: profile)); userId: \(userId); userName: \(userName)")
         }
 #endif
 
@@ -235,7 +235,7 @@ private class RequestHandler : CredsDelegate {
                 }
                 
                 if errorString != nil || dbCreds == nil {
-                    self.failWithError(message: "Could not convert Creds of type: \(currentSignedInUser!.accountType) from JSON: \(currentSignedInUser!.creds); error: \(errorString)")
+                    self.failWithError(message: "Could not convert Creds of type: \(currentSignedInUser!.accountType) from JSON: \(currentSignedInUser!.creds); error: \(String(describing: errorString))")
                     return
                 }
                 
@@ -431,7 +431,7 @@ private class RequestHandler : CredsDelegate {
                         return false
                         
                     case .exceededMaximumUUIDsPerUser:
-                        failWithError(message: "Exceeded maximum UUIDs per user: \(repositories.deviceUUID.maximumNumberOfDeviceUUIDsPerUser)")
+                        failWithError(message: "Exceeded maximum UUIDs per user: \(String(describing: repositories.deviceUUID.maximumNumberOfDeviceUUIDsPerUser))")
                         return false
                         
                     case .success:
@@ -450,7 +450,7 @@ class CreateRoutes {
     }
     
     func addRoute(ep:ServerEndpoint,
-        createRequest: @escaping (RouterRequest) ->(RequestMessage?),
+        createRequest: @escaping (RouterRequest) -> (RequestMessage?),
         processRequest: @escaping ProcessRequest) {
         
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {

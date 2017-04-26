@@ -35,7 +35,7 @@ public class SharingInvitation {
     //      <BundleId>.invitation://?code=<InvitationCode>&permission=<permission>
     //      where <BundleId> is something like biz.SpasticMuffin.SharedNotes
     //
-    public static func createSharingURL(invitationCode invitationCode:String, permission:SharingPermission) -> String {
+    public static func createSharingURL(invitationCode:String, permission:SharingPermission) -> String {
         let urlString = self.urlScheme + "://?\(queryItemAuthorizationCode)=" + invitationCode + "&\(queryItemPermission)=" + permission.rawValue
         return urlString
     }
@@ -49,7 +49,7 @@ public class SharingInvitation {
         // Use case insensitive comparison because the incoming url scheme will be lower case.
         if url.scheme!.caseInsensitiveCompare(SharingInvitation.urlScheme) == ComparisonResult.orderedSame {
             if let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
-                Log.msg("components.queryItems: \(components.queryItems)")
+                Log.msg("components.queryItems: \(String(describing: components.queryItems))")
                 
                 if components.queryItems != nil && components.queryItems!.count == 2 {
                     var code:String?

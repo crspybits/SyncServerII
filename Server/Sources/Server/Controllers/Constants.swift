@@ -90,6 +90,6 @@ class Constants {
         db.database = try! config.getString(varName: "mySQL.database")
                 
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
-        print("maxNumberDeviceUUIDPerUser: \(maxNumberDeviceUUIDPerUser)")
+        print("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")
     }
 }
