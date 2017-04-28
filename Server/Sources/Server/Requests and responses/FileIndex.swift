@@ -60,7 +60,7 @@ class FileIndexResponse : ResponseMessage {
     var fileIndex:[FileInfo]?
     
     required init?(json: JSON) {
-        self.masterVersion = FileIndexResponse.masterVersionKey <~~ json
+        self.masterVersion = Decoder.decode(int64ForKey: FileIndexResponse.masterVersionKey)(json)        
         self.fileIndex = FileIndexResponse.fileIndexKey <~~ json
     }
     

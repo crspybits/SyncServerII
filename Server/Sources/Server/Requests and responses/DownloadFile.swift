@@ -39,9 +39,10 @@ class DownloadFileRequest : NSObject, RequestMessage {
         super.init()
         
         self.fileUUID = DownloadFileRequest.fileUUIDKey <~~ json
-        self.masterVersion = DownloadFileRequest.masterVersionKey <~~ json
-        self.fileVersion = DownloadFileRequest.fileVersionKey <~~ json
         
+        self.masterVersion = Decoder.decode(int64ForKey: DownloadFileRequest.masterVersionKey)(json)
+        self.fileVersion = Decoder.decode(int32ForKey: DownloadFileRequest.fileVersionKey)(json)
+
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
             return nil
         }
@@ -81,12 +82,12 @@ class DownloadFileResponse : ResponseMessage {
     
     // If the master version for the user on the server has been incremented, this key will be present in the response-- with the new value of the master version. The download was not attempted in this case.
     static let masterVersionUpdateKey = "masterVersionUpdate"
-    var masterVersionUpdate:Int64?
+    var masterVersionUpdate:MasterVersionInt?
     
     required init?(json: JSON) {
-        self.masterVersionUpdate = DownloadFileResponse.masterVersionUpdateKey <~~ json
+        self.masterVersionUpdate = Decoder.decode(int64ForKey: DownloadFileResponse.masterVersionUpdateKey)(json)
         self.appMetaData = DownloadFileResponse.appMetaDataKey <~~ json
-        self.fileSizeBytes = DownloadFileResponse.fileSizeBytesKey <~~ json
+        self.fileSizeBytes = Decoder.decode(int64ForKey: DownloadFileResponse.fileSizeBytesKey)(json)
     }
     
     convenience init?() {

@@ -14,7 +14,7 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - FirebaseAnalytics (3.8.0):
+  - FirebaseAnalytics (3.9.0):
     - FirebaseCore (~> 3.6)
     - FirebaseInstanceID (~> 1.0)
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
@@ -78,7 +78,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  FirebaseAnalytics: 920e46455f27b0a52a80907a6d9b73ee4bd1c635
+  FirebaseAnalytics: e5fe8486efc01bec33f6bf82e2fa9fce4b124052
   FirebaseCore: 9691ee2ade70c098d7cf92440f4303f16d83ca75
   FirebaseInstanceID: b9eedd6846fb5e1f0f7279e1deaa7a7e4cf8392e
   Gloss: 4e036074610fdb993abcb958ebcd7332588e2333
@@ -95,6 +95,6 @@ SPEC CHECKSUMS:
   SwiftyBeaver: f29dc64b0ae619d73ee94fd04bd532f895765208
   SyncServer: ca7d76d87cdc430da5c47138ab66519bca456b4d
 
-PODFILE CHECKSUM: d2f725232b78bc723467639a89ed640cd691a038
+PODFILE CHECKSUM: 4126ed4dfef41705c23ebf2b21599f948cd8a617
 
 COCOAPODS: 1.2.0

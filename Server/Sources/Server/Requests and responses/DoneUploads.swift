@@ -44,7 +44,8 @@ class DoneUploadsRequest : NSObject, RequestMessage {
     required init?(json: JSON) {
         super.init()
         
-        self.masterVersion = DoneUploadsRequest.masterVersionKey <~~ json
+        self.masterVersion = Decoder.decode(int64ForKey: DoneUploadsRequest.masterVersionKey)(json)
+        
 #if DEBUG
         self.testLockSync = DoneUploadsRequest.testLockSyncKey <~~ json
 #endif
@@ -97,9 +98,9 @@ class DoneUploadsResponse : ResponseMessage {
     var numberDeletionErrors:Int32?
     
     required init?(json: JSON) {
-        self.numberUploadsTransferred = DoneUploadsResponse.numberUploadsTransferredKey <~~ json
-        self.masterVersionUpdate = DoneUploadsResponse.masterVersionUpdateKey <~~ json
-        self.numberDeletionErrors = DoneUploadsResponse.numberDeletionErrorsKey <~~ json
+        self.numberUploadsTransferred = Decoder.decode(int32ForKey: DoneUploadsResponse.numberUploadsTransferredKey)(json)
+        self.masterVersionUpdate = Decoder.decode(int64ForKey: DoneUploadsResponse.masterVersionUpdateKey)(json)
+        self.numberDeletionErrors = Decoder.decode(int32ForKey: DoneUploadsResponse.numberDeletionErrorsKey)(json)
     }
     
     convenience init?() {

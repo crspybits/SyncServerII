@@ -26,3 +26,4 @@ ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/CreateSha
 ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/RedeemSharingInvitation.swift
 ln -s ../../../../../../Server/Sources/Server/Controllers/Types.swift
 ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/CheckCreds.swift
+ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/Decoder+Extras.swift 

@@ -55,11 +55,12 @@ class UploadDeletionRequest : NSObject, RequestMessage, Filenaming {
         super.init()
         
         self.fileUUID = UploadDeletionRequest.fileUUIDKey <~~ json
-        self.masterVersion = UploadDeletionRequest.masterVersionKey <~~ json
-        self.fileVersion = UploadDeletionRequest.fileVersionKey <~~ json
+        
+        self.masterVersion = Decoder.decode(int64ForKey: UploadDeletionRequest.masterVersionKey)(json)
+        self.fileVersion = Decoder.decode(int32ForKey: UploadDeletionRequest.fileVersionKey)(json)
         
 #if DEBUG
-        self.actualDeletion = UploadDeletionRequest.actualDeletionKey <~~ json
+        self.actualDeletion = Decoder.decode(int32ForKey:  UploadDeletionRequest.actualDeletionKey)(json)
 #endif
         
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
@@ -106,7 +107,7 @@ class UploadDeletionResponse : ResponseMessage {
     var masterVersionUpdate:Int64?
     
     required init?(json: JSON) {
-        self.masterVersionUpdate = UploadDeletionResponse.masterVersionUpdateKey <~~ json
+        self.masterVersionUpdate = Decoder.decode(int64ForKey:  UploadDeletionResponse.masterVersionUpdateKey)(json)        
     }
     
     convenience init?() {

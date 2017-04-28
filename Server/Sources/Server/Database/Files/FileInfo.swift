@@ -48,8 +48,10 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible, Filenamin
         self.mimeType = FileInfo.mimeTypeKey <~~ json
         self.appMetaData = FileInfo.appMetaDataKey <~~ json
         self.deleted = FileInfo.deletedKey <~~ json
-        self.fileVersion = FileInfo.fileVersionKey <~~ json
-        self.fileSizeBytes = FileInfo.fileSizeBytesKey <~~ json
+        
+        self.fileVersion = Decoder.decode(int32ForKey: FileInfo.fileVersionKey)(json)
+        self.fileSizeBytes = Decoder.decode(int64ForKey: FileInfo.fileSizeBytesKey)(json)
+        
         self.cloudFolderName = FileInfo.cloudFolderNameKey <~~ json
     }
     

@@ -60,8 +60,8 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
         self.fileUUID = UploadFileRequest.fileUUIDKey <~~ json
         self.mimeType = UploadFileRequest.mimeTypeKey <~~ json
         self.cloudFolderName = UploadFileRequest.cloudFolderNameKey <~~ json
-        self.fileVersion = UploadFileRequest.fileVersionKey <~~ json
-        self.masterVersion = UploadFileRequest.masterVersionKey <~~ json
+        self.fileVersion = Decoder.decode(int32ForKey: UploadFileRequest.fileVersionKey)(json)
+        self.masterVersion = Decoder.decode(int64ForKey: UploadFileRequest.masterVersionKey)(json)
         self.appMetaData = UploadFileRequest.appMetaDataKey <~~ json
         
 #if SERVER
@@ -114,8 +114,8 @@ class UploadFileResponse : ResponseMessage {
     var masterVersionUpdate:Int64?
     
     required init?(json: JSON) {
-        self.size = UploadFileResponse.sizeKey <~~ json
-        self.masterVersionUpdate = UploadFileResponse.masterVersionUpdateKey <~~ json
+        self.size = Decoder.decode(int64ForKey: UploadFileResponse.sizeKey)(json)
+        self.masterVersionUpdate = Decoder.decode(int64ForKey: UploadFileResponse.masterVersionUpdateKey)(json)        
     }
     
     convenience init?() {
