@@ -15,25 +15,14 @@ import Kitura
 
 // Request an index of all files that have been uploaded with UploadFile and committed using DoneUploads by the user-- queries the meta data on the sync server.
 
-class FileIndexRequest : NSObject, RequestMessage {
-    // MARK: Properties for use in request message.
-    
-    func nonNilKeys() -> [String] {
-        return []
-    }
-    
-    func allKeys() -> [String] {
-        return self.nonNilKeys()
-    }
-    
+class FileIndexRequest : NSObject, RequestMessage {    
     required init?(json: JSON) {
         super.init()
-        
-#if SERVER
-        if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
-            return nil
-        }
-#endif
+    }
+
+    func toJSON() -> JSON? {
+        return jsonify([
+        ])
     }
     
 #if SERVER
@@ -41,11 +30,9 @@ class FileIndexRequest : NSObject, RequestMessage {
         self.init(json: request.queryParameters)
     }
 #endif
-
-    func toJSON() -> JSON? {
-        return jsonify([
-        ])
-    }
+    
+    func allKeys() -> [String] { return [] }
+    func nonNilKeys() -> [String] { return [] }
 }
 
 class FileIndexResponse : ResponseMessage {
@@ -60,7 +47,7 @@ class FileIndexResponse : ResponseMessage {
     var fileIndex:[FileInfo]?
     
     required init?(json: JSON) {
-        self.masterVersion = Decoder.decode(int64ForKey: FileIndexResponse.masterVersionKey)(json)        
+        self.masterVersion = Decoder.decode(int64ForKey: FileIndexResponse.masterVersionKey)(json)
         self.fileIndex = FileIndexResponse.fileIndexKey <~~ json
     }
     
@@ -68,7 +55,6 @@ class FileIndexResponse : ResponseMessage {
         self.init(json:[:])
     }
     
-    // MARK: - Serialization
     func toJSON() -> JSON? {
         return jsonify([
             FileIndexResponse.masterVersionKey ~~> self.masterVersion,
@@ -76,3 +62,4 @@ class FileIndexResponse : ResponseMessage {
         ])
     }
 }
+

@@ -135,7 +135,7 @@ class GoogleDriveTests: ServerTestCase {
     }
     
     // Haven't been able to get trashFile to work yet.
-#if false
+/*
     func testTrashFolder() {
         let creds = GoogleCreds()
         creds.refreshToken = self.credentialsToken()
@@ -159,7 +159,7 @@ class GoogleDriveTests: ServerTestCase {
 
         waitForExpectations(timeout: 10, handler: nil)
     }
-#endif
+*/
 
     func testCreateAndDeleteFolder() {
         let creds = GoogleCreds()

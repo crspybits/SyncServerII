@@ -84,9 +84,18 @@ class ServerAPI {
     
     // MARK: Health check
     
+    func makeURL(forEndpoint endpoint:ServerEndpoint, parameters:String? = nil) -> URL {
+        var path = endpoint.pathWithSuffixSlash
+        if parameters != nil {
+            path += "?" + parameters!
+        }
+        
+        return URL(string: baseURL + path)!
+    }
+    
     func healthCheck(completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.healthCheck
-        let url = URL(string: baseURL + endpoint.path)!
+        let url = makeURL(forEndpoint: endpoint)
         
         sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             completion?(self.checkForError(statusCode: httpStatus, error: error))
@@ -98,7 +107,7 @@ class ServerAPI {
     // Adds the user specified by the creds property (or authenticationDelegate in ServerNetworking if that is nil).
     public func addUser(completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.addUser
-        let url = URL(string: baseURL + endpoint.path)!
+        let url = makeURL(forEndpoint: endpoint)
         
         sendRequestUsing(method: endpoint.method,
             toURL: url) { (response,  httpStatus, error) in
@@ -115,7 +124,7 @@ class ServerAPI {
     // Checks the creds of the user specified by the creds property (or authenticationDelegate in ServerNetworking if that is nil). Because this method uses an unauthorized (401) http status code to indicate that the user doesn't exist, it will not do retries in the case of an error.
     public func checkCreds(completion:((_ checkCredsResult:CheckCredsResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.checkCreds
-        let url = URL(string: baseURL + endpoint.path)!
+        let url = makeURL(forEndpoint: endpoint)
         
         sendRequestUsing(method: endpoint.method, toURL: url, retryIfError: false) { (response, httpStatus, error) in
 
@@ -153,7 +162,7 @@ class ServerAPI {
     
     func removeUser(retryIfError:Bool=true, completion:((Error?)->(Void))?) {
         let endpoint = ServerEndpoints.removeUser
-        let url = URL(string: baseURL + endpoint.path)!
+        let url = makeURL(forEndpoint: endpoint)
         
         sendRequestUsing(method: endpoint.method, toURL: url, retryIfError: retryIfError) {
             (response,  httpStatus, error) in
@@ -171,8 +180,7 @@ class ServerAPI {
     func fileIndex(completion:((_ fileIndex: [FileInfo]?, _ masterVersion:MasterVersionInt?, Error?)->(Void))?) {
     
         let endpoint = ServerEndpoints.fileIndex
-        
-        let url = URL(string: baseURL + endpoint.path)!
+        let url = makeURL(forEndpoint: endpoint)
         
         sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
@@ -243,7 +251,7 @@ class ServerAPI {
         }
         
         let parameters = uploadRequest.urlParameters()!
-        let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        let url = makeURL(forEndpoint: endpoint, parameters: parameters)
         
         postUploadDataTo(url, dataToUpload: fileData) { (resultDict, httpStatus, error) in
         
@@ -299,7 +307,7 @@ class ServerAPI {
         }
 
         let parameters = doneUploadsRequest.urlParameters()!
-        let url = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        let url = makeURL(forEndpoint: endpoint, parameters: parameters)
 
         sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
         
@@ -355,7 +363,7 @@ class ServerAPI {
         }
 
         let parameters = downloadFileRequest.urlParameters()!
-        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        let serverURL = makeURL(forEndpoint: endpoint, parameters: parameters)
 
         downloadFrom(serverURL, method: endpoint.method) { (resultURL, response, statusCode, error) in
         
@@ -440,7 +448,7 @@ class ServerAPI {
     
         let endpoint = ServerEndpoints.getUploads
         
-        let url = URL(string: baseURL + endpoint.path)!
+        let url = makeURL(forEndpoint: endpoint)
         
         sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
@@ -499,7 +507,7 @@ class ServerAPI {
         let uploadDeletion = UploadDeletionRequest(json: paramsForRequest)!
         
         let parameters = uploadDeletion.urlParameters()!
-        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        let serverURL = makeURL(forEndpoint: endpoint, parameters: parameters)
         
         sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
@@ -536,7 +544,7 @@ class ServerAPI {
         let invitationRequest = CreateSharingInvitationRequest(json: paramsForRequest)!
         
         let parameters = invitationRequest.urlParameters()!
-        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        let serverURL = makeURL(forEndpoint: endpoint, parameters: parameters)
         
         sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
@@ -567,7 +575,7 @@ class ServerAPI {
         let redeemRequest = RedeemSharingInvitationRequest(json: paramsForRequest)!
         
         let parameters = redeemRequest.urlParameters()!
-        let serverURL = URL(string: baseURL + endpoint.path + "/?" + parameters)!
+        let serverURL = makeURL(forEndpoint: endpoint, parameters: parameters)
         
         sendRequestUsing(method: endpoint.method, toURL: serverURL) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)

@@ -103,7 +103,7 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode != .OK, "Worked on uploadFile request!")
                 }
                 else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request")
+                    XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request: \(response!.statusCode)")
                     XCTAssert(dict != nil)
                     
                     if let uploadResponse = UploadFileResponse(json: dict!) {
@@ -340,7 +340,7 @@ class ServerTestCase : XCTestCase {
                     completion(expectation, nil)
                 }
                 else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on request")
+                    XCTAssert(response!.statusCode == .OK, "Did not work on request: \(response!.statusCode)")
                     XCTAssert(dict != nil)
                     let response = CreateSharingInvitationResponse(json: dict!)
                     completion(expectation, response?.sharingInvitationUUID)

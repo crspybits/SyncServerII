@@ -97,9 +97,9 @@ extension KituraTest {
             }
         }
         
-        var path = route.path
+        var path = route.pathWithSuffixSlash
         if urlParameters != nil {
-            path += "/" + urlParameters!
+            path += urlParameters!
         }
         
         allHeaders["Content-Type"] = "text/plain"

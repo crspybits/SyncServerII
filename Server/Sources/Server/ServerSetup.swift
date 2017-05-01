@@ -15,7 +15,7 @@ import Credentials
 import CredentialsGoogle
 import Foundation
 
-public class ServerSetup {        
+class ServerSetup {
     // Just a guess. Don't know what's suitable for length. See https://github.com/IBM-Swift/Kitura/issues/917
     private static let secretStringLength = 256
     
@@ -461,17 +461,17 @@ class CreateRoutes {
         
         switch (ep.method) {
         case .get:
-            self.router.get(ep.path) { routerRequest, routerResponse, _ in
+            self.router.get(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
             
         case .post:
-            self.router.post(ep.path) { routerRequest, routerResponse, _ in
+            self.router.post(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         
         case .delete:
-            self.router.delete(ep.path) { routerRequest, routerResponse, _ in
+            self.router.delete(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         }
@@ -505,3 +505,5 @@ class CreateRoutes {
         return self.router
     }
 }
+
+

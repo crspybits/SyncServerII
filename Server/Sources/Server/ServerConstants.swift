@@ -63,8 +63,12 @@ public struct ServerEndpoint {
         self.minSharingPermission = minSharingPermission
     }
     
-    public var path:String { // With preceding "/"
+    public var path:String { // With prefix "/"
         return "/" + pathName
+    }
+    
+    public var pathWithSuffixSlash:String { // With prefix "/" and suffix "/"
+        return path + "/"
     }
 }
 
