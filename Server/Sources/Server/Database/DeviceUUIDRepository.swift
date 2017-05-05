@@ -14,8 +14,30 @@ import Foundation
 import PerfectLib
 
 class DeviceUUID : NSObject, Model {
+    static let userIdKey = "userId"
     var userId: UserId!
+    
+    static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
+    
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case DeviceUUID.userIdKey:
+                userId = newValue as! UserId?
+                
+            case DeviceUUID.deviceUUIDKey:
+                deviceUUID = newValue as! String?
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
 
     override init() {
         super.init()

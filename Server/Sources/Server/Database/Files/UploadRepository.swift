@@ -67,33 +67,87 @@ static func maxCharacterLength() -> Int { return 22 }
 }
 
 class Upload : NSObject, Model, Filenaming {
+    static let uploadIdKey = "uploadId"
     var uploadId: Int64!
+    
+    static let fileUUIDKey = "fileUUID"
     var fileUUID: String!
     
+    static let userIdKey = "userId"
     // The userId of the sharing or owning user, i.e., this is not the owning user id.
     var userId: UserId!
     
+    static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
+    
+    static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
     
     // TODO: *0*
     // var creationDate:Date!
     
-    let stateKey = "state"
+    static let stateKey = "state"
     var state:UploadState!
     
+    static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
     
+    static let fileSizeBytesKey = "fileSizeBytes"
     // Making this optional to give flexibility about when we create the Upload entry in the repo (e.g., before or after the upload to cloud storage).
     var fileSizeBytes: Int64?
     
     // These two are not present in upload deletions.
+    static let mimeTypeKey = "mimeType"
     var mimeType: String?
+    static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName: String?
+    
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case Upload.uploadIdKey:
+                uploadId = newValue as! Int64?
+
+            case Upload.fileUUIDKey:
+                fileUUID = newValue as! String?
+
+            case Upload.userIdKey:
+                userId = newValue as! UserId?
+                
+            case Upload.fileVersionKey:
+                fileVersion = newValue as! FileVersionInt?
+                
+            case Upload.deviceUUIDKey:
+                deviceUUID = newValue as! String?
+
+            case Upload.stateKey:
+                state = newValue as! UploadState?
+                
+            case Upload.appMetaDataKey:
+                appMetaData = newValue as! String?
+            
+            case Upload.fileSizeBytesKey:
+                fileSizeBytes = newValue as! Int64?
+                
+            case Upload.mimeTypeKey:
+                mimeType = newValue as! String?
+                
+            case Upload.cloudFolderNameKey:
+                cloudFolderName = newValue as! String?
+
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
 
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
-            case stateKey:
+            case Upload.stateKey:
                 return {(x:Any) -> Any? in
                     return UploadState(rawValue: x as! String)
                 }

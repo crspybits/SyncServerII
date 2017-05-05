@@ -14,7 +14,6 @@ import Credentials
 import CredentialsGoogle
 import PerfectLib
 import Foundation
-import Reflection
 
 class SpecificDatabaseTests: ServerTestCase {
 
@@ -319,95 +318,6 @@ class SpecificDatabaseTests: ServerTestCase {
         }
         else {
             XCTFail()
-        }
-    }
-    
-    // On 3/23/17, This crashes. Why?
-    func testReflectionCrash1() {
-        let modelInit:(() -> Model)? = FileIndex.init
-        
-        let fileIndex = modelInit!()
-        
-        let rowFieldValue:Any? = Int64(1)
-        let key = "fileIndexId"
-        
-        do {
-            try Reflection.set(rowFieldValue!, key: key, for: fileIndex)
-        } catch {
-        }
-    }
-    
-    class TestClass2 : NSObject {
-        var fileIndexId: Int64!
-    }
-
-    // Crashes using Xcode 8.3
-    // See https://github.com/Zewo/Zewo/issues/238
-    func testReflectionCrash2() {
-        let fileIndex = TestClass2()
-        
-        let rowFieldValue = Int64(1)
-        let key = "fileIndexId"
-        
-        do {
-            try Reflection.set(rowFieldValue, key: key, for: fileIndex)
-        } catch {
-        }
-    }
-    
-    class TestClass3 : NSObject {
-        var fileIndexId: Int32!
-    }
-
-    // Does not crash. Something going on with Int64's?
-    func testReflectionDoesNotCrash() {
-        let fileIndex = TestClass3()
-        
-        let rowFieldValue = Int32(1)
-        let key = "fileIndexId"
-        
-        do {
-            try Reflection.set(rowFieldValue, key: key, for: fileIndex)
-        } catch {
-        }
-    }
-    
-    class TestClass4 : NSObject {
-        var fileIndexId: Int64
-        
-        override init() {
-            fileIndexId = 1
-            super.init()
-        }
-    }
-
-    // Does not crash. Something going on with optional Int64's?
-    func testReflectionDoesNotCrash2() {
-        let fileIndex = TestClass4()
-        
-        let rowFieldValue = Int64(1)
-        let key = "fileIndexId"
-        
-        do {
-            try Reflection.set(rowFieldValue, key: key, for: fileIndex)
-        } catch {
-        }
-    }
-    
-    class TestClass5 {
-        var fileIndexId: Int64!
-    }
-
-    // Does not crash.
-    func testReflectionDoesNotCrash3() {
-        let fileIndex = TestClass4()
-        
-        let rowFieldValue = Int64(1)
-        let key = "fileIndexId"
-        
-        do {
-            try Reflection.set(rowFieldValue, key: key, for: fileIndex)
-        } catch {
         }
     }
 }

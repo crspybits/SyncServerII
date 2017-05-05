@@ -47,6 +47,73 @@ class model : Model {
     var c16: String! // Insert mySQL DATETIME in format: '2013-12-31 11:30:45'
     var c17: String! // Insert mySQL TIMESTAMP in format: '2013-12-31 11:30:45'
     var c18: String! // Insert mySQL TIME in format: '11:30:45'
+    
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case "c1":
+                c1 = newValue as! String?
+                
+            case "c2":
+                c2 = newValue as! String?
+
+            case "c3":
+                c3 = newValue as! String?
+
+            case "c4":
+                c4 = newValue as! String?
+                
+            case "c5":
+                c5 = newValue as! String?
+                
+            case "c6":
+                c6 = newValue as! String?
+                
+            case "c7":
+                c7 = newValue as! Int8?
+                
+            case "c8":
+                c8 = newValue as! Int16?
+                
+            case "c9":
+                c9 = newValue as! Int32?
+                
+            case "c10":
+                c10 = newValue as! Int32?
+                
+            case "c11":
+                c11 = newValue as! Int64?
+                
+            case "c12":
+                c12 = newValue as! Float?
+                
+            case "c13":
+                c13 = newValue as! Double?
+                
+            //case "c14":
+            //    break
+            
+            case "c15":
+                c15 = newValue as! String?
+                
+            case "c16":
+                c16 = newValue as! String?
+                
+            case "c17":
+                c17 = newValue as! String?
+                
+            case "c18":
+                c18 = newValue as! String?
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey:key)
+        }
+    }
 }
 
 enum TestEnum : String {
@@ -57,6 +124,25 @@ case TestEnum2
 class model2 : Model {
     var c1: TestEnum!
     var c2: Date!
+
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case "c1":
+                c1 = newValue as! TestEnum?
+                
+            case "c2":
+                c2 = newValue as! Date?
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey:key)
+        }
+    }
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {

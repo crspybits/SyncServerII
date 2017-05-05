@@ -34,11 +34,11 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.masterVersionKey: 42
         ])
         
-        let fileVersion = uploadRequest!.valueForProperty(propertyName: UploadFileRequest.fileVersionKey) as? FileVersionInt
-        XCTAssert(fileVersion == 1)
+        let fileVersion = valueFor(property: UploadFileRequest.fileVersionKey, of: uploadRequest! as Any) as? FileVersionInt
+        XCTAssert(fileVersion == 1, "fileVersion = \(fileVersion)")
         
-        let masterVersion = uploadRequest!.valueForProperty(propertyName: UploadFileRequest.masterVersionKey) as? MasterVersionInt
-        XCTAssert(masterVersion == 42)
+        let masterVersion = valueFor(property: UploadFileRequest.masterVersionKey, of: uploadRequest!  as Any) as? MasterVersionInt
+        XCTAssert(masterVersion == 42, "masterVersion = \(masterVersion)")
   }
 
     func testURLParameters() {
@@ -73,6 +73,27 @@ class MessageTests: ServerTestCase {
         XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(String(describing: result))")
     }
     
+    func testURLParametersForUploadDeletion() {
+        let uuidString = PerfectLib.UUID().string
+
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uuidString,
+            UploadDeletionRequest.fileVersionKey: 99,
+            UploadDeletionRequest.masterVersionKey: 23,
+            UploadDeletionRequest.actualDeletionKey: 1
+        ])
+        
+        let result = uploadDeletionRequest!.urlParameters()
+        
+        let expectedURLParams =
+            "\(UploadDeletionRequest.fileUUIDKey)=\(uuidString)&" +
+            "\(UploadDeletionRequest.fileVersionKey)=99&" +
+            "\(UploadDeletionRequest.masterVersionKey)=23&" +
+            "\(UploadDeletionRequest.actualDeletionKey)=1"
+        
+        XCTAssert(result == expectedURLParams, "Result was: \(String(describing: result))")
+    }
+    
     func testBadUUIDForFileName() {
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : "foobar",
@@ -100,5 +121,17 @@ class MessageTests: ServerTestCase {
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.cloudFolderNameKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileVersionKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.masterVersionKey))
+    }
+    
+    func testNilRequestMessageParams() {
+        let upload = RedeemSharingInvitationRequest(json: [:])
+        XCTAssert(upload == nil)
+    }
+    
+    func testNonNilRequestMessageParams() {
+        let upload = RedeemSharingInvitationRequest(json: [
+            RedeemSharingInvitationRequest.sharingInvitationUUIDKey:"foobar"])
+        XCTAssert(upload != nil)
+        XCTAssert(upload!.sharingInvitationUUID == "foobar")
     }
 }

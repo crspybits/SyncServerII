@@ -10,27 +10,54 @@ import Foundation
 import PerfectLib
 
 class SharingInvitation : NSObject, Model {
+    static let sharingInvitationUUIDKey = "sharingInvitationUUID"
     var sharingInvitationUUID:String!
     
-    let expiryKey = "expiry"
+    static let expiryKey = "expiry"
     var expiry:Date!
     
     // 60 seconds/minute * 60 minutes/hour * 24 hours/day == seconds/day
     static let expiryDuration:TimeInterval = 60*60*24
     
+    static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId!
     
-    let sharingPermissionKey = "sharingPermission"
+    static let sharingPermissionKey = "sharingPermission"
     var sharingPermission: SharingPermission!
+    
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case SharingInvitation.sharingInvitationUUIDKey:
+                sharingInvitationUUID = newValue as! String?
+                
+            case SharingInvitation.expiryKey:
+                expiry = newValue as! Date?
+                
+            case SharingInvitation.owningUserIdKey:
+                owningUserId = newValue as! UserId?
+            
+            case SharingInvitation.sharingPermissionKey:
+                sharingPermission = newValue as! SharingPermission?
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
-            case sharingPermissionKey:
+            case SharingInvitation.sharingPermissionKey:
                 return {(x:Any) -> Any? in
                     return SharingPermission(rawValue: x as! String)
                 }
             
-            case expiryKey:
+            case SharingInvitation.expiryKey:
                 return {(x:Any) -> Any? in
                     return Database.date(x as! String, fromFormat: .DATETIME)
                 }

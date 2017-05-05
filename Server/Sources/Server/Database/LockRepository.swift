@@ -12,13 +12,40 @@ import Foundation
 import PerfectLib
 
 class Lock : NSObject, Model {
+    static let userIdKey = "userId"
     var userId: UserId!
+    
+    static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
+    
+    static let expiryKey = "expiry"
     var expiry: Date!
     
     // This expiry mechanism ought never to actually be needed. Since, a lock will be rolled back should a server request fail, we should never have to be concerned about having stale locks. I'm keeping expiries here just as an insurance plan-- e.g., in case a software glitch causes a lock to be retained after a server request has been finished.
     static let expiryDuration:TimeInterval = 60
 
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case Lock.userIdKey:
+                userId = newValue as! UserId!
+                
+            case Lock.deviceUUIDKey:
+                deviceUUID = newValue as! String!
+                
+            case Lock.expiryKey:
+                expiry = newValue as! Date!
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
+    
     override init() {
         super.init()
     }

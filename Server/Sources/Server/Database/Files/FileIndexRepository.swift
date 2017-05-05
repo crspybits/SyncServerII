@@ -14,26 +14,82 @@ import PerfectLib
 typealias FileIndexId = Int64
 
 class FileIndex : NSObject, Model, Filenaming {
+    static let fileIndexIdKey = "fileIndexId"
     var fileIndexId: FileIndexId!
+    
+    static let fileUUIDKey = "fileUUID"
     var fileUUID: String!
+    
+    static let deviceUUIDKey = "deviceUUID"
     var deviceUUID:String!
     
     // TODO: *0*
     // var creationDate:Date!
     
     // The userId of the owning user.
+    static let userIdKey = "userId"
     var userId: UserId!
     
+    static let mimeTypeKey = "mimeType"
     var mimeType: String!
+    
+    static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName: String!
+    
+    static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
     
-    let deletedKey = "deleted"
+    static let deletedKey = "deleted"
     var deleted:Bool!
     
+    static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
     
+    static let fileSizeBytesKey = "fileSizeBytes"
     var fileSizeBytes: Int64!
+    
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case FileIndex.fileIndexIdKey:
+                fileIndexId = newValue as! FileIndexId?
+
+            case FileIndex.fileUUIDKey:
+                fileUUID = newValue as! String?
+                
+            case FileIndex.deviceUUIDKey:
+                deviceUUID = newValue as! String?
+                
+            case FileIndex.userIdKey:
+                userId = newValue as! UserId?
+                
+            case FileIndex.mimeTypeKey:
+                mimeType = newValue as! String?
+                
+            case FileIndex.cloudFolderNameKey:
+                cloudFolderName = newValue as! String?
+                
+            case FileIndex.appMetaDataKey:
+                appMetaData = newValue as! String?
+            
+            case FileIndex.deletedKey:
+                deleted = newValue as! Bool?
+                
+            case FileIndex.fileVersionKey:
+                fileVersion = newValue as! FileVersionInt?
+                
+            case FileIndex.fileSizeBytesKey:
+                fileSizeBytes = newValue as! Int64?
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
     
     override init() {
         super.init()
@@ -41,7 +97,7 @@ class FileIndex : NSObject, Model, Filenaming {
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
-            case deletedKey:
+            case FileIndex.deletedKey:
                 return {(x:Any) -> Any? in
                     return (x as! Int8) == 1
                 }

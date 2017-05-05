@@ -72,7 +72,10 @@ enum UserType : String {
 }
 
 class User : NSObject, Model {
+    static let userIdKey = "userId"
     var userId: UserId!
+    
+    static let usernameKey = "username"
     var username: String!
     
     // A given user on the system can only have a single UserType role, i.e., either an owning user or a sharing user.
@@ -80,6 +83,7 @@ class User : NSObject, Model {
     var userType:UserType!
     
     // Only when the current user is a sharing user, this gives the userId that is the owner of the data.
+    static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId?
 
     // Only when the current user is a sharing user, this gives the permission that the sharing user has to the owning users data.
@@ -90,10 +94,48 @@ class User : NSObject, Model {
     var accountType: AccountType!
 
     // Account type specific id. E.g., for Google, this is the "sub".
+    static let credsIdKey = "credsId"
     var credsId:String!
     
-    let credsKey = "credsKey"
+    static let credsKey = "creds"
     var creds:String! // Stored as JSON
+    
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case User.userIdKey:
+                userId = newValue as! UserId?
+
+            case User.usernameKey:
+                username = newValue as! String?
+                
+            case User.userTypeKey:
+                userType = newValue as! UserType?
+                
+            case User.owningUserIdKey:
+                owningUserId = newValue as! UserId?
+                
+            case User.sharingPermissionKey:
+                sharingPermission = newValue as! SharingPermission?
+                
+            case User.accountTypeKey:
+                accountType = newValue as! AccountType?
+                
+            case User.credsIdKey:
+                credsId = newValue as! String?
+            
+            case User.credsKey:
+                creds = newValue as! String?
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
     
     // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
     var credsObject:Creds? {

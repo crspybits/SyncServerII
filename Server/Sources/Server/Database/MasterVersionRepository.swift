@@ -12,8 +12,30 @@ import Foundation
 import PerfectLib
 
 class MasterVersion : NSObject, Model {
+    static let userIdKey = "userId"
     var userId: UserId!
+    
+    static let masterVersionKey = "masterVersion"
     var masterVersion: MasterVersionInt!
+    
+    subscript(key:String) -> Any? {
+        set {
+            switch key {
+            case MasterVersion.userIdKey:
+                userId = newValue as! UserId!
+                
+            case MasterVersion.masterVersionKey:
+                masterVersion = newValue as! MasterVersionInt!
+                
+            default:
+                assert(false)
+            }
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
 }
 
 class MasterVersionRepository : Repository {

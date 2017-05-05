@@ -9,7 +9,6 @@
 import PerfectLib
 import Foundation
 import MySQL
-import Reflection
 
 // See https://github.com/PerfectlySoft/Perfect-MySQL for assumptions about mySQL installation.
 // For mySQL interface docs, see: http://perfect.org/docs/MySQL.html
@@ -280,17 +279,7 @@ class Select {
                     }
                 }
                 
-                do {
-                    try Reflection.set(rowFieldValue!, key: fieldName, for: rowModel)
-                } catch {
-                    let message = "Problem with KVC set for: \(self.fieldTypes[fieldNumber]!); fieldNumber: \(fieldNumber)"
-                    Log.error(message: message)
-                    if !ignoreErrors {
-                        self.forEachRowStatus = .failedSettingFieldValueInModel(message)
-                        failure = true
-                        return
-                    }
-                }
+                rowModel[fieldName] = rowFieldValue!
 			} // end for
             
             callback(rowModel)

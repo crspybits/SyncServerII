@@ -8,7 +8,6 @@
 
 import Foundation
 import Gloss
-import Reflection
 
 #if SERVER
 import PerfectLib
@@ -26,6 +25,22 @@ public protocol RequestMessage : NSObjectProtocol, Encodable, Decodable {
     func nonNilKeys() -> [String]
 }
 
+// See http://stackoverflow.com/questions/43794228/getting-the-value-of-a-property-using-its-string-name-in-pure-swift-using-refle
+// Don't pass this an unwrapped optional. i.e., unwrap an optional before you pass it.
+func valueFor(property:String, of object:Any) -> Any? {
+    func isNilDescendant(_ any: Any?) -> Bool {
+        return String(describing: any) == "Optional(nil)"
+    }
+    
+    let mirror = Mirror(reflecting: object)
+    if let child = mirror.descendant(property), !isNilDescendant(child) {
+        return child
+    }
+    else {
+        return nil
+    }
+}
+
 public extension RequestMessage {
     func allKeys() -> [String] {
         return []
@@ -35,15 +50,26 @@ public extension RequestMessage {
         return []
     }
     
+    // http://stackoverflow.com/questions/27989094/how-to-unwrap-an-optional-value-from-any-type/43754449#43754449
+    private func unwrap<T>(_ any: T) -> Any {
+        let mirror = Mirror(reflecting: any)
+        guard mirror.displayStyle == .optional, let first = mirror.children.first else {
+            return any
+        }
+        return unwrap(first.value)
+    }
+    
     func urlParameters() -> String? {
         var result = ""
         for key in self.allKeys() {
-            if let keyValue = valueForProperty(propertyName: key) {
+            if let keyValue = valueFor(property: key, of: self) {
                 if result.characters.count > 0 {
                     result += "&"
                 }
 
-                let newKeyValue = "\(key)=\(keyValue)"
+                // At this point, keyValue while officially of "Any" type in the code, can actually be an optional. Any, it turns out is compatible with optional types. And if we use this optional value in "\(key)=\(keyValue)" below, we get `Optional(Something)` for the \(keyValue). Odd.
+                
+                let newKeyValue = "\(key)=\(unwrap(keyValue))"
                 
                 if let escapedNewKeyValue = newKeyValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) {
                     result += escapedNewKeyValue
@@ -68,28 +94,12 @@ public extension RequestMessage {
     }
     
     func propertyHasValue(propertyName:String) -> Bool {
-        if valueForProperty(propertyName: propertyName) == nil {
+        if valueFor(property: propertyName, of: self) == nil {
             return false
         }
         else {
             return true
         }
-    }
-    
-    func valueForProperty(propertyName:String) -> Any? {
-        var keyValue: Any?
-        do {
-            keyValue = try Reflection.get(propertyName, from: self)
-        } catch (let error) {
-            let message = "Error trying to get \(propertyName): \(error)"
-#if SERVER
-            Log.error(message: message)
-#else
-            print(message)
-#endif
-        }
-        
-        return keyValue
     }
     
     // Returns false if any of the properties do not have value.
