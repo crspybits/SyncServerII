@@ -33,7 +33,7 @@ class Client_Downloads: TestCase {
                 XCTAssert(expectedFiles.count == 0)
                 
             case .downloadsOrDeletionsAvailable(numberOfFiles: let numDownloads):
-                XCTAssert(Int32(expectedFiles.count) == numDownloads)
+                XCTAssert(Int32(expectedFiles.count) == numDownloads, "numDownloads: \(numDownloads); expectedFiles.count: \(expectedFiles.count)")
                 
             case .error(_):
                 XCTFail()
@@ -43,7 +43,7 @@ class Client_Downloads: TestCase {
                 XCTAssert(Singleton.get().masterVersion == expectedMasterVersion)
 
                 let dfts = DownloadFileTracker.fetchAll()
-                XCTAssert(dfts.count == expectedFiles.count)
+                XCTAssert(dfts.count == expectedFiles.count, "dfts.count: \(dfts.count); expectedFiles.count: \(expectedFiles.count)")
 
                 for file in expectedFiles {
                     let dftsResult = dfts.filter { $0.fileUUID == file.fileUUID &&

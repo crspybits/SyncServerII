@@ -35,10 +35,10 @@ class MessageTests: ServerTestCase {
         ])
         
         let fileVersion = valueFor(property: UploadFileRequest.fileVersionKey, of: uploadRequest! as Any) as? FileVersionInt
-        XCTAssert(fileVersion == 1, "fileVersion = \(fileVersion)")
+        XCTAssert(fileVersion == 1, "fileVersion = \(String(describing: fileVersion))")
         
         let masterVersion = valueFor(property: UploadFileRequest.masterVersionKey, of: uploadRequest!  as Any) as? MasterVersionInt
-        XCTAssert(masterVersion == 42, "masterVersion = \(masterVersion)")
+        XCTAssert(masterVersion == 42, "masterVersion = \(String(describing: masterVersion))")
   }
 
     func testURLParameters() {
@@ -85,6 +85,7 @@ class MessageTests: ServerTestCase {
         
         let result = uploadDeletionRequest!.urlParameters()
         
+        let x:Int?=1
         let expectedURLParams =
             "\(UploadDeletionRequest.fileUUIDKey)=\(uuidString)&" +
             "\(UploadDeletionRequest.fileVersionKey)=99&" +
