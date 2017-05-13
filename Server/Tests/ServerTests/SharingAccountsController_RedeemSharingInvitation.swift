@@ -167,3 +167,17 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
         }
     }
 }
+
+extension SharingAccountsController_RedeemSharingInvitation {
+    static var allTests : [(String, (SharingAccountsController_RedeemSharingInvitation) -> () throws -> Void)] {
+        return [
+            ("testThatRedeemingWithAnotherGoogleAccountWorks", testThatRedeemingWithAnotherGoogleAccountWorks),
+            ("testThatRedeemingASharingInvitationWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationWithoutGivingTheInvitationUUIDFails),
+            ("testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails),
+            ("testThatRedeemingWithAnExistingOtherOwningGoogleAccountFails", testThatRedeemingWithAnExistingOtherOwningGoogleAccountFails),
+            ("testThatRedeemingWithAnExistingOtherSharingGoogleAccountFails", testThatRedeemingWithAnExistingOtherSharingGoogleAccountFails),
+            ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
+            ("testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission", testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission)
+        ]
+    }
+}

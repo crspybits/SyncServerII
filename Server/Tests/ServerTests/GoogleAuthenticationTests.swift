@@ -81,3 +81,19 @@ class GoogleAuthenticationTests: ServerTestCase {
     }
 }
 
+extension GoogleAuthenticationTests {
+    static var allTests : [(String, (GoogleAuthenticationTests) -> () throws -> Void)] {
+        var result:[(String, (GoogleAuthenticationTests) -> () throws -> Void)] = [
+            ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
+            ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
+            ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
+            ("testRefreshGoogleAccessTokenWorks", testRefreshGoogleAccessTokenWorks)
+        ]
+        
+#if DEBUG
+        result += [("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks)]
+#endif
+
+        return result
+    }
+}

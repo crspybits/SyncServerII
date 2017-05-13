@@ -81,7 +81,7 @@ extension KituraTest {
             }
 
             // blocks test until request completes
-            self.waitExpectation(timeout: 30) { error in
+            self.waitExpectation(timeout: 60) { error in
                 ServerMain.shutdown()
                 XCTAssertNil(error)
             }
@@ -158,6 +158,11 @@ extension KituraTest {
         guard let jsonDict = jsonString!.toJSONDictionary() else {
             Log.error(message: "Could not convert string to JSON dict")
             return nil
+        }
+        
+        Log.info("Contents of dictionary:")
+        for (key, value) in jsonDict {
+            Log.info("key: \(key): value: \(value); type of value: \(type(of: value))")
         }
         
         return jsonDict

@@ -191,7 +191,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: 100
+            UploadDeletionRequest.masterVersionKey: MasterVersionInt(100)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, updatedMasterVersionExpected: 1)
@@ -208,7 +208,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
             UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
             UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1,
-            UploadDeletionRequest.actualDeletionKey: 1
+            UploadDeletionRequest.actualDeletionKey: Int32(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -264,5 +264,21 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
         ]
 
         self.getFileIndex(expectedFiles: [uploadRequest1], masterVersionExpected: uploadRequest1.masterVersion + 2, expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+    }
+}
+
+extension FileControllerTests_UploadDeletion {
+    static var allTests : [(String, (FileControllerTests_UploadDeletion) -> () throws -> Void)] {
+        return [
+            ("testThatUploadDeletionTransfersToUploads", testThatUploadDeletionTransfersToUploads),
+            ("testThatCombinedUploadDeletionAndFileUploadWork", testThatCombinedUploadDeletionAndFileUploadWork),
+            ("testThatUploadDeletionTwiceOfSameFileWorks", testThatUploadDeletionTwiceOfSameFileWorks),
+            ("testThatUploadDeletionFollowedByDoneUploadsActuallyDeletes", testThatUploadDeletionFollowedByDoneUploadsActuallyDeletes),
+            ("testThatDeletionOfDifferentVersionFails", testThatDeletionOfDifferentVersionFails),
+            ("testThatDeletionOfUnknownFileUUIDFails", testThatDeletionOfUnknownFileUUIDFails),
+            ("testThatDeletionFailsWhenMasterVersionDoesNotMatch", testThatDeletionFailsWhenMasterVersionDoesNotMatch),
+            ("testThatDebugDeletionFromServerWorks", testThatDebugDeletionFromServerWorks),
+            ("testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes", testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes)
+        ]
     }
 }

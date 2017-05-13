@@ -16,8 +16,8 @@ let package = Package(
 		.Package(url: "https://github.com/PerfectlySoft/Perfect.git", majorVersion: 2, minor: 0),
 		.Package(url:"https://github.com/crspybits/Perfect-MySQL.git", majorVersion: 2, minor: 1),
 		
-        .Package(url: "https://github.com/hkellaway/Gloss.git", majorVersion: 1, minor: 2),
-		// .Package(url: "https://github.com/crspybits/Gloss.git", majorVersion: 1, minor: 2),
+        // .Package(url: "https://github.com/hkellaway/Gloss.git", majorVersion: 1, minor: 2),
+		.Package(url: "https://github.com/crspybits/Gloss.git", majorVersion: 1, minor: 2),
 		
         //.Package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", majorVersion: 1, minor: 7),
         .Package(url: "https://github.com/crspybits/Kitura-Credentials.git", majorVersion: 1, minor: 7),

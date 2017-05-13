@@ -173,3 +173,22 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         }
     }
 }
+
+extension SpecificDatabaseTests_Uploads {
+    static var allTests : [(String, (SpecificDatabaseTests_Uploads) -> () throws -> Void)] {
+        return [
+            ("testAddUpload", testAddUpload),
+            ("testAddUploadSucceedsWithNilFileSizeBytes", testAddUploadSucceedsWithNilFileSizeBytes),
+            ("testAddUploadSucceedsWithNilAppMetaData", testAddUploadSucceedsWithNilAppMetaData),
+            ("testAddUploadSucceedsWithNilMimeType", testAddUploadSucceedsWithNilMimeType),
+            ("testUpdateUpload", testUpdateUpload),
+            ("testUpdateUploadFailsWithoutUploadId", testUpdateUploadFailsWithoutUploadId),
+            ("testUpdateUploadSucceedsWithNilFileSize", testUpdateUploadSucceedsWithNilFileSize),
+            ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
+            ("testUpdateUploadSucceedsWithNilMimeType", testUpdateUploadSucceedsWithNilMimeType),
+            ("testLookupFromUpload", testLookupFromUpload),
+            ("testGetUploadsWithNoFiles", testGetUploadsWithNoFiles),
+            ("testUploadedIndexWithOneFile", testUploadedIndexWithOneFile)
+        ]
+    }
+}

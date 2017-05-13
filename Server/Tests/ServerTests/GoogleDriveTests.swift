@@ -292,3 +292,24 @@ class GoogleDriveTests: ServerTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
 }
+
+extension GoogleDriveTests {
+    static var allTests : [(String, (GoogleDriveTests) -> () throws -> Void)] {
+        return [
+            ("testListFiles", testListFiles),
+            ("testSearchForPresentFolder", testSearchForPresentFolder),
+            ("testSearchForAbsentFolder", testSearchForAbsentFolder),
+            ("testSearchForPresentFile", testSearchForPresentFile),
+            ("testSearchForAbsentFile", testSearchForAbsentFile),
+            ("testSearchForPresentFileInFolder", testSearchForPresentFileInFolder),
+            ("testSearchForAbsentFileInFolder", testSearchForAbsentFileInFolder),
+            ("testCreateAndDeleteFolder", testCreateAndDeleteFolder),
+            ("testDeleteFolderThatDoesNotExistFailure", testDeleteFolderThatDoesNotExistFailure),
+            ("testCreateFolderIfDoesNotExist", testCreateFolderIfDoesNotExist),
+            ("testBasicFileDownloadWorks", testBasicFileDownloadWorks),
+            ("testFileDownloadOfNonExistentFileFails", testFileDownloadOfNonExistentFileFails),
+            ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken)
+        ]
+    }
+}
+

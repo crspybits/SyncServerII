@@ -110,3 +110,20 @@ class FileControllerTests: ServerTestCase {
     // TODO: *1* Test that two concurrent downloads work.
 }
 
+extension FileControllerTests {
+    static var allTests : [(String, (FileControllerTests) -> () throws -> Void)] {
+        return [
+            ("testMasterVersionConflict1", testMasterVersionConflict1),
+            ("testMasterVersionConflict2", testMasterVersionConflict2),
+            ("testFileIndexWithNoFiles", testFileIndexWithNoFiles),
+            ("testFileIndexWithOneFile", testFileIndexWithOneFile),
+            ("testFileIndexWithTwoFiles", testFileIndexWithTwoFiles),
+            ("testDownloadFileTextSucceeds", testDownloadFileTextSucceeds),
+            ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
+            ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
+            ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
+        ]
+    }
+}
+
+

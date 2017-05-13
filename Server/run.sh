@@ -8,10 +8,16 @@ if [ "empty${CMD}" == "empty" ] ; then
 	CMD="build"
 fi
 
+if [ $? == 0 ] && [ "${CMD}" == "test" ] ; then
+	# Some test cases expect `Cat.jpg` in /tmp
+	cp Resources/Cat.jpg /tmp
+fi
+
 # use --verbose flag to show more output
 swift "${CMD}" -Xswiftc -DDEBUG -Xswiftc -DSERVER
 
 if [ $? == 0 ] && [ "${CMD}" == "build" ] ; then
-	.build/debug/Main ../../Private/Server/SharedImagesServer.json
+	echo .build/debug/Main ../../Private/Server/SharedImagesServer.json
 	# .build/debug/Main ../../Private/Server/Server.json
 fi
+

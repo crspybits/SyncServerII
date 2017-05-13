@@ -250,3 +250,25 @@ class Sharing_FileManipulationTests: ServerTestCase {
         downloadTextFile(token: .googleRefreshToken3, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
     }
 }
+
+extension Sharing_FileManipulationTests {
+    static var allTests : [(String, (Sharing_FileManipulationTests) -> () throws -> Void)] {
+        return [
+            ("testThatReadSharingUserCannotUploadAFile", testThatReadSharingUserCannotUploadAFile),
+            ("testThatReadSharingUserCannotUploadDeleteAFile", testThatReadSharingUserCannotUploadDeleteAFile),
+            ("testThatReadSharingUserCanDownloadAFile", testThatReadSharingUserCanDownloadAFile),
+            ("testThatReadSharingUserCanDownloadDeleteAFile", testThatReadSharingUserCanDownloadDeleteAFile),
+            ("testThatWriteSharingUserCanUploadAFile", testThatWriteSharingUserCanUploadAFile),
+            ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
+            ("testThatWriteSharingUserCanDownloadAFile", testThatWriteSharingUserCanDownloadAFile),
+            ("testThatWriteSharingUserCanDownloadDeleteAFile", testThatWriteSharingUserCanDownloadDeleteAFile),
+            ("testThatAdminSharingUserCanUploadAFile", testThatAdminSharingUserCanUploadAFile),
+            ("testThatAdminSharingUserCanUploadDeleteAFile", testThatAdminSharingUserCanUploadDeleteAFile),
+            ("testThatAdminSharingUserCanDownloadAFile", testThatAdminSharingUserCanDownloadAFile),
+            ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
+            ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
+            ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile)
+        ]
+    }
+}
+

@@ -67,3 +67,14 @@ class UtilsTests: ServerTestCase {
         XCTAssert(propertyType1 == propertyType2, "\(String(describing: propertyType1)) != \(propertyType2)")
     }
 }
+
+extension UtilsTests {
+    static var allTests : [(String, (UtilsTests) -> () throws -> Void)] {
+        return [
+            ("testOptionalString", testOptionalString),
+            ("testString", testString),
+            ("testOptionalInt", testOptionalInt),
+            ("testInt", testInt)
+        ]
+    }
+}

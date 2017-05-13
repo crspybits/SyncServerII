@@ -113,3 +113,18 @@ class UserControllerTests: ServerTestCase {
         testCheckCredsWhenUserDoesNotExist()
     }
 }
+
+extension UserControllerTests {
+    static var allTests : [(String, (UserControllerTests) -> () throws -> Void)] {
+        return [
+            ("testAddUserSucceedsWhenAddingNewUser", testAddUserSucceedsWhenAddingNewUser),
+            ("testAddUserFailsWhenAddingExistingUser", testAddUserFailsWhenAddingExistingUser),
+            ("testCheckCredsWhenUserDoesExist", testCheckCredsWhenUserDoesExist),
+            ("testCheckCredsWhenUserDoesNotExist", testCheckCredsWhenUserDoesNotExist),
+            ("testCheckCredsWithBadAccessToken", testCheckCredsWithBadAccessToken),
+            ("testRemoveUserFailsWithNonExistingUser", testRemoveUserFailsWithNonExistingUser),
+            ("testRemoveUserSucceedsWithExistingUser", testRemoveUserSucceedsWithExistingUser)
+        ]
+    }
+}
+

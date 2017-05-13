@@ -54,3 +54,17 @@ class FileController_UploadTests: ServerTestCase {
         _ = uploadTextFile(appMetaData:"{ \"foo\": \"bar\" }")
     }
 }
+
+extension FileController_UploadTests {
+    static var allTests : [(String, (FileController_UploadTests) -> () throws -> Void)] {
+        return [
+            ("testUploadTextFile", testUploadTextFile),
+            ("testUploadJPEGFile", testUploadJPEGFile),
+            ("testUploadTextAndJPEGFile", testUploadTextAndJPEGFile),
+            ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
+            ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
+            ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
+
+        ]
+    }
+}

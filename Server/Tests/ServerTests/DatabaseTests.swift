@@ -363,6 +363,15 @@ class GeneralDatabaseTests: ServerTestCase {
         
         XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(String(describing: select.forEachRowStatus))")
         XCTAssert(rows == 1, "Didn't find expected number of rows")
+    }
+}
 
+extension GeneralDatabaseTests {
+    static var allTests : [(String, (GeneralDatabaseTests) -> () throws -> Void)] {
+        return [
+            ("testSelectForEachRowIgnoringErrors", testSelectForEachRowIgnoringErrors),
+            ("testSelectForEachRowNotIgnoringErrors", testSelectForEachRowNotIgnoringErrors),
+            ("testTypeConverters", testTypeConverters)
+        ]
     }
 }

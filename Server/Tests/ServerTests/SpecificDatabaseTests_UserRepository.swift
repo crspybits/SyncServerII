@@ -157,3 +157,17 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
         }
     }
 }
+
+extension SpecificDatabaseTests_UserRepository {
+    static var allTests : [(String, (SpecificDatabaseTests_UserRepository) -> () throws -> Void)] {
+        return [
+            ("testAddOwningUser", testAddOwningUser),
+            ("testAddOwningUserFailsIfYouGiveAnOwningUserId", testAddOwningUserFailsIfYouGiveAnOwningUserId),
+            ("testAddOwningUserFailsIfYouGivePermissions", testAddOwningUserFailsIfYouGivePermissions),
+            ("testAddSharingUser", testAddSharingUser),
+            ("testUserLookup1", testUserLookup1),
+            ("testUserLookup1b", testUserLookup1b),
+            ("testUserLookup2", testUserLookup2)
+        ]
+    }
+}

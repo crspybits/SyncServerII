@@ -26,8 +26,12 @@ extension Decoder {
         return {
             json in
             
-            if let number = json.valueForKeyPath(keyPath: key, withDelimiter: keyPathDelimiter) as? NSNumber {
-                return number.int32Value
+            if let number = json.valueForKeyPath(keyPath: key, withDelimiter: keyPathDelimiter) as? Int32 {
+                return number
+            }
+
+            if let number = json.valueForKeyPath(keyPath: key, withDelimiter: keyPathDelimiter) as? Int {
+                return Int32(number)
             }
             
             return decodeStringAsInt(json: json, toInt:{ Int32($0) }, keyPath: key, keyPathDelimiter: keyPathDelimiter)
@@ -38,8 +42,16 @@ extension Decoder {
         return {
             json in
             
-            if let number = json.valueForKeyPath(keyPath: key, withDelimiter: keyPathDelimiter) as? NSNumber {
-                return number.int64Value
+            if let number = json.valueForKeyPath(keyPath: key, withDelimiter: keyPathDelimiter) as? Int64 {
+                return number
+            }
+            
+            if let number = json.valueForKeyPath(keyPath: key, withDelimiter: keyPathDelimiter) as? Int32 {
+                return Int64(number)
+            }
+            
+            if let number = json.valueForKeyPath(keyPath: key, withDelimiter: keyPathDelimiter) as? Int {
+                return Int64(number)
             }
             
             return decodeStringAsInt(json: json, toInt:{ Int64($0) }, keyPath: key, keyPathDelimiter: keyPathDelimiter)

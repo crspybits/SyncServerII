@@ -85,3 +85,16 @@ class FileControllerTests_GetUploads: ServerTestCase {
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:])
     }
 }
+
+extension FileControllerTests_GetUploads {
+    static var allTests : [(String, (FileControllerTests_GetUploads) -> () throws -> Void)] {
+        return [
+            ("testForZeroUploads", testForZeroUploads),
+            ("testForOneUpload", testForOneUpload),
+            ("testForOneUploadButDoneTwice", testForOneUploadButDoneTwice),
+            ("testForOneUploadButFromWrongDeviceUUID", testForOneUploadButFromWrongDeviceUUID),
+            ("testForTwoUploads", testForTwoUploads),
+            ("testForNoUploadsAfterDoneUploads", testForNoUploadsAfterDoneUploads)
+        ]
+    }
+}

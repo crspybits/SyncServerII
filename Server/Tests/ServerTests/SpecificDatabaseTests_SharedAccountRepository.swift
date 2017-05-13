@@ -161,3 +161,13 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase {
         waitForExpectations(timeout: 20, handler: nil)
     }
 }
+
+extension SpecificDatabaseTests_SharingInvitationRepository {
+    static var allTests : [(String, (SpecificDatabaseTests_SharingInvitationRepository) -> () throws -> Void)] {
+        return [
+            ("testAddingSharingInvitation", testAddingSharingInvitation),
+            ("testAttemptToRemoveStaleInvitationsThatAreNotStale", testAttemptToRemoveStaleInvitationsThatAreNotStale),
+            ("testRemoveStaleSharingInvitations", testRemoveStaleSharingInvitations)
+        ]
+    }
+}

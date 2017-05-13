@@ -83,8 +83,9 @@ class ServerTestCase : XCTestCase {
         
         uploadRequest.appMetaData = appMetaData
         
+        Log.info("Starting runUploadTest: uploadTextFile")
         runUploadTest(token:token, data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
-        
+        Log.info("Completed runUploadTest: uploadTextFile")
         return (request:uploadRequest, fileSize: Int64(stringToUpload.characters.count))
     }
     
@@ -106,6 +107,8 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request: \(response!.statusCode)")
                     XCTAssert(dict != nil)
                     
+                    let sizeInBytes = dict![UploadFileResponse.sizeKey]
+                    Log.debug("type of sizeInBytes: \(type(of: sizeInBytes))")
                     if let uploadResponse = UploadFileResponse(json: dict!) {
                         if updatedMasterVersionExpected == nil {
                             XCTAssert(uploadResponse.size != nil)
@@ -145,7 +148,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:Int64 = 0) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
@@ -160,11 +163,12 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: 0
+            UploadFileRequest.masterVersionKey: MasterVersionInt(0)
         ])
         
+        Log.info("Starting runUploadTest: uploadJPEGFile")
         runUploadTest(data:data, uploadRequest:uploadRequest!, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID)
-        
+        Log.info("Completed runUploadTest: uploadJPEGFile")
         return (uploadRequest!, sizeOfCatFileInBytes)
     }
     
@@ -188,7 +192,7 @@ class ServerTestCase : XCTestCase {
                     
                     if let doneUploadsResponse = DoneUploadsResponse(json: dict!) {
                         XCTAssert(doneUploadsResponse.masterVersionUpdate == updatedMasterVersionExpected)
-                        XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads)
+                        XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads, "doneUploadsResponse.numberUploadsTransferred: \(String(describing: doneUploadsResponse.numberUploadsTransferred)); expectedNumberOfUploads: \(String(describing: expectedNumberOfUploads))")
                         XCTAssert(doneUploadsResponse.numberDeletionErrors == nil)
                     }
                     else {
@@ -453,7 +457,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func downloadTextFile(token:CredentialsToken = .googleRefreshToken1,masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:Int64 = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) {
+    func downloadTextFile(token:CredentialsToken = .googleRefreshToken1,masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) {
     
         let deviceUUID = PerfectLib.UUID().string
         let masterVersion:Int64 = 0

@@ -142,7 +142,14 @@ class DatabaseModelTests: XCTestCase {
         XCTAssert(user.userType == newUserType)
         XCTAssert(user.owningUserId == newOwningUserId)
         XCTAssert(user.sharingPermission == newSharingPermission)
-        XCTAssert(user.accountType == newAccountType)
+        
+        // Swift Compiler issues.
+        // XCTAssert(user.accountType == newAccountType)
+        
+        if user.accountType != newAccountType {
+            XCTFail()
+        }
+        
         XCTAssert(user.credsId == newCredsId)
         XCTAssert(user.creds == newCreds)
         
@@ -281,5 +288,19 @@ class DatabaseModelTests: XCTestCase {
         XCTAssert(upload.fileSizeBytes == nil)
         XCTAssert(upload.mimeType == nil)
         XCTAssert(upload.cloudFolderName == nil)
+    }
+}
+
+extension DatabaseModelTests {
+    static var allTests : [(String, (DatabaseModelTests) -> () throws -> Void)] {
+        return [
+            ("testDeviceUUID", testDeviceUUID),
+            ("testLock", testLock),
+            ("testMasterVersion", testMasterVersion),
+            ("testSharingInvitation", testSharingInvitation),
+            ("testUser", testUser),
+            ("testFileIndex", testFileIndex),
+            ("testUpload", testUpload),
+        ]
     }
 }

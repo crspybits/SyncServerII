@@ -34,3 +34,12 @@ class GeneralAuthTests: ServerTestCase {
         }
     }
 }
+
+extension GeneralAuthTests {
+    static var allTests : [(String, (GeneralAuthTests) -> () throws -> Void)] {
+        return [
+            ("testBadEndpointFails", testBadEndpointFails),
+            ("testGoodEndpointWithNoCredsRequiredWorks", testGoodEndpointWithNoCredsRequiredWorks)
+        ]
+    }
+}

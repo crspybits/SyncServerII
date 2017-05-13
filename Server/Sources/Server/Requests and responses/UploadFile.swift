@@ -111,7 +111,7 @@ class UploadFileResponse : ResponseMessage {
     
     // If the master version for the user on the server has been incremented, this key will be present in the response-- with the new value of the master version. The upload was not attempted in this case.
     static let masterVersionUpdateKey = "masterVersionUpdate"
-    var masterVersionUpdate:Int64?
+    var masterVersionUpdate:MasterVersionInt?
     
     required init?(json: JSON) {
         self.size = Decoder.decode(int64ForKey: UploadFileResponse.sizeKey)(json)

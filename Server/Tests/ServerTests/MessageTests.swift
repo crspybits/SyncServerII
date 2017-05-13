@@ -30,8 +30,8 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.fileVersionKey: 1,
-            UploadFileRequest.masterVersionKey: 42
+            UploadFileRequest.fileVersionKey: FileVersionInt(1),
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
         
         let fileVersion = valueFor(property: UploadFileRequest.fileVersionKey, of: uploadRequest! as Any) as? FileVersionInt
@@ -48,8 +48,8 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.fileVersionKey: 1,
-            UploadFileRequest.masterVersionKey: 42
+            UploadFileRequest.fileVersionKey: FileVersionInt(1),
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
         
         let result = uploadRequest!.urlParameters()
@@ -78,14 +78,13 @@ class MessageTests: ServerTestCase {
 
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uuidString,
-            UploadDeletionRequest.fileVersionKey: 99,
-            UploadDeletionRequest.masterVersionKey: 23,
-            UploadDeletionRequest.actualDeletionKey: 1
+            UploadDeletionRequest.fileVersionKey: FileVersionInt(99),
+            UploadDeletionRequest.masterVersionKey: MasterVersionInt(23),
+            UploadDeletionRequest.actualDeletionKey: Int32(1)
         ])
         
         let result = uploadDeletionRequest!.urlParameters()
         
-        let x:Int?=1
         let expectedURLParams =
             "\(UploadDeletionRequest.fileUUIDKey)=\(uuidString)&" +
             "\(UploadDeletionRequest.fileVersionKey)=99&" +
@@ -100,8 +99,8 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.fileVersionKey: 1,
-            UploadFileRequest.masterVersionKey: 42
+            UploadFileRequest.fileVersionKey: FileVersionInt(1),
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
         XCTAssert(uploadRequest == nil)
     }
@@ -113,8 +112,8 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
-            UploadFileRequest.fileVersionKey: 1,
-            UploadFileRequest.masterVersionKey: 42
+            UploadFileRequest.fileVersionKey: FileVersionInt(1),
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
         
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileUUIDKey))
@@ -135,4 +134,38 @@ class MessageTests: ServerTestCase {
         XCTAssert(upload != nil)
         XCTAssert(upload!.sharingInvitationUUID == "foobar")
     }
+    
+    // Because of some Linux problems I was having.
+    func testDoneUploadsResponse() {
+        let numberUploads = Int32(23)
+        let response = DoneUploadsResponse(json:[
+            DoneUploadsResponse.numberUploadsTransferredKey: numberUploads
+        ])!
+        XCTAssert(response.numberUploadsTransferred == numberUploads)
+        
+        guard let jsonDict = response.toJSON() else {
+            XCTFail()
+            return
+        }
+        
+        // Could not cast value of type 'Foundation.NSNumber' (0x7fd77dcf8188) to 'Swift.Int32' (0x7fd77e0c9b18).
+        XCTAssert(jsonDict[DoneUploadsResponse.numberUploadsTransferredKey] as! Int32 == numberUploads)
+    }
 }
+
+extension MessageTests {
+    static var allTests : [(String, (MessageTests) -> () throws -> Void)] {
+        return [
+            ("testIntConversions", testIntConversions),
+            ("testURLParameters", testURLParameters),
+            ("testURLParametersWithIntegersAsStrings", testURLParametersWithIntegersAsStrings),
+            ("testURLParametersForUploadDeletion", testURLParametersForUploadDeletion),
+            ("testBadUUIDForFileName", testBadUUIDForFileName),
+            ("testPropertyHasValue", testPropertyHasValue),
+            ("testNilRequestMessageParams", testNilRequestMessageParams),
+            ("testNonNilRequestMessageParams", testNonNilRequestMessageParams),
+            ("testDoneUploadsResponse", testDoneUploadsResponse)
+        ]
+    }
+}
+

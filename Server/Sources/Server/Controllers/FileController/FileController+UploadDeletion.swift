@@ -66,7 +66,9 @@ extension FileController {
                 params.completion(nil)
                 return
             }
-
+            
+            Log.debug(message: "uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
+            
 #if DEBUG
             if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion != 0 {
                 actuallyDeleteFileFromServer(key:key, uploadDeletionRequest:uploadDeletionRequest, fileIndexObj:fileIndexObj, params:params)
