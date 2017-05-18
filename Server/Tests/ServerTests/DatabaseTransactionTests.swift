@@ -9,6 +9,9 @@
 import XCTest
 @testable import Server
 
+// TODO: *0* Add "set global max_connections = 50;" into testing mySQL statements-- I just got an error on AWS with 66 max connections during testing. It appears I wasn't closing down connections. I have modified the code so it should now close connections, but it will be good to have this included in the testing.
+// To see the current connections, http://stackoverflow.com/questions/7432241/mysql-show-status-active-or-total-connections
+
 class DatabaseTransactionTests: ServerTestCase {
 
     override func setUp() {

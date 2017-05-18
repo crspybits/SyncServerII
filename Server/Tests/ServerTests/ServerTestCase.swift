@@ -46,6 +46,13 @@ class ServerTestCase : XCTestCase {
         _ = SharingInvitationRepository(db).create()
     }
     
+    override func tearDown() {
+        super.tearDown()
+        
+        // Otherwise we can have too many db connections open during testing.
+        self.db.close()
+    }
+    
     func addNewUser(token:CredentialsToken = .googleRefreshToken1, deviceUUID:String) {
         self.performServerTest(token:token) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)

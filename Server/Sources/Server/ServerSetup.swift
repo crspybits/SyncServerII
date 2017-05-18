@@ -106,19 +106,21 @@ private class RequestHandler : CredsDelegate {
     case data(data:Data?, headers:[String:String])
     }
     
-    @discardableResult
-    private func endWith(clientResponse:EndWithResponse) -> Bool {
+    private func endWith(clientResponse:EndWithResponse) {
         var jsonString:String?
         
+        Log.info(message: "REQUEST \(request.urlURL.path) COMPLETED")
+
         switch clientResponse {
         case .json(let jsonDict):
             
             do {
                 jsonString = try jsonDict.jsonEncodedString()
             } catch (let error) {
-                Log.error(message: "Failed on json encode: \(error.localizedDescription) for jsonDict: \(jsonDict)")
-                // TODO: *2* It may not be such a good idea to not do `self.response.send` here. It may be better to send back an error response. Otherwise, this can hang up a client.
-                return false
+                let message = "Failed on json encode: \(error.localizedDescription) for jsonDict: \(jsonDict)"
+                Log.error(message: message)
+                self.response.statusCode = HTTPStatusCode.internalServerError
+                self.response.send(message)
             }
             
             if jsonString != nil {
@@ -137,15 +139,10 @@ private class RequestHandler : CredsDelegate {
 
         do {
             try self.response.end()
-            Log.info(message: "Request completed with HTTP status code: \(response.statusCode)")
+            Log.info(message: "REQUEST \(request.urlURL.path) STATUS CODE: \(response.statusCode)")
         } catch (let error) {
             Log.error(message: "Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
-            return false
         }
-        
-        Log.info(message: "REQUEST COMPLETED: \(request.urlURL.path)")
-        
-        return true
     }
     
     func setJsonResponseHeaders() {

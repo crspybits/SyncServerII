@@ -28,6 +28,7 @@ public class B {
 
 class UtilsTests: ServerTestCase {
     override func setUp() {
+        super.setUp()
         Log.logger = HeliumLogger()
     }
     

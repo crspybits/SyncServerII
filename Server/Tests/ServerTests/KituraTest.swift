@@ -49,6 +49,8 @@ case googleSub3 = "GoogleSub3"
 case facebook = "FacebookLongLivedToken"
 }
 
+// TODO: *0* Why do I have to have both Server.json and ServerTests.json for testing??
+
 extension KituraTest {
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     func credentialsToken(token:CredentialsToken = .googleRefreshToken1) -> String {

@@ -24,7 +24,11 @@ public class Database {
     // E.g.,[ERR] Could not insert into ShortLocks: Failure: 1062 Duplicate entry '1' for key 'userId'
     static let duplicateEntryForKey = UInt32(1062)
     
+    private var closed = false
     public private(set) var connection: MySQL!
+
+    private static var numberOpened = 0
+    private static var numberClosed = 0
 
     var error: String {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
@@ -40,10 +44,15 @@ public class Database {
                 "Failure connecting to mySQL server \(Constants.session.db.host): \(self.error)")
             return
         }
+        
+        Database.numberOpened += 1
 
         if showStartupInfo {
             Log.info(message: "Connecting to database named: \(Constants.session.db.database)...")
         }
+        
+        Log.info(message: "DB CONNECTION STATS: opened: \(Database.numberOpened); closed: \(Database.numberClosed)")
+
         guard self.connection.selectDatabase(named: Constants.session.db.database) else {
             Log.error(message: "Failure: \(self.error)")
             return
@@ -51,7 +60,17 @@ public class Database {
     }
     
     deinit {
-        self.connection.close()
+        close()
+    }
+    
+    // Do not close the database connection until rollback or commit have been called.
+    public func close() {
+        if !closed {
+            Database.numberClosed += 1
+            Log.info(message: "CLOSING DB CONNECTION (opened: \(Database.numberOpened); closed: \(Database.numberClosed))")
+            connection.close()
+            closed = true
+        }
     }
 
     public enum TableCreationSuccess {
