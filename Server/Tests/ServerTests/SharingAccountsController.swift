@@ -92,11 +92,11 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase {
         
         guard case .found(let model2) = results,
             let invitation = model2 as? SharingInvitation else {
-            XCTFail()
+            XCTFail("ERROR: Did not find sharing invitation!")
             return
         }
         
-        XCTAssert(invitation.owningUserId == owningUserId)
+        XCTAssert(invitation.owningUserId == owningUserId, "ERROR: invitation.owningUserId: \(invitation.owningUserId) was not equal to \(owningUserId)")
     }
     
     func testFailureOfSharingInvitationCreationByAReadSharingUser() {
