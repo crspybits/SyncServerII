@@ -45,9 +45,28 @@ public class ServerMain {
             Log.error("Failed during startup: Could not setup controller(s).")
             exit(1)
         }
+        
+#if os(Linux)
+        let myCertFile = "cert.pem"
+        let myKeyFile = "key.pem"
+                 
+        let sslConfig = SSLConfig(withCACertificateDirectory: nil,
+                                     usingCertificateFile: myCertFile, 
+                                     withKeyFile: myKeyFile, 
+                                     usingSelfSignedCerts: true)
+#else // on macOS
+        var myCertKeyFile = "cert.pfx"
+        if Constants.session.xCodeCertPfxFullFilePath != nil {
+            myCertKeyFile = Constants.session.xCodeCertPfxFullFilePath!
+        }
+    
+        let sslConfig = SSLConfig(withChainFilePath: myCertKeyFile,
+                                     withPassword: Constants.session.sslConfigPassword,
+                                     usingSelfSignedCerts: true)
+#endif
 
         let serverRoutes = CreateRoutes()
-        Kitura.addHTTPServer(onPort: self.port, with: serverRoutes.getRoutes())
+        Kitura.addHTTPServer(onPort: self.port, with: serverRoutes.getRoutes(), withSSL: sslConfig)
         
         switch type {
         case .blocking:

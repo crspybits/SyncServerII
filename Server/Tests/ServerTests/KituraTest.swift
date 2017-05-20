@@ -106,16 +106,16 @@ extension KituraTest {
         
         allHeaders["Content-Type"] = "text/plain"
         let options: [ClientRequest.Options] =
-            [.method(route.method.rawValue), .hostname("localhost"),
+            [.disableSSLVerification, .schema("https://"), .method(route.method.rawValue), .hostname("localhost"),
                 .port(Int16(ServerMain.port)), .path(path), .headers(allHeaders)]
         
-        let req = HTTP.request(options) { (response:ClientResponse?) in
+        let req:ClientRequest = HTTP.request(options) { (response:ClientResponse?) in
             var dict:[String:Any]?
             if response != nil {
                 dict = self.getResponseDict(response: response!, responseDictFrom:responseDictFrom)
             }
             
-            Log.info("Result: \(String(describing: dict))")
+            Log.info("Result: \(String(describing: dict)); \(String(describing: response))")
             callback(response, dict)
         }
         
