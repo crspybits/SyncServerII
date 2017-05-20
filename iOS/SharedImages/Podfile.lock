@@ -14,7 +14,7 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - FirebaseAnalytics (3.8.0):
+  - FirebaseAnalytics (3.9.0):
     - FirebaseCore (~> 3.6)
     - FirebaseInstanceID (~> 1.0)
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
@@ -45,25 +45,23 @@ PODS:
   - GoogleToolboxForMac/NSString+URLArguments (2.1.1)
   - GTMOAuth2 (1.1.4):
     - GTMSessionFetcher (~> 1.1)
-  - GTMSessionFetcher (1.1.9):
-    - GTMSessionFetcher/Full (= 1.1.9)
-  - GTMSessionFetcher/Core (1.1.9)
-  - GTMSessionFetcher/Full (1.1.9):
-    - GTMSessionFetcher/Core (= 1.1.9)
+  - GTMSessionFetcher (1.1.10):
+    - GTMSessionFetcher/Full (= 1.1.10)
+  - GTMSessionFetcher/Core (1.1.10)
+  - GTMSessionFetcher/Full (1.1.10):
+    - GTMSessionFetcher/Core (= 1.1.10)
   - HPTextViewTapGestureRecognizer (0.1)
   - Reachability (3.2)
-  - Reflection (0.14.3)
   - SevenSwitch (2.1.0)
-  - SMCoreLib (0.0.27):
+  - SMCoreLib (0.0.28):
     - AFNetworking
     - HPTextViewTapGestureRecognizer (~> 0.1)
     - Reachability
     - SwiftyBeaver
-  - SwiftyBeaver (1.2.0)
+  - SwiftyBeaver (1.2.2)
   - SyncServer (0.1.0):
     - AFNetworking
     - Gloss
-    - Reflection
     - SMCoreLib
 
 DEPENDENCIES:
@@ -78,7 +76,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  FirebaseAnalytics: 920e46455f27b0a52a80907a6d9b73ee4bd1c635
+  FirebaseAnalytics: e5fe8486efc01bec33f6bf82e2fa9fce4b124052
   FirebaseCore: 9691ee2ade70c098d7cf92440f4303f16d83ca75
   FirebaseInstanceID: b9eedd6846fb5e1f0f7279e1deaa7a7e4cf8392e
   Gloss: 4e036074610fdb993abcb958ebcd7332588e2333
@@ -86,14 +84,13 @@ SPEC CHECKSUMS:
   GoogleSignIn: d7ad83f13480e1f30453471d00d19b5293ac46af
   GoogleToolboxForMac: 8e329f1b599f2512c6b10676d45736bcc2cbbeb0
   GTMOAuth2: 7fc9c10f5c745f4d9850419ea88889fe3baa6b7d
-  GTMSessionFetcher: 5c046c76a1f859bc9c187e918f18e4fc7bb57b5e
+  GTMSessionFetcher: 30d874b96d0d76028f61fbd122801e3f030d47db
   HPTextViewTapGestureRecognizer: 6a73fd09f858e49a2743c3a338dc5c0791b0fae0
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  Reflection: 93327e50981227ac33c18274fcbaed33b1127811
   SevenSwitch: 5543327829b7bec5b29b73bad5f3cc3f92c1736d
-  SMCoreLib: 8319b7a5827a09ed349cba5369c3f1a639848c53
-  SwiftyBeaver: ee865c50ec462ff142f232145057818491c2b344
-  SyncServer: ca7d76d87cdc430da5c47138ab66519bca456b4d
+  SMCoreLib: ac8fb3acca61a9f373f253c9d568f6e26b6d3938
+  SwiftyBeaver: 90a39e3dc5136b7285f2e4c870b107e3933b8b84
+  SyncServer: 173c3628b67e3f07597504b7c02a399340ca7460
 
 PODFILE CHECKSUM: f0a6705ab7e42e53fec3bb00b04ba7ddfee62fee
 
