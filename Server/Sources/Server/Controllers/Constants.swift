@@ -40,6 +40,12 @@ class Constants {
     var googleClientId:String = ""
     var googleClientSecret:String = ""
     var maxNumberDeviceUUIDPerUser:Int?
+    
+    // The sslConfigPassword needs to be the "export password:" that comes up in this procedure: https://developer.ibm.com/swift/2016/09/22/securing-kitura-part-1-enabling-ssltls-on-your-swift-server/
+    var sslConfigPassword:String = ""
+    
+    // Only used when running project directly from within Xcode.
+    var xCodeCertPfxFullFilePath:String? = ""
 
     static var session:Constants!
 
@@ -88,8 +94,11 @@ class Constants {
         db.user = try! config.getString(varName: "mySQL.user")
         db.password = try! config.getString(varName: "mySQL.password")
         db.database = try! config.getString(varName: "mySQL.database")
-                
+        
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
         print("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")
+        
+        sslConfigPassword = try! config.getString(varName: "sslConfigPassword")
+        xCodeCertPfxFullFilePath = try? config.getString(varName: "xCodeCertPfxFullFilePath")
     }
 }

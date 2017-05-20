@@ -15,13 +15,10 @@ protocol ServerNetworkingAuthentication : class {
     func headerAuthentication(forServerNetworking: ServerNetworking) -> [String:String]?
 }
 
-class ServerNetworking {
+class ServerNetworking : NSObject {
     //fileprivate let manager: AFHTTPSessionManager!
     static let session = ServerNetworking()
     weak var authenticationDelegate:ServerNetworkingAuthentication?
-    
-    fileprivate init() {
-    }
     
     func appLaunchSetup() {
         // To get "spinner" in status bar when ever we have network activity.
@@ -60,8 +57,8 @@ class ServerNetworking {
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
         
         // COULD DO: Use a delegate here to track upload progress.
-        let session = URLSession(configuration: sessionConfiguration)
-    
+        let session = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
+        
         // COULD DO: Data uploading task. We could use NSURLSessionUploadTask instead of NSURLSessionDataTask if we needed to support uploads in the background
         
         var request = URLRequest(url: serverURL)
@@ -96,7 +93,7 @@ class ServerNetworking {
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
         
-        let session = URLSession(configuration: sessionConfiguration)
+        let session = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
 
         var request = URLRequest(url: serverURL)
         request.httpMethod = method.rawValue.uppercased()
@@ -154,8 +151,8 @@ class ServerNetworking {
         Log.msg("httpAdditionalHeaders: \(String(describing: sessionConfiguration.httpAdditionalHeaders))")
         
         // If needed, use a delegate here to track upload progress.
-        let session = URLSession(configuration: sessionConfiguration)
-    
+        let session = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
+        
         // Data uploading task. We could use NSURLSessionUploadTask instead of NSURLSessionDataTask if we needed to support uploads in the background
         
         var request = URLRequest(url: serverURL)
@@ -217,5 +214,12 @@ extension ServerNetworking /* Extras */ {
         TimedCallback.withDuration(duration) {
             completion()
         }
+    }
+}
+
+extension ServerNetworking : URLSessionDelegate {
+    // TODO: *3* To allow sign-signed SSL certificates-- remove this in production.
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void) {
+        completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
     }
 }
