@@ -109,8 +109,6 @@ private class RequestHandler : CredsDelegate {
     private func endWith(clientResponse:EndWithResponse) {
         var jsonString:String?
         
-        Log.info(message: "REQUEST \(request.urlURL.path) COMPLETED")
-
         switch clientResponse {
         case .json(let jsonDict):
             
@@ -133,13 +131,17 @@ private class RequestHandler : CredsDelegate {
             }
             
             if data != nil {
+                Log.info(message: "REQUEST \(request.urlURL.path): STARTING DATA SEND")
                 self.response.send(data: data!)
+                Log.info(message: "REQUEST \(request.urlURL.path): DONE DATA SEND")
             }
         }
+        
+        Log.info(message: "REQUEST \(request.urlURL.path): COMPLETED")
 
         do {
             try self.response.end()
-            Log.info(message: "REQUEST \(request.urlURL.path) STATUS CODE: \(response.statusCode)")
+            Log.info(message: "REQUEST \(request.urlURL.path): STATUS CODE: \(response.statusCode)")
         } catch (let error) {
             Log.error(message: "Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
         }
