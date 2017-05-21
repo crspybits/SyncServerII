@@ -708,6 +708,11 @@ extension ServerAPI {
     func retryIfError(_ error:Error?, statusCode:Int?, numberOfAttempts:inout Int, request:@escaping ()->(), completion:()->()) {
     
         let errorCheck = checkForError(statusCode:statusCode, error:error)
+        
+        if errorCheck != nil {
+            Log.msg("Error: \(errorCheck!)")
+        }
+        
         if errorCheck == nil {
             completion()
         }

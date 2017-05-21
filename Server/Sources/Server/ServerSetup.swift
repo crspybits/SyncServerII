@@ -131,13 +131,11 @@ private class RequestHandler : CredsDelegate {
             }
             
             if data != nil {
-                Log.info(message: "REQUEST \(request.urlURL.path): STARTING DATA SEND")
                 self.response.send(data: data!)
-                Log.info(message: "REQUEST \(request.urlURL.path): DONE DATA SEND")
             }
         }
         
-        Log.info(message: "REQUEST \(request.urlURL.path): COMPLETED")
+        Log.info(message: "REQUEST \(request.urlURL.path): ABOUT TO END ...")
 
         do {
             try self.response.end()
@@ -145,6 +143,8 @@ private class RequestHandler : CredsDelegate {
         } catch (let error) {
             Log.error(message: "Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
         }
+        
+        Log.info(message: "REQUEST \(request.urlURL.path): COMPLETED")
     }
     
     func setJsonResponseHeaders() {
