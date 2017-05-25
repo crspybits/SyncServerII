@@ -15,6 +15,11 @@ import Credentials
 import CredentialsGoogle
 import Foundation
 
+/* I'm getting the following error, after having started using SSL and self-signing certificates:
+[2017-05-20T21:26:32.218-06:00] [ERROR] [IncomingSocketHandler.swift:148 handleRead()] Read from socket (file descriptor 15) failed. Error = Error code: -9806(0x-264E), ERROR: SSLRead, code: -9806, reason: errSSLClosedAbort.
+See also: https://github.com/IBM-Swift/Kitura-net/issues/196
+*/
+
 class ServerSetup {
     // Just a guess. Don't know what's suitable for length. See https://github.com/IBM-Swift/Kitura/issues/917
     private static let secretStringLength = 256

@@ -218,8 +218,9 @@ extension ServerNetworking /* Extras */ {
 }
 
 extension ServerNetworking : URLSessionDelegate {
-    // TODO: *3* To allow sign-signed SSL certificates-- remove this in production.
+    // TODO: *3* To allow self-signed SSL certificates-- remove this in production.
+    /*
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void) {
         completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
-    }
+    }*/
 }

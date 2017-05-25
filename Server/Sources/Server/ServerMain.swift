@@ -47,22 +47,16 @@ public class ServerMain {
         }
         
 #if os(Linux)
-        let myCertFile = "cert.pem"
-        let myKeyFile = "key.pem"
-                 
-        let sslConfig = SSLConfig(withCACertificateDirectory: nil,
-                                     usingCertificateFile: myCertFile, 
-                                     withKeyFile: myKeyFile, 
-                                     usingSelfSignedCerts: true)
+        let sslConfig = SSLConfig(
+                withCACertificateDirectory: Constants.session.ssl.caCertificateDirectory,
+                usingCertificateFile: Constants.session.ssl.certFile,
+                withKeyFile: Constants.session.ssl.keyFile,
+                usingSelfSignedCerts: Constants.session.ssl.selfSigning)
 #else // on macOS
-        var myCertKeyFile = "cert.pfx"
-        if Constants.session.xCodeCertPfxFullFilePath != nil {
-            myCertKeyFile = Constants.session.xCodeCertPfxFullFilePath!
-        }
-    
-        let sslConfig = SSLConfig(withChainFilePath: myCertKeyFile,
-                                     withPassword: Constants.session.sslConfigPassword,
-                                     usingSelfSignedCerts: true)
+        let sslConfig = SSLConfig(
+                withChainFilePath: Constants.session.ssl.certPfxFile,
+                withPassword: Constants.session.ssl.configPassword,
+                usingSelfSignedCerts: Constants.session.ssl.selfSigning)
 #endif
 
         let serverRoutes = CreateRoutes()

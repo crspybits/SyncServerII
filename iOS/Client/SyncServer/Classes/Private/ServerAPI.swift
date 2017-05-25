@@ -490,6 +490,7 @@ class ServerAPI {
     case getUploadDeletionResponseConversionError
     }
     
+    // TODO: *3* It would be *much* faster, at least in some testing situations, to batch together a group of deletions for upload-- instead of uploading them one by one.
     func uploadDeletion(file: FileToDelete, serverMasterVersion:MasterVersionInt!, completion:((UploadDeletionResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadDeletion
                 

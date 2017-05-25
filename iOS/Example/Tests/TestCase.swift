@@ -256,7 +256,7 @@ class TestCase: XCTestCase {
         waitForExpectations(timeout: 10.0, handler: nil)
     }
     
-    func removeAllServerFilesInFileIndex() {
+    func removeAllServerFilesInFileIndex(actualDeletion:Bool=true) {
         let masterVersion = getMasterVersion()
         
         var filesToDelete:[FileInfo]?
@@ -270,7 +270,8 @@ class TestCase: XCTestCase {
             
             let fileIndexObj = filesToDelete![indexToRemove]
             var fileToDelete = ServerAPI.FileToDelete(fileUUID: fileIndexObj.fileUUID, fileVersion: fileIndexObj.fileVersion)
-            fileToDelete.actualDeletion = true
+            
+            fileToDelete.actualDeletion = actualDeletion
             
             ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (result, error) in
                 XCTAssert(error == nil)
@@ -291,7 +292,7 @@ class TestCase: XCTestCase {
             recursiveRemoval(indexToRemove: 0)
         }
         
-        waitForExpectations(timeout: 30.0, handler: nil)
+        waitForExpectations(timeout: 120.0, handler: nil)
     }
     
     func filesHaveSameContents(url1: URL, url2: URL) -> Bool {
@@ -522,7 +523,7 @@ class TestCase: XCTestCase {
         return (url as URL, attr)
     }
     
-    func resetFileMetaData() {
+    func resetFileMetaData(removeServerFiles:Bool=true, actualDeletion:Bool=true) {
         CoreData.sessionNamed(Constants.coreDataName).performAndWait {
             DownloadFileTracker.removeAll()
             DirectoryEntry.removeAll()
@@ -538,7 +539,9 @@ class TestCase: XCTestCase {
             }
         }
 
-        removeAllServerFilesInFileIndex()
+        if removeServerFiles {
+            removeAllServerFilesInFileIndex(actualDeletion:actualDeletion)
+        }
     }
 }
 
