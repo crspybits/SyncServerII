@@ -543,6 +543,36 @@ class TestCase: XCTestCase {
             removeAllServerFilesInFileIndex(actualDeletion:actualDeletion)
         }
     }
+    
+    func doASingleDownloadUsingSync(fileName: String, fileExtension:String, mimeType:String) {
+        let initialDeviceUUID = self.deviceUUID
+
+        // First upload a file.
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
+        
+        guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: mimeType, fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        let expectation = self.expectation(description: "test1")
+        self.deviceUUID = Foundation.UUID()
+        
+        shouldSaveDownloads = { downloads in
+            expectation.fulfill()
+        }
+        
+        // Next, initiate the download using .sync()
+        SyncServer.session.sync()
+        
+        XCTAssert(initialDeviceUUID != ServerAPI.session.delegate.deviceUUID(forServerAPI: ServerAPI.session))
+        
+        waitForExpectations(timeout: 60.0, handler: nil)
+    }
 }
 
 extension TestCase : ServerNetworkingAuthentication {

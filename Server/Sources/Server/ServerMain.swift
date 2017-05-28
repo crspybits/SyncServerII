@@ -18,7 +18,8 @@ public class ServerMain {
     // If server fails to start, try looking for a process using the port:
     //      sudo lsof -i -n -P | grep TCP | grep 8181
     public static let port = 8181
-    
+    //public static let port = 443
+
     public enum ServerStartup {
         case blocking // doesn't return from startup (normal case)
         case nonBlocking // returns from startup (for XCTests)

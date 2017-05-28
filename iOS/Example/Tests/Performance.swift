@@ -21,15 +21,15 @@ class Performance: TestCase {
         super.tearDown()
     }
     
-    func downloadNFiles(_ N:UInt) {
+    func downloadNFiles(_ N:UInt, fileName: String, fileExtension:String, mimeType:String) {
         // First upload N files.
         let masterVersion = getMasterVersion()
-        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "Cat", withExtension: "jpg")!
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
         
         for _ in 1...N {
             let fileUUID = UUID().uuidString
 
-            guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: "image/jpeg", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: mimeType, fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
                 return
             }
         }
@@ -50,8 +50,28 @@ class Performance: TestCase {
         waitForExpectations(timeout: Double(N) * 20.0, handler: nil)
     }
     
-    func test10Downloads() {
-        downloadNFiles(10)
+    func test10SmallTextFileDownloads() {
+        downloadNFiles(10, fileName: "UploadMe", fileExtension:"txt", mimeType: "text/plain")
+    }
+ 
+    // 5/27/17; I've been having problems with large-ish downloads. E.g., See https://stackoverflow.com/questions/44224048/timeout-issue-when-downloading-from-aws-ec2-to-ios-app
+    func test10SmallerImageFileDownloads() {
+        downloadNFiles(10, fileName: "SmallerCat", fileExtension:"jpg", mimeType:"image/jpeg")
+    }
+    
+    func test10LargeImageFileDownloads() {
+        downloadNFiles(10, fileName: "Cat", fileExtension:"jpg", mimeType:"image/jpeg")
+    }
+    
+    func interspersedDownloadsOfSmallTextFile(_ N:Int) {
+        for _ in 1...N {
+            doASingleDownloadUsingSync(fileName: "UploadMe", fileExtension:"txt", mimeType: "text/plain")
+        }
+    }
+    
+    // TODO: *0* Change this to not allow retries at the ServerAPI or networking level. i.e., so that it fails if a retry was to be required.
+    func test10SmallTextFileDownloadsInterspersed() {
+        interspersedDownloadsOfSmallTextFile(10)
     }
     
     // TODO: *0* Delete 50 files in the same done uploads.
