@@ -74,5 +74,41 @@ class Performance: TestCase {
         interspersedDownloadsOfSmallTextFile(10)
     }
     
+    func deleteNFiles(_ N:UInt, fileName: String, fileExtension:String, mimeType:String) {
+        // First upload N files.
+        let masterVersion = getMasterVersion()
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
+        
+        var fileUUIDs = [String]()
+        
+        for _ in 1...N {
+            let fileUUID = UUID().uuidString
+            fileUUIDs.append(fileUUID)
+            
+            guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: mimeType, fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+                return
+            }
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: Int64(N))
+        
+        for fileIndex in 0...N-1 {
+            let fileUUID = fileUUIDs[Int(fileIndex)]
+
+            let fileToDelete = ServerAPI.FileToDelete(fileUUID: fileUUID, fileVersion: 0)
+            uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion+1)
+        }
+        
+        doneUploads(masterVersion: masterVersion+1, expectedNumberDeletions: N)
+    }
+    
+    func test10Deletions() {
+        deleteNFiles(10, fileName: "UploadMe", fileExtension:"txt", mimeType: "text/plain")
+    }
+    
+    func test50Deletions() {
+        deleteNFiles(50, fileName: "UploadMe", fileExtension:"txt", mimeType: "text/plain")
+    }
+    
     // TODO: *0* Delete 50 files in the same done uploads.
 }

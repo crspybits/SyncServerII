@@ -8,6 +8,7 @@
 
 import Foundation
 import PerfectLib
+import Dispatch
 
 extension FileController {
     private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?)? {
@@ -99,6 +100,10 @@ extension FileController {
         
         // 3) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
         let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        
+        // 5/28/17; I just got an error on this: 
+        // [ERR] Number rows removed from Upload was 10 but should have been Optional(9)!
+        // How could this happen?
         
         switch params.repos.upload.remove(key: filesForUserDevice) {
         case .removed(let numberRows):
@@ -225,8 +230,10 @@ extension FileController {
         let uploadDeletion = uploadDeletions![0]
         let cloudFileName = uploadDeletion.cloudFileName(deviceUUID: uploadDeletion.deviceUUID!)
 
-        googleCreds.deleteFile(cloudFolderName: uploadDeletion.cloudFolderName!, cloudFileName: cloudFileName, mimeType: uploadDeletion.mimeType!) { error in
+        Log.info(message: "Deleting file: \(cloudFileName)")
         
+        googleCreds.deleteFile(cloudFolderName: uploadDeletion.cloudFolderName!, cloudFileName: cloudFileName, mimeType: uploadDeletion.mimeType!) { error in
+
             let tail = (uploadDeletions!.count > 0) ?
                 Array(uploadDeletions![1..<uploadDeletions!.count]) : nil
             var numberAdditionalErrors:Int32 = 0
@@ -238,7 +245,10 @@ extension FileController {
                 numberAdditionalErrors = 1
             }
             
-            self.finishDoneUploads(uploadDeletions: tail, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+            // 5/29/17; I was having apparent problems with the stack growing too big if I do this in a purely recursive manner. Using the DispatchQueue is my effort to work around this.
+            DispatchQueue.global().sync() {
+                self.finishDoneUploads(uploadDeletions: tail, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+            }
         }
     }
 }

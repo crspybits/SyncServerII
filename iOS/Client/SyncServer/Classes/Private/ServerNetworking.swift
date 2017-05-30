@@ -12,13 +12,31 @@ import SMCoreLib
 
 protocol ServerNetworkingAuthentication : class {
     // Key/value pairs to be added to the outgoing HTTP header for authentication
-    func headerAuthentication(forServerNetworking: ServerNetworking) -> [String:String]?
+    func headerAuthentication(forServerNetworking: Any?) -> [String:String]?
+}
+
+enum DownloadFromError : Error {
+case couldNotGetHTTPURLResponse
+case didNotGetURL
+case couldNotMoveFile
+case couldNotCreateNewFile
 }
 
 class ServerNetworking : NSObject {
     //fileprivate let manager: AFHTTPSessionManager!
     static let session = ServerNetworking()
-    weak var authenticationDelegate:ServerNetworkingAuthentication?
+    
+    private weak var _authenticationDelegate:ServerNetworkingAuthentication?
+
+    var authenticationDelegate:ServerNetworkingAuthentication? {
+        get {
+            return _authenticationDelegate
+        }
+        set {
+            ServerNetworkingDownload.session.authenticationDelegate = newValue
+            _authenticationDelegate = newValue
+        }
+    }
     
     func appLaunchSetup() {
         // To get "spinner" in status bar when ever we have network activity.
@@ -32,10 +50,10 @@ class ServerNetworking : NSObject {
     case noNetworkError
     }
     
-    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL,
+    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL, timeoutIntervalForRequest:TimeInterval? = nil,
         completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
         
-        sendRequestTo(serverURL, method: method) { (serverResponse, statusCode, error) in
+        sendRequestTo(serverURL, method: method, timeoutIntervalForRequest:timeoutIntervalForRequest) { (serverResponse, statusCode, error) in
             completion?(serverResponse, statusCode, error)
         }
     }
@@ -76,70 +94,27 @@ class ServerNetworking : NSObject {
         uploadTask.resume()
     }
     
-    enum DownloadFromError : Error {
-    case couldNotGetHTTPURLResponse
-    case didNotGetURL
-    case couldNotMoveFile
-    case couldNotCreateNewFile
-    }
-    
-    func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?)->())?) {
+    public func downloadFrom(_ serverURL: URL, method: ServerHTTPMethod, completion:((SMRelativeLocalURL?, _ serverResponse:HTTPURLResponse?, _ statusCode:Int?, _ error:Error?)->())?) {
 
         guard Network.session().connected() else {
             completion?(nil, nil, nil, ServerNetworkingError.noNetworkError)
             return
         }
         
-        let sessionConfiguration = URLSessionConfiguration.default
-        sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
-        
-        let session = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
-
-        var request = URLRequest(url: serverURL)
-        request.httpMethod = method.rawValue.uppercased()
-        
-        Log.msg("downloadFrom: serverURL: \(serverURL)")
-        
-        let downloadTask:URLSessionDownloadTask = session.downloadTask(with: request) { (url, urlResponse, error) in
+        ServerNetworkingDownload.session.downloadFrom(serverURL, method: method) { (url, urlResponse, status, error) in
         
             if error == nil {
-                // With an HTTP or HTTPS request, we get HTTPURLResponse back. See https://developer.apple.com/reference/foundation/urlsession/1407613-datatask
-                guard let response = urlResponse as? HTTPURLResponse else {
-                    completion?(nil, nil, nil, DownloadFromError.couldNotGetHTTPURLResponse)
-                    return
-                }
-                
                 guard url != nil else {
-                    completion?(nil, nil, response.statusCode, DownloadFromError.didNotGetURL)
+                    completion?(nil, nil, urlResponse?.statusCode, DownloadFromError.didNotGetURL)
                     return
                 }
-                
-                // Transfer the temporary file to a more permanent location.
-                if let newTempURL = FilesMisc.createTemporaryRelativeFile() {
-                    do {
-                        _ = try FileManager.default.replaceItemAt(newTempURL as URL, withItemAt: url!)
-                    }
-                    catch (let error) {
-                        Log.error("Could not move file: \(error)")
-                        completion?(nil, nil, response.statusCode, DownloadFromError.couldNotMoveFile)
-                        return
-                    }
-                    
-                    completion?(newTempURL, response, response.statusCode, nil)
-                }
-                else {
-                    completion?(nil, nil, response.statusCode, DownloadFromError.couldNotCreateNewFile)
-                }
             }
-            else {
-                completion?(nil, nil, nil, error)
-            }
-        }
 
-        downloadTask.resume()
+            completion?(url, urlResponse, urlResponse?.statusCode, error)
+        }
     }
     
-    private func sendRequestTo(_ serverURL: URL, method: ServerHTTPMethod, dataToUpload:Data? = nil, completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
+    private func sendRequestTo(_ serverURL: URL, method: ServerHTTPMethod, dataToUpload:Data? = nil, timeoutIntervalForRequest:TimeInterval? = nil, completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
     
         guard Network.session().connected() else {
             completion?(nil, nil, ServerNetworkingError.noNetworkError)
@@ -147,6 +122,10 @@ class ServerNetworking : NSObject {
         }
     
         let sessionConfiguration = URLSessionConfiguration.default
+        if timeoutIntervalForRequest != nil {
+            sessionConfiguration.timeoutIntervalForRequest = timeoutIntervalForRequest!
+        }
+        
         sessionConfiguration.httpAdditionalHeaders = self.authenticationDelegate?.headerAuthentication(forServerNetworking: self)
         Log.msg("httpAdditionalHeaders: \(String(describing: sessionConfiguration.httpAdditionalHeaders))")
         
@@ -218,9 +197,9 @@ extension ServerNetworking /* Extras */ {
 }
 
 extension ServerNetworking : URLSessionDelegate {
-    // TODO: *3* To allow self-signed SSL certificates-- remove this in production.
-    /*
+#if SELF_SIGNED_SSL
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void) {
         completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
-    }*/
+    }
+#endif
 }

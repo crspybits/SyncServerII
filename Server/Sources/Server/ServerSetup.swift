@@ -80,6 +80,8 @@ private class RequestHandler : CredsDelegate {
     private var currentSignedInUser:User?
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
+    private static var numberCreated = 0
+    private static var numberDeleted = 0
     
     init(request:RouterRequest, response:RouterResponse, endpoint:ServerEndpoint? = nil) {
         self.request = request
@@ -91,6 +93,14 @@ private class RequestHandler : CredsDelegate {
             self.authenticationLevel = endpoint!.authenticationLevel
         }
         self.endpoint = endpoint
+        
+        RequestHandler.numberCreated += 1
+        Log.info(message: "RequestHandler.init: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
+    }
+    
+    deinit {
+        RequestHandler.numberDeleted += 1
+        Log.info(message: "RequestHandler.deinit: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
     }
 
     public func failWithError(message:String, statusCode:HTTPStatusCode = .internalServerError) {

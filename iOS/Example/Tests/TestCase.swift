@@ -236,15 +236,22 @@ class TestCase: XCTestCase {
         }
     }
     
-    func doneUploads(masterVersion: MasterVersionInt, expectedNumberUploads:Int64) {
+    func doneUploads(masterVersion: MasterVersionInt, expectedNumberUploads:Int64=0, expectedNumberDeletions:UInt=0) {
+    
+        let expectedNumber = expectedNumberUploads + Int64(expectedNumberDeletions)
+        if expectedNumber <= 0 {
+            XCTFail()
+            return
+        }
+        
         let expectation = self.expectation(description: "doneUploads")
 
-        ServerAPI.session.doneUploads(serverMasterVersion: masterVersion) {
+        ServerAPI.session.doneUploads(serverMasterVersion: masterVersion, numberOfDeletions: expectedNumberDeletions) {
             doneUploadsResult, error in
             
             XCTAssert(error == nil)
             if case .success(let numberUploads) = doneUploadsResult! {
-                XCTAssert(numberUploads == expectedNumberUploads)
+                XCTAssert(numberUploads == expectedNumber, "Didn't get the number of uploads \(numberUploads) we expected \(expectedNumber)")
             }
             else {
                 XCTFail()
@@ -253,7 +260,7 @@ class TestCase: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectations(timeout: 10.0, handler: nil)
+        waitForExpectations(timeout: Double(expectedNumber)*10.0, handler: nil)
     }
     
     func removeAllServerFilesInFileIndex(actualDeletion:Bool=true) {
@@ -271,6 +278,7 @@ class TestCase: XCTestCase {
             let fileIndexObj = filesToDelete![indexToRemove]
             var fileToDelete = ServerAPI.FileToDelete(fileUUID: fileIndexObj.fileUUID, fileVersion: fileIndexObj.fileVersion)
             
+            
             fileToDelete.actualDeletion = actualDeletion
             
             ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (result, error) in
@@ -284,7 +292,10 @@ class TestCase: XCTestCase {
             }
         }
         
+        var numberDeletions:Int!
+        
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
+            numberDeletions = fileIndex?.count
             XCTAssert(error == nil)
             XCTAssert(masterVersion! >= 0)
             
@@ -293,6 +304,10 @@ class TestCase: XCTestCase {
         }
         
         waitForExpectations(timeout: 120.0, handler: nil)
+        
+        if numberDeletions! > 0 {
+            doneUploads(masterVersion: masterVersion, expectedNumberDeletions: UInt(numberDeletions!))
+        }
     }
     
     func filesHaveSameContents(url1: URL, url2: URL) -> Bool {
@@ -576,7 +591,7 @@ class TestCase: XCTestCase {
 }
 
 extension TestCase : ServerNetworkingAuthentication {
-    func headerAuthentication(forServerNetworking: ServerNetworking) -> [String:String]? {
+    func headerAuthentication(forServerNetworking: Any?) -> [String:String]? {
         var result = [String:String]()
         for (key, value) in self.authTokens {
             result[key] = value

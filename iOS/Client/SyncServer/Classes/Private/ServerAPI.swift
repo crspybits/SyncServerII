@@ -289,8 +289,17 @@ class ServerAPI {
     case serverMasterVersionUpdate(Int64)
     }
     
-    func doneUploads(serverMasterVersion:MasterVersionInt!, completion:((DoneUploadsResult?, Error?)->(Void))?) {
+    // I'm providing a numberOfDeletions parameter here because the duration of these requests varies, if we're doing deletions, based on the number of items we're deleting.
+    func doneUploads(serverMasterVersion:MasterVersionInt!, numberOfDeletions:UInt = 0, completion:((DoneUploadsResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.doneUploads
+        
+        // See https://developer.apple.com/reference/foundation/nsurlsessionconfiguration/1408259-timeoutintervalforrequest
+        let defaultTimeout = 60.0
+        
+        var timeoutIntervalForRequest:TimeInterval?
+        if numberOfDeletions > 0 {
+            timeoutIntervalForRequest = defaultTimeout + Double(numberOfDeletions) * 5.0
+        }
         
         var params = [String : Any]()
         params[DoneUploadsRequest.masterVersionKey] = serverMasterVersion
@@ -309,7 +318,7 @@ class ServerAPI {
         let parameters = doneUploadsRequest.urlParameters()!
         let url = makeURL(forEndpoint: endpoint, parameters: parameters)
 
-        sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
+        sendRequestUsing(method: endpoint.method, toURL: url, timeoutIntervalForRequest:timeoutIntervalForRequest) { (response,  httpStatus, error) in
         
             let resultError = self.checkForError(statusCode: httpStatus, error: error)
 
@@ -600,7 +609,7 @@ let maximumNumberRetries = 3
 
 // MARK: Wrapper over ServerNetworking calls to provide for error retries and credentials refresh.
 extension ServerAPI {
-    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL, retryIfError retry:Bool=true,
+    func sendRequestUsing(method: ServerHTTPMethod, toURL serverURL: URL, timeoutIntervalForRequest:TimeInterval? = nil, retryIfError retry:Bool=true,
         completion:((_ serverResponse:[String:Any]?, _ statusCode:Int?, _ error:Error?)->())?) {
         
         var request:(()->())!
@@ -618,7 +627,7 @@ extension ServerAPI {
         }
         
         request = {
-            ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL) { (serverResponse, statusCode, error) in
+            ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL, timeoutIntervalForRequest:timeoutIntervalForRequest) { (serverResponse, statusCode, error) in
                 if statusCode == self.httpUnauthorizedError && self.creds != nil {
                     self.creds!.refreshCredentials() { error in
                         // Only try refresh once!
@@ -745,7 +754,7 @@ extension ServerAPI {
 }
 
 extension ServerAPI : ServerNetworkingAuthentication {
-    func headerAuthentication(forServerNetworking: ServerNetworking) -> [String:String]? {
+    func headerAuthentication(forServerNetworking: Any?) -> [String:String]? {
         var result = [String:String]()
         if self.authTokens != nil {
             for (key, value) in self.authTokens! {
