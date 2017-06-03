@@ -61,7 +61,7 @@ public class ServerMain {
 #endif
 
         let serverRoutes = CreateRoutes()
-        
+
         Kitura.addHTTPServer(onPort: self.port, with: serverRoutes.getRoutes(), withSSL: sslConfig)
         //Kitura.addHTTPServer(onPort: self.port, with: serverRoutes.getRoutes())
         

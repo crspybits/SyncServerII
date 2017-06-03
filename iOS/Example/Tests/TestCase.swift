@@ -305,7 +305,8 @@ class TestCase: XCTestCase {
         
         waitForExpectations(timeout: 120.0, handler: nil)
         
-        if numberDeletions! > 0 {
+        // actual deletion removes actual rows from the file index-- in which case we don't need the done uploads to wrap things up.
+        if numberDeletions! > 0 && !actualDeletion {
             doneUploads(masterVersion: masterVersion, expectedNumberDeletions: UInt(numberDeletions!))
         }
     }

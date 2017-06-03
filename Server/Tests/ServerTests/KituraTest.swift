@@ -105,6 +105,8 @@ extension KituraTest {
         }
         
         allHeaders["Content-Type"] = "text/plain"
+        
+        // .disableSSLVerification is used here because we'll likely be using a self-signed SSL certificate.
         let options: [ClientRequest.Options] =
             [.disableSSLVerification, .schema("https://"), .method(route.method.rawValue), .hostname("localhost"),
                 .port(Int16(ServerMain.port)), .path(path), .headers(allHeaders)]

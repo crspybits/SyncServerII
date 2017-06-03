@@ -87,6 +87,9 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         }
         
         // Simulate another device deleting the files.
+        let currDeviceUUID = deviceUUID
+        deviceUUID = Foundation.UUID()
+        
         let fileToDelete1 = ServerAPI.FileToDelete(fileUUID: file1.fileUUID, fileVersion: file1.fileVersion)
         uploadDeletion(fileToDelete: fileToDelete1, masterVersion: masterVersion)
 
@@ -97,6 +100,8 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         
         // Now, see if `SyncManager.session.start` finds the download deletions...
         
+        deviceUUID = currDeviceUUID
+
         var calledShouldDoDeletions = false
         
         shouldDoDeletions = { (downloadDeletions:[SyncAttributes]) in
@@ -126,7 +131,7 @@ class Client_SyncManager_DownloadDeletion: TestCase {
         }
         
         SyncManager.session.start { (error) in
-            XCTAssert(eventsOccurred == 1)
+            XCTAssert(eventsOccurred == 1, "eventsOccurred was \(eventsOccurred)")
             XCTAssert(calledShouldDoDeletions)
             
             expectation2.fulfill()
