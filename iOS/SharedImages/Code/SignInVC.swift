@@ -97,7 +97,7 @@ class SignInVC : SMGoogleUserSignInViewController {
         var alert:UIAlertController
         
         if SignIn.session.googleSignIn.userIsSignedIn {
-            alert = UIAlertController(title: "Share your data with a Google user?", message: nil, preferredStyle: .actionSheet)
+            alert = UIAlertController(title: "Share your images with a Google user?", message: nil, preferredStyle: .actionSheet)
 
             func addAlertAction(_ permission:SharingPermission) {
                 alert.addAction(UIAlertAction(title: permission.userFriendlyText(), style: .default){alert in

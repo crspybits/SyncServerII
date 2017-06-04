@@ -71,6 +71,6 @@ class ServerAPI_DownloadFile: TestCase {
             expectation2.fulfill()
         }
         
-        waitForExpectations(timeout: 20.0, handler: nil)
+        waitForExpectations(timeout: 40.0, handler: nil)
     }
 }

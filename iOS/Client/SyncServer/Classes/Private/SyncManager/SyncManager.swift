@@ -264,6 +264,7 @@ class SyncManager {
                         _ = fileUploads.map {uft in
                             guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
                                 assert(false)
+                                return
                             }
 
                             uploadedEntry.fileVersion = uft.fileVersion
@@ -284,6 +285,7 @@ class SyncManager {
                         _ = uploadDeletions.map { uft in
                             guard let uploadedEntry = DirectoryEntry.fetchObjectWithUUID(uuid: uft.fileUUID) else {
                                 assert(false)
+                                return
                             }
 
                             uploadedEntry.deletedOnServer = true

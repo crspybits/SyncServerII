@@ -19,6 +19,7 @@ fi
 swift "${CMD}" -Xswiftc -DDEBUG -Xswiftc -DSERVER --build-path "${buildLocation}"
 
 if [ $? == 0 ] && [ "${CMD}" == "build" ] ; then
+	# ( ./run.sh > ~/output.log 2>&1 & ) 
 	# ${buildLocation}/debug/Main ../../Private/Server/SharedImagesServer.json
 	${buildLocation}/debug/Main ../../Private/Server/Server.json
 fi

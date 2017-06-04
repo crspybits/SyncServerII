@@ -12,6 +12,10 @@ import LoggerAPI
 import PerfectLib
 import Kitura
 
+// See note in Package.swift
+//import SwiftMetrics
+//import SwiftMetricsDash
+
 // If given, the single command line argument to the server is expected to be a full path to the server config file.
 
 public class ServerMain {
@@ -29,6 +33,14 @@ public class ServerMain {
         Log.logger = HeliumLogger()
         
         Log.info("Launching server in \(type) mode with \(CommandLine.arguments.count) command line arguments.")
+        
+        // See note in Package.swift
+        // And: http://www.kitura.io/en/resources/tutorials/swiftmetrics.html
+        // https://developer.ibm.com/swift/2017/03/21/using-swiftmetrics-secure-kitura-server/
+        // Enable SwiftMetrics Monitoring
+        //let sm = try SwiftMetrics()
+        // Pass SwiftMetrics to the dashboard for visualising
+        //let smd = try SwiftMetricsDash(swiftMetricsInstance : sm)
         
         if type == .blocking {
             // When we launch the server from within Xcode (or just with no explicit arguments), we have 1 "argument" (CommandLine.arguments[0]).
@@ -59,6 +71,13 @@ public class ServerMain {
                 withPassword: Constants.session.ssl.configPassword,
                 usingSelfSignedCerts: Constants.session.ssl.selfSigning)
 #endif
+
+        var signingType = "CA Signed"
+        if Constants.session.ssl.selfSigning {
+            signingType = "Self-Signed"
+        }
+
+        Log.info("Using \(signingType) SSL Certificate")
 
         let serverRoutes = CreateRoutes()
 

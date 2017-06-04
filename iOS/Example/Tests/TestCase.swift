@@ -190,7 +190,7 @@ class TestCase: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectations(timeout: 40.0, handler: nil)
+        waitForExpectations(timeout: 60.0, handler: nil)
         
         if fileSize == nil {
             return nil

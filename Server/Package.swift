@@ -13,6 +13,10 @@ let package = Package(
     dependencies: [
         .Package(url: "https://github.com/crspybits/SMServerLib.git", majorVersion: 0),
         .Package(url: "https://github.com/IBM-Swift/Kitura.git", majorVersion: 1, minor: 7),
+        
+        // 6/3/17; This depends on Kitura 1.6, so I can't use right now without reverting back on Kitura, which I don't want to do.
+        // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
+        
 		.Package(url: "https://github.com/PerfectlySoft/Perfect.git", majorVersion: 2, minor: 0),
 		.Package(url:"https://github.com/crspybits/Perfect-MySQL.git", majorVersion: 2, minor: 1),
 		

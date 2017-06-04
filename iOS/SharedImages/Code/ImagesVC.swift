@@ -77,6 +77,15 @@ class ImagesVC: UIViewController {
         titleLabel.isUserInteractionEnabled = true
     }
     
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+
+        // To resize cells when we rotate the device.
+        if let flowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            flowLayout.invalidateLayout()
+        }
+    }
+    
     func setAddButtonState() {
         switch SignInVC.sharingPermission {
         case .some(.admin), .some(.write), .none: // .none means this is not a sharing user.

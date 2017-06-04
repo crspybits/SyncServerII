@@ -27,7 +27,7 @@ class ImageCollectionVC : UICollectionViewCell {
         self.imageView.image = uiImage
         
         Log.msg("image.url: \(image.url!.path!)")
-        Log.msg("image.uuid: \(image.uuid)")
+        Log.msg("image.uuid: \(String(describing: image.uuid))")
     }
     
     func remove() {
