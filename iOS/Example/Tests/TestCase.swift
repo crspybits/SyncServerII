@@ -416,21 +416,6 @@ class TestCase: XCTestCase {
         return (fileUUID, masterVersion+1)
     }
     
-    func uploadDeletion(fileToDelete:ServerAPI.FileToDelete, masterVersion:MasterVersionInt) {
-        let uploadDeletion = self.expectation(description: "uploadDeletion")
-
-        ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (result, error) in
-            XCTAssert(error == nil)
-            guard case .success = result! else {
-                XCTFail()
-                return
-            }
-            uploadDeletion.fulfill()
-        }
-        
-        waitForExpectations(timeout: 10.0, handler: nil)
-    }
-
     func uploadDeletionOfOneFileWithDoneUploads() {
         guard let (fileUUID, masterVersion) = uploadDeletion() else {
             XCTFail()
@@ -655,5 +640,20 @@ extension TestCase : SyncServerDelegate {
         else {
             syncServerSingleFileDownloadCompleted!(next)
         }
+    }
+    
+    func uploadDeletion(fileToDelete:ServerAPI.FileToDelete, masterVersion:MasterVersionInt) {
+        let uploadDeletion = self.expectation(description: "uploadDeletion")
+
+        ServerAPI.session.uploadDeletion(file: fileToDelete, serverMasterVersion: masterVersion) { (result, error) in
+            XCTAssert(error == nil)
+            guard case .success = result! else {
+                XCTFail()
+                return
+            }
+            uploadDeletion.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
     }
 }

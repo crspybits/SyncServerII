@@ -15,16 +15,16 @@ class Download {
     private init() {
     }
     
-    enum CheckCompletion {
-    case noDownloadsOrDeletionsAvailable
-    case downloadsOrDeletionsAvailable(numberOfFiles:Int32)
+    enum OnlyCheckCompletion {
+    case checkResult(downloadFiles:[FileInfo]?, downloadDeletions:[FileInfo]?, MasterVersionInt?)
     case error(Error)
     }
     
-    // TODO: *0* while this check is occuring, we want to make sure we don't have a concurrent check operation.
-    // Creates DownloadFileTracker's to represent files that need downloading/download deleting. Updates MasterVersion with the master version on the server.
-    func check(completion:((CheckCompletion)->())? = nil) {
-        Log.msg("Download.check")
+    // TODO: *0* while this check is occurring, we want to make sure we don't have a concurrent check operation.
+    // Doesn't create DownloadFileTracker's or update MasterVersion.
+    func onlyCheck(completion:((OnlyCheckCompletion)->())? = nil) {
+        
+        Log.msg("Download.onlyCheckForDownloads")
         
         ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
             guard error == nil else {
@@ -32,54 +32,75 @@ class Download {
                 return
             }
 
-            var completionResult:CheckCompletion!
+            var completionResult:OnlyCheckCompletion!
             
             CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
-                var fileDownloads:[FileInfo]!
-                var downloadDeletions:[FileInfo]!
-                
                 do {
                     let (downloads, deletions) =
                         try Directory.session.checkFileIndex(fileIndex: fileIndex!)
-                    fileDownloads = downloads
-                    downloadDeletions = deletions
+                    completionResult =
+                        .checkResult(downloadFiles:downloads, downloadDeletions:deletions, masterVersion)
                 } catch (let error) {
                     completionResult = .error(error)
-                    return
                 }
                 
-                Singleton.get().masterVersion = masterVersion!
+                completion?(completionResult)
+            }
+        }
+    }
+    
+    enum CheckCompletion {
+    case noDownloadsOrDeletionsAvailable
+    case downloadsOrDeletionsAvailable(numberOfFiles:Int32)
+    case error(Error)
+    }
+    
+    // TODO: *0* while this check is occurring, we want to make sure we don't have a concurrent check operation.
+    // Creates DownloadFileTracker's to represent files that need downloading/download deleting. Updates MasterVersion with the master version on the server.
+    func check(completion:((CheckCompletion)->())? = nil) {
+        onlyCheck() { onlyCheckResult in
+            switch onlyCheckResult {
+            case .error(let error):
+                completion?(.error(error))
+            
+            case .checkResult(downloadFiles: let fileDownloads, downloadDeletions: let downloadDeletions, let masterVersion):
                 
-                if fileDownloads == nil && downloadDeletions == nil {
-                    completionResult = .noDownloadsOrDeletionsAvailable
-                }
-                else {
-                    let allFiles = (fileDownloads ?? []) + (downloadDeletions ?? [])
-                    for file in allFiles {
-                        if file.fileVersion != 0 {
-                            // TODO: *5* We're considering this an error currently because we're not yet supporting multiple file versions.
-                            assert(false, "Not Yet Implemented: Multiple File Versions")
+                var completionResult:CheckCompletion!
+
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    Singleton.get().masterVersion = masterVersion!
+                    
+                    if fileDownloads == nil && downloadDeletions == nil {
+                        completionResult = .noDownloadsOrDeletionsAvailable
+                    }
+                    else {
+                        let allFiles = (fileDownloads ?? []) + (downloadDeletions ?? [])
+                        for file in allFiles {
+                            if file.fileVersion != 0 {
+                                // TODO: *5* We're considering this an error currently because we're not yet supporting multiple file versions.
+                                assert(false, "Not Yet Implemented: Multiple File Versions")
+                            }
+                            
+                            let dft = DownloadFileTracker.newObject() as! DownloadFileTracker
+                            dft.fileUUID = file.fileUUID
+                            dft.fileVersion = file.fileVersion
+                            dft.mimeType = file.mimeType
+                            dft.deletedOnServer = file.deleted!
                         }
                         
-                        let dft = DownloadFileTracker.newObject() as! DownloadFileTracker
-                        dft.fileUUID = file.fileUUID
-                        dft.fileVersion = file.fileVersion
-                        dft.mimeType = file.mimeType
-                        dft.deletedOnServer = file.deleted!
+                        completionResult = .downloadsOrDeletionsAvailable(numberOfFiles: Int32(allFiles.count))
                     }
                     
-                    completionResult = .downloadsOrDeletionsAvailable(numberOfFiles: Int32(allFiles.count))
-                }
+                    do {
+                        try CoreData.sessionNamed(Constants.coreDataName).context.save()
+                    } catch (let error) {
+                        completionResult = .error(error)
+                        return
+                    }
+                } // End performAndWait
                 
-                do {
-                    try CoreData.sessionNamed(Constants.coreDataName).context.save()
-                } catch (let error) {
-                    completionResult = .error(error)
-                    return
-                }
-            } // End performAndWait
-            
-            completion?(completionResult)
+                completion?(completionResult)
+            }
         }
     }
 

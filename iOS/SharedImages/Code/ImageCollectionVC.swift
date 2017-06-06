@@ -22,12 +22,28 @@ class ImageCollectionVC : UICollectionViewCell {
     func setProperties(image:Image, syncController:SyncController) {
         self.image = image
         self.syncController = syncController
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
         
-        let uiImage = UIImage(contentsOfFile: self.image.url!.path!)
-        self.imageView.image = uiImage
+        let imageFileName = image.url!.lastPathComponent!
+        let iconDirectory = "SmallImages"
+        let iconDirectoryURL = FileStorage.url(ofItem: iconDirectory)
+        let largeImageDirectoryURL = FileStorage.url(ofItem: FileExtras.defaultDirectoryPath)
+
+        // Need to figure out the size of the icon so we don't distort the aspect ratio. Adapted from https://gist.github.com/tomasbasham/10533743
+        let largeImageSize = ImageStorage.size(ofImage: imageFileName, withPath: largeImageDirectoryURL)
         
-        Log.msg("image.url: \(image.url!.path!)")
-        Log.msg("image.uuid: \(String(describing: image.uuid))")
+        let aspectWidth = imageView.frameSize.width / largeImageSize.width
+        let aspectHeight = imageView.frameSize.height / largeImageSize.height
+        let aspectRatio = min(aspectWidth, aspectHeight)
+
+        let iconSize = CGSize(width: largeImageSize.width * aspectRatio, height: largeImageSize.height * aspectRatio)
+        
+        let imageIcon = ImageStorage.getImage(imageFileName, of: iconSize, fromIconDirectory: iconDirectoryURL, withLargeImageDirectory: largeImageDirectoryURL)
+        
+        imageView.image = imageIcon
     }
     
     func remove() {

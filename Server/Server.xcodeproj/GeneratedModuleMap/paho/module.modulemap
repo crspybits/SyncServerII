@@ -1,0 +1,4 @@
+module paho {
+    umbrella "/Users/chris/Dropbox/Ubuntu/SyncServerII/SwiftySyncServer-Github/Server/.build/checkouts/SwiftMetrics.git-8417478658542232501/Sources/paho/include"
+    export *
+}
