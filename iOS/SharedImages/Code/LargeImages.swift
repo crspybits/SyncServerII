@@ -15,6 +15,8 @@ class LargeImages : UIViewController {
     // Set these two when creating an instance of this class.
     var startItem: Int! = 0
     var syncController:SyncController!
+    private var deviceRotationIndexPath:IndexPath?
+    let IMAGE_WIDTH_PADDING:CGFloat = 20.0
 
     @IBOutlet weak var collectionView: UICollectionView!
     var coreDataSource:CoreDataSource!
@@ -26,6 +28,7 @@ class LargeImages : UIViewController {
         collectionView.delegate = self
 
         coreDataSource = CoreDataSource(delegate: self)
+        self.edgesForExtendedLayout = []
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -36,6 +39,37 @@ class LargeImages : UIViewController {
         collectionView.layoutIfNeeded()
         let indexPath = IndexPath(item: startItem, section: 0)
         collectionView.scrollToItem(at: indexPath, at: .left, animated: false)
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        // Because the order of indexPathsForVisibleItems doesn't appear sorted-- otherwise, with repeated device rotation, we get to much image motion. Looks odd.
+        let visibleItems = collectionView.indexPathsForVisibleItems as [IndexPath]
+        let sortedArray = visibleItems.sorted {$0 < $1}
+        
+        deviceRotationIndexPath = sortedArray[0]
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+
+        // To resize cells when we rotate the device.
+        if deviceRotationIndexPath != nil {
+            if let flowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+                flowLayout.invalidateLayout()
+            }
+        }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // Because when we rotate the device, we don't end up looking at the same image. I first tried this at the end of `viewWillLayoutSubviews`, but it doesn't work there.
+        if deviceRotationIndexPath != nil {
+            collectionView.scrollToItem(at: deviceRotationIndexPath!, at: .left, animated: false)
+            deviceRotationIndexPath = nil
+        }
     }
 }
 
@@ -90,6 +124,14 @@ extension LargeImages : UICollectionViewDataSource {
 // MARK: UICollectionViewDelegateFlowLayout
 extension LargeImages : UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
+    
+        // Because we can scroll horizontally, let the width be large
+        let width = max(collectionView.frame.height,collectionView.frame.width)
+        let boundingSize = CGSize(width: width, height: collectionView.frame.height)
+        
+        let image = self.coreDataSource.object(at: indexPath) as! Image
+        let imageSize = ImageCollectionVC.imageSize(image: image, boundingSize: boundingSize)
+        
+        return CGSize(width: imageSize.width + IMAGE_WIDTH_PADDING, height: imageSize.height)
     }
 }
