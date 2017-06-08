@@ -166,6 +166,7 @@ class Download {
                 var nextCompletionResult:NextCompletion!
                 CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                     nextToDownload.status = .downloaded
+                    Log.msg("downloadedFile.appMetaData: \(String(describing: downloadedFile.appMetaData))")
                     nextToDownload.appMetaData = downloadedFile.appMetaData
                     nextToDownload.fileSizeBytes = downloadedFile.fileSizeBytes
                     nextToDownload.localURL = downloadedFile.url
@@ -178,7 +179,8 @@ class Download {
                     }
                     
                     let url = nextToDownload.localURL
-                    let attr = SyncAttributes(fileUUID: nextToDownload.fileUUID, mimeType: nextToDownload.mimeType!)
+                    var attr = SyncAttributes(fileUUID: nextToDownload.fileUUID, mimeType: nextToDownload.mimeType!)
+                    attr.appMetaData = nextToDownload.appMetaData
                     nextCompletionResult = .fileDownloaded(url:url!, attr:attr)
                 }
         

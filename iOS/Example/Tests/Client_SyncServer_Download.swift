@@ -65,4 +65,8 @@ class Client_SyncServer_Download: TestCase {
         
         waitForExpectations(timeout: 30.0, handler: nil)
     }
+    
+    func testDownloadWithMetaData() {
+         doASingleDownloadUsingSync(fileName: "UploadMe", fileExtension:"txt", mimeType: "text/plain", appMetaData: "Some app meta data")
+    }
 }

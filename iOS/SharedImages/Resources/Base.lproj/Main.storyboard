@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -59,13 +59,11 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="p10-SC-T2M" userLabel="imageView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="75" height="75"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="75" id="b0P-ma-47r"/>
-                                                    </constraints>
+                                                    <rect key="frame" x="0.0" y="0.0" width="75" height="85"/>
+                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                                 </imageView>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nlX-iC-FAf">
-                                                    <rect key="frame" x="0.0" y="73" width="75" height="18"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nlX-iC-FAf">
+                                                    <rect key="frame" x="0.0" y="85" width="75" height="12"/>
                                                     <edgeInsets key="layoutMargins" top="0.0" left="8" bottom="8" right="8"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                     <nil key="textColor"/>
@@ -73,14 +71,15 @@
                                                 </label>
                                             </subviews>
                                         </view>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstItem="nlX-iC-FAf" firstAttribute="top" secondItem="p10-SC-T2M" secondAttribute="bottom" constant="-2" id="BDP-Yb-hvC"/>
+                                            <constraint firstAttribute="bottom" secondItem="nlX-iC-FAf" secondAttribute="bottom" id="5mS-Rh-yeM"/>
+                                            <constraint firstItem="nlX-iC-FAf" firstAttribute="top" secondItem="p10-SC-T2M" secondAttribute="bottom" id="BDP-Yb-hvC"/>
                                             <constraint firstItem="p10-SC-T2M" firstAttribute="leading" secondItem="GHm-lm-kQ4" secondAttribute="leading" id="FZq-DT-1ra"/>
                                             <constraint firstItem="p10-SC-T2M" firstAttribute="top" secondItem="GHm-lm-kQ4" secondAttribute="top" id="TSW-dI-kUC"/>
                                             <constraint firstItem="nlX-iC-FAf" firstAttribute="leading" secondItem="GHm-lm-kQ4" secondAttribute="leading" id="cTj-rL-df1"/>
                                             <constraint firstAttribute="trailing" secondItem="p10-SC-T2M" secondAttribute="trailing" id="gPY-rR-do2"/>
                                             <constraint firstAttribute="trailing" secondItem="nlX-iC-FAf" secondAttribute="trailing" id="qzX-je-mKO"/>
-                                            <constraint firstAttribute="bottom" secondItem="nlX-iC-FAf" secondAttribute="bottom" constant="6" id="v7r-ZU-yi9"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="imageView" destination="p10-SC-T2M" id="Q4Y-a1-JBB"/>
@@ -110,7 +109,6 @@
         <!--Large Images-->
         <scene sceneID="efv-cU-CzA">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Pt9-uX-zAW" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="LargeImages" id="7QN-xT-tOc" customClass="LargeImages" customModule="SharedImages" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ASX-tC-PLm"/>
@@ -182,6 +180,7 @@
                         <outlet property="collectionView" destination="ZdO-Nh-jZh" id="yfe-x5-HmR"/>
                     </connections>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Pt9-uX-zAW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1165.5999999999999" y="160.56971514242881"/>
         </scene>
@@ -212,7 +211,7 @@
                         <offsetWrapper key="titlePositionAdjustment" horizontal="0.0" vertical="0.0"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="9q4-aK-g6R">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="9q4-aK-g6R">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="barTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -232,7 +231,7 @@
                 <navigationController storyboardIdentifier="ImagesNavController" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="VMm-4I-Aav" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Images" image="images" selectedImage="images" id="Zwn-MX-8e3"/>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="eEP-EW-VdI">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="eEP-EW-VdI">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="barTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>

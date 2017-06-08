@@ -23,34 +23,16 @@ class ImageCollectionVC : UICollectionViewCell {
     func setProperties(image:Image, syncController:SyncController) {
         self.image = image
         self.syncController = syncController
-        title?.text = "Bushrod Thomas from Florida"
-    }
-    
-    static let iconDirectory = "SmallImages"
-    static let iconDirectoryURL = FileStorage.url(ofItem: iconDirectory)
-    static let largeImageDirectoryURL = FileStorage.url(ofItem: FileExtras.defaultDirectoryPath)
-    static func imageFileName(_ image:Image) -> String {
-        return image.url!.lastPathComponent!
-    }
-
-    // Get the size of the icon without distorting the aspect ratio. Adapted from https://gist.github.com/tomasbasham/10533743
-    static func imageSize(image:Image, boundingSize:CGSize) -> CGSize {
-
-        let largeImageSize = ImageStorage.size(ofImage: imageFileName(image), withPath: largeImageDirectoryURL)
-        
-        let aspectWidth = boundingSize.width / largeImageSize.width
-        let aspectHeight = boundingSize.height / largeImageSize.height
-        let aspectRatio = min(aspectWidth, aspectHeight)
-
-        return CGSize(width: largeImageSize.width * aspectRatio, height: largeImageSize.height * aspectRatio)
+        title.text = image.title
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        let iconSize = ImageCollectionVC.imageSize(image: image, boundingSize: imageView.frameSize)
+        let originalSize = ImageExtras.sizeFromImage(image:image)
+        let smallerSize = ImageExtras.boundingImageSizeFor(originalSize: originalSize, boundingSize: imageView.frameSize)
         
-        imageView.image = ImageStorage.getImage(ImageCollectionVC.imageFileName(image), of: iconSize, fromIconDirectory: ImageCollectionVC.iconDirectoryURL, withLargeImageDirectory: ImageCollectionVC.largeImageDirectoryURL)
+        imageView.image = ImageStorage.getImage(ImageExtras.imageFileName(url: image.url! as URL), of: smallerSize, fromIconDirectory: ImageExtras.iconDirectoryURL, withLargeImageDirectory: ImageExtras.largeImageDirectoryURL)
     }
     
     func remove() {

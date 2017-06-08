@@ -92,7 +92,8 @@ class SyncManager {
                 
                 if self.fileDownloadDfts!.count > 0 {
                     _ = self.fileDownloadDfts!.map { dft in
-                        let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
+                        var attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
+                        attr.appMetaData = dft.appMetaData
                         downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
                     }
                 }

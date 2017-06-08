@@ -53,7 +53,7 @@ PODS:
   - HPTextViewTapGestureRecognizer (0.1)
   - Reachability (3.2)
   - SevenSwitch (2.1.0)
-  - SMCoreLib (0.0.28):
+  - SMCoreLib (0.0.29):
     - AFNetworking
     - HPTextViewTapGestureRecognizer (~> 0.1)
     - Reachability
@@ -88,7 +88,7 @@ SPEC CHECKSUMS:
   HPTextViewTapGestureRecognizer: 6a73fd09f858e49a2743c3a338dc5c0791b0fae0
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SevenSwitch: 5543327829b7bec5b29b73bad5f3cc3f92c1736d
-  SMCoreLib: ac8fb3acca61a9f373f253c9d568f6e26b6d3938
+  SMCoreLib: bfb5b7004a95077cc91e28b1e5f4a7bfaa879306
   SwiftyBeaver: 90a39e3dc5136b7285f2e4c870b107e3933b8b84
   SyncServer: 173c3628b67e3f07597504b7c02a399340ca7460
 

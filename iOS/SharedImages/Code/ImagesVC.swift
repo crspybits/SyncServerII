@@ -144,7 +144,7 @@ class ImagesVC: UIViewController {
     }
     
     @discardableResult
-    func addLocalImage(newImageURL: SMRelativeLocalURL, mimeType:String, uuid:String? = nil) -> Image {
+    func addLocalImage(newImageURL: SMRelativeLocalURL, mimeType:String, uuid:String? = nil, title:String? = nil) -> Image {
         var newImage:Image!
         
         if uuid == nil {
@@ -157,6 +157,13 @@ class ImagesVC: UIViewController {
         
         newImage.url = newImageURL
         newImage.mimeType = mimeType
+        newImage.title = title
+        
+        let imageFileName = newImageURL.lastPathComponent
+        let size = ImageStorage.size(ofImage: imageFileName, withPath: ImageExtras.largeImageDirectoryURL)
+        newImage.originalHeight = Float(size.height)
+        newImage.originalWidth = Float(size.width)
+
         CoreData.sessionNamed(CoreDataExtras.sessionName).saveContext()
         
         return newImage
@@ -195,7 +202,7 @@ extension ImagesVC : UICollectionViewDataSource {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ImageCollectionVC
         cell.setProperties(image: self.coreDataSource.object(at: indexPath) as! Image, syncController: syncController)
-        
+                
         return cell
     }
 }
@@ -208,8 +215,11 @@ extension ImagesVC : SMAcquireImageDelegate {
     
     // Called after the image is acquired.
     func smAcquireImage(_ acquireImage:SMAcquireImage, newImageURL: SMRelativeLocalURL, mimeType:String) {
+    
+        let userName = SignIn.session.googleSignIn.signedInUser.username
+        
         // We're making an image that the user of the app added-- we'll generate a new UUID.
-        let newImage = addLocalImage(newImageURL:newImageURL, mimeType:mimeType)
+        let newImage = addLocalImage(newImageURL:newImageURL, mimeType:mimeType, title:userName)
         
         // Sync this new image with the server.
         syncController.add(image: newImage)
@@ -250,9 +260,9 @@ extension ImagesVC : CoreDataSourceDelegate {
 }
 
 extension ImagesVC : SyncControllerDelegate {
-    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String) {
+    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String, title:String?) {
         // We're making an image for which there is already a UUID on the server.
-        addLocalImage(newImageURL: url, mimeType: mimeType, uuid:uuid)
+        addLocalImage(newImageURL: url, mimeType: mimeType, uuid:uuid, title:title)
     }
     
     func removeLocalImage(syncController:SyncController, uuid:String) {
@@ -292,8 +302,23 @@ extension ImagesVC : SyncControllerDelegate {
 
 extension ImagesVC : UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let size = collectionView.frame.width * 0.20
-        return CGSize(width: size, height: size)
+    
+        let proportion:CGFloat = 0.30
+        // Estimate a suitable size for the cell. proportion*100% of the width of the collection view.
+        let size = collectionView.frame.width * proportion
+        let boundingCellSize = CGSize(width: size, height: size)
+        
+        // And then figure out how big the image will be.
+        let image = self.coreDataSource.object(at: indexPath) as! Image
+        let originalImageSize = ImageExtras.sizeFromImage(image: image)
+
+        let boundedImageSize = ImageExtras.boundingImageSizeFor(originalSize: originalImageSize, boundingSize: boundingCellSize)
+
+        return CGSize(width: boundedImageSize.width, height: boundedImageSize.height)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10.0
     }
 }
 

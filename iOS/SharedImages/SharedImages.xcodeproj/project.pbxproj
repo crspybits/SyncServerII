@@ -16,6 +16,7 @@
 		8324EE521E778623000656AF /* ODRefreshControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE4D1E778623000656AF /* ODRefreshControl.m */; };
 		8324EE541E77873F000656AF /* SyncSpinner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE531E77873F000656AF /* SyncSpinner.swift */; };
 		83D1FE341EAB074A00DD468F /* LargeImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D1FE331EAB074A00DD468F /* LargeImages.swift */; };
+		83DC0C311EE7A0CD00727EF2 /* ImageExtras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DC0C301EE7A0CD00727EF2 /* ImageExtras.swift */; };
 		83F882451E711FC6008F644A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83F8823D1E711FC6008F644A /* Assets.xcassets */; };
 		83F882461E711FC6008F644A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83F8823E1E711FC6008F644A /* LaunchScreen.storyboard */; };
 		83F882471E711FC6008F644A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83F882401E711FC6008F644A /* Main.storyboard */; };
@@ -44,6 +45,8 @@
 		8324EE4D1E778623000656AF /* ODRefreshControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ODRefreshControl.m; sourceTree = "<group>"; };
 		8324EE531E77873F000656AF /* SyncSpinner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyncSpinner.swift; sourceTree = "<group>"; };
 		83D1FE331EAB074A00DD468F /* LargeImages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LargeImages.swift; sourceTree = "<group>"; };
+		83DC0C2B1EE795FA00727EF2 /* SharedImages2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SharedImages2.xcdatamodel; sourceTree = "<group>"; };
+		83DC0C301EE7A0CD00727EF2 /* ImageExtras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageExtras.swift; sourceTree = "<group>"; };
 		83F8821F1E711600008F644A /* SharedImages.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SharedImages.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83F8823D1E711FC6008F644A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
 		83F8823F1E711FC6008F644A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Resources/Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -107,6 +110,7 @@
 		8324EE311E763DBE000656AF /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				83DC0C301EE7A0CD00727EF2 /* ImageExtras.swift */,
 				83F8824C1E712004008F644A /* ImagesVC.swift */,
 				83D1FE331EAB074A00DD468F /* LargeImages.swift */,
 				83F8824F1E73A6F6008F644A /* ImageCollectionVC.swift */,
@@ -336,6 +340,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8324EE331E764907000656AF /* SyncController.swift in Sources */,
+				83DC0C311EE7A0CD00727EF2 /* ImageExtras.swift in Sources */,
 				83F8824E1E712004008F644A /* ImagesVC.swift in Sources */,
 				83F882611E749C18008F644A /* Consts.swift in Sources */,
 				83F8824D1E712004008F644A /* AppDelegate.swift in Sources */,
@@ -527,9 +532,10 @@
 		83F882431E711FC6008F644A /* SharedImages.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				83DC0C2B1EE795FA00727EF2 /* SharedImages2.xcdatamodel */,
 				83F882441E711FC6008F644A /* SharedImages.xcdatamodel */,
 			);
-			currentVersion = 83F882441E711FC6008F644A /* SharedImages.xcdatamodel */;
+			currentVersion = 83DC0C2B1EE795FA00727EF2 /* SharedImages2.xcdatamodel */;
 			name = SharedImages.xcdatamodeld;
 			path = Resources/SharedImages.xcdatamodeld;
 			sourceTree = "<group>";

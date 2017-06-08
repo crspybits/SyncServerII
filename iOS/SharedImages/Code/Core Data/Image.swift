@@ -21,7 +21,7 @@ public class Image: NSManagedObject {
                 return nil
             }
             else {
-                let url = NSKeyedUnarchiver.unarchiveObject(with: urlInternal as! Data) as? SMRelativeLocalURL
+                let url = NSKeyedUnarchiver.unarchiveObject(with: urlInternal! as Data) as? SMRelativeLocalURL
                 Assert.If(url == nil, thenPrintThisString: "Yikes: No URL!")
                 return url
             }

@@ -560,7 +560,7 @@ class TestCase: XCTestCase {
         }
     }
     
-    func doASingleDownloadUsingSync(fileName: String, fileExtension:String, mimeType:String) {
+    func doASingleDownloadUsingSync(fileName: String, fileExtension:String, mimeType:String, appMetaData:String? = nil) {
         let initialDeviceUUID = self.deviceUUID
 
         // First upload a file.
@@ -569,7 +569,7 @@ class TestCase: XCTestCase {
         let fileUUID = UUID().uuidString
         let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
         
-        guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: mimeType, fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+        guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: mimeType, fileUUID: fileUUID, serverMasterVersion: masterVersion, appMetaData: appMetaData) else {
             return
         }
         
@@ -579,6 +579,8 @@ class TestCase: XCTestCase {
         self.deviceUUID = Foundation.UUID()
         
         shouldSaveDownloads = { downloads in
+            XCTAssert(downloads.count == 1)
+            XCTAssert(downloads[0].downloadedFileAttributes.appMetaData == appMetaData)
             expectation.fulfill()
         }
         

@@ -26,7 +26,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let coreDataSession = CoreData(options: [
             CoreDataBundleModelName: "SharedImages",
             CoreDataSqlliteBackupFileName: "~SharedImages.sqlite",
-            CoreDataSqlliteFileName: "SharedImages.sqlite"
+            CoreDataSqlliteFileName: "SharedImages.sqlite",
+            CoreDataLightWeightMigration: true
         ]);
         
         CoreData.registerSession(coreDataSession, forName: CoreDataExtras.sessionName)

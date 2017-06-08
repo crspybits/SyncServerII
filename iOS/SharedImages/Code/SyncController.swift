@@ -17,7 +17,7 @@ enum SyncControllerEvent {
 }
 
 protocol SyncControllerDelegate : class {
-    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String)
+    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String, title:String?)
     func removeLocalImage(syncController:SyncController, uuid:String)
     func syncEvent(syncController:SyncController, event:SyncControllerEvent)
 }
@@ -35,8 +35,11 @@ class SyncController {
     }
     
     func add(image:Image) {
-        let attr = SyncAttributes(fileUUID:image.uuid!, mimeType:image.mimeType!)
-        
+        var attr = SyncAttributes(fileUUID:image.uuid!, mimeType:image.mimeType!)
+        if image.title != nil {
+            attr.appMetaData = "{\"\(ImageExtras.appMetaDataTitleKey)\": \"\(image.title!)\"}";
+        }
+    
         do {
             try SyncServer.session.uploadImmutable(localFile: image.url!, withAttributes: attr)
             SyncServer.session.sync()
@@ -67,7 +70,21 @@ extension SyncController : SyncServerDelegate {
                 Log.error("An error occurred moving a file: \(error)")
             }
             
-            delegate.addLocalImage(syncController: self, url: url, uuid: download.downloadedFileAttributes.fileUUID, mimeType: download.downloadedFileAttributes.mimeType)
+            var title:String?
+            
+            if download.downloadedFileAttributes.appMetaData != nil {
+                Log.msg("download.downloadedFileAttributes.appMetaData: \(download.downloadedFileAttributes.appMetaData!)")
+            }
+            
+            // If present, the appMetaData will be a JSON string
+            if let jsonData = download.downloadedFileAttributes.appMetaData?.data(using: String.Encoding.utf8, allowLossyConversion: false) {
+            
+                if let appMetaDataJSON = try? JSONSerialization.jsonObject(with: jsonData, options: []) as! [String: AnyObject] {
+                    title = appMetaDataJSON[ImageExtras.appMetaDataTitleKey] as? String
+                }
+            }
+
+            delegate.addLocalImage(syncController: self, url: url, uuid: download.downloadedFileAttributes.fileUUID, mimeType: download.downloadedFileAttributes.mimeType, title:title)
         }
     }
 
