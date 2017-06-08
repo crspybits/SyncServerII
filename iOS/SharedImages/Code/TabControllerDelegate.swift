@@ -9,10 +9,6 @@
 import Foundation
 import UIKit
 
-protocol TabControllerNavigation {
-func tabBarViewControllerWasSelected()
-}
-
 class TabControllerDelegate : NSObject, UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
 
@@ -22,14 +18,6 @@ class TabControllerDelegate : NSObject, UITabBarControllerDelegate {
         }
         
         return true
-    }
-    
-    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        // Assumes each tab VC is nested in a nav controller
-        if let nav = viewController as? UINavigationController,
-            let topVC = nav.topViewController as? TabControllerNavigation {
-            topVC.tabBarViewControllerWasSelected()
-        }
     }
 }
 

@@ -86,6 +86,13 @@ class ImagesVC: UIViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        AppBadge.checkForBadgeAuthorization(usingViewController: self)
+        setAddButtonState()
+    }
+
     func setAddButtonState() {
         switch SignInVC.sharingPermission {
         case .some(.admin), .some(.write), .none: // .none means this is not a sharing user.
@@ -319,11 +326,5 @@ extension ImagesVC : UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 10.0
-    }
-}
-
-extension ImagesVC : TabControllerNavigation {
-    func tabBarViewControllerWasSelected() {
-        setAddButtonState()
     }
 }

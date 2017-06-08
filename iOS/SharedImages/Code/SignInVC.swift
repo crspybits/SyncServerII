@@ -79,6 +79,12 @@ class SignInVC : SMGoogleUserSignInViewController {
         setSignInTypeState()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        setSignInTypeState()
+    }
+    
     func setSharingButtonState() {
         switch sharingPermission {
         case .some(.admin), .none: // .none means this is not a sharing user.
@@ -140,7 +146,7 @@ class SignInVC : SMGoogleUserSignInViewController {
                 }
             }
             else {
-                let alert = UIAlertController(title: "Error creating sharing invitation!", message: "\(error)", preferredStyle: .alert)
+                let alert = UIAlertController(title: "Error creating sharing invitation!", message: "\(error!)", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .cancel) {alert in
                 })
                 self.present(alert, animated: true, completion: nil)
@@ -205,12 +211,6 @@ extension SignInVC : SMGoogleUserSignInDelegate {
         }
         
         setSharingButtonState()
-        setSignInTypeState()
-    }
-}
-
-extension SignInVC : TabControllerNavigation {
-    func tabBarViewControllerWasSelected() {
         setSignInTypeState()
     }
 }

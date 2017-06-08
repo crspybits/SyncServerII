@@ -341,6 +341,26 @@ public class SyncServer {
         }
     }
     
+    public struct Stats {
+        public let downloadsAvailable:Int
+        public let downloadDeletionsAvailable:Int
+    }
+    
+    // completion gives nil if there was an error. This information is for general purpose use (e.g., UI) and makes no guarantees about files to be downloaded when you next do a `sync` operation.
+    public func getStats(completion:@escaping (Stats?)->()) {
+        Download.session.onlyCheck() { onlyCheckResult in
+            switch onlyCheckResult {
+            case .error(let error):
+                Log.error("Error on Download onlyCheck: \(error)")
+                completion(nil)
+                
+            case .checkResult(downloadFiles: let downloadFiles, downloadDeletions: let downloadDeletions, _):
+                let stats = Stats(downloadsAvailable: downloadFiles?.count ?? 0, downloadDeletionsAvailable: downloadDeletions?.count ?? 0)
+                completion(stats)
+            }
+        }
+    }
+    
     private func start(completion:(()->())?) {
         EventDesired.reportEvent(.syncStarted, mask: self.eventsDesired, delegate: self.delegate)
         Log.msg("SyncServer.start")

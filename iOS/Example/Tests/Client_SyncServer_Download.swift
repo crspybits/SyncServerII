@@ -69,4 +69,42 @@ class Client_SyncServer_Download: TestCase {
     func testDownloadWithMetaData() {
          doASingleDownloadUsingSync(fileName: "UploadMe", fileExtension:"txt", mimeType: "text/plain", appMetaData: "Some app meta data")
     }
+    
+    func testGetStats() {
+        // 1) Get a download deletion ready
+        
+        // Uses SyncManager.session.start so we have the file in our local Directory after download.
+        guard let (file, masterVersion) = uploadAndDownloadOneFileUsingStart() else {
+            XCTFail()
+            return
+        }
+        
+        // Simulate another device deleting the file.
+        let fileToDelete = ServerAPI.FileToDelete(fileUUID: file.fileUUID, fileVersion: file.fileVersion)
+        uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion)
+        
+        self.doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        // 2) Get a file download ready
+        let fileUUID = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion+1) else {
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion+1, expectedNumberUploads: 1)
+        
+        let uploadDeletionExp = self.expectation(description: "uploadDeletion")
+        
+        // 3) Now, check to make sure we have what we expect
+        
+        SyncServer.session.getStats { stats in
+            XCTAssert(stats!.downloadsAvailable == 1)
+            XCTAssert(stats!.downloadDeletionsAvailable == 1)
+            uploadDeletionExp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
 }

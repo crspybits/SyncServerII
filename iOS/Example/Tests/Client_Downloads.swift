@@ -287,4 +287,60 @@ class Client_Downloads: TestCase {
         
         waitForExpectations(timeout: 30.0, handler: nil)
     }
+    
+    func onlyCheck(expectedDownloads:Int?=nil, expectedDownloadDeletions:Int?=nil) {
+        let masterVersionFirst = getMasterVersion()
+        let expectation1 = self.expectation(description: "onlyCheck")
+
+        Download.session.onlyCheck { onlyCheckResult in
+            switch onlyCheckResult {
+            case .error(let error):
+                XCTFail("Failed: \(error)")
+            
+            case .checkResult(downloadFiles: let downloads, downloadDeletions: let deletions, let masterVersion):
+                XCTAssert(downloads?.count == expectedDownloads)
+                XCTAssert(deletions?.count == expectedDownloadDeletions)
+                XCTAssert(masterVersion == masterVersionFirst)
+            }
+            
+            expectation1.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
+    
+    func testOnlyCheckWhenNoFiles() {
+        onlyCheck()
+    }
+    
+    func testOnlyCheckWhenOneFileForDownload() {
+        let masterVersion = getMasterVersion()
+        
+        let fileUUID = UUID().uuidString
+        let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
+        
+        guard let (_, _) = uploadFile(fileURL:fileURL, mimeType: "text/plain", fileUUID: fileUUID, serverMasterVersion: masterVersion) else {
+            return
+        }
+        
+        doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        onlyCheck(expectedDownloads:1)
+    }
+    
+    func testOnlyCheckWhenOneFileForDownloadDeletion() {
+        // Uses SyncManager.session.start so we have the file in our local Directory after download.
+        guard let (file, masterVersion) = uploadAndDownloadOneFileUsingStart() else {
+            XCTFail()
+            return
+        }
+        
+        // Simulate another device deleting the file.
+        let fileToDelete = ServerAPI.FileToDelete(fileUUID: file.fileUUID, fileVersion: file.fileVersion)
+        uploadDeletion(fileToDelete: fileToDelete, masterVersion: masterVersion)
+        
+        self.doneUploads(masterVersion: masterVersion, expectedNumberUploads: 1)
+        
+        onlyCheck(expectedDownloadDeletions:1)
+    }
 }

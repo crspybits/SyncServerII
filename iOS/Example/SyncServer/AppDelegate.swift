@@ -6,6 +6,9 @@
 //  Copyright (c) 2016 Christopher Prince. All rights reserved.
 //
 
+// To use this app with a self-signed SSL certificate, you need to add a flag:
+//  -D SELF_SIGNED_SSL
+
 import UIKit
 import SMCoreLib
 import SyncServer
