@@ -16,8 +16,9 @@ protocol Repository {
 
     var tableName:String {get}
 
-    // Create the database table.
-    func create() -> Database.TableCreationResult
+    // If the table is present, and it's structure needs updating, update it.
+    // If it's absent, create it.
+    func upcreate() -> Database.TableUpcreateResult
     
     // Returns a constraint for a WHERE clause in mySQL based on the key
     func lookupConstraint(key:LOOKUPKEY) -> String

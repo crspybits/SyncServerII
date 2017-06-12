@@ -185,6 +185,8 @@ class DatabaseModelTests: XCTestCase {
         let newDeleted = false
         let newFileVersion = FileVersionInt(100)
         let newFileSizeBytes = Int64(322)
+        let creationDate = Date()
+        let updateDate = Date()
         
         fileIndex[FileIndex.fileIndexIdKey] = newFileIndexId
         fileIndex[FileIndex.fileUUIDKey] = newFileUUID
@@ -196,6 +198,8 @@ class DatabaseModelTests: XCTestCase {
         fileIndex[FileIndex.deletedKey] = newDeleted
         fileIndex[FileIndex.fileVersionKey] = newFileVersion
         fileIndex[FileIndex.fileSizeBytesKey] = newFileSizeBytes
+        fileIndex[FileIndex.creationDateKey] = creationDate
+        fileIndex[FileIndex.updateDateKey] = updateDate
         
         XCTAssert(fileIndex.fileIndexId == newFileIndexId)
         XCTAssert(fileIndex.fileUUID == newFileUUID)
@@ -207,7 +211,9 @@ class DatabaseModelTests: XCTestCase {
         XCTAssert(fileIndex.deleted == newDeleted)
         XCTAssert(fileIndex.fileVersion == newFileVersion)
         XCTAssert(fileIndex.fileSizeBytes == newFileSizeBytes)
-        
+        XCTAssert(fileIndex.creationDate == creationDate)
+        XCTAssert(fileIndex.updateDate == updateDate)
+
         fileIndex[FileIndex.fileIndexIdKey] = nil
         fileIndex[FileIndex.fileUUIDKey] = nil
         fileIndex[FileIndex.deviceUUIDKey] = nil
@@ -218,7 +224,9 @@ class DatabaseModelTests: XCTestCase {
         fileIndex[FileIndex.deletedKey] = nil
         fileIndex[FileIndex.fileVersionKey] = nil
         fileIndex[FileIndex.fileSizeBytesKey] = nil
-        
+        fileIndex[FileIndex.creationDateKey] = nil
+        fileIndex[FileIndex.updateDateKey] = nil
+
         XCTAssert(fileIndex.fileIndexId == nil)
         XCTAssert(fileIndex.fileUUID == nil)
         XCTAssert(fileIndex.deviceUUID == nil)
@@ -229,6 +237,8 @@ class DatabaseModelTests: XCTestCase {
         XCTAssert(fileIndex.deleted == nil)
         XCTAssert(fileIndex.fileVersion == nil)
         XCTAssert(fileIndex.fileSizeBytes == nil)
+        XCTAssert(fileIndex.creationDate == nil)
+        XCTAssert(fileIndex.updateDate == nil)
     }
     
     func testUpload() {
@@ -244,6 +254,8 @@ class DatabaseModelTests: XCTestCase {
         let fileSizeBytes = Int64(4211)
         let mimeType = "text/plain"
         let cloudFolderName = "folder"
+        let creationDate = Date()
+        let updateDate = Date()
         
         upload[Upload.uploadIdKey] = uploadId
         upload[Upload.fileUUIDKey] = fileUUID
@@ -255,6 +267,8 @@ class DatabaseModelTests: XCTestCase {
         upload[Upload.fileSizeBytesKey] = fileSizeBytes
         upload[Upload.mimeTypeKey] = mimeType
         upload[Upload.cloudFolderNameKey] = cloudFolderName
+        upload[Upload.creationDateKey] = creationDate
+        upload[Upload.updateDateKey] = updateDate
         
         XCTAssert(upload.uploadId == uploadId)
         XCTAssert(upload.fileUUID == fileUUID)
@@ -266,7 +280,9 @@ class DatabaseModelTests: XCTestCase {
         XCTAssert(upload.fileSizeBytes == fileSizeBytes)
         XCTAssert(upload.mimeType == mimeType)
         XCTAssert(upload.cloudFolderName == cloudFolderName)
-
+        XCTAssert(upload.creationDate == creationDate)
+        XCTAssert(upload.updateDate == updateDate)
+        
         upload[Upload.uploadIdKey] = nil
         upload[Upload.fileUUIDKey] = nil
         upload[Upload.userIdKey] = nil
@@ -277,6 +293,8 @@ class DatabaseModelTests: XCTestCase {
         upload[Upload.fileSizeBytesKey] = nil
         upload[Upload.mimeTypeKey] = nil
         upload[Upload.cloudFolderNameKey] = nil
+        upload[Upload.creationDateKey] = nil
+        upload[Upload.updateDateKey] = nil
         
         XCTAssert(upload.uploadId == nil)
         XCTAssert(upload.fileUUID == nil)
@@ -288,6 +306,8 @@ class DatabaseModelTests: XCTestCase {
         XCTAssert(upload.fileSizeBytes == nil)
         XCTAssert(upload.mimeType == nil)
         XCTAssert(upload.cloudFolderName == nil)
+        XCTAssert(upload.creationDate == nil)
+        XCTAssert(upload.updateDate == nil)
     }
 }
 

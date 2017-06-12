@@ -66,7 +66,7 @@ class DeviceUUIDRepository : Repository {
 
     // TODO: *3* We can possibly have the same device used by two different users. E.g., if a user signs in on the device with one set of credentials, then signs out and signs in with a different set of credentials.
     
-    func create() -> Database.TableCreationResult {
+    func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             // reference into User table
             "(userId BIGINT NOT NULL, " +

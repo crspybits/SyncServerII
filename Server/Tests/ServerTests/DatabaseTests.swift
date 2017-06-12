@@ -153,7 +153,7 @@ class model2 : Model {
             
             case "c2":
                 return {(x:Any) -> Any? in
-                    return Database.date(x as! String, fromFormat: .DATE)
+                    return DateExtras.date(x as! String, fromFormat: .DATE)
                 }
 
             default:
@@ -199,10 +199,10 @@ class GeneralDatabaseTests: ServerTestCase {
         super.setUp()
         Log.logger = HeliumLogger()
         
-        c15String = Database.date(c15Value, toFormat: .DATE)
-        c16String = Database.date(c16Value, toFormat: .DATETIME)
-        c17String = Database.date(c17Value, toFormat: .TIMESTAMP)
-        c18String = Database.date(c18Value, toFormat: .TIME)
+        c15String = DateExtras.date(c15Value, toFormat: .DATE)
+        c16String = DateExtras.date(c16Value, toFormat: .DATETIME)
+        c17String = DateExtras.date(c17Value, toFormat: .TIMESTAMP)
+        c18String = DateExtras.date(c18Value, toFormat: .TIME)
 
         // Ignore any failure in dropping: E.g., a failure resulting from the table not existing the first time around.
         let _ = db.connection.query(statement: "DROP TABLE \(testTableName)")
@@ -274,7 +274,7 @@ class GeneralDatabaseTests: ServerTestCase {
     
     func insertRows2() {
         let c1Value:TestEnum = .TestEnum1
-        let c2Value = Database.date(c2Table2Value, toFormat: .DATE)
+        let c2Value = DateExtras.date(c2Table2Value, toFormat: .DATE)
         
         let insertRow1 = "INSERT INTO \(testTableName2) (c1, c2) VALUES('\(c1Value.rawValue)', '\(c2Value)');"
         guard db.connection.query(statement: insertRow1) else {
@@ -364,6 +364,17 @@ class GeneralDatabaseTests: ServerTestCase {
         XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(String(describing: select.forEachRowStatus))")
         XCTAssert(rows == 1, "Didn't find expected number of rows")
     }
+    
+    func testColumnExists() {
+        XCTAssert(db.columnExists("c1", in: testTableName) == true)
+        XCTAssert(db.columnExists("c3", in: testTableName2) == false)
+        XCTAssert(db.columnExists("xxx", in: "yyy") == false)
+    }
+    
+    func testAddColumn() {
+        XCTAssert(db.addColumn("newTextColumn TEXT", to: testTableName))
+        XCTAssert(!db.addColumn("newTextColumn TEXT", to: testTableName))
+    }
 }
 
 extension GeneralDatabaseTests {
@@ -371,7 +382,24 @@ extension GeneralDatabaseTests {
         return [
             ("testSelectForEachRowIgnoringErrors", testSelectForEachRowIgnoringErrors),
             ("testSelectForEachRowNotIgnoringErrors", testSelectForEachRowNotIgnoringErrors),
-            ("testTypeConverters", testTypeConverters)
+            ("testTypeConverters", testTypeConverters),
+            ("testColumnExists", testColumnExists),
+            ("testAddColumn", testAddColumn)
         ]
+    }
+    
+    // Modified from https://oleb.net/blog/2017/03/keeping-xctest-in-sync/
+    func testLinuxTestSuiteIncludesAllTests() {
+        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+            let thisClass = type(of: self)
+            
+            // Adding 1 to linuxCount because it doesn't have *this* test.
+            let linuxCount = thisClass.allTests.count + 1
+            
+            let darwinCount = Int(thisClass
+                .defaultTestSuite().testCaseCount)
+            XCTAssertEqual(linuxCount, darwinCount,
+                "\(darwinCount - linuxCount) test(s) are missing from allTests")
+        #endif
     }
 }

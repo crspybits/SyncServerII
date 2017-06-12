@@ -13,7 +13,7 @@ import MySQL
 // See https://github.com/PerfectlySoft/Perfect-MySQL for assumptions about mySQL installation.
 // For mySQL interface docs, see: http://perfect.org/docs/MySQL.html
 
-public class Database {
+class Database {
     // See http://stackoverflow.com/questions/13397038/uuid-max-character-length
     static let uuidLength = 36
     
@@ -34,7 +34,7 @@ public class Database {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
     }
     
-    public init(showStartupInfo:Bool = false) {
+    init(showStartupInfo:Bool = false) {
         self.connection = MySQL()
         if showStartupInfo {
             Log.info(message: "Connecting to database with host: \(Constants.session.db.host)...")
@@ -64,7 +64,7 @@ public class Database {
     }
     
     // Do not close the database connection until rollback or commit have been called.
-    public func close() {
+    func close() {
         if !closed {
             Database.numberClosed += 1
             Log.info(message: "CLOSING DB CONNECTION (opened: \(Database.numberOpened); closed: \(Database.numberClosed))")
@@ -73,23 +73,25 @@ public class Database {
         }
     }
 
-    public enum TableCreationSuccess {
+    enum TableUpcreateSuccess {
         case created
+        case updated
         case alreadyPresent
     }
     
-    public enum TableCreationError : Error {
+    enum TableUpcreateError : Error {
         case query
         case tableCreation
+        case columnCreation
     }
     
-    public enum TableCreationResult {
-        case success(TableCreationSuccess)
-        case failure(TableCreationError)
+    enum TableUpcreateResult {
+        case success(TableUpcreateSuccess)
+        case failure(TableUpcreateError)
     }
     
     // columnCreateQuery is the table creation query without the prefix "CREATE TABLE <TableName>"
-    public func createTableIfNeeded(tableName:String, columnCreateQuery:String) -> TableCreationResult {
+    func createTableIfNeeded(tableName:String, columnCreateQuery:String) -> TableUpcreateResult {
         let checkForTable = "SELECT * " +
             "FROM information_schema.tables " +
             "WHERE table_schema = '\(Constants.session.db.database)' " +
@@ -117,37 +119,39 @@ public class Database {
         return .success(.created)
     }
     
-    public enum MySQLDateFormat : String {
-    case DATE
-    case DATETIME
-    case TIMESTAMP
-    case TIME
-    }
-    
-    private class func getDateFormatter(format:MySQLDateFormat) -> DateFormatter {
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-
-        switch format {
-        case .DATE:
-            dateFormatter.dateFormat = "yyyy-MM-dd"
+    // Returns nil on error.
+    func columnExists(_ column:String, in tableName:String) -> Bool? {
+        let checkForColumn = "SELECT * " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = '\(Constants.session.db.database)' " +
+            "AND table_name = '\(tableName)' " +
+            "AND column_name = '\(column)' " +
+            "LIMIT 1;"
         
-        case .DATETIME, .TIMESTAMP:
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            
-        case .TIME:
-            dateFormatter.dateFormat = "HH:mm:ss"
+        guard connection.query(statement: checkForColumn) else {
+            Log.error(message: "Failure: \(self.error)")
+            return nil
         }
-    
-        return dateFormatter
+        
+        if let results = connection.storeResults(), results.numRows() == 1 {
+            Log.info(message: "Column \(column) was already in database table \(tableName)")
+            return true
+        }
+        
+        Log.info(message: "Column \(column) was not in database table \(tableName)")
+        return false
     }
     
-    public class func date(_ date:Date, toFormat format:MySQLDateFormat) -> String {
-        return getDateFormatter(format: format).string(from: date)
-    }
-    
-    public class func date(_ date: String, fromFormat format:MySQLDateFormat) -> Date? {
-        return getDateFormatter(format: format).date(from: date)
+    // column should be something like "newStrCol VARCHAR(255)"
+    func addColumn(_ column:String, to tableName:String) -> Bool {
+        let query = "ALTER TABLE \(tableName) ADD \(column)"
+        
+        guard connection.query(statement: query) else {
+            Log.error(message: "Failure: \(self.error)")
+            return false
+        }
+        
+        return true
     }
     
     /* References on mySQL transactions, locks, and blocking
@@ -231,7 +235,7 @@ class Select {
         case problemConvertingFieldValueToModel(String)
     }
     
-    public private(set) var forEachRowStatus: ProcessResultRowsError?
+    private(set) var forEachRowStatus: ProcessResultRowsError?
 
     typealias FieldName = String
     

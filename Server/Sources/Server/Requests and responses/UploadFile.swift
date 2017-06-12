@@ -41,18 +41,27 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
     static let masterVersionKey = "masterVersion"
     var masterVersion:MasterVersionInt!
     
+    // The value given for the following two dates using its key in `init?(json: JSON)` needs to be a UTC Date String formatted with DateExtras.date(<YourDate>, toFormat: .DATETIME)
+    static let creationDateKey = "creationDate"
+    var creationDate:Date!
+    
+    static let updateDateKey = "updateDate"
+    var updateDate:Date!
+    
     // MARK: Properties NOT used in the request message.
     
     var data = Data()
     var sizeOfDataInBytes:Int!
     
     func nonNilKeys() -> [String] {
-        return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.fileVersionKey, UploadFileRequest.masterVersionKey]
+        return [UploadFileRequest.fileUUIDKey, UploadFileRequest.mimeTypeKey, UploadFileRequest.cloudFolderNameKey, UploadFileRequest.fileVersionKey, UploadFileRequest.masterVersionKey, UploadFileRequest.creationDateKey, UploadFileRequest.updateDateKey]
     }
     
     func allKeys() -> [String] {
         return self.nonNilKeys() + [UploadFileRequest.appMetaDataKey]
     }
+    
+    
     
     required init?(json: JSON) {
         super.init()
@@ -63,6 +72,10 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
         self.fileVersion = Decoder.decode(int32ForKey: UploadFileRequest.fileVersionKey)(json)
         self.masterVersion = Decoder.decode(int64ForKey: UploadFileRequest.masterVersionKey)(json)
         self.appMetaData = UploadFileRequest.appMetaDataKey <~~ json
+        
+        let dateFormatter = DateExtras.getDateFormatter(format: .DATETIME)
+        self.creationDate = Decoder.decode(dateForKey: UploadFileRequest.creationDateKey, dateFormatter: dateFormatter)(json)
+        self.updateDate = Decoder.decode(dateForKey: UploadFileRequest.updateDateKey, dateFormatter: dateFormatter)(json)
         
 #if SERVER
         if !self.propertiesHaveValues(propertyNames: self.nonNilKeys()) {
@@ -89,13 +102,17 @@ class UploadFileRequest : NSObject, RequestMessage, Filenaming {
 #endif
     
     func toJSON() -> JSON? {
+        let dateFormatter = DateExtras.getDateFormatter(format: .DATETIME)
+
         return jsonify([
             UploadFileRequest.fileUUIDKey ~~> self.fileUUID,
             UploadFileRequest.mimeTypeKey ~~> self.mimeType,
             UploadFileRequest.cloudFolderNameKey ~~> self.cloudFolderName,
             UploadFileRequest.fileVersionKey ~~> self.fileVersion,
             UploadFileRequest.masterVersionKey ~~> self.masterVersion,
-            UploadFileRequest.appMetaDataKey ~~> self.appMetaData
+            UploadFileRequest.appMetaDataKey ~~> self.appMetaData,
+            Encoder.encode(dateForKey: UploadFileRequest.creationDateKey, dateFormatter: dateFormatter)(self.creationDate),
+            Encoder.encode(dateForKey: UploadFileRequest.updateDateKey, dateFormatter: dateFormatter)(self.updateDate)
         ])
     }
 }

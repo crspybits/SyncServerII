@@ -94,6 +94,8 @@ class SyncManager {
                     _ = self.fileDownloadDfts!.map { dft in
                         var attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
                         attr.appMetaData = dft.appMetaData
+                        attr.creationDate = dft.creationDate! as Date
+                        attr.updateDate = dft.updateDate! as Date
                         downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
                     }
                 }

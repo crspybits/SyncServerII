@@ -156,6 +156,8 @@ class SpecificDatabaseTests: ServerTestCase {
         fileIndex.userId = userId
         fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
         fileIndex.cloudFolderName = "Test.Folder"
+        fileIndex.creationDate = Date()
+        fileIndex.updateDate = Date()
         
         let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
         XCTAssert(result1 == 1, "Bad fileIndexId!")

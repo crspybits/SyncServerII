@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_490"
+               BlueprintIdentifier = "OBJ_496"
                BuildableName = "PerfectLib.framework"
                BlueprintName = "PerfectLib"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -28,7 +28,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_506"
+               BlueprintIdentifier = "OBJ_512"
                BuildableName = "SMServerLib.framework"
                BlueprintName = "SMServerLib"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -42,7 +42,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_515"
+               BlueprintIdentifier = "OBJ_521"
                BuildableName = "LoggerAPI.framework"
                BlueprintName = "LoggerAPI"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -56,7 +56,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_522"
+               BlueprintIdentifier = "OBJ_528"
                BuildableName = "Socket.framework"
                BlueprintName = "Socket"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -70,7 +70,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_531"
+               BlueprintIdentifier = "OBJ_537"
                BuildableName = "SSLService.framework"
                BlueprintName = "SSLService"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -84,7 +84,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_540"
+               BlueprintIdentifier = "OBJ_546"
                BuildableName = "KituraNet.framework"
                BlueprintName = "KituraNet"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -98,7 +98,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_588"
+               BlueprintIdentifier = "OBJ_594"
                BuildableName = "CHTTPParser.framework"
                BlueprintName = "CHTTPParser"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -112,7 +112,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_603"
+               BlueprintIdentifier = "OBJ_609"
                BuildableName = "SwiftyJSON.framework"
                BlueprintName = "SwiftyJSON"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -126,7 +126,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_611"
+               BlueprintIdentifier = "OBJ_617"
                BuildableName = "KituraTemplateEngine.framework"
                BlueprintName = "KituraTemplateEngine"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -140,7 +140,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_618"
+               BlueprintIdentifier = "OBJ_624"
                BuildableName = "Kitura.framework"
                BlueprintName = "Kitura"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -154,7 +154,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_681"
+               BlueprintIdentifier = "OBJ_687"
                BuildableName = "Cryptor.framework"
                BlueprintName = "Cryptor"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -168,7 +168,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_697"
+               BlueprintIdentifier = "OBJ_703"
                BuildableName = "KituraWebSocket.framework"
                BlueprintName = "KituraWebSocket"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -182,7 +182,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_725"
+               BlueprintIdentifier = "OBJ_731"
                BuildableName = "KituraRequest.framework"
                BlueprintName = "KituraRequest"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -196,7 +196,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_755"
+               BlueprintIdentifier = "OBJ_761"
                BuildableName = "Configuration.framework"
                BlueprintName = "Configuration"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -210,7 +210,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_769"
+               BlueprintIdentifier = "OBJ_775"
                BuildableName = "TestProgram"
                BlueprintName = "TestProgram"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -224,7 +224,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_780"
+               BlueprintIdentifier = "OBJ_786"
                BuildableName = "CloudFoundryEnv.framework"
                BlueprintName = "CloudFoundryEnv"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -238,7 +238,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_796"
+               BlueprintIdentifier = "OBJ_802"
                BuildableName = "CloudFoundryConfig.framework"
                BlueprintName = "CloudFoundryConfig"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -252,7 +252,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_810"
+               BlueprintIdentifier = "OBJ_816"
                BuildableName = "SwiftBAMDC.framework"
                BlueprintName = "SwiftBAMDC"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -266,7 +266,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_856"
+               BlueprintIdentifier = "OBJ_862"
                BuildableName = "cpuplugin.framework"
                BlueprintName = "cpuplugin"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -280,7 +280,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_904"
+               BlueprintIdentifier = "OBJ_910"
                BuildableName = "mqttplugin.framework"
                BlueprintName = "mqttplugin"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -294,7 +294,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_945"
+               BlueprintIdentifier = "OBJ_951"
                BuildableName = "SwiftMetricsBluemix.framework"
                BlueprintName = "SwiftMetricsBluemix"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -308,7 +308,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_996"
+               BlueprintIdentifier = "OBJ_1002"
                BuildableName = "SwiftMetricsDash.framework"
                BlueprintName = "SwiftMetricsDash"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -322,7 +322,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_854"
+               BlueprintIdentifier = "OBJ_860"
                BuildableName = "agentcore.framework"
                BlueprintName = "agentcore"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -336,7 +336,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_862"
+               BlueprintIdentifier = "OBJ_868"
                BuildableName = "hcapiplugin.framework"
                BlueprintName = "hcapiplugin"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -350,7 +350,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_864"
+               BlueprintIdentifier = "OBJ_870"
                BuildableName = "SwiftMetrics.framework"
                BlueprintName = "SwiftMetrics"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -364,7 +364,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_858"
+               BlueprintIdentifier = "OBJ_864"
                BuildableName = "envplugin.framework"
                BlueprintName = "envplugin"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -378,7 +378,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_866"
+               BlueprintIdentifier = "OBJ_872"
                BuildableName = "SwiftMetricsKitura.framework"
                BlueprintName = "SwiftMetricsKitura"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -392,7 +392,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_943"
+               BlueprintIdentifier = "OBJ_949"
                BuildableName = "paho.framework"
                BlueprintName = "paho"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -406,7 +406,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_860"
+               BlueprintIdentifier = "OBJ_866"
                BuildableName = "memplugin.framework"
                BlueprintName = "memplugin"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -420,7 +420,21 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1360"
+               BlueprintIdentifier = "OBJ_1366"
+               BuildableName = "PerfectThread.framework"
+               BlueprintName = "PerfectThread"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "OBJ_1375"
                BuildableName = "MySQL.framework"
                BlueprintName = "MySQL"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -434,7 +448,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1367"
+               BlueprintIdentifier = "OBJ_1382"
                BuildableName = "Gloss.framework"
                BlueprintName = "Gloss"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -448,7 +462,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1380"
+               BlueprintIdentifier = "OBJ_1395"
                BuildableName = "KituraSession.framework"
                BlueprintName = "KituraSession"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -462,7 +476,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1412"
+               BlueprintIdentifier = "OBJ_1427"
                BuildableName = "Credentials.framework"
                BlueprintName = "Credentials"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -476,7 +490,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1445"
+               BlueprintIdentifier = "OBJ_1460"
                BuildableName = "CredentialsGoogle.framework"
                BlueprintName = "CredentialsGoogle"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -490,7 +504,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1478"
+               BlueprintIdentifier = "OBJ_1493"
                BuildableName = "HeliumLogger.framework"
                BlueprintName = "HeliumLogger"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -504,7 +518,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1488"
+               BlueprintIdentifier = "OBJ_1503"
                BuildableName = "Server.framework"
                BlueprintName = "Server"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -518,7 +532,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1613"
+               BlueprintIdentifier = "OBJ_1631"
                BuildableName = "Main"
                BlueprintName = "Main"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -536,7 +550,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_1690"
+               BlueprintIdentifier = "OBJ_1710"
                BuildableName = "ServerTests.xctest"
                BlueprintName = "ServerTests"
                ReferencedContainer = "container:Server.xcodeproj">
@@ -559,7 +573,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "OBJ_490"
+            BlueprintIdentifier = "OBJ_496"
             BuildableName = "PerfectLib.framework"
             BlueprintName = "PerfectLib"
             ReferencedContainer = "container:Server.xcodeproj">

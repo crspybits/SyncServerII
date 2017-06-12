@@ -51,7 +51,7 @@ class MasterVersionRepository : Repository {
     
     let initialMasterVersion = 0
 
-    func create() -> Database.TableCreationResult {
+    func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             // reference into User table
             "(userId BIGINT NOT NULL, " +

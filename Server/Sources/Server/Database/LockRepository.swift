@@ -66,14 +66,14 @@ class LockRepository : Repository {
         self.db = db
     }
     
-    let dateFormat = Database.MySQLDateFormat.DATETIME
+    let dateFormat = DateExtras.DateFormat.DATETIME
 
     var tableName:String {
         // Apparently the table name Lock is special-- get an error if we use it.
         return "ShortLocks"
     }
 
-    func create() -> Database.TableCreationResult {
+    func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             // reference into User table
             "(userId BIGINT NOT NULL, " +
@@ -131,7 +131,7 @@ class LockRepository : Repository {
             }
         }
         
-        let expiry = Database.date(lock.expiry, toFormat: dateFormat)
+        let expiry = DateExtras.date(lock.expiry, toFormat: dateFormat)
         
         // TODO: *2* It would be good to specify the expiry time dynamically if possible-- this insert can block. e.g., NOW() + INTERVAL 15 DAY
         // It is conceptually possible for the block to wake up and the lock already to be expired.
@@ -155,7 +155,7 @@ class LockRepository : Repository {
     // Omit the userId parameter to remove all stale locks.
     // Returns the number of stale locks that were actually removed, or nil if there was an error.
     func removeStaleLock(forUserId userId:UserId? = nil) -> Int? {
-        let staleDate = Database.date(Date(), toFormat: dateFormat)
+        let staleDate = DateExtras.date(Date(), toFormat: dateFormat)
         
         var userIdConstraint = ""
         if userId != nil {

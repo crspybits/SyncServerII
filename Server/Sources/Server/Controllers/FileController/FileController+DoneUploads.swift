@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import PerfectLib
+import PerfectThread
 import Dispatch
+import PerfectLib
 
 extension FileController {
     private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?)? {
@@ -204,11 +205,21 @@ extension FileController {
             return
         }
         
-        finishDoneUploads(uploadDeletions: uploadDeletions, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred)
+        if uploadDeletions == nil || uploadDeletions!.count == 0 {
+            let response = DoneUploadsResponse()!
+            response.numberUploadsTransferred = numberTransferred
+            Log.debug(message: "doneUploads.numberUploadsTransferred: \(numberTransferred)")
+            params.completion(response)
+            return
+        }
+        
+        let async = AsyncTailRecursion()
+        async.start {
+            self.finishDoneUploads(uploadDeletions: uploadDeletions, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, async:async)
+        }
     }
-    
-    // This operates recursively so that we are not spinning off multiple threads when deleting > 1 file. This may make our processing dependent on stack depth. It does seem Swift makes use of tail recursion optimizations-- though not sure if this applies in the case of callbacks.
-    private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, googleCreds:GoogleCreds, numberTransferred:Int32, numberErrorsDeletingFiles:Int32 = 0) {
+
+     private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, googleCreds:GoogleCreds, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
     
         // Base case.
         if uploadDeletions == nil || uploadDeletions!.count == 0 {
@@ -221,8 +232,8 @@ extension FileController {
             
             response.numberUploadsTransferred = numberTransferred
             Log.debug(message: "doneUploads.numberUploadsTransferred: \(numberTransferred)")
-            
             params.completion(response)
+            async.done()
             return
         }
         
@@ -245,9 +256,8 @@ extension FileController {
                 numberAdditionalErrors = 1
             }
             
-            // 5/29/17; I was having apparent problems with the stack growing too big if I do this in a purely recursive manner. Using the DispatchQueue is my effort to work around this.
-            DispatchQueue.global().sync() {
-                self.finishDoneUploads(uploadDeletions: tail, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+            async.next() {
+                self.finishDoneUploads(uploadDeletions: tail, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
             }
         }
     }

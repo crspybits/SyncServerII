@@ -59,7 +59,7 @@ class SharingInvitation : NSObject, Model {
             
             case SharingInvitation.expiryKey:
                 return {(x:Any) -> Any? in
-                    return Database.date(x as! String, fromFormat: .DATETIME)
+                    return DateExtras.date(x as! String, fromFormat: .DATETIME)
                 }
             
             default:
@@ -79,9 +79,9 @@ class SharingInvitationRepository : Repository {
         return "SharingInvitation"
     }
     
-    let dateFormat = Database.MySQLDateFormat.DATETIME
+    let dateFormat = DateExtras.DateFormat.DATETIME
         
-    func create() -> Database.TableCreationResult {
+    func upcreate() -> Database.TableUpcreateResult {
         let spMaxLen = SharingPermission.maxStringLength()
         let createColumns =
             // Id for the sharing invitation-- I'm not using a regular sequential numeric Id here to avoid attacks where someone could enumerate sharing invitation ids.
@@ -120,7 +120,7 @@ class SharingInvitationRepository : Repository {
         case .sharingInvitationUUID(let uuid):
             return "sharingInvitationUUID = '\(uuid)'"
         case .staleExpiryDates:
-            let staleDateString = Database.date(Date(), toFormat: dateFormat)
+            let staleDateString = DateExtras.date(Date(), toFormat: dateFormat)
             return "expiry < '\(staleDateString)'"
         }
     }
@@ -133,7 +133,7 @@ class SharingInvitationRepository : Repository {
     func add(owningUserId:UserId, sharingPermission:SharingPermission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
         let calendar = Calendar.current
         let expiryDate = calendar.date(byAdding: .second, value: Int(expiryDuration), to: Date())!
-        let expiryDateString = Database.date(expiryDate, toFormat: dateFormat)
+        let expiryDateString = DateExtras.date(expiryDate, toFormat: dateFormat)
         
         let uuid = UUID().uuidString
         

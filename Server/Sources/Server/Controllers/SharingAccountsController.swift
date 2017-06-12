@@ -11,7 +11,7 @@ import Credentials
 
 class SharingAccountsController : ControllerProtocol {
     class func setup(db:Database) -> Bool {
-        if case .failure(_) = SharingInvitationRepository(db).create() {
+        if case .failure(_) = SharingInvitationRepository(db).upcreate() {
             return false
         }
         

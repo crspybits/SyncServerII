@@ -60,18 +60,24 @@ public extension RequestMessage {
     }
     
     func urlParameters() -> String? {
+        // 6/9/17; I was previously using `valueFor` method, and not just converting to a dict. Can't recall why. However, this started giving me grief when I started using dates.
+        guard let jsonDict = toJSON() else {
+#if SERVER
+            Log.error(message: "Could not convert toJSON()!")
+#endif
+            return nil
+        }
+        
         var result = ""
         for key in self.allKeys() {
-            if let keyValue = valueFor(property: key, of: self) {
+            if let keyValue = jsonDict[key] {
                 if result.characters.count > 0 {
                     result += "&"
                 }
-
-                // At this point, keyValue while officially of "Any" type in the code, can actually be an optional. Any, it turns out is compatible with optional types. And if we use this optional value in "\(key)=\(keyValue)" below, we get `Optional(Something)` for the \(keyValue). Odd.
                 
-                let newKeyValue = "\(key)=\(unwrap(keyValue))"
+                let newURLParameter = "\(key)=\(keyValue)"
                 
-                if let escapedNewKeyValue = newKeyValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) {
+                if let escapedNewKeyValue = newURLParameter.escape() {
                     result += escapedNewKeyValue
                 }
                 else {

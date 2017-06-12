@@ -31,19 +31,19 @@ class ServerTestCase : XCTestCase {
         self.db = Database()
         
         _ = UserRepository(db).remove()
-        _ = UserRepository(db).create()
+        _ = UserRepository(db).upcreate()
         _ = UploadRepository(db).remove()
-        _ = UploadRepository(db).create()
+        _ = UploadRepository(db).upcreate()
         _ = MasterVersionRepository(db).remove()
-        _ = MasterVersionRepository(db).create()
+        _ = MasterVersionRepository(db).upcreate()
         _ = FileIndexRepository(db).remove()
-        _ = FileIndexRepository(db).create()
+        _ = FileIndexRepository(db).upcreate()
         _ = LockRepository(db).remove()
-        _ = LockRepository(db).create()
+        _ = LockRepository(db).upcreate()
         _ = DeviceUUIDRepository(db).remove()
-        _ = DeviceUUIDRepository(db).create()
+        _ = DeviceUUIDRepository(db).upcreate()
         _ = SharingInvitationRepository(db).remove()
-        _ = SharingInvitationRepository(db).create()
+        _ = SharingInvitationRepository(db).upcreate()
     }
     
     override func tearDown() {
@@ -85,7 +85,9 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: cloudFolderName,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: masterVersion
+            UploadFileRequest.masterVersionKey: masterVersion,
+            UploadFileRequest.creationDateKey: DateExtras.date(Date(), toFormat: .DATETIME),
+            UploadFileRequest.updateDateKey: DateExtras.date(Date(), toFormat: .DATETIME)
         ])!
         
         uploadRequest.appMetaData = appMetaData
@@ -164,13 +166,16 @@ class ServerTestCase : XCTestCase {
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
         let sizeOfCatFileInBytes:Int64 = 1162662
         let data = try! Data(contentsOf: fileURL)
-        
+        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
+
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: MasterVersionInt(0)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(0),
+            UploadFileRequest.creationDateKey: dateString,
+            UploadFileRequest.updateDateKey: dateString
         ])
         
         Log.info("Starting runUploadTest: uploadJPEGFile")

@@ -161,7 +161,7 @@ class TestCase: XCTestCase {
             finalDeviceUUID = theDeviceUUID!
         }
         
-        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: finalDeviceUUID, appMetaData: appMetaData, fileVersion: 0)
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: finalDeviceUUID, appMetaData: appMetaData, fileVersion: 0, creationDate:Date(), updateDate:Date())
         
         // Just to get the size-- this is redundant with the file read in ServerAPI.session.uploadFile
         guard let fileData = try? Data(contentsOf: file.localURL) else {
@@ -212,7 +212,7 @@ class TestCase: XCTestCase {
         
         let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: fileName, withExtension: fileExtension)!
 
-        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: mimeType, cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         
         // Just to get the size-- this is redundant with the file read in ServerAPI.session.uploadFile
         guard let fileData = try? Data(contentsOf: file.localURL) else {

@@ -20,6 +20,12 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible, Filenamin
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String?
     
+    static let creationDateKey = "creationDate"
+    var creationDate: Date?
+ 
+    static let updateDateKey = "updateDate"
+    var updateDate: Date?
+    
     static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName: String?
     
@@ -39,7 +45,7 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible, Filenamin
     var fileSizeBytes: Int64!
     
     public var description: String {
-        return "fileUUID: \(fileUUID); deviceUUID: \(String(describing: deviceUUID)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(String(describing: cloudFolderName))"
+        return "fileUUID: \(fileUUID); deviceUUID: \(String(describing: deviceUUID)); creationDate: \(String(describing: creationDate)); updateDate: \(String(describing: updateDate)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(String(describing: cloudFolderName))"
     }
     
     required public init?(json: JSON) {
@@ -53,6 +59,10 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible, Filenamin
         self.fileSizeBytes = Decoder.decode(int64ForKey: FileInfo.fileSizeBytesKey)(json)
         
         self.cloudFolderName = FileInfo.cloudFolderNameKey <~~ json
+        
+        let dateFormatter = DateExtras.getDateFormatter(format: .DATETIME)
+        self.creationDate = Decoder.decode(dateForKey: FileInfo.creationDateKey, dateFormatter: dateFormatter)(json)
+        self.updateDate = Decoder.decode(dateForKey: FileInfo.updateDateKey, dateFormatter: dateFormatter)(json)
     }
     
     convenience init?() {
@@ -60,6 +70,8 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible, Filenamin
     }
     
     public func toJSON() -> JSON? {
+        let dateFormatter = DateExtras.getDateFormatter(format: .DATETIME)
+
         return jsonify([
             FileInfo.fileUUIDKey ~~> self.fileUUID,
             FileInfo.deviceUUIDKey ~~> self.deviceUUID,
@@ -68,7 +80,9 @@ public class FileInfo : Encodable, Decodable, CustomStringConvertible, Filenamin
             FileInfo.deletedKey ~~> self.deleted,
             FileInfo.fileVersionKey ~~> self.fileVersion,
             FileInfo.fileSizeBytesKey ~~> self.fileSizeBytes,
-            FileInfo.cloudFolderNameKey ~~> self.cloudFolderName
+            FileInfo.cloudFolderNameKey ~~> self.cloudFolderName,
+            Encoder.encode(dateForKey: FileInfo.creationDateKey, dateFormatter: dateFormatter)(self.creationDate),
+            Encoder.encode(dateForKey: FileInfo.updateDateKey, dateFormatter: dateFormatter)(self.updateDate)
         ])
     }
 }

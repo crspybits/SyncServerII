@@ -85,7 +85,7 @@ class ServerAPI_NetworkLoss: TestCase {
 
         let fileURL = Bundle(for: ServerAPI_UploadFile.self).url(forResource: "UploadMe", withExtension: "txt")!
         
-        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: "text/plain", cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0)
+        let file = ServerAPI.File(localURL: fileURL, fileUUID: uploadFileUUID, mimeType: "text/plain", cloudFolderName: cloudFolderName, deviceUUID: deviceUUID.uuidString, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         
         let masterVersion = getMasterVersion()
 

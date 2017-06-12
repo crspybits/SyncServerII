@@ -31,7 +31,9 @@ class MessageTests: ServerTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            UploadFileRequest.creationDateKey: DateExtras.date(Date(), toFormat: .DATETIME),
+            UploadFileRequest.updateDateKey: DateExtras.date(Date(), toFormat: .DATETIME)
         ])
         
         let fileVersion = valueFor(property: UploadFileRequest.fileVersionKey, of: uploadRequest! as Any) as? FileVersionInt
@@ -43,34 +45,42 @@ class MessageTests: ServerTestCase {
 
     func testURLParameters() {
         let uuidString1 = PerfectLib.UUID().string
+        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
+        let escapedDateString = dateString.escape()!
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            UploadFileRequest.creationDateKey: dateString,
+            UploadFileRequest.updateDateKey: dateString
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(UploadFileRequest.creationDateKey)=\(escapedDateString)&\(UploadFileRequest.updateDateKey)=\(escapedDateString)", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersWithIntegersAsStrings() {
         let uuidString1 = PerfectLib.UUID().string
-        
+        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
+        let escapedDateString = dateString.escape()!
+
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: "1",
-            UploadFileRequest.masterVersionKey: "42"
+            UploadFileRequest.masterVersionKey: "42",
+            UploadFileRequest.creationDateKey: dateString,
+            UploadFileRequest.updateDateKey: dateString
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(UploadFileRequest.creationDateKey)=\(escapedDateString)&\(UploadFileRequest.updateDateKey)=\(escapedDateString)", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersForUploadDeletion() {
@@ -95,25 +105,32 @@ class MessageTests: ServerTestCase {
     }
     
     func testBadUUIDForFileName() {
+        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
+
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            UploadFileRequest.creationDateKey: dateString,
+            UploadFileRequest.updateDateKey: dateString
         ])
         XCTAssert(uploadRequest == nil)
     }
     
     func testPropertyHasValue() {
         let uuidString1 = PerfectLib.UUID().string
-        
+        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
+
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            UploadFileRequest.creationDateKey: dateString,
+            UploadFileRequest.updateDateKey: dateString
         ])
         
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileUUIDKey))
@@ -121,6 +138,8 @@ class MessageTests: ServerTestCase {
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.cloudFolderNameKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileVersionKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.masterVersionKey))
+        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.creationDateKey))
+        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.updateDateKey))
     }
     
     func testNilRequestMessageParams() {
@@ -166,6 +185,21 @@ extension MessageTests {
             ("testNonNilRequestMessageParams", testNonNilRequestMessageParams),
             ("testDoneUploadsResponse", testDoneUploadsResponse)
         ]
+    }
+
+    // Modified from https://oleb.net/blog/2017/03/keeping-xctest-in-sync/
+    func testLinuxTestSuiteIncludesAllTests() {
+        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+            let thisClass = type(of: self)
+            
+            // Adding 1 to linuxCount because it doesn't have *this* test.
+            let linuxCount = thisClass.allTests.count + 1
+            
+            let darwinCount = Int(thisClass
+                .defaultTestSuite().testCaseCount)
+            XCTAssertEqual(linuxCount, darwinCount,
+                "\(darwinCount - linuxCount) test(s) are missing from allTests")
+        #endif
     }
 }
 

@@ -23,8 +23,12 @@ class FileIndex : NSObject, Model, Filenaming {
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID:String!
     
-    // TODO: *0*
-    // var creationDate:Date!
+    static let creationDateKey = "creationDate"
+    var creationDate:Date!
+    
+    // Mostly for future use since we're not yet allowing multiple file versions.
+    static let updateDateKey = "updateDate"
+    var updateDate:Date!
     
     // The userId of the owning user.
     static let userIdKey = "userId"
@@ -59,6 +63,12 @@ class FileIndex : NSObject, Model, Filenaming {
                 
             case FileIndex.deviceUUIDKey:
                 deviceUUID = newValue as! String?
+                
+            case FileIndex.creationDateKey:
+                creationDate = newValue as! Date?
+
+            case FileIndex.updateDateKey:
+                updateDate = newValue as! Date?
                 
             case FileIndex.userIdKey:
                 userId = newValue as! UserId?
@@ -102,13 +112,23 @@ class FileIndex : NSObject, Model, Filenaming {
                     return (x as! Int8) == 1
                 }
             
+            case FileIndex.creationDateKey:
+                return {(x:Any) -> Any? in
+                    return DateExtras.date(x as! String, fromFormat: .DATETIME)
+                }
+
+            case FileIndex.updateDateKey:
+                return {(x:Any) -> Any? in
+                    return DateExtras.date(x as! String, fromFormat: .DATETIME)
+                }
+            
             default:
                 return nil
         }
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID); creationDate: \(creationDate); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
     }
 }
 
@@ -123,7 +143,7 @@ class FileIndexRepository : Repository {
         return "FileIndex"
     }
     
-    func create() -> Database.TableCreationResult {
+    func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(fileIndexId BIGINT NOT NULL AUTO_INCREMENT, " +
                         
@@ -136,7 +156,11 @@ class FileIndexRepository : Repository {
             // identifies a specific mobile device (assigned by app)
             // This plays a different role than it did in the Upload table. Here, it forms part of the filename in cloud storage, and thus must be retained. We will ignore this field otherwise, i.e., we will not have two entries in this table for the same userId, fileUUID pair.
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
-                
+            
+            // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates.
+            "creationDate DATETIME," +
+            "updateDate DATETIME," +
+
             // MIME type of the file
             "mimeType VARCHAR(\(Database.maxMimeTypeLength)) NOT NULL, " +
 
@@ -155,15 +179,36 @@ class FileIndexRepository : Repository {
             "UNIQUE (fileUUID, userId), " +
             "UNIQUE (fileIndexId))"
         
-        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        switch result {
+        case .success(.alreadyPresent):
+            // Table was already there. Do we need to update it?
+            // Evolution 1: Are creationDate and updateDate present? If not, add them.
+            if db.columnExists(Upload.creationDateKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.creationDateKey) DATETIME", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            if db.columnExists(Upload.updateDateKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.updateDateKey) DATETIME", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            break
+            
+        default:
+            break
+        }
+        
+        return result
     }
     
     private func columnNames(appMetaDataFieldName:String = "appMetaData,") -> String {
-        return "fileUUID, userId, deviceUUID, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes, cloudFolderName"
+        return "fileUUID, userId, deviceUUID, creationDate, updateDate, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes, cloudFolderName"
     }
     
     private func haveNilFieldForAdd(fileIndex:FileIndex) -> Bool {
-        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil || fileIndex.cloudFolderName == nil
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil || fileIndex.cloudFolderName == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
@@ -185,7 +230,10 @@ class FileIndexRepository : Repository {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
-        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), '\(fileIndex.cloudFolderName!)');"
+        let creationDateValue = DateExtras.date(fileIndex.creationDate, toFormat: .DATETIME)
+        let updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
+
+        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), '\(fileIndex.cloudFolderName!)');"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -201,7 +249,7 @@ class FileIndexRepository : Repository {
         return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil
     }
     
-    // The FileIndex model *must* have an fileIndexId
+    // The FileIndex model *must* have a fileIndexId
     func update(fileIndex:FileIndex) -> Bool {
         if fileIndex.fileIndexId == nil ||
             haveNilFieldForUpdate(fileIndex: fileIndex) {
@@ -298,6 +346,8 @@ class FileIndexRepository : Repository {
             fileIndex.userId = owningUserId
             fileIndex.appMetaData = upload.appMetaData
             fileIndex.cloudFolderName = upload.cloudFolderName
+            fileIndex.creationDate = upload.creationDate
+            fileIndex.updateDate = upload.updateDate
             
             let key = LookupKey.primaryKeys(userId: "\(owningUserId)", fileUUID: upload.fileUUID)
             let result = self.lookup(key: key, modelInit: FileIndex.init)
@@ -400,6 +450,8 @@ class FileIndexRepository : Repository {
             fileInfo.fileSizeBytes = rowModel.fileSizeBytes
             fileInfo.mimeType = rowModel.mimeType
             fileInfo.cloudFolderName = rowModel.cloudFolderName
+            fileInfo.creationDate = rowModel.creationDate
+            fileInfo.updateDate = rowModel.updateDate
             
             result.append(fileInfo)
         }

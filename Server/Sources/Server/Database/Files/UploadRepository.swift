@@ -11,53 +11,6 @@
 import Foundation
 import PerfectLib
 
-/*
-    var uploadsSchema = new Schema({
-        // _id: (ObjectId), // Uniquely identifies the upload (autocreated by Mongo)
-        
-        // Together, these three form a unique key. The deviceId is needed because two devices using the same userId (i.e., the same owning user credentials) could be uploading the same file at the same time.
-		fileId: String, // UUID; permanent reference to file, assigned by app
-		userId: ObjectId, // reference into PSUserCredentials (i.e., _id from PSUserCredentials)
-        deviceId: String, // UUID; identifies a specific mobile device (assigned by app)
-
-        cloudFileName: String, // name of the file in cloud storage excluding the folder path.
-
-        mimeType: String, // MIME type of the file
-        appMetaData: Schema.Types.Mixed, // Free-form JSON Structure; App-specific meta data
-        
-        fileUpload: Boolean, // true if file-upload, false if upload-deletion.
-        
-        fileVersion: {
-          type: Number,
-          min:  0,
-          validate: {
-            validator: Number.isInteger,
-            message: '{VALUE} is not an integer value'
-          }
-        },
-        
-        state: {
-          type: Number,
-          min:  0,
-          max: exports.maxStateValue,
-          validate: {
-            validator: Number.isInteger,
-            message: '{VALUE} is not an integer value'
-          }
-        },
-        
-        fileSizeBytes: {
-          type: Number,
-          min:  0,
-          validate: {
-            validator: Number.isInteger,
-            message: '{VALUE} is not an integer value'
-          }
-        }
-        
-    }, { collection: collectionName });
-*/
-
 enum UploadState : String {
 case uploading
 case uploaded
@@ -83,8 +36,13 @@ class Upload : NSObject, Model, Filenaming {
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
     
-    // TODO: *0*
-    // var creationDate:Date!
+    // The following two dates are required for file uploads.
+    static let creationDateKey = "creationDate"
+    var creationDate:Date?
+    
+    // Mostly for future use since we're not yet allowing multiple file versions.
+    static let updateDateKey = "updateDate"
+    var updateDate:Date?
     
     static let stateKey = "state"
     var state:UploadState!
@@ -93,7 +51,8 @@ class Upload : NSObject, Model, Filenaming {
     var appMetaData: String?
     
     static let fileSizeBytesKey = "fileSizeBytes"
-    // Making this optional to give flexibility about when we create the Upload entry in the repo (e.g., before or after the upload to cloud storage).
+    
+    // Required only when the state is .uploaded
     var fileSizeBytes: Int64?
     
     // These two are not present in upload deletions.
@@ -119,6 +78,12 @@ class Upload : NSObject, Model, Filenaming {
                 
             case Upload.deviceUUIDKey:
                 deviceUUID = newValue as! String?
+                
+            case Upload.creationDateKey:
+                creationDate = newValue as! Date?
+
+            case Upload.updateDateKey:
+                updateDate = newValue as! Date?
 
             case Upload.stateKey:
                 state = newValue as! UploadState?
@@ -152,6 +117,16 @@ class Upload : NSObject, Model, Filenaming {
                     return UploadState(rawValue: x as! String)
                 }
             
+            case Upload.creationDateKey:
+                return {(x:Any) -> Any? in
+                    return DateExtras.date(x as! String, fromFormat: .DATETIME)
+                }
+
+            case Upload.updateDateKey:
+                return {(x:Any) -> Any? in
+                    return DateExtras.date(x as! String, fromFormat: .DATETIME)
+                }
+            
             default:
                 return nil
         }
@@ -169,11 +144,11 @@ class UploadRepository : Repository {
         return "Upload"
     }
     
-    func create() -> Database.TableCreationResult {
+    func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(uploadId BIGINT NOT NULL AUTO_INCREMENT, " +
             
-            // Together, these three form a unique key. The deviceUUID is needed because two devices using the same userId (i.e., the same owning user credentials) could be uploading the same file at the same time.
+            // Together, the next three fields form a unique key. The deviceUUID is needed because two devices using the same userId (i.e., the same owning user credentials) could be uploading the same file at the same time.
         
             // permanent reference to file (assigned by app)
             "fileUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
@@ -183,6 +158,10 @@ class UploadRepository : Repository {
                 
             // identifies a specific mobile device (assigned by app)
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
+            
+            // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates. Plus, upload deletions need not have dates.
+            "creationDate DATETIME," +
+            "updateDate DATETIME," +
                 
             // MIME type of the file; will be nil for UploadDeletion's.
             "mimeType VARCHAR(\(Database.maxMimeTypeLength)), " +
@@ -202,11 +181,49 @@ class UploadRepository : Repository {
             "UNIQUE (fileUUID, userId, deviceUUID), " +
             "UNIQUE (uploadId))"
         
-        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        switch result {
+        case .success(.alreadyPresent):
+            // Table was already there. Do we need to update it?
+            // Evolution 1: Are creationDate and updateDate present? If not, add them.
+            if db.columnExists(Upload.creationDateKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.creationDateKey) DATETIME", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            if db.columnExists(Upload.updateDateKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.updateDateKey) DATETIME", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            break
+            
+        default:
+            break
+        }
+        
+        return result
     }
     
     private func haveNilField(upload:Upload) -> Bool {
-        return upload.fileUUID == nil || upload.userId == nil || upload.fileVersion == nil || upload.state == nil
+        // Basic criteria-- applies across uploads and upload deletion.
+        if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.fileVersion == nil || upload.state == nil {
+            return true
+        }
+        if upload.state == .toDeleteFromFileIndex {
+            return false
+        }
+        
+        // We're uploading a file if we get to here. Criteria only for file uploads:
+        if upload.mimeType == nil || upload.cloudFolderName == nil || upload.creationDate == nil || upload.updateDate == nil {
+            return true
+        }
+        if upload.state == .uploading {
+            return false
+        }
+        
+        // Have to have fileSizeBytes when we're in the uploaded state.
+        return upload.fileSizeBytes == nil
     }
     
     enum AddResult {
@@ -224,15 +241,30 @@ class UploadRepository : Repository {
         }
     
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-        let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaData, fieldName: "appMetaData")
+        let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaData, fieldName: Upload.appMetaDataKey)
 
-        let (fileSizeFieldValue, fileSizeFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileSizeBytes, fieldName: "fileSizeBytes", fieldIsString:false)
+        let (fileSizeFieldValue, fileSizeFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileSizeBytes, fieldName: Upload.fileSizeBytesKey, fieldIsString:false)
  
-        let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: "mimeType")
+        let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
         
-        let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: upload.cloudFolderName, fieldName: "cloudFolderName")
+        let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: upload.cloudFolderName, fieldName: Upload.cloudFolderNameKey)
         
-        let query = "INSERT INTO \(tableName) (fileUUID, userId, deviceUUID, fileVersion, state \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(cloudFolderNameFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', \(upload.fileVersion!), '\(upload.state!.rawValue)' \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(cloudFolderNameFieldValue));"
+        var creationDateValue:String?
+        var updateDateValue:String?
+        
+        if upload.creationDate != nil {
+            creationDateValue = DateExtras.date(upload.creationDate!, toFormat: .DATETIME)
+        }
+        
+        if upload.updateDate != nil {
+            updateDateValue = DateExtras.date(upload.updateDate!, toFormat: .DATETIME)
+        }
+        
+         let (creationDateFieldValue, creationDateFieldName) = getInsertFieldValueAndName(fieldValue: creationDateValue, fieldName: Upload.creationDateKey)
+        
+         let (updateDateFieldValue, updateDateFieldName) = getInsertFieldValueAndName(fieldValue: updateDateValue, fieldName: Upload.updateDateKey)
+        
+        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.fileVersionKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(cloudFolderNameFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', \(upload.fileVersion!), '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(cloudFolderNameFieldValue));"
         
         if db.connection.query(statement: query) {
             return .success(uploadId: db.connection.lastInsertId())
@@ -354,6 +386,8 @@ class UploadRepository : Repository {
             fileInfo.fileSizeBytes = rowModel.fileSizeBytes
             fileInfo.mimeType = rowModel.mimeType
             fileInfo.cloudFolderName = rowModel.cloudFolderName
+            fileInfo.creationDate = rowModel.creationDate
+            fileInfo.updateDate = rowModel.creationDate
             
             fileInfoResult.append(fileInfo)
         }

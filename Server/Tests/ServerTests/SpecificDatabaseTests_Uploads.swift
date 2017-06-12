@@ -27,29 +27,43 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         super.tearDown()
     }
 
-    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:String? = "{ \"foo\": \"bar\" }", userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string) -> Upload {
+    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:String? = "{ \"foo\": \"bar\" }", userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string, missingField:Bool = false) -> Upload {
         let upload = Upload()
-        upload.deviceUUID = deviceUUID
+        
+        if !missingField {
+            upload.deviceUUID = deviceUUID
+        }
+        
         upload.fileSizeBytes = fileSizeBytes
         upload.fileUUID = PerfectLib.UUID().string
         upload.fileVersion = 1
         upload.mimeType = mimeType
-        upload.state = .uploaded
+        upload.state = .uploading
         upload.userId = userId
         upload.appMetaData = appMetaData
+        upload.cloudFolderName = testFolder
+        upload.creationDate = Date()
+        upload.updateDate = Date()
         
         let result = UploadRepository(db).add(upload: upload)
         
-        var uploadId:Int64!
+        var uploadId:Int64?
         switch result {
         case .success(uploadId: let id):
+            if missingField {
+                XCTFail()
+            }
             uploadId = id
         
         default:
-            XCTFail()
+            if !missingField {
+                XCTFail()
+            }
         }
         
-        XCTAssert(uploadId == 1, "Bad uploadId!")
+        if !missingField {
+            XCTAssert(uploadId == 1, "Bad uploadId!")
+        }
         
         upload.uploadId = uploadId
         
@@ -60,16 +74,62 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         _ = doAddUpload()
     }
     
-    func testAddUploadSucceedsWithNilFileSizeBytes() {
-        _ = doAddUpload(fileSizeBytes:nil)
+    func testAddUploadWithMissingField() {
+        _ = doAddUpload(missingField: true)
+    }
+    
+    func doAddUploadDeletion(userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string, missingField:Bool = false) -> Upload {
+        let upload = Upload()
+        upload.deviceUUID = deviceUUID
+        upload.fileUUID = PerfectLib.UUID().string
+        upload.fileVersion = 1
+        upload.state = .toDeleteFromFileIndex
+        
+        if !missingField {
+            upload.userId = userId
+        }
+        
+        let result = UploadRepository(db).add(upload: upload)
+        
+        var uploadId:Int64?
+        switch result {
+        case .success(uploadId: let id):
+            if missingField {
+                XCTFail()
+            }
+            uploadId = id
+        
+        default:
+            if !missingField {
+                XCTFail()
+            }
+        }
+        
+        if missingField {
+            XCTAssert(uploadId == nil, "Good uploadId!")
+        }
+        else {
+            XCTAssert(uploadId == 1, "Bad uploadId!")
+            upload.uploadId = uploadId
+        }
+        
+        return upload
+    }
+    
+    func testAddUploadDeletion() {
+        _ = doAddUploadDeletion()
+    }
+    
+    func testAddUploadDeletionWithMissingField() {
+        _ = doAddUploadDeletion(missingField:true)
     }
     
     func testAddUploadSucceedsWithNilAppMetaData() {
         _ = doAddUpload(appMetaData:nil)
     }
     
-    func testAddUploadSucceedsWithNilMimeType() {
-        _ = doAddUpload(mimeType:nil)
+    func testAddUploadSucceedsWithNilFileSizeBytes() {
+        _ = doAddUpload(fileSizeBytes:nil)
     }
     
     func testUpdateUpload() {
@@ -83,21 +143,16 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
-    func testUpdateUploadSucceedsWithNilFileSize() {
+    func testUpdateUploadToUploadedFailsWithoutFileSizeBytes() {
         let upload = doAddUpload()
         upload.fileSizeBytes = nil
-        XCTAssert(UploadRepository(db).update(upload: upload))
+        upload.state = .uploaded
+        XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
     func testUpdateUploadSucceedsWithNilAppMetaData() {
         let upload = doAddUpload()
         upload.appMetaData = nil
-        XCTAssert(UploadRepository(db).update(upload: upload))
-    }
-    
-    func testUpdateUploadSucceedsWithNilMimeType() {
-        let upload = doAddUpload()
-        upload.mimeType = nil
         XCTAssert(UploadRepository(db).update(upload: upload))
     }
     
@@ -178,17 +233,33 @@ extension SpecificDatabaseTests_Uploads {
     static var allTests : [(String, (SpecificDatabaseTests_Uploads) -> () throws -> Void)] {
         return [
             ("testAddUpload", testAddUpload),
-            ("testAddUploadSucceedsWithNilFileSizeBytes", testAddUploadSucceedsWithNilFileSizeBytes),
+            ("testAddUploadWithMissingField", testAddUploadWithMissingField),
+            ("testAddUploadDeletion", testAddUploadDeletion),
+            ("testAddUploadDeletionWithMissingField", testAddUploadDeletionWithMissingField),
             ("testAddUploadSucceedsWithNilAppMetaData", testAddUploadSucceedsWithNilAppMetaData),
-            ("testAddUploadSucceedsWithNilMimeType", testAddUploadSucceedsWithNilMimeType),
+            ("testAddUploadSucceedsWithNilFileSizeBytes", testAddUploadSucceedsWithNilFileSizeBytes),
             ("testUpdateUpload", testUpdateUpload),
             ("testUpdateUploadFailsWithoutUploadId", testUpdateUploadFailsWithoutUploadId),
-            ("testUpdateUploadSucceedsWithNilFileSize", testUpdateUploadSucceedsWithNilFileSize),
+            ("testUpdateUploadToUploadedFailsWithoutFileSizeBytes", testUpdateUploadToUploadedFailsWithoutFileSizeBytes),
             ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
-            ("testUpdateUploadSucceedsWithNilMimeType", testUpdateUploadSucceedsWithNilMimeType),
             ("testLookupFromUpload", testLookupFromUpload),
             ("testGetUploadsWithNoFiles", testGetUploadsWithNoFiles),
             ("testUploadedIndexWithOneFile", testUploadedIndexWithOneFile)
         ]
+    }
+    
+    // Modified from https://oleb.net/blog/2017/03/keeping-xctest-in-sync/
+    func testLinuxTestSuiteIncludesAllTests() {
+        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+            let thisClass = type(of: self)
+            
+            // Adding 1 to linuxCount because it doesn't have *this* test.
+            let linuxCount = thisClass.allTests.count + 1
+            
+            let darwinCount = Int(thisClass
+                .defaultTestSuite().testCaseCount)
+            XCTAssertEqual(linuxCount, darwinCount,
+                "\(darwinCount - linuxCount) test(s) are missing from allTests")
+        #endif
     }
 }

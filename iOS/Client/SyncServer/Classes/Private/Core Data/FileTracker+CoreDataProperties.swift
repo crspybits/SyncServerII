@@ -2,7 +2,7 @@
 //  FileTracker+CoreDataProperties.swift
 //  Pods
 //
-//  Created by Christopher Prince on 3/2/17.
+//  Created by Christopher Prince on 6/9/17.
 //
 //
 
@@ -13,7 +13,7 @@ import CoreData
 extension FileTracker {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<FileTracker> {
-        return NSFetchRequest<FileTracker>(entityName: "FileTracker");
+        return NSFetchRequest<FileTracker>(entityName: "FileTracker")
     }
 
     @NSManaged public var appMetaData: String?
@@ -21,7 +21,9 @@ extension FileTracker {
     @NSManaged public var fileUUIDInternal: String?
     @NSManaged public var fileVersionInternal: Int32
     @NSManaged public var localURLData: NSData?
-    @NSManaged public var statusRaw: String?
     @NSManaged public var mimeType: String?
+    @NSManaged public var statusRaw: String?
+    @NSManaged public var creationDate: NSDate?
+    @NSManaged public var updateDate: NSDate?
 
 }

@@ -207,6 +207,8 @@ class ServerAPI {
         let deviceUUID:String!
         let appMetaData:String?
         let fileVersion:FileVersionInt!
+        let creationDate:Date!
+        let updateDate:Date!
     }
     
     enum UploadFileError : Error {
@@ -223,17 +225,17 @@ class ServerAPI {
     func uploadFile(file:File, serverMasterVersion:MasterVersionInt, completion:((UploadFileResult?, Error?)->(Void))?) {
         let endpoint = ServerEndpoints.uploadFile
 
-        Log.msg("ServerNetworking.session.authenticationDelegate2: \(String(describing: ServerNetworking.session.authenticationDelegate))")
-        
         Log.special("file.fileUUID: \(file.fileUUID)")
-        
+
         let params:[String : Any] = [
             UploadFileRequest.fileUUIDKey: file.fileUUID,
             UploadFileRequest.mimeTypeKey: file.mimeType,
             UploadFileRequest.cloudFolderNameKey: file.cloudFolderName,
             UploadFileRequest.appMetaDataKey: file.appMetaData as Any,
             UploadFileRequest.fileVersionKey: file.fileVersion,
-            UploadFileRequest.masterVersionKey: serverMasterVersion
+            UploadFileRequest.masterVersionKey: serverMasterVersion,
+            UploadFileRequest.creationDateKey: DateExtras.date(file.creationDate, toFormat: .DATETIME),
+            UploadFileRequest.updateDateKey: DateExtras.date(file.updateDate, toFormat: .DATETIME)
         ]
         
         guard let uploadRequest = UploadFileRequest(json: params) else {

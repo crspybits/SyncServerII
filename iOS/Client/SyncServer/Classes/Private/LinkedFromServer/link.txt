@@ -27,3 +27,5 @@ ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/RedeemSha
 ln -s ../../../../../../Server/Sources/Server/Controllers/Types.swift
 ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/CheckCreds.swift
 ln -s ../../../../../../Server/Sources/Server/Requests\ and\ responses/Decoder+Extras.swift 
+ln -s ../../../../../../Server/Sources/Server/Utils/DateExtras.swift 
+ln -s ../../../../../../Server/Sources/Server/Utils/String+Extras.swift

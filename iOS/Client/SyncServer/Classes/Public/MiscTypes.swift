@@ -16,11 +16,11 @@ public typealias UUIDString = String
 public struct SyncAttributes {
     public var fileUUID:String!
     public var mimeType:String!
-    
-    // Internally, we use file versions. However, client's don't need to know about those-- clients just upload files and receive downloads.
-    // public var fileVersion:FileVersionInt!
-    
     public var appMetaData:String?
+    
+    // These are only present during download delegate calls
+    public var creationDate:Date?
+    public var updateDate:Date?
     
     public init(fileUUID:String, mimeType:String) {
         self.fileUUID = fileUUID

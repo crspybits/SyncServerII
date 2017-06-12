@@ -86,6 +86,10 @@ class Download {
                             dft.fileVersion = file.fileVersion
                             dft.mimeType = file.mimeType
                             dft.deletedOnServer = file.deleted!
+                            if file.creationDate != nil {
+                                dft.creationDate = file.creationDate! as NSDate
+                                dft.updateDate = file.updateDate! as NSDate
+                            }
                         }
                         
                         completionResult = .downloadsOrDeletionsAvailable(numberOfFiles: Int32(allFiles.count))

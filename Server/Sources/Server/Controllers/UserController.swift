@@ -13,15 +13,15 @@ import CredentialsGoogle
 class UserController : ControllerProtocol {
     // Don't do this setup in init so that database initalizations don't have to be done per endpoint call.
     class func setup(db:Database) -> Bool {
-        if case .failure(_) = UserRepository(db).create() {
+        if case .failure(_) = UserRepository(db).upcreate() {
             return false
         }
         
-        if case .failure(_) = MasterVersionRepository(db).create() {
+        if case .failure(_) = MasterVersionRepository(db).upcreate() {
             return false
         }
         
-        if case .failure(_) = DeviceUUIDRepository(db).create() {
+        if case .failure(_) = DeviceUUIDRepository(db).upcreate() {
             return false
         }
 

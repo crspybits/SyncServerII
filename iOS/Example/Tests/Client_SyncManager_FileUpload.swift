@@ -34,7 +34,7 @@ class Client_SyncServer_FileUpload: TestCase {
             masterVersion = Singleton.get().masterVersion
         }
         
-        let file = ServerAPI.File(localURL: nil, fileUUID: attr.fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        let file = ServerAPI.File(localURL: nil, fileUUID: attr.fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         onlyDownloadFile(comparisonFileURL: url, file: file, masterVersion: masterVersion)
     }
     
@@ -86,10 +86,10 @@ class Client_SyncServer_FileUpload: TestCase {
             masterVersion = Singleton.get().masterVersion
         }
         
-        let file1 = ServerAPI.File(localURL: nil, fileUUID: fileUUID1, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        let file1 = ServerAPI.File(localURL: nil, fileUUID: fileUUID1, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         onlyDownloadFile(comparisonFileURL: url as URL, file: file1, masterVersion: masterVersion)
         
-        let file2 = ServerAPI.File(localURL: nil, fileUUID: fileUUID2, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        let file2 = ServerAPI.File(localURL: nil, fileUUID: fileUUID2, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         onlyDownloadFile(comparisonFileURL: url as URL, file: file2, masterVersion: masterVersion)
     }
 
@@ -143,7 +143,7 @@ class Client_SyncServer_FileUpload: TestCase {
             masterVersion = Singleton.get().masterVersion
         }
         
-        let file = ServerAPI.File(localURL: nil, fileUUID: fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        let file = ServerAPI.File(localURL: nil, fileUUID: fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         onlyDownloadFile(comparisonFileURL: url2 as URL, file: file, masterVersion: masterVersion)
     }
     
@@ -225,7 +225,7 @@ class Client_SyncServer_FileUpload: TestCase {
             masterVersion = Singleton.get().masterVersion
         }
         
-        let file = ServerAPI.File(localURL: nil, fileUUID: fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        let file = ServerAPI.File(localURL: nil, fileUUID: fileUUID, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         onlyDownloadFile(comparisonFileURL: url as URL, file: file, masterVersion: masterVersion)
     }
     
@@ -318,10 +318,10 @@ class Client_SyncServer_FileUpload: TestCase {
             masterVersion = Singleton.get().masterVersion
         }
         
-        let file1 = ServerAPI.File(localURL: nil, fileUUID: fileUUID1, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        let file1 = ServerAPI.File(localURL: nil, fileUUID: fileUUID1, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         onlyDownloadFile(comparisonFileURL: url1 as URL, file: file1, masterVersion: masterVersion)
         
-        let file2 = ServerAPI.File(localURL: nil, fileUUID: fileUUID2, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0)
+        let file2 = ServerAPI.File(localURL: nil, fileUUID: fileUUID2, mimeType: nil, cloudFolderName: nil, deviceUUID: nil, appMetaData: nil, fileVersion: 0, creationDate:Date(), updateDate:Date())
         onlyDownloadFile(comparisonFileURL: url2 as URL, file: file2, masterVersion: masterVersion)
     }
     

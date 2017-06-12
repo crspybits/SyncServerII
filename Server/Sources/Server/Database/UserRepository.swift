@@ -193,7 +193,7 @@ class UserRepository : Repository {
     let credsIdMaxLength = 255
     let accountTypeMaxLength = 20
     
-    func create() -> Database.TableCreationResult {
+    func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(userId BIGINT NOT NULL AUTO_INCREMENT, " +
             "username VARCHAR(\(usernameMaxLength)) NOT NULL, " +

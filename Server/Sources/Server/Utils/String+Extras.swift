@@ -7,9 +7,12 @@
 //
 
 import Foundation
+#if SERVER
 import PerfectLib
+#endif
 
 extension String {
+#if SERVER
     func toJSONDictionary() -> [String:Any]? {
         guard let data = self.data(using: String.Encoding.utf8) else {
             return nil
@@ -30,5 +33,10 @@ extension String {
         }
         
         return jsonDict
+    }
+#endif
+
+    func escape() -> String? {
+        return addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
     }
 }
