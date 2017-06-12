@@ -54,8 +54,8 @@ extension FileController {
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadRequest.appMetaData
             upload.cloudFolderName = uploadRequest.cloudFolderName
-            upload.creationDate = Date()
-            upload.updateDate = Date()
+            upload.creationDate = uploadRequest.creationDate
+            upload.updateDate = uploadRequest.updateDate
             
             // In order to allow for client retries (both due to error conditions, and when the master version is updated), I need to enable this call to not fail on a retry. However, I don't have to actually upload the file a second time to cloud storage. 
             // If we have the entry for the file in the Upload table, then we can be assume we did not get an error uploading the file to cloud storage. This is because if we did get an error uploading the file, we would have done a rollback on the Upload table `add`.
