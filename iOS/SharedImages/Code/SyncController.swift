@@ -17,7 +17,7 @@ enum SyncControllerEvent {
 }
 
 protocol SyncControllerDelegate : class {
-    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String, title:String?)
+    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String, title:String?, creationDate: NSDate?)
     func removeLocalImage(syncController:SyncController, uuid:String)
     func syncEvent(syncController:SyncController, event:SyncControllerEvent)
 }
@@ -36,6 +36,11 @@ class SyncController {
     
     func add(image:Image) {
         var attr = SyncAttributes(fileUUID:image.uuid!, mimeType:image.mimeType!)
+        attr.creationDate = image.creationDate! as Date
+        
+        // Don't have multiple file versions (yet).
+        attr.updateDate = image.creationDate! as Date
+        
         if image.title != nil {
             attr.appMetaData = "{\"\(ImageExtras.appMetaDataTitleKey)\": \"\(image.title!)\"}";
         }
@@ -84,7 +89,7 @@ extension SyncController : SyncServerDelegate {
                 }
             }
 
-            delegate.addLocalImage(syncController: self, url: url, uuid: download.downloadedFileAttributes.fileUUID, mimeType: download.downloadedFileAttributes.mimeType, title:title)
+            delegate.addLocalImage(syncController: self, url: url, uuid: download.downloadedFileAttributes.fileUUID, mimeType: download.downloadedFileAttributes.mimeType, title:title, creationDate:download.downloadedFileAttributes.creationDate as NSDate?)
         }
     }
 

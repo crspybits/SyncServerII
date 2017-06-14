@@ -24,3 +24,17 @@ if [ $? == 0 ] && [ "${CMD}" == "build" ] ; then
 	${buildLocation}/debug/Main ../../Private/Server/Server.json
 fi
 
+exit 0
+
+# For running SharedImages server on AWS
+
+# `stdbuf` gets rid of buffering; see also https://serverfault.com/questions/294218/is-there-a-way-to-redirect-output-to-a-file-without-buffering-on-unix-linux
+cd
+sudo bash
+source ~/.bashrc
+cd SyncServerII/Server/
+# Should have check here to make sure `Main` isn't running
+# and need to make sure we have selected SharedImages db.
+( stdbuf -o0 ./run.sh > ~/output.log 2>&1 & ) 
+
+

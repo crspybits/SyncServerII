@@ -379,8 +379,8 @@ class TestCase: XCTestCase {
                     XCTAssert(entriesResult.count == 1)
                 }
                 
-                XCTAssert(downloadsOccurred == 1)
-                XCTAssert(eventsOccurred == 1)
+                XCTAssert(downloadsOccurred == 1, "downloadsOccurred: \(downloadsOccurred)")
+                XCTAssert(eventsOccurred == 1, "eventsOccurred: \(eventsOccurred)")
                 expectation.fulfill()
             }
         }

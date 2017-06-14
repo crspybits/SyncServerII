@@ -209,8 +209,8 @@ public class SyncServer {
             newUft.appMetaData = attr.appMetaData
             newUft.fileUUID = attr.fileUUID
             newUft.mimeType = attr.mimeType
-            newUft.creationDate = NSDate()
-            newUft.updateDate = newUft.creationDate
+            newUft.creationDate = attr.creationDate as NSDate?
+            newUft.updateDate = attr.updateDate as NSDate?
             
             // TODO: *1* I think this mechanism for setting the file version of the UploadFileTracker is not correct. Analogous to the deletion case, where we wait until the last moment prior to the upload deletion, I think we have to wait until the last moment of file upload to figure out the file version of the upload. The issue comes in with a series of upload/sync/upload/sync's, where we won't get all of the file version's correct.
             if entry!.fileVersion == nil {

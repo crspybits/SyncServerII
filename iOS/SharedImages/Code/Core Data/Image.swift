@@ -42,14 +42,19 @@ public class Image: NSManagedObject {
     }
 
     // Only may throw when makeUUIDAndUpload is true.
-    class func newObjectAndMakeUUID(makeUUID: Bool) -> NSManagedObject {
+    class func newObjectAndMakeUUID(makeUUID: Bool, creationDate:NSDate? = nil) -> NSManagedObject {
         let image = CoreData.sessionNamed(CoreDataExtras.sessionName).newObject(withEntityName: self.entityName()) as! Image
         
         if makeUUID {
             image.uuid = UUID.make()
         }
         
-        image.creationDate = NSDate()
+        if creationDate == nil {
+            image.creationDate = NSDate()
+        }
+        else {
+            image.creationDate = creationDate
+        }
         
         return image
     }

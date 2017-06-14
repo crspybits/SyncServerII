@@ -50,7 +50,7 @@ class ViewController: SMGoogleUserSignInViewController {
 }
 
 extension ViewController : SMGoogleUserSignInDelegate {
-    func shouldDoUserAction(creds:GoogleSignInCreds) -> UserActionNeeded {
+    func shouldDoUserAction(googleUserSignIn: SMGoogleUserSignIn) -> UserActionNeeded {
         var result:UserActionNeeded
         
         if signinTypeSwitch.isOn() {

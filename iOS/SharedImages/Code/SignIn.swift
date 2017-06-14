@@ -13,6 +13,10 @@ class SignIn {
     let googleSignIn: SMGoogleUserSignIn!
     static let session = SignIn()
     
+    // These must be stored in user defaults-- so that if they delete the app, we lose it, and can start again. Storing both the email and userId because the userId (at least for Google) is just a number and not intelligible in the UI.
+    static var currentUserEmail = SMPersistItemString(name:"SignIn.currentUserEmail", initialStringValue:"",  persistType: .userDefaults)
+    static var currentUserId = SMPersistItemString(name:"SignIn.currentUserId", initialStringValue:"",  persistType: .userDefaults)
+
     private init() {
         var serverClientId:String!
         var appClientId:String!

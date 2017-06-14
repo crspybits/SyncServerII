@@ -18,7 +18,7 @@ public struct SyncAttributes {
     public var mimeType:String!
     public var appMetaData:String?
     
-    // These are only present during download delegate calls
+    // These are present during download delegate calls and are needed when uploading a file.
     public var creationDate:Date?
     public var updateDate:Date?
     

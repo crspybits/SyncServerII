@@ -175,12 +175,32 @@ extension SignInVC : SharingInvitationDelegate {
 }
 
 extension SignInVC : SMGoogleUserSignInDelegate {
-    func shouldDoUserAction(creds:GoogleSignInCreds) -> UserActionNeeded {
+    func shouldDoUserAction(googleUserSignIn:SMGoogleUserSignIn) -> UserActionNeeded {
         var result:UserActionNeeded
         
-        if acceptSharingInvitation {
+        if SignIn.currentUserId.stringValue != "" &&
+            googleUserSignIn.signedInUser.userId != nil &&
+            SignIn.currentUserId.stringValue != googleUserSignIn.signedInUser.userId &&
+            Image.fetchAll().count > 0 {
+            
+            // Attempting to sign in as a different user, and there are images present. Yikes.  Not allowing this yet because this would try to access a different account on the server and would just confuse things.
+            googleUserSignIn.signUserOut()
+            
+            var title:String = "You are trying to sign in as a different user than before."
+            if SignIn.currentUserEmail.stringValue != "" {
+                title = "You were previously signed in as \(SignIn.currentUserEmail.stringValue) but you are now signing in as a different user."
+            }
+            
+            let alert = UIAlertController(title: title, message: "The Shared Images app doesn't allow this (yet).", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .cancel) {alert in
+            })
+            self.present(alert, animated: true, completion: nil)
+            result = .none
+        }
+        else if acceptSharingInvitation {
             result = .createSharingUser(invitationCode: SharingInvitation.session.sharingInvitationCode!)
-        } else if signinTypeSwitch.isOn() {
+        }
+        else if signinTypeSwitch.isOn() {
             result = .createOwningUser
         }
         else {
@@ -191,6 +211,14 @@ extension SignInVC : SMGoogleUserSignInDelegate {
     }
     
     func userActionOccurred(action:UserActionOccurred, googleUserSignIn:SMGoogleUserSignIn) {
+        func successfulSignIn() {
+            if SignIn.currentUserId.stringValue == "" {
+                // No user signed in yet.
+                SignIn.currentUserEmail.stringValue = googleUserSignIn.signedInUser.email ?? ""
+                SignIn.currentUserId.stringValue = googleUserSignIn.signedInUser.userId ?? ""
+            }
+        }
+        
         switch action {
         case .userSignedOut:
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -202,12 +230,15 @@ extension SignInVC : SMGoogleUserSignInDelegate {
             
         case .existingUserSignedIn(let sharingPermission):
             self.sharingPermission = sharingPermission
+            successfulSignIn()
             
         case .owningUserCreated:
             sharingPermission = nil
+            successfulSignIn()
             
         case .sharingUserCreated:
             self.sharingPermission = SharingInvitation.session.sharingInvitationPermission!
+            successfulSignIn()
         }
         
         setSharingButtonState()

@@ -13,8 +13,8 @@ import SMCoreLib
 class ImageCollectionVC : UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var title: UILabel!
-    private var image:Image!
-    private weak var syncController:SyncController!
+    private(set) var image:Image!
+    private(set) weak var syncController:SyncController!
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)

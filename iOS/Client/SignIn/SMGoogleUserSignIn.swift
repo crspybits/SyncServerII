@@ -97,6 +97,7 @@ public enum UserActionNeeded {
 case createSharingUser(invitationCode:String)
 case createOwningUser
 case signInExistingUser
+case none // e.g., error
 }
 
 public enum UserActionOccurred {
@@ -108,7 +109,7 @@ case owningUserCreated
 }
 
 protocol SMGoogleUserSignInDelegate : class {
-func shouldDoUserAction(creds:GoogleSignInCreds) -> UserActionNeeded
+func shouldDoUserAction(googleUserSignIn:SMGoogleUserSignIn) -> UserActionNeeded
 func userActionOccurred(action:UserActionOccurred, googleUserSignIn:SMGoogleUserSignIn)
 }
 
@@ -225,7 +226,6 @@ open class SMGoogleUserSignIn : NSObject {
     }
     
     func signedInUser(forUser user:GIDGoogleUser) -> GoogleSignInCreds {
-        // let userId = user.userID     // For client-side use only!
         let name = user.profile.name
         let email = user.profile.email
         
@@ -237,6 +237,7 @@ open class SMGoogleUserSignIn : NSObject {
         }
 
         let creds = GoogleSignInCreds()
+        creds.userId = user.userID
         creds.email = email
         creds.username = name
         creds.idToken = user.authentication.idToken
@@ -285,7 +286,7 @@ extension SMGoogleUserSignIn : GIDSignInDelegate {
             self.signInOutButton.buttonShowing = .signOut
             let creds = signedInUser(forUser: user)
 
-            guard let userAction = self.delegate?.shouldDoUserAction(creds: self.signedInUser) else {
+            guard let userAction = self.delegate?.shouldDoUserAction(googleUserSignIn: self) else {
                 // This occurs if we don't have a delegate (e.g., on a silent sign in). But, we need to set up creds-- because this is what gives us credentials for connecting to the SyncServer.
                 SyncServerUser.session.creds = creds
                 return
@@ -336,6 +337,9 @@ extension SMGoogleUserSignIn : GIDSignInDelegate {
                         self.signUserOut()
                     }
                 }
+            
+            case .none:
+                break
             }
         }
         else {

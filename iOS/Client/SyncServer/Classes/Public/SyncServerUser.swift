@@ -13,6 +13,7 @@ open class SignInCreds {
     public init() {
     }
     
+    public var userId:String? // e.g., for Google, this is their `sub`
     public var username:String?
     public var email:String?
     

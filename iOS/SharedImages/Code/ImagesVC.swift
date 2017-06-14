@@ -114,17 +114,45 @@ class ImagesVC: UIViewController {
     }
     
     @objc private func imageDeletionLongPressAction(gesture : UILongPressGestureRecognizer!) {
+        // Flash a red border around the image when the pressing starts-- to give an indication that something is going on.
+        if gesture.state == .began {
+            let p = gesture.location(in: self.collectionView)
+            if let indexPath = collectionView.indexPathForItem(at: p) {
+                let cell = self.collectionView.cellForItem(at: indexPath) as! ImageCollectionVC
+                let layer = cell.layer
+                layer.borderColor = UIColor.red.cgColor
+                layer.borderWidth = 4.0
+                cell.layoutIfNeeded()
+                TimedCallback.withDuration(0.3) {
+                    layer.borderColor = nil
+                    layer.borderWidth = 0.0
+                    cell.layoutIfNeeded()
+                }
+            }
+        }
         if gesture.state != .ended {
             return
         }
         
         let p = gesture.location(in: self.collectionView)
 
-        // TODO: *2* Confirm the deletion with the user.
+        // Confirm the deletion with the user.
         
         if let indexPath = collectionView.indexPathForItem(at: p) {
             let cell = self.collectionView.cellForItem(at: indexPath) as! ImageCollectionVC
-            cell.remove()
+            
+            var message:String?
+            if cell.image.title != nil {
+                message = "title: \(cell.image.title!)"
+            }
+            
+            let alert = UIAlertController(title: "Remove this image?", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) {alert in
+            })
+            alert.addAction(UIAlertAction(title: "Remove", style: .default) {alert in
+                cell.remove()
+            })
+            self.present(alert, animated: true, completion: nil)
         } else {
             Log.msg("couldn't find index path")
         }
@@ -151,14 +179,14 @@ class ImagesVC: UIViewController {
     }
     
     @discardableResult
-    func addLocalImage(newImageURL: SMRelativeLocalURL, mimeType:String, uuid:String? = nil, title:String? = nil) -> Image {
+    func addLocalImage(newImageURL: SMRelativeLocalURL, mimeType:String, uuid:String? = nil, title:String? = nil, creationDate: NSDate? = nil) -> Image {
         var newImage:Image!
         
         if uuid == nil {
-            newImage = Image.newObjectAndMakeUUID(makeUUID: true) as! Image
+            newImage = Image.newObjectAndMakeUUID(makeUUID: true, creationDate: creationDate) as! Image
         }
         else {
-            newImage = Image.newObjectAndMakeUUID(makeUUID: false) as! Image
+            newImage = Image.newObjectAndMakeUUID(makeUUID: false, creationDate: creationDate) as! Image
             newImage.uuid = uuid
         }
         
@@ -267,9 +295,9 @@ extension ImagesVC : CoreDataSourceDelegate {
 }
 
 extension ImagesVC : SyncControllerDelegate {
-    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String, title:String?) {
+    func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String, title:String?, creationDate: NSDate?) {
         // We're making an image for which there is already a UUID on the server.
-        addLocalImage(newImageURL: url, mimeType: mimeType, uuid:uuid, title:title)
+        addLocalImage(newImageURL: url, mimeType: mimeType, uuid:uuid, title:title, creationDate: creationDate)
     }
     
     func removeLocalImage(syncController:SyncController, uuid:String) {
