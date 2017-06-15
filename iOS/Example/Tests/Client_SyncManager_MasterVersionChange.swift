@@ -97,8 +97,8 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
 
-        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
-        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
+        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
 
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         
@@ -222,8 +222,8 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
 
-        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
-        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
+        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
 
         let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
     
@@ -332,7 +332,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
     func testMasterVersionUpdateOnUploadDeletion() {
         let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
         let fileUUID1 = UUID().uuidString
-        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
 
         // 1) Preparation: Upload a file, identified by UUID1. This is the file we'll delete below. We have to use the SyncServer.session client interface so that it will get recorded in the local meta data for the client.
 
@@ -363,7 +363,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         // File to upload which will cause a SyncServer event which will allow us to upload fileUUID2
         let fileUUID3 = UUID().uuidString
         
-        let attr3 = SyncAttributes(fileUUID: fileUUID3, mimeType: "text/plain")
+        let attr3 = SyncAttributes(fileUUID: fileUUID3, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
 
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete, .uploadDeletionsCompleted]
         

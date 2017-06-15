@@ -204,8 +204,11 @@ class Download {
                     }
                     
                     let url = nextToDownload.localURL
-                    var attr = SyncAttributes(fileUUID: nextToDownload.fileUUID, mimeType: nextToDownload.mimeType!)
+                    var attr = SyncAttributes(fileUUID: nextToDownload.fileUUID, mimeType: nextToDownload.mimeType!, creationDate: nextToDownload.creationDate! as Date, updateDate: nextToDownload.updateDate! as Date)
                     attr.appMetaData = nextToDownload.appMetaData
+                    attr.creationDate = nextToDownload.creationDate as Date?
+                    attr.updateDate = nextToDownload.updateDate as Date?
+                    
                     nextCompletionResult = .fileDownloaded(url:url!, attr:attr)
                 }
         

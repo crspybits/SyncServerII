@@ -29,7 +29,7 @@ extension Upload {
         assert(Singleton.get().pendingSync!.uploads!.count > 0)
         
         let uploadQueues = synced()
-        uploadQueues.addToQueues(Singleton.get().pendingSync!)
+        uploadQueues.addToQueuesOverride(Singleton.get().pendingSync!)
         
         // This does a `saveContext`, so don't need to do that again.
         try createNewPendingSync()

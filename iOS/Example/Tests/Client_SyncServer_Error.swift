@@ -106,8 +106,8 @@ class Client_SyncServer_Error: TestCase {
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
 
-        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
-        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
+        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
     
         let previousSyncServerSingleFileUploadCompleted = self.syncServerSingleFileUploadCompleted
     

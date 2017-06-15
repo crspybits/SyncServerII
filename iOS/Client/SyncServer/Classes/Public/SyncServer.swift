@@ -189,7 +189,6 @@ public class SyncServer {
             else {
                 if entry!.fileVersion != nil {
                     // Right now, we're not allowing uploads of multiple version files, so this is not allowed.
-                    // When we can do upload deletions, we'll enable this too, but still you will only be able to delete version 0 of the file.
                     assert(false)
                 }
                 
@@ -232,7 +231,7 @@ public class SyncServer {
                         }
                     }
                     
-                    try Upload.pendingSync().addToUploads(newUft)
+                    try Upload.pendingSync().addToUploadsOverride(newUft)
                     try CoreData.sessionNamed(Constants.coreDataName).context.save()
                 } catch (let error) {
                     errorToThrow = error
@@ -301,7 +300,7 @@ public class SyncServer {
                         AND: In general, there can be any number of uploads queued and sync'ed prior to this upload deletion, which would mean we can't simply determine the version to delete at this point in time. It seems easiest to wait until the last possible moment to determine the file version we are deleting.
                     */
                     
-                    try Upload.pendingSync().addToUploads(newUft)
+                    try Upload.pendingSync().addToUploadsOverride(newUft)
                     try CoreData.sessionNamed(Constants.coreDataName).context.save()
                 } catch (let error) {
                     errorToThrow = error

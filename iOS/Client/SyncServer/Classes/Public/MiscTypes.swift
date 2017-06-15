@@ -16,15 +16,15 @@ public typealias UUIDString = String
 public struct SyncAttributes {
     public var fileUUID:String!
     public var mimeType:String!
+    public var creationDate:Date!
+    public var updateDate:Date!
     public var appMetaData:String?
     
-    // These are present during download delegate calls and are needed when uploading a file.
-    public var creationDate:Date?
-    public var updateDate:Date?
-    
-    public init(fileUUID:String, mimeType:String) {
+    public init(fileUUID:String, mimeType:String, creationDate: Date, updateDate: Date) {
         self.fileUUID = fileUUID
         self.mimeType = mimeType
+        self.creationDate = creationDate
+        self.updateDate = updateDate
     }
 }
 

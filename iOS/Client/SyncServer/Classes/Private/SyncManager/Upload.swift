@@ -216,8 +216,8 @@ class Upload {
                         completionResult = .error("\(error)")
                         return
                     }
-                    
-                    let attr = SyncAttributes(fileUUID: nextToUpload.fileUUID, mimeType:nextToUpload.mimeType!)
+
+                    let attr = SyncAttributes(fileUUID: nextToUpload.fileUUID, mimeType:nextToUpload.mimeType!, creationDate: nextToUpload.creationDate! as Date, updateDate: nextToUpload.updateDate! as Date)
                     completionResult = .fileUploaded(attr)
                 }
                 

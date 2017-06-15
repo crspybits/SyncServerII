@@ -43,8 +43,8 @@ class Client_SyncServer_FileUpload: TestCase {
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
 
-        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
-        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
+        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
 
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let expectation1 = self.expectation(description: "test1")
@@ -104,7 +104,7 @@ class Client_SyncServer_FileUpload: TestCase {
         let url1 = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
         let url2 = SMRelativeLocalURL(withRelativePath: "UploadMe3.txt", toBaseURLType: .mainBundle)!
         let fileUUID = UUID().uuidString
-        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
         
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let expectation1 = self.expectation(description: "test1")
@@ -152,10 +152,10 @@ class Client_SyncServer_FileUpload: TestCase {
         let url2 = SMRelativeLocalURL(withRelativePath: "UploadMe3.txt", toBaseURLType: .mainBundle)!
         let fileUUID = UUID().uuidString
         
-        let attr1 = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        let attr1 = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
         
         // Different mime type for second upload attempt.
-        let attr2 = SyncAttributes(fileUUID: fileUUID, mimeType: "image/jpeg")
+        let attr2 = SyncAttributes(fileUUID: fileUUID, mimeType: "image/jpeg", creationDate: Date(), updateDate: Date())
         
         try! SyncServer.session.uploadImmutable(localFile: url1, withAttributes: attr1)
         
@@ -172,7 +172,7 @@ class Client_SyncServer_FileUpload: TestCase {
     func testSyncAferCompleteUploadWorks() {
         let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
         let fileUUID = UUID().uuidString
-        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
         
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let syncDone1 = self.expectation(description: "test1")
@@ -233,11 +233,11 @@ class Client_SyncServer_FileUpload: TestCase {
         
         let url1 = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
         let fileUUID1 = UUID().uuidString
-        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain")
+        let attr1 = SyncAttributes(fileUUID: fileUUID1, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
 
         let url2 = SMRelativeLocalURL(withRelativePath: "UploadMe3.txt", toBaseURLType: .mainBundle)!
         let fileUUID2 = UUID().uuidString
-        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain")
+        let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
         
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let expectSyncDone1 = self.expectation(description: "test1")

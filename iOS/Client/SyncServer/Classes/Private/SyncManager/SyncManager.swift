@@ -92,10 +92,8 @@ class SyncManager {
                 
                 if self.fileDownloadDfts!.count > 0 {
                     _ = self.fileDownloadDfts!.map { dft in
-                        var attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
+                        var attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!, creationDate: dft.creationDate! as Date, updateDate: dft.updateDate! as Date)
                         attr.appMetaData = dft.appMetaData
-                        attr.creationDate = dft.creationDate! as Date
-                        attr.updateDate = dft.updateDate! as Date
                         downloads += [(downloadedFile: dft.localURL! as NSURL, downloadedFileAttributes: attr)]
                     }
                 }
@@ -117,7 +115,7 @@ class SyncManager {
             CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
                 if self.downloadDeletionDfts!.count > 0 {
                     _ = self.downloadDeletionDfts!.map { dft in
-                        let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!)
+                        let attr = SyncAttributes(fileUUID: dft.fileUUID, mimeType: dft.mimeType!, creationDate: dft.creationDate! as Date, updateDate: dft.updateDate! as Date)
                         deletions += [attr]
                     }
                     
@@ -185,7 +183,7 @@ class SyncManager {
         let nextResult = Upload.session.next { nextCompletion in
             switch nextCompletion {
             case .fileUploaded(let uft):
-                let attr = SyncAttributes(fileUUID: uft.fileUUID, mimeType:uft.mimeType!)
+                let attr = SyncAttributes(fileUUID: uft.fileUUID, mimeType:uft.mimeType!, creationDate: uft.creationDate! as Date, updateDate: uft.updateDate! as Date)
                 EventDesired.reportEvent(.singleFileUploadComplete(attr: attr), mask: self.desiredEvents, delegate: self.delegate)
                 
                 func after() {

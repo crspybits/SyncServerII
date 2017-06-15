@@ -2,10 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+
 <key>NSAppTransportSecurity</key>
 <dict>
-      <key>NSExceptionDomains</key>
-      <dict>
+    <key>NSExceptionDomains</key>
+    <dict>
             <key>syncserver.cprince.com</key>
             <dict>
                   <key>NSThirdPartyExceptionMinimumTLSVersion</key>
@@ -15,7 +16,19 @@
                   <key>NSIncludesSubdomains</key>
                   <true/>
             </dict>
-      </dict>
+
+            <!-- This was needed for iOS9. Oddly, wasn't needed for iOS10. 
+                Also: only localhost works, not 127.0.0.1, and both of these keys are needed.
+                See also https://forums.developer.apple.com/thread/11698
+            -->
+            <key>localhost</key>
+            <dict>
+                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+                <key>NSThirdPartyExceptionRequiresForwardSecrecy</key>
+                <false/>
+            </dict>
+    </dict>
 </dict>
 
 	<key>CFBundleDevelopmentRegion</key>

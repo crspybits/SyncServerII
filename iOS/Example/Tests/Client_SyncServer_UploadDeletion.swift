@@ -74,7 +74,7 @@ class Client_SyncServer_UploadDeletion: TestCase {
     func testThatUploadDeletionWorksWhenYouDoNotWaitUntilAfterUpload() {
         let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
         let fileUUID = UUID().uuidString
-        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
         
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete, .uploadDeletionsCompleted, .singleUploadDeletionComplete]
         
@@ -145,7 +145,7 @@ class Client_SyncServer_UploadDeletion: TestCase {
     func testUploadImmediatelyFollowedByDeletionWorks() {
         let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
         let fileUUID = UUID().uuidString
-        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
         
         // Include events other than syncDone just as a means of ensuring they don't occur.
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete, .uploadDeletionsCompleted, .singleUploadDeletionComplete]

@@ -490,7 +490,7 @@ class TestCase: XCTestCase {
     func uploadSingleFileUsingSync() -> (URL, SyncAttributes) {
         let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
         let fileUUID = UUID().uuidString
-        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain")
+        let attr = SyncAttributes(fileUUID: fileUUID, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
         
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted, .singleFileUploadComplete]
         let expectation1 = self.expectation(description: "test1")
