@@ -119,11 +119,12 @@ class SignInVC : SMGoogleUserSignInViewController {
             })
         }
         else {
-            alert = UIAlertController(title: "Please sign in first!", message: "There is no signed in user.", preferredStyle: .alert)
+            alert = UIAlertController(title: "Please sign in first!", message: "There is no signed in user.", preferredStyle: .actionSheet)
             alert.addAction(UIAlertAction(title: "OK", style: .cancel){alert in
             })
         }
         
+        Alert.styleForIPad(alert)
         alert.popoverPresentationController?.barButtonItem = sharingBarButton
         present(alert, animated: true, completion: nil)
     }
@@ -146,7 +147,10 @@ class SignInVC : SMGoogleUserSignInViewController {
                 }
             }
             else {
-                let alert = UIAlertController(title: "Error creating sharing invitation!", message: "\(error!)", preferredStyle: .alert)
+                let alert = UIAlertController(title: "Error creating sharing invitation!", message: "\(error!)", preferredStyle: .actionSheet)
+                alert.popoverPresentationController?.barButtonItem = self.sharingBarButton
+                Alert.styleForIPad(alert)
+
                 alert.addAction(UIAlertAction(title: "OK", style: .cancel) {alert in
                 })
                 self.present(alert, animated: true, completion: nil)
@@ -162,7 +166,10 @@ extension SignInVC : SharingInvitationDelegate {
         
         let userFriendlyText = sharingInvitation.sharingInvitationPermission!.userFriendlyText()
         if !SignIn.session.googleSignIn.userIsSignedIn {
-            let alert = UIAlertController(title: "Do you want to share the images (\(userFriendlyText)) in the invitation?", message: nil, preferredStyle: .alert)
+            let alert = UIAlertController(title: "Do you want to share the images (\(userFriendlyText)) in the invitation?", message: nil, preferredStyle: .actionSheet)
+            Alert.styleForIPad(alert)
+            alert.popoverPresentationController?.barButtonItem = sharingBarButton
+
             alert.addAction(UIAlertAction(title: "Not now", style: .cancel) {alert in
             })
             alert.addAction(UIAlertAction(title: "Share", style: .default) {alert in
@@ -191,7 +198,10 @@ extension SignInVC : SMGoogleUserSignInDelegate {
                 title = "You were previously signed in as \(SignIn.currentUserEmail.stringValue) but you are now signing in as a different user."
             }
             
-            let alert = UIAlertController(title: title, message: "The Shared Images app doesn't allow this (yet).", preferredStyle: .alert)
+            let alert = UIAlertController(title: title, message: "The Shared Images app doesn't allow this (yet).", preferredStyle: .actionSheet)
+            alert.popoverPresentationController?.barButtonItem = sharingBarButton
+            Alert.styleForIPad(alert)
+
             alert.addAction(UIAlertAction(title: "OK", style: .cancel) {alert in
             })
             self.present(alert, animated: true, completion: nil)

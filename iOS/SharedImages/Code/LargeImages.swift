@@ -15,6 +15,7 @@ class LargeImages : UIViewController {
     // Set these two when creating an instance of this class.
     var startItem: Int! = 0
     var syncController:SyncController!
+    
     private var seekToIndexPath:IndexPath?
     let IMAGE_WIDTH_PADDING:CGFloat = 20.0
 
@@ -97,6 +98,13 @@ extension LargeImages : CoreDataSourceDelegate {
     // 5/20/16; Odd. This gets called when an object is updated, sometimes. It may be because the sorting key I'm using in the fetched results controller changed.
     func coreDataSource(_ cds: CoreDataSource!, objectWasMovedFrom oldIndexPath: IndexPath!, to newIndexPath: IndexPath!) {
         collectionView.reloadData()
+    }
+}
+
+// MARK: UICollectionViewDelegate
+extension LargeImages : UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        (cell as! ImageCollectionVC).willDisplay()
     }
 }
 

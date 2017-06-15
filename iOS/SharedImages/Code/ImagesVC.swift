@@ -146,7 +146,10 @@ class ImagesVC: UIViewController {
                 message = "title: \(cell.image.title!)"
             }
             
-            let alert = UIAlertController(title: "Remove this image?", message: message, preferredStyle: .alert)
+            let alert = UIAlertController(title: "Remove this image?", message: message, preferredStyle: .actionSheet)
+            alert.popoverPresentationController?.sourceView = cell
+            Alert.styleForIPad(alert)
+            
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) {alert in
             })
             alert.addAction(UIAlertAction(title: "Remove", style: .default) {alert in
@@ -220,6 +223,11 @@ extension ImagesVC : UICollectionViewDelegate {
         largeImages.startItem = indexPath.item
         largeImages.syncController = syncController
         navigationController!.pushViewController(largeImages, animated: true)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        (cell as! ImageCollectionVC).willDisplay()
+        print("cell.frame: \(cell.frame)")
     }
 }
 

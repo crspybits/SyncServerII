@@ -26,8 +26,10 @@ class ImageCollectionVC : UICollectionViewCell {
         title.text = image.title
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
+    // I had problems knowing when the cell was sized correctly so that I could call `ImageStorage.getImage`. It turns out `layoutSubviews` is not the right place. And neither is `setProperties` (which gets called by cellForItemAt). When the UICollectionView is first displayed, I get small sizes (less than 1/2 of correct sizes) at least on iPad. Odd.
+    func willDisplay() {
+        // For some reason, when I get here, the cell is sized correctly, but it's subviews are not. And more specifically, the image view subview is not sized correctly all the time. And since I'm basing my image fetch/resize on the image view size, I need it correctly sized right now.
+        layoutIfNeeded()
         
         let originalSize = ImageExtras.sizeFromImage(image:image)
         let smallerSize = ImageExtras.boundingImageSizeFor(originalSize: originalSize, boundingSize: imageView.frameSize)

@@ -44,6 +44,9 @@ class AppBadge {
         else {
             AppBadge.askedUserAboutBadges.boolValue = true
             let alert = UIAlertController(title: "Would you like to know about images ready for download via a `badge` or count on the app icon?", message: "Then, answer `Allow` to the next prompt!", preferredStyle: .actionSheet)
+            alert.popoverPresentationController?.sourceView = viewController.view
+            Alert.styleForIPad(alert)
+
             alert.addAction(UIAlertAction(title: "Continue", style: .cancel) {alert in
                 badgeAuthorization()
             })
