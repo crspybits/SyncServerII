@@ -48,6 +48,11 @@ class LargeImages : UIViewController {
         let sortedArray = visibleItems.sorted {$0 < $1}
         
         seekToIndexPath = sortedArray[0]
+        
+        // This is my solution to an annoying problem: I need to reload the images at their changed size after rotation. This is how I'm getting a callback *after* the rotation has completed when the cells have been sized properly.
+        coordinator.animate(alongsideTransition: nil) { context in
+            self.collectionView.reloadData()
+        }
     }
     
     override func viewWillLayoutSubviews() {
@@ -104,7 +109,7 @@ extension LargeImages : CoreDataSourceDelegate {
 // MARK: UICollectionViewDelegate
 extension LargeImages : UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        (cell as! ImageCollectionVC).willDisplay()
+        (cell as! ImageCollectionVC).cellSizeHasBeenChanged()
     }
 }
 

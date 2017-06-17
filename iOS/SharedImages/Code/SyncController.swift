@@ -35,11 +35,8 @@ class SyncController {
     }
     
     func add(image:Image) {
-        var attr = SyncAttributes(fileUUID:image.uuid!, mimeType:image.mimeType!)
-        attr.creationDate = image.creationDate! as Date
-        
-        // Don't have multiple file versions (yet).
-        attr.updateDate = image.creationDate! as Date
+        // Make both the creation and update dates the same because we don't have multiple file versions yet.
+        var attr = SyncAttributes(fileUUID:image.uuid!, mimeType:image.mimeType!, creationDate: image.creationDate! as Date, updateDate: image.creationDate! as Date)
         
         if image.title != nil {
             attr.appMetaData = "{\"\(ImageExtras.appMetaDataTitleKey)\": \"\(image.title!)\"}";

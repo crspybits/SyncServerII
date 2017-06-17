@@ -47,7 +47,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if SignIn.session.googleSignIn.userIsSignedIn {
             selectTabInController(tab: .images)
         }
-
+        
+        let clientUUIDs = Image.fetchAll().map { $0.uuid!}
+        do {
+            let results = try SyncServer.session.localConsistencyCheck(clientFiles: clientUUIDs)
+            for missing in results.clientMissingAndDeleted {
+                // Somehow this was deleted in the SyncServer meta data, but not deleted from the Shared Images client. Delete it now.
+                ImageExtras.removeLocalImage(uuid:missing)
+            }
+        } catch (let error) {
+            Log.error("Error doing local consistency check: \(error)")
+        }
+        
         return true
     }
     

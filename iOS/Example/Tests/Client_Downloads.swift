@@ -51,10 +51,10 @@ class Client_Downloads: TestCase {
                     }
                     XCTAssert(dftsResult.count == 1)
                     if file.creationDate != nil {
-                        XCTAssert(DateExtras.equals(dftsResult[0].creationDate! as Date, file.creationDate), "dftsResult[0].creationDate: \(dftsResult[0].creationDate); file.creationDate: \(file.creationDate)")
+                        XCTAssert(DateExtras.equals(dftsResult[0].creationDate! as Date, file.creationDate), "dftsResult[0].creationDate: \(String(describing: dftsResult[0].creationDate)); file.creationDate: \(file.creationDate)")
                         
                         XCTAssert(DateExtras.equals(dftsResult[0].updateDate! as Date, file.updateDate)
-, "dftsResult[0].updateDate: \(dftsResult[0].updateDate); file.updateDate: \(file.updateDate)")
+, "dftsResult[0].updateDate: \(String(describing: dftsResult[0].updateDate)); file.updateDate: \(file.updateDate)")
                     }
                 }
                 

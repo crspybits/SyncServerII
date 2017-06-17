@@ -363,6 +363,81 @@ public class SyncServer {
         }
     }
     
+    public struct LocalConsistencyResults {
+        public let clientMissingAndDeleted:Set<UUIDString>!
+        public let clientMissingNotDeleted:Set<UUIDString>!
+        public let directoryMissing:Set<UUIDString>!
+    }
+    
+    // Only operates if not currently synchronizing.
+    public func localConsistencyCheck(clientFiles:[UUIDString]) throws -> LocalConsistencyResults {
+        var error: Error?
+        var results:LocalConsistencyResults!
+        
+        Synchronized.block(self) {
+            if !syncOperating {
+                /* client: A, B, C
+                    metadata: B, C, D
+                    1) intersection= client intersect metadata (= B, C)
+                    2) client - intersection = A
+                    3) metadata - intersection = D
+                */
+                let client = Set(clientFiles)
+                var directory = Set<UUIDString>()
+                
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    do {
+                        let directoryEntries = try CoreData.sessionNamed(Constants.coreDataName).fetchAllObjects(withEntityName: DirectoryEntry.entityName()) as? [DirectoryEntry]
+                        if directoryEntries != nil {
+                            for entry in directoryEntries! {
+                                if !entry.deletedOnServer {
+                                    directory.insert(entry.fileUUID!)
+                                }
+                            }
+                        }
+                    } catch (let exception) {
+                        error = exception
+                    }
+                }
+                
+                if error != nil {
+                    return
+                }
+                
+                let intersection = client.intersection(directory)
+                
+                // Elements from client that are missing in the directory
+                let clientMissing = client.subtracting(intersection)
+                var clientMissingNotDeleted = Set<UUIDString>()
+                
+                // Check to see if these are deleted from the directory
+                CoreData.sessionNamed(Constants.coreDataName).performAndWait() {
+                    for missing in clientMissing {
+                        if let entry = DirectoryEntry.fetchObjectWithUUID(uuid: missing), !entry.deletedOnServer {
+                            clientMissingNotDeleted.insert(missing)
+                        }
+                    }
+                }
+                
+                let clientMissingAndDeleted = clientMissing.subtracting(clientMissingNotDeleted)
+                
+                // Elements in directory that are missing in client
+                let directoryMissing = directory.subtracting(intersection)
+                
+                print("clientMissingAndDeleted: \(clientMissingAndDeleted)")
+                print("clientMissingNotDeleted: \(clientMissingNotDeleted)")
+                print("directoryMissing: \(directoryMissing)")
+                results = LocalConsistencyResults(clientMissingAndDeleted: clientMissingAndDeleted, clientMissingNotDeleted: clientMissingNotDeleted, directoryMissing: directoryMissing)
+            }
+        }
+                        
+        if error != nil {
+            throw error!
+        }
+        
+        return results
+    }
+    
     private func start(completion:(()->())?) {
         EventDesired.reportEvent(.syncStarted, mask: self.eventsDesired, delegate: self.delegate)
         Log.msg("SyncServer.start")
@@ -426,7 +501,6 @@ public class SyncServer {
             CoreData.sessionNamed(Constants.coreDataName).saveContext()
         }
     }
-
 
     // This is intended for development/debug only. This enables you do a consistency check between your local files and SyncServer meta data. Does a sync first to ensure files are synchronized.
     // TODO: *2* This is incomplete. Needs more work.

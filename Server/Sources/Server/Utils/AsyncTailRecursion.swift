@@ -7,41 +7,31 @@
 //
 
 import Foundation
-import PerfectThread
 import Dispatch
-import PerfectLib
 
 // This might be a better solution: https://stackoverflow.com/questions/35906568/wait-until-swift-for-loop-with-asynchronous-network-requests-finishes-executing
 // Except that the above technique allows multiple async requests to operate in parallel, which is not what I want.
 
 class AsyncTailRecursion {
-    private let event = Threading.Event()
-    init() {
-        event.lock()
-    }
+    private let lock = DispatchSemaphore(value: 0)
     
-    // `f` should be your first recursive call.
-    func start(_ f:@escaping ()->()) {
-        // This immediate async dispatch and ensuing short sleep is to avoid a race condition between the signal given by `done` and the event.wait below.
+    // Blocks the calling thread and another thread starts the recursion.
+    func start(_ firstRecursiveCall:@escaping ()->()) {
         DispatchQueue.global().async() {
-            Threading.sleep(seconds: 0.01)
-            f()
+            firstRecursiveCall()
         }
         
-        if !event.wait() {
-            Log.error(message: "Failed waiting for event!")
-        }
+        lock.wait()
     }
     
-    // `f` should be your subsequent recursive calls.
-    func next(_ f:@escaping ()->()) {
+    func next(_ subsequentRecursiveCall:@escaping ()->()) {
         DispatchQueue.global().async() {
-            f()
+            subsequentRecursiveCall()
         }
     }
     
     // Call this to terminate your recursion. The thread blocked by calling `start` will restart.
     func done() {
-        event.signal()
+        lock.signal()
     }
 }

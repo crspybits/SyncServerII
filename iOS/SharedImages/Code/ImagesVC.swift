@@ -86,6 +86,15 @@ class ImagesVC: UIViewController {
         }
     }
     
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        // This is my solution to an annoying problem: I need to reload the images at their changed size after rotation. This is how I'm getting a callback *after* the rotation has completed when the cells have been sized properly.
+        coordinator.animate(alongsideTransition: nil) { context in
+            self.collectionView.reloadData()
+        }
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -208,12 +217,7 @@ class ImagesVC: UIViewController {
     }
     
     func removeLocalImage(uuid:String) {
-        guard let image = Image.fetchObjectWithUUID(uuid: uuid) else {
-            Log.error("Cannot find image with UUID: \(uuid)")
-            return
-        }
-        
-        CoreData.sessionNamed(CoreDataExtras.sessionName).remove(image)
+        ImageExtras.removeLocalImage(uuid:uuid)
     }
 }
 
@@ -226,7 +230,7 @@ extension ImagesVC : UICollectionViewDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        (cell as! ImageCollectionVC).willDisplay()
+        (cell as! ImageCollectionVC).cellSizeHasBeenChanged()
         print("cell.frame: \(cell.frame)")
     }
 }
