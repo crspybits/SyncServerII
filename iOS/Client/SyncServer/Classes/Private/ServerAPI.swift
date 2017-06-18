@@ -57,13 +57,7 @@ class ServerAPI {
     // If this is nil, you must use the ServerNetworking authenticationDelegate to provide credentials. Direct use of authenticationDelegate is for internal testing.
     public var creds:SignInCreds? {
         didSet {
-            if creds == nil {
-                ServerNetworking.session.authenticationDelegate = nil
-            }
-            else {
-                ServerNetworking.session.authenticationDelegate = self
-                self.authTokens = creds!.authDict()
-            }
+            updateCreds(creds)
         }
     }
 
@@ -72,9 +66,28 @@ class ServerAPI {
     fileprivate init() {
     }
     
-    func checkForError(statusCode:Int?, error:Error?) -> Error? {
-        // We don't necessarily want to treat an HTTPStatus.unauthorized as an error: It's a valid response when the user isn't present on the server.
-        if statusCode == HTTPStatus.ok.rawValue || statusCode == HTTPStatus.unauthorized.rawValue || statusCode == nil  {
+    private func updateCreds(_ creds:SignInCreds?) {
+        if creds == nil {
+            ServerNetworking.session.authenticationDelegate = nil
+        }
+        else {
+            ServerNetworking.session.authenticationDelegate = self
+            self.authTokens = creds!.authDict()
+        }
+    }
+    
+    // Make sure self.creds is non-nil before you call this!
+    fileprivate func refreshCredentials(completion: @escaping (Error?) ->()) {
+        self.creds!.refreshCredentials { error in
+            if error == nil {
+                self.updateCreds(self.creds)
+            }
+            completion(error)
+        }
+    }
+    
+    fileprivate func checkForError(statusCode:Int?, error:Error?) -> Error? {
+        if statusCode == HTTPStatus.ok.rawValue || statusCode == nil  {
             return error
         }
         else {
@@ -631,7 +644,9 @@ extension ServerAPI {
         request = {
             ServerNetworking.session.sendRequestUsing(method: method, toURL: serverURL, timeoutIntervalForRequest:timeoutIntervalForRequest) { (serverResponse, statusCode, error) in
                 if statusCode == self.httpUnauthorizedError && self.creds != nil {
-                    self.creds!.refreshCredentials() { error in
+                    // TODO: *0* If we fail to refresh credentials *and* we have a network connection, at the UI level, we ought to switch the user back to the sign in screen. This will happen already *except* when we signed in and went directly to the ImagesVC. Which seems odd that we have this exception. This exception is due to the lack of setting up a delegate for our Google creds.
+                    // TODO: *0* With the request retry, this is going to amount to retrying the credentials refresh more than once. This seems odd.
+                    self.refreshCredentials() { error in
                         // Only try refresh once!
                         if error == nil {
                             // Since we're only doing the refresh once, I'm not doing retries here.
@@ -665,9 +680,10 @@ extension ServerAPI {
         request = {
             ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload) { (serverResponse, statusCode, error) in
                 if statusCode == self.httpUnauthorizedError && self.creds != nil {
-                    self.creds!.refreshCredentials() { error in
+                    self.refreshCredentials() { error in
                         // Only try refresh once!
                         if error == nil {
+                            
                             ServerNetworking.session.postUploadDataTo(serverURL, dataToUpload: dataToUpload, completion:completion)
                         }
                         else {
@@ -698,7 +714,7 @@ extension ServerAPI {
         request = {
             ServerNetworking.session.downloadFrom(serverURL, method: method) { (localURL, urlResponse, statusCode, error) in
                 if statusCode == self.httpUnauthorizedError && self.creds != nil {
-                    self.creds!.refreshCredentials() { error in
+                    self.refreshCredentials() { error in
                         // Only try refresh once!
                         if error == nil {
                             ServerNetworking.session.downloadFrom(serverURL, method: method, completion: completion)

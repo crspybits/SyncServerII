@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         tabBarController.delegate = tabBarDelegate
         window = UIWindow(frame: UIScreen.main.bounds)
         window!.rootViewController = tabBarController
-                
+        
         if SignIn.session.googleSignIn.userIsSignedIn {
             selectTabInController(tab: .images)
         }

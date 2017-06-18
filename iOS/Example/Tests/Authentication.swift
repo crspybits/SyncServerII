@@ -5,6 +5,18 @@ import SMCoreLib
 // After creating this project afresh, I was getting errors like: "...couldn’t be loaded because it is damaged or missing necessary resources. Try reinstalling the bundle."
 // The solution for me was to manually set the host applicaton. See https://github.com/CocoaPods/CocoaPods/issues/5022
 
+enum TestCredsError : Error {
+    case TheError
+}
+
+class TestCreds : SignInCreds {
+    var called = false
+    override func refreshCredentials(completion: @escaping (Error?) ->()) {
+        called = true
+        completion(TestCredsError.TheError)
+    }
+}
+
 class ServerAPI_Authentication: TestCase {
     override func setUp() {
         super.setUp()
@@ -130,5 +142,23 @@ class ServerAPI_Authentication: TestCase {
         }
         
         waitForExpectations(timeout: 10.0, handler: nil)
+    }
+    
+    func testCredentialsRefreshGenerically() {
+        let testCreds = TestCreds()
+        testCreds.email = "chris@cprince.com"
+        testCreds.username = "Chris"
+        ServerAPI.session.creds = testCreds
+        
+        // Just do a (random) server call on the API to make use of the creds, and ensure the ServerAPI attempts a credentials refresh.
+        
+        let expectation1 = self.expectation(description: "fileIndex")
+        
+        ServerAPI.session.fileIndex { (fileIndex, masterVersion, error) in
+            XCTAssert(error != nil)
+            XCTAssert(testCreds.called == true)
+            expectation1.fulfill()
+        }
+        waitForExpectations(timeout: 60.0, handler: nil)
     }
 }

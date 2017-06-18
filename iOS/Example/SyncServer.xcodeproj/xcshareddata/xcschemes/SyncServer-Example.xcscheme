@@ -52,6 +52,16 @@
                ReferencedContainer = "container:SyncServer.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "83544F831EF58B32007E0887"
+               BuildableName = "SyncServer_ExampleUITests.xctest"
+               BlueprintName = "SyncServer_ExampleUITests"
+               ReferencedContainer = "container:SyncServer.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

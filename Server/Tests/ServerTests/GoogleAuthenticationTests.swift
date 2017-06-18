@@ -15,8 +15,8 @@ class GoogleAuthenticationTests: ServerTestCase {
         performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
+                Log.info("Status code: \(response!.statusCode.rawValue)")
+                XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
                 expectation.fulfill()
             }
         }

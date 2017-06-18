@@ -12,6 +12,8 @@ import SMCoreLib
 import SyncServer
 import SevenSwitch
 
+// This view controller doesn't load upon initial launch of the app, if the user is signed in (silent sign in), and the AppDelegate takes the user directly to the ImagesVC.
+
 class SignInVC : SMGoogleUserSignInViewController {
     fileprivate var signinTypeSwitch:SevenSwitch!
     

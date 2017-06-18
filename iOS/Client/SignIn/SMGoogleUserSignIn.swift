@@ -13,6 +13,11 @@ import SyncServer
 import SMCoreLib
 import GoogleSignIn
 
+/* 6/15/17; Just started seeing: "[!] Google has been deprecated"
+    with the Google/SignIn Cocoapod when I do a `pod update`
+See also: https://stackoverflow.com/questions/44398121/google-signin-cocoapod-deprecated
+*/
+
 /* 6/25/16; Just started seeing this issue: https://forums.developer.apple.com/message/148335#148335
 Failed to get remote view controller with error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.uikit.viewservice.com.apple.SafariViewService" UserInfo={NSDebugDescription=connection to service named com.apple.uikit.viewservice.com.apple.SafariViewService}
 It's only happening in the simulator. The console log also shows:
@@ -53,11 +58,16 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
         return "Google Access Token: \(String(describing: accessToken))"
     }
     
+    enum RefreshCredentialsResult : Error {
+    case noGoogleUser
+    }
+    
     override open func refreshCredentials(completion: @escaping (Error?) ->()) {
         // See also this on refreshing of idTokens: http://stackoverflow.com/questions/33279485/how-to-refresh-authentication-idtoken-with-gidsignin-or-gidauthentication
         
         guard self.googleUser != nil
         else {
+            completion(RefreshCredentialsResult.noGoogleUser)
             return
         }
         
@@ -81,6 +91,7 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
             }
             else {
                 Log.error("Error refreshing tokens: \(String(describing: error))")
+                // I'm not really sure it's reasonable to sign the user out at this point, after a single attempt at refreshing credentials. It's a simple strategy, but say, what if we have no network connection. Why sign the user out then?
                 self.delegate?.signUserOutUsing(creds: self)
             }
             

@@ -155,6 +155,12 @@ class ServerNetworking : NSObject {
                 return
             }
             
+            // Treating unauthorized specially because we attempt a credentials refresh in some cases when we get this.
+            if response.statusCode == HTTPStatus.unauthorized.rawValue {
+                completion?(nil, response.statusCode, nil)
+                return
+            }
+            
             var json:Any?
             do {
                 try json = JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions(rawValue: UInt(0)))

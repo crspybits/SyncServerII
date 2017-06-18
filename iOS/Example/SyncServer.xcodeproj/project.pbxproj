@@ -18,9 +18,10 @@
 		831DE3D01EDA877B0084070F /* SmallerCat.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 831DE3CC1EDA850F0084070F /* SmallerCat.jpg */; };
 		8324EE5A1E83675F000656AF /* Client_SyncServer_Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE591E83675E000656AF /* Client_SyncServer_Download.swift */; };
 		8324EE5C1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE5B1E8367C2000656AF /* Client_SyncServer_DownloadDeletion.swift */; };
-		833729861E0F6BC0002CA164 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833729841E0F6BAE002CA164 /* Authentication.swift */; };
 		8344CC211E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8344CC201E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift */; };
 		8344CC2B1E5FDD1800BEB263 /* Client_Downloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8344CC2A1E5FDD1800BEB263 /* Client_Downloads.swift */; };
+		83544F7F1EF4E0E5007E0887 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833729841E0F6BAE002CA164 /* Authentication.swift */; };
+		83544F871EF58B32007E0887 /* SyncServer_ExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83544F861EF58B32007E0887 /* SyncServer_ExampleUITests.swift */; };
 		835C60AC1E62ABF3003E9AF8 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C60AB1E62ABF3003E9AF8 /* CoreDataTests.swift */; };
 		835C60B21E6369DE003E9AF8 /* Client_SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C60B11E6369DE003E9AF8 /* Client_SyncManager.swift */; };
 		835C610C1E6504D4003E9AF8 /* Client_NetworkLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */; };
@@ -62,6 +63,13 @@
 			remoteGlobalIDString = 607FACCF1AFB9204008FA782;
 			remoteInfo = SyncServer;
 		};
+		83544F891EF58B32007E0887 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 607FACCF1AFB9204008FA782;
+			remoteInfo = SyncServer_Example;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -85,6 +93,9 @@
 		833729841E0F6BAE002CA164 /* Authentication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
 		8344CC201E5FC67700BEB263 /* ServerAPI_UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_UploadDeletion.swift; sourceTree = "<group>"; };
 		8344CC2A1E5FDD1800BEB263 /* Client_Downloads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_Downloads.swift; sourceTree = "<group>"; };
+		83544F841EF58B32007E0887 /* SyncServer_ExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SyncServer_ExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		83544F861EF58B32007E0887 /* SyncServer_ExampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncServer_ExampleUITests.swift; sourceTree = "<group>"; };
+		83544F881EF58B32007E0887 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		835C60AB1E62ABF3003E9AF8 /* CoreDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
 		835C60B11E6369DE003E9AF8 /* Client_SyncManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager.swift; sourceTree = "<group>"; };
 		835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_NetworkLoss.swift; sourceTree = "<group>"; };
@@ -138,6 +149,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		83544F811EF58B32007E0887 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -156,6 +174,7 @@
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACD21AFB9204008FA782 /* Example for SyncServer */,
 				607FACE81AFB9204008FA782 /* Tests */,
+				83544F851EF58B32007E0887 /* SyncServer_ExampleUITests */,
 				607FACD11AFB9204008FA782 /* Products */,
 				881D5EB56DAB9EE45ECC0D5E /* Pods */,
 				231FCE67547F0427377A6A02 /* Frameworks */,
@@ -167,6 +186,7 @@
 			children = (
 				607FACD01AFB9204008FA782 /* SyncServer_Example.app */,
 				607FACE51AFB9204008FA782 /* SyncServer_Tests.xctest */,
+				83544F841EF58B32007E0887 /* SyncServer_ExampleUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -255,6 +275,15 @@
 			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
+		83544F851EF58B32007E0887 /* SyncServer_ExampleUITests */ = {
+			isa = PBXGroup;
+			children = (
+				83544F861EF58B32007E0887 /* SyncServer_ExampleUITests.swift */,
+				83544F881EF58B32007E0887 /* Info.plist */,
+			);
+			path = SyncServer_ExampleUITests;
+			sourceTree = "<group>";
+		};
 		881D5EB56DAB9EE45ECC0D5E /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -310,13 +339,31 @@
 			productReference = 607FACE51AFB9204008FA782 /* SyncServer_Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		83544F831EF58B32007E0887 /* SyncServer_ExampleUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83544F8D1EF58B32007E0887 /* Build configuration list for PBXNativeTarget "SyncServer_ExampleUITests" */;
+			buildPhases = (
+				83544F801EF58B32007E0887 /* Sources */,
+				83544F811EF58B32007E0887 /* Frameworks */,
+				83544F821EF58B32007E0887 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				83544F8A1EF58B32007E0887 /* PBXTargetDependency */,
+			);
+			name = SyncServer_ExampleUITests;
+			productName = SyncServer_ExampleUITests;
+			productReference = 83544F841EF58B32007E0887 /* SyncServer_ExampleUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		607FACC81AFB9204008FA782 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0720;
+				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = CocoaPods;
 				TargetAttributes = {
@@ -329,6 +376,12 @@
 						CreatedOnToolsVersion = 6.3.1;
 						DevelopmentTeam = BH68R29JBE;
 						LastSwiftMigration = 0820;
+						TestTargetID = 607FACCF1AFB9204008FA782;
+					};
+					83544F831EF58B32007E0887 = {
+						CreatedOnToolsVersion = 8.3.2;
+						DevelopmentTeam = BH68R29JBE;
+						ProvisioningStyle = Automatic;
 						TestTargetID = 607FACCF1AFB9204008FA782;
 					};
 				};
@@ -348,6 +401,7 @@
 			targets = (
 				607FACCF1AFB9204008FA782 /* SyncServer_Example */,
 				607FACE41AFB9204008FA782 /* SyncServer_Tests */,
+				83544F831EF58B32007E0887 /* SyncServer_ExampleUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -376,6 +430,13 @@
 				831DE3D01EDA877B0084070F /* SmallerCat.jpg in Resources */,
 				83F37A171E4445CB00479175 /* Server.plist in Resources */,
 				83F37A221E46D52500479175 /* UploadMe.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83544F821EF58B32007E0887 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -508,15 +569,23 @@
 				837244541E419E7B00155E89 /* DoneUploads.swift in Sources */,
 				83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */,
 				8378D9BE1E91B8F000470D49 /* Client_SyncServer_Error.swift in Sources */,
+				83544F7F1EF4E0E5007E0887 /* Authentication.swift in Sources */,
 				8324EE5A1E83675F000656AF /* Client_SyncServer_Download.swift in Sources */,
 				835C60AC1E62ABF3003E9AF8 /* CoreDataTests.swift in Sources */,
 				83D95CA01E6A971000DF3BF3 /* Client_SyncManager_FileUpload.swift in Sources */,
-				833729861E0F6BC0002CA164 /* Authentication.swift in Sources */,
 				8344CC2B1E5FDD1800BEB263 /* Client_Downloads.swift in Sources */,
 				83F882131E6E5FDD008F644A /* Client_SyncServer_Sync.swift in Sources */,
 				83F37A301E51120B00479175 /* ServerAPI_DownloadFile.swift in Sources */,
 				835C60B21E6369DE003E9AF8 /* Client_SyncManager.swift in Sources */,
 				83EB63011E9F1A2100B20B9B /* ServerAPI_CreateSharingInvitation.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83544F801EF58B32007E0887 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83544F871EF58B32007E0887 /* SyncServer_ExampleUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,6 +596,11 @@
 			isa = PBXTargetDependency;
 			target = 607FACCF1AFB9204008FA782 /* SyncServer_Example */;
 			targetProxy = 607FACE61AFB9204008FA782 /* PBXContainerItemProxy */;
+		};
+		83544F8A1EF58B32007E0887 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 607FACCF1AFB9204008FA782 /* SyncServer_Example */;
+			targetProxy = 83544F891EF58B32007E0887 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -706,6 +780,42 @@
 			};
 			name = Release;
 		};
+		83544F8B1EF58B32007E0887 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = BH68R29JBE;
+				INFOPLIST_FILE = SyncServer_ExampleUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "biz.SpasticMuffin.SyncServer-ExampleUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = SyncServer_Example;
+			};
+			name = Debug;
+		};
+		83544F8C1EF58B32007E0887 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				DEVELOPMENT_TEAM = BH68R29JBE;
+				INFOPLIST_FILE = SyncServer_ExampleUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "biz.SpasticMuffin.SyncServer-ExampleUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = SyncServer_Example;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -735,6 +845,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		83544F8D1EF58B32007E0887 /* Build configuration list for PBXNativeTarget "SyncServer_ExampleUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83544F8B1EF58B32007E0887 /* Debug */,
+				83544F8C1EF58B32007E0887 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

@@ -91,7 +91,8 @@ class ImagesVC: UIViewController {
 
         // This is my solution to an annoying problem: I need to reload the images at their changed size after rotation. This is how I'm getting a callback *after* the rotation has completed when the cells have been sized properly.
         coordinator.animate(alongsideTransition: nil) { context in
-            self.collectionView.reloadData()
+            // I made this an optional because, oddly, I get in here when I've never navigated to this tab.
+            self.collectionView?.reloadData()
         }
     }
     
