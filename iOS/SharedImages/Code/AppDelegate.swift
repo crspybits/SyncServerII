@@ -59,6 +59,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Log.error("Error doing local consistency check: \(error)")
         }
         
+        // Do a background fetch every two hours
+        let minimumBackgroundFetchInterval:TimeInterval = 60 * 60 * 2
+        application.setMinimumBackgroundFetchInterval(minimumBackgroundFetchInterval)
+        
         return true
     }
     
@@ -81,6 +85,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         AppBadge.iOS9BadgeAuthorization(didRegister: notificationSettings)
     }
 
+    // I've been having issues with getting this to work. For troubleshooting, see https://stackoverflow.com/questions/39197933/how-to-troubleshoot-ios-background-app-fetch-not-working
+    // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623125-application
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         AppBadge.setBadge(completionHandler: completionHandler)
     }

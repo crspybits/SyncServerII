@@ -39,6 +39,7 @@ class SyncServer_ExampleUITests: XCTestCase {
         
         // Need a button press on the Google Sign In screen.
         // Hmmm. Don't know how to do that yet. The Xcode record function doesn't do it. See also: https://stackoverflow.com/questions/36116009/google-sign-in-on-ios-can-not-be-recorded-using-xcode-ui-testing-inspector-perh
+        // And see https://stackoverflow.com/questions/36770289/how-to-write-ui-tests-covering-login-with-facebook-in-xcode
         
         app.buttons["Test Credentials Refresh"].tap()
         

@@ -62,7 +62,6 @@ class AppBadge {
                     UIApplication.shared.applicationIconBadgeNumber = total
                     if total > 0 {
                         completionHandler?(.newData)
-
                     }
                     else {
                         completionHandler?(.noData)
