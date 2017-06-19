@@ -63,18 +63,26 @@ private class RequestWithRetries {
             completion()
         }
     }
+    
+    private func completion(_ error:Error?) {
+        completionHandler(error)
+        
+        // Get rid of circular reference so `RequestWithRetries` instance can be deallocated.
+        completionHandler = nil
+        request = nil
+    }
 
     func retryCheck(statusCode:Int?, error:Error?) {
         numberTries += 1
         let errorCheck = checkForError(statusCode, error)
         
         if errorCheck == nil || numberTries >= maximumNumberRetries || !retryIfError {
-            completionHandler(errorCheck)
+            completion(errorCheck)
         }
         else if statusCode == HTTPStatus.unauthorized.rawValue {
             if triedToRefreshCreds || creds == nil {
                 // unauthorized, but we're not refreshing. Cowardly give up.
-                completionHandler(error)
+                completion(error)
             }
             else {
                 triedToRefreshCreds = true
@@ -87,7 +95,7 @@ private class RequestWithRetries {
                     }
                     else {
                         // Failed on refreshing creds-- not much point in going on.
-                        self.completionHandler(error)
+                        self.completion(error)
                     }
                 }
             }
