@@ -28,10 +28,20 @@ class SyncServer_ExampleUITests: XCTestCase {
         super.tearDown()
     }
     
-    // TODO: *0* Add in a test of credentials refreshing. This is going to require adding a UI component-- e.g., a button on the main screen of this testing app, that will do something like:
-    //      creds.accessToken = "foobar"
-    // and then it will cause use of some server API such as FileIndex, all of course after having properly setup creds with the ServerAPI.session. The problem I've been having is that I can't use GoogleSignInCreds from my normal unit tests.
-    func testExample() {
+    // Assumes that user already exists on the server.
+    // Causes use of some server API such as FileIndex, all of course after having properly setup creds with the ServerAPI.session. The problem I've been having is that I can't use GoogleSignInCreds from my normal unit tests.
+    /*
+    func testCredentialsRefresh() {
+        // First press the button on the UI
+        
+        let app = XCUIApplication()
+        app.buttons["GIDSignInButton"].tap()
+        
+        // Need a button press on the Google Sign In screen.
+        // Hmmm. Don't know how to do that yet. The Xcode record function doesn't do it. See also: https://stackoverflow.com/questions/36116009/google-sign-in-on-ios-can-not-be-recorded-using-xcode-ui-testing-inspector-perh
+        
+        app.buttons["Test Credentials Refresh"].tap()
         
     }
+    */
 }

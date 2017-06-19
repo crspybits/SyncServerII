@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="vXZ-lx-hvc">
     <device id="retina3_5" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -20,8 +19,33 @@
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EhT-f8-VAK">
+                                <rect key="frame" x="76" y="416" width="168" height="30"/>
+                                <state key="normal" title="Test Credentials Refresh"/>
+                                <connections>
+                                    <action selector="testCredentialsRefreshAction:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="w4H-6q-xRh"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lYq-xT-cLr">
+                                <rect key="frame" x="160" y="451" width="0.0" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="lYq-xT-cLr" firstAttribute="centerX" secondItem="kh9-bI-dsS" secondAttribute="centerX" id="8st-kb-Yhj"/>
+                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="EhT-f8-VAK" secondAttribute="bottom" constant="34" id="Nth-af-Otd"/>
+                            <constraint firstItem="lYq-xT-cLr" firstAttribute="top" secondItem="EhT-f8-VAK" secondAttribute="bottom" constant="5" id="VYJ-MF-HIz"/>
+                            <constraint firstItem="EhT-f8-VAK" firstAttribute="centerX" secondItem="kh9-bI-dsS" secondAttribute="centerX" id="iNb-MR-m3L"/>
+                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="lYq-xT-cLr" secondAttribute="bottom" constant="8" id="tFk-X4-E1B"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="testingOutcome" destination="lYq-xT-cLr" id="1oZ-M2-Wxp"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>

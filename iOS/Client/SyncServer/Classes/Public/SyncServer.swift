@@ -23,6 +23,8 @@ public enum SyncEvent {
     
     case syncStarted
     case syncDone
+    
+    case refreshingCredentials
 }
 
 public struct EventDesired: OptionSet {
@@ -41,10 +43,12 @@ public struct EventDesired: OptionSet {
     public static let syncStarted = EventDesired(rawValue: 1 << 7)
     public static let syncDone = EventDesired(rawValue: 1 << 8)
     
+    public static let refreshingCredentials = EventDesired(rawValue: 1 << 9)
+    
     public static let defaults:EventDesired =
         [.singleFileDownloadComplete, .fileDownloadsCompleted, .downloadDeletionsCompleted,
         .singleFileUploadComplete, .singleUploadDeletionComplete, .fileUploadsCompleted, .uploadDeletionsCompleted]
-    public static let all:EventDesired = EventDesired.defaults.union([EventDesired.syncStarted, EventDesired.syncDone])
+    public static let all:EventDesired = EventDesired.defaults.union([EventDesired.syncStarted, EventDesired.syncDone, EventDesired.refreshingCredentials])
     
     static func reportEvent(_ event:SyncEvent, mask:EventDesired, delegate:SyncServerDelegate?) {
     
@@ -77,6 +81,9 @@ public struct EventDesired: OptionSet {
             
         case .singleUploadDeletionComplete(_):
             eventIsDesired = .singleUploadDeletionComplete
+        
+        case .refreshingCredentials:
+            eventIsDesired = .refreshingCredentials
         }
         
         if mask.contains(eventIsDesired) {
@@ -105,6 +112,7 @@ public protocol SyncServerDelegate : class {
     func syncServerEventOccurred(event:SyncEvent)
     
 #if DEBUG
+    // With each of these two callbacks, you *must* call `next` before returning.
     func syncServerSingleFileUploadCompleted(next: @escaping ()->())
     func syncServerSingleFileDownloadCompleted(next: @escaping ()->())
 #endif
@@ -121,6 +129,7 @@ public class SyncServer {
     public var eventsDesired:EventDesired {
         set {
             SyncManager.session.desiredEvents = newValue
+            ServerAPI.session.desiredEvents = newValue
         }
         
         get {
@@ -131,6 +140,7 @@ public class SyncServer {
     public weak var delegate:SyncServerDelegate? {
         set {
             SyncManager.session.delegate = newValue
+            ServerAPI.session.syncServerDelegate = newValue
         }
         
         get {
