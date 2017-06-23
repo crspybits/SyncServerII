@@ -24,24 +24,6 @@ class ImageExtras {
         return ImageStorage.size(ofImage: imageFileName(url:url), withPath: largeImageDirectoryURL)
     }
     
-    static func sizeFromImage(image:Image) -> CGSize {
-        var originalImageSize = CGSize()
-
-        // Originally, I wasn't storing these sizes, so need to grab & store them here if we can. (Defaults for sizes are -1).
-        if image.originalWidth < 0 || image.originalHeight < 0 {
-            originalImageSize = ImageExtras.sizeFromFile(url: image.url! as URL)
-            image.originalWidth = Float(originalImageSize.width)
-            image.originalHeight = Float(originalImageSize.height)
-            CoreData.sessionNamed(CoreDataExtras.sessionName).saveContext()
-        }
-        else {
-            originalImageSize.height = CGFloat(image.originalHeight)
-            originalImageSize.width = CGFloat(image.originalWidth)
-        }
-        
-        return originalImageSize
-    }
-    
     // Get the size of the icon without distorting the aspect ratio. Adapted from https://gist.github.com/tomasbasham/10533743
     static func boundingImageSizeFor(originalSize:CGSize, boundingSize:CGSize) -> CGSize {
         let aspectWidth = boundingSize.width / originalSize.width

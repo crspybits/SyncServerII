@@ -141,9 +141,7 @@ extension LargeImages : UICollectionViewDelegateFlowLayout {
         let boundingCellSize = CGSize(width: width, height: collectionView.frame.height)
         
         let image = self.coreDataSource.object(at: indexPath) as! Image
-        let originalImageSize = ImageExtras.sizeFromImage(image: image)
-
-        let boundedImageSize = ImageExtras.boundingImageSizeFor(originalSize: originalImageSize, boundingSize: boundingCellSize)
+        let boundedImageSize = ImageExtras.boundingImageSizeFor(originalSize: image.originalSize, boundingSize: boundingCellSize)
 
         return CGSize(width: boundedImageSize.width + IMAGE_WIDTH_PADDING, height: boundedImageSize.height)
     }

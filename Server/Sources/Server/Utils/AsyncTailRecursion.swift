@@ -13,6 +13,11 @@ import Dispatch
 // Except that the above technique allows multiple async requests to operate in parallel, which is not what I want.
 
 class AsyncTailRecursion {
+    // TODO: *1* Make sure we're getting deallocation
+    deinit {
+        print("AsyncTailRecursion.deinit")
+    }
+    
     private let lock = DispatchSemaphore(value: 0)
     
     // Blocks the calling thread and another thread starts the recursion.
