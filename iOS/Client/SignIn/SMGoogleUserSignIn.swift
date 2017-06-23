@@ -90,7 +90,7 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
                 self.accessToken = auth!.accessToken
             }
             else {
-                Log.error("Error refreshing tokens: \(String(describing: error))")
+                Log.error("Error refreshing tokens: \(error!)")
                 // I'm not really sure it's reasonable to sign the user out at this point, after a single attempt at refreshing credentials. It's a simple strategy, but say, what if we have no network connection. Why sign the user out then?
                 self.delegate?.signUserOutUsing(creds: self)
             }
@@ -100,7 +100,7 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
     }
 }
 
-// The class that you used to enable sign-in to Google should subclass this VC class.
+// The class that you use to enable sign-in to Google should subclass this VC class.
 open class SMGoogleUserSignInViewController : UIViewController, GIDSignInUIDelegate {
 }
 
@@ -122,6 +122,10 @@ case owningUserCreated
 protocol SMGoogleUserSignInDelegate : class {
 func shouldDoUserAction(googleUserSignIn:SMGoogleUserSignIn) -> UserActionNeeded
 func userActionOccurred(action:UserActionOccurred, googleUserSignIn:SMGoogleUserSignIn)
+}
+
+protocol GoogleUserSignOutDelegate : class {
+func userWasSignedOut(googleUserSignIn:SMGoogleUserSignIn)
 }
 
 // See https://developers.google.com/identity/sign-in/ios/sign-in
@@ -157,7 +161,11 @@ open class SMGoogleUserSignIn : NSObject {
     
     fileprivate let signInOutButton = GoogleSignInOutButton()
     
+    // The intent of this delegate is that it may not be present until later in the lifecycle of the app. E.g., in the Shared Images app, it's only present after the user has navigated to the SignIn tab.
     weak var delegate:SMGoogleUserSignInDelegate?
+    
+    // The intent of this delegate is that it will *always* be present.
+    weak var signOutDelegate:GoogleUserSignOutDelegate!
    
     public init(serverClientId:String, appClientId:String) {
         self.serverClientId = serverClientId
@@ -285,8 +293,9 @@ extension SMGoogleUserSignIn : GoogleSignInCredsDelegate {
 extension SMGoogleUserSignIn {
     @objc public func signUserOut() {
         GIDSignIn.sharedInstance().signOut()
-        self.signInOutButton.buttonShowing = .signIn
-        self.delegate?.userActionOccurred(action: .userSignedOut, googleUserSignIn: self)
+        signInOutButton.buttonShowing = .signIn
+        signOutDelegate.userWasSignedOut(googleUserSignIn: self)
+        delegate?.userActionOccurred(action: .userSignedOut, googleUserSignIn: self)
     }
 }
 

@@ -6,8 +6,20 @@
 //
 //
 
+/* To test refresh failure: in "Other Swift Flags" in Xcode settings in the SyncServer pod define:
+
+      TEST_REFRESH_FAILURE
+ 
+    So far this is relevant to only the Shared Images app. This test requires that, when the Shared Images app first launches, it takes you to the images page. Then, try a refresh operation. A successful test outcome is that the user should be signed out and navigation should occur to the SignIn tab.
+*/
 import Foundation
 import SMCoreLib
+
+#if TEST_REFRESH_FAILURE
+enum RequestWithRetriesError : Error {
+case testRefreshFailure
+}
+#endif
 
 private class RequestWithRetries {
     let maximumNumberRetries = 3
@@ -45,7 +57,12 @@ private class RequestWithRetries {
             if error == nil {
                 self.updateCreds(self.creds)
             }
+            
+#if TEST_REFRESH_FAILURE
+            completion(RequestWithRetriesError.testRefreshFailure)
+#else
             completion(error)
+#endif
         }
     }
     
@@ -125,7 +142,14 @@ extension ServerAPI {
                 rwr.completionHandler = { error in
                     completion?(serverResponse, statusCode, error)
                 }
-                rwr.retryCheck(statusCode: statusCode, error: error)
+                
+#if TEST_REFRESH_FAILURE
+                let theStatusCode:Int? = HTTPStatus.unauthorized.rawValue
+#else
+                let theStatusCode:Int? = statusCode
+#endif
+
+                rwr.retryCheck(statusCode: theStatusCode, error: error)
             }
         }
         rwr.start()

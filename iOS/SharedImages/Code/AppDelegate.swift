@@ -44,6 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         window!.rootViewController = tabBarController
         
+        // The default UI displayed tab is .signIn
         if SignIn.session.googleSignIn.userIsSignedIn {
             selectTabInController(tab: .images)
         }
@@ -59,13 +60,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Log.error("Error doing local consistency check: \(error)")
         }
         
-        // Do a background fetch every two hours
-        let minimumBackgroundFetchInterval:TimeInterval = 60 * 60 * 2
-        application.setMinimumBackgroundFetchInterval(minimumBackgroundFetchInterval)
+        let minimumBackgroundFetchIntervalOneHour:TimeInterval = 60 * 60
+        application.setMinimumBackgroundFetchInterval(minimumBackgroundFetchIntervalOneHour)
         
         return true
     }
     
+    // The specific values for this enum correspond to the order of the tabs, left to right, in the UI.
     enum Tab : Int {
         case signIn = 0
         case images = 1
@@ -85,10 +86,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         AppBadge.iOS9BadgeAuthorization(didRegister: notificationSettings)
     }
 
-    // I've been having issues with getting this to work. For troubleshooting, see https://stackoverflow.com/questions/39197933/how-to-troubleshoot-ios-background-app-fetch-not-working
+    // I've had been having issues with getting this to work. For troubleshooting, see https://stackoverflow.com/questions/39197933/how-to-troubleshoot-ios-background-app-fetch-not-working
     // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623125-application
+    // The "final" fix was to run a `beginBackgroundTask`. See the above SO link.
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        AppBadge.setBadge(completionHandler: completionHandler)
+    
+        var bgTaskId:UIBackgroundTaskIdentifier!
+        
+        func endBgTask() {
+            application.endBackgroundTask(bgTaskId)
+            bgTaskId = UIBackgroundTaskInvalid
+        }
+        
+        bgTaskId = application.beginBackgroundTask() {
+            endBgTask()
+        }
+    
+        AppBadge.setBadge() { (fetchResult:UIBackgroundFetchResult) in
+            completionHandler(fetchResult)
+            endBgTask()
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

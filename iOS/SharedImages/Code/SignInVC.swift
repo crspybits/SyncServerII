@@ -233,8 +233,8 @@ extension SignInVC : SMGoogleUserSignInDelegate {
         
         switch action {
         case .userSignedOut:
-            let appDelegate = UIApplication.shared.delegate as! AppDelegate
-            appDelegate.selectTabInController(tab: .signIn)
+            // Don't need to switch the tab to the SignInVC-- that's already done by the `GoogleUserSignOutDelegate`.
+            break
             
         case .userNotFoundOnSignInAttempt:
             // TODO: *2* Need to inform user.

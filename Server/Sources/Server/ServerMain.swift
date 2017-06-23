@@ -13,17 +13,20 @@ import PerfectLib
 import Kitura
 
 // See note in Package.swift
-//import SwiftMetrics
-//import SwiftMetricsDash
+import SwiftMetrics
+import SwiftMetricsDash
 
 // If given, the single command line argument to the server is expected to be a full path to the server config file.
 
 public class ServerMain {
     // If server fails to start, try looking for a process using the port:
     //      sudo lsof -i -n -P | grep TCP | grep 8181
-    public static let port = 8181
-    //public static let port = 443
-
+    
+    // I'm using port 8181 for local testing, and 443 for AWS.
+    // TODO: *1* Using port 443 on the server currently requires that you be root. Is there a way around that?
+    
+    static var smd:SwiftMetricsDash?
+    
     public enum ServerStartup {
         case blocking // doesn't return from startup (normal case)
         case nonBlocking // returns from startup (for XCTests)
@@ -38,9 +41,9 @@ public class ServerMain {
         // And: http://www.kitura.io/en/resources/tutorials/swiftmetrics.html
         // https://developer.ibm.com/swift/2017/03/21/using-swiftmetrics-secure-kitura-server/
         // Enable SwiftMetrics Monitoring
-        //let sm = try SwiftMetrics()
+        let sm = try! SwiftMetrics()
         // Pass SwiftMetrics to the dashboard for visualising
-        //let smd = try SwiftMetricsDash(swiftMetricsInstance : sm)
+        smd = try? SwiftMetricsDash(swiftMetricsInstance : sm)
         
         if type == .blocking {
             // When we launch the server from within Xcode (or just with no explicit arguments), we have 1 "argument" (CommandLine.arguments[0]).
@@ -81,8 +84,7 @@ public class ServerMain {
 
         let serverRoutes = CreateRoutes()
 
-        Kitura.addHTTPServer(onPort: self.port, with: serverRoutes.getRoutes(), withSSL: sslConfig)
-        //Kitura.addHTTPServer(onPort: self.port, with: serverRoutes.getRoutes())
+        Kitura.addHTTPServer(onPort: Constants.session.port, with: serverRoutes.getRoutes(), withSSL: sslConfig)
         
         switch type {
         case .blocking:

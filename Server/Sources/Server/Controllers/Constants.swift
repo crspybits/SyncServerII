@@ -37,6 +37,8 @@ class Constants {
     }
     var db = mySQL()
     
+    var port:Int!
+    
     var googleClientId:String = ""
     var googleClientSecret:String = ""
     var maxNumberDeviceUUIDPerUser:Int?
@@ -102,6 +104,8 @@ class Constants {
         db.user = try! config.getString(varName: "mySQL.user")
         db.password = try! config.getString(varName: "mySQL.password")
         db.database = try! config.getString(varName: "mySQL.database")
+        
+        port = try! config.getInt(varName: "port")
         
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
         print("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")

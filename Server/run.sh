@@ -1,27 +1,44 @@
 #!/bin/bash
 
 # Build and run the server from the command line
-# Optionally, you can give a single argument: build or test. The default is build, which will also run the server after building.
+# Usage:
+#	1) run test -- run server tests
+#	2) run server <PathToJsonConfigFile> -- start up the server
+#		In this case, the server is built before running.
+#		e.g., 
+#			./run.sh server ../../Private/Server/SharedImagesServer.json
+#			./run.sh server ../../Private/Server/Server.json
 
 buildLocation=~/builds/.build-server
 
-CMD=$1
-if [ "empty${CMD}" == "empty" ] ; then
-	CMD="build"
-fi
+ARG1=$1
+ARG2=$2
 
-if [ $? == 0 ] && [ "${CMD}" == "test" ] ; then
+if [ "empty${ARG1}" == "empty" ] ; then
+	echo "See usage instructions!"
+	exit 1
+elif [ "${ARG1}" == "test" ] ; then
 	# Some test cases expect `Cat.jpg` in /tmp
 	cp Resources/Cat.jpg /tmp
+	CMD="test"
+elif [ "${ARG1}" == "server" ] ; then
+	if [ "empty${ARG2}" == "empty" ] ; then
+		echo "See usage instructions!"
+		exit 1	
+	fi
+	
+	CMD="build"
+	JSONCONFIG="${ARG2}"
+else
+	echo "See usage instructions!"
+	exit 1
 fi
 
 # use --verbose flag to show more output
 swift "${CMD}" -Xswiftc -DDEBUG -Xswiftc -DSERVER --build-path "${buildLocation}"
 
 if [ $? == 0 ] && [ "${CMD}" == "build" ] ; then
-	# ( ./run.sh > ~/output.log 2>&1 & ) 
-	# ${buildLocation}/debug/Main ../../Private/Server/SharedImagesServer.json
-	${buildLocation}/debug/Main ../../Private/Server/Server.json
+	${buildLocation}/debug/Main "${JSONCONFIG}"
 fi
 
 exit 0
@@ -33,8 +50,17 @@ cd
 sudo bash
 source ~/.bashrc
 cd SyncServerII/Server/
-# Should have check here to make sure `Main` isn't running
-# and need to make sure we have selected SharedImages db.
-( stdbuf -o0 ./run.sh > ~/output.log 2>&1 & ) 
+RUNCHECK=`ps -A | grep Main`
+if [ "empty${RUNCHECK}" == "empty" ] ; then
+	( stdbuf -o0 ./run.sh server ../../Private/Server/SharedImagesServer.json > ~/output.log 2>&1 & ) 
+elif
+	echo "The server is already running: "
+	ps -A | grep Main
+fi
+
+# Installing next version:
+git reset --hard
+git pull origin master
+# Until I get this changed, need to change to using port 443 and change the run.sh
 
 
