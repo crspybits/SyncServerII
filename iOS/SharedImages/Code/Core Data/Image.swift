@@ -81,12 +81,12 @@ public class Image: NSManagedObject {
         return newObjectAndMakeUUID(makeUUID: false)
     }
     
-    class func fetchRequestForAllObjects() -> NSFetchRequest<NSFetchRequestResult>? {
+    class func fetchRequestForAllObjects(ascending:Bool) -> NSFetchRequest<NSFetchRequestResult>? {
         var fetchRequest: NSFetchRequest<NSFetchRequestResult>?
         fetchRequest = CoreData.sessionNamed(CoreDataExtras.sessionName).fetchRequest(withEntityName: self.entityName(), modifyingFetchRequestWith: nil)
         
         if fetchRequest != nil {
-            let sortDescriptor = NSSortDescriptor(key: CREATION_DATE_KEY, ascending: false)
+            let sortDescriptor = NSSortDescriptor(key: CREATION_DATE_KEY, ascending: ascending)
             fetchRequest!.sortDescriptors = [sortDescriptor]
         }
         
@@ -113,16 +113,14 @@ public class Image: NSManagedObject {
 }
 
 extension Image : CacheDataSource {
-    func keyFor(args:Any?) -> String {
+    func keyFor(args size:CGSize) -> String {
         // Using as the key:
         // <filename>.<W>x<H>
-        let size = args! as! CGSize
         let filename = ImageExtras.imageFileName(url: url! as URL)
         return "\(filename).\(size.width)x\(size.height)"
     }
     
-    func cacheDataFor(args:Any?) -> UIImage {
-        let size = args! as! CGSize
+    func cacheDataFor(args size:CGSize) -> UIImage {
         return ImageStorage.getImage(ImageExtras.imageFileName(url: url! as URL), of: size, fromIconDirectory: ImageExtras.iconDirectoryURL, withLargeImageDirectory: ImageExtras.largeImageDirectoryURL)
     }
     
@@ -132,8 +130,10 @@ extension Image : CacheDataSource {
     }
 
 #if DEBUG
-    func cachedItem(_ item:Any) {}
-    func evictedItemFromCache(_ item:Any) {}
+    func cachedItem(_ item:UIImage) {}
+    func evictedItemFromCache(_ item:UIImage) {
+        Log.msg("Evicted image from cache.")
+    }
 #endif
 }
 

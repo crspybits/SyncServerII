@@ -14,18 +14,24 @@ class ImagesVC: UIViewController {
     let reuseIdentifier = "ImageIcon"
     var acquireImage:SMAcquireImage!
     var addImageBarButton:UIBarButtonItem!
+    var sortingOrder:UIBarButtonItem!
     var coreDataSource:CoreDataSource!
     var syncController = SyncController()
     
     // To enable pulling down on the table view to do a sync with server.
     var refreshControl:ODRefreshControl!
     
-    let spinner = SyncSpinner(frame: CGRect(x: 0, y: 0, width: 25, height: 25))
-    var barButtonSpinner:UIBarButtonItem!
-
+    static let spinnerContainerSize:CGFloat = 25
+    var spinnerContainer:UIView!
+    let spinner = SyncSpinner(frame: CGRect(x: 0, y: 0, width: spinnerContainerSize, height: spinnerContainerSize))
+    
     @IBOutlet weak var collectionView: UICollectionView!
     
     var timeThatSpinnerStarts:CFTimeInterval!
+    
+    fileprivate var imageCache:LRUCache<Image>! {
+        return ImageExtras.imageCache
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,8 +39,8 @@ class ImagesVC: UIViewController {
         collectionView.delegate = self
   
         // Spinner that shows when syncing
-        barButtonSpinner = UIBarButtonItem(customView: spinner)
-        navigationItem.leftBarButtonItem = barButtonSpinner
+        createSpinnerContainer()
+        spinnerContainer.addSubview(spinner)
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(spinnerTapGestureAction))
         self.spinner.addGestureRecognizer(tapGesture)
         
@@ -75,6 +81,38 @@ class ImagesVC: UIViewController {
         let lp = UILongPressGestureRecognizer(target: self, action: #selector(consistencyCheckAction(gesture:)))
         titleLabel.addGestureRecognizer(lp)
         titleLabel.isUserInteractionEnabled = true
+        
+        // Controlling sorting order of images
+        sortingOrder = UIBarButtonItem(title: "Sort", style: .plain, target: self, action: #selector(sortingOrderAction))
+        navigationItem.leftBarButtonItem = sortingOrder
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        ImageExtras.resetToSmallerImageCache() {
+            collectionView.reloadData()
+        }
+    }
+    
+    func scrollIfNeeded(animated:Bool = true) {
+        let count = collectionView.numberOfItems(inSection: 0)
+        if count == 0 {
+            return
+        }
+        
+        var position:UICollectionViewScrollPosition
+        var indexPath:IndexPath
+        
+        if ImageExtras.currentSortingOrder.stringValue == SortingOrder.newerAtTop.rawValue {
+            indexPath = IndexPath(item: 0, section: 0)
+            position = .bottom
+        }
+        else {
+            indexPath = IndexPath(item: count-1, section: 0)
+            position = .top
+        }
+        
+        collectionView.scrollToItem(at: indexPath, at: position, animated: animated)
     }
     
     override func viewWillLayoutSubviews() {
@@ -88,19 +126,46 @@ class ImagesVC: UIViewController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-
-        // This is my solution to an annoying problem: I need to reload the images at their changed size after rotation. This is how I'm getting a callback *after* the rotation has completed when the cells have been sized properly.
-        coordinator.animate(alongsideTransition: nil) { context in
+        
+        // The collection view reload in the completion is my solution to an annoying problem: I need to reload the images at their changed size after rotation. This is how I'm getting a callback *after* the rotation has completed when the cells have been sized properly.
+        coordinator.animate(alongsideTransition: {context in
+            self.positionSpinnerContainer(usingScreenSize: UIScreen.main.bounds.size)
+        }) { context in
             // I made this an optional because, oddly, I get in here when I've never navigated to this tab.
             self.collectionView?.reloadData()
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        coreDataSource.fetchData()
+        positionSpinnerContainer(usingScreenSize: UIScreen.main.bounds.size)
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        scrollIfNeeded(animated: true)
+
         AppBadge.checkForBadgeAuthorization(usingViewController: self)
         setAddButtonState()
+    }
+    
+    func createSpinnerContainer() {
+        spinnerContainer = UIView()
+        spinnerContainer.backgroundColor = UIColor.clear
+        spinnerContainer.frame = CGRect(x: 0, y: 0, width: ImagesVC.spinnerContainerSize, height: ImagesVC.spinnerContainerSize)
+        self.tabBarController!.view.addSubview(spinnerContainer)
+    }
+    
+    func positionSpinnerContainer(usingScreenSize size:CGSize) {
+        var frame = spinnerContainer.frame
+        
+        // The - 5 is a fudge to get the spinner lined near the top of the tab bar graphics, so it looks about right.
+        frame.origin.y = size.height - tabBarController!.tabBar.frame.height/2.0 - ImagesVC.spinnerContainerSize/2.0 - 5.0
+        frame.origin.x = size.width/2.0 - ImagesVC.spinnerContainerSize/2.0
+        
+        spinnerContainer.frame = frame
     }
 
     func setAddButtonState() {
@@ -181,14 +246,35 @@ class ImagesVC: UIViewController {
         Log.msg("spinner tapped")
         refresh()
     }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        coreDataSource.fetchData()
-    }
     
     func addImageAction() {
         self.acquireImage.showAlert(fromBarButton: addImageBarButton)
+    }
+    
+    func sortingOrderAction() {
+        let alert = UIAlertController(title: "Sorting order of images:", message: "Newer images at the top or the bottom?", preferredStyle: .actionSheet)
+        alert.popoverPresentationController?.barButtonItem = sortingOrder
+        Alert.styleForIPad(alert)
+        
+        alert.addAction(UIAlertAction(title: "Newer at top", style: .default) {alert in
+            if ImageExtras.currentSortingOrder.stringValue != SortingOrder.newerAtTop.rawValue {
+                ImageExtras.currentSortingOrder.stringValue = SortingOrder.newerAtTop.rawValue
+                self.coreDataSource.fetchData()
+                self.collectionView.reloadData()
+                self.scrollIfNeeded(animated:true)
+            }
+        })
+        alert.addAction(UIAlertAction(title: "Newer at bottom", style: .default) {alert in
+            if ImageExtras.currentSortingOrder.stringValue != SortingOrder.newerAtBottom.rawValue {
+                ImageExtras.currentSortingOrder.stringValue = SortingOrder.newerAtBottom.rawValue
+                self.coreDataSource.fetchData()
+                self.collectionView.reloadData()
+                self.scrollIfNeeded(animated:true)
+            }
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) {alert in
+        })
+        self.present(alert, animated: true, completion: nil)
     }
     
     @discardableResult
@@ -249,7 +335,7 @@ extension ImagesVC : UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ImageCollectionVC
-        cell.setProperties(image: self.coreDataSource.object(at: indexPath) as! Image, syncController: syncController)
+        cell.setProperties(image: self.coreDataSource.object(at: indexPath) as! Image, syncController: syncController, cache: imageCache)
                 
         return cell
     }
@@ -269,6 +355,8 @@ extension ImagesVC : SMAcquireImageDelegate {
         // We're making an image that the user of the app added-- we'll generate a new UUID.
         let newImage = addLocalImage(newImageURL:newImageURL, mimeType:mimeType, title:userName)
         
+        scrollIfNeeded(animated:true)
+        
         // Sync this new image with the server.
         syncController.add(image: newImage)
     }
@@ -277,7 +365,8 @@ extension ImagesVC : SMAcquireImageDelegate {
 extension ImagesVC : CoreDataSourceDelegate {
     // This must have sort descriptor(s) because that is required by the NSFetchedResultsController, which is used internally by this class.
     func coreDataSourceFetchRequest(_ cds: CoreDataSource!) -> NSFetchRequest<NSFetchRequestResult>! {
-        return Image.fetchRequestForAllObjects()
+        let ascending = ImageExtras.currentSortingOrder.stringValue == SortingOrder.newerAtBottom.rawValue
+        return Image.fetchRequestForAllObjects(ascending:ascending)
     }
     
     func coreDataSourceContext(_ cds: CoreDataSource!) -> NSManagedObjectContext! {
@@ -345,6 +434,10 @@ extension ImagesVC : SyncControllerDelegate {
         }
         
         self.spinner.setNeedsLayout()
+    }
+    
+    func completedAddingLocalImages() {
+        scrollIfNeeded(animated: true)
     }
 }
 

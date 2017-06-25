@@ -3,11 +3,14 @@
 # Build and run the server from the command line
 # Usage:
 #	1) run test -- run server tests
-#	2) run server <PathToJsonConfigFile> -- start up the server
+#	2) run [local | aws] <PathToJsonConfigFile> -- start up the server
 #		In this case, the server is built before running.
 #		e.g., 
-#			./run.sh server ../../Private/Server/SharedImagesServer.json
-#			./run.sh server ../../Private/Server/Server.json
+#			./run.sh local ../../Private/Server/Server.json
+#			./run.sh aws ../../Private/Server/SharedImagesServer.json
+
+#		When running on AWS, you first need to do :
+#		cd ~/SyncServerII/Server; sudo bash; source ~/.bashrc
 
 buildLocation=~/builds/.build-server
 
@@ -21,10 +24,19 @@ elif [ "${ARG1}" == "test" ] ; then
 	# Some test cases expect `Cat.jpg` in /tmp
 	cp Resources/Cat.jpg /tmp
 	CMD="test"
-elif [ "${ARG1}" == "server" ] ; then
+elif [ "${ARG1}" == "local" ] || [ "${ARG1}" == "aws" ] ; then
 	if [ "empty${ARG2}" == "empty" ] ; then
 		echo "See usage instructions!"
 		exit 1	
+	fi
+	
+	if [ "${ARG1}" == "aws" ] ; then
+		RUNCHECK=`ps -A | grep Main`
+		if [ "empty${RUNCHECK}" != "empty" ] ; then	
+			echo "The server is already running: "
+			ps -A | grep Main
+			exit 1
+		fi
 	fi
 	
 	CMD="build"
@@ -34,29 +46,27 @@ else
 	exit 1
 fi
 
+if [ "${ARG1}" == "test" ] ; then
+	echo "Building server and then running tests ..."
+else
+	echo "Building server ..."
+fi
+
 # use --verbose flag to show more output
 swift "${CMD}" -Xswiftc -DDEBUG -Xswiftc -DSERVER --build-path "${buildLocation}"
 
 if [ $? == 0 ] && [ "${CMD}" == "build" ] ; then
-	${buildLocation}/debug/Main "${JSONCONFIG}"
+	if [ "${ARG1}" == "local" ] ; then
+		echo "Starting server locally..."
+		${buildLocation}/debug/Main "${JSONCONFIG}"
+	else 
+		echo "Starting server on AWS ..."	
+		# `stdbuf` gets rid of buffering; see also https://serverfault.com/questions/294218/is-there-a-way-to-redirect-output-to-a-file-without-buffering-on-unix-linux
+		( stdbuf -o0 ${buildLocation}/debug/Main "${JSONCONFIG}" > ~/output.log 2>&1 & ) 
+	fi
 fi
 
 exit 0
-
-# For running SharedImages server on AWS
-
-# `stdbuf` gets rid of buffering; see also https://serverfault.com/questions/294218/is-there-a-way-to-redirect-output-to-a-file-without-buffering-on-unix-linux
-cd
-sudo bash
-source ~/.bashrc
-cd SyncServerII/Server/
-RUNCHECK=`ps -A | grep Main`
-if [ "empty${RUNCHECK}" == "empty" ] ; then
-	( stdbuf -o0 ./run.sh server ../../Private/Server/SharedImagesServer.json > ~/output.log 2>&1 & ) 
-elif
-	echo "The server is already running: "
-	ps -A | grep Main
-fi
 
 # Installing next version:
 git reset --hard

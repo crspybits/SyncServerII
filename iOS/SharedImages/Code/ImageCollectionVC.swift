@@ -15,16 +15,17 @@ class ImageCollectionVC : UICollectionViewCell {
     @IBOutlet weak var title: UILabel!
     private(set) var image:Image!
     private(set) weak var syncController:SyncController!
-    static var imageCache = LRUCache<Image>(maxItems: 200)!
+    weak var imageCache:LRUCache<Image>!
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    func setProperties(image:Image, syncController:SyncController) {
+    func setProperties(image:Image, syncController:SyncController, cache: LRUCache<Image>) {
         self.image = image
         self.syncController = syncController
         title.text = image.title
+        imageCache = cache
     }
     
     // I had problems knowing when the cell was sized correctly so that I could call `ImageStorage.getImage`. `layoutSubviews` seems to not be the right place. And neither is `setProperties` (which gets called by cellForItemAt). When the UICollectionView is first displayed, I get small sizes (less than 1/2 of correct sizes) at least on iPad. Odd.
@@ -33,7 +34,7 @@ class ImageCollectionVC : UICollectionViewCell {
         layoutIfNeeded()
         
         let smallerSize = ImageExtras.boundingImageSizeFor(originalSize: image.originalSize, boundingSize: imageView.frameSize)
-        imageView.image = ImageCollectionVC.imageCache.getItem(from: image, with: smallerSize)
+        imageView.image = imageCache.getItem(from: image, with: smallerSize)
     }
     
     func remove() {
