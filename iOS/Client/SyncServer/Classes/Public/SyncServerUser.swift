@@ -14,7 +14,7 @@ open class SignInCreds {
     }
     
     public var userId:String? // e.g., for Google, this is their `sub`
-    public var username:String?
+    public var username:String!
     public var email:String?
     
     // Uses ServerConstants keys to provide creds values for HTTP headers.

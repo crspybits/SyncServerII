@@ -14,8 +14,10 @@ public class ServerConstants {
     public static let httpEmailKey = "Kitura-email"
     public static let XTokenTypeKey = "X-token-type"
 
+    // Generic authorization keys
+    public static let HTTPOauth2AccessTokenKey = "Kitura-access-token"
+    
     // HTTP request header keys specific to Google
-    public static let GoogleHTTPAccessTokenKey = "Kitura-access-token"
     public static let GoogleHTTPServerAuthCodeKey = "Kitura-server-auth-code"
 
 #if DEBUG

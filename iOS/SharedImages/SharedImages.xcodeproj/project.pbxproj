@@ -16,6 +16,8 @@
 		8324EE521E778623000656AF /* ODRefreshControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE4D1E778623000656AF /* ODRefreshControl.m */; };
 		8324EE541E77873F000656AF /* SyncSpinner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324EE531E77873F000656AF /* SyncSpinner.swift */; };
 		8347BA651EF109F9002763F6 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8347BA641EF109F9002763F6 /* Alert.swift */; };
+		83BDCB0E1EFDC39700F86A51 /* GenericSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BDCB0D1EFDC39700F86A51 /* GenericSignIn.swift */; };
+		83BDCB101EFDC5CD00F86A51 /* SignInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BDCB0F1EFDC5CD00F86A51 /* SignInManager.swift */; };
 		83D1FE341EAB074A00DD468F /* LargeImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D1FE331EAB074A00DD468F /* LargeImages.swift */; };
 		83DC0C311EE7A0CD00727EF2 /* ImageExtras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DC0C301EE7A0CD00727EF2 /* ImageExtras.swift */; };
 		83F58ACB1EE3BA140081C3D1 /* AppBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F58ACA1EE3BA140081C3D1 /* AppBadge.swift */; };
@@ -47,6 +49,8 @@
 		8324EE4D1E778623000656AF /* ODRefreshControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ODRefreshControl.m; sourceTree = "<group>"; };
 		8324EE531E77873F000656AF /* SyncSpinner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyncSpinner.swift; sourceTree = "<group>"; };
 		8347BA641EF109F9002763F6 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		83BDCB0D1EFDC39700F86A51 /* GenericSignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GenericSignIn.swift; path = ../../Client/SignIn/GenericSignIn.swift; sourceTree = "<group>"; };
+		83BDCB0F1EFDC5CD00F86A51 /* SignInManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SignInManager.swift; path = ../../Client/SignIn/SignInManager.swift; sourceTree = "<group>"; };
 		83D1FE331EAB074A00DD468F /* LargeImages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LargeImages.swift; sourceTree = "<group>"; };
 		83DC0C2B1EE795FA00727EF2 /* SharedImages2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SharedImages2.xcdatamodel; sourceTree = "<group>"; };
 		83DC0C301EE7A0CD00727EF2 /* ImageExtras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageExtras.swift; sourceTree = "<group>"; };
@@ -108,6 +112,8 @@
 				8324EE2F1E75EC62000656AF /* SignInVC.swift */,
 				8324EE2A1E74ABCE000656AF /* SignIn.swift */,
 				83F882621E749EE0008F644A /* SMGoogleUserSignIn.swift */,
+				83BDCB0D1EFDC39700F86A51 /* GenericSignIn.swift */,
+				83BDCB0F1EFDC5CD00F86A51 /* SignInManager.swift */,
 			);
 			name = SignIn;
 			sourceTree = "<group>";
@@ -359,6 +365,7 @@
 				83F8824D1E712004008F644A /* AppDelegate.swift in Sources */,
 				83F882531E73B172008F644A /* CoreDataExtras.swift in Sources */,
 				8324EE301E75EC62000656AF /* SignInVC.swift in Sources */,
+				83BDCB0E1EFDC39700F86A51 /* GenericSignIn.swift in Sources */,
 				83F882561E73B2DC008F644A /* Image.swift in Sources */,
 				8324EE351E7649E3000656AF /* TabControllerDelegate.swift in Sources */,
 				8324EE541E77873F000656AF /* SyncSpinner.swift in Sources */,
@@ -369,6 +376,7 @@
 				8324EE2B1E74ABCE000656AF /* SignIn.swift in Sources */,
 				83F882571E73B2DC008F644A /* Image+CoreDataProperties.swift in Sources */,
 				83F58ACB1EE3BA140081C3D1 /* AppBadge.swift in Sources */,
+				83BDCB101EFDC5CD00F86A51 /* SignInManager.swift in Sources */,
 				8324EE4E1E778623000656AF /* CALayer+MBAnimationPersistence.m in Sources */,
 				8347BA651EF109F9002763F6 /* Alert.swift in Sources */,
 				83F882631E749EE0008F644A /* SMGoogleUserSignIn.swift in Sources */,

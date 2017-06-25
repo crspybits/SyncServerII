@@ -34,7 +34,7 @@ protocol GoogleSignInCredsDelegate : class {
 func signUserOutUsing(creds:GoogleSignInCreds)
 }
 
-class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
+class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible, UserIdentifiers {
     fileprivate var currentlyRefreshing = false
     fileprivate var googleUser:GIDGoogleUser?
 
@@ -46,6 +46,7 @@ class GoogleSignInCreds : SignInCreds, CustomDebugStringConvertible {
     
     weak var delegate:GoogleSignInCredsDelegate?
     
+    // TODO: Get rid of.
     override public func authDict() -> [String:String] {
         var result = super.authDict()
         result[ServerConstants.XTokenTypeKey] = ServerConstants.AuthTokenType.GoogleToken.rawValue
@@ -129,7 +130,7 @@ func userWasSignedOut(googleUserSignIn:SMGoogleUserSignIn)
 }
 
 // See https://developers.google.com/identity/sign-in/ios/sign-in
-open class SMGoogleUserSignIn : NSObject {
+open class SMGoogleUserSignIn : NSObject, GenericSignIn {
     // Specific to Google Credentials. I'm not sure it's needed really (i.e., could it be obtained each time the app launches on sign in-- since to be signed in really assumes we're connected to the network?), but I'll store this in the Keychain since it's credential info.
     // Hmmmm. I may be making incorrect assumptions about the longevity of these IdTokens. See https://github.com/google/google-auth-library-nodejs/issues/46 Does silently signing the user in generate a new IdToken?
     fileprivate static let IdToken = SMPersistItemString(name: "SMGoogleUserSignIn.IdToken", initialStringValue: "", persistType: .keyChain)
@@ -166,6 +167,22 @@ open class SMGoogleUserSignIn : NSObject {
     
     // The intent of this delegate is that it will *always* be present.
     weak var signOutDelegate:GoogleUserSignOutDelegate!
+    
+    var httpRequestHeaders:[String:String] {
+        assert(userIsSignedIn)
+        
+        var result = [String:String]()
+        result[ServerConstants.HTTPOauth2AccessTokenKey] = signedInUser.accessToken
+        result[ServerConstants.GoogleHTTPServerAuthCodeKey] = signedInUser.serverAuthCode
+        result[ServerConstants.XTokenTypeKey] = ServerConstants.AuthTokenType.GoogleToken.rawValue
+
+        return result
+    }
+    
+    var userIdentifiers:UserIdentifiers {
+        
+    }
+
    
     public init(serverClientId:String, appClientId:String) {
         self.serverClientId = serverClientId
