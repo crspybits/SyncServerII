@@ -23,6 +23,10 @@ class LargeImages : UIViewController {
     var coreDataSource:CoreDataSource!
     let reuseIdentifier = "largeImage"
     
+    fileprivate var imageCache:LRUCache<Image>! {
+        return ImageExtras.imageCache
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.dataSource = self
@@ -30,6 +34,13 @@ class LargeImages : UIViewController {
 
         coreDataSource = CoreDataSource(delegate: self)
         self.edgesForExtendedLayout = []
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        ImageExtras.resetToSmallerImageCache() {
+            collectionView.reloadData()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -80,7 +91,8 @@ class LargeImages : UIViewController {
 extension LargeImages : CoreDataSourceDelegate {
     // This must have sort descriptor(s) because that is required by the NSFetchedResultsController, which is used internally by this class.
     func coreDataSourceFetchRequest(_ cds: CoreDataSource!) -> NSFetchRequest<NSFetchRequestResult>! {
-        return Image.fetchRequestForAllObjects()
+        let ascending = ImageExtras.currentSortingOrder.stringValue == SortingOrder.newerAtBottom.rawValue
+        return Image.fetchRequestForAllObjects(ascending:ascending)
     }
     
     func coreDataSourceContext(_ cds: CoreDataSource!) -> NSManagedObjectContext! {
@@ -126,7 +138,7 @@ extension LargeImages : UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ImageCollectionVC
-        cell.setProperties(image: self.coreDataSource.object(at: indexPath) as! Image, syncController: syncController)
+        cell.setProperties(image: self.coreDataSource.object(at: indexPath) as! Image, syncController: syncController, cache: imageCache)
         
         return cell
     }
@@ -141,9 +153,7 @@ extension LargeImages : UICollectionViewDelegateFlowLayout {
         let boundingCellSize = CGSize(width: width, height: collectionView.frame.height)
         
         let image = self.coreDataSource.object(at: indexPath) as! Image
-        let originalImageSize = ImageExtras.sizeFromImage(image: image)
-
-        let boundedImageSize = ImageExtras.boundingImageSizeFor(originalSize: originalImageSize, boundingSize: boundingCellSize)
+        let boundedImageSize = ImageExtras.boundingImageSizeFor(originalSize: image.originalSize, boundingSize: boundingCellSize)
 
         return CGSize(width: boundedImageSize.width + IMAGE_WIDTH_PADDING, height: boundedImageSize.height)
     }

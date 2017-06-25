@@ -11,4 +11,14 @@ target 'SharedImages' do
 	pod 'SyncServer', :path => '../Client/'
 	pod 'SMCoreLib'
     pod 'Google/SignIn'
+    
+	target 'SharedImagesTests' do
+    	inherit! :search_paths
+    	
+		pod 'SevenSwitch', '~> 2.1'
+		pod 'SyncServer', :path => '../Client/'
+		pod 'SMCoreLib'
+		pod 'Google/SignIn'
+  	end
 end
+

@@ -18,6 +18,7 @@ enum SyncControllerEvent {
 
 protocol SyncControllerDelegate : class {
     func addLocalImage(syncController:SyncController, url:SMRelativeLocalURL, uuid:String, mimeType:String, title:String?, creationDate: NSDate?)
+    func completedAddingLocalImages()
     func removeLocalImage(syncController:SyncController, uuid:String)
     func syncEvent(syncController:SyncController, event:SyncControllerEvent)
 }
@@ -88,6 +89,8 @@ extension SyncController : SyncServerDelegate {
 
             delegate.addLocalImage(syncController: self, url: url, uuid: download.downloadedFileAttributes.fileUUID, mimeType: download.downloadedFileAttributes.mimeType, title:title, creationDate:download.downloadedFileAttributes.creationDate as NSDate?)
         }
+        
+        delegate.completedAddingLocalImages()
     }
 
     func shouldDoDeletions(downloadDeletions:[SyncAttributes]) {
