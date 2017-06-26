@@ -149,6 +149,10 @@ extension SyncServerUser : ServerAPIDelegate {
     func doneUploadsRequestTestLockSync(forServerAPI: ServerAPI) -> TimeInterval? {
         return nil
     }
+    
+    func fileIndexRequestServerSleep(forServerAPI: ServerAPI) -> TimeInterval? {
+        return nil
+    }
 #endif
 }
 

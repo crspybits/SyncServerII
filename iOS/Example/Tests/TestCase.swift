@@ -19,6 +19,7 @@ class TestCase: XCTestCase {
     var deviceUUIDUsed:Bool = false
     
     var testLockSync: TimeInterval?
+    var fileIndexServerSleep: TimeInterval?
     var testLockSyncCalled:Bool = false
     
     var shouldSaveDownloads: ((_ downloads: [(downloadedFile: NSURL, downloadedFileAttributes: SyncAttributes)]) -> ())!
@@ -54,6 +55,7 @@ class TestCase: XCTestCase {
         ]
         
         SyncManager.session.delegate = self
+        fileIndexServerSleep = nil
     }
     
     override func tearDown() {
@@ -602,6 +604,10 @@ extension TestCase : ServerAPIDelegate {
     func doneUploadsRequestTestLockSync(forServerAPI: ServerAPI) -> TimeInterval? {
         testLockSyncCalled = true
         return testLockSync
+    }
+    
+    func fileIndexRequestServerSleep(forServerAPI: ServerAPI) -> TimeInterval? {
+        return fileIndexServerSleep
     }
     
     func deviceUUID(forServerAPI: ServerAPI) -> Foundation.UUID {

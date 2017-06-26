@@ -14,6 +14,7 @@ protocol ServerAPIDelegate : class {
     
 #if DEBUG
     func doneUploadsRequestTestLockSync(forServerAPI: ServerAPI) -> TimeInterval?
+    func fileIndexRequestServerSleep(forServerAPI: ServerAPI) -> TimeInterval?
 #endif
 }
 
@@ -185,7 +186,21 @@ class ServerAPI {
     func fileIndex(completion:((_ fileIndex: [FileInfo]?, _ masterVersion:MasterVersionInt?, Error?)->(Void))?) {
     
         let endpoint = ServerEndpoints.fileIndex
-        let url = makeURL(forEndpoint: endpoint)
+        var params = [String : Any]()
+        
+#if DEBUG
+        if let serverSleep = delegate.fileIndexRequestServerSleep(forServerAPI: self) {
+            params[FileIndexRequest.testServerSleepKey] = Int32(serverSleep)
+        }
+#endif
+        
+        guard let fileIndexRequest = FileIndexRequest(json: params) else {
+            completion?(nil, nil, FileIndexError.couldNotCreateFileIndexRequest)
+            return
+        }
+
+        let urlParameters = fileIndexRequest.urlParameters()
+        let url = makeURL(forEndpoint: endpoint, parameters: urlParameters)
         
         sendRequestUsing(method: endpoint.method, toURL: url) { (response,  httpStatus, error) in
             let resultError = self.checkForError(statusCode: httpStatus, error: error)

@@ -710,6 +710,7 @@
 				830B1DFF1EFCC03E0022FCC7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		83F8821A1E711600008F644A /* Build configuration list for PBXProject "SharedImages" */ = {
 			isa = XCConfigurationList;

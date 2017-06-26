@@ -62,11 +62,19 @@ class FileController : ControllerProtocol {
     }
             
     func fileIndex(params:RequestProcessingParameters) {
-        guard params.request is FileIndexRequest else {
+        guard let fileIndexRequest = params.request as? FileIndexRequest else {
             Log.error(message: "Did not receive FileIndexRequest")
             params.completion(nil)
             return
         }
+
+#if DEBUG
+        if fileIndexRequest.testServerSleep != nil {
+            Log.info(message: "Starting sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
+            Thread.sleep(forTimeInterval: TimeInterval(fileIndexRequest.testServerSleep!))
+            Log.info(message: "Finished sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
+        }
+#endif
         
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
