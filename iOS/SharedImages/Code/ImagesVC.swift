@@ -264,7 +264,7 @@ extension ImagesVC : SMAcquireImageDelegate {
     // Called after the image is acquired.
     func smAcquireImage(_ acquireImage:SMAcquireImage, newImageURL: SMRelativeLocalURL, mimeType:String) {
     
-        let userName = SignIn.session.googleSignIn.signedInUser.username
+        let userName = SignInManager.session.currentSignIn!.credentials!.username
         
         // We're making an image that the user of the app added-- we'll generate a new UUID.
         let newImage = addLocalImage(newImageURL:newImageURL, mimeType:mimeType, title:userName)

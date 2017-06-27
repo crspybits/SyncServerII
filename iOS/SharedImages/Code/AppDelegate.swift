@@ -20,6 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     
+        SetupSignIn.session.appLaunch()
+
         // Used by SMEmail in messages where email isn't allowed.
         SMUIMessages.session().appName = "Shared Images"
 
@@ -45,7 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window!.rootViewController = tabBarController
         
         // The default UI displayed tab is .signIn
-        if SignIn.session.googleSignIn.userIsSignedIn {
+        if let signedIn = SignInManager.session.currentSignIn?.userIsSignedIn, signedIn {
             selectTabInController(tab: .images)
         }
         
@@ -77,7 +79,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-        return SignIn.session.googleSignIn.application(app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject) ||
+        return SignInManager.session.application(app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject) ||
         SharingInvitation.session.application(application: app, openURL: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation] as AnyObject)
     }
     
@@ -131,4 +133,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         CoreData.sessionNamed(CoreDataExtras.sessionName).saveContext()
     }
 }
+
 

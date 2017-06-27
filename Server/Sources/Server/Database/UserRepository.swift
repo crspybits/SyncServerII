@@ -11,57 +11,6 @@ import PerfectLib
 import Credentials
 import CredentialsGoogle
 
-/* Data model v2 (with both OwningUser's and SharingUser's)
-	{
-		_id: (ObjectId), // userId: unique to the user (assigned by MongoDb).
- 
-		username: (String), // account name, e.g., email address.
-        
-        // The permissible userTypes for these account creds.
-        // "OwningUser" and/or "SharingUser" in an array
-        userTypes: [],
- 
-        accountType: // Value as follows
-
-        // If userTypes includes "OwningUser", then the following options are available for accountType
-        accountType: "Google",
-
-         // If userTypes includes "SharingUser", then the following options are available for accountType
-        accountType: "Facebook",
-
-        creds: // Value as follows
-
-        // If accountType is "Google"
-        creds: {
-            sub: XXXX, // Google individual identifier
-            access_token: XXXX,
-            refresh_token: XXXX
-        }
-        
-        // If accountType is "Facebook"
-        creds: {
-            userId: String,
-            
-            // This is the last validated access token. It's stored so I don't have to do validation by going to Facebook's servers (see also https://stackoverflow.com/questions/37822004/facebook-server-side-access-token-validation-can-it-be-done-locally) 
-            accessToken: String
-        }
-        
-        // Users with SharingUser in their userTypes have another field in this structure:
-
-        // The linked or shared "Owning User" accounts.
-        // Array of structures because a given sharing user can potentially share more than one set of cloud storage data.
-        linked: [
-            { 
-                // The _id of a PSUserCredentials object that must be an OwningUser
-                owningUser: ObjectId,
-            
-                // See ServerConstants.sharingType
-                sharingType: String
-            }
-        ]
-	}
-*/
-
 enum UserType : String {
     case sharing // user is sharing data
     case owning // user owns the data

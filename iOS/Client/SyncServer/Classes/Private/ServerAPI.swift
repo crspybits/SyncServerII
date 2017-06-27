@@ -57,7 +57,7 @@ class ServerAPI {
     }
     
     // If this is nil, you must use the ServerNetworking authenticationDelegate to provide credentials. Direct use of authenticationDelegate is for internal testing.
-    public var creds:SignInCreds? {
+    public var creds:GenericCredentials? {
         didSet {
             updateCreds(creds)
         }
@@ -68,13 +68,13 @@ class ServerAPI {
     fileprivate init() {
     }
     
-    func updateCreds(_ creds:SignInCreds?) {
+    func updateCreds(_ creds:GenericCredentials?) {
         if creds == nil {
             ServerNetworking.session.authenticationDelegate = nil
         }
         else {
             ServerNetworking.session.authenticationDelegate = self
-            self.authTokens = creds!.authDict()
+            self.authTokens = creds!.httpRequestHeaders
         }
     }
     

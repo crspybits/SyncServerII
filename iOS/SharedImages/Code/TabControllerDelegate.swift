@@ -8,13 +8,14 @@
 
 import Foundation
 import UIKit
+import SyncServer
 
 class TabControllerDelegate : NSObject, UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
 
         // Only allow a transition to the Images screen if the user is signed in.
         if viewController.restorationIdentifier == "ImagesNavController" {
-            return SignIn.session.googleSignIn.userIsSignedIn
+            return SignInManager.session.currentSignIn?.userIsSignedIn ?? false
         }
         
         return true

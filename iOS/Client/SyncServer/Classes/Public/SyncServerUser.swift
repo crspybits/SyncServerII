@@ -9,30 +9,9 @@
 import Foundation
 import SMCoreLib
 
-open class SignInCreds {
-    public init() {
-    }
-    
-    public var userId:String? // e.g., for Google, this is their `sub`
-    public var username:String!
-    public var email:String?
-    
-    // Uses ServerConstants keys to provide creds values for HTTP headers.
-    open func authDict() -> [String:String] {
-        var result = [String:String]()
-        result[ServerConstants.httpUsernameKey] = self.username
-        result[ServerConstants.httpEmailKey] = self.email
-        return result
-    }
-    
-    // Override this if your credentials scheme enables a refresh.
-    open func refreshCredentials(completion: @escaping (Error?) ->()) {
-    }
-}
-
 public class SyncServerUser {
-    private var _creds:SignInCreds?
-    public var creds:SignInCreds? {
+    private var _creds:GenericCredentials?
+    public var creds:GenericCredentials? {
         set {
             ServerAPI.session.creds = newValue
             _creds = newValue
@@ -64,7 +43,7 @@ public class SyncServerUser {
     case sharingUser(sharingPermission:SharingPermission)
     }
     
-    public func checkForExistingUser(creds: SignInCreds,
+    public func checkForExistingUser(creds: GenericCredentials,
         completion:@escaping (_ result: CheckForExistingUserResult?, Error?) ->()) {
         
         Log.msg("SignInCreds: \(creds)")
@@ -103,7 +82,7 @@ public class SyncServerUser {
         }
     }
     
-    public func addUser(creds: SignInCreds, completion:@escaping (Error?) ->()) {
+    public func addUser(creds: GenericCredentials, completion:@escaping (Error?) ->()) {
         Log.msg("SignInCreds: \(creds)")
 
         self.creds = creds
@@ -128,7 +107,7 @@ public class SyncServerUser {
         }
     }
     
-    public func redeemSharingInvitation(creds: SignInCreds, invitationCode:String, completion:((Error?)->())?) {
+    public func redeemSharingInvitation(creds: GenericCredentials, invitationCode:String, completion:((Error?)->())?) {
         
         self.creds = creds
         

@@ -11,11 +11,11 @@
 public class ServerConstants {
     // HTTP request header authentication keys
     public static let httpUsernameKey = "Kitura-username"
-    public static let httpEmailKey = "Kitura-email"
+    //public static let httpEmailKey = "Kitura-email"
     public static let XTokenTypeKey = "X-token-type"
 
     // Generic authorization keys
-    public static let HTTPOauth2AccessTokenKey = "Kitura-access-token"
+    public static let HTTPOAuth2AccessTokenKey = "Kitura-access-token"
     
     // HTTP request header keys specific to Google
     public static let GoogleHTTPServerAuthCodeKey = "Kitura-server-auth-code"
