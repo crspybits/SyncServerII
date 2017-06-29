@@ -50,14 +50,28 @@ public protocol GenericSignInDelegate : class {
     func userActionOccurred(action:UserActionOccurred, signIn:GenericSignIn)
 }
 
-public protocol GenericSignIn {
-    // The intent of this delegate is that it will *always* be present.
-    var signOutDelegate:GenericSignOutDelegate! {get set}
+public enum SignInState {
+    case signInStarted
+    case signedIn
+    case signedOut
+}
 
-    // The intent of this delegate is that it may not be present until later in the lifecycle of the app. E.g., in the Shared Images app, it's only present after the user has navigated to the SignIn tab.
+public protocol GenericSignInManagerDelegate : class {
+    func signInStateChanged(to state: SignInState, for signIn:GenericSignIn)
+}
+
+public protocol GenericSignIn : class {
+    // Delgate not dependent on the UI. Typically present through lifespan of app.
+    var signOutDelegate:GenericSignOutDelegate? {get set}
+
+    // Delegate dependent on the UI. Typically present through only part of lifespan of app.
     var delegate:GenericSignInDelegate? {get set}
     
+    // Used exclusively by the SignInManager.
+    var managerDelegate:GenericSignInManagerDelegate! {get set}
+    
     func appLaunchSetup(silentSignIn: Bool)
+    
     func application(_ application: UIApplication!, openURL url: URL!, sourceApplication: String!, annotation: AnyObject!) -> Bool
 
     // The UI element to use to allow signing in. A successful result will give a non-nil UI element.

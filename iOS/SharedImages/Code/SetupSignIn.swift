@@ -32,7 +32,7 @@ class SetupSignIn {
             serverClientId = value
         }
         
-        let googleSignIn = GoogleSignIn(serverClientId: serverClientId, appClientId: appClientId)
+        googleSignIn = GoogleSignIn(serverClientId: serverClientId, appClientId: appClientId)
         googleSignIn.signOutDelegate = self
         SignInManager.session.addSignIn(googleSignIn)
     }

@@ -29,7 +29,7 @@ public class GoogleCredentials : GenericCredentials, CustomDebugStringConvertibl
     public var username:String = ""
     
     public var uiDisplayName:String {
-        return email!
+        return email ?? username
     }
     
     public var email:String?
@@ -104,21 +104,26 @@ class GoogleSignInViewController : UIViewController, GIDSignInUIDelegate {
 
 // See https://developers.google.com/identity/sign-in/ios/sign-in
 class GoogleSignIn : NSObject, GenericSignIn {
-
-
     fileprivate let serverClientId:String!
     fileprivate let appClientId:String!
     
     fileprivate let signInOutButton = GoogleSignInOutButton()
     
     weak public var delegate:GenericSignInDelegate?    
-    weak public var signOutDelegate:GenericSignOutDelegate!
+    weak public var signOutDelegate:GenericSignOutDelegate?
+    weak public var managerDelegate:GenericSignInManagerDelegate!
+    
+    private func getManagerDelegate() -> GenericSignInManagerDelegate {
+        return managerDelegate
+    }
    
     public init(serverClientId:String, appClientId:String) {
         self.serverClientId = serverClientId
         self.appClientId = appClientId
         super.init()
         self.signInOutButton.signOutButton.addTarget(self, action: #selector(signUserOut), for: .touchUpInside)
+        signInOutButton.managerDelegate = getManagerDelegate
+        signInOutButton.signIn = self
     }
     
     open func appLaunchSetup(silentSignIn: Bool) {
@@ -147,7 +152,6 @@ class GoogleSignIn : NSObject, GenericSignIn {
         // See also this on refreshing of idTokens: http://stackoverflow.com/questions/33279485/how-to-refresh-authentication-idtoken-with-gidsignin-or-gidauthentication
         if silentSignIn {
             GIDSignIn.sharedInstance().signInSilently()
-            //let creds = signedInUser(forUser: user)
         }
         else {
             // I'm doing this to force a user-signout, so that I get the serverAuthCode. Seems I only get this with the user explicitly signed out before hand.
@@ -214,7 +218,7 @@ extension GoogleSignIn {
     @objc public func signUserOut() {
         GIDSignIn.sharedInstance().signOut()
         signInOutButton.buttonShowing = .signIn
-        signOutDelegate.userWasSignedOut(signIn: self)
+        signOutDelegate?.userWasSignedOut(signIn: self)
         delegate?.userActionOccurred(action: .userSignedOut, signIn: self)
     }
 }
@@ -303,6 +307,9 @@ public class GoogleSignInOutButton : UIView {
     let signOutButton = UIButton(type: .system)
     let signOutLabel = UILabel()
     
+    var managerDelegate:(()->GenericSignInManagerDelegate)!
+    weak var signIn: GoogleSignIn!
+
     init() {
         super.init(frame: CGRect.zero)
         self.addSubview(signInButton)
@@ -344,6 +351,14 @@ public class GoogleSignInOutButton : UIView {
         layer.borderWidth = 0.5
         
         self.buttonShowing = .signIn
+        
+        signInButton.addTarget(self, action: #selector(signInButtonAction), for: .touchUpInside)
+    }
+    
+    func signInButtonAction() {
+        if buttonShowing == .signIn {
+            managerDelegate().signInStateChanged(to: .signInStarted, for: signIn)
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {

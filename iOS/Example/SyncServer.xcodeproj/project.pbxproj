@@ -27,7 +27,7 @@
 		835C610C1E6504D4003E9AF8 /* Client_NetworkLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */; };
 		835C61121E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835C61111E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift */; };
 		836D4BD61E10728D005209F2 /* HealthCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BD51E10728D005209F2 /* HealthCheck.swift */; };
-		836D4BE21E11AF8C005209F2 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BE11E11AF8C005209F2 /* SignIn.swift */; };
+		836D4BE21E11AF8C005209F2 /* SetupSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BE11E11AF8C005209F2 /* SetupSignIn.swift */; };
 		836D4BF01E1205CF005209F2 /* Consts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D4BEF1E1205CF005209F2 /* Consts.swift */; };
 		83709F801EA4718F00BCDC32 /* ServerAPI_Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83709F7F1EA4718F00BCDC32 /* ServerAPI_Sharing.swift */; };
 		837244541E419E7B00155E89 /* DoneUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837244531E419E7B00155E89 /* DoneUploads.swift */; };
@@ -52,7 +52,7 @@
 		83F55F811E58D59D00759578 /* ServerAPI_GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F55F801E58D59D00759578 /* ServerAPI_GetUploads.swift */; };
 		83F882131E6E5FDD008F644A /* Client_SyncServer_Sync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882121E6E5FDD008F644A /* Client_SyncServer_Sync.swift */; };
 		83F882151E6FB03D008F644A /* Client_SyncServer_UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882141E6FB03D008F644A /* Client_SyncServer_UploadDeletion.swift */; };
-		83F8823A1E711E24008F644A /* SMGoogleUserSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882391E711E24008F644A /* SMGoogleUserSignIn.swift */; };
+		83F8823A1E711E24008F644A /* GoogleUserSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F882391E711E24008F644A /* GoogleUserSignIn.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,7 +101,7 @@
 		835C610B1E6504D4003E9AF8 /* Client_NetworkLoss.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_NetworkLoss.swift; sourceTree = "<group>"; };
 		835C61111E653D7D003E9AF8 /* Client_SyncManager_DownloadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncManager_DownloadDeletion.swift; sourceTree = "<group>"; };
 		836D4BD51E10728D005209F2 /* HealthCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthCheck.swift; sourceTree = "<group>"; };
-		836D4BE11E11AF8C005209F2 /* SignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
+		836D4BE11E11AF8C005209F2 /* SetupSignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetupSignIn.swift; sourceTree = "<group>"; };
 		836D4BEF1E1205CF005209F2 /* Consts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Consts.swift; sourceTree = "<group>"; };
 		83709F7F1EA4718F00BCDC32 /* ServerAPI_Sharing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_Sharing.swift; sourceTree = "<group>"; };
 		837244531E419E7B00155E89 /* DoneUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoneUploads.swift; sourceTree = "<group>"; };
@@ -124,7 +124,7 @@
 		83F55F801E58D59D00759578 /* ServerAPI_GetUploads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerAPI_GetUploads.swift; sourceTree = "<group>"; };
 		83F882121E6E5FDD008F644A /* Client_SyncServer_Sync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_Sync.swift; sourceTree = "<group>"; };
 		83F882141E6FB03D008F644A /* Client_SyncServer_UploadDeletion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client_SyncServer_UploadDeletion.swift; sourceTree = "<group>"; };
-		83F882391E711E24008F644A /* SMGoogleUserSignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SMGoogleUserSignIn.swift; path = ../../Client/SignIn/SMGoogleUserSignIn.swift; sourceTree = "<group>"; };
+		83F882391E711E24008F644A /* GoogleUserSignIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GoogleUserSignIn.swift; path = ../../Client/SignIn/GoogleUserSignIn.swift; sourceTree = "<group>"; };
 		950FA6AEF6E79D1648CC8B07 /* Pods-SyncServer_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SyncServer_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-SyncServer_Example/Pods-SyncServer_Example.release.xcconfig"; sourceTree = "<group>"; };
 		99CC8F59D9EBD3C940A50230 /* SyncServer.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SyncServer.podspec; path = ../SyncServer.podspec; sourceTree = "<group>"; };
 		A5DC520778F7EB9A2C2C2CA7 /* Pods-SyncServer_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SyncServer_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SyncServer_Example/Pods-SyncServer_Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -195,9 +195,9 @@
 			isa = PBXGroup;
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
+				836D4BE11E11AF8C005209F2 /* SetupSignIn.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
-				83F882391E711E24008F644A /* SMGoogleUserSignIn.swift */,
-				836D4BE11E11AF8C005209F2 /* SignIn.swift */,
+				83F882391E711E24008F644A /* GoogleUserSignIn.swift */,
 				836D4BEF1E1205CF005209F2 /* Consts.swift */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
@@ -540,11 +540,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83F8823A1E711E24008F644A /* SMGoogleUserSignIn.swift in Sources */,
+				83F8823A1E711E24008F644A /* GoogleUserSignIn.swift in Sources */,
 				836D4BF01E1205CF005209F2 /* Consts.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
-				836D4BE21E11AF8C005209F2 /* SignIn.swift in Sources */,
+				836D4BE21E11AF8C005209F2 /* SetupSignIn.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -853,6 +853,7 @@
 				83544F8C1EF58B32007E0887 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

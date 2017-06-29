@@ -50,7 +50,7 @@ class TestCase: XCTestCase {
         
         self.authTokens = [
             ServerConstants.XTokenTypeKey: ServerConstants.AuthTokenType.GoogleToken.rawValue,
-            ServerConstants.GoogleHTTPAccessTokenKey: TestCase.accessToken
+            ServerConstants.HTTPOAuth2AccessTokenKey: TestCase.accessToken
         ]
         
         SyncManager.session.delegate = self

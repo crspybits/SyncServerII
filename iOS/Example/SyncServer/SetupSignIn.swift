@@ -1,5 +1,5 @@
 //
-//  SignIn.swift
+//  SetupSignIn.swift
 //  SyncServer
 //
 //  Created by Christopher Prince on 12/2/16.
@@ -8,12 +8,16 @@
 
 import Foundation
 import SMCoreLib
+import SyncServer
 
-class SignIn {
-    let googleSignIn: SMGoogleUserSignIn!
-    static let session = SignIn()
+class SetupSignIn {
+    var googleSignIn:GoogleSignIn!
+    static let session = SetupSignIn()
     
-    init() {
+    private init() {
+    }
+    
+    func appLaunch() {
         var serverClientId:String!
         var appClientId:String!
         
@@ -27,7 +31,7 @@ class SignIn {
             serverClientId = value
         }
     
-        self.googleSignIn =  SMGoogleUserSignIn(serverClientId: serverClientId, appClientId: appClientId)
-        self.googleSignIn.appLaunchSetup(silentSignIn: false)
+        googleSignIn = GoogleSignIn(serverClientId: serverClientId, appClientId: appClientId)
+        SignInManager.session.addSignIn(googleSignIn)
     }
 }
