@@ -41,7 +41,7 @@ public class SignInManager {
         // This gives "GenericSignIn"
         // String(describing: type(of: currentSignIn!))
         
-        let mirror = Mirror(reflecting: currentSignIn!)
+        let mirror = Mirror(reflecting: signIn)
         return "\(mirror.subjectType)"
     }
     
