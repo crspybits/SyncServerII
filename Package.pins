@@ -1,0 +1,150 @@
+{
+  "autoPin": true,
+  "pins": [
+    {
+      "package": "CCurl",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/CCurl.git",
+      "version": "0.4.0"
+    },
+    {
+      "package": "CEpoll",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/CEpoll.git",
+      "version": "0.1.0"
+    },
+    {
+      "package": "Cryptor",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
+      "version": "0.8.14"
+    },
+    {
+      "package": "Gloss",
+      "reason": null,
+      "repositoryURL": "https://github.com/crspybits/Gloss.git",
+      "version": "1.2.7"
+    },
+    {
+      "package": "HeliumLogger",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/HeliumLogger.git",
+      "version": "1.7.0"
+    },
+    {
+      "package": "Kitura",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura.git",
+      "version": "1.7.6"
+    },
+    {
+      "package": "Kitura-Credentials",
+      "reason": null,
+      "repositoryURL": "https://github.com/crspybits/Kitura-Credentials.git",
+      "version": "1.7.1"
+    },
+    {
+      "package": "Kitura-CredentialsGoogle",
+      "reason": null,
+      "repositoryURL": "https://github.com/crspybits/Kitura-CredentialsGoogle.git",
+      "version": "1.7.1"
+    },
+    {
+      "package": "Kitura-net",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
+      "version": "1.7.12"
+    },
+    {
+      "package": "Kitura-Session",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura-Session.git",
+      "version": "1.7.0"
+    },
+    {
+      "package": "Kitura-TemplateEngine",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura-TemplateEngine.git",
+      "version": "1.7.1"
+    },
+    {
+      "package": "LinuxBridge",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+      "version": "2.0.2"
+    },
+    {
+      "package": "LoggerAPI",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/LoggerAPI.git",
+      "version": "1.7.0"
+    },
+    {
+      "package": "MySQL",
+      "reason": null,
+      "repositoryURL": "https://github.com/crspybits/Perfect-MySQL.git",
+      "version": "2.1.2"
+    },
+    {
+      "package": "mysqlclient",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+      "version": "2.0.1"
+    },
+    {
+      "package": "OpenSSL",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
+      "version": "0.3.5"
+    },
+    {
+      "package": "PerfectLib",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
+      "version": "2.0.10"
+    },
+    {
+      "package": "PerfectThread",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Thread.git",
+      "version": "2.0.12"
+    },
+    {
+      "package": "Signals",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+      "version": "0.9.47"
+    },
+    {
+      "package": "SMServerLib",
+      "reason": null,
+      "repositoryURL": "https://github.com/crspybits/SMServerLib.git",
+      "version": "0.0.4"
+    },
+    {
+      "package": "Socket",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
+      "version": "0.12.55"
+    },
+    {
+      "package": "SSLService",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
+      "version": "0.12.44"
+    },
+    {
+      "package": "SwiftyJSON",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/SwiftyJSON.git",
+      "version": "16.0.1"
+    },
+    {
+      "package": "SyncServer_Shared",
+      "reason": null,
+      "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
+      "version": "0.0.5"
+    }
+  ],
+  "version": 1
+}
