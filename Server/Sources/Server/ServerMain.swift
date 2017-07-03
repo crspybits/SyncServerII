@@ -12,9 +12,10 @@ import LoggerAPI
 import PerfectLib
 import Kitura
 
-// See note in Package.swift
-import SwiftMetrics
-import SwiftMetricsDash
+// 7/2/17; SwiftMetrics, perhaps because it was mis-installed, was causing several of my higher-performing test cases to fail. E.g., 10 consecutive uploads and downloads of a 1MB file. Thus, I've commented it out for now.
+
+// import SwiftMetrics
+// import SwiftMetricsDash
 
 // If given, the single command line argument to the server is expected to be a full path to the server config file.
 
@@ -25,7 +26,7 @@ public class ServerMain {
     // I'm using port 8181 for local testing, and 443 for AWS.
     // TODO: *1* Using port 443 on the server currently requires that you be root. Is there a way around that?
     
-    static var smd:SwiftMetricsDash?
+    // static var smd:SwiftMetricsDash?
     
     public enum ServerStartup {
         case blocking // doesn't return from startup (normal case)
@@ -37,13 +38,12 @@ public class ServerMain {
         
         Log.info("Launching server in \(type) mode with \(CommandLine.arguments.count) command line arguments.")
         
-        // See note in Package.swift
-        // And: http://www.kitura.io/en/resources/tutorials/swiftmetrics.html
+        // http://www.kitura.io/en/resources/tutorials/swiftmetrics.html
         // https://developer.ibm.com/swift/2017/03/21/using-swiftmetrics-secure-kitura-server/
         // Enable SwiftMetrics Monitoring
-        let sm = try! SwiftMetrics()
+        //let sm = try! SwiftMetrics()
         // Pass SwiftMetrics to the dashboard for visualising
-        smd = try? SwiftMetricsDash(swiftMetricsInstance : sm)
+        //smd = try? SwiftMetricsDash(swiftMetricsInstance : sm)
         
         if type == .blocking {
             // When we launch the server from within Xcode (or just with no explicit arguments), we have 1 "argument" (CommandLine.arguments[0]).
