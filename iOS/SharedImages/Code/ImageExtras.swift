@@ -9,10 +9,30 @@
 import Foundation
 import SMCoreLib
 
+enum SortingOrder : String {
+case newerAtTop
+case newerAtBottom
+}
+
 class ImageExtras {
+    static var currentSortingOrder = SMPersistItemString(name:"ImageExtras.currentSortingOrder", initialStringValue:SortingOrder.newerAtBottom.rawValue,  persistType: .userDefaults)
+    
     static let iconDirectory = "SmallImages"
     static let iconDirectoryURL = FileStorage.url(ofItem: iconDirectory)
     static let largeImageDirectoryURL = FileStorage.url(ofItem: FileExtras.defaultDirectoryPath)
+
+    // For some idea of free RAM available: https://stackoverflow.com/questions/5887248/ios-app-maximum-memory-budget
+    static var minCostCache:UInt64 = 1000000
+    static var maxCostCache:UInt64 = 10000000
+    static var imageCache = LRUCache<Image>(maxItems: 500, maxCost:maxCostCache)!
+
+    // Resets to smaller if not already at smaller size; only if reset is done will callback be called.
+    static func resetToSmallerImageCache(didTheReset:()->()) {
+        if imageCache.maxCost == maxCostCache {
+            imageCache = LRUCache<Image>(maxItems: 500, maxCost:minCostCache)!
+            didTheReset()
+        }
+    }
 
     static let appMetaDataTitleKey = "title"
     
@@ -22,24 +42,6 @@ class ImageExtras {
     
     static func sizeFromFile(url:URL) -> CGSize {
         return ImageStorage.size(ofImage: imageFileName(url:url), withPath: largeImageDirectoryURL)
-    }
-    
-    static func sizeFromImage(image:Image) -> CGSize {
-        var originalImageSize = CGSize()
-
-        // Originally, I wasn't storing these sizes, so need to grab & store them here if we can. (Defaults for sizes are -1).
-        if image.originalWidth < 0 || image.originalHeight < 0 {
-            originalImageSize = ImageExtras.sizeFromFile(url: image.url! as URL)
-            image.originalWidth = Float(originalImageSize.width)
-            image.originalHeight = Float(originalImageSize.height)
-            CoreData.sessionNamed(CoreDataExtras.sessionName).saveContext()
-        }
-        else {
-            originalImageSize.height = CGFloat(image.originalHeight)
-            originalImageSize.width = CGFloat(image.originalWidth)
-        }
-        
-        return originalImageSize
     }
     
     // Get the size of the icon without distorting the aspect ratio. Adapted from https://gist.github.com/tomasbasham/10533743
