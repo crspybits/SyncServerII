@@ -24,8 +24,8 @@ case testRefreshFailure
 private class RequestWithRetries {
     let maximumNumberRetries = 3
     
-    let creds:SignInCreds?
-    let updateCreds:((_ creds:SignInCreds?)->())
+    let creds:GenericCredentials?
+    let updateCreds:((_ creds:GenericCredentials?)->())
     let checkForError:(_ statusCode:Int?, _ error:Error?) -> Error?
     let desiredEvents:EventDesired!
     weak var delegate:SyncServerDelegate!
@@ -37,7 +37,7 @@ private class RequestWithRetries {
     var request:(()->())!
     var completionHandler:((_ error:Error?)->())!
     
-    init(retryIfError:Bool = true, creds:SignInCreds?, desiredEvents:EventDesired, delegate:SyncServerDelegate!, updateCreds:@escaping (_ creds:SignInCreds?)->(), checkForError:@escaping (_ statusCode:Int?, _ error:Error?) -> Error?) {
+    init(retryIfError:Bool = true, creds:GenericCredentials?, desiredEvents:EventDesired, delegate:SyncServerDelegate!, updateCreds:@escaping (_ creds:GenericCredentials?)->(), checkForError:@escaping (_ statusCode:Int?, _ error:Error?) -> Error?) {
         self.creds = creds
         self.updateCreds = updateCreds
         self.checkForError = checkForError

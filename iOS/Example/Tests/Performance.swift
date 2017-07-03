@@ -53,6 +53,10 @@ class Performance: TestCase {
     func test10SmallTextFileDownloads() {
         downloadNFiles(10, fileName: "UploadMe", fileExtension:"txt", mimeType: "text/plain")
     }
+    
+    func test10_120K_ImageFileDownloads() {
+        downloadNFiles(10, fileName: "CatBehaviors", fileExtension:"jpg", mimeType:"image/jpeg")
+    }
  
     // 5/27/17; I've been having problems with large-ish downloads. E.g., See https://stackoverflow.com/questions/44224048/timeout-issue-when-downloading-from-aws-ec2-to-ios-app
     func test10SmallerImageFileDownloads() {

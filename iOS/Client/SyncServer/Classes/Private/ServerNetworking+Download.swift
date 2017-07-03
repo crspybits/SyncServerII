@@ -111,7 +111,7 @@ extension ServerNetworkingDownload : URLSessionDelegate, URLSessionTaskDelegate,
             self.delegate?.serverNetworkingDownloadCompleted(self, url: newFileURL, response: response, statusCode: response?.statusCode, error: returnError)
         }
         
-        Log.msg("Number of completion handlers in dictionary: \(completionHandlers.count)")
+        Log.msg("Number of completion handlers in dictionary (start): \(completionHandlers.count)")
     }
     
     // This gets called even when there was no error, but I believe only it (and not the `didFinishDownloadingTo` method) gets called if there is an error.
@@ -125,7 +125,7 @@ extension ServerNetworkingDownload : URLSessionDelegate, URLSessionTaskDelegate,
             completionHandlers[downloadTask] = nil
         }
         
-        Log.msg("Number of completion handlers in dictionary: \(completionHandlers.count)")
+        Log.msg("Number of completion handlers in dictionary (end): \(completionHandlers.count)")
         
         if error == nil {
             Log.msg("didCompleteWithError: \(String(describing: error)); status: \(String(describing: response?.statusCode))")

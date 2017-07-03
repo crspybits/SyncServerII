@@ -11,7 +11,7 @@ import SMCoreLib
 @testable import SyncServer
 import SevenSwitch
 
-class ViewController: SMGoogleUserSignInViewController {
+class ViewController: GoogleSignInViewController {
     var googleSignInButton:UIView!
     fileprivate var signinTypeSwitch:SevenSwitch!
     var syncServerEventOccurred: ((_ : SyncEvent)->())?
@@ -27,7 +27,7 @@ class ViewController: SMGoogleUserSignInViewController {
         SyncServer.session.delegate = self
 
         // These are a bit of a hack to do this testing.
-        let user = SignIn.session.googleSignIn.signedInUser
+        let user = SetupSignIn.session.googleSignIn.credentials as! GoogleCredentials
         user.accessToken = "foobar"
         SyncServerUser.session.creds = user
         
@@ -70,13 +70,13 @@ class ViewController: SMGoogleUserSignInViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-                
-        googleSignInButton = SignIn.session.googleSignIn.signInButton(delegate: self)
+        
+        googleSignInButton = SetupSignIn.session.googleSignIn.getSignInButton(params: ["delegate": self])
         googleSignInButton.frameY = 100
         view.addSubview(googleSignInButton)
         googleSignInButton.centerHorizontallyInSuperview()
         
-        SignIn.session.googleSignIn.delegate = self
+        SetupSignIn.session.googleSignIn.delegate = self
         
         signinTypeSwitch = SevenSwitch()
         signinTypeSwitch.offLabel.text = "Existing user"
@@ -98,12 +98,12 @@ class ViewController: SMGoogleUserSignInViewController {
     }
     
     func setSignInTypeState() {
-        signinTypeSwitch?.isHidden = SignIn.session.googleSignIn.userIsSignedIn
+        signinTypeSwitch?.isHidden = SetupSignIn.session.googleSignIn.userIsSignedIn
     }
 }
 
-extension ViewController : SMGoogleUserSignInDelegate {
-    func shouldDoUserAction(googleUserSignIn: SMGoogleUserSignIn) -> UserActionNeeded {
+extension ViewController : GenericSignInDelegate {
+    func shouldDoUserAction(signIn: GenericSignIn) -> UserActionNeeded {
         var result:UserActionNeeded
         
         if signinTypeSwitch.isOn() {
@@ -116,7 +116,7 @@ extension ViewController : SMGoogleUserSignInDelegate {
         return result
     }
     
-    func userActionOccurred(action:UserActionOccurred, googleUserSignIn:SMGoogleUserSignIn) {
+    func userActionOccurred(action:UserActionOccurred, signIn: GenericSignIn) {
         switch action {
         case .userSignedOut:
             break

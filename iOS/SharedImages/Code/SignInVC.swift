@@ -14,7 +14,7 @@ import SevenSwitch
 
 // This view controller doesn't load upon initial launch of the app, if the user is signed in (silent sign in), and the AppDelegate takes the user directly to the ImagesVC.
 
-class SignInVC : SMGoogleUserSignInViewController {
+class SignInVC : GoogleSignInViewController {
     fileprivate var signinTypeSwitch:SevenSwitch!
     
     static private var rawSharingPermission:SMPersistItemString = SMPersistItemString(name: "SignInVC.rawSharingPermission", initialStringValue: "", persistType: .userDefaults)
@@ -54,7 +54,7 @@ class SignInVC : SMGoogleUserSignInViewController {
         
         // TODO: *2* Signing out and then signing in as a different user will mess up this app. What we're really assuming is that the user may sign out, but will then again sign in as the same user. If the user signs in as a different user, we need to alert them that this is going to remove all local files. And, signing in again as the prior user will cause redownload of the prior files. This may be something we want to fix in the future: To enable the client to handle multiple users. This would require indexing the meta data by user.
         
-        googleSignInButton = SignIn.session.googleSignIn.signInButton(delegate: self)
+        googleSignInButton = SetupSignIn.session.googleSignIn.getSignInButton(params: ["delegate": self]) as! GoogleSignInOutButton
         googleSignInButton.frameY = 100
         view.addSubview(googleSignInButton)
         googleSignInButton.centerHorizontallyInSuperview()
@@ -75,7 +75,7 @@ class SignInVC : SMGoogleUserSignInViewController {
         navigationItem.rightBarButtonItem = sharingBarButton
         
         SharingInvitation.session.delegate = self
-        SignIn.session.googleSignIn.delegate = self
+        SetupSignIn.session.googleSignIn.delegate = self
         
         setSharingButtonState()
         setSignInTypeState()
@@ -98,13 +98,13 @@ class SignInVC : SMGoogleUserSignInViewController {
     }
     
     func setSignInTypeState() {
-        signinTypeSwitch?.isHidden = SignIn.session.googleSignIn.userIsSignedIn
+        signinTypeSwitch?.isHidden = SignInManager.session.userIsSignIn
     }
     
     func shareAction() {
         var alert:UIAlertController
         
-        if SignIn.session.googleSignIn.userIsSignedIn {
+        if SignInManager.session.userIsSignIn {
             alert = UIAlertController(title: "Share your images with a Google user?", message: nil, preferredStyle: .actionSheet)
 
             func addAlertAction(_ permission:SharingPermission) {
@@ -167,7 +167,7 @@ extension SignInVC : SharingInvitationDelegate {
     func sharingInvitationReceived(_ sharingInvitation:SharingInvitation) {
         
         let userFriendlyText = sharingInvitation.sharingInvitationPermission!.userFriendlyText()
-        if !SignIn.session.googleSignIn.userIsSignedIn {
+        if !SignInManager.session.userIsSignIn {
             let alert = UIAlertController(title: "Do you want to share the images (\(userFriendlyText)) in the invitation?", message: nil, preferredStyle: .actionSheet)
             Alert.styleForIPad(alert)
             alert.popoverPresentationController?.barButtonItem = sharingBarButton
@@ -183,21 +183,21 @@ extension SignInVC : SharingInvitationDelegate {
     }
 }
 
-extension SignInVC : SMGoogleUserSignInDelegate {
-    func shouldDoUserAction(googleUserSignIn:SMGoogleUserSignIn) -> UserActionNeeded {
+extension SignInVC : GenericSignInDelegate {
+    func shouldDoUserAction(signIn:GenericSignIn) -> UserActionNeeded {
         var result:UserActionNeeded
         
-        if SignIn.currentUserId.stringValue != "" &&
-            googleUserSignIn.signedInUser.userId != nil &&
-            SignIn.currentUserId.stringValue != googleUserSignIn.signedInUser.userId &&
+        if SignInManager.currentUserId.stringValue != "" &&
+            signIn.credentials?.userId != nil &&
+            SignInManager.currentUserId.stringValue != signIn.credentials?.userId &&
             Image.fetchAll().count > 0 {
             
             // Attempting to sign in as a different user, and there are images present. Yikes.  Not allowing this yet because this would try to access a different account on the server and would just confuse things.
-            googleUserSignIn.signUserOut()
+            signIn.signUserOut()
             
             var title:String = "You are trying to sign in as a different user than before."
-            if SignIn.currentUserEmail.stringValue != "" {
-                title = "You were previously signed in as \(SignIn.currentUserEmail.stringValue) but you are now signing in as a different user."
+            if SignInManager.currentUIDisplayName.stringValue != "" {
+                title = "You were previously signed in as \(SignInManager.currentUIDisplayName.stringValue) but you are now signing in as a different user."
             }
             
             let alert = UIAlertController(title: title, message: "The Shared Images app doesn't allow this (yet).", preferredStyle: .actionSheet)
@@ -222,12 +222,12 @@ extension SignInVC : SMGoogleUserSignInDelegate {
         return result
     }
     
-    func userActionOccurred(action:UserActionOccurred, googleUserSignIn:SMGoogleUserSignIn) {
+    func userActionOccurred(action:UserActionOccurred, signIn:GenericSignIn) {
         func successfulSignIn() {
-            if SignIn.currentUserId.stringValue == "" {
+            if SignInManager.currentUserId.stringValue == "" {
                 // No user signed in yet.
-                SignIn.currentUserEmail.stringValue = googleUserSignIn.signedInUser.email ?? ""
-                SignIn.currentUserId.stringValue = googleUserSignIn.signedInUser.userId ?? ""
+                SignInManager.currentUIDisplayName.stringValue = signIn.credentials?.uiDisplayName ?? ""
+                SignInManager.currentUserId.stringValue = signIn.credentials?.userId ?? ""
             }
         }
         

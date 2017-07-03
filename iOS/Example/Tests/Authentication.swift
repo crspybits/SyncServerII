@@ -9,9 +9,16 @@ enum TestCredsError : Error {
     case TheError
 }
 
-class TestCreds : SignInCreds {
+class TestCreds : GenericCredentials {
+    var userId = ""
+    var username = ""
+    var uiDisplayName = ""
+    var httpRequestHeaders:[String:String] {
+        return [String:String]()
+    }
+    
     var called = false
-    override func refreshCredentials(completion: @escaping (Error?) ->()) {
+    func refreshCredentials(completion: @escaping (Error?) ->()) {
         called = true
         completion(TestCredsError.TheError)
     }
@@ -92,7 +99,7 @@ class ServerAPI_Authentication: TestCase {
             XCTAssert(error == nil)
             addUserExpectation.fulfill()
             
-            self.authTokens[ServerConstants.GoogleHTTPAccessTokenKey] = "foobar"
+            self.authTokens[ServerConstants.HTTPOAuth2AccessTokenKey] = "foobar"
             
             ServerAPI.session.checkCreds { checkCredsResult, error in
                 XCTAssert(error == nil)
@@ -115,7 +122,7 @@ class ServerAPI_Authentication: TestCase {
             XCTAssert(error == nil)
             addUserExpectation.fulfill()
             
-            self.authTokens[ServerConstants.GoogleHTTPAccessTokenKey] = "foobar"
+            self.authTokens[ServerConstants.HTTPOAuth2AccessTokenKey] = "foobar"
             
             ServerAPI.session.removeUser { error in
                 // Expect an error here because we have a bad access token.
@@ -146,7 +153,7 @@ class ServerAPI_Authentication: TestCase {
     
     func testCredentialsRefreshGenerically() {
         let testCreds = TestCreds()
-        testCreds.email = "chris@cprince.com"
+        testCreds.uiDisplayName = "chris@cprince.com"
         testCreds.username = "Chris"
         ServerAPI.session.creds = testCreds
         

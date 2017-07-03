@@ -73,4 +73,6 @@ class ServerAPI_DownloadFile: TestCase {
         
         waitForExpectations(timeout: 120.0, handler: nil)
     }
+    
+    // TODO: *1* Also try parallel downloads from different (simulated) deviceUUID's.
 }
