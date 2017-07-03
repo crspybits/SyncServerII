@@ -217,7 +217,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         masterVersionChangeDuringUpload(withDeletion:true)
     }
     
-    // TODO: *0* First, using .sync(), upload a file. Then proceed as above, but the intervening "other" client does a deletion. So, this will cause a download deletion to interrupt the upload.
+    // First, using .sync(), upload a file. Then proceed as above, but the intervening "other" client does a deletion. So, this will cause a download deletion to interrupt the upload.
     func testMasterVersionChangeBecauseOfKnownFileDeletion() {
         let fileUUID1 = UUID().uuidString
         let fileUUID2 = UUID().uuidString
@@ -226,7 +226,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         let attr2 = SyncAttributes(fileUUID: fileUUID2, mimeType: "text/plain", creationDate: Date(), updateDate: Date())
 
         let url = SMRelativeLocalURL(withRelativePath: "UploadMe2.txt", toBaseURLType: .mainBundle)!
-    
+
         SyncServer.session.eventsDesired = [.syncDone, .fileUploadsCompleted]
 
         let syncDone1Exp = self.expectation(description: "syncDone1Exp")
@@ -289,6 +289,7 @@ class Client_SyncManager_MasterVersionChange: TestCase {
         let previousSyncServerSingleFileUploadCompleted = self.syncServerSingleFileUploadCompleted
     
         syncServerSingleFileUploadCompleted = {next in
+            // SIMULATE A DEVICE CHANGE: Change to a new new deviceUUID
             let previousDeviceUUID = self.deviceUUID
             self.deviceUUID = UUID()
             
@@ -297,8 +298,11 @@ class Client_SyncManager_MasterVersionChange: TestCase {
                 XCTAssert(error == nil)
                 XCTAssert(masterVersion! >= 0)
                 
+                // INITIATE DELETION of the first file-- which will cause a master version update.
                 let fileToDelete = ServerAPI.FileToDelete(fileUUID: fileUUID1, fileVersion: 0)
                 self.deleteFile(file: fileToDelete, masterVersion: masterVersion!) {
+                
+                    // SIMULATE switch back to prior device
                     self.deviceUUID = previousDeviceUUID
                     
                     self.syncServerSingleFileUploadCompleted = previousSyncServerSingleFileUploadCompleted

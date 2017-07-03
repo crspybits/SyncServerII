@@ -66,16 +66,11 @@ class ServerAPI {
     public static let session = ServerAPI()
     
     fileprivate init() {
+        ServerNetworking.session.authenticationDelegate = self
     }
     
     func updateCreds(_ creds:GenericCredentials?) {
-        if creds == nil {
-            ServerNetworking.session.authenticationDelegate = nil
-        }
-        else {
-            ServerNetworking.session.authenticationDelegate = self
-            self.authTokens = creds!.httpRequestHeaders
-        }
+        authTokens = creds?.httpRequestHeaders
     }
     
     func checkForError(statusCode:Int?, error:Error?) -> Error? {

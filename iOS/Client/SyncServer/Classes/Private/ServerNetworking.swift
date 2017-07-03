@@ -85,9 +85,7 @@ class ServerNetworking : NSObject {
         
         Log.msg("postUploadDataTo: serverURL: \(serverURL)")
         
-        let uploadTask:URLSessionUploadTask = session.uploadTask(with: request, from: dataToUpload) { (data, urlResponse, error) in
-            Log.msg("request.url: \(String(describing: request.url))")
-            
+        let uploadTask:URLSessionUploadTask = session.uploadTask(with: request, from: dataToUpload) { (data, urlResponse, error) in            
             self.processResponse(data: data, urlResponse: urlResponse, error: error, completion: completion)
         }
         
