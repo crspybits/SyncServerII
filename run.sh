@@ -7,10 +7,10 @@
 #			<test-module>.<test-case> or <test-module>.<test-case>/<test>
 #		./run.sh test ServerTests.SharingAccountsController_CreateSharingInvitation
 #
-#	2) run [local | aws] <PathToJsonConfigFile> -- start up the server
+#	2) ./run.sh [local | aws] <PathToJsonConfigFile> -- start up the server
 #		In this case, the server is built before running.
 #		e.g., 
-#			./run.sh local ../../Private/Server/Server.json
+#			./run.sh local ../Private/Server/Server.json
 #			./run.sh aws ../../Private/Server/SharedImagesServer.json
 
 #		When running on AWS, you first need to do :
