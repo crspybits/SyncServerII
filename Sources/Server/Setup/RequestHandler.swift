@@ -23,7 +23,7 @@ See also: https://github.com/IBM-Swift/Kitura-net/issues/196
 
 public typealias ProcessRequest = (RequestProcessingParameters)->()
 
-class RequestHandler : CredsDelegate {
+class RequestHandler : AccountDelegate {
     private var request:RouterRequest!
     private var response:RouterResponse!
     
@@ -201,13 +201,13 @@ class RequestHandler : CredsDelegate {
             }
         }
         
-        var dbCreds:Creds?
+        var dbCreds:Account?
 
         if authenticationLevel! == .secondary {
             // We have .secondary authentication-- i.e., we should have the user recorded in the database already.
-
-            guard let accountType = AccountType.fromSpecificCredsType(specificCreds: profile!.accountSpecificCreds!) else {
-                self.failWithError(message: "Could not convert fromSpecificCredsType.")
+            
+            guard let accountType = AccountType.for(userProfile: profile!) else {
+                self.failWithError(message: "Could not get accountType.")
                 return
             }
             
@@ -220,7 +220,7 @@ class RequestHandler : CredsDelegate {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try Creds.toCreds(accountType: currentSignedInUser!.accountType, fromJSON: currentSignedInUser!.creds, user: .user(currentSignedInUser!), delegate:self)
+                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountType: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: self)
                 } catch (let error) {
                     errorString = "\(error)"
                 }
@@ -274,7 +274,7 @@ class RequestHandler : CredsDelegate {
             }
         }
         else {
-            var credsUser:CredsUser?
+            var credsUser:AccountCreationUser?
             switch authenticationLevel! {
             case .primary:
                 // We don't have a userId yet for this user.
@@ -287,7 +287,8 @@ class RequestHandler : CredsDelegate {
                 assertionFailure("Should never get here with authenticationLevel == .none!")
             }
             
-            if let profileCreds = Creds.toCreds(fromProfile: profile!, user:credsUser, delegate:self) {
+            
+            if let profileCreds = AccountManager.session.accountFromProfile(profile: profile!, user: credsUser, delegate: self) {
                 transactionResult = dbTransaction(db) {
                     return doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
                 }
@@ -316,9 +317,9 @@ class RequestHandler : CredsDelegate {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Creds?, profileCreds:Creds?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> ServerResult {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> ServerResult {
     
-        var effectiveOwningUserCreds:Creds?
+        var effectiveOwningUserCreds:Account?
         
         if currentSignedInUser != nil {
             let effectiveOwningUserKey = UserRepository.LookupKey.userId(currentSignedInUser!.effectiveOwningUserId)
@@ -393,8 +394,8 @@ class RequestHandler : CredsDelegate {
     
     // MARK: CredsDelegate
     
-    func saveToDatabase(creds:Creds, user:CredsUser) -> Bool {
-        let result = self.repositories.user.updateCreds(creds: creds, forUser: user)
+    func saveToDatabase(account creds:Account) -> Bool {
+        let result = self.repositories.user.updateCreds(creds: creds, forUser: creds.accountCreationUser!)
         Log.debug(message: "saveToDatabase: result: \(result)")
         return result
     }

@@ -101,7 +101,7 @@ class SharingAccountsController : ControllerProtocol {
         
         let user = User()
         user.username = params.userProfile!.displayName
-        user.accountType = params.profileCreds!.accountType
+        user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON()
         

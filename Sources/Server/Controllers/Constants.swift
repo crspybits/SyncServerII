@@ -57,6 +57,12 @@ class Constants {
     }
     var ssl = SSL()
     
+    struct AllowedSignInTypes {
+        var Google = false
+        var Facebook = false
+    }
+    var allowedSignInTypes = AllowedSignInTypes()
+    
     static var session:Constants!
 
     // If there is a delegate, then use this to get the config file path. This is purely a hack for testing-- because I've not been able to get access to the Server.config file otherwise.
@@ -110,8 +116,7 @@ class Constants {
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
         print("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")
         
-        // TODO: *3* Make a getBool method.
-        if let selfSigning = try? config.getString(varName: "ssl.selfSigning"), selfSigning == "true" {
+        if let selfSigning = try? config.getBool(varName: "ssl.selfSigning"), selfSigning {
             ssl.selfSigning = true
         }
         
@@ -123,5 +128,13 @@ class Constants {
         ssl.keyFile = try? config.getString(varName: "ssl.keyFile")
         ssl.certFile = try? config.getString(varName: "ssl.certFile")
         ssl.caCertificateDirectory = try? config.getString(varName: "ssl.caCertificateDirectory")
+        
+        if let googleSignIn = try? config.getBool(varName: "allowedSignInTypes.Google"), googleSignIn {
+            allowedSignInTypes.Google = true
+        }
+        
+        if let facebookSignIn = try? config.getBool(varName: "allowedSignInTypes.Facebook"), facebookSignIn {
+            allowedSignInTypes.Facebook = true
+        }
     }
 }

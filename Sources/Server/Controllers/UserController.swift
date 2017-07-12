@@ -40,7 +40,7 @@ class UserController : ControllerProtocol {
     
     // Looks up UserProfile in mySQL database.
     static func userExists(userProfile:UserProfile, userRepository:UserRepository) -> UserStatus {
-        guard let accountType = AccountType.fromSpecificCredsType(specificCreds: userProfile.accountSpecificCreds!) else {
+        guard let accountType = AccountType.for(userProfile: userProfile) else {
             return .error
         }
         
@@ -77,7 +77,7 @@ class UserController : ControllerProtocol {
         
         let user = User()
         user.username = params.userProfile!.displayName
-        user.accountType = params.profileCreds!.accountType
+        user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON()
         
@@ -85,7 +85,7 @@ class UserController : ControllerProtocol {
         user.userType = .owning
         
         // TODO: *5* Remove this restriction when we add Dropbox or other cloud storage services.
-        guard params.profileCreds!.accountType == .Google else {
+        guard user.accountType == .Google else {
             Log.error(message: "Owning users must currently be using Google creds!")
             return
         }
@@ -106,9 +106,10 @@ class UserController : ControllerProtocol {
         }
         
         // Previously, we won't have established a CredsUser for these Creds-- because this is a new user.
-        params.profileCreds!.user = .userId(userId!)
+        var profileCreds = params.profileCreds!
+        profileCreds.accountCreationUser = .userId(userId!)
         
-        params.profileCreds!.generateTokens() { successGeneratingTokens, error in
+        profileCreds.generateTokens() { successGeneratingTokens, error in
             guard error == nil else {
                 Log.error(message: "Failed attempting to generate tokens: \(String(describing: error))")
                 params.completion(nil)
@@ -161,7 +162,13 @@ class UserController : ControllerProtocol {
         
         // I'm not going to remove the users files in their cloud storage. They own those. I think I don't have any business removing their files in this context.
         
-        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: params.creds!.accountType, credsId: params.userProfile!.id)
+        guard let accountType = AccountType.for(userProfile: params.userProfile!) else {
+            Log.error(message: "Could not get accountType!")
+            params.completion(nil)
+            return
+        }
+        
+        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
         if case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey) {
             if numberRows == 1 {
                 success += 1
