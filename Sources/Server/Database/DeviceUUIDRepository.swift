@@ -9,7 +9,7 @@
 // Tracks deviceUUID's and their userId's. This is important for security. Also can enable limitations about number of devices per userId.
 
 import Foundation
-import PerfectLib
+import LoggerAPI
 import SyncServerShared
 
 class DeviceUUID : NSObject, Model {
@@ -112,7 +112,7 @@ class DeviceUUIDRepository : Repository {
     func add(deviceUUID:DeviceUUID) -> DeviceUUIDAddResult {
         if deviceUUID.userId == nil || deviceUUID.deviceUUID == nil {
             let message = "One of the model values was nil!"
-            Log.error(message: message)
+            Log.error(message)
             return .error(message)
         }
         
@@ -137,7 +137,7 @@ class DeviceUUIDRepository : Repository {
         }
         else {
             let message = "Could not insert into \(tableName): \(db.error)"
-            Log.error(message: message)
+            Log.error(message)
             return .error(message)
         }
     }

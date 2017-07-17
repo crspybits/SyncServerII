@@ -27,15 +27,11 @@ let package = Package(
         // .Package(url: "https://github.com/hkellaway/Gloss.git", majorVersion: 1, minor: 2),
 		.Package(url: "https://github.com/crspybits/Gloss.git", majorVersion: 1, minor: 2),
 		
-        //.Package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", majorVersion: 1, minor: 7),
-        .Package(url: "https://github.com/crspybits/Kitura-Credentials.git", majorVersion: 1, minor: 7),
-        
-        // 7/9/17; I've just added this, but I'm using my own forked version because I need to have both the Google and Facebook creds use my Kitura-Credentials.
-        .Package(url: "https://github.com/crspybits/Kitura-CredentialsFacebook.git", majorVersion: 1, minor: 7),
-        
-        // .Package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", majorVersion: 1, minor: 4),
-        .Package(url: "https://github.com/crspybits/Kitura-CredentialsGoogle.git", majorVersion: 1, minor: 7),
-        
+        .Package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", majorVersion: 1, minor: 7),
+        .Package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", majorVersion: 1, minor: 7),
+        .Package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", majorVersion: 1, minor: 7),
+
+
         .Package(url: "https://github.com/IBM-Swift/HeliumLogger.git", majorVersion: 1, minor: 7)        
 	]
 )

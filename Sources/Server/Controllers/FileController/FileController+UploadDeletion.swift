@@ -7,27 +7,27 @@
 //
 
 import Foundation
-import PerfectLib
+import LoggerAPI
 import SyncServerShared
 
 extension FileController {
     func uploadDeletion(params:RequestProcessingParameters) {
         guard let uploadDeletionRequest = params.request as? UploadDeletionRequest else {
-            Log.error(message: "Did not receive UploadDeletionRequest")
+            Log.error("Did not receive UploadDeletionRequest")
             params.completion(nil)
             return
         }
         
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
-                Log.error(message: "Error: \(String(describing: error))")
+                Log.error("Error: \(String(describing: error))")
                 params.completion(nil)
                 return
             }
 
             if masterVersion != uploadDeletionRequest.masterVersion {
                 let response = UploadDeletionResponse()!
-                Log.warning(message: "Master version update: \(String(describing: masterVersion))")
+                Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return
@@ -46,29 +46,29 @@ extension FileController {
             case .found(let modelObj):
                 fileIndexObj = modelObj as? FileIndex
                 if fileIndexObj == nil {
-                    Log.error(message: "Could not convert model object to FileIndex")
+                    Log.error("Could not convert model object to FileIndex")
                     params.completion(nil)
                     return
                 }
                 
             case .noObjectFound:
-                Log.error(message: "Could not find file to delete in FileIndex")
+                Log.error("Could not find file to delete in FileIndex")
                 params.completion(nil)
                 return
                 
             case .error(let error):
-                Log.error(message: "Error looking up file in FileIndex: \(error)")
+                Log.error("Error looking up file in FileIndex: \(error)")
                 params.completion(nil)
                 return
             }
             
             if fileIndexObj.fileVersion != uploadDeletionRequest.fileVersion {
-                Log.error(message: "File index version is: \(fileIndexObj.fileVersion), but you asked to delete version: \(uploadDeletionRequest.fileVersion)")
+                Log.error("File index version is: \(fileIndexObj.fileVersion), but you asked to delete version: \(uploadDeletionRequest.fileVersion)")
                 params.completion(nil)
                 return
             }
             
-            Log.debug(message: "uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
+            Log.debug("uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
             
 #if DEBUG
             if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion != 0 {
@@ -96,7 +96,7 @@ extension FileController {
                 return
                 
             case .duplicateEntry:
-                Log.info(message: "File was already marked for deletion: Not adding again.")
+                Log.info("File was already marked for deletion: Not adding again.")
                 let response = UploadDeletionResponse()!
                 params.completion(response)
                 return
@@ -108,7 +108,7 @@ extension FileController {
                 errorString = error
             }
 
-            Log.error(message: errorString!)
+            Log.error(errorString!)
             params.completion(nil)
             return
         }
@@ -121,19 +121,19 @@ extension FileController {
         switch result {
         case .removed(numberRows: let numberRows):
             if numberRows != 1 {
-                Log.error(message: "Number of rows deleted \(numberRows) != 1")
+                Log.error("Number of rows deleted \(numberRows) != 1")
                 params.completion(nil)
                 return
             }
             
         case .error(let error):
-            Log.error(message: "Error deleting from FileIndex: \(error)")
+            Log.error("Error deleting from FileIndex: \(error)")
             params.completion(nil)
             return
         }
         
         guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-            Log.error(message: "Error converting to GoogleCreds!")
+            Log.error("Error converting to GoogleCreds!")
             params.completion(nil)
             return
         }
@@ -142,7 +142,7 @@ extension FileController {
 
         googleCreds.deleteFile(cloudFolderName: fileIndexObj.cloudFolderName!, cloudFileName: cloudFileName, mimeType: fileIndexObj.mimeType!) { error in
             if error != nil  {
-                Log.warning(message: "Error deleting file from cloud storage: \(error!)!")
+                Log.warning("Error deleting file from cloud storage: \(error!)!")
                 // I'm not going to fail if this fails-- this is for debugging and it's not a big deal. Drop through and report success.
             }
             

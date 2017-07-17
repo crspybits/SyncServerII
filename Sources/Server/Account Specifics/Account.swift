@@ -10,7 +10,7 @@ import SyncServerShared
 import Credentials
 import SwiftyJSON
 import KituraNet
-import PerfectLib
+import LoggerAPI
 import Kitura
 
 enum AccountCreationUser {
@@ -18,7 +18,7 @@ enum AccountCreationUser {
     case userId(UserId) // and this if we don't.
 }
 
-// SyncServer Keys for UserProfile extendedProperties
+// SyncServer specific Keys for UserProfile extendedProperties
 let SyncServerAccountType = "syncServerAccountType" // In Dictionary as a String
 
 protocol AccountDelegate : class {
@@ -54,6 +54,14 @@ enum AccountType : String {
     case Google
     case Facebook
     
+    static func `for`(userProfile:UserProfile) -> AccountType? {
+        guard let accountTypeString = userProfile.extendedProperties[SyncServerAccountType] as? String else {
+            return nil
+        }
+        
+        return AccountType(rawValue: accountTypeString)
+    }
+    
     func toAuthTokenType() -> ServerConstants.AuthTokenType {
         switch self {
             case .Google:
@@ -70,14 +78,6 @@ enum AccountType : String {
             case .FacebookToken:
                 return .Facebook
         }
-    }
-    
-    static func `for`(userProfile:UserProfile) -> AccountType? {
-        guard let accountTypeString = userProfile.extendedProperties[SyncServerAccountType] as? String else {
-            return nil
-        }
-        
-        return AccountType(rawValue: accountTypeString)
     }
 }
 
@@ -139,7 +139,6 @@ class AccountAPICall {
         let req = HTTP.request(requestOptions) { response in
             if let response:KituraNet.ClientResponse = response {
                 let statusCode = response.statusCode
-                // Log.debug(message: "HTTP status code: \(statusCode); raw: \(statusCode.rawValue)")
                 if statusCode != HTTPStatusCode.OK {
                     // for header in response.headers {
                     //     Log.debug(message: "Header: \(header)")
@@ -171,7 +170,7 @@ class AccountAPICall {
                     completion(result, statusCode)
                     return
                 } catch (let error) {
-                    Log.error(message: "Failed to read Google response: \(error)")
+                    Log.error("Failed to read Google response: \(error)")
                 }
             }
             

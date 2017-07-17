@@ -6,7 +6,7 @@
 //
 //
 
-import PerfectLib
+import LoggerAPI
 import Credentials
 import CredentialsGoogle
 import SyncServerShared
@@ -68,7 +68,7 @@ class UserController : ControllerProtocol {
         case .doesNotExist:
             break
         case .error, .exists(_):
-            Log.error(message: "Could not add user: Already exists!")
+            Log.error("Could not add user: Already exists!")
             params.completion(nil)
             return
         }
@@ -86,13 +86,13 @@ class UserController : ControllerProtocol {
         
         // TODO: *5* Remove this restriction when we add Dropbox or other cloud storage services.
         guard user.accountType == .Google else {
-            Log.error(message: "Owning users must currently be using Google creds!")
+            Log.error("Owning users must currently be using Google creds!")
             return
         }
         
         let userId = params.repos.user.add(user: user)
         if userId == nil {
-            Log.error(message: "Failed on adding user to User!")
+            Log.error("Failed on adding user to User!")
             params.completion(nil)
             return
         }
@@ -100,7 +100,7 @@ class UserController : ControllerProtocol {
         user.userId = userId
         
         if !params.repos.masterVersion.initialize(userId:userId!) {
-            Log.error(message: "Failed on creating MasterVersion record for user!")
+            Log.error("Failed on creating MasterVersion record for user!")
             params.completion(nil)
             return
         }
@@ -111,7 +111,7 @@ class UserController : ControllerProtocol {
         
         profileCreds.generateTokens() { successGeneratingTokens, error in
             guard error == nil else {
-                Log.error(message: "Failed attempting to generate tokens: \(String(describing: error))")
+                Log.error("Failed attempting to generate tokens: \(String(describing: error))")
                 params.completion(nil)
                 return
             }
@@ -137,7 +137,7 @@ class UserController : ControllerProtocol {
                     params.completion(response)
                 }
                 else {
-                    Log.error(message: "Failed attempting to generate tokens: \(String(describing: error))")
+                    Log.error("Failed attempting to generate tokens: \(String(describing: error))")
                     params.completion(nil)
                 }
             }
@@ -163,7 +163,7 @@ class UserController : ControllerProtocol {
         // I'm not going to remove the users files in their cloud storage. They own those. I think I don't have any business removing their files in this context.
         
         guard let accountType = AccountType.for(userProfile: params.userProfile!) else {
-            Log.error(message: "Could not get accountType!")
+            Log.error("Could not get accountType!")
             params.completion(nil)
             return
         }

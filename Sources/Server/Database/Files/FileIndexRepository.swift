@@ -9,7 +9,7 @@
 // Meta data for files currently in cloud storage.
 
 import Foundation
-import PerfectLib
+import LoggerAPI
 import SyncServerShared
 
 typealias FileIndexId = Int64
@@ -215,7 +215,7 @@ class FileIndexRepository : Repository {
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     func add(fileIndex:FileIndex) -> Int64? {
         if haveNilFieldForAdd(fileIndex: fileIndex) {
-            Log.error(message: "One of the model values was nil: \(fileIndex)")
+            Log.error("One of the model values was nil: \(fileIndex)")
             return nil
         }
     
@@ -241,7 +241,7 @@ class FileIndexRepository : Repository {
         }
         else {
             let error = db.error
-            Log.error(message: "Could not insert row into \(tableName): \(error)")
+            Log.error("Could not insert row into \(tableName): \(error)")
             return nil
         }
     }
@@ -254,7 +254,7 @@ class FileIndexRepository : Repository {
     func update(fileIndex:FileIndex) -> Bool {
         if fileIndex.fileIndexId == nil ||
             haveNilFieldForUpdate(fileIndex: fileIndex) {
-            Log.error(message: "One of the model values was nil: \(fileIndex)")
+            Log.error("One of the model values was nil: \(fileIndex)")
             return false
         }
         
@@ -277,13 +277,13 @@ class FileIndexRepository : Repository {
                 return true
             }
             else {
-                Log.error(message: "Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
+                Log.error("Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
                 return false
             }
         }
         else {
             let error = db.error
-            Log.error(message: "Could not update \(tableName): \(error)")
+            Log.error("Could not update \(tableName): \(error)")
             return false
         }
     }
@@ -363,14 +363,14 @@ class FileIndexRepository : Repository {
 
                 if uploadDeletion {
                     guard upload.fileVersion == existingFileIndex.fileVersion else {
-                        Log.error(message: "Did not specify current version of file in upload deletion!")
+                        Log.error("Did not specify current version of file in upload deletion!")
                         error = true
                         return
                     }
                 }
                 else {
-                    guard upload.fileVersion == existingFileIndex.fileVersion + 1 else {
-                        Log.error(message: "Did not have next version of file!")
+                    guard upload.fileVersion == existingFileIndex.fileVersion + FileVersionInt(1) else {
+                        Log.error("Did not have next version of file!")
                         error = true
                         return
                     }
@@ -382,27 +382,27 @@ class FileIndexRepository : Repository {
                 fileIndex.fileIndexId = existingFileIndex.fileIndexId
                 
                 guard self.update(fileIndex: fileIndex) else {
-                    Log.error(message: "Could not update FileIndex!")
+                    Log.error("Could not update FileIndex!")
                     error = true
                     return
                 }
                 
             case .noObjectFound:
                 if uploadDeletion {
-                    Log.error(message: "Attempting to delete a file not present in the file index: \(key)!")
+                    Log.error("Attempting to delete a file not present in the file index: \(key)!")
                     error = true
                     return
                 }
                 else {
                     guard upload.fileVersion == 0 else {
-                        Log.error(message: "Did not have version 0 of file!")
+                        Log.error("Did not have version 0 of file!")
                         error = true
                         return
                     }
                     
                     let fileIndexId = self.add(fileIndex: fileIndex)
                     if fileIndexId == nil {
-                        Log.error(message: "Could not add new FileIndex!")
+                        Log.error("Could not add new FileIndex!")
                         error = true
                         return
                     }

@@ -9,8 +9,8 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
+import PerfectLib
 
 class FileController_UploadTests: ServerTestCase {
 

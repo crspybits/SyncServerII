@@ -10,9 +10,9 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import HeliumLogger
-import PerfectLib
 import Foundation
 import SyncServerShared
+import PerfectLib
 
 class DatabaseModelTests: XCTestCase {
 

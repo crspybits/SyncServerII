@@ -9,9 +9,9 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
 import SyncServerShared
+import PerfectLib
 
 class FileControllerTests_UploadDeletion: ServerTestCase {
 

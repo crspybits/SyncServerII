@@ -6,7 +6,8 @@
 //
 //
 
-import PerfectLib
+import LoggerAPI
+//import PerfectLib
 import Kitura
 import KituraNet
 import Gloss
@@ -47,18 +48,18 @@ class RequestHandler : AccountDelegate {
         self.endpoint = endpoint
         
         RequestHandler.numberCreated += 1
-        Log.info(message: "RequestHandler.init: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
+        Log.info("RequestHandler.init: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
     }
     
     deinit {
         RequestHandler.numberDeleted += 1
-        Log.info(message: "RequestHandler.deinit: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
+        Log.info("RequestHandler.deinit: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
     }
 
     public func failWithError(message:String, statusCode:HTTPStatusCode = .internalServerError) {
         
         setJsonResponseHeaders()
-        Log.error(message: message)
+        Log.error(message)
 
         self.response.statusCode = statusCode
         
@@ -83,7 +84,7 @@ class RequestHandler : AccountDelegate {
                 jsonString = try jsonDict.jsonEncodedString()
             } catch (let error) {
                 let message = "Failed on json encode: \(error.localizedDescription) for jsonDict: \(jsonDict)"
-                Log.error(message: message)
+                Log.error(message)
                 self.response.statusCode = HTTPStatusCode.internalServerError
                 self.response.send(message)
             }
@@ -102,16 +103,16 @@ class RequestHandler : AccountDelegate {
             }
         }
         
-        Log.info(message: "REQUEST \(request.urlURL.path): ABOUT TO END ...")
+        Log.info("REQUEST \(request.urlURL.path): ABOUT TO END ...")
 
         do {
             try self.response.end()
-            Log.info(message: "REQUEST \(request.urlURL.path): STATUS CODE: \(response.statusCode)")
+            Log.info("REQUEST \(request.urlURL.path): STATUS CODE: \(response.statusCode)")
         } catch (let error) {
-            Log.error(message: "Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
+            Log.error("Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
         }
         
-        Log.info(message: "REQUEST \(request.urlURL.path): COMPLETED")
+        Log.info("REQUEST \(request.urlURL.path): COMPLETED")
     }
     
     func setJsonResponseHeaders() {
@@ -154,14 +155,14 @@ class RequestHandler : AccountDelegate {
             if !db.commit() {
                 let message = "Error during COMMIT operation!"
                 operationResult = .failure(.message(message))
-                Log.error(message: message)
+                Log.error(message)
             }
             
         case .failure(_):
             if !db.rollback() {
                 let message = "Error during ROLLBACK operation!"
                 operationResult = .failure(.message(message))
-                Log.error(message: message)
+                Log.error(message)
             }
         }
         
@@ -174,13 +175,13 @@ class RequestHandler : AccountDelegate {
         setJsonResponseHeaders()
         let profile = request.userProfile
         self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
-        Log.info(message: "self.deviceUUID: \(String(describing: self.deviceUUID))")
+        Log.info("self.deviceUUID: \(String(describing: self.deviceUUID))")
         
 #if DEBUG
         if profile != nil {
             let userId = profile!.id
             let userName = profile!.displayName
-            Log.info(message: "Profile: \(String(describing: profile)); userId: \(userId); userName: \(userName)")
+            Log.info("Profile: \(String(describing: profile)); userId: \(userId); userName: \(userName)")
         }
 #endif
 
@@ -195,7 +196,17 @@ class RequestHandler : AccountDelegate {
             if profile == nil {
                 // We should really never get here. Credentials security check should make sure of that. This is a double check.
                 let message = "YIKES: Should have had a user profile!"
-                Log.critical(message: message)
+                Log.error(message)
+                failWithError(message: message)
+                return
+            }
+            
+            // Only do this if we are requiring primary or secondary authorization-- this updates the profile from the request, assuming we are using authorization.
+            do {
+                try AccountManager.session.updateUserProfile(profile!, fromRequest: request)
+            } catch (let error) {
+                let message = "YIKES: Non-nil UserProfile, but could not do profile update: \(error)"
+                Log.error(message)
                 failWithError(message: message)
                 return
             }
@@ -222,7 +233,7 @@ class RequestHandler : AccountDelegate {
                 do {
                     dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountType: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: self)
                 } catch (let error) {
-                    errorString = "\(error)"
+                    errorString = "\(error)"  
                 }
                 
                 if errorString != nil || dbCreds == nil {
@@ -396,7 +407,7 @@ class RequestHandler : AccountDelegate {
     
     func saveToDatabase(account creds:Account) -> Bool {
         let result = self.repositories.user.updateCreds(creds: creds, forUser: creds.accountCreationUser!)
-        Log.debug(message: "saveToDatabase: result: \(result)")
+        Log.debug("saveToDatabase: result: \(result)")
         return result
     }
     

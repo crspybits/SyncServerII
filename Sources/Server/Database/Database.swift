@@ -6,7 +6,7 @@
 //
 //
 
-import PerfectLib
+import LoggerAPI
 import Foundation
 import MySQL
 
@@ -37,24 +37,23 @@ class Database {
     init(showStartupInfo:Bool = false) {
         self.connection = MySQL()
         if showStartupInfo {
-            Log.info(message: "Connecting to database with host: \(Constants.session.db.host)...")
+            Log.info("Connecting to database with host: \(Constants.session.db.host)...")
         }
         guard self.connection.connect(host: Constants.session.db.host, user: Constants.session.db.user, password: Constants.session.db.password ) else {
-            Log.error(message:
-                "Failure connecting to mySQL server \(Constants.session.db.host): \(self.error)")
+            Log.error("Failure connecting to mySQL server \(Constants.session.db.host): \(self.error)")
             return
         }
         
         Database.numberOpened += 1
 
         if showStartupInfo {
-            Log.info(message: "Connecting to database named: \(Constants.session.db.database)...")
+            Log.info("Connecting to database named: \(Constants.session.db.database)...")
         }
         
-        Log.info(message: "DB CONNECTION STATS: opened: \(Database.numberOpened); closed: \(Database.numberClosed)")
+        Log.info("DB CONNECTION STATS: opened: \(Database.numberOpened); closed: \(Database.numberClosed)")
 
         guard self.connection.selectDatabase(named: Constants.session.db.database) else {
-            Log.error(message: "Failure: \(self.error)")
+            Log.error("Failure: \(self.error)")
             return
         }
     }
@@ -67,7 +66,7 @@ class Database {
     func close() {
         if !closed {
             Database.numberClosed += 1
-            Log.info(message: "CLOSING DB CONNECTION (opened: \(Database.numberOpened); closed: \(Database.numberClosed))")
+            Log.info("CLOSING DB CONNECTION (opened: \(Database.numberOpened); closed: \(Database.numberClosed))")
             connection.close()
             closed = true
         }
@@ -99,20 +98,20 @@ class Database {
             "LIMIT 1;"
         
         guard connection.query(statement: checkForTable) else {
-            Log.error(message: "Failure: \(self.error)")
+            Log.error("Failure: \(self.error)")
             return .failure(.query)
         }
         
         if let results = connection.storeResults(), results.numRows() == 1 {
-            Log.info(message: "Table \(tableName) was already in database")
+            Log.info("Table \(tableName) was already in database")
             return .success(.alreadyPresent)
         }
         
-        Log.info(message: "**** Table \(tableName) was not already in database")
+        Log.info("**** Table \(tableName) was not already in database")
 
         let query = "CREATE TABLE \(tableName) \(columnCreateQuery) ENGINE=InnoDB;"
         guard connection.query(statement: query) else {
-            Log.error(message: "Failure: \(self.error)")
+            Log.error("Failure: \(self.error)")
             return .failure(.tableCreation)
         }
         
@@ -129,16 +128,16 @@ class Database {
             "LIMIT 1;"
         
         guard connection.query(statement: checkForColumn) else {
-            Log.error(message: "Failure: \(self.error)")
+            Log.error("Failure: \(self.error)")
             return nil
         }
         
         if let results = connection.storeResults(), results.numRows() == 1 {
-            Log.info(message: "Column \(column) was already in database table \(tableName)")
+            Log.info("Column \(column) was already in database table \(tableName)")
             return true
         }
         
-        Log.info(message: "Column \(column) was not in database table \(tableName)")
+        Log.info("Column \(column) was not in database table \(tableName)")
         return false
     }
     
@@ -147,7 +146,7 @@ class Database {
         let query = "ALTER TABLE \(tableName) ADD \(column)"
         
         guard connection.query(statement: query) else {
-            Log.error(message: "Failure: \(self.error)")
+            Log.error("Failure: \(self.error)")
             return false
         }
         
@@ -166,7 +165,7 @@ class Database {
             return true
         }
         else {
-            Log.error(message: "Could not start transaction: \(self.error)")
+            Log.error("Could not start transaction: \(self.error)")
             return false
         }
     }
@@ -177,7 +176,7 @@ class Database {
             return true
         }
         else {
-            Log.error(message: "Could not commit transaction: \(self.error)")
+            Log.error("Could not commit transaction: \(self.error)")
             return false
         }
     }
@@ -188,7 +187,7 @@ class Database {
             return true
         }
         else {
-            Log.error(message: "Could not rollback transaction: \(self.error)")
+            Log.error("Could not rollback transaction: \(self.error)")
             return false
         }
     }
@@ -209,12 +208,12 @@ class Select {
         self.ignoreErrors = ignoreErrors
         
         if !self.stmt.prepare(statement: query) {
-            Log.error(message: "Failed on preparing statement: \(query)")
+            Log.error("Failed on preparing statement: \(query)")
             return
         }
         
         if !self.stmt.execute() {
-            Log.error(message: "Failed on executing statement: \(query)")
+            Log.error("Failed on executing statement: \(query)")
             return
         }
         
@@ -277,7 +276,7 @@ class Select {
                         }
                     }
                 default:
-                    Log.error(message: "Unknown field type: \(self.fieldTypes[fieldNumber]!); fieldNumber: \(fieldNumber)")
+                    Log.error("Unknown field type: \(self.fieldTypes[fieldNumber]!); fieldNumber: \(fieldNumber)")
                     if !ignoreErrors {
                         self.forEachRowStatus = .unknownFieldType
                         failure = true
@@ -294,7 +293,7 @@ class Select {
                         }
                         else {
                             let message = "Problem with converting: \(self.fieldTypes[fieldNumber]!); fieldNumber: \(fieldNumber)"
-                            Log.error(message: message)
+                            Log.error(message)
                             self.forEachRowStatus = .problemConvertingFieldValueToModel(message)
                             failure = true
                             return

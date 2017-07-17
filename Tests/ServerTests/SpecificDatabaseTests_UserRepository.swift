@@ -132,8 +132,11 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
     }
     
     func testUserLookup2() {
-        addOwningUsers()
+        // Faking this so we don't have to startup server.
+        AccountManager.session.addAccountType(GoogleCreds.self)
         
+        addOwningUsers()
+
         let result = UserRepository(db).lookup(key: .accountTypeInfo(accountType:.Google, credsId:"100"), modelInit:User.init)
         switch result {
         case .error(let error):

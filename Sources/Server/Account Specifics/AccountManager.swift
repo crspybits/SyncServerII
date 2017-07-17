@@ -17,6 +17,11 @@ class AccountManager {
     private init() {
     }
     
+    func reset() {
+        accountTypes.removeAll()
+    }
+    
+    // I'm allowing these to be added dynamically to enable the user of the server to disallow  certain types of account credentials.
     func addAccountType(_ newAccountType:Account.Type) {
         for accountType in accountTypes {
             // Don't add the same account type twice!
@@ -28,46 +33,55 @@ class AccountManager {
         accountTypes.append(newAccountType)
     }
     
-    enum UpdateUserProfileResult {
-        case success
+    enum UpdateUserProfileError : Error {
         case noAccountWithThisToken
         case noTokenFoundInHeaders
         case badTokenFoundInHeaders
     }
     
-    // Allow the specific Account's to process headers in their own special way, and modify the UserProfile accordingly if they need to.
-    func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest) -> UpdateUserProfileResult {
+    // Allow the specific Account's to process headers in their own special way, and modify the UserProfile accordingly if they need to. Must be called at the very start of request processing.
+    func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest) throws {
         guard let tokenTypeString = request.headers[ServerConstants.XTokenTypeKey] else {
-            return .noTokenFoundInHeaders
+            throw UpdateUserProfileError.noTokenFoundInHeaders
         }
         
         guard let tokenType = ServerConstants.AuthTokenType(rawValue: tokenTypeString) else {
-            return .badTokenFoundInHeaders
+            throw UpdateUserProfileError.badTokenFoundInHeaders
         }
+        
+        let accountType = AccountType.fromAuthTokenType(tokenType)
+        userProfile.extendedProperties[SyncServerAccountType] = accountType.rawValue
         
         for accountType in accountTypes {
             if tokenType == accountType.accountType.toAuthTokenType() {
                 accountType.updateUserProfile(userProfile, fromRequest: request)
-                return .success
+                return
             }
         }
         
-        return .noAccountWithThisToken
+        throw UpdateUserProfileError.noAccountWithThisToken
     }
     
     func accountFromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         
-        let specificAccountToken = ServerConstants.AuthTokenType.GoogleToken
+        let currentAccountType = AccountType.for(userProfile: profile)
         for accountType in accountTypes {
-            if accountType.accountType.toAuthTokenType() == specificAccountToken {
-                // TODO!!: Complete this!
+            if accountType.accountType == currentAccountType {
+                return accountType.fromProfile(profile: profile, user: user, delegate: delegate)
             }
         }
         
         return nil
     }
     
-    func accountFromJSON(_ json:String, accountType: AccountType, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
+    func accountFromJSON(_ json:String, accountType type: AccountType, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
+    
+        for accountType in accountTypes {
+            if accountType.accountType == type {
+                return try accountType.fromJSON(json, user: user, delegate: delegate)
+            }
+        }
+        
         return nil
     }
 }

@@ -8,8 +8,8 @@
 
 import Foundation
 import Kitura
-import PerfectLib
 import SyncServerShared
+import LoggerAPI
 
 class CreateRoutes {
     private var router = Router()
@@ -20,9 +20,9 @@ class CreateRoutes {
     func addRoute(ep:ServerEndpoint,
         createRequest: @escaping (RouterRequest) -> (RequestMessage?),
         processRequest: @escaping ProcessRequest) {
-        
+
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
-            Log.info(message: "parsedURL: \(routerRequest.parsedURL)")
+            Log.info("parsedURL: \(routerRequest.parsedURL)")
             let handler = RequestHandler(request: routerRequest, response: routerResponse, endpoint:ep)
             handler.doRequest(createRequest: createRequest, processRequest: processRequest)
         }

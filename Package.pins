@@ -8,10 +8,10 @@
       "version": "0.4.0"
     },
     {
-      "package": "CommonCrypto",
+      "package": "CEpoll",
       "reason": null,
-      "repositoryURL": "https://github.com/IBM-Swift/CommonCrypto.git",
-      "version": "0.1.4"
+      "repositoryURL": "https://github.com/IBM-Swift/CEpoll.git",
+      "version": "0.1.0"
     },
     {
       "package": "Cryptor",
@@ -40,20 +40,26 @@
     {
       "package": "Kitura-Credentials",
       "reason": null,
-      "repositoryURL": "https://github.com/crspybits/Kitura-Credentials.git",
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura-Credentials.git",
       "version": "1.7.2"
     },
     {
       "package": "Kitura-CredentialsFacebook",
       "reason": null,
-      "repositoryURL": "https://github.com/crspybits/Kitura-CredentialsFacebook.git",
-      "version": "1.7.1"
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git",
+      "version": "1.7.0"
     },
     {
       "package": "Kitura-CredentialsGoogle",
       "reason": null,
-      "repositoryURL": "https://github.com/crspybits/Kitura-CredentialsGoogle.git",
-      "version": "1.7.1"
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git",
+      "version": "1.7.0"
+    },
+    {
+      "package": "Kitura-net",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
+      "version": "1.7.13"
     },
     {
       "package": "Kitura-Session",
@@ -68,10 +74,10 @@
       "version": "1.7.1"
     },
     {
-      "package": "Kitura-net",
+      "package": "LinuxBridge",
       "reason": null,
-      "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
-      "version": "1.7.13"
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+      "version": "2.0.2"
     },
     {
       "package": "LoggerAPI",
@@ -86,6 +92,18 @@
       "version": "2.1.2"
     },
     {
+      "package": "mysqlclient",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+      "version": "2.0.1"
+    },
+    {
+      "package": "OpenSSL",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
+      "version": "0.3.5"
+    },
+    {
       "package": "PerfectLib",
       "reason": null,
       "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
@@ -98,22 +116,28 @@
       "version": "2.0.12"
     },
     {
+      "package": "Signals",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+      "version": "0.9.48"
+    },
+    {
       "package": "SMServerLib",
       "reason": null,
       "repositoryURL": "https://github.com/crspybits/SMServerLib.git",
       "version": "0.0.5"
     },
     {
-      "package": "SSLService",
-      "reason": null,
-      "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
-      "version": "0.12.45"
-    },
-    {
       "package": "Socket",
       "reason": null,
       "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
       "version": "0.12.56"
+    },
+    {
+      "package": "SSLService",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
+      "version": "0.12.45"
     },
     {
       "package": "SwiftyJSON",
@@ -125,13 +149,7 @@
       "package": "SyncServer_Shared",
       "reason": null,
       "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
-      "version": "0.0.6"
-    },
-    {
-      "package": "mysqlclient",
-      "reason": null,
-      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
-      "version": "2.0.0"
+      "version": "0.0.7"
     }
   ],
   "version": 1

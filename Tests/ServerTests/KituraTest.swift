@@ -175,9 +175,12 @@ extension KituraTest {
     
     func setupHeaders(accessToken: String, deviceUUID:String) -> [String: String] {
         var headers = [String: String]()
-        headers[CredentialsGoogleToken.xTokenTypeKey] = ServerConstants.AuthTokenType.GoogleToken.rawValue
-        headers[CredentialsGoogleToken.accessTokenKey] = accessToken
+        
+        headers[ServerConstants.XTokenTypeKey] = ServerConstants.AuthTokenType.GoogleToken.rawValue
+        headers[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
+        
         headers[ServerConstants.httpRequestDeviceUUID] = deviceUUID
+
         return headers
     }
 }

@@ -70,7 +70,8 @@ class GoogleCreds : AccountAPICall, Account {
     }
     
     static func updateUserProfile(_ userProfile: UserProfile, fromRequest request: RouterRequest) {
-        // TODO:!!!
+        userProfile.extendedProperties[ServerConstants.GoogleHTTPServerAuthCodeKey] = request.headers[ServerConstants.GoogleHTTPServerAuthCodeKey]
+        userProfile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey]
     }
     
     enum FromJSONError : Swift.Error {
@@ -142,16 +143,14 @@ class GoogleCreds : AccountAPICall, Account {
     }
     
     static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        guard let googleSpecificCreds = profile.accountSpecificCreds as? GoogleSpecificCreds else {
-            Log.error(message: "Account specific creds were not GoogleSpecificCreds")
-            return nil
-        }
         
         let creds = GoogleCreds()
         creds.accountCreationUser = user
         creds.delegate = delegate
-        creds.accessToken = googleSpecificCreds.accessToken
-        creds.serverAuthCode = googleSpecificCreds.serverAuthCode
+        creds.accessToken =
+            profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
+        creds.serverAuthCode =
+            profile.extendedProperties[ServerConstants.GoogleHTTPServerAuthCodeKey] as? String
         return creds
     }
     
