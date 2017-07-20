@@ -55,14 +55,11 @@ class ServerSetup {
             AccountManager.session.addAccountType(GoogleCreds.self)
         }
         
-        /*
         if Constants.session.allowedSignInTypes.Facebook {
             let facebookCredentials = CredentialsFacebookToken()
             credentials.register(plugin: facebookCredentials)
-            // TODO
-            // AccountManager.session.addAccountType(...)
+            AccountManager.session.addAccountType(FacebookCreds.self)
         }
-        */
         
         router.all { (request, response, next) in
             Log.info(message: "REQUEST RECEIVED: \(request.urlURL.path)")

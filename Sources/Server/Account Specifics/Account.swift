@@ -33,13 +33,16 @@ protocol Account {
     
     var accountCreationUser:AccountCreationUser? {get set}
     
+    // What sign in type(s) does this account allow?
+    var signInType:SignInType {get}
+    
     func toJSON() -> String?
     
-    // Given existing Account info stored in the database, decide if we need to generate tokens. The intent of generating tokens is for owning users-- to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
-    func needToGenerateTokens(dbCreds:Account) -> Bool
+    // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
+    func needToGenerateTokens(userType:UserType, dbCreds:Account?) -> Bool
     
-    // Some Account's (e.g., Google) need to generate internal tokens (a refresh token) in some circumstances (e.g., when having a serverAuthCode). If error == nil, then success will have a non-nil value. Uses delegate, if one is defined, to save creds to database.
-    func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->())
+    // Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
+    func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->())
     
     func merge(withNewer account:Account)
     
@@ -48,6 +51,26 @@ protocol Account {
     
     static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
     static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account?
+}
+
+extension Account {
+    func generateTokensIfNeeded(userType:UserType, dbCreds:Account?, routerResponse:RouterResponse, success:@escaping ()->(), failure: @escaping ()->()) {
+    
+        if needToGenerateTokens(userType: userType, dbCreds: dbCreds) {
+            generateTokens(response: routerResponse) { error in
+                if error == nil {
+                    success()
+                }
+                else {
+                    Log.error("Failed attempting to generate tokens: \(error!))")
+                    failure()
+                }
+            }
+        }
+        else {
+            success()
+        }
+    }
 }
 
 enum AccountType : String {

@@ -26,9 +26,6 @@ class Constants {
     */
     static let serverConfigFile = "Server.json"
     
-    // TODO: *3* Don't know what this should be
-    //static let serverConfigFilePathOnLinux = ""
-    
     struct mySQL {
         var host:String = ""
         var user:String = ""
@@ -39,8 +36,14 @@ class Constants {
     
     var port:Int!
     
-    var googleClientId:String = ""
-    var googleClientSecret:String = ""
+    // If you are using Google Accounts
+    var googleClientId:String? = ""
+    var googleClientSecret:String? = ""
+    
+    // If you are using Facebook Accounts
+    var facebookClientId:String? = ""
+    var facebookClientSecret:String? = ""
+    
     var maxNumberDeviceUUIDPerUser:Int?
     
     struct SSL {
@@ -103,9 +106,12 @@ class Constants {
             config = try! ConfigLoader(usingPath: path, andFileName: configFileName, forConfigType: .jsonDictionary)
         }
         
-        googleClientId = try! config.getString(varName: "GoogleServerClientId")
-        googleClientSecret = try! config.getString(varName: "GoogleServerSecret")
+        googleClientId = try? config.getString(varName: "GoogleServerClientId")
+        googleClientSecret = try? config.getString(varName: "GoogleServerSecret")
 
+        facebookClientId = try? config.getString(varName: "FacebookClientId")
+        facebookClientSecret = try? config.getString(varName: "FacebookClientSecret")
+        
         db.host = try! config.getString(varName: "mySQL.host")
         db.user = try! config.getString(varName: "mySQL.user")
         db.password = try! config.getString(varName: "mySQL.password")

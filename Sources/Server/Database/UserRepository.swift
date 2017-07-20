@@ -12,15 +12,6 @@ import Credentials
 import CredentialsGoogle
 import SyncServerShared
 
-enum UserType : String {
-    case sharing // user is sharing data
-    case owning // user owns the data
-
-    static func maxStringLength() -> Int {
-        return max(UserType.sharing.rawValue.characters.count, UserType.owning.rawValue.characters.count)
-    }
-}
-
 class User : NSObject, Model {
     static let userIdKey = "userId"
     var userId: UserId!

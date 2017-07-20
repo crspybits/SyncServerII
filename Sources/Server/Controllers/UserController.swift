@@ -60,9 +60,6 @@ class UserController : ControllerProtocol {
     }
     
     func addUser(params:RequestProcessingParameters) {
-        // TODO: *0* Should this still be marked as `generateTokens`? We're generating the tokens locally, in this method.
-        assert(params.ep.generateTokens)
-
         let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
@@ -81,12 +78,12 @@ class UserController : ControllerProtocol {
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON()
         
-        // This necessarily is an owning user-- sharing users are created by the redeemSharingInvitation endpoint. This user must also be using Google creds.
+        // This necessarily is an owning user-- sharing users are created by the redeemSharingInvitation endpoint.
         user.userType = .owning
         
-        // TODO: *5* Remove this restriction when we add Dropbox or other cloud storage services.
-        guard user.accountType == .Google else {
-            Log.error("Owning users must currently be using Google creds!")
+        guard params.profileCreds!.signInType.contains(.owningUser) else {
+            Log.error("Attempting to add a user with an Account that only allows sharing users!")
+            params.completion(nil)
             return
         }
         
@@ -105,50 +102,35 @@ class UserController : ControllerProtocol {
             return
         }
         
-        // Previously, we won't have established a CredsUser for these Creds-- because this is a new user.
+        // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
         var profileCreds = params.profileCreds!
         profileCreds.accountCreationUser = .userId(userId!)
         
-        profileCreds.generateTokens() { successGeneratingTokens, error in
-            guard error == nil else {
-                Log.error("Failed attempting to generate tokens: \(String(describing: error))")
-                params.completion(nil)
-                return
-            }
-            
-            let response = AddUserResponse()!
+        let response = AddUserResponse()!
+
+        // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
+        params.profileCreds!.generateTokensIfNeeded(userType: .owning, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
             params.completion(response)
-        }
+        }, failure: {
+            params.completion(nil)
+        })
     }
     
     func checkCreds(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
 
-        // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
-        assert(params.ep.generateTokens)
-
-        // We only need to do token generation if this is an owning user. This is because token generation is used for offline access to owning user data.
-        let owningUser = params.currentSignedInUser!.userType == .owning
+        let sharingUser = params.currentSignedInUser!.userType == .sharing
+        let response = CheckCredsResponse()!
+        if sharingUser {
+            response.sharingPermission = params.currentSignedInUser!.sharingPermission
+        }
         
-        if owningUser && params.profileCreds!.needToGenerateTokens(dbCreds: params.creds!) {
-            params.profileCreds!.generateTokens() { successGeneratingTokens, error in
-                if error == nil {
-                    let response = CheckCredsResponse()!
-                    params.completion(response)
-                }
-                else {
-                    Log.error("Failed attempting to generate tokens: \(String(describing: error))")
-                    params.completion(nil)
-                }
-            }
-        }
-        else {
-            let response = CheckCredsResponse()!
-            if !owningUser {
-                response.sharingPermission = params.currentSignedInUser!.sharingPermission
-            }
+        // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
+        params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
             params.completion(response)
-        }
+        }, failure: {
+            params.completion(nil)
+        })
     }
     
     // A user can only remove themselves, not another user-- this policy is enforced because the currently signed in user (with the UserProfile) is the one removed.
