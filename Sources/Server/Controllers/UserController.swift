@@ -109,7 +109,7 @@ class UserController : ControllerProtocol {
         let response = AddUserResponse()!
 
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
-        params.profileCreds!.generateTokensIfNeeded(userType: .owning, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(userType: .owning, dbCreds: user.credsObject, routerResponse: params.routerResponse, success: {
             params.completion(response)
         }, failure: {
             params.completion(nil)

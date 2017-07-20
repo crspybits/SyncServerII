@@ -8,7 +8,7 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class GoogleAuthenticationTests: ServerTestCase {    
+class AccountAuthenticationTests_Google: ServerTestCase {    
     let serverResponseTime:TimeInterval = 10
 
     func testGoodEndpointWithBadCredsFails() {
@@ -82,9 +82,9 @@ class GoogleAuthenticationTests: ServerTestCase {
     }
 }
 
-extension GoogleAuthenticationTests {
-    static var allTests : [(String, (GoogleAuthenticationTests) -> () throws -> Void)] {
-        var result:[(String, (GoogleAuthenticationTests) -> () throws -> Void)] = [
+extension AccountAuthenticationTests_Google {
+    static var allTests : [(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] {
+        var result:[(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] = [
             ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
             ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
             ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),

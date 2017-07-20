@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		678BB8D84B03298F8B49FA89 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2BF9074F484F3A9D05F8B46 /* ServerTests.json */; };
 		7A6DB454432AED7B467DDC0F /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = B15817F0D39409AB1D747F70 /* Server.json */; };
+		83857A7E1F20533C00C42ACD /* AccountAuthenticationTests_Facebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83857A7D1F20533C00C42ACD /* AccountAuthenticationTests_Facebook.swift */; };
 		OBJ_326 /* Decoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_290 /* Decoder.swift */; };
 		OBJ_327 /* Encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_291 /* Encoder.swift */; };
 		OBJ_328 /* ExtensionArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_292 /* ExtensionArray.swift */; };
@@ -330,7 +331,7 @@
 		OBJ_886 /* FileControllerTests_DeleteFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* FileControllerTests_DeleteFile.swift */; };
 		OBJ_887 /* FileControllerTests_GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_61 /* FileControllerTests_GetUploads.swift */; };
 		OBJ_888 /* GeneralAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* GeneralAuthTests.swift */; };
-		OBJ_889 /* GoogleAuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* GoogleAuthenticationTests.swift */; };
+		OBJ_889 /* AccountAuthenticationTests_Google.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* AccountAuthenticationTests_Google.swift */; };
 		OBJ_890 /* GoogleDriveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_64 /* GoogleDriveTests.swift */; };
 		OBJ_891 /* KituraTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* KituraTest.swift */; };
 		OBJ_892 /* MessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* MessageTests.swift */; };
@@ -1295,6 +1296,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		83857A7D1F20533C00C42ACD /* AccountAuthenticationTests_Facebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Facebook.swift; sourceTree = "<group>"; };
 		B15817F0D39409AB1D747F70 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		E2BF9074F484F3A9D05F8B46 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		OBJ_100 /* CredentialsPluginProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsPluginProtocol.swift; sourceTree = "<group>"; };
@@ -1524,7 +1526,7 @@
 		OBJ_60 /* FileControllerTests_DeleteFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileControllerTests_DeleteFile.swift; sourceTree = "<group>"; };
 		OBJ_61 /* FileControllerTests_GetUploads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileControllerTests_GetUploads.swift; sourceTree = "<group>"; };
 		OBJ_62 /* GeneralAuthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralAuthTests.swift; sourceTree = "<group>"; };
-		OBJ_63 /* GoogleAuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleAuthenticationTests.swift; sourceTree = "<group>"; };
+		OBJ_63 /* AccountAuthenticationTests_Google.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Google.swift; sourceTree = "<group>"; };
 		OBJ_64 /* GoogleDriveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleDriveTests.swift; sourceTree = "<group>"; };
 		OBJ_65 /* KituraTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KituraTest.swift; sourceTree = "<group>"; };
 		OBJ_66 /* MessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTests.swift; sourceTree = "<group>"; };
@@ -2460,6 +2462,8 @@
 		OBJ_52 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83857A7D1F20533C00C42ACD /* AccountAuthenticationTests_Facebook.swift */,
+				OBJ_63 /* AccountAuthenticationTests_Google.swift */,
 				OBJ_53 /* DatabaseModelTests.swift */,
 				OBJ_54 /* DatabaseTests.swift */,
 				OBJ_55 /* DatabaseTransactionTests.swift */,
@@ -2470,7 +2474,6 @@
 				OBJ_60 /* FileControllerTests_DeleteFile.swift */,
 				OBJ_61 /* FileControllerTests_GetUploads.swift */,
 				OBJ_62 /* GeneralAuthTests.swift */,
-				OBJ_63 /* GoogleAuthenticationTests.swift */,
 				OBJ_64 /* GoogleDriveTests.swift */,
 				OBJ_65 /* KituraTest.swift */,
 				OBJ_66 /* MessageTests.swift */,
@@ -3568,12 +3571,13 @@
 				OBJ_886 /* FileControllerTests_DeleteFile.swift in Sources */,
 				OBJ_887 /* FileControllerTests_GetUploads.swift in Sources */,
 				OBJ_888 /* GeneralAuthTests.swift in Sources */,
-				OBJ_889 /* GoogleAuthenticationTests.swift in Sources */,
+				OBJ_889 /* AccountAuthenticationTests_Google.swift in Sources */,
 				OBJ_890 /* GoogleDriveTests.swift in Sources */,
 				OBJ_891 /* KituraTest.swift in Sources */,
 				OBJ_892 /* MessageTests.swift in Sources */,
 				OBJ_893 /* SepecificDatabaseTests.swift in Sources */,
 				OBJ_894 /* ServerTestCase.swift in Sources */,
+				83857A7E1F20533C00C42ACD /* AccountAuthenticationTests_Facebook.swift in Sources */,
 				OBJ_895 /* Sharing_FileManipulationTests.swift in Sources */,
 				OBJ_896 /* SharingAccountsController.swift in Sources */,
 				OBJ_897 /* SharingAccountsController_RedeemSharingInvitation.swift in Sources */,
