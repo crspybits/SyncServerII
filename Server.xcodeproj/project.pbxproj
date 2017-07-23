@@ -322,28 +322,28 @@
 		OBJ_851 /* HeliumLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_317 /* HeliumLogger.framework */; };
 		OBJ_852 /* Server.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_318 /* Server.framework */; };
 		OBJ_879 /* DatabaseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_53 /* DatabaseModelTests.swift */; };
-		OBJ_880 /* DatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* DatabaseTests.swift */; };
+		OBJ_880 /* GeneralDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* GeneralDatabaseTests.swift */; };
 		OBJ_881 /* DatabaseTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_55 /* DatabaseTransactionTests.swift */; };
 		OBJ_882 /* FailureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* FailureTests.swift */; };
 		OBJ_883 /* FileController_DoneUploadsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_57 /* FileController_DoneUploadsTests.swift */; };
 		OBJ_884 /* FileController_UploadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_58 /* FileController_UploadTests.swift */; };
 		OBJ_885 /* FileControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* FileControllerTests.swift */; };
-		OBJ_886 /* FileControllerTests_DeleteFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* FileControllerTests_DeleteFile.swift */; };
+		OBJ_886 /* FileControllerTests_UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* FileControllerTests_UploadDeletion.swift */; };
 		OBJ_887 /* FileControllerTests_GetUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_61 /* FileControllerTests_GetUploads.swift */; };
 		OBJ_888 /* GeneralAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* GeneralAuthTests.swift */; };
 		OBJ_889 /* AccountAuthenticationTests_Google.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* AccountAuthenticationTests_Google.swift */; };
 		OBJ_890 /* GoogleDriveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_64 /* GoogleDriveTests.swift */; };
 		OBJ_891 /* KituraTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* KituraTest.swift */; };
 		OBJ_892 /* MessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* MessageTests.swift */; };
-		OBJ_893 /* SepecificDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* SepecificDatabaseTests.swift */; };
+		OBJ_893 /* SpecificDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* SpecificDatabaseTests.swift */; };
 		OBJ_894 /* ServerTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_68 /* ServerTestCase.swift */; };
 		OBJ_895 /* Sharing_FileManipulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_69 /* Sharing_FileManipulationTests.swift */; };
-		OBJ_896 /* SharingAccountsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_70 /* SharingAccountsController.swift */; };
+		OBJ_896 /* SharingAccountsController_CreateSharingInvitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_70 /* SharingAccountsController_CreateSharingInvitation.swift */; };
 		OBJ_897 /* SharingAccountsController_RedeemSharingInvitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_71 /* SharingAccountsController_RedeemSharingInvitation.swift */; };
-		OBJ_898 /* SpecificDatabaseTests_SharedAccountRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* SpecificDatabaseTests_SharedAccountRepository.swift */; };
+		OBJ_898 /* SpecificDatabaseTests_SharingInvitationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* SpecificDatabaseTests_SharingInvitationRepository.swift */; };
 		OBJ_899 /* SpecificDatabaseTests_Uploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* SpecificDatabaseTests_Uploads.swift */; };
 		OBJ_900 /* SpecificDatabaseTests_UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_74 /* SpecificDatabaseTests_UserRepository.swift */; };
-		OBJ_901 /* UserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_75 /* UserController.swift */; };
+		OBJ_901 /* UserControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_75 /* UserControllerTests.swift */; };
 		OBJ_902 /* UtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_76 /* UtilsTests.swift */; };
 		OBJ_904 /* Gloss.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_298 /* Gloss.framework */; };
 		OBJ_905 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_299 /* LoggerAPI.framework */; };
@@ -1516,29 +1516,29 @@
 		OBJ_48 /* NSObject+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSObject+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_50 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_53 /* DatabaseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseModelTests.swift; sourceTree = "<group>"; };
-		OBJ_54 /* DatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseTests.swift; sourceTree = "<group>"; };
+		OBJ_54 /* GeneralDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralDatabaseTests.swift; sourceTree = "<group>"; };
 		OBJ_55 /* DatabaseTransactionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseTransactionTests.swift; sourceTree = "<group>"; };
 		OBJ_56 /* FailureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FailureTests.swift; sourceTree = "<group>"; };
 		OBJ_57 /* FileController_DoneUploadsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController_DoneUploadsTests.swift; sourceTree = "<group>"; };
 		OBJ_58 /* FileController_UploadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController_UploadTests.swift; sourceTree = "<group>"; };
 		OBJ_59 /* FileControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileControllerTests.swift; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		OBJ_60 /* FileControllerTests_DeleteFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileControllerTests_DeleteFile.swift; sourceTree = "<group>"; };
+		OBJ_60 /* FileControllerTests_UploadDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileControllerTests_UploadDeletion.swift; sourceTree = "<group>"; };
 		OBJ_61 /* FileControllerTests_GetUploads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileControllerTests_GetUploads.swift; sourceTree = "<group>"; };
 		OBJ_62 /* GeneralAuthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralAuthTests.swift; sourceTree = "<group>"; };
 		OBJ_63 /* AccountAuthenticationTests_Google.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Google.swift; sourceTree = "<group>"; };
 		OBJ_64 /* GoogleDriveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleDriveTests.swift; sourceTree = "<group>"; };
 		OBJ_65 /* KituraTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KituraTest.swift; sourceTree = "<group>"; };
 		OBJ_66 /* MessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTests.swift; sourceTree = "<group>"; };
-		OBJ_67 /* SepecificDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SepecificDatabaseTests.swift; sourceTree = "<group>"; };
+		OBJ_67 /* SpecificDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests.swift; sourceTree = "<group>"; };
 		OBJ_68 /* ServerTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerTestCase.swift; sourceTree = "<group>"; };
 		OBJ_69 /* Sharing_FileManipulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sharing_FileManipulationTests.swift; sourceTree = "<group>"; };
-		OBJ_70 /* SharingAccountsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingAccountsController.swift; sourceTree = "<group>"; };
+		OBJ_70 /* SharingAccountsController_CreateSharingInvitation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingAccountsController_CreateSharingInvitation.swift; sourceTree = "<group>"; };
 		OBJ_71 /* SharingAccountsController_RedeemSharingInvitation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingAccountsController_RedeemSharingInvitation.swift; sourceTree = "<group>"; };
-		OBJ_72 /* SpecificDatabaseTests_SharedAccountRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_SharedAccountRepository.swift; sourceTree = "<group>"; };
+		OBJ_72 /* SpecificDatabaseTests_SharingInvitationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_SharingInvitationRepository.swift; sourceTree = "<group>"; };
 		OBJ_73 /* SpecificDatabaseTests_Uploads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_Uploads.swift; sourceTree = "<group>"; };
 		OBJ_74 /* SpecificDatabaseTests_UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_UserRepository.swift; sourceTree = "<group>"; };
-		OBJ_75 /* UserController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserController.swift; sourceTree = "<group>"; };
+		OBJ_75 /* UserControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserControllerTests.swift; sourceTree = "<group>"; };
 		OBJ_76 /* UtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilsTests.swift; sourceTree = "<group>"; };
 		OBJ_77 /* Database migrations */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Database migrations"; sourceTree = SOURCE_ROOT; };
 		OBJ_78 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = SOURCE_ROOT; };
@@ -2436,7 +2436,7 @@
 			path = Sources/Main;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -2448,7 +2448,6 @@
 				OBJ_297 /* Products */,
 				838579F91F1F296600C42ACD /* Recovered References */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* Tests */ = {
@@ -2465,27 +2464,27 @@
 				83857A7D1F20533C00C42ACD /* AccountAuthenticationTests_Facebook.swift */,
 				OBJ_63 /* AccountAuthenticationTests_Google.swift */,
 				OBJ_53 /* DatabaseModelTests.swift */,
-				OBJ_54 /* DatabaseTests.swift */,
 				OBJ_55 /* DatabaseTransactionTests.swift */,
 				OBJ_56 /* FailureTests.swift */,
 				OBJ_57 /* FileController_DoneUploadsTests.swift */,
 				OBJ_58 /* FileController_UploadTests.swift */,
 				OBJ_59 /* FileControllerTests.swift */,
-				OBJ_60 /* FileControllerTests_DeleteFile.swift */,
 				OBJ_61 /* FileControllerTests_GetUploads.swift */,
+				OBJ_60 /* FileControllerTests_UploadDeletion.swift */,
 				OBJ_62 /* GeneralAuthTests.swift */,
+				OBJ_54 /* GeneralDatabaseTests.swift */,
 				OBJ_64 /* GoogleDriveTests.swift */,
 				OBJ_65 /* KituraTest.swift */,
 				OBJ_66 /* MessageTests.swift */,
-				OBJ_67 /* SepecificDatabaseTests.swift */,
 				OBJ_68 /* ServerTestCase.swift */,
 				OBJ_69 /* Sharing_FileManipulationTests.swift */,
-				OBJ_70 /* SharingAccountsController.swift */,
+				OBJ_70 /* SharingAccountsController_CreateSharingInvitation.swift */,
 				OBJ_71 /* SharingAccountsController_RedeemSharingInvitation.swift */,
-				OBJ_72 /* SpecificDatabaseTests_SharedAccountRepository.swift */,
+				OBJ_67 /* SpecificDatabaseTests.swift */,
+				OBJ_72 /* SpecificDatabaseTests_SharingInvitationRepository.swift */,
 				OBJ_73 /* SpecificDatabaseTests_Uploads.swift */,
 				OBJ_74 /* SpecificDatabaseTests_UserRepository.swift */,
-				OBJ_75 /* UserController.swift */,
+				OBJ_75 /* UserControllerTests.swift */,
 				OBJ_76 /* UtilsTests.swift */,
 			);
 			name = ServerTests;
@@ -3143,7 +3142,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_297 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -3562,29 +3561,29 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_879 /* DatabaseModelTests.swift in Sources */,
-				OBJ_880 /* DatabaseTests.swift in Sources */,
+				OBJ_880 /* GeneralDatabaseTests.swift in Sources */,
 				OBJ_881 /* DatabaseTransactionTests.swift in Sources */,
 				OBJ_882 /* FailureTests.swift in Sources */,
 				OBJ_883 /* FileController_DoneUploadsTests.swift in Sources */,
 				OBJ_884 /* FileController_UploadTests.swift in Sources */,
 				OBJ_885 /* FileControllerTests.swift in Sources */,
-				OBJ_886 /* FileControllerTests_DeleteFile.swift in Sources */,
+				OBJ_886 /* FileControllerTests_UploadDeletion.swift in Sources */,
 				OBJ_887 /* FileControllerTests_GetUploads.swift in Sources */,
 				OBJ_888 /* GeneralAuthTests.swift in Sources */,
 				OBJ_889 /* AccountAuthenticationTests_Google.swift in Sources */,
 				OBJ_890 /* GoogleDriveTests.swift in Sources */,
 				OBJ_891 /* KituraTest.swift in Sources */,
 				OBJ_892 /* MessageTests.swift in Sources */,
-				OBJ_893 /* SepecificDatabaseTests.swift in Sources */,
+				OBJ_893 /* SpecificDatabaseTests.swift in Sources */,
 				OBJ_894 /* ServerTestCase.swift in Sources */,
 				83857A7E1F20533C00C42ACD /* AccountAuthenticationTests_Facebook.swift in Sources */,
 				OBJ_895 /* Sharing_FileManipulationTests.swift in Sources */,
-				OBJ_896 /* SharingAccountsController.swift in Sources */,
+				OBJ_896 /* SharingAccountsController_CreateSharingInvitation.swift in Sources */,
 				OBJ_897 /* SharingAccountsController_RedeemSharingInvitation.swift in Sources */,
-				OBJ_898 /* SpecificDatabaseTests_SharedAccountRepository.swift in Sources */,
+				OBJ_898 /* SpecificDatabaseTests_SharingInvitationRepository.swift in Sources */,
 				OBJ_899 /* SpecificDatabaseTests_Uploads.swift in Sources */,
 				OBJ_900 /* SpecificDatabaseTests_UserRepository.swift in Sources */,
-				OBJ_901 /* UserController.swift in Sources */,
+				OBJ_901 /* UserControllerTests.swift in Sources */,
 				OBJ_902 /* UtilsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

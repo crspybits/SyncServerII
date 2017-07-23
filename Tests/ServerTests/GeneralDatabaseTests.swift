@@ -1,5 +1,5 @@
 //
-//  DatabaseTests.swift
+//  GeneralDatabaseTests.swift
 //  Server
 //
 //  Created by Christopher Prince on 12/6/16.

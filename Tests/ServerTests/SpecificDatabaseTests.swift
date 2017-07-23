@@ -1,5 +1,5 @@
 //
-//  SepecificDatabaseTests.swift
+//  SpecificDatabaseTests.swift
 //  Server
 //
 //  Created by Christopher Prince on 12/18/16.
