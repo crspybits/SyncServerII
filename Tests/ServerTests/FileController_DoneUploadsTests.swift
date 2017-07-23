@@ -12,7 +12,7 @@ import LoggerAPI
 import Foundation
 import PerfectLib
 
-class FileController_DoneUploadsTests: ServerTestCase {
+class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -72,5 +72,9 @@ extension FileController_DoneUploadsTests {
             ("testDoneUploadsThatUpdatesFileVersion", testDoneUploadsThatUpdatesFileVersion),
             ("testDoneUploadsTwiceDoesNothingSecondTime", testDoneUploadsTwiceDoesNothingSecondTime)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:FileController_DoneUploadsTests.self)
     }
 }

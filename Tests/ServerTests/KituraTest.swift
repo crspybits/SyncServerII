@@ -1,3 +1,5 @@
+// Modified from:
+
 /**
  * Copyright IBM Corporation 2016
  *
@@ -37,41 +39,46 @@ case body
 case header
 }
 
-enum CredentialsToken : String {
-case googleRefreshToken1 = "GoogleRefreshToken"
-case googleSub1 = "GoogleSub"
-
-case googleRefreshToken2 = "GoogleRefreshToken2"
-case googleSub2 = "GoogleSub2"
-
-case googleRefreshToken3 = "GoogleRefreshToken3"
-case googleSub3 = "GoogleSub3"
-
-case facebook = "FacebookLongLivedToken"
-}
-
-// TODO: *0* Why do I have to have both Server.json and ServerTests.json for testing??
-
-extension KituraTest {
+struct TestAccount {
+    // These String's are keys into a .json file.
+    let tokenKey:String // key values: Google: a refresh token; Facebook:long-lived access token.
+    let idKey:String
+    
+    let type:AccountType
+    
+    static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google)
+    static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google)
+    static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google)
+    
+    static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", type: .Facebook)
+    
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
-    func credentialsToken(token:CredentialsToken = .googleRefreshToken1) -> String {
+    private func configValue(key:String) -> String {
 #if os(macOS)
         let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "Server.json", forConfigType: .jsonDictionary)
 #else // Linux
         let config = try! ConfigLoader(usingPath: "../Private/Server", andFileName: "Server.json", forConfigType: .jsonDictionary)
 #endif
-        let token = try! config.getString(varName: token.rawValue)
+        let token = try! config.getString(varName: key)
         return token
     }
     
-    func performServerTest(token:CredentialsToken = .googleRefreshToken1,
-        asyncTasks: @escaping (XCTestExpectation, GoogleCreds) -> Void...) {
+    func token() -> String {
+        return configValue(key: tokenKey)
+    }
+    
+    func id() -> String {
+        return configValue(key: idKey)
+    }
+}
+
+// TODO: *0* Why do I have to have both Server.json and ServerTests.json for testing??
+
+extension KituraTest {
+    func performServerTest(testAccount:TestAccount = .google1,
+        asyncTasks: @escaping (XCTestExpectation, Account) -> Void...) {
         
-        let creds = GoogleCreds()
-        creds.refreshToken = self.credentialsToken(token:token)
-        creds.refresh { error in
-            XCTAssert(error == nil)
-            
+        func runTest(usingCreds creds:Account) {
             ServerMain.startup(type: .nonBlocking)
             
             let requestQueue = DispatchQueue(label: "Request queue")
@@ -88,6 +95,24 @@ extension KituraTest {
                 ServerMain.shutdown()
                 XCTAssertNil(error)
             }
+        }
+        
+        switch testAccount.type {
+        case .Google:
+            let creds = GoogleCreds()
+            creds.refreshToken = testAccount.token()
+            creds.refresh { error in
+                XCTAssert(error == nil)
+                runTest(usingCreds: creds)
+            }
+            
+        case .Facebook:
+            let creds = FacebookCreds()
+            creds.accessToken = testAccount.token()
+            runTest(usingCreds: creds)
+            
+        default:
+            XCTAssert(false)
         }
     }
     
@@ -173,10 +198,10 @@ extension KituraTest {
         return jsonDict
     }
     
-    func setupHeaders(accessToken: String, deviceUUID:String) -> [String: String] {
+    func setupHeaders(tokenType: ServerConstants.AuthTokenType = ServerConstants.AuthTokenType.GoogleToken, accessToken: String, deviceUUID:String) -> [String: String] {
         var headers = [String: String]()
         
-        headers[ServerConstants.XTokenTypeKey] = ServerConstants.AuthTokenType.GoogleToken.rawValue
+        headers[ServerConstants.XTokenTypeKey] = tokenType.rawValue
         headers[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
         
         headers[ServerConstants.httpRequestDeviceUUID] = deviceUUID

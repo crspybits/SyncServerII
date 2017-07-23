@@ -12,7 +12,7 @@ import LoggerAPI
 import Foundation
 import PerfectLib
 
-class FileControllerTests_GetUploads: ServerTestCase {
+class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -96,5 +96,9 @@ extension FileControllerTests_GetUploads {
             ("testForTwoUploads", testForTwoUploads),
             ("testForNoUploadsAfterDoneUploads", testForNoUploadsAfterDoneUploads)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:FileControllerTests_GetUploads.self)
     }
 }

@@ -33,6 +33,9 @@ protocol Account {
     
     var accountCreationUser:AccountCreationUser? {get set}
     
+    // Currently assuming all Account's use access tokens.
+    var accessToken: String! {get set}
+    
     // What sign in type(s) does this account allow?
     var signInType:SignInType {get}
     

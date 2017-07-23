@@ -15,7 +15,7 @@ import CredentialsGoogle
 import PerfectLib
 import Foundation
 
-class SpecificDatabaseTests_UserRepository: ServerTestCase {
+class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -172,5 +172,9 @@ extension SpecificDatabaseTests_UserRepository {
             ("testUserLookup1b", testUserLookup1b),
             ("testUserLookup2", testUserLookup2)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests_UserRepository.self)
     }
 }

@@ -16,7 +16,7 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class SpecificDatabaseTests: ServerTestCase {
+class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -349,5 +349,9 @@ extension SpecificDatabaseTests {
             ("testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax", testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax),
             ("testLookupFromDeviceUUID", testLookupFromDeviceUUID)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests.self)
     }
 }

@@ -13,7 +13,7 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class Sharing_FileManipulationTests: ServerTestCase {
+class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -29,7 +29,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
         let deviceUUID1 = PerfectLib.UUID().string
         
         // Create a user identified by googleRefreshToken1
-        addNewUser(token: .googleRefreshToken1, deviceUUID:deviceUUID1)
+        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
         
         var sharingInvitationUUID:String!
         
@@ -40,16 +40,16 @@ class Sharing_FileManipulationTests: ServerTestCase {
         }
         
         // Redeem that sharing invitation with a new user: googleRefreshToken2
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: .google2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
         
         let deviceUUID2 = PerfectLib.UUID().string
         
         // Attempting to upload a file by our sharing user
-        let (request, fileSize) = uploadTextFile(token: .googleRefreshToken2, deviceUUID:deviceUUID2, addUser:false, errorExpected: failureExpected)
+        let (request, fileSize) = uploadTextFile(testAccount: .google2, deviceUUID:deviceUUID2, addUser:false, errorExpected: failureExpected)
         
-        sendDoneUploads(token: .googleRefreshToken2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, failureExpected: failureExpected)
+        sendDoneUploads(testAccount: .google2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, failureExpected: failureExpected)
         
         return (request, fileSize)
     }
@@ -58,11 +58,11 @@ class Sharing_FileManipulationTests: ServerTestCase {
         let deviceUUID1 = PerfectLib.UUID().string
         
         // Create a user identified by googleRefreshToken1
-        addNewUser(token: .googleRefreshToken1, deviceUUID:deviceUUID1)
+        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
         
         // And upload a file by that user.
-        let (uploadRequest, _) = uploadTextFile(token: .googleRefreshToken1, deviceUUID:deviceUUID1, addUser:false)
-        sendDoneUploads(token: .googleRefreshToken1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        let (uploadRequest, _) = uploadTextFile(testAccount: .google1, deviceUUID:deviceUUID1, addUser:false)
+        sendDoneUploads(testAccount: .google1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
         var sharingInvitationUUID:String!
         
@@ -73,7 +73,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
         }
         
         // Redeem that sharing invitation with a new user: googleRefreshToken2
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: .google2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
         
@@ -85,19 +85,19 @@ class Sharing_FileManipulationTests: ServerTestCase {
             UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + 1
         ])!
         
-        uploadDeletion(token: .googleRefreshToken2, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false, expectError: failureExpected)
-        sendDoneUploads(token: .googleRefreshToken2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest.masterVersion + 1, failureExpected:failureExpected)
+        uploadDeletion(testAccount: .google2, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false, expectError: failureExpected)
+        sendDoneUploads(testAccount: .google2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest.masterVersion + 1, failureExpected:failureExpected)
     }
     
     func downloadFileBySharingUser(withPermission sharingPermission:SharingPermission, failureExpected:Bool = false) {
         let deviceUUID1 = PerfectLib.UUID().string
         
         // Create a user identified by googleRefreshToken1
-        addNewUser(token: .googleRefreshToken1, deviceUUID:deviceUUID1)
+        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
         
         // And upload a file by that user.
-        let (uploadRequest, fileSize) = uploadTextFile(token: .googleRefreshToken1, deviceUUID:deviceUUID1, addUser:false)
-        sendDoneUploads(token: .googleRefreshToken1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        let (uploadRequest, fileSize) = uploadTextFile(testAccount: .google1, deviceUUID:deviceUUID1, addUser:false)
+        sendDoneUploads(testAccount: .google1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
         var sharingInvitationUUID:String!
         
@@ -107,13 +107,12 @@ class Sharing_FileManipulationTests: ServerTestCase {
             expectation.fulfill()
         }
         
-        // Redeem that sharing invitation with a new user: googleRefreshToken2
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: .google2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
         
         // Now see if we can download the file with the sharing user creds.
-        downloadTextFile(token: .googleRefreshToken2, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:failureExpected)
+        downloadTextFile(testAccount: .google2, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:failureExpected)
     }
     
     func downloadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, failureExpected:Bool = false) {
@@ -121,11 +120,11 @@ class Sharing_FileManipulationTests: ServerTestCase {
         let deviceUUID1 = PerfectLib.UUID().string
         
         // Create a user identified by googleRefreshToken1
-        addNewUser(token: .googleRefreshToken1, deviceUUID:deviceUUID1)
+        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
         
         // And upload a file by that user.
-        let (uploadRequest, _) = uploadTextFile(token: .googleRefreshToken1, deviceUUID:deviceUUID1, addUser:false)
-        sendDoneUploads(token: .googleRefreshToken1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        let (uploadRequest, _) = uploadTextFile(testAccount: .google1, deviceUUID:deviceUUID1, addUser:false)
+        sendDoneUploads(testAccount: .google1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
@@ -145,7 +144,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
         }
         
         // Redeem that sharing invitation with a new user: googleRefreshToken2
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: .google2, sharingInvitationUUID:sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
     
@@ -153,7 +152,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
         
         let deviceUUID2 = PerfectLib.UUID().string
 
-        self.performServerTest(token: .googleRefreshToken2) { expectation, googleCreds in
+        self.performServerTest(testAccount: .google2) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID2)
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
@@ -230,7 +229,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
     func testThatOwningUserCanDownloadSharingUserFile() {
         let (uploadRequest, fileSize) = uploadFileBySharingUser(withPermission: .write)
 
-        downloadTextFile(token: .googleRefreshToken1, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
+        downloadTextFile(testAccount: .google1, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
     }
     
     func testThatSharingUserCanDownloadSharingUserFile() {
@@ -244,11 +243,11 @@ class Sharing_FileManipulationTests: ServerTestCase {
         }
         
         // Redeem that sharing invitation with a new user
-        redeemSharingInvitation(token: .googleRefreshToken3, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: .google3, sharingInvitationUUID:sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
         
-        downloadTextFile(token: .googleRefreshToken3, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
+        downloadTextFile(testAccount: .google3, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
     }
 }
 
@@ -270,6 +269,10 @@ extension Sharing_FileManipulationTests {
             ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
             ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:Sharing_FileManipulationTests.self)
     }
 }
 

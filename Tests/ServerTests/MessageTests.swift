@@ -12,7 +12,7 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class MessageTests: ServerTestCase {
+class MessageTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -188,19 +188,8 @@ extension MessageTests {
         ]
     }
 
-    // Modified from https://oleb.net/blog/2017/03/keeping-xctest-in-sync/
     func testLinuxTestSuiteIncludesAllTests() {
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-            let thisClass = type(of: self)
-            
-            // Adding 1 to linuxCount because it doesn't have *this* test.
-            let linuxCount = thisClass.allTests.count + 1
-            
-            let darwinCount = Int(thisClass
-                .defaultTestSuite().testCaseCount)
-            XCTAssertEqual(linuxCount, darwinCount,
-                "\(darwinCount - linuxCount) test(s) are missing from allTests")
-        #endif
+        linuxTestSuiteIncludesAllTests(testType:MessageTests.self)
     }
 }
 

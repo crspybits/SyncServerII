@@ -12,7 +12,7 @@ import LoggerAPI
 import Foundation
 import PerfectLib
 
-class FileControllerTests: ServerTestCase {
+class FileControllerTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -123,6 +123,10 @@ extension FileControllerTests {
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:FileControllerTests.self)
     }
 }
 

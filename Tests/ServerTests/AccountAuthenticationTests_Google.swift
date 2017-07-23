@@ -8,14 +8,14 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class AccountAuthenticationTests_Google: ServerTestCase {    
+class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     let serverResponseTime:TimeInterval = 10
 
     func testGoodEndpointWithBadCredsFails() {
         let deviceUUID = PerfectLib.UUID().string
         performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: "foobar", deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
+            self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode.rawValue)")
                 XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
                 expectation.fulfill()
@@ -23,7 +23,6 @@ class AccountAuthenticationTests_Google: ServerTestCase {
         }
     }
 
-#if DEBUG
     // Good Google creds, not creds that are necessarily on the server.
     func testGoodEndpointWithGoodCredsWorks() {
         let deviceUUID = PerfectLib.UUID().string
@@ -37,7 +36,6 @@ class AccountAuthenticationTests_Google: ServerTestCase {
             }
         }
     }
-#endif
     
     func testBadPathWithGoodCredsFails() {
         let badRoute = ServerEndpoint("foobar", method: .post)
@@ -68,7 +66,7 @@ class AccountAuthenticationTests_Google: ServerTestCase {
     
     func testRefreshGoogleAccessTokenWorks() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.credentialsToken()
+        creds.refreshToken = TestAccount.google1.token()
         
         let exp = expectation(description: "\(#function)\(#line)")
 
@@ -96,5 +94,9 @@ extension AccountAuthenticationTests_Google {
 #endif
 
         return result
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Google.self)
     }
 }

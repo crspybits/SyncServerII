@@ -245,7 +245,7 @@ class GoogleCreds : AccountAPICall, Account {
     func refresh(completion:@escaping (Swift.Error?)->()) {
         // See "Using a refresh token" at https://developers.google.com/identity/protocols/OAuth2WebServer
 
-        // TODO: *0* Sometimes we've been ending up in a situation where we don't have a refresh token. The database somehow doesn't get the refresh token saveed in certain situations. What are those situations?
+        // TODO: *0* Sometimes we've been ending up in a situation where we don't have a refresh token. The database somehow doesn't get the refresh token saved in certain situations. What are those situations?
         guard self.refreshToken != nil else {
             completion(RefreshError.noRefreshToken)
             return

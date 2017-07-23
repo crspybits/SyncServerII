@@ -163,7 +163,7 @@ class model2 : Model {
     }
 }
 
-class GeneralDatabaseTests: ServerTestCase {
+class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     let c1Value = "a"
     let c2Value = "bc"
     let c3Value = "def"
@@ -389,18 +389,7 @@ extension GeneralDatabaseTests {
         ]
     }
     
-    // Modified from https://oleb.net/blog/2017/03/keeping-xctest-in-sync/
     func testLinuxTestSuiteIncludesAllTests() {
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-            let thisClass = type(of: self)
-            
-            // Adding 1 to linuxCount because it doesn't have *this* test.
-            let linuxCount = thisClass.allTests.count + 1
-            
-            let darwinCount = Int(thisClass
-                .defaultTestSuite().testCaseCount)
-            XCTAssertEqual(linuxCount, darwinCount,
-                "\(darwinCount - linuxCount) test(s) are missing from allTests")
-        #endif
+        linuxTestSuiteIncludesAllTests(testType:GeneralDatabaseTests.self)
     }
 }

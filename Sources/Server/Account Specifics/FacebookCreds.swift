@@ -13,9 +13,6 @@ import LoggerAPI
 import KituraNet
 
 class FacebookCreds : AccountAPICall,  Account {
-    // The following keys are for conversion <-> JSON (e.g., to store this into a database).
-    
-    static let accessTokenKey = "accessToken"
     var accessToken: String!
     
     static var accountType:AccountType {
@@ -35,9 +32,9 @@ class FacebookCreds : AccountAPICall,  Account {
         baseURL = "graph.facebook.com"
     }
     
+    // There is no need to put any tokens into the database for Facebook. We don't need to access Facebook creds when the mobile user is offline, and this would just make an extra security issue.
     func toJSON() -> String? {
-        var jsonDict = [String:String]()
-        jsonDict[FacebookCreds.accessTokenKey] = self.accessToken
+        let jsonDict = [String:String]()
         return JSONExtras.toJSONString(dict: jsonDict)
     }
     
@@ -57,7 +54,7 @@ class FacebookCreds : AccountAPICall,  Account {
         let fbAppId = Constants.session.facebookClientId!
         let fbAppSecret = Constants.session.facebookClientSecret!
         
-        let urlParameters = "grant_type=fb_exchange_token&client_id=\(fbAppId)&client_secret=\(fbAppSecret)&fb_exchange_token=\(accessToken)"
+        let urlParameters = "grant_type=fb_exchange_token&client_id=\(fbAppId)&client_secret=\(fbAppSecret)&fb_exchange_token=\(accessToken!)"
 
         /*
         GET /oauth/access_token?
@@ -109,20 +106,10 @@ class FacebookCreds : AccountAPICall,  Account {
     }
     
     static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
-        guard let jsonDict = json.toJSONDictionary() as? [String:String] else {
-            Log.error("Could not convert string to JSON [String:String]: \(json)")
-            return nil
-        }
         
         let creds = FacebookCreds()
         creds.accountCreationUser = user
         creds.delegate = delegate
-        creds.accessToken = jsonDict[FacebookCreds.accessTokenKey]
-        
-        if creds.accessToken == nil {
-            Log.error("No access token in JSON creds!")
-            return nil
-        }
         
         return creds
     }

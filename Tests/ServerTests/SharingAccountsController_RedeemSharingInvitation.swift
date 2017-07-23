@@ -13,7 +13,7 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
+class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -34,14 +34,14 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
     }*/
     
     func testThatRedeemingWithAnotherGoogleAccountWorks() {
-        createSharingUser()
+        createSharingUser(sharingUser: .google2)
     }
     
     func testThatRedeemingASharingInvitationWithoutGivingTheInvitationUUIDFails() {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
         
-        redeemSharingInvitation(token: .googleRefreshToken2, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .google2, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
@@ -57,7 +57,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(token: .googleRefreshToken1, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .google1, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
@@ -74,9 +74,9 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
         }
         
         let deviceUUID2 = PerfectLib.UUID().string
-        addNewUser(token:.googleRefreshToken3, deviceUUID:deviceUUID2)
+        addNewUser(testAccount: .google3, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(token: .googleRefreshToken3, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .google3, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
@@ -92,12 +92,12 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID: sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: .google2, sharingInvitationUUID: sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
 
         // Check to make sure we have a new user:
-        let googleSub2 = credentialsToken(token: .googleSub2)
+        let googleSub2 = TestAccount.google2.id()
         let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: .Google, credsId: googleSub2)
         let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
         guard case .found(_) = userResults else {
@@ -119,18 +119,18 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
         }
         
         // Since the user account represented by googleRefreshToken2 has already been used to create a sharing account, this redeem attempt will fail.
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { expectation in
+        redeemSharingInvitation(sharingUser: .google2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { expectation in
             expectation.fulfill()
         }
     }
     
     func testThatCheckingCredsOnASharingUserGivesSharingPermission() {
         let perm:SharingPermission = .write
-        createSharingUser(withSharingPermission: perm)
+        createSharingUser(withSharingPermission: perm, sharingUser: .google2)
         
         let deviceUUID = PerfectLib.UUID().string
 
-        performServerTest(token:.googleRefreshToken2) { expectation, googleCreds in
+        performServerTest(testAccount: .google2) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
@@ -151,7 +151,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
         
-        performServerTest(token: .googleRefreshToken1) { expectation, googleCreds in
+        performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
@@ -180,5 +180,10 @@ extension SharingAccountsController_RedeemSharingInvitation {
             ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
             ("testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission", testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:
+            SharingAccountsController_RedeemSharingInvitation.self)
     }
 }

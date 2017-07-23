@@ -13,7 +13,7 @@ import XCTest
 import Foundation
 import SyncServerShared
 
-class GeneralAuthTests: ServerTestCase {
+class GeneralAuthTests: ServerTestCase, LinuxTestable {
 
     func testBadEndpointFails() {
         performServerTest { expectation, googleCreds in
@@ -42,5 +42,9 @@ extension GeneralAuthTests {
             ("testBadEndpointFails", testBadEndpointFails),
             ("testGoodEndpointWithNoCredsRequiredWorks", testGoodEndpointWithNoCredsRequiredWorks)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:GeneralAuthTests.self)
     }
 }

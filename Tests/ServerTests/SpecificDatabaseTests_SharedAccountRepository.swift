@@ -13,7 +13,7 @@ import Foundation
 import Dispatch
 import SyncServerShared
 
-class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase {
+class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -170,5 +170,9 @@ extension SpecificDatabaseTests_SharingInvitationRepository {
             ("testAttemptToRemoveStaleInvitationsThatAreNotStale", testAttemptToRemoveStaleInvitationsThatAreNotStale),
             ("testRemoveStaleSharingInvitations", testRemoveStaleSharingInvitations)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests_SharingInvitationRepository.self)
     }
 }

@@ -13,7 +13,7 @@ import XCTest
 import Foundation
 import SyncServerShared
 
-class FailureTests: ServerTestCase {
+class FailureTests: ServerTestCase, LinuxTestable {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -40,5 +40,9 @@ class FailureTests: ServerTestCase {
 extension FailureTests {
     static var allTests : [(String, (FailureTests) -> () throws -> Void)] {
         return [("testThatHealthCheckFailsWhenRequested", testThatHealthCheckFailsWhenRequested)]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:FailureTests.self)
     }
 }
