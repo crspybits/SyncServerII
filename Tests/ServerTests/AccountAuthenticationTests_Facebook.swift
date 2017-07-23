@@ -75,6 +75,21 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
             }
         }
     }
+    
+    func testThatFacebookUserHasValidCreds() {
+        createSharingUser(withSharingPermission: .read, sharingUser: .facebook1)
+        
+        let deviceUUID = PerfectLib.UUID().string
+        
+        self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
+            let headers = self.setupHeaders(tokenType: ServerConstants.AuthTokenType.FacebookToken, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
+            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
+                expectation.fulfill()
+            }
+        }
+    }
 }
 
 extension AccountAuthenticationTests_Facebook {
@@ -84,6 +99,7 @@ extension AccountAuthenticationTests_Facebook {
             ("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks),
             ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
             ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
+            ("testThatFacebookUserHasValidCreds", testThatFacebookUserHasValidCreds),
         ]
         
         return result

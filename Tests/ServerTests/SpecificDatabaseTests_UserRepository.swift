@@ -19,6 +19,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
+        AccountManager.session.reset()
     }
     
     func addOwningUsers() {
@@ -73,11 +74,18 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         XCTAssert(result1 == nil, "Good id!!")
     }
     
-    func addSharingUser() {
+    func addSharingUser(accountType:AccountType = .Google) {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
-        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.accountType = accountType
+        
+        switch (accountType) {
+        case .Google:
+            user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        case .Facebook:
+            user1.creds = "{}"
+        }
+        
         user1.credsId = "100"
         user1.userType = .sharing
         user1.sharingPermission = .write
@@ -87,8 +95,12 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         XCTAssert(result1 == 1, "Bad credentialsId!")
     }
     
-    func testAddSharingUser() {
+    func testAddSharingGoogleUser() {
         addSharingUser()
+    }
+    
+    func testAddSharingFacebookUser() {
+        addSharingUser(accountType: .Facebook)
     }
     
     func testUserLookup1() {
@@ -167,7 +179,10 @@ extension SpecificDatabaseTests_UserRepository {
             ("testAddOwningUser", testAddOwningUser),
             ("testAddOwningUserFailsIfYouGiveAnOwningUserId", testAddOwningUserFailsIfYouGiveAnOwningUserId),
             ("testAddOwningUserFailsIfYouGivePermissions", testAddOwningUserFailsIfYouGivePermissions),
-            ("testAddSharingUser", testAddSharingUser),
+            
+            ("testAddSharingGoogleUser", testAddSharingGoogleUser),
+            ("testAddSharingFacebookUser", testAddSharingFacebookUser),
+                        
             ("testUserLookup1", testUserLookup1),
             ("testUserLookup1b", testUserLookup1b),
             ("testUserLookup2", testUserLookup2)

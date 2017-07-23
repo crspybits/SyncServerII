@@ -122,8 +122,9 @@ class ServerTestCase : XCTestCase {
     
     func runUploadTest(testAccount:TestAccount = .google1, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
         
-        self.performServerTest(testAccount:testAccount) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let tokenType = testAccount.type.toAuthTokenType()
+            let headers = self.setupHeaders(tokenType:tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
             XCTAssert(ServerEndpoints.uploadFile.method == .post)
@@ -209,8 +210,9 @@ class ServerTestCase : XCTestCase {
     
     func sendDoneUploads(testAccount:TestAccount = .google1, expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
         
-        self.performServerTest(testAccount:testAccount) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let tokenType = testAccount.type.toAuthTokenType()
+            let headers = self.setupHeaders(tokenType:tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
                 DoneUploadsRequest.masterVersionKey : "\(masterVersion)"
@@ -361,8 +363,8 @@ class ServerTestCase : XCTestCase {
 
     func createSharingInvitation(testAccount: TestAccount = .google1, permission: SharingPermission? = nil, deviceUUID:String = PerfectLib.UUID().string, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
-        self.performServerTest(testAccount: testAccount) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount: testAccount) { expectation, testCreds in
+            let headers = self.setupHeaders(tokenType: testAccount.type.toAuthTokenType(), accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             var request:CreateSharingInvitationRequest!
             if permission == nil {
@@ -466,8 +468,9 @@ class ServerTestCase : XCTestCase {
             self.addNewUser(deviceUUID:deviceUUID)
         }
 
-        self.performServerTest(testAccount:testAccount) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let tokenType = testAccount.type.toAuthTokenType()
+            let headers = self.setupHeaders(tokenType:tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.uploadDeletion, headers: headers, urlParameters: "?" + uploadDeletionRequest.urlParameters()!) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -512,8 +515,9 @@ class ServerTestCase : XCTestCase {
             actualFileSize = fileSize
         }
         
-        self.performServerTest(testAccount:testAccount) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let tokenType = testAccount.type.toAuthTokenType()
+            let headers = self.setupHeaders(tokenType: tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let downloadFileRequest = DownloadFileRequest(json: [
                 DownloadFileRequest.fileUUIDKey: actualUploadFileRequest!.fileUUID,

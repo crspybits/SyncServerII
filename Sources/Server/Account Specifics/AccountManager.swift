@@ -21,7 +21,7 @@ class AccountManager {
         accountTypes.removeAll()
     }
     
-    // I'm allowing these to be added dynamically to enable the user of the server to disallow  certain types of account credentials.
+    // I'm allowing these to be added dynamically to enable the user of the server to disallow certain types of account credentials.
     func addAccountType(_ newAccountType:Account.Type) {
         for accountType in accountTypes {
             // Don't add the same account type twice!
