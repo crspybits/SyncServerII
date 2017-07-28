@@ -93,6 +93,7 @@ class SharingInvitationRepository : Repository {
 
             // The inited user is being invited to share data owned by the following (owning) user.
             // This is a reference into the User table.
+            // TODO: *2* Make this a foreign key reference to the User table.
             "owningUserId BIGINT NOT NULL, " +
             
             "sharingPermission VARCHAR(\(spMaxLen)) NOT NULL, " +

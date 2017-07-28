@@ -340,6 +340,7 @@ class RequestHandler : AccountDelegate {
         
         if currentSignedInUser != nil {
             let effectiveOwningUserKey = UserRepository.LookupKey.userId(currentSignedInUser!.effectiveOwningUserId)
+            Log.debug("currentSignedInUser!.effectiveOwningUserId: \(currentSignedInUser!.effectiveOwningUserId)")
             let userResults = UserRepository(db).lookup(key: effectiveOwningUserKey, modelInit: User.init)
             guard case .found(let model) = userResults,
                 let effectiveOwningUser = model as? User else {

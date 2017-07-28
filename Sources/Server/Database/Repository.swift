@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import PerfectLib
+import LoggerAPI
 
 protocol Repository {
     associatedtype LOOKUPKEY
@@ -55,13 +55,13 @@ extension Repository {
             else {
                 initialMessage = "Successfully removed \(numberRows) row(s)"
             }
-            Log.info(message: "\(initialMessage) from \(tableName): \(key)")
+            Log.info("\(initialMessage) from \(tableName): \(key)")
             
             return .removed(numberRows:Int32(numberRows))
         }
         else {
             let error = db.error
-            Log.error(message: "Could not remove rows from \(tableName): \(error)")
+            Log.error("Could not remove rows from \(tableName): \(error)")
             return .error("\(error)")
         }
     }
@@ -72,6 +72,7 @@ extension Repository {
         
         switch select.numberResultRows() {
         case 0:
+            Log.debug("No object found!")
             return .noObjectFound
             
         case 1:
@@ -82,15 +83,16 @@ extension Repository {
             
             if select.forEachRowStatus != nil {
                 let error = "Error: \(select.forEachRowStatus!) in Select forEachRow"
-                Log.error(message: error)
+                Log.error(error)
                 return .error(error)
             }
             
+            Log.debug("Found result!")
             return .found(result)
 
         default:
             let error = "Error: \(select.numberResultRows()) in Select result: More than one object found!"
-            Log.error(message: error)
+            Log.error(error)
             return .error(error)
         }
     }

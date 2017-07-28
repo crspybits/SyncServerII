@@ -142,12 +142,14 @@ class UserRepository : Repository {
             "userType VARCHAR(\(UserType.maxStringLength())) NOT NULL, " +
     
             // If non-NULL, references a user in the User table.
+            // TODO: *2* Make this a foreign key reference to this same table.
             "owningUserId BIGINT, " +
             
             "sharingPermission VARCHAR(\(SharingPermission.maxStringLength())), " +
         
             "accountType VARCHAR(\(accountTypeMaxLength)) NOT NULL, " +
             
+            // An id specific to the particular type of credentials, e.g., Google.
             "credsId VARCHAR(\(credsIdMaxLength)) NOT NULL, " +
         
             // Stored as JSON
