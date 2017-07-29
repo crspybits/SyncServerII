@@ -91,7 +91,7 @@ class SharingInvitationRepository : Repository {
             // gives time/day that the invitation will expire
             "expiry \(dateFormat.rawValue) NOT NULL, " +
 
-            // The inited user is being invited to share data owned by the following (owning) user.
+            // The invited user is being invited to share data owned by the following (owning) user.
             // This is a reference into the User table.
             // TODO: *2* Make this a foreign key reference to the User table.
             "owningUserId BIGINT NOT NULL, " +
