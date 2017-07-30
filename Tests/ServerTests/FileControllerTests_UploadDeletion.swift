@@ -9,11 +9,11 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
 import SyncServerShared
+import PerfectLib
 
-class FileControllerTests_UploadDeletion: ServerTestCase {
+class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -218,8 +218,10 @@ class FileControllerTests_UploadDeletion: ServerTestCase {
         
         self.getFileIndex(expectedFiles: [], masterVersionExpected: uploadRequest1.masterVersion + 1, expectedFileSizes: [:], expectedDeletionState:[:])
         
-        self.performServerTest { expectation, googleCreds in
+        self.performServerTest { expectation, creds in
             let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID)
+            
+            let googleCreds = creds as! GoogleCreds
             
             googleCreds.searchFor(cloudFileName: cloudFileName, inCloudFolder: uploadRequest1.cloudFolderName, fileMimeType: uploadRequest1.mimeType) { (cloudFileId, error) in
                 XCTAssert(error != nil)
@@ -281,5 +283,9 @@ extension FileControllerTests_UploadDeletion {
             ("testThatDebugDeletionFromServerWorks", testThatDebugDeletionFromServerWorks),
             ("testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes", testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:FileControllerTests_UploadDeletion.self)
     }
 }

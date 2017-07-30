@@ -13,7 +13,7 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class UserControllerTests: ServerTestCase {
+class UserControllerTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()        
@@ -126,6 +126,10 @@ extension UserControllerTests {
             ("testRemoveUserFailsWithNonExistingUser", testRemoveUserFailsWithNonExistingUser),
             ("testRemoveUserSucceedsWithExistingUser", testRemoveUserSucceedsWithExistingUser)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType: UserControllerTests.self)
     }
 }
 

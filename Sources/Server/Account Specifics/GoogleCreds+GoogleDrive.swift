@@ -1,16 +1,17 @@
 //
-//  Google.swift
+//  GoogleCreds.swift
 //  Server
 //
 //  Created by Christopher Prince on 12/22/16.
 //
 //
 
-import PerfectLib
+import LoggerAPI
 import KituraNet
 import SwiftyJSON
 import Foundation
 import SyncServerShared
+import PerfectLib
 
 // TODO: *5* MD5 checksums can be obtained from Google Drive: http://stackoverflow.com/questions/23462168/google-drive-md5-checksum-for-files 
 // At least for Google Drive this ought to enable us to deal with issues of users modifying files and messing us up. i.e., we should drop the byte count support we have and go with a checksum validation.
@@ -194,7 +195,7 @@ extension GoogleCreds {
             "mimeType" : "\(folderMimeType)"
         ]
         
-        guard let jsonString = dictionaryToJSONString(dict: bodyDict) else {
+        guard let jsonString = JSONExtras.toJSONString(dict: bodyDict) else {
             completion(nil, CreateFolderError.couldNotConvertJSONToString)
             return
         }
@@ -280,7 +281,7 @@ extension GoogleCreds {
         
         self.googleAPICall(method: "PATCH", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders, body: jsonString) { (json, error) in
             if error != nil {
-                Log.error(message: "\(error)")
+                Log.error("\(error)")
             }
             completion(error)
         }
@@ -342,7 +343,7 @@ extension GoogleCreds {
                     }
                 }
                 else {
-                    Log.error(message: "Error in searchFor: \(String(describing: error))")
+                    Log.error("Error in searchFor: \(String(describing: error))")
                     completion(nil, error)
                 }
             }
@@ -386,7 +387,7 @@ extension GoogleCreds {
 
             if statusCode != HTTPStatusCode.OK {
                 // Error case
-                Log.error(message: "Error in completeSmallFileUpload: statusCode=\(String(describing: statusCode))")
+                Log.error("Error in completeSmallFileUpload: statusCode=\(String(describing: statusCode))")
                 resultError = UploadError.badStatusCode(statusCode)
                 completion(nil, resultError)
             }
@@ -405,7 +406,7 @@ extension GoogleCreds {
                         }
                     }
                     else {
-                        Log.error(message: "Error in completeSmallFileUpload.searchFor: statusCode=\(String(describing: error))")
+                        Log.error("Error in completeSmallFileUpload.searchFor: statusCode=\(String(describing: error))")
                         completion(nil, error)
                     }
                 }

@@ -8,14 +8,14 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class GoogleAuthenticationTests: ServerTestCase {    
+class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     let serverResponseTime:TimeInterval = 10
 
     func testGoodEndpointWithBadCredsFails() {
         let deviceUUID = PerfectLib.UUID().string
         performServerTest { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: "foobar", deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
+            self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode.rawValue)")
                 XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
                 expectation.fulfill()
@@ -23,7 +23,6 @@ class GoogleAuthenticationTests: ServerTestCase {
         }
     }
 
-#if DEBUG
     // Good Google creds, not creds that are necessarily on the server.
     func testGoodEndpointWithGoodCredsWorks() {
         let deviceUUID = PerfectLib.UUID().string
@@ -37,7 +36,6 @@ class GoogleAuthenticationTests: ServerTestCase {
             }
         }
     }
-#endif
     
     func testBadPathWithGoodCredsFails() {
         let badRoute = ServerEndpoint("foobar", method: .post)
@@ -68,7 +66,7 @@ class GoogleAuthenticationTests: ServerTestCase {
     
     func testRefreshGoogleAccessTokenWorks() {
         let creds = GoogleCreds()
-        creds.refreshToken = self.credentialsToken()
+        creds.refreshToken = TestAccount.google1.token()
         
         let exp = expectation(description: "\(#function)\(#line)")
 
@@ -82,9 +80,9 @@ class GoogleAuthenticationTests: ServerTestCase {
     }
 }
 
-extension GoogleAuthenticationTests {
-    static var allTests : [(String, (GoogleAuthenticationTests) -> () throws -> Void)] {
-        var result:[(String, (GoogleAuthenticationTests) -> () throws -> Void)] = [
+extension AccountAuthenticationTests_Google {
+    static var allTests : [(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] {
+        var result:[(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] = [
             ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
             ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
             ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
@@ -96,5 +94,9 @@ extension GoogleAuthenticationTests {
 #endif
 
         return result
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Google.self)
     }
 }

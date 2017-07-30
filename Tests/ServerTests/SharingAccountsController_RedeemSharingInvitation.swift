@@ -13,7 +13,7 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
-class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
+class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -34,16 +34,28 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
     }*/
     
     func testThatRedeemingWithAnotherGoogleAccountWorks() {
-        createSharingUser()
+        createSharingUser(sharingUser: .google2)
     }
     
-    func testThatRedeemingASharingInvitationWithoutGivingTheInvitationUUIDFails() {
+    func testThatRedeemingWithAFacebookAccountWorks() {
+        createSharingUser(sharingUser: .facebook1)
+    }
+    
+    func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
-        
-        redeemSharingInvitation(token: .googleRefreshToken2, errorExpected:true) { expectation in
+            
+        redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { expectation in
             expectation.fulfill()
         }
+    }
+    
+    func testThatRedeemingASharingInvitationByAGoogleUserWithoutGivingTheInvitationUUIDFails() {
+        redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: .google2)
+    }
+    
+    func testThatRedeemingASharingInvitationByAFacebookUserWithoutGivingTheInvitationUUIDFails() {
+        redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: .facebook1)
     }
     
     func testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails() {
@@ -57,7 +69,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(token: .googleRefreshToken1, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .google1, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
@@ -74,64 +86,72 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
         }
         
         let deviceUUID2 = PerfectLib.UUID().string
-        addNewUser(token:.googleRefreshToken3, deviceUUID:deviceUUID2)
+        addNewUser(testAccount: .google3, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(token: .googleRefreshToken3, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .google3, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
     
-    func testThatRedeemingWithAnExistingOtherSharingGoogleAccountFails() {
+    func redeemingWithAnExistingOtherSharingAccountFails(sharingUser: TestAccount) {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
-        
+            
         var sharingInvitationUUID:String!
-        
+            
         createSharingInvitation(permission: .read) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
-        
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID: sharingInvitationUUID) { expectation in
+            
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
-
+            
         // Check to make sure we have a new user:
-        let googleSub2 = credentialsToken(token: .googleSub2)
-        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: .Google, credsId: googleSub2)
+        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
         let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
         guard case .found(_) = userResults else {
             XCTFail()
             return
         }
-        
+            
         let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
         let results = SharingInvitationRepository(self.db).lookup(key: key, modelInit: SharingInvitation.init)
-        
+            
         guard case .noObjectFound = results else {
             XCTFail()
             return
         }
-
+            
         createSharingInvitation(permission: .write) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
-        
-        // Since the user account represented by googleRefreshToken2 has already been used to create a sharing account, this redeem attempt will fail.
-        redeemSharingInvitation(token: .googleRefreshToken2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { expectation in
+            
+        // Since the user account represented by sharingUser has already been used to create a sharing account, this redeem attempt will fail.
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { expectation in
             expectation.fulfill()
         }
     }
     
-    func testThatCheckingCredsOnASharingUserGivesSharingPermission() {
+    func testThatRedeemingWithAnExistingSharingGoogleAccountFails() {
+        redeemingWithAnExistingOtherSharingAccountFails(sharingUser: .google2)
+    }
+    
+    func testThatRedeemingWithAnExistingSharingFacebookAccountFails() {
+        redeemingWithAnExistingOtherSharingAccountFails(sharingUser: .facebook1)
+    }
+    
+    func checkingCredsOnASharingUserGivesSharingPermission(sharingUser: TestAccount) {
         let perm:SharingPermission = .write
-        createSharingUser(withSharingPermission: perm)
-        
+        createSharingUser(withSharingPermission: perm, sharingUser: sharingUser)
+            
         let deviceUUID = PerfectLib.UUID().string
-
-        performServerTest(token:.googleRefreshToken2) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+        performServerTest(testAccount: sharingUser) { expectation, testCreds in
+            let tokenType = sharingUser.type.toAuthTokenType()
+            let headers = self.setupHeaders(tokenType: tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -147,11 +167,19 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
         }
     }
     
+    func testThatCheckingCredsOnAGoogleSharingUserGivesSharingPermission() {
+        checkingCredsOnASharingUserGivesSharingPermission(sharingUser: .google2)
+    }
+    
+    func testThatCheckingCredsOnAFacebookSharingUserGivesSharingPermission() {
+        checkingCredsOnASharingUserGivesSharingPermission(sharingUser: .facebook1)
+    }
+    
     func testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission() {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
         
-        performServerTest(token: .googleRefreshToken1) { expectation, googleCreds in
+        performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
@@ -173,12 +201,21 @@ extension SharingAccountsController_RedeemSharingInvitation {
     static var allTests : [(String, (SharingAccountsController_RedeemSharingInvitation) -> () throws -> Void)] {
         return [
             ("testThatRedeemingWithAnotherGoogleAccountWorks", testThatRedeemingWithAnotherGoogleAccountWorks),
-            ("testThatRedeemingASharingInvitationWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationWithoutGivingTheInvitationUUIDFails),
+            ("testThatRedeemingWithAFacebookAccountWorks", testThatRedeemingWithAFacebookAccountWorks),
+            ("testThatRedeemingASharingInvitationByAGoogleUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAGoogleUserWithoutGivingTheInvitationUUIDFails),
+            ("testThatRedeemingASharingInvitationByAFacebookUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAFacebookUserWithoutGivingTheInvitationUUIDFails),
             ("testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails),
             ("testThatRedeemingWithAnExistingOtherOwningGoogleAccountFails", testThatRedeemingWithAnExistingOtherOwningGoogleAccountFails),
-            ("testThatRedeemingWithAnExistingOtherSharingGoogleAccountFails", testThatRedeemingWithAnExistingOtherSharingGoogleAccountFails),
-            ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
+            ("testThatRedeemingWithAnExistingSharingGoogleAccountFails", testThatRedeemingWithAnExistingSharingGoogleAccountFails),
+            ("testThatRedeemingWithAnExistingSharingFacebookAccountFails", testThatRedeemingWithAnExistingSharingFacebookAccountFails),
+            ("testThatCheckingCredsOnAGoogleSharingUserGivesSharingPermission", testThatCheckingCredsOnAGoogleSharingUserGivesSharingPermission),
+            ("testThatCheckingCredsOnAFacebookSharingUserGivesSharingPermission", testThatCheckingCredsOnAFacebookSharingUserGivesSharingPermission),
             ("testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission", testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:
+            SharingAccountsController_RedeemSharingInvitation.self)
     }
 }

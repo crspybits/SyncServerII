@@ -7,27 +7,27 @@
 //
 
 import Foundation
-import PerfectLib
+import LoggerAPI
 import SyncServerShared
 
 extension FileController {
     func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
-            Log.error(message: "Did not receive UploadFileRequest")
+            Log.error("Did not receive UploadFileRequest")
             params.completion(nil)
             return
         }
         
         getMasterVersion(params: params) { error, masterVersion in
             if error != nil {
-                Log.error(message: "Error: \(String(describing: error))")
+                Log.error("Error: \(String(describing: error))")
                 params.completion(nil)
                 return
             }
 
             if masterVersion != uploadRequest.masterVersion {
                 let response = UploadFileResponse()!
-                Log.warning(message: "Master version update: \(String(describing: masterVersion))")
+                Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return
@@ -35,7 +35,7 @@ extension FileController {
             
             // TODO: *3* Needs generalization for multiple cloud services.
             guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-                Log.error(message: "Could not obtain Google Creds")
+                Log.error("Could not obtain Google Creds")
                 params.completion(nil)
                 return
             }
@@ -77,7 +77,7 @@ extension FileController {
                 
                 switch lookupResult {
                 case .found(let model):
-                    Log.info(message: "File was already present: Not uploading again.")
+                    Log.info("File was already present: Not uploading again.")
                     let upload = model as! Upload
                     let response = UploadFileResponse()!
                     response.size = Int64(upload.fileSizeBytes!)
@@ -99,12 +99,12 @@ extension FileController {
             }
             
             if errorString != nil {
-                Log.error(message: errorString!)
+                Log.error(errorString!)
                 params.completion(nil)
                 return
             }
             
-            Log.info(message: "File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
+            Log.info("File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
             
             googleCreds.uploadSmallFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
                 if error == nil {
@@ -118,13 +118,13 @@ extension FileController {
                     }
                     else {
                         // TODO: *0* Need to remove the file from the cloud server.
-                        Log.error(message: "Could not update UploadRepository: \(String(describing: error))")
+                        Log.error("Could not update UploadRepository: \(String(describing: error))")
                         params.completion(nil)
                     }
                 }
                 else {
                     // TODO: *0* It could be useful to remove the file from the cloud server. It might be there.
-                    Log.error(message: "Could not uploadSmallFile: error: \(String(describing: error))")
+                    Log.error("Could not uploadSmallFile: error: \(String(describing: error))")
                     params.completion(nil)
                 }
             }

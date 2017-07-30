@@ -155,6 +155,7 @@ class UploadRepository : Repository {
             "fileUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
         
             // reference into User table
+            // TODO: *2* Make this a foreign reference.
             "userId BIGINT NOT NULL, " +
                 
             // identifies a specific mobile device (assigned by app)

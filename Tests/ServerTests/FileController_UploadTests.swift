@@ -9,10 +9,10 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
+import PerfectLib
 
-class FileController_UploadTests: ServerTestCase {
+class FileController_UploadTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
@@ -64,7 +64,10 @@ extension FileController_UploadTests {
             ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
             ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
             ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
-
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:FileController_UploadTests.self)
     }
 }

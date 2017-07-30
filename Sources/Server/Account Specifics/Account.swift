@@ -1,75 +1,130 @@
 //
-//  Creds.swift
+//  Account.swift
 //  Server
 //
-//  Created by Christopher Prince on 12/22/16.
-//
+//  Created by Christopher Prince on 7/9/17.
 //
 
 import Foundation
-import Credentials
-import CredentialsGoogle
-import PerfectLib
-import KituraNet
-import SwiftyJSON
 import SyncServerShared
+import Credentials
+import SwiftyJSON
+import KituraNet
+import LoggerAPI
+import Kitura
 
-protocol CredsDelegate : class {
-// This is delegated because (a) it enables me to only sometimes allow Creds to save to the database, and (b) because knowledge of how to save to a database seems outside of the responsibilities of `Creds`. Returns false iff an error occurred on database save.
-func saveToDatabase(creds:Creds, user:CredsUser) -> Bool
-}
-    
-enum CredsUser {
-case user(User) // use this if we have it.
-case userId(UserId) // and this if we don't.
+enum AccountCreationUser {
+    case user(User) // use this if we have it.
+    case userId(UserId) // and this if we don't.
 }
 
-public class Creds {
-    var accountType:AccountType!
-    var baseURL:String?
-    weak var delegate:CredsDelegate?
-    var user:CredsUser!
+// SyncServer specific Keys for UserProfile extendedProperties
+let SyncServerAccountType = "syncServerAccountType" // In Dictionary as a String
+
+protocol AccountDelegate : class {
+    // This is delegated because (a) it enables me to only sometimes allow an Account to save to the database, and (b) because knowledge of how to save to a database seems outside of the responsibilities of `Account`s. Returns false iff an error occurred on database save.
+    func saveToDatabase(account:Account) -> Bool
+}
+
+protocol Account {
+    static var accountType:AccountType {get}
     
-    func toJSON() -> String? {
-        assert(false, "Unimplemented")
-        return nil
+    weak var delegate:AccountDelegate? {get}
+    
+    var accountCreationUser:AccountCreationUser? {get set}
+    
+    // Currently assuming all Account's use access tokens.
+    var accessToken: String! {get set}
+    
+    // What sign in type(s) does this account allow?
+    var signInType:SignInType {get}
+    
+    func toJSON() -> String?
+    
+    // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
+    func needToGenerateTokens(userType:UserType, dbCreds:Account?) -> Bool
+    
+    // Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
+    func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->())
+    
+    func merge(withNewer account:Account)
+    
+    // Only updates the user profile if the request header has the Account's specific token.
+    static func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest)
+    
+    static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
+    static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account?
+}
+
+extension Account {
+    func generateTokensIfNeeded(userType:UserType, dbCreds:Account?, routerResponse:RouterResponse, success:@escaping ()->(), failure: @escaping ()->()) {
+    
+        if needToGenerateTokens(userType: userType, dbCreds: dbCreds) {
+            generateTokens(response: routerResponse) { error in
+                if error == nil {
+                    success()
+                }
+                else {
+                    Log.error("Failed attempting to generate tokens: \(error!))")
+                    failure()
+                }
+            }
+        }
+        else {
+            success()
+        }
+    }
+}
+
+enum AccountType : String {
+    case Google
+    case Facebook
+    
+    static func `for`(userProfile:UserProfile) -> AccountType? {
+        guard let accountTypeString = userProfile.extendedProperties[SyncServerAccountType] as? String else {
+            return nil
+        }
+        
+        return AccountType(rawValue: accountTypeString)
     }
     
-    class func fromProfile(profile:UserProfile, user:CredsUser?, delegate:CredsDelegate?) -> Creds? {
-        assert(false, "Unimplemented")
-        return nil
+    func toAuthTokenType() -> ServerConstants.AuthTokenType {
+        switch self {
+            case .Google:
+                return .GoogleToken
+            case .Facebook:
+                return .FacebookToken
+        }
     }
     
-    class func fromJSON(s:String, user:CredsUser?, delegate:CredsDelegate?) throws -> Creds? {
-        assert(false, "Unimplemented")
-        return nil
+    static func fromAuthTokenType(_ authTokenType: ServerConstants.AuthTokenType) -> AccountType {
+        switch authTokenType {
+            case .GoogleToken:
+                return .Google
+            case .FacebookToken:
+                return .Facebook
+        }
     }
-    
-    // Given existing creds stored in the database, decide if we need to generate tokens. The intent of generating tokens is for owning users-- to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
-    func needToGenerateTokens(dbCreds:Creds) -> Bool {
-        return false
-    }
-    
-    // Some Creds (e.g., Google) need to generate internal tokens (a refresh token) in some circumstances (e.g., when having a serverAuthCode). If error == nil, then success will have a non-nil value. Uses delegate, if one is defined, to save creds to database.
-    func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->()) {
-    }
-    
-    func merge(withNewerCreds creds:Creds) {
-    }
-    
-    enum Body {
+}
+
+enum APICallBody {
     case string(String)
     case data(Data)
-    }
-    
-    enum APICallResult {
+}
+
+enum APICallResult {
     case json(JSON)
     case data(Data)
-    }
+}
+
+// I didn't just use a protocol extension for this because I want to be able to override `apiCall` and call "super to get the base definition.
+class AccountAPICall {
+    // Used by `apiCall` function to make a REST call to an Account service.
+    var baseURL:String?
     
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
     func apiCall(method:String, baseURL:String? = nil, path:String,
-        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:Body? = nil,
+        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:APICallBody? = nil,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
         var hostname = baseURL
@@ -106,11 +161,10 @@ public class Creds {
         }
         
         requestOptions.append(.headers(headers))
- 
+        
         let req = HTTP.request(requestOptions) { response in
             if let response:KituraNet.ClientResponse = response {
                 let statusCode = response.statusCode
-                // Log.debug(message: "HTTP status code: \(statusCode); raw: \(statusCode.rawValue)")
                 if statusCode != HTTPStatusCode.OK {
                     // for header in response.headers {
                     //     Log.debug(message: "Header: \(header)")
@@ -131,7 +185,7 @@ public class Creds {
                     try response.readAllData(into: &body)
                     let jsonBody = JSON(data: body)
                     var result:APICallResult?
-                                        
+                    
                     if jsonBody.type == .null {
                         result = .data(body)
                     }
@@ -142,7 +196,7 @@ public class Creds {
                     completion(result, statusCode)
                     return
                 } catch (let error) {
-                    Log.error(message: "Failed to read Google response: \(error)")
+                    Log.error("Failed to read Google response: \(error)")
                 }
             }
             
@@ -162,58 +216,3 @@ public class Creds {
     }
 }
 
-extension Creds {
-    static func toCreds(accountType:AccountType, fromJSON json:String, user:CredsUser?, delegate:CredsDelegate?) throws -> Creds? {
-        switch accountType {
-        case .Google:
-            return try GoogleCreds.fromJSON(s: json, user:user, delegate:delegate)
-        }
-    }
-    
-    static func toJSON(fromProfile profile:UserProfile) -> String? {
-        guard let accountType = AccountType.fromSpecificCredsType(specificCreds: profile.accountSpecificCreds!) else {
-            return nil
-        }
-        
-        switch accountType {
-        case .Google:
-            if let creds = GoogleCreds.fromProfile(profile: profile, user:nil, delegate:nil) {
-                return creds.toJSON()
-            }
-            else {
-                return nil
-            }
-        }
-    }
-    
-    class func toCreds(fromProfile profile:UserProfile, user:CredsUser?, delegate:CredsDelegate?) -> Creds? {
-        guard let accountType = AccountType.fromSpecificCredsType(specificCreds: profile.accountSpecificCreds!) else {
-            return nil
-        }
-        
-        switch accountType {
-        case .Google:
-            if let creds = GoogleCreds.fromProfile(profile: profile, user:user, delegate:delegate) {
-                return creds
-            }
-            else {
-                return nil
-            }
-        }
-    }
-}
-
-enum AccountType : String {
-    case Google
-    
-    static func fromSpecificCredsType(specificCreds: AccountSpecificCreds) -> AccountType? {
-        switch specificCreds {
-        case is GoogleSpecificCreds:
-            return .Google
-            
-        default:
-            Log.error(message: "Could not convert \(specificCreds) to AccountType")
-            return nil
-        }
-    }
-}

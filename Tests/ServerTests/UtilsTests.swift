@@ -26,7 +26,7 @@ public class B {
     var p4: Int!
 }
 
-class UtilsTests: ServerTestCase {
+class UtilsTests: ServerTestCase, LinuxTestable {
     override func setUp() {
         super.setUp()
         Log.logger = HeliumLogger()
@@ -77,5 +77,9 @@ extension UtilsTests {
             ("testOptionalInt", testOptionalInt),
             ("testInt", testInt)
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType: UtilsTests.self)
     }
 }

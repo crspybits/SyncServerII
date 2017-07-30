@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import PerfectLib
+import LoggerAPI
 import Credentials
 import CredentialsGoogle
 import SyncServerShared
@@ -57,23 +57,23 @@ class FileController : ControllerProtocol {
             
         case .noObjectFound:
             let errorMessage = "Master version record not found for: \(key)"
-            Log.error(message: errorMessage)
+            Log.error(errorMessage)
             completion(GetMasterVersionError.noObjectFound, nil)
         }
     }
             
     func fileIndex(params:RequestProcessingParameters) {
         guard let fileIndexRequest = params.request as? FileIndexRequest else {
-            Log.error(message: "Did not receive FileIndexRequest")
+            Log.error("Did not receive FileIndexRequest")
             params.completion(nil)
             return
         }
 
 #if DEBUG
         if fileIndexRequest.testServerSleep != nil {
-            Log.info(message: "Starting sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
+            Log.info("Starting sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
             Thread.sleep(forTimeInterval: TimeInterval(fileIndexRequest.testServerSleep!))
-            Log.info(message: "Finished sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
+            Log.info("Finished sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
         }
 #endif
         
@@ -88,14 +88,14 @@ class FileController : ControllerProtocol {
 
             switch fileIndexResult {
             case .fileIndex(let fileIndex):
-                Log.info(message: "Number of entries in FileIndex: \(fileIndex.count)")
+                Log.info("Number of entries in FileIndex: \(fileIndex.count)")
                 let response = FileIndexResponse()!
                 response.fileIndex = fileIndex
                 response.masterVersion = masterVersion
                 params.completion(response)
                 
             case .error(let error):
-                Log.error(message: "Error: \(error)")
+                Log.error("Error: \(error)")
                 params.completion(nil)
                 return
             }
@@ -104,7 +104,7 @@ class FileController : ControllerProtocol {
         
     func getUploads(params:RequestProcessingParameters) {
         guard params.request is GetUploadsRequest else {
-            Log.error(message: "Did not receive GetUploadsRequest")
+            Log.error("Did not receive GetUploadsRequest")
             params.completion(nil)
             return
         }
@@ -118,7 +118,7 @@ class FileController : ControllerProtocol {
             params.completion(response)
             
         case .error(let error):
-            Log.error(message: "Error: \(error)")
+            Log.error("Error: \(error)")
             params.completion(nil)
             return
         }

@@ -10,19 +10,16 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import HeliumLogger
-import PerfectLib
 import Foundation
 import SyncServerShared
+import PerfectLib
 
-class DatabaseModelTests: XCTestCase {
-
+class DatabaseModelTests: XCTestCase, LinuxTestable {
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
 
@@ -323,5 +320,9 @@ extension DatabaseModelTests {
             ("testFileIndex", testFileIndex),
             ("testUpload", testUpload),
         ]
+    }
+    
+    func testLinuxTestSuiteIncludesAllTests() {
+        linuxTestSuiteIncludesAllTests(testType:DatabaseModelTests.self)
     }
 }

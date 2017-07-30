@@ -7,13 +7,13 @@
 //
 
 import Foundation
-import PerfectLib
+import LoggerAPI
 import SyncServerShared
 
 extension FileController {
     func downloadFile(params:RequestProcessingParameters) {
         guard let downloadRequest = params.request as? DownloadFileRequest else {
-            Log.error(message: "Did not receive DownloadFileRequest")
+            Log.error("Did not receive DownloadFileRequest")
             params.completion(nil)
             return
         }
@@ -30,7 +30,7 @@ extension FileController {
 
             if masterVersion != downloadRequest.masterVersion {
                 let response = DownloadFileResponse()!
-                Log.warning(message: "Master version update: \(String(describing: masterVersion))")
+                Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(response)
                 return
@@ -38,7 +38,7 @@ extension FileController {
 
             // TODO: *5* Generalize this to use other cloud storage services.
             guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-                Log.error(message: "Could not obtain Google Creds")
+                Log.error("Could not obtain Google Creds")
                 params.completion(nil)
                 return
             }
@@ -56,30 +56,30 @@ extension FileController {
             case .found(let modelObj):
                 fileIndexObj = modelObj as? FileIndex
                 if fileIndexObj == nil {
-                    Log.error(message: "Could not convert model object to FileIndex")
+                    Log.error("Could not convert model object to FileIndex")
                     params.completion(nil)
                     return
                 }
                 
             case .noObjectFound:
-                Log.error(message: "Could not find file in FileIndex")
+                Log.error("Could not find file in FileIndex")
                 params.completion(nil)
                 return
                 
             case .error(let error):
-                Log.error(message: "Error looking up file in FileIndex: \(error)")
+                Log.error("Error looking up file in FileIndex: \(error)")
                 params.completion(nil)
                 return
             }
             
             guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
-                Log.error(message: "Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)")
+                Log.error("Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)")
                 params.completion(nil)
                 return
             }
             
             if fileIndexObj!.deleted! {
-                Log.error(message: "The file you are trying to download has been deleted!")
+                Log.error("The file you are trying to download has been deleted!")
                 params.completion(nil)
                 return
             }
@@ -95,7 +95,7 @@ extension FileController {
                 cloudFolderName: fileIndexObj!.cloudFolderName, cloudFileName: cloudFileName, mimeType: fileIndexObj!.mimeType) { (data, error) in
                 if error == nil {
                     if Int64(data!.count) != fileIndexObj!.fileSizeBytes {
-                        Log.error(message: "Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
+                        Log.error("Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
                         params.completion(nil)
                         return
                     }
@@ -109,7 +109,7 @@ extension FileController {
                     return
                 }
                 else {
-                    Log.error(message: "Failed downloading file: \(String(describing: error))")
+                    Log.error("Failed downloading file: \(String(describing: error))")
                     params.completion(nil)
                     return
                 }

@@ -12,15 +12,6 @@ import Credentials
 import CredentialsGoogle
 import SyncServerShared
 
-enum UserType : String {
-    case sharing // user is sharing data
-    case owning // user owns the data
-
-    static func maxStringLength() -> Int {
-        return max(UserType.sharing.rawValue.characters.count, UserType.owning.rawValue.characters.count)
-    }
-}
-
 class User : NSObject, Model {
     static let userIdKey = "userId"
     var userId: UserId!
@@ -88,9 +79,9 @@ class User : NSObject, Model {
     }
     
     // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
-    var credsObject:Creds? {
+    var credsObject:Account? {
         do {
-            let credsObj = try Creds.toCreds(accountType: accountType, fromJSON: creds, user: .user(self), delegate:nil)
+            let credsObj = try AccountManager.session.accountFromJSON(creds, accountType: accountType, user: .user(self), delegate: nil)
             return credsObj
         }
         catch (let error) {
@@ -151,12 +142,14 @@ class UserRepository : Repository {
             "userType VARCHAR(\(UserType.maxStringLength())) NOT NULL, " +
     
             // If non-NULL, references a user in the User table.
+            // TODO: *2* Make this a foreign key reference to this same table.
             "owningUserId BIGINT, " +
             
             "sharingPermission VARCHAR(\(SharingPermission.maxStringLength())), " +
         
             "accountType VARCHAR(\(accountTypeMaxLength)) NOT NULL, " +
             
+            // An id specific to the particular type of credentials, e.g., Google.
             "credsId VARCHAR(\(credsIdMaxLength)) NOT NULL, " +
         
             // Stored as JSON
@@ -201,8 +194,8 @@ class UserRepository : Repository {
             return nil
         }
         
-        // Validate the JSON before we insert it. Can't really do it in the setter for creds because it's
-        guard let _ = try? Creds.toCreds(accountType: user.accountType, fromJSON: user.creds, user: .user(user), delegate:nil) else {
+        // Validate the JSON before we insert it.
+        guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountType: user.accountType, user: .user(user), delegate: nil) else {
             Log.error(message: "Invalid creds JSON: \(user.creds)")
             return nil
         }
@@ -236,7 +229,7 @@ class UserRepository : Repository {
         }
     }
     
-    func updateCreds(creds newCreds:Creds, forUser updateCredsUser:CredsUser) -> Bool {
+    func updateCreds(creds newCreds:Account, forUser updateCredsUser:AccountCreationUser) -> Bool {
         var credsJSONString:String
         var userId:UserId
         
@@ -245,7 +238,7 @@ class UserRepository : Repository {
             // First need to merge creds-- otherwise, we might override part of the creds with our update.
             // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
             let oldCreds = user.credsObject!
-            oldCreds.merge(withNewerCreds: newCreds)
+            oldCreds.merge(withNewer: newCreds)
             credsJSONString = oldCreds.toJSON()!
             userId = user.userId
             

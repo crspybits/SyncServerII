@@ -6,7 +6,7 @@
 //
 //
 
-import PerfectLib
+import LoggerAPI
 import Kitura
 import KituraNet
 import Gloss
@@ -23,7 +23,7 @@ See also: https://github.com/IBM-Swift/Kitura-net/issues/196
 
 public typealias ProcessRequest = (RequestProcessingParameters)->()
 
-class RequestHandler : CredsDelegate {
+class RequestHandler : AccountDelegate {
     private var request:RouterRequest!
     private var response:RouterResponse!
     
@@ -47,18 +47,18 @@ class RequestHandler : CredsDelegate {
         self.endpoint = endpoint
         
         RequestHandler.numberCreated += 1
-        Log.info(message: "RequestHandler.init: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
+        Log.info("RequestHandler.init: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
     }
     
     deinit {
         RequestHandler.numberDeleted += 1
-        Log.info(message: "RequestHandler.deinit: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
+        Log.info("RequestHandler.deinit: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
     }
 
     public func failWithError(message:String, statusCode:HTTPStatusCode = .internalServerError) {
         
         setJsonResponseHeaders()
-        Log.error(message: message)
+        Log.error(message)
 
         self.response.statusCode = statusCode
         
@@ -83,7 +83,7 @@ class RequestHandler : CredsDelegate {
                 jsonString = try jsonDict.jsonEncodedString()
             } catch (let error) {
                 let message = "Failed on json encode: \(error.localizedDescription) for jsonDict: \(jsonDict)"
-                Log.error(message: message)
+                Log.error(message)
                 self.response.statusCode = HTTPStatusCode.internalServerError
                 self.response.send(message)
             }
@@ -102,16 +102,16 @@ class RequestHandler : CredsDelegate {
             }
         }
         
-        Log.info(message: "REQUEST \(request.urlURL.path): ABOUT TO END ...")
+        Log.info("REQUEST \(request.urlURL.path): ABOUT TO END ...")
 
         do {
             try self.response.end()
-            Log.info(message: "REQUEST \(request.urlURL.path): STATUS CODE: \(response.statusCode)")
+            Log.info("REQUEST \(request.urlURL.path): STATUS CODE: \(response.statusCode)")
         } catch (let error) {
-            Log.error(message: "Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
+            Log.error("Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
         }
         
-        Log.info(message: "REQUEST \(request.urlURL.path): COMPLETED")
+        Log.info("REQUEST \(request.urlURL.path): COMPLETED")
     }
     
     func setJsonResponseHeaders() {
@@ -134,38 +134,45 @@ class RequestHandler : CredsDelegate {
         case failure(FailureResult)
     }
     
-    // Starts a transaction, and calls the closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.
-    private func dbTransaction(_ db:Database, dbOperations:()->(ServerResult)) -> ServerResult {
+    // Starts a transaction, and calls the `dbOperations` closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.
+    private func dbTransaction(_ db:Database, handleResult:@escaping (ServerResult) ->(), dbOperations:(_ callback: @escaping (ServerResult) ->())->()) {
     
         if !db.startTransaction() {
-            return .failure(.message("Could not start a transaction!"))
+            handleResult(.failure(.message("Could not start a transaction!")))
+            return
         }
         
+        // Waiting until this point to call `checkDeviceUUID` because it may create a db record.
         let result = checkDeviceUUID()
         if result != nil && !result! {
             _ = db.rollback()
-            return .failure(.message("No Device UUID with header!"))
+            handleResult(.failure(.message("No Device UUID with header!")))
+            return
         }
-        
-        var operationResult = dbOperations()
-        
-        switch operationResult {
-        case .success(_):
-            if !db.commit() {
-                let message = "Error during COMMIT operation!"
-                operationResult = .failure(.message(message))
-                Log.error(message: message)
+
+        func dbTransactionHandleResult(_ result: ServerResult) {
+            switch result {
+            case .success(_):
+                if !db.commit() {
+                    let message = "Error during COMMIT operation!"
+                    Log.error(message)
+                    handleResult(.failure(.message(message)))
+                    return
+                }
+                
+            case .failure(_):
+                if !db.rollback() {
+                    let message = "Error during ROLLBACK operation!"
+                    Log.error(message)
+                    handleResult(.failure(.message(message)))
+                    return
+                }
             }
             
-        case .failure(_):
-            if !db.rollback() {
-                let message = "Error during ROLLBACK operation!"
-                operationResult = .failure(.message(message))
-                Log.error(message: message)
-            }
+            handleResult(result)
         }
         
-        return operationResult
+        dbOperations(dbTransactionHandleResult)
     }
     
     func doRequest(createRequest: @escaping (RouterRequest) -> RequestMessage?,
@@ -174,13 +181,13 @@ class RequestHandler : CredsDelegate {
         setJsonResponseHeaders()
         let profile = request.userProfile
         self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
-        Log.info(message: "self.deviceUUID: \(String(describing: self.deviceUUID))")
+        Log.info("self.deviceUUID: \(String(describing: self.deviceUUID))")
         
 #if DEBUG
         if profile != nil {
             let userId = profile!.id
             let userName = profile!.displayName
-            Log.info(message: "Profile: \(String(describing: profile)); userId: \(userId); userName: \(userName)")
+            Log.info("Profile: \(String(describing: profile)); userId: \(userId); userName: \(userName)")
         }
 #endif
 
@@ -195,19 +202,29 @@ class RequestHandler : CredsDelegate {
             if profile == nil {
                 // We should really never get here. Credentials security check should make sure of that. This is a double check.
                 let message = "YIKES: Should have had a user profile!"
-                Log.critical(message: message)
+                Log.error(message)
+                failWithError(message: message)
+                return
+            }
+            
+            // Only do this if we are requiring primary or secondary authorization-- this updates the profile from the request, assuming we are using authorization.
+            do {
+                try AccountManager.session.updateUserProfile(profile!, fromRequest: request)
+            } catch (let error) {
+                let message = "YIKES: Non-nil UserProfile, but could not do profile update: \(error)"
+                Log.error(message)
                 failWithError(message: message)
                 return
             }
         }
-        
-        var dbCreds:Creds?
 
+        var dbCreds:Account?
+    
         if authenticationLevel! == .secondary {
             // We have .secondary authentication-- i.e., we should have the user recorded in the database already.
-
-            guard let accountType = AccountType.fromSpecificCredsType(specificCreds: profile!.accountSpecificCreds!) else {
-                self.failWithError(message: "Could not convert fromSpecificCredsType.")
+            
+            guard let accountType = AccountType.for(userProfile: profile!) else {
+                self.failWithError(message: "Could not get accountType.")
                 return
             }
             
@@ -220,9 +237,9 @@ class RequestHandler : CredsDelegate {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try Creds.toCreds(accountType: currentSignedInUser!.accountType, fromJSON: currentSignedInUser!.creds, user: .user(currentSignedInUser!), delegate:self)
+                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountType: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: self)
                 } catch (let error) {
-                    errorString = "\(error)"
+                    errorString = "\(error)"  
                 }
                 
                 if errorString != nil || dbCreds == nil {
@@ -264,17 +281,15 @@ class RequestHandler : CredsDelegate {
         
         // 6/1/17; Up until this point, I had been (a) calling .end on the RouterResponse object, and (b) only after that committing the transaction (or rolling it back) on the database. However, that can generate some unwanted asynchronous processing. i.e., the network caller can potentially initiate another request *before* the database commit completes. Instead, I should be: (a) committing (or rolling back) the transaction, and then (b) calling .end. That should provide the synchronous character that I really want.
         
-        var transactionResult:ServerResult!
-        
         if profile == nil {
             assert(authenticationLevel! == .none)
             
-            transactionResult = dbTransaction(db) {
-                return doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, processRequest: processRequest)
+            dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
+                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
-            var credsUser:CredsUser?
+            var credsUser:AccountCreationUser?
             switch authenticationLevel! {
             case .primary:
                 // We don't have a userId yet for this user.
@@ -287,18 +302,21 @@ class RequestHandler : CredsDelegate {
                 assertionFailure("Should never get here with authenticationLevel == .none!")
             }
             
-            if let profileCreds = Creds.toCreds(fromProfile: profile!, user:credsUser, delegate:self) {
-                transactionResult = dbTransaction(db) {
-                    return doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest)
+            if let profileCreds = AccountManager.session.accountFromProfile(profile: profile!, user: credsUser, delegate: self) {
+            
+                dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
+                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
-                transactionResult = .failure(.messageWithStatus("Failed converting to Creds from profile", .unauthorized))
+                handleTransactionResult(.failure(.messageWithStatus("Failed converting to Creds from profile", .unauthorized)))
             }
         }
-        
+    }
+    
+    private func handleTransactionResult(_ result:ServerResult) {
         // `endWith` and `failWithError` call the `RouterResponse` `end` method, and thus we have waited until the very end of processing of the request to finish and return control back to the caller.
-        switch transactionResult! {
+        switch result {
         case .success(.json(let json)):
             endWith(clientResponse: .json(json))
         
@@ -316,42 +334,66 @@ class RequestHandler : CredsDelegate {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Creds?, profileCreds:Creds?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest) -> ServerResult {
-    
-        var effectiveOwningUserCreds:Creds?
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+        
+        var effectiveOwningUserCreds:Account?
         
         if currentSignedInUser != nil {
             let effectiveOwningUserKey = UserRepository.LookupKey.userId(currentSignedInUser!.effectiveOwningUserId)
+            Log.debug("currentSignedInUser!.effectiveOwningUserId: \(currentSignedInUser!.effectiveOwningUserId)")
             let userResults = UserRepository(db).lookup(key: effectiveOwningUserKey, modelInit: User.init)
             guard case .found(let model) = userResults,
                 let effectiveOwningUser = model as? User else {
-                return .failure(.message("Could not get effective owning user from database."))
+                handleResult(.failure(.message("Could not get effective owning user from database.")))
+                return
             }
             
             effectiveOwningUserCreds = effectiveOwningUser.credsObject
             guard effectiveOwningUserCreds != nil else {
-                return .failure(.message("Could not get effective owning user creds."))
+                handleResult(.failure(.message("Could not get effective owning user creds.")))
+                return
+            }
+        }
+        
+        if self.endpoint.needsLock {
+            let lock = Lock(userId:currentSignedInUser!.effectiveOwningUserId, deviceUUID:deviceUUID!)
+            switch repositories.lock.lock(lock: lock) {
+            case .success:
+                break
+            
+            // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
+            case .lockAlreadyHeld:
+                handleResult(.failure(.message("Could not obtain lock!!")))
+                return
+            
+            case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+                handleResult(.failure(.message("Error obtaining lock!")))
+                return
             }
         }
 
-        var operationResult:ServerResult = .success(.nothing)
-
-        let params = RequestProcessingParameters(request: requestObject!, ep:self.self.endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: self.deviceUUID) { responseObject in
+        let params = RequestProcessingParameters(request: requestObject!, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { responseObject in
+        
+            // If we locked before, do unlock now.
+            if self.endpoint.needsLock {
+                _ = self.repositories.lock.unlock(userId:
+                    self.currentSignedInUser!.effectiveOwningUserId)
+            }
         
             if nil == responseObject {
-                operationResult = .failure(.message("Could not create response object from request object"))
+                handleResult(.failure(.message("Could not create response object from request object")))
                 return
             }
             
             let jsonDict = responseObject!.toJSON()
             if nil == jsonDict {
-                operationResult = .failure(.message("Could not convert response object to json dictionary"))
+                handleResult(.failure(.message("Could not convert response object to json dictionary")))
                 return
             }
             
             switch responseObject!.responseType {
             case .json:
-                operationResult = .success(.json(jsonDict!))
+                handleResult(.success(.json(jsonDict!)))
 
             case .data(let data):
                 var jsonString:String?
@@ -359,43 +401,24 @@ class RequestHandler : CredsDelegate {
                 do {
                     jsonString = try jsonDict!.jsonEncodedString()
                 } catch (let error) {
-                    operationResult = .failure(.message("Could not convert json dict to string: \(error)"))
+                    handleResult(.failure(.message("Could not convert json dict to string: \(error)")))
                     return
                 }
                 
-                operationResult = .success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString!]))
+                handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString!])))
             }
         }
-        
-        if self.endpoint.needsLock {
-            let lock = Lock(userId:params.currentSignedInUser!.effectiveOwningUserId, deviceUUID:params.deviceUUID!)
-            switch params.repos.lock.lock(lock: lock) {
-            case .success:
-                break
-            
-            // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
-            case .lockAlreadyHeld:
-                return .failure(.message("Could not obtain lock!!"))
-            
-            case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-                return .failure(.message("Error obtaining lock!"))
-            }
-        }
-        
+
+        // 7/16/17; Until today I had another large bug that was undetected. I was calling `processRequest` below assuming that request processing was being done *synchronously*, which was blatently untrue! This was causing `end` to be called for some requests prematurely. I've now made changes to use callbacks, and deal with the fact that asynchronous request processing is happening in many cases.
+
         processRequest(params)
-        
-        if self.endpoint.needsLock {
-            _ = params.repos.lock.unlock(userId: params.currentSignedInUser!.effectiveOwningUserId)
-        }
-        
-        return operationResult
     }
     
-    // MARK: CredsDelegate
+    // MARK: AccountDelegate
     
-    func saveToDatabase(creds:Creds, user:CredsUser) -> Bool {
-        let result = self.repositories.user.updateCreds(creds: creds, forUser: user)
-        Log.debug(message: "saveToDatabase: result: \(result)")
+    func saveToDatabase(account creds:Account) -> Bool {
+        let result = self.repositories.user.updateCreds(creds: creds, forUser: creds.accountCreationUser!)
+        Log.debug("saveToDatabase: result: \(result)")
         return result
     }
     

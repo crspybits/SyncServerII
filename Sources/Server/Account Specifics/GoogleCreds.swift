@@ -12,6 +12,9 @@ import CredentialsGoogle
 import PerfectLib
 import KituraNet
 import SwiftyJSON
+import SyncServerShared
+import Kitura
+import LoggerAPI
 
 // Credentials basis for making Google endpoint calls.
 
@@ -35,7 +38,7 @@ d) The rationale for the two kinds of access tokens (client-side, and server-sid
     ii) The pattern of client-based primary authentication and server-side tokens that access cloud services is the general pattern by which the server needs to be structured. For example, for shared account authorization where Google Drive user X wants to allow a Facebook user Y to make use of their files, primary authentication will take place using Facebook credentials for Y, and server-side use of Google Drive will make use of X's stored refresh token/access token's.
 */
 
-class GoogleCreds : Creds {
+class GoogleCreds : AccountAPICall, Account {
     // The following keys are for conversion <-> JSON (e.g., to store this into a database).
     
     static let accessTokenKey = "accessToken"
@@ -52,22 +55,37 @@ class GoogleCreds : Creds {
     
     let expiredAccessTokenHTTPCode = HTTPStatusCode.unauthorized
     
+    static var accountType:AccountType {
+        return .Google
+    }
+    
+    var signInType:SignInType {
+        return .both
+    }
+
+    weak var delegate:AccountDelegate?
+    var accountCreationUser:AccountCreationUser?
+    
     // This is to ensure that some error doesn't cause us to attempt to refresh the access token multiple times in a row. I'm assuming that for any one endpoint invocation, we'll at most need to refresh the access token a single time.
     private var alreadyRefreshed = false
     
     override init() {
         super.init()
-        self.accountType = .Google
-        self.baseURL = "www.googleapis.com"
+        baseURL = "www.googleapis.com"
+    }
+    
+    static func updateUserProfile(_ userProfile: UserProfile, fromRequest request: RouterRequest) {
+        userProfile.extendedProperties[ServerConstants.GoogleHTTPServerAuthCodeKey] = request.headers[ServerConstants.GoogleHTTPServerAuthCodeKey]
+        userProfile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey]
     }
     
     enum FromJSONError : Swift.Error {
     case noRequiredKeyValue
     }
     
-    override static func fromJSON(s:String, user:CredsUser?, delegate:CredsDelegate?) throws -> Creds? {
-        guard let jsonDict = s.toJSONDictionary() as? [String:String] else {
-            Log.error(message: "Could not convert string to JSON [String:String]: \(s)")
+    static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
+        guard let jsonDict = json.toJSONDictionary() as? [String:String] else {
+            Log.error("Could not convert string to JSON [String:String]: \(json)")
             return nil
         }
         
@@ -75,11 +93,11 @@ class GoogleCreds : Creds {
             let keyValue = jsonDict[key]
             if keyValue == nil {
                 if required {
-                    Log.error(message: "No \(key) value present.")
+                    Log.error("No \(key) value present.")
                     throw FromJSONError.noRequiredKeyValue
                 }
                 else {
-                    Log.warning(message: "No \(key) value present.")
+                    Log.warning("No \(key) value present.")
                 }
             }
             else {
@@ -89,7 +107,7 @@ class GoogleCreds : Creds {
         
         let result = GoogleCreds()
         result.delegate = delegate
-        result.user = user
+        result.accountCreationUser = user
 
         try setProperty(key: accessTokenKey) { value in
             result.accessToken = value
@@ -108,38 +126,23 @@ class GoogleCreds : Creds {
         return result
     }
     
-    func dictionaryToJSONString(dict:[String:Any]) -> String? {
-        var data:Data!
-        
-        do {
-            try data = JSONSerialization.data(withJSONObject: dict, options: JSONSerialization.WritingOptions(rawValue: UInt(0)))
-        } catch (let error) {
-            Log.error(message: "Could not convert json to data: \(error)")
-            return nil
-        }
-        
-        return String(data: data, encoding: String.Encoding.utf8)
-    }
-    
-    override func toJSON() -> String? {
+    func toJSON() -> String? {
         var jsonDict = [String:String]()
         jsonDict[GoogleCreds.accessTokenKey] = self.accessToken
         jsonDict[GoogleCreds.refreshTokenKey] = self.refreshToken
         jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode
-        return dictionaryToJSONString(dict: jsonDict)
+        return JSONExtras.toJSONString(dict: jsonDict)
     }
     
-    override static func fromProfile(profile:UserProfile, user:CredsUser?, delegate:CredsDelegate?) -> Creds? {
-        guard let googleSpecificCreds = profile.accountSpecificCreds as? GoogleSpecificCreds else {
-            Log.error(message: "Account specific creds were not GoogleSpecificCreds")
-            return nil
-        }
+    static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         
         let creds = GoogleCreds()
-        creds.user = user
+        creds.accountCreationUser = user
         creds.delegate = delegate
-        creds.accessToken = googleSpecificCreds.accessToken
-        creds.serverAuthCode = googleSpecificCreds.serverAuthCode
+        creds.accessToken =
+            profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
+        creds.serverAuthCode =
+            profile.extendedProperties[ServerConstants.GoogleHTTPServerAuthCodeKey] as? String
         return creds
     }
     
@@ -153,32 +156,36 @@ class GoogleCreds : Creds {
     case errorSavingCredsToDatabase
     }
     
-    override func needToGenerateTokens(dbCreds:Creds) -> Bool {
+    func needToGenerateTokens(userType:UserType, dbCreds:Account? = nil) -> Bool {
+        if userType == .sharing {
+            return false
+        }
+        
         let dbGoogleCreds = dbCreds as! GoogleCreds
         return serverAuthCode != nil && serverAuthCode != dbGoogleCreds.serverAuthCode
     }
     
     // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is true iff the generation occurred successfully.
-    override func generateTokens(completion:@escaping (_ success:Bool?, Swift.Error?)->()) {
+    func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->()) {
         if self.serverAuthCode == nil {
-            Log.info(message: "No serverAuthCode from client.")
-            completion(false, nil)
+            Log.info("No serverAuthCode from client.")
+            completion(nil)
             return
         }
 
-        let bodyParameters = "code=\(self.serverAuthCode!)&client_id=\(Constants.session.googleClientId)&client_secret=\(Constants.session.googleClientSecret)&redirect_uri=&grant_type=authorization_code"
-        Log.debug(message: "bodyParameters: \(bodyParameters)")
+        let bodyParameters = "code=\(self.serverAuthCode!)&client_id=\(Constants.session.googleClientId!)&client_secret=\(Constants.session.googleClientSecret!)&redirect_uri=&grant_type=authorization_code"
+        Log.debug("bodyParameters: \(bodyParameters)")
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
 
         self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
-                completion(nil, GenerateTokensError.badStatusCode(statusCode))
+                completion(GenerateTokensError.badStatusCode(statusCode))
                 return
             }
             
             guard apiResult != nil else {
-                completion(nil, GenerateTokensError.nilAPIResult)
+                completion(GenerateTokensError.nilAPIResult)
                 return
             }
             
@@ -188,30 +195,30 @@ class GoogleCreds : Creds {
                 
                 self.accessToken = accessToken
                 self.refreshToken = refreshToken
-                Log.debug(message: "Obtained tokens: accessToken: \(accessToken)\n refreshToken: \(refreshToken)")
+                Log.debug("Obtained tokens: accessToken: \(accessToken)\n refreshToken: \(refreshToken)")
                 
                 if self.delegate == nil {
-                    Log.warning(message: "No Google Creds delegate!")
-                    completion(true, nil)
+                    Log.warning("No Google Creds delegate!")
+                    completion(nil)
                     return
                 }
                 
-                if self.delegate!.saveToDatabase(creds: self, user:self.user) {
-                    completion(true, nil)
+                if self.delegate!.saveToDatabase(account: self) {
+                    completion(nil)
                     return
                 }
                 
-                completion(nil, GenerateTokensError.errorSavingCredsToDatabase)
+                completion(GenerateTokensError.errorSavingCredsToDatabase)
                 return
             }
             
-            completion(nil, GenerateTokensError.couldNotObtainParameterFromJSON)
+            completion(GenerateTokensError.couldNotObtainParameterFromJSON)
         }
     }
     
-    override func merge(withNewerCreds newerCreds:Creds) {
-        assert(newerCreds is GoogleCreds, "Wrong other type of creds!")
-        let newerGoogleCreds = newerCreds as! GoogleCreds
+    func merge(withNewer newerAccount:Account) {
+        assert(newerAccount is GoogleCreds, "Wrong other type of creds!")
+        let newerGoogleCreds = newerAccount as! GoogleCreds
         
         if newerGoogleCreds.refreshToken != nil {
             self.refreshToken = newerGoogleCreds.refreshToken
@@ -238,32 +245,32 @@ class GoogleCreds : Creds {
     func refresh(completion:@escaping (Swift.Error?)->()) {
         // See "Using a refresh token" at https://developers.google.com/identity/protocols/OAuth2WebServer
 
-        // TODO: *0* Sometimes we've been ending up in a situation where we don't have a refresh token. The database somehow doesn't get the refresh token saveed in certain situations. What are those situations?
+        // TODO: *0* Sometimes we've been ending up in a situation where we don't have a refresh token. The database somehow doesn't get the refresh token saved in certain situations. What are those situations?
         guard self.refreshToken != nil else {
             completion(RefreshError.noRefreshToken)
             return
         }
         
-        let bodyParameters = "client_id=\(Constants.session.googleClientId)&client_secret=\(Constants.session.googleClientSecret)&refresh_token=\(self.refreshToken!)&grant_type=refresh_token"
-        Log.debug(message: "bodyParameters: \(bodyParameters)")
+        let bodyParameters = "client_id=\(Constants.session.googleClientId!)&client_secret=\(Constants.session.googleClientSecret!)&refresh_token=\(self.refreshToken!)&grant_type=refresh_token"
+        Log.debug("bodyParameters: \(bodyParameters)")
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
         
         self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
             guard statusCode == HTTPStatusCode.OK else {
-                Log.error(message: "Bad status code: \(String(describing: statusCode))")
+                Log.error("Bad status code: \(String(describing: statusCode))")
                 completion(RefreshError.badStatusCode(statusCode))
                 return
             }
             
             guard apiResult != nil else {
-                Log.error(message: "API result was nil!")
+                Log.error("API result was nil!")
                 completion(RefreshError.nilAPIResult)
                 return
             }
             
             guard case .json(let jsonResult) = apiResult! else {
-                Log.error(message: "Bad JSON result: \(String(describing: apiResult))")
+                Log.error("Bad JSON result: \(String(describing: apiResult))")
                 completion(RefreshError.badJSONResult)
                 return
             }
@@ -271,9 +278,9 @@ class GoogleCreds : Creds {
             if let accessToken =
                 jsonResult[GoogleCreds.googleAPIAccessTokenKey].string {
                 self.accessToken = accessToken
-                Log.debug(message: "Refreshed access token: \(accessToken)")
+                Log.debug("Refreshed access token: \(accessToken)")
                 
-                if self.delegate == nil || self.delegate!.saveToDatabase(creds: self, user:self.user) {
+                if self.delegate == nil || self.delegate!.saveToDatabase(account: self) {
                     completion(nil)
                     return
                 }
@@ -282,13 +289,13 @@ class GoogleCreds : Creds {
                 return
             }
             
-            Log.error(message: "Could not obtain parameter from JSON!")
+            Log.error("Could not obtain parameter from JSON!")
             completion(RefreshError.couldNotObtainParameterFromJSON)
         }
     }
     
     override func apiCall(method:String, baseURL:String? = nil, path:String,
-        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:Body? = nil,
+        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:APICallBody? = nil,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
         var headers:[String:String] = additionalHeaders ?? [:]
@@ -302,19 +309,19 @@ class GoogleCreds : Creds {
         
             if statusCode == self.expiredAccessTokenHTTPCode && !self.alreadyRefreshed {
                 self.alreadyRefreshed = true
-                Log.info(message: "Attempting to refresh access token...")
+                Log.info("Attempting to refresh access token...")
                 
                 self.refresh() { error in
                     if error == nil {
-                        Log.info(message: "Successfully refreshed access token!")
+                        Log.info("Successfully refreshed access token!")
 
                         // Refresh was successful, update the authorization header and try the operation again.
-                        headers["Authorization" ] = "Bearer \(self.accessToken!)"
+                        headers["Authorization"] = "Bearer \(self.accessToken!)"
 
                         super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, completion: completion)
                     }
                     else {
-                        Log.error(message: "Failed to refresh access token: \(String(describing: error))")
+                        Log.error("Failed to refresh access token: \(String(describing: error))")
                         completion(nil, .internalServerError)
                     }
                 }

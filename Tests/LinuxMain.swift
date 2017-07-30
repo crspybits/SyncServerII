@@ -2,6 +2,8 @@ import XCTest
 @testable import ServerTests
 
 XCTMain([
+    testCase(AccountAuthenticationTests_Facebook.allTests),
+    testCase(AccountAuthenticationTests_Google.allTests),
     testCase(DatabaseModelTests.allTests),
     testCase(FailureTests.allTests),
     testCase(FileController_DoneUploadsTests.allTests),
@@ -11,7 +13,6 @@ XCTMain([
     testCase(FileControllerTests_UploadDeletion.allTests),
     testCase(GeneralAuthTests.allTests),
     testCase(GeneralDatabaseTests.allTests),
-    testCase(GoogleAuthenticationTests.allTests),
     testCase(GoogleDriveTests.allTests),
     testCase(MessageTests.allTests),
     testCase(Sharing_FileManipulationTests.allTests),
