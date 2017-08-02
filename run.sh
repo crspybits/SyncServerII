@@ -13,8 +13,15 @@
 #			./run.sh local ../Private/Server/Server.json
 #			./run.sh aws ../../Private/Server/SharedImagesServer.json
 
-#		When running on AWS, you first need to do :
-#		cd ~/SyncServerII/Server; sudo bash; source ~/.bashrc
+#		When running on AWS, you first need to do:
+#			cd ~/SyncServerII/Server; sudo bash; source ~/.bashrc
+# 		If the repo has been changed, do:
+#			git status
+#			git reset --hard
+#		If you need to get a new repo version:
+#			git pull origin master
+#		And finally, you may need to change the port number in:
+#			Server/Sources/Server/ServerMain.swift 
 
 buildLocation=~/builds/.build-server
 
