@@ -11,17 +11,21 @@
 #		In this case, the server is built before running.
 #		e.g., 
 #			./run.sh local ../Private/Server/Server.json
-#			./run.sh aws ../../Private/Server/SharedImagesServer.json
+#			./run.sh aws ../Private/Server/SharedImagesServer.json
 
-#		When running on AWS, you first need to do:
-#			cd ~/SyncServerII/Server; sudo bash; source ~/.bashrc
-# 		If the repo has been changed, do:
-#			git status
+#		When running on AWS, you first need to kill the prior running instance:
+#			ps -A | grep Main # and get the pid
+#			sudo kill -9 <PID>
+# 		If the repo has been changed (check with: git status), do:
 #			git reset --hard
-#		If you need to get a new repo version:
+#		If you need to get the new repo version:
 #			git pull origin master
-#		And finally, you may need to change the port number in:
-#			Server/Sources/Server/ServerMain.swift 
+#		Then:
+#			cd ~/SyncServerII; sudo bash; source ~/.bashrc
+#		Then, run the server.
+#		If you get a crash during building, you may need to do:
+#			trash ~/builds/
+#		And try again.
 
 buildLocation=~/builds/.build-server
 
@@ -83,11 +87,5 @@ if [ $? == 0 ] && [ "${CMD}" == "build" ] ; then
 	fi
 fi
 
-exit 0
-
-# Installing next version:
-git reset --hard
-git pull origin master
-# Until I get this changed, need to change to using port 443 and change the run.sh
 
 
