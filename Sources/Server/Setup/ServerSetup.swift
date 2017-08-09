@@ -61,6 +61,17 @@ class ServerSetup {
             AccountManager.session.addAccountType(FacebookCreds.self)
         }
         
+        // 8/8/17; There needs to be at least one sign-in type configured for the server to do anything. And at least one of these needs to allow owning users. If there can be no owning users, how do you create anything to share? https://github.com/crspybits/SyncServerII/issues/9
+        if AccountManager.session.numberAccountTypes == 0 {
+            Log.critical(message: "There are no sign-in types configured!")
+            exit(1)
+        }
+        
+        if AccountManager.session.numberOfOwningAccountTypes == 0 {
+            Log.critical(message: "There are no owning sign-in types configured!")
+            exit(1)
+        }
+        
         router.all { (request, response, next) in
             Log.info(message: "REQUEST RECEIVED: \(request.urlURL.path)")
             

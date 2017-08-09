@@ -59,7 +59,7 @@ class GoogleCreds : AccountAPICall, Account {
         return .Google
     }
     
-    var signInType:SignInType {
+    static var signInType:SignInType {
         return .both
     }
 
