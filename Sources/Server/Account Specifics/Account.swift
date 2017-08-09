@@ -36,8 +36,8 @@ protocol Account {
     // Currently assuming all Account's use access tokens.
     var accessToken: String! {get set}
     
-    // What sign in type(s) does this account type allow?
-    static var signInType:SignInType {get}
+    // What sign in type(s) does this account allow?
+    var signInType:SignInType {get}
     
     func toJSON() -> String?
     
@@ -57,10 +57,6 @@ protocol Account {
 }
 
 extension Account {
-    var signInType: SignInType {
-        return type(of: self).signInType
-    }
-    
     func generateTokensIfNeeded(userType:UserType, dbCreds:Account?, routerResponse:RouterResponse, success:@escaping ()->(), failure: @escaping ()->()) {
     
         if needToGenerateTokens(userType: userType, dbCreds: dbCreds) {

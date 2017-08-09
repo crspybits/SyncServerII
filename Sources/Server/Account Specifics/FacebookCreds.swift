@@ -23,7 +23,7 @@ class FacebookCreds : AccountAPICall,  Account {
     
     var accountCreationUser:AccountCreationUser?
     
-    static var signInType:SignInType {
+    var signInType:SignInType {
         return .sharingUser
     }
     
