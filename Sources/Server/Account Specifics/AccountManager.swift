@@ -9,10 +9,28 @@ import Foundation
 import Credentials
 import Kitura
 import SyncServerShared
+import LoggerAPI
 
 class AccountManager {
     static let session = AccountManager()
     private var accountTypes = [Account.Type]()
+    
+    var numberAccountTypes: Int {
+        return accountTypes.count
+    }
+    
+    // Number of account types that can own.
+    var numberOfOwningAccountTypes:Int {
+        var number = 0
+        
+        for accountType in accountTypes {
+            if accountType.signInType.contains(.owningUser) {
+                number += 1
+            }
+        }
+        
+        return number
+    }
     
     private init() {
     }
@@ -30,6 +48,7 @@ class AccountManager {
             }
         }
         
+        Log.info("Added account type to system: \(newAccountType)")
         accountTypes.append(newAccountType)
     }
     
