@@ -104,7 +104,7 @@ class UserController : ControllerProtocol {
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
         var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId!)
+        profileCreds.accountCreationUser = .userId(userId!, .owning)
         
         let response = AddUserResponse()!
 
