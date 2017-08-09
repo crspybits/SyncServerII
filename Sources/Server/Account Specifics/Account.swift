@@ -15,7 +15,7 @@ import Kitura
 
 enum AccountCreationUser {
     case user(User) // use this if we have it.
-    case userId(UserId) // and this if we don't.
+    case userId(UserId, UserType) // and this if we don't.
 }
 
 // SyncServer specific Keys for UserProfile extendedProperties

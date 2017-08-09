@@ -242,7 +242,7 @@ class UserRepository : Repository {
             credsJSONString = oldCreds.toJSON()!
             userId = user.userId
             
-        case .userId(let id):
+        case .userId(let id, _):
             credsJSONString = newCreds.toJSON()!
             userId = id
         }
