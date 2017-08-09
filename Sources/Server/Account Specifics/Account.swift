@@ -29,7 +29,7 @@ protocol AccountDelegate : class {
 protocol Account {
     static var accountType:AccountType {get}
     
-    weak var delegate:AccountDelegate? {get}
+    weak var delegate:AccountDelegate? {get set}
     
     var accountCreationUser:AccountCreationUser? {get set}
     

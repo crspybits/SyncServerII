@@ -101,7 +101,7 @@ class FacebookCreds : AccountAPICall,  Account {
         let creds = FacebookCreds()
         creds.accountCreationUser = user
         creds.delegate = delegate
-        creds.accessToken =             profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
+        creds.accessToken = profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
         return creds
     }
     

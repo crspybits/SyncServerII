@@ -353,6 +353,8 @@ class RequestHandler : AccountDelegate {
                 handleResult(.failure(.message("Could not get effective owning user creds.")))
                 return
             }
+            
+            effectiveOwningUserCreds!.delegate = self
         }
         
         if self.endpoint.needsLock {
