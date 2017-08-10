@@ -298,7 +298,12 @@ class GoogleCreds : AccountAPICall, Account {
                 self.accessToken = accessToken
                 Log.debug("Refreshed access token: \(accessToken)")
                 
-                if self.delegate == nil || self.delegate!.saveToDatabase(account: self) {
+                if self.delegate == nil {
+                    Log.warning("Delegate was nil-- could not save creds to database!")
+                    completion(nil)
+                }
+                
+                if self.delegate!.saveToDatabase(account: self) {
                     completion(nil)
                     return
                 }
