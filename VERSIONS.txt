@@ -2,10 +2,13 @@ Version 0.6; 8/9/17-- Bug fixes
 	* Don't store additional creds info for Google shared users
 		https://github.com/crspybits/SyncServerII/issues/13
 	
+	* Make sure there is at least one cloud-storage sign-in in config when server starts
+		https://github.com/crspybits/SyncServerII/issues/9
+		
 	* Use server-side date/time for file creation dates
 		https://github.com/crspybits/SyncServerII/issues/4
 		(Also necessitated removal of date keys for requests for UploadFile, and hence an update
 		to the SyncServer-Shared library, to version 2.0.0).
-	
-	* Make sure there is at least one cloud-storage sign-in in config when server starts
-		https://github.com/crspybits/SyncServerII/issues/9
+		
+	* Refresh token not saving result to mySQL
+		https://github.com/crspybits/SyncServerII/issues/20
