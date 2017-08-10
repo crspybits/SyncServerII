@@ -1,1 +1,1 @@
-The files `Server.json` contains private info, and so is not contained in the public repo. For now, search the code for this file name to find out the keys/values it contains. Hopefully later, I document this better! :).
+The file `Server.json` contains private info, and so is not contained in the public repo. For now, search the code for this file name to find out the keys/values it contains. Hopefully later, I document this better! :).
