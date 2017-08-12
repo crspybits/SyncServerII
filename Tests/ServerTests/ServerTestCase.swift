@@ -107,9 +107,7 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: cloudFolderName,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: masterVersion,
-            UploadFileRequest.creationDateKey: DateExtras.date(Date(), toFormat: .DATETIME),
-            UploadFileRequest.updateDateKey: DateExtras.date(Date(), toFormat: .DATETIME)
+            UploadFileRequest.masterVersionKey: masterVersion
         ])!
         
         uploadRequest.appMetaData = appMetaData
@@ -190,16 +188,13 @@ class ServerTestCase : XCTestCase {
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
         let sizeOfCatFileInBytes:Int64 = 1162662
         let data = try! Data(contentsOf: fileURL)
-        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
 
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: MasterVersionInt(0),
-            UploadFileRequest.creationDateKey: dateString,
-            UploadFileRequest.updateDateKey: dateString
+            UploadFileRequest.masterVersionKey: MasterVersionInt(0)
         ])
         
         Log.info("Starting runUploadTest: uploadJPEGFile")

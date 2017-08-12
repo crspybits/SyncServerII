@@ -39,7 +39,7 @@ protocol Account {
     // What sign in type(s) does this account type allow?
     static var signInType:SignInType {get}
     
-    func toJSON() -> String?
+    func toJSON(userType: UserType) -> String?
     
     // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
     func needToGenerateTokens(userType:UserType, dbCreds:Account?) -> Bool

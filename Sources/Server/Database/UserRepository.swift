@@ -239,11 +239,11 @@ class UserRepository : Repository {
             // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
             let oldCreds = user.credsObject!
             oldCreds.merge(withNewer: newCreds)
-            credsJSONString = oldCreds.toJSON()!
+            credsJSONString = oldCreds.toJSON(userType:user.userType)!
             userId = user.userId
             
-        case .userId(let id, _):
-            credsJSONString = newCreds.toJSON()!
+        case .userId(let id, let userType):
+            credsJSONString = newCreds.toJSON(userType: userType)!
             userId = id
         }
         

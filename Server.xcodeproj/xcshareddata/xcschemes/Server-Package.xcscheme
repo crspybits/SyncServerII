@@ -70,6 +70,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Kitura-CredentialsFacebook::CredentialsFacebook"
+               BuildableName = "CredentialsFacebook.framework"
+               BlueprintName = "CredentialsFacebook"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "Kitura-Credentials::Credentials"
                BuildableName = "Credentials.framework"
                BlueprintName = "Credentials"

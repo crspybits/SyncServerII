@@ -126,24 +126,11 @@ class GoogleCreds : AccountAPICall, Account {
         return result
     }
     
-    func toJSON() -> String? {
+    func toJSON(userType: UserType) -> String? {
         var jsonDict = [String:String]()
         
-        var storeCreds = false
-        
         // 8/8/17; Only if a Google user is an owning user should we be storing creds info into the database. https://github.com/crspybits/SyncServerII/issues/13
-        switch accountCreationUser {
-        case .some(.userId(_, .owning)):
-            storeCreds = true
-            
-        case .some(.user(let user)) where user.userType == .owning:
-            storeCreds = true
-            
-        default:
-            break
-        }
-        
-        if storeCreds {
+        if userType == .owning {
             jsonDict[GoogleCreds.accessTokenKey] = self.accessToken
             jsonDict[GoogleCreds.refreshTokenKey] = self.refreshToken
             jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode

@@ -104,6 +104,7 @@ class SharingAccountsController : ControllerProtocol {
         }
         
         // All seems good. Let's create the new sharing user.
+        let userType:UserType = .sharing
         
         // No database creds because this is a new sharing user-- so use params.profileCreds
         
@@ -111,9 +112,9 @@ class SharingAccountsController : ControllerProtocol {
         user.username = params.userProfile!.displayName
         user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON()
+        user.creds = params.profileCreds!.toJSON(userType:userType)
         
-        user.userType = .sharing
+        user.userType = userType
         user.sharingPermission = sharingInvitation.sharingPermission
         user.owningUserId = sharingInvitation.owningUserId
         
@@ -126,7 +127,7 @@ class SharingAccountsController : ControllerProtocol {
         
         let response = RedeemSharingInvitationResponse()!
 
-        params.profileCreds!.generateTokensIfNeeded(userType: .sharing, dbCreds: nil, routerResponse: params.routerResponse, success: {
+        params.profileCreds!.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
             params.completion(response)
         }, failure: {
             params.completion(nil)
