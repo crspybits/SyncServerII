@@ -15,7 +15,7 @@ import Kitura
 
 enum AccountCreationUser {
     case user(User) // use this if we have it.
-    case userId(UserId) // and this if we don't.
+    case userId(UserId, UserType) // and this if we don't.
 }
 
 // SyncServer specific Keys for UserProfile extendedProperties
@@ -29,7 +29,7 @@ protocol AccountDelegate : class {
 protocol Account {
     static var accountType:AccountType {get}
     
-    weak var delegate:AccountDelegate? {get}
+    weak var delegate:AccountDelegate? {get set}
     
     var accountCreationUser:AccountCreationUser? {get set}
     
@@ -39,7 +39,7 @@ protocol Account {
     // What sign in type(s) does this account type allow?
     static var signInType:SignInType {get}
     
-    func toJSON() -> String?
+    func toJSON(userType: UserType) -> String?
     
     // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
     func needToGenerateTokens(userType:UserType, dbCreds:Account?) -> Bool
@@ -53,7 +53,7 @@ protocol Account {
     static func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest)
     
     static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
-    static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account?
+    static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account?
 }
 
 extension Account {

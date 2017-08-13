@@ -107,9 +107,7 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: cloudFolderName,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: masterVersion,
-            UploadFileRequest.creationDateKey: DateExtras.date(Date(), toFormat: .DATETIME),
-            UploadFileRequest.updateDateKey: DateExtras.date(Date(), toFormat: .DATETIME)
+            UploadFileRequest.masterVersionKey: masterVersion
         ])!
         
         uploadRequest.appMetaData = appMetaData
@@ -190,16 +188,13 @@ class ServerTestCase : XCTestCase {
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
         let sizeOfCatFileInBytes:Int64 = 1162662
         let data = try! Data(contentsOf: fileURL)
-        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
 
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: MasterVersionInt(0),
-            UploadFileRequest.creationDateKey: dateString,
-            UploadFileRequest.updateDateKey: dateString
+            UploadFileRequest.masterVersionKey: MasterVersionInt(0)
         ])
         
         Log.info("Starting runUploadTest: uploadJPEGFile")
@@ -291,6 +286,28 @@ class ServerTestCase : XCTestCase {
                 }
                 
                 expectation.fulfill()
+            }
+        }
+    }
+    
+    func getFileIndex(deviceUUID:String = PerfectLib.UUID().string, completion: @escaping ([FileInfo]?) -> ()) {
+        
+        self.performServerTest { expectation, googleCreds in
+            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
+                XCTAssert(dict != nil)
+                
+                guard let fileIndexResponse = FileIndexResponse(json: dict!) else {
+                    expectation.fulfill()
+                    completion(nil)
+                    return
+                }
+                
+                expectation.fulfill()
+                completion(fileIndexResponse.fileIndex)
             }
         }
     }
@@ -504,11 +521,17 @@ class ServerTestCase : XCTestCase {
         var actualUploadFileRequest:UploadFileRequest!
         var actualFileSize:Int64!
         
+        let beforeUploadTime = Date()
+        var afterUploadTime:Date!
+        var fileUUID:String!
+        
         if uploadFileRequest == nil {
             let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: self.testFolder, appMetaData:appMetaData)
+            fileUUID = uploadRequest.fileUUID
             actualUploadFileRequest = uploadRequest
             actualFileSize = size
             self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+            afterUploadTime = Date()
         }
         else {
             actualUploadFileRequest = uploadFileRequest
@@ -552,6 +575,33 @@ class ServerTestCase : XCTestCase {
                 }
                 
                 expectation.fulfill()
+            }
+        }
+        
+        if let afterUploadTime = afterUploadTime, let fileUUID = fileUUID {
+            checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime)
+        }
+    }
+    
+    func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date) {
+        getFileIndex() { fileInfo in
+            let file = fileInfo!.filter({$0.fileUUID == fileUUID})[0]
+            let comp1 = file.creationDate!.compare(start)
+            
+            switch comp1 {
+            case .orderedDescending:
+                break
+            default:
+                XCTAssert(false)
+            }
+            
+            let comp2 = file.creationDate!.compare(end)
+            
+            switch comp2 {
+            case .orderedAscending:
+                break
+            default:
+                XCTAssert(false)
             }
         }
     }

@@ -41,8 +41,8 @@ elif [ "${ARG1}" == "test" ] ; then
 	CMD="test"
 	
 	if [ "empty${ARG2}" != "empty" ] ; then
-		# -s command line option to `swift` indicates a specific test
-		SPECIFIC_TEST="-s ${ARG2}"
+		# --filter command line option to `swift` indicates a specific test
+		SPECIFIC_TEST="--filter ${ARG2}"
 	fi
 elif [ "${ARG1}" == "local" ] || [ "${ARG1}" == "aws" ] ; then
 	if [ "empty${ARG2}" == "empty" ] ; then

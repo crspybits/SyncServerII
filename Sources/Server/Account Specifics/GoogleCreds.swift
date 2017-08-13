@@ -83,7 +83,7 @@ class GoogleCreds : AccountAPICall, Account {
     case noRequiredKeyValue
     }
     
-    static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
+    static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
         guard let jsonDict = json.toJSONDictionary() as? [String:String] else {
             Log.error("Could not convert string to JSON [String:String]: \(json)")
             return nil
@@ -108,9 +108,18 @@ class GoogleCreds : AccountAPICall, Account {
         let result = GoogleCreds()
         result.delegate = delegate
         result.accountCreationUser = user
-
-        try setProperty(key: accessTokenKey) { value in
-            result.accessToken = value
+        
+        // Only owning users have access token's in creds. Sharing users have empty creds stored in the database.
+        switch user {
+        case .user(let user) where user.userType == .owning:
+            fallthrough
+        case .userId(_, .owning):
+            try setProperty(key: accessTokenKey) { value in
+                result.accessToken = value
+            }
+            
+        default:
+            break
         }
         
         // Considering the refresh token and serverAuthCode as optional because (a) I think I don't always get these from the client, and (b) during testing, I don't always have these.
@@ -126,11 +135,16 @@ class GoogleCreds : AccountAPICall, Account {
         return result
     }
     
-    func toJSON() -> String? {
+    func toJSON(userType: UserType) -> String? {
         var jsonDict = [String:String]()
-        jsonDict[GoogleCreds.accessTokenKey] = self.accessToken
-        jsonDict[GoogleCreds.refreshTokenKey] = self.refreshToken
-        jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode
+        
+        // 8/8/17; Only if a Google user is an owning user should we be storing creds info into the database. https://github.com/crspybits/SyncServerII/issues/13
+        if userType == .owning {
+            jsonDict[GoogleCreds.accessTokenKey] = self.accessToken
+            jsonDict[GoogleCreds.refreshTokenKey] = self.refreshToken
+            jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode
+        }
+
         return JSONExtras.toJSONString(dict: jsonDict)
     }
     
@@ -280,7 +294,13 @@ class GoogleCreds : AccountAPICall, Account {
                 self.accessToken = accessToken
                 Log.debug("Refreshed access token: \(accessToken)")
                 
-                if self.delegate == nil || self.delegate!.saveToDatabase(account: self) {
+                if self.delegate == nil {
+                    Log.warning("Delegate was nil-- could not save creds to database!")
+                    completion(nil)
+                    return
+                }
+                
+                if self.delegate!.saveToDatabase(account: self) {
                     completion(nil)
                     return
                 }

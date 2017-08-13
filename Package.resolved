@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "CommonCrypto",
+        "repositoryURL": "https://github.com/IBM-Swift/CommonCrypto.git",
+        "state": {
+          "branch": null,
+          "revision": "02a5c0520b1a0a7a6c606f0273fcd161973722fa",
+          "version": "0.1.4"
+        }
+      },
+      {
         "package": "Cryptor",
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
@@ -87,8 +96,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
         "state": {
           "branch": null,
-          "revision": "03af0ffa166e3f1a076dc8f873ba24dbbc891617",
-          "version": "1.7.14"
+          "revision": "b5c3b26321964978abb3b03230684a347a00a4b7",
+          "version": "1.7.15"
         }
       },
       {
@@ -138,10 +147,10 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
         "state": {
           "branch": null,
-          "revision": "b35cf9671ae9ceb6dec05900b8a69e53ed1985d7",
+          "revision": "51991fc81e40ddef36e8db1868c9b7f1f83d30dc",
           "version": "2.0.1"
         }
       },
@@ -195,8 +204,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "007fa4078475bf410d75bc1871487f64872e7c78",
-          "version": "0.12.56"
+          "revision": "c53f2459eeb60f7250f2dbc40e01685bae9f1526",
+          "version": "0.12.61"
         }
       },
       {
@@ -204,8 +213,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
         "state": {
           "branch": null,
-          "revision": "78e19eb4137ca98c13cea1539c8144908a906d17",
-          "version": "0.12.45"
+          "revision": "9f5d0b37b7856c502873223544f37689484778bc",
+          "version": "0.12.47"
         }
       },
       {
@@ -222,8 +231,8 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "de2e8c5758aeaa37f79f6a122389c0596a35dd93",
-          "version": "1.0.0"
+          "revision": "59bae6ea30e17195afbab72d7f30eaee2c821a52",
+          "version": "2.0.0"
         }
       }
     ]

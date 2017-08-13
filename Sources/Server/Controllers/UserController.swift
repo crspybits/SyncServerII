@@ -70,16 +70,16 @@ class UserController : ControllerProtocol {
             return
         }
         
+        // This necessarily is an owning user-- sharing users are created by the redeemSharingInvitation endpoint.
+        let userType:UserType = .owning
+
         // No database creds because this is a new user-- so use params.profileCreds
-        
         let user = User()
         user.username = params.userProfile!.displayName
         user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON()
-        
-        // This necessarily is an owning user-- sharing users are created by the redeemSharingInvitation endpoint.
-        user.userType = .owning
+        user.creds = params.profileCreds!.toJSON(userType: userType)
+        user.userType = userType
         
         guard params.profileCreds!.signInType.contains(.owningUser) else {
             Log.error("Attempting to add a user with an Account that only allows sharing users!")
@@ -104,12 +104,12 @@ class UserController : ControllerProtocol {
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
         var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId!)
+        profileCreds.accountCreationUser = .userId(userId!, userType)
         
         let response = AddUserResponse()!
 
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
-        profileCreds.generateTokensIfNeeded(userType: .owning, dbCreds: user.credsObject, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: user.credsObject, routerResponse: params.routerResponse, success: {
             params.completion(response)
         }, failure: {
             params.completion(nil)

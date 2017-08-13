@@ -11,6 +11,7 @@ import PerfectLib
 import Credentials
 import CredentialsGoogle
 import SyncServerShared
+import LoggerAPI
 
 class User : NSObject, Model {
     static let userIdKey = "userId"
@@ -85,7 +86,7 @@ class User : NSObject, Model {
             return credsObj
         }
         catch (let error) {
-            Log.error(message: "\(error)")
+            Log.error("\(error)")
             return nil
         }
     }
@@ -190,26 +191,26 @@ class UserRepository : Repository {
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
     func add(user:User) -> Int64? {
         if user.username == nil || user.accountType == nil || user.credsId == nil || user.userType == nil {
-            Log.error(message: "One of the model values was nil!")
+            Log.error("One of the model values was nil!")
             return nil
         }
         
         // Validate the JSON before we insert it.
         guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountType: user.accountType, user: .user(user), delegate: nil) else {
-            Log.error(message: "Invalid creds JSON: \(user.creds)")
+            Log.error("Invalid creds JSON: \(user.creds) for accountType: \(user.accountType)")
             return nil
         }
         
         switch user.userType! {
         case .sharing:
             guard user.owningUserId != nil && user.sharingPermission != nil else {
-                Log.error(message: "Sharing user, but there was no owningUserId or sharingPermission")
+                Log.error("Sharing user, but there was no owningUserId or sharingPermission")
                 return nil
             }
             
         case .owning:
             guard user.owningUserId == nil && user.sharingPermission == nil else {
-                Log.error(message: "Owning user, and there was an owningUserId or sharingPermission")
+                Log.error("Owning user, and there was an owningUserId or sharingPermission")
                 return nil
             }
         }
@@ -224,7 +225,7 @@ class UserRepository : Repository {
         }
         else {
             let error = db.error
-            Log.error(message: "Could not insert into \(tableName): \(error)")
+            Log.error("Could not insert into \(tableName): \(error)")
             return nil
         }
     }
@@ -239,11 +240,11 @@ class UserRepository : Repository {
             // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
             let oldCreds = user.credsObject!
             oldCreds.merge(withNewer: newCreds)
-            credsJSONString = oldCreds.toJSON()!
+            credsJSONString = oldCreds.toJSON(userType:user.userType)!
             userId = user.userId
             
-        case .userId(let id):
-            credsJSONString = newCreds.toJSON()!
+        case .userId(let id, let userType):
+            credsJSONString = newCreds.toJSON(userType: userType)!
             userId = id
         }
         
@@ -256,13 +257,13 @@ class UserRepository : Repository {
                 return true
             }
             else {
-                Log.error(message: "Expected 1 update, but had \(numberUpdates)")
+                Log.error("Expected 1 update, but had \(numberUpdates)")
                 return false
             }
         }
         else {
             let error = db.error
-            Log.error(message: "Could not update row for \(tableName): \(error)")
+            Log.error("Could not update row for \(tableName): \(error)")
             return false
         }
     }

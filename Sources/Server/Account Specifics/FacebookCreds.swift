@@ -33,7 +33,7 @@ class FacebookCreds : AccountAPICall,  Account {
     }
     
     // There is no need to put any tokens into the database for Facebook. We don't need to access Facebook creds when the mobile user is offline, and this would just make an extra security issue.
-    func toJSON() -> String? {
+    func toJSON(userType: UserType) -> String? {
         let jsonDict = [String:String]()
         return JSONExtras.toJSONString(dict: jsonDict)
     }
@@ -101,11 +101,11 @@ class FacebookCreds : AccountAPICall,  Account {
         let creds = FacebookCreds()
         creds.accountCreationUser = user
         creds.delegate = delegate
-        creds.accessToken =             profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
+        creds.accessToken = profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
         return creds
     }
     
-    static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
+    static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
         
         let creds = FacebookCreds()
         creds.accountCreationUser = user

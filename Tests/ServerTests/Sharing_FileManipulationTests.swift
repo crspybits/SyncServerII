@@ -82,11 +82,11 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(testAccount: sharingUser, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false, expectError: failureExpected)
-        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest.masterVersion + 1, failureExpected:failureExpected)
+        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1), failureExpected:failureExpected)
     }
     
     func downloadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .google2, failureExpected:Bool = false) {
@@ -129,11 +129,11 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID1, addUser: false, expectError: failureExpected)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: uploadRequest.masterVersion + 1, failureExpected:failureExpected)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1), failureExpected:failureExpected)
         
         var sharingInvitationUUID:String!
         
@@ -271,7 +271,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     func testThatAdminSharingFacebookUserCanDownloadDeleteAFile() {
-        downloadDeleteFileBySharingUser(withPermission: .admin)
+        downloadDeleteFileBySharingUser(withPermission: .admin, sharingUser: .facebook1)
     }
     
     // MARK: Across sharing and owning users.

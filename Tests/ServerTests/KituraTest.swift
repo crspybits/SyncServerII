@@ -110,9 +110,6 @@ extension KituraTest {
             let creds = FacebookCreds()
             creds.accessToken = testAccount.token()
             runTest(usingCreds: creds)
-            
-        default:
-            XCTAssert(false)
         }
     }
     
