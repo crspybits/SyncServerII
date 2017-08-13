@@ -96,8 +96,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
     }
     
     func testBadUUIDForFileName() {
-        let dateString = DateExtras.date(Date(), toFormat: .DATETIME)
-
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",

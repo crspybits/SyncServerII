@@ -1297,6 +1297,7 @@
 
 /* Begin PBXFileReference section */
 		0D6CB16BECCADDBD1ECD1DE5 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		8344E9891F3FC7EF0056978E /* LinuxMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		F159D7DD419608E53B382380 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_100 /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		OBJ_101 /* CredentialsPluginProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsPluginProtocol.swift; sourceTree = "<group>"; };
@@ -1852,6 +1853,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8344E9881F3FC5310056978E /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				F159D7DD419608E53B382380 /* Server.json */,
+				0D6CB16BECCADDBD1ECD1DE5 /* ServerTests.json */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		OBJ_10 /* Account Specifics */ = {
 			isa = PBXGroup;
 			children = (
@@ -2427,7 +2437,7 @@
 			path = Sources/Main;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -2437,13 +2447,14 @@
 				OBJ_79 /* Resources */,
 				OBJ_80 /* Dependencies */,
 				OBJ_298 /* Products */,
+				8344E9881F3FC5310056978E /* Recovered References */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				8344E9891F3FC7EF0056978E /* LinuxMain.swift */,
 				OBJ_52 /* ServerTests */,
 			);
 			name = Tests;
@@ -3133,7 +3144,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_298 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";

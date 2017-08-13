@@ -105,7 +105,7 @@ class FacebookCreds : AccountAPICall,  Account {
         return creds
     }
     
-    static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
+    static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
         
         let creds = FacebookCreds()
         creds.accountCreationUser = user

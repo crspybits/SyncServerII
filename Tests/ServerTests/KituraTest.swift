@@ -110,6 +110,7 @@ extension KituraTest {
             let creds = FacebookCreds()
             creds.accessToken = testAccount.token()
             runTest(usingCreds: creds)
+        }
     }
     
     func performRequest(route:ServerEndpoint, responseDictFrom:ResponseDictFrom = .body, headers: [String: String]? = nil, urlParameters:String? = nil, body:Data? = nil, callback: @escaping (ClientResponse?, [String:Any]?) -> Void) {

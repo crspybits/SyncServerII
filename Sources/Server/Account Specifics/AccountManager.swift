@@ -93,7 +93,7 @@ class AccountManager {
         return nil
     }
     
-    func accountFromJSON(_ json:String, accountType type: AccountType, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account? {
+    func accountFromJSON(_ json:String, accountType type: AccountType, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
     
         for accountType in accountTypes {
             if accountType.accountType == type {

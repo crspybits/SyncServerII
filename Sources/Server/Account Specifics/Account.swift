@@ -53,7 +53,7 @@ protocol Account {
     static func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest)
     
     static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
-    static func fromJSON(_ json:String, user:AccountCreationUser?, delegate:AccountDelegate?) throws -> Account?
+    static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account?
 }
 
 extension Account {

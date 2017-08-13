@@ -38,7 +38,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -49,7 +49,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadRequest], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadRequest.masterVersion + 1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1))
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false)
     }
@@ -63,7 +63,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -74,7 +74,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadRequest], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadRequest.masterVersion + 1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1))
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false)
         
@@ -82,7 +82,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             uploadRequest.fileUUID: fileSize
         ]
         
-        self.getFileIndex(expectedFiles: [uploadRequest], masterVersionExpected: uploadRequest.masterVersion + 2, expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+        self.getFileIndex(expectedFiles: [uploadRequest], masterVersionExpected: uploadRequest.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
     
     func testThatUploadDeletionTwiceOfSameFileWorks() {
@@ -94,7 +94,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -119,13 +119,13 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
         
         // This file will not be deleted.
-        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID:deviceUUID, addUser:false, masterVersion: uploadRequest1.masterVersion + 1)
+        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID:deviceUUID, addUser:false, masterVersion: uploadRequest1.masterVersion + MasterVersionInt(1))
 
         let expectedDeletionState = [
             uploadRequest1.fileUUID: true,
@@ -134,7 +134,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadRequest1, uploadRequest2], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
 
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: uploadRequest1.masterVersion + 1)
+        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: uploadRequest1.masterVersion + MasterVersionInt(1))
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
         
@@ -143,7 +143,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             uploadRequest2.fileUUID: fileSize2,
         ]
 
-        self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2], masterVersionExpected: uploadRequest1.masterVersion + 2, expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+        self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
     
     // TODO: *0* Test upload deletion with with 2 files
@@ -157,8 +157,8 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion + 1,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1
+            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion + FileVersionInt(1),
+            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
@@ -174,7 +174,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: PerfectLib.UUID().string,
             UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
@@ -208,7 +208,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1,
+            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1),
             UploadDeletionRequest.actualDeletionKey: Int32(1)
         ])!
         
@@ -216,7 +216,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         // Make sure deletion actually occurred!
         
-        self.getFileIndex(expectedFiles: [], masterVersionExpected: uploadRequest1.masterVersion + 1, expectedFileSizes: [:], expectedDeletionState:[:])
+        self.getFileIndex(expectedFiles: [], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(1), expectedFileSizes: [:], expectedDeletionState:[:])
         
         self.performServerTest { expectation, creds in
             let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID)
@@ -249,7 +249,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + 1
+            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
         ])!
         
         let deviceUUID2 = PerfectLib.UUID().string
@@ -260,13 +260,13 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             uploadRequest1.fileUUID: true,
         ]
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest1.masterVersion + 1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest1.masterVersion + MasterVersionInt(1))
         
         let expectedSizes = [
             uploadRequest1.fileUUID: fileSize1,
         ]
 
-        self.getFileIndex(expectedFiles: [uploadRequest1], masterVersionExpected: uploadRequest1.masterVersion + 2, expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+        self.getFileIndex(expectedFiles: [uploadRequest1], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
 }
 
