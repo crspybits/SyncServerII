@@ -34,7 +34,8 @@ public class ServerMain {
     }
     
     public class func startup(type:ServerStartup = .blocking) {
-        Log.logger = HeliumLogger()
+        // Set the logging level
+        HeliumLogger.use(.debug)
         
         Log.info("Launching server in \(type) mode with \(CommandLine.arguments.count) command line arguments.")
         

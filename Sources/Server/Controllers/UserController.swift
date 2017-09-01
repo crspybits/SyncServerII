@@ -108,8 +108,10 @@ class UserController : ControllerProtocol {
         
         let response = AddUserResponse()!
 
+        Log.info("About to check if we need to generate tokens...")
+        
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
-        profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: user.credsObject, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
             params.completion(response)
         }, failure: {
             params.completion(nil)

@@ -171,12 +171,26 @@ class GoogleCreds : AccountAPICall, Account {
     }
     
     func needToGenerateTokens(userType:UserType, dbCreds:Account? = nil) -> Bool {
+        var result:Bool
         if userType == .sharing {
-            return false
+            result = false
+        }
+        else {
+            result = serverAuthCode != nil
+            
+            // If no dbCreds, then we generate tokens.
+            if let dbCreds = dbCreds {
+                if let dbGoogleCreds = dbCreds as? GoogleCreds {
+                    result = result && serverAuthCode != dbGoogleCreds.serverAuthCode
+                }
+                else {
+                    Log.error("Did not get GoogleCreds as dbCreds!")
+                }
+            }
         }
         
-        let dbGoogleCreds = dbCreds as! GoogleCreds
-        return serverAuthCode != nil && serverAuthCode != dbGoogleCreds.serverAuthCode
+        Log.debug("needToGenerateTokens: \(result); serverAuthCode: \(String(describing: serverAuthCode))")
+        return result
     }
     
     // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is true iff the generation occurred successfully.
