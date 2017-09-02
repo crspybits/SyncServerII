@@ -50,6 +50,10 @@ struct TestAccount {
     static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google)
     static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google)
     
+    static func isGoogle(_ account: TestAccount) -> Bool {
+        return account == google1 || account == google2 || account == google3
+    }
+    
     static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", type: .Facebook)
     
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
