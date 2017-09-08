@@ -47,6 +47,9 @@ class Constants {
     var maxNumberDeviceUUIDPerUser:Int?
     
     struct SSL {
+        // You *should* use SSL when using SyncServer. You just might want to not use Kitura to provide this service. See https://crspybits.github.io/SyncServerII/nginx.html
+        var usingKituraSSL: Bool = false
+        
         var selfSigning:Bool = false
 
         // MacOS only. The sslConfigPassword needs to be the "export password:" that comes up in this procedure: https://developer.ibm.com/swift/2016/09/22/securing-kitura-part-1-enabling-ssltls-on-your-swift-server/
@@ -121,6 +124,10 @@ class Constants {
         
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
         print("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")
+ 
+        if let usingKituraSSL = try? config.getBool(varName: "ssl.usingKituraSSL"), usingKituraSSL {
+            ssl.usingKituraSSL = true
+        }
         
         if let selfSigning = try? config.getBool(varName: "ssl.selfSigning"), selfSigning {
             ssl.selfSigning = true

@@ -15,13 +15,13 @@
 
 #		When running on AWS, you first need to kill the prior running instance:
 #			ps -A | grep Main # and get the pid
-#			sudo kill -9 <PID>
+#			kill -9 <PID>
 # 		If the repo has been changed (check with: git status), do:
 #			git reset --hard
 #		If you need to get the new repo version:
 #			git pull origin master
 #		Then:
-#			cd ~/SyncServerII; sudo bash; source ~/.bashrc
+#			cd ~/SyncServerII
 #		Then, run the server.
 #		If you get a crash during building, you may need to do:
 #			trash ~/builds/
