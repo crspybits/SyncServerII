@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.7.0; 9/8/17
+	* Made SSL using Kitura optional. 
+		See https://crspybits.github.io/SyncServerII/nginx.html
+
 Version 0.6.1; 9/2/17
 	* Fixed issue: Google auth code was being sent to server when an owning user account was created, but was not being converted to a refresh token and saved.
 	

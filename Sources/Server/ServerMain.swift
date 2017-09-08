@@ -20,11 +20,8 @@ import Kitura
 // If given, the single command line argument to the server is expected to be a full path to the server config file.
 
 public class ServerMain {
-    // If server fails to start, try looking for a process using the port:
-    //      sudo lsof -i -n -P | grep TCP | grep 8181
-    
-    // I'm using port 8181 for local testing, and 443 for AWS.
-    // TODO: *1* Using port 443 on the server currently requires that you be root. Is there a way around that?
+    // If server fails to start, try looking for a process using the server's port:
+    //      sudo lsof -i -n -P | grep TCP | grep 8080
     
     // static var smd:SwiftMetricsDash?
     
@@ -62,30 +59,34 @@ public class ServerMain {
             Log.error("Failed during startup: Could not setup controller(s).")
             exit(1)
         }
-        
-#if os(Linux)
-        let sslConfig = SSLConfig(
-                withCACertificateDirectory: Constants.session.ssl.caCertificateDirectory,
-                usingCertificateFile: Constants.session.ssl.certFile,
-                withKeyFile: Constants.session.ssl.keyFile,
-                usingSelfSignedCerts: Constants.session.ssl.selfSigning)
-#else // on macOS
-        let sslConfig = SSLConfig(
-                withChainFilePath: Constants.session.ssl.certPfxFile,
-                withPassword: Constants.session.ssl.configPassword,
-                usingSelfSignedCerts: Constants.session.ssl.selfSigning)
-#endif
-
-        var signingType = "CA Signed"
-        if Constants.session.ssl.selfSigning {
-            signingType = "Self-Signed"
-        }
-
-        Log.info("Using \(signingType) SSL Certificate")
 
         let serverRoutes = CreateRoutes()
 
-        Kitura.addHTTPServer(onPort: Constants.session.port, with: serverRoutes.getRoutes(), withSSL: sslConfig)
+        if Constants.session.ssl.usingKituraSSL {
+#if os(Linux)
+            let sslConfig = SSLConfig(
+                    withCACertificateDirectory: Constants.session.ssl.caCertificateDirectory,
+                    usingCertificateFile: Constants.session.ssl.certFile,
+                    withKeyFile: Constants.session.ssl.keyFile,
+                    usingSelfSignedCerts: Constants.session.ssl.selfSigning)
+#else // on macOS
+            let sslConfig = SSLConfig(
+                    withChainFilePath: Constants.session.ssl.certPfxFile,
+                    withPassword: Constants.session.ssl.configPassword,
+                    usingSelfSignedCerts: Constants.session.ssl.selfSigning)
+#endif
+
+            var signingType = "CA Signed"
+            if Constants.session.ssl.selfSigning {
+                signingType = "Self-Signed"
+            }
+
+            Log.info("Using \(signingType) SSL Certificate")
+            Kitura.addHTTPServer(onPort: Constants.session.port, with: serverRoutes.getRoutes(), withSSL: sslConfig)
+        }
+        else {
+            Kitura.addHTTPServer(onPort: Constants.session.port, with: serverRoutes.getRoutes())
+        }
         
         switch type {
         case .blocking:
