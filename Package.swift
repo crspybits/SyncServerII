@@ -11,7 +11,7 @@ let package = Package(
                dependencies: [.Target(name: "Server")]),
         Target(name: "Server")],
     dependencies: [
-        .Package(url: "https://github.com/crspybits/SyncServer-Shared.git", majorVersion: 2, minor: 0),
+        .Package(url: "https://github.com/crspybits/SyncServer-Shared.git", majorVersion: 2, minor: 1),
 
         .Package(url: "https://github.com/crspybits/SMServerLib.git", majorVersion: 0),
         .Package(url: "https://github.com/IBM-Swift/Kitura.git", majorVersion: 1, minor: 7),

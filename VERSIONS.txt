@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.7.1; 9/12/17
+	* Version bump on Shared library to fix http response header issue.
+	
 Version 0.7.0; 9/8/17
 	* Made SSL using Kitura optional. 
 		See https://crspybits.github.io/SyncServerII/nginx.html
