@@ -39,6 +39,10 @@ case body
 case header
 }
 
+func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
+    return lhs.tokenKey == rhs.tokenKey && lhs.idKey == rhs.idKey
+}
+
 struct TestAccount {
     // These String's are keys into a .json file.
     let tokenKey:String // key values: Google: a refresh token; Facebook:long-lived access token.

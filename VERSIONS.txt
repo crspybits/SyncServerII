@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.7.2; 9/19/17
+	* Added missing `==` overload.
+	
 Version 0.7.1; 9/12/17
 	* Version bump on Shared library to fix http response header issue.
 	
