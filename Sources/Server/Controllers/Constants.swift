@@ -41,8 +41,8 @@ class Constants {
     var googleClientSecret:String? = ""
     
     // If you are using Facebook Accounts
-    var facebookClientId:String? = ""
-    var facebookClientSecret:String? = ""
+    var facebookClientId:String? = "" // This is the AppId from Facebook
+    var facebookClientSecret:String? = "" // App Secret from Facebook
     
     var maxNumberDeviceUUIDPerUser:Int?
     

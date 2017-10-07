@@ -56,6 +56,7 @@ class FacebookCreds : AccountAPICall,  Account {
         
         let urlParameters = "grant_type=fb_exchange_token&client_id=\(fbAppId)&client_secret=\(fbAppSecret)&fb_exchange_token=\(accessToken!)"
 
+        Log.debug("urlParameters: \(urlParameters)")
         /*
         GET /oauth/access_token?
          grant_type=fb_exchange_token&amp;
@@ -83,6 +84,7 @@ class FacebookCreds : AccountAPICall,  Account {
                 }
             }
             else {
+                Log.debug("apiCallResult: \(String(describing: apiCallResult))")
                 completion(GenerateTokensError.non200ErrorCode(httpStatus.map { $0.rawValue }))
             }
         }
