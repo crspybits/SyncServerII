@@ -256,6 +256,7 @@ class RequestHandler : AccountDelegate {
                 }
                 
             case .noObjectFound:
+                Log.error("User lookup key: \(key)")
                 failWithError(message: "Failed on secondary authentication", statusCode: .unauthorized)
                 return
                 

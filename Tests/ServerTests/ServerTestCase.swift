@@ -48,7 +48,7 @@ class ServerTestCase : XCTestCase {
         Constants.delegate = self
         Constants.setup(configFileName: "ServerTests.json")
 #else // Linux
-        Constants.setup(configFileFullPath: "../Private/Server/ServerTests.json")
+        Constants.setup(configFileFullPath: "./ServerTests.json")
 #endif
         self.db = Database()
         
@@ -185,7 +185,12 @@ class ServerTestCase : XCTestCase {
             self.addNewUser(deviceUUID:deviceUUID)
         }
         
+#if os(macOS)
         let fileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
+#else
+        let fileURL = URL(fileURLWithPath: "./Resources/Cat.jpg")
+#endif
+
         let sizeOfCatFileInBytes:Int64 = 1162662
         let data = try! Data(contentsOf: fileURL)
 

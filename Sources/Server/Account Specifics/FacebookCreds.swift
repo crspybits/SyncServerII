@@ -41,7 +41,13 @@ class FacebookCreds : AccountAPICall,  Account {
     // We're using token generation with Facebook to exchange a short-lived access token for a long-lived one. See https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension and https://stackoverflow.com/questions/37674620/do-facebook-has-a-refresh-token-of-oauth/37683233
     func needToGenerateTokens(userType:UserType, dbCreds:Account? = nil) -> Bool {
         assert(userType == .sharing)
+    
+        // 11/5/17; See SharingAccountsController.swift comment with the same date for the reason for this conditional compilation. When running the server XCTest cases, make sure to turn on this flag.
+#if DEVTESTING
+        return false
+#else
         return true
+#endif
     }
 
     enum GenerateTokensError : Swift.Error {

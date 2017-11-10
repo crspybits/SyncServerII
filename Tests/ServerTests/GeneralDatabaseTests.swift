@@ -198,6 +198,9 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
+        
+        Log.info("Starting setUp")
+        
         Log.logger = HeliumLogger()
         
         c15String = DateExtras.date(c15Value, toFormat: .DATE)
@@ -213,6 +216,8 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         XCTAssert(createTable2())
         insertRows()
         insertRows2()
+        
+        Log.info("Completed setUp")
     }
     
     func createTable() -> Bool {
@@ -337,10 +342,10 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         let componentsDate1 = Calendar.current.dateComponents(in: utc, from: date1)
         let componentsDate2 = Calendar.current.dateComponents(in: utc, from: date2)
         
-        print("date1: \(date1); date2: \(date2)")
-        print("componentsDate1.year: \(String(describing: componentsDate1.year)) componentsDate2.year: \(String(describing: componentsDate2.year))")
-        print("componentsDate1.month: \(String(describing: componentsDate1.month)) componentsDate2.month: \(String(describing: componentsDate2.month))")
-        print("componentsDate1.day: \(String(describing: componentsDate1.day)) componentsDate2.day: \(String(describing: componentsDate2.day))")
+        Log.info("date1: \(date1); date2: \(date2)")
+        Log.info("componentsDate1.year: \(String(describing: componentsDate1.year)) componentsDate2.year: \(String(describing: componentsDate2.year))")
+        Log.info("componentsDate1.month: \(String(describing: componentsDate1.month)) componentsDate2.month: \(String(describing: componentsDate2.month))")
+        Log.info("componentsDate1.day: \(String(describing: componentsDate1.day)) componentsDate2.day: \(String(describing: componentsDate2.day))")
         
         return componentsDate1.year == componentsDate2.year &&
             componentsDate1.month == componentsDate2.month &&

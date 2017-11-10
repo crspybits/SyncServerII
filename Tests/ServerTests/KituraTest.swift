@@ -65,7 +65,7 @@ struct TestAccount {
 #if os(macOS)
         let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "Server.json", forConfigType: .jsonDictionary)
 #else // Linux
-        let config = try! ConfigLoader(usingPath: "../Private/Server", andFileName: "Server.json", forConfigType: .jsonDictionary)
+        let config = try! ConfigLoader(usingPath: "./", andFileName: "Server.json", forConfigType: .jsonDictionary)
 #endif
         let token = try! config.getString(varName: key)
         return token
@@ -137,10 +137,17 @@ extension KituraTest {
         
         allHeaders["Content-Type"] = "text/plain"
         
-        // .disableSSLVerification is used here because we'll likely be using a self-signed SSL certificate for testing.
-        let options: [ClientRequest.Options] =
-            [.disableSSLVerification, .schema("https://"), .method(route.method.rawValue), .hostname("localhost"),
+        var options: [ClientRequest.Options] =
+            [.method(route.method.rawValue), .hostname("localhost"),
                 .port(Int16(Constants.session.port)), .path(path), .headers(allHeaders)]
+        
+        if Constants.session.ssl.usingKituraSSL {
+            // .disableSSLVerification is used here because we'll likely be using a self-signed SSL certificate for testing.
+            options += [.disableSSLVerification, .schema("https://")]
+        }
+        else {
+            options += [.schema("http://")]
+        }
         
         let req:ClientRequest = HTTP.request(options) { (response:ClientResponse?) in
             var dict:[String:Any]?
