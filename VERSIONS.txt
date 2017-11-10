@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.7.4; 11/9/17
+	* Added devops files; getting tests running on Docker.
+
 Version 0.7.3; 10/7/17
 	* Added comments, log output
 	* Added parameter to nginx.conf to fix upload size limit bug. See 	
