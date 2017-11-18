@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 11/18/17: This is the script I was using to run/test the server prior to starting to use the AWS Elastic Beanstalk.
+
 # Build and run the server from the command line
 # Usage:
 #	1) ./run.sh test [Optional-Specific-Test] -- run server tests
