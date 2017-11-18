@@ -1,6 +1,6 @@
 SyncServer
 
-Version TBD
+Version (Committed to repo but not yet tagged as a release)
 	* Added dev ops files & script -- to create application bundles for Elastic Beanstalk deployment.
 	
 Version 0.7.4; 11/9/17
