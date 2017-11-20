@@ -28,8 +28,10 @@ deploy:
   You will need the `arn` reference for this SSL certificate in the configure.yml file below.
 
 * Create a yml file for your environmnent (I'm calling them `configure.yml` files). There's an example in EBSEnvironments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. While much of it can just be copied and used for other environments, you will need to change the value of at least two parameters:
-	a) SSLCertificateId -- which you generated with the AWS Certificate Manager above, and is tied to a particular URL, and 
-	b) EC2KeyName -- which is the name of a security key pair to allow you SSH access into the EC2 instances. You need to create this using the AWS web console.
+
+	  a) SSLCertificateId -- which you generated with the AWS Certificate Manager above, and is tied to a particular URL, and 
+
+	  b) EC2KeyName -- which is the name of a security key pair to allow you SSH access into the EC2 instances. You need to create this using the AWS web console.
     
   Also, if you want to change parameters such as the EC2 instance type used in the environment you'll need to make changes to this file. See the README.txt in the "AWS application bundle" folder for references on the details on the contents of the configure.yml file.
 
