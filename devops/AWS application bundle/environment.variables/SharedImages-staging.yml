@@ -1,0 +1,22 @@
+option_settings:  
+  aws:elasticbeanstalk:environment:
+    ServiceRole: aws-elasticbeanstalk-service-role
+    LoadBalancerType: classic
+    EnvironmentType: LoadBalanced
+  aws:elb:loadbalancer:
+    CrossZone: 'false'
+  aws:elb:listener:
+    ListenerEnabled: 'false'
+  aws:elb:listener:443:
+    ListenerProtocol: HTTPS
+    SSLCertificateId: arn:aws:acm:us-west-2:549454826488:certificate/db25a1b8-799a-4024-89eb-105cf541b8dd
+    InstancePort: 80
+    InstanceProtocol: HTTP
+  aws:elasticbeanstalk:healthreporting:system:
+    SystemType: enhanced
+  aws:autoscaling:launchconfiguration:
+    IamInstanceProfile: aws-elasticbeanstalk-ec2-role
+    InstanceType: t2.micro
+    EC2KeyName: amazon1    
+  aws:autoscaling:asg:
+    MaxSize: '1'

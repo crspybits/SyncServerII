@@ -1,44 +1,28 @@
 #!/bin/bash
 
 # Purpose: Creates an application bundle for upload to the AWS Elastic Beanstalk, for running SyncServer
-# Usage: ./make.sh <file>.json [<environment-configuration>.yml]
+# Usage: ./make.sh <file>.json [<environment-variables>.yml]
 # The .json file will be used as the Server.json file to start the server.
-# To see how to get an environment configuration look at: 	http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environment-configuration-savedconfig.html
+# The environment variables are a little tricky. See the README.txt in this folder.
 # WARNING: I believe AWS doesn't do well with Server.json files that have blank lines in the technique I'm using to transfer the file to the Docker container.
 # Assumes: That this script is run from the directory the script is located in.
 
 # Examples: 
 # ./make.sh ../../../Private/Server.json.aws.app.bundles/iOSClient-testing.json 
-# ./make.sh ../../../Private/Server.json.aws.app.bundles/SharedImages-staging.json example-manifests/SharedImages-staging.yml
+
+# SharedImages staging server
+# ./make.sh ../../../Private/Server.json.aws.app.bundles/SharedImages-staging.json environment.variables/SharedImages-staging.yml
+
+# SyncServer iOS client example app testing
+# ./make.sh ../../../Private/Server.json.aws.app.bundles/iOSClient-testing.json environment.variables/syncserver-testing.yml
 
 SERVER_JSON=$1
-ENV_CONFIG=$2
+ENV_VAR_PARAM=$2
 ZIPFILE=bundle.zip
-FINAL_ENV_CONFIG=""
+ENV_VARIABLES="env.variables.config"
 
 # 6 Extra blanks because config file needs these prepended before json file lines for YAML formatting.
 EXTRA_BLANKS="      "
-
-if [ "empty${SERVER_JSON}" == "empty" ]; then
-	echo "**** You need to give the server .json file as a parameter!"
-	exit
-fi
-
-if [ "empty${ENV_CONFIG}" != "empty" ]; then
-	if [ ! -e "${ENV_CONFIG}" ]; then
-		echo "**** Couldn't find: ${ENV_CONFIG} -- giving up!"
-		exit
-	fi
-	
-	echo "Using your environment configuration: ${ENV_CONFIG}"
-
-	# Make sure the env configuration is named env.yml; see the web reference given above.
-	cp "${ENV_CONFIG}" env.yml
-	FINAL_ENV_CONFIG="env.yml"
-fi
-
-echo "Using ${SERVER_JSON} as the server json file ..."
-echo
 
 if [ ! -d .ebextensions ]; then
 	mkdir .ebextensions
@@ -47,6 +31,27 @@ fi
 if [ ! -d tmp ]; then
 	mkdir tmp
 fi
+
+if [ "empty${SERVER_JSON}" == "empty" ]; then
+	echo "**** You need to give the server .json file as a parameter!"
+	exit
+fi
+
+if [ "empty${ENV_VAR_PARAM}" != "empty" ]; then
+	if [ ! -e "${ENV_VAR_PARAM}" ]; then
+		echo "**** Couldn't find: ${ENV_VAR_PARAM} -- giving up!"
+		exit
+	fi
+	
+	echo "Using your environment variables file: ${ENV_VAR_PARAM}"
+
+	# Make sure the environment variables file is named with a .config extension.
+	cp "${ENV_VAR_PARAM}" "$ENV_VARIABLES"
+	mv -f "$ENV_VARIABLES" .ebextensions
+fi
+
+echo "Using ${SERVER_JSON} as the server json file ..."
+echo
 
 cp -f raw.materials/Server.json.config tmp
 
@@ -63,7 +68,7 @@ if [ -e ${ZIPFILE} ]; then
   	rm ${ZIPFILE}
 fi
 
-zip -r ${ZIPFILE} Dockerrun.aws.json .ebextensions ${FINAL_ENV_CONFIG}
+zip -r ${ZIPFILE} Dockerrun.aws.json .ebextensions
 # zip -d ${ZIPFILE} __MACOSX/\*
 
 if [ -e ~/Desktop/${ZIPFILE} ]; then
@@ -73,6 +78,7 @@ fi
 mv ${ZIPFILE} ~/Desktop
 rm .ebextensions/*
 rmdir .ebextensions
+rmdir tmp
 
 echo
 echo "application bundle ${ZIPFILE} created and moved to the Desktop-- upload this to AWS."

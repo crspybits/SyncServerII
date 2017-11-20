@@ -1,15 +1,16 @@
 EnvironmentConfigurationMetadata:
-  DateCreated: '1510520274000'
-  DateModified: '1510520274000'
+  Description: Testing using the SyncServer Example iOS Tests
+  DateCreated: '1510733928000'
+  DateModified: '1510733928000'
 Platform:
-  PlatformArn: arn:aws:elasticbeanstalk:us-west-2::platform/Docker running on 64bit Amazon Linux/2.7.4
+  PlatformArn: arn:aws:elasticbeanstalk:us-west-2::platform/Docker running on 64bit Amazon Linux/2.8.0
 OptionSettings:
   aws:elasticbeanstalk:environment:
     ServiceRole: aws-elasticbeanstalk-service-role
   AWSEBLoadBalancer.aws:elb:loadbalancer:
     LoadBalancerHTTPSPort: '443'
     LoadBalancerHTTPPort: 'OFF'
-    SSLCertificateId: arn:aws:acm:us-west-2:549454826488:certificate/db25a1b8-799a-4024-89eb-105cf541b8dd
+    SSLCertificateId: arn:aws:acm:us-west-2:549454826488:certificate/95aa3334-4c31-43b3-bb4d-b98639a53dc4
   aws:elasticbeanstalk:healthreporting:system:
     SystemType: enhanced
   aws:autoscaling:launchconfiguration:
@@ -22,6 +23,4 @@ OptionSettings:
 EnvironmentTier:
   Type: Standard
   Name: WebServer
-EnvironmentName:
-  SharedimagesStaging-env
 AWSConfigurationTemplateVersion: 1.1.0.0
