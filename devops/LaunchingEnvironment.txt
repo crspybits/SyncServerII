@@ -21,12 +21,15 @@ See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configura
 
 * Create a Server.json file -- this provides the configuration needed by SyncServer. Put that in your environment folder. (I have just put a sym link because I don't want to expose private info in my repo!). Hold off on putting the database specifics into this file. That comes below.
 
-* Create a yml file for your environmnent (I'm calling them `configure.yml`). There's an example in EBSEnvironments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. However, most of it can just be copied and used for other environments-- except for the SSLCertificateId which is tied to a particular URL. See the README.txt in the "AWS application bundle" folder for details on the contents of the configure.yml file.
+* Create a yml file for your environmnent (I'm calling them `configure.yml`). There's an example in EBSEnvironments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. However, most of it can just be copied and used for other environments-- except for the SSLCertificateId which is tied to a particular URL. Also, if you want to change parameters such as the EC2 instance type used in the environment you'll need to make changes to this file. See the README.txt in the "AWS application bundle" folder for references on the details on the contents of the configure.yml file.
+
+* Create a SSL certificate for the domain or subdomain for your environment. For example, I'm using staging.syncserver.cprince.com for my staging server. It's free using the AWS Certificate Manager. As part of the creation process, AWS sends a confirmation email to several email addresses related to the domain or subdomain. E.g., you have to be the administrator on record with WHOIS for the domain or subdomain. See https://aws.amazon.com/certificate-manager/
+You will need the `arn` reference for this SSL certificate in the configure.yml file below.
 
 FOR ENVIRONMENT/DATABASE COMBO's THAT YOU REGULARLY START/SHUTDOWN, THIS IS THE PART YOU REPEAT:
 ================================================================================================
 
-* Start a database for your environment. I've been using RDS mySQL. You'll need a specific database schema created, and a username and password to access that database.
+* Start a database for your environment. I've been using RDS mySQL. You'll need a specific database schema created, and a username and password to access that database. You will need to open up the security group for your database to allow access from the necessary ports (so far I've just been opening this up to the world-- and plan to figure out how to make this more restrictive using AWS VPC).
 
 * Edit your Server.json file for the environment to contain the database particulars. You *must* do this before the next step (of zipping up your application bundle) because your Server.json file goes into the zipped application bundle.
 
@@ -40,6 +43,6 @@ See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-create.html
 
 You can control this Elastic Beanstalk environment at the AWS UI web console. Use https://aws.amazon.com/console/ and find Elastic Beanstalk.
 
-* The configure.yml file specified an SSL certificate. Now, finally, you have to set up a DNS A record to direct the URL referenced by that SSL certificate to the IP address for the load balancer for the server. The URL for your load balancer (from which you can get its IP address) will be something like: sharedimages-staging.us-west-2.elasticbeanstalk.com
+* The configure.yml file specified an SSL certificate. Now, finally, you have to set up a DNS A record to direct the domain or subdomain referenced by that SSL certificate to the IP address for the load balancer for the server. The URL for your load balancer (from which you can get its IP address) will be something like: sharedimages-staging.us-west-2.elasticbeanstalk.com
 
 * Hit on your server!
