@@ -31,7 +31,7 @@ See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configura
 The make.sh script puts a few other files into the application bundle. One of these is a file named Dockerrun.aws.json. This file, amongst other things, configures the Docker image (for SyncServer) that will be used.
 To learn more about AWS application bundles, see http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/beanstalk-environment-configuration-advanced.html
 
-* Start up your environment using the eb cli. Within one of your evironment folders, run:
+* Start up your environment using the eb cli. Within one of your evironment folders, run, for example:
     eb create sharedimages-staging --cname sharedimages-staging
 See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-create.html
 
