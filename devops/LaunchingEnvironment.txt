@@ -23,6 +23,9 @@ See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configura
 
 * Create a yml file for your environmnent (I'm calling them `configure.yml`). There's an example in EBSEnvironments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. However, most of it can just be copied and used for other environments-- except for the SSLCertificateId which is tied to a particular URL. See the README.txt in the "AWS application bundle" folder for details on the contents of the configure.yml file.
 
+FOR ENVIRONMENT/DATABASE COMBO's THAT YOU REGULARLY START/SHUTDOWN, THIS IS THE PART YOU REPEAT:
+================================================================================================
+
 * Start a database for your environment. I've been using RDS mySQL. You'll need a specific database schema created, and a username and password to access that database.
 
 * Edit your Server.json file for the environment to contain the database particulars. You *must* do this before the next step (of zipping up your application bundle) because your Server.json file goes into the zipped application bundle.
