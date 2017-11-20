@@ -1,0 +1,42 @@
+ONE-TIME INSTALL
+================
+
+* Install the eb cli
+	http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install-osx.html
+
+PER SERVER ENVIRONMENT INSTALLS
+===============================
+
+Note that I'm not making a difference here between Elastic Beanstalk Applications and Environments. I'm just using a single environment within each of my applications.
+
+* Configure the eb cli for an environment in a folder. I've put mine in subfolders of EBSEnvironments in the repo. See http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configuration.html
+I get rid of the .gitignore files in these directories. I  like to put them under version control.
+
+* In your environment folder, add the following to the .elasticbeanstalk/config.yml file in that folder. It tells the eb cli where to find your application bundle, which the make.sh script is going to place on your desktop (I'm just dealing with MacOS for the time being).
+
+deploy:
+  artifact: <your-user-path>/Desktop/bundle.zip
+
+See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configuration.html#eb-cli3-artifact
+
+* Create a Server.json file -- this provides the configuration needed by SyncServer. Put that in your environment folder. (I have just put a sym link because I don't want to expose private info in my repo!). Hold off on putting the database specifics into this file. That comes below.
+
+* Create a yml file for your environmnent (I'm calling them `configure.yml`). There's an example in EBSEnvironments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. However, most of it can just be copied and used for other environments-- except for the SSLCertificateId which is tied to a particular URL. See the README.txt in the "AWS application bundle" folder for details on the contents of the configure.yml file.
+
+* Start a database for your environment. I've been using RDS mySQL. You'll need a specific database schema created, and a username and password to access that database.
+
+* Edit your Server.json file for the environment to contain the database particulars. You *must* do this before the next step (of zipping up your application bundle) because your Server.json file goes into the zipped application bundle.
+
+* Zip up your AWS application bundle using the make.sh script within the "AWS application bundle". Your application bundle will contain your environment's Server.json and configure.yml files, and a few others. Do this at the command line within the "AWS application bundle" folder. The top comments of make.sh contain examples on how to run it. 
+The make.sh script puts a few other files into the application bundle. One of these is a file named Dockerrun.aws.json. This file, amongst other things, configures the Docker image (for SyncServer) that will be used.
+To learn more about AWS application bundles, see http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/beanstalk-environment-configuration-advanced.html
+
+* Start up your environment using the eb cli. Within one of your evironment folders, run:
+    eb create sharedimages-staging --cname sharedimages-staging
+See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-create.html
+
+You can control this Elastic Beanstalk environment at the AWS UI web console. Use https://aws.amazon.com/console/ and find Elastic Beanstalk.
+
+* The configure.yml file specified an SSL certificate. Now, finally, you have to set up a DNS A record to direct the URL referenced by that SSL certificate to the IP address for the load balancer for the server. The URL for your load balancer (from which you can get its IP address) will be something like: sharedimages-staging.us-west-2.elasticbeanstalk.com
+
+* Hit on your server!

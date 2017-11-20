@@ -25,4 +25,14 @@ http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-applicati
 
 I did use the Elastic Beanstalk configuration files, saved from particular environments, as a starting point for these.
 
+5) I struggled quite a bit trying to figure out how to put most of the parameters needed to launch an environment from the EB web UI into a .config file. However, that doesn't seem fully possible. See https://devops.stackexchange.com/questions/2598/elastic-beanstalk-setting-parameters-from-a-config-file-in-the-application-bun
+
+5) I've finally boiled down the .config file (I'm calling it config.yml) contents to two parts that work when using the eb cli. One part is a `Resources` section and the other part is a `option_settings` section. It seems the Resources section is needed with the eb cli, otherwise, the load balancer doesn't get configured properly.
+https://aws.amazon.com/blogs/devops/three-easy-steps-to-enable-cross-zone-load-balancing-in-elastic-beanstalk/
+http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/customize-containers-format-resources-eb.html
+http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environment-resources.html
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-elb.html
+
+
+
 

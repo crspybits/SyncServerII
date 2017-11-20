@@ -7,14 +7,10 @@
 # WARNING: I believe AWS doesn't do well with Server.json files that have blank lines in the technique I'm using to transfer the file to the Docker container.
 # Assumes: That this script is run from the directory the script is located in.
 
-# Examples: 
-# ./make.sh ../../../Private/Server.json.aws.app.bundles/iOSClient-testing.json 
+# Example: 
 
 # SharedImages staging server
-# ./make.sh ../../../Private/Server.json.aws.app.bundles/SharedImages-staging.json environment.variables/SharedImages-staging.yml
-
-# SyncServer iOS client example app testing
-# ./make.sh ../../../Private/Server.json.aws.app.bundles/iOSClient-testing.json environment.variables/syncserver-testing.yml
+# ./make.sh ../EBSEnvironments/sharedimages-staging\ /Server.json ../EBSEnvironments/sharedimages-staging\ /configure.yml
 
 SERVER_JSON=$1
 ENV_VAR_PARAM=$2
@@ -58,7 +54,7 @@ cp -f raw.materials/Server.json.config tmp
 # There's some trickyness to avoid removing white space and avoid removing the last line if it doesn't end with a newline. See https://stackoverflow.com/questions/10929453/
 while IFS='' read -r line || [[ -n "$line" ]]; do
 	echo "${EXTRA_BLANKS}$line" >> tmp/Server.json.config
-done < ${SERVER_JSON}
+done < "${SERVER_JSON}"
 
 mv -f tmp/Server.json.config .ebextensions
 cp -f raw.materials/SyncServer.ngnix.config .ebextensions
