@@ -32,15 +32,23 @@ deploy:
 1. SSLCertificateId -- which you generated with the AWS Certificate Manager above, and is tied to a particular URL, and 
 
 2. EC2KeyName -- which is the name of a security key pair to allow you SSH access into the EC2 instances. You need to create this using the AWS web console.
+
+3. SecurityGroups-- the security group for your database. See below.
     
   Also, if you want to change parameters such as the EC2 instance type used in the environment you'll need to make changes to this file. See the README.txt in the "AWS application bundle" folder for references on the details on the contents of the configure.yml file.
 
 FOR ENVIRONMENT/DATABASE COMBO's THAT YOU REGULARLY START/SHUTDOWN, THIS IS THE PART YOU REPEAT:
 ================================================================================================
 
-* Start a database for your environment. I've been using RDS mySQL. You'll need a specific database schema created, and a username and password to access that database. You will need to open up the security group for your database to allow access from the necessary ports (so far I've just been opening this up to the world-- and plan to figure out how to make this more restrictive using AWS VPC).
+* Start a database for your environment. I've been using RDS mySQL. You'll need a specific database schema created, and a username and password to access that database.
 
-* Edit your Server.json file for the environment to contain the database particulars. You *must* do this before the next step (of zipping up your application bundle) because your Server.json file goes into the zipped application bundle.
+* Change the database security group by adding a custom rule that allows ingress from your databases security group. Seems odd, but you're going to also use that security group immediately below. See http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.RDS.html
+
+  Note down the name of that security group. E.g., sg-d8e99ea3
+
+* Edit the configure.yml file for your environment so that the key value for `SecurityGroups` is your database security group.
+
+* Edit your Server.json file for the environment to contain the database particulars, i.e., endpoint, username, password, database name. You *must* do this before the next step (of zipping up your application bundle) because your Server.json file goes into the zipped application bundle.
 
 * Zip up your AWS application bundle using the make.sh script within the "AWS application bundle". Your application bundle will contain your environment's Server.json and configure.yml files, and a few others. Do this at the command line within the "AWS application bundle" folder. The top comments of make.sh contain examples on how to run it.
 
