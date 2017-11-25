@@ -17,12 +17,9 @@ option_settings:
     IamInstanceProfile: aws-elasticbeanstalk-ec2-role
     InstanceType: t2.micro
     EC2KeyName: amazon1
-    SecurityGroups:
-    - TheDatabaseSecurityGroup
   aws:autoscaling:asg:
     MaxSize: '1'
   aws:elasticbeanstalk:environment:
     EnvironmentType: LoadBalanced
     LoadBalancerType: classic
     ServiceRole: aws-elasticbeanstalk-service-role
-  
