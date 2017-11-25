@@ -7,10 +7,13 @@
 # WARNING: I believe AWS doesn't do well with Server.json files that have blank lines in the technique I'm using to transfer the file to the Docker container.
 # Assumes: That this script is run from the directory the script is located in.
 
-# Example: 
+# Examples: 
 
 # SharedImages staging server
 # ./make.sh ../EBSEnvironments/sharedimages-staging\ /Server.json ../EBSEnvironments/sharedimages-staging\ /configure.yml
+
+# iOS Client testing server
+# ./make.sh ../EBSEnvironments/syncserver-testing/Server.json ../EBSEnvironments/syncserver-testing/configure.yml
 
 SERVER_JSON=$1
 ENV_VAR_PARAM=$2

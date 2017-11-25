@@ -27,7 +27,7 @@ deploy:
 
   You will need the `arn` reference for this SSL certificate in the configure.yml file below.
   
-* If you want your database secured not only by password and username, but also secured behind a Virtual Private Cloud (VPC), then [also follow these steps](LaunchingEnvironment-VPC.md).
+* If you want your database secured not only by password and username, but also secured behind an AWS Virtual Private Cloud (VPC), then [also follow these steps](LaunchingEnvironment-VPC.md).
 
 * Create a yml file for your environmnent (I'm calling them `configure.yml` files). There's an example in EBSEnvironments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. While much of it can just be copied and used for other environments, you will need to change the value of at least two parameters:
 

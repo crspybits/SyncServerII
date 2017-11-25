@@ -1,0 +1,25 @@
+Resources:
+  AWSEBLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Listeners:
+      - InstancePort: 80
+        InstanceProtocol: HTTP
+        LoadBalancerPort: 443
+        Protocol: HTTPS
+        SSLCertificateId: arn:aws:acm:us-west-2:549454826488:certificate/95aa3334-4c31-43b3-bb4d-b98639a53dc4
+option_settings:
+  aws:elb:listener:
+    ListenerEnabled: 'false'
+  aws:elasticbeanstalk:healthreporting:system:
+    SystemType: enhanced
+  aws:autoscaling:launchconfiguration:
+    IamInstanceProfile: aws-elasticbeanstalk-ec2-role
+    InstanceType: t2.micro
+    EC2KeyName: amazon1
+  aws:autoscaling:asg:
+    MaxSize: '1'
+  aws:elasticbeanstalk:environment:
+    EnvironmentType: LoadBalanced
+    LoadBalancerType: classic
+    ServiceRole: aws-elasticbeanstalk-service-role
