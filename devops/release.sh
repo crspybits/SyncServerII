@@ -32,12 +32,12 @@ docker build -t $USERNAME/$IMAGE:latest .
 
 # tag it
 git add -A
-git commit -m "version $version"
-git tag -a "$version" -m "version $version"
+git commit -m "version $RELEASE_TAG"
+git tag -a "$RELEASE_TAG" -m "version $RELEASE_TAG"
 git push
 git push --tags
-docker tag $USERNAME/$IMAGE:latest $USERNAME/$IMAGE:$version
+docker tag $USERNAME/$IMAGE:latest $USERNAME/$IMAGE:$RELEASE_TAG
 
 # push it
 docker push $USERNAME/$IMAGE:latest
-docker push $USERNAME/$IMAGE:$version
+docker push $USERNAME/$IMAGE:$RELEASE_TAG
