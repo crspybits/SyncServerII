@@ -1,7 +1,8 @@
 SyncServer
 
-Version (Committed to repo but not yet tagged as a release)
+Version 0.7.5; 11/25/17
 	* Added dev ops files & script -- to create application bundles for Elastic Beanstalk deployment.
+	* Lots of related dev ops changes (no changes to the server code itself).
 	
 Version 0.7.4; 11/9/17
 	* Added devops files; getting tests running on Docker.

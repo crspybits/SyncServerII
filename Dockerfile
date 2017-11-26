@@ -9,6 +9,9 @@ USER root
 # This depends on the Server.json file using port 8080 for SyncServer.
 EXPOSE 8080
 
+# The version number of SyncServer-- just for documentation.
+ADD VERSION .
+
 # Binaries should have been compiled against the correct platform (i.e. Ubuntu 16.04).
 COPY .build/debug/Main /root/SyncServerII/.build/debug/Main
 
