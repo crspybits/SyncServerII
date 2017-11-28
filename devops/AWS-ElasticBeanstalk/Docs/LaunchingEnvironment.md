@@ -1,8 +1,15 @@
+ASSUMPTIONS
+===========
+
+* I assume you're running MacOS. :).
+
 ONE-TIME INSTALL
 ================
 
 * Install the eb cli
 	http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install-osx.html
+
+* To use the `make.sh` script (see below; it zips up your application bundle), you'll need the `jq` program installed. The make.sh script below contains, inside it, instructions on how to do this.
 
 PER SERVER ENVIRONMENT INSTALLS
 ===============================
@@ -12,7 +19,7 @@ PER SERVER ENVIRONMENT INSTALLS
 * Configure the eb cli for an environment in a folder. I've put mine in subfolders of EBSEnvironments in the repo. See http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configuration.html
 I get rid of the .gitignore files in these directories. I like to put them under version control.
 
-* In your environment folder, add the following to the .elasticbeanstalk/config.yml file in that folder. It tells the eb cli where to find your application bundle, which the make.sh script is going to place on your desktop (I'm just dealing with MacOS for the time being).
+* In your environment folder, add the following to the .elasticbeanstalk/config.yml file in that folder. It tells the eb cli where to find your application bundle, which the make.sh script is going to place on your desktop.
 
 ```
 deploy:
@@ -46,9 +53,11 @@ FOR ENVIRONMENT/DATABASE COMBO's THAT YOU REGULARLY START/SHUTDOWN, THIS IS THE 
 
 * Edit your Server.json file for the environment to contain the database particulars, i.e., endpoint, username, password, database name. You *must* do this before the next step (of zipping up your application bundle) because your Server.json file goes into the zipped application bundle.
 
-* Zip up your AWS application bundle using the make.sh script within the "AWS application bundle". Your application bundle will contain your environment's Server.json and configure.yml files, and a few others. Do this at the command line within the "AWS application bundle" folder. The top comments of make.sh contain examples on how to run it.
+* Zip up your AWS application bundle using the make.sh script within the "AWS application bundle". Do this at the command line within the "AWS application bundle" folder. The top comments of make.sh contain examples on how to run it, but the basics are that you give three command line arguments:
 
-  The make.sh script puts a few other files into the application bundle. One of these is a file named Dockerrun.aws.json. This file, amongst other things, configures the Docker image (for SyncServer) that will be used. In particular, it uses the docker image: https://hub.docker.com/r/crspybits/syncserver-runner/ which contains the most recent build of the SyncServer. That is, each time you start an environment, it pulls the current SyncServer image from hub.docker.com-- which will be updated from time to time.
+  ./make.sh `<DockerImageTag>` Server.json configure.yml
+
+  As a result of running make.sh, your application bundle will contain your environment's Server.json and configure.yml files, and a few others. One of these is a file named Dockerrun.aws.json. This file, amongst other things, indicates the Docker image for SyncServer that will be used. In particular, it uses the docker image: https://hub.docker.com/r/crspybits/syncserver-runner/ with the tag `<DockerImageTag>` (that you gave to make.sh). That is, the application bundle indicates which SyncServer image to pull from hub.docker.com.
 
   To learn more about AWS application bundles, see http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/beanstalk-environment-configuration-advanced.html
 
@@ -62,10 +71,16 @@ eb create sharedimages-staging --cname sharedimages-staging
 
   You can control this Elastic Beanstalk environment at the AWS UI web console. Use https://aws.amazon.com/console/ and find Elastic Beanstalk.
 
-* The configure.yml file specified an SSL certificate. Now, finally, you have to set up a DNS A record to direct the domain or subdomain referenced by that SSL certificate to the IP address for the load balancer for the server. The URL for your load balancer (from which you can get its IP address) will be something like:
+* The configure.yml file specified an SSL certificate. Now, finally, you have to set up a DNS CNAME record to direct the domain or subdomain referenced by that SSL certificate to the CNAME address for the load balancer for the server. The URL for your load balancer will be something like:
 
 ```
 sharedimages-staging.us-west-2.elasticbeanstalk.com
 ```
+
+NOTE: The configuration I'm using is for a Classical Elastic Beanstalk load balancer (not a Network Load Balancer) and so its CNAME doesn't have a static IP address. Hence, you can't use redirection with a DNS A record (I learned this the hard way!). See also:
+https://forums.aws.amazon.com/thread.jspa?threadID=9061
+http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-nlb.html
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-loadbalancer.html
+https://stackoverflow.com/questions/9935229/cname-ssl-certificates
 
 * Hit on your server!

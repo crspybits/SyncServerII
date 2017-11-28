@@ -12,11 +12,14 @@
 
 # Examples: 
 
+# SharedImages production server
+# ./make.sh 0.7.6 ../Environments/sharedimages-production/Server.json ../Environments/sharedimages-production/configure.yml
+
 # SharedImages staging server
-# ./make.sh latest ../Environments/sharedimages-staging\ /Server.json ../Environments/sharedimages-staging\ /configure.yml
+# ./make.sh 0.7.6 ../Environments/sharedimages-staging/Server.json ../Environments/sharedimages-staging/configure.yml
 
 # iOS Client testing server
-# ./make.sh latest ../Environments/sharedimages-staging\ /Server.json ../Environments/sharedimages-staging\ /configure.yml
+# ./make.sh latest ../Environments/syncserver-testing/Server.json ../Environments/syncserver-testing/configure.yml
 
 DOCKER_IMAGE_TAG=$1
 SERVER_JSON=$2
