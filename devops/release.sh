@@ -3,7 +3,8 @@
 # Usage: release.sh <ReleaseTag>
 # 	<ReleaseTag> is the tag to apply to git, and to use as a tag for Docker Hub.
 # Run this from the root of the repo. i.e., ./devops/release.sh
-# Example: ./devops/release.sh 0.7.5
+# after you have built the SyncServer server binary.
+# Example: ./devops/release.sh 0.7.7
 
 # This script adapted from https://medium.com/travis-on-docker/how-to-version-your-docker-images-1d5c577ebf54
 

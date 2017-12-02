@@ -71,6 +71,7 @@ extension FileController {
         let uploadDeletionsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!, andState: .toDeleteFromFileIndex)
         switch uploadDeletionsResult {
         case .uploads(let fileInfoArray):
+            Log.debug("fileInfoArray.count for deletions: \(fileInfoArray.count)")
             uploadDeletions = fileInfoArray
 
         case .error(let error):
@@ -79,10 +80,12 @@ extension FileController {
             return nil
         }
         
+        
         var primaryFileIndexKeys:[FileIndexRepository.LookupKey] = []
         
         for uploadDeletion in uploadDeletions {
-            primaryFileIndexKeys += [.primaryKeys(userId: "\(params.currentSignedInUser!.userId!)", fileUUID: uploadDeletion.fileUUID)]
+            // 12/1/17; Up until today, I was using the params.currentSignedInUser!.userId in here and not the effective user id. Thus, when sharing users did an upload deletion, the files got deleted from the file index, but didn't get deleted from cloud storage.
+            primaryFileIndexKeys += [.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadDeletion.fileUUID)]
         }
         
         var fileIndexDeletions:[FileInfo]?
@@ -152,7 +155,6 @@ extension FileController {
             result = UpdateMasterVersionResult.error(message)
             
         case .didNotMatchCurrentMasterVersion:
-            
             getMasterVersion(params: params) { (error, masterVersion) in
                 if error == nil {
                     result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
@@ -209,7 +211,7 @@ extension FileController {
         if uploadDeletions == nil || uploadDeletions!.count == 0 {
             let response = DoneUploadsResponse()!
             response.numberUploadsTransferred = numberTransferred
-            Log.debug("doneUploads.numberUploadsTransferred: \(numberTransferred)")
+            Log.debug("no upload deletions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
             params.completion(response)
             return
         }
@@ -222,6 +224,8 @@ extension FileController {
 
      private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, googleCreds:GoogleCreds, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
     
+        Log.info("Enter finishDoneUploads")
+
         // Base case.
         if uploadDeletions == nil || uploadDeletions!.count == 0 {
             let response = DoneUploadsResponse()!
@@ -232,7 +236,7 @@ extension FileController {
             }
             
             response.numberUploadsTransferred = numberTransferred
-            Log.debug("doneUploads.numberUploadsTransferred: \(numberTransferred)")
+            Log.debug("base case: doneUploads.numberUploadsTransferred: \(numberTransferred)")
             params.completion(response)
             async.done()
             return

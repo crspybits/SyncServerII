@@ -377,7 +377,7 @@ class FileIndexRepository : Repository {
                     }
                 }
                 
-                // The file we are deleting is named in cloud storage by the fileUUID, deviceUUID *currently in the file index*, and the version. So we have to keep the existing deviceUUID.
+                // The file we are deleting (or eventually, updating) is named in cloud storage by the fileUUID, deviceUUID *currently in the file index*, and the version. So we have to keep the existing deviceUUID.
                 fileIndex.deviceUUID = existingFileIndex.deviceUUID
                 
                 fileIndex.fileIndexId = existingFileIndex.fileIndexId
