@@ -13,7 +13,7 @@
 # Examples: 
 
 # SharedImages production server
-# ./make.sh 0.7.6 ../Environments/sharedimages-production/Server.json ../Environments/sharedimages-production/configure.yml
+# ./make.sh 0.7.7 ../Environments/sharedimages-production/Server.json ../Environments/sharedimages-production/configure.yml
 
 # SharedImages staging server
 # ./make.sh 0.7.6 ../Environments/sharedimages-staging/Server.json ../Environments/sharedimages-staging/configure.yml
