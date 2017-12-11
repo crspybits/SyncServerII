@@ -84,6 +84,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
             user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         case .Facebook:
             user1.creds = "{}"
+        case .Dropbox:
+            user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\", \"accountId\": \"SomeAccountIdValue1\"}"
         }
         
         user1.credsId = "100"

@@ -44,7 +44,7 @@ class UtilsTests: ServerTestCase, LinuxTestable {
     func testString() {
         let a = A()
         let propertyType1 = a.typeOfProperty(name: "p2")
-        let other: String!
+        let other: String! = nil
         let propertyType2 = type(of:other)
         XCTAssert(propertyType1 != nil)
         XCTAssert(propertyType1 == propertyType2, "\(String(describing: propertyType1)) != \(propertyType2)")
@@ -62,7 +62,7 @@ class UtilsTests: ServerTestCase, LinuxTestable {
     func testInt() {
         let a = A()
         let propertyType1 = a.typeOfProperty(name: "p4")
-        let other: Int!
+        let other: Int! = nil
         let propertyType2 = type(of:other)
         XCTAssert(propertyType1 != nil)
         XCTAssert(propertyType1 == propertyType2, "\(String(describing: propertyType1)) != \(propertyType2)")

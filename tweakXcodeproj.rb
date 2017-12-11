@@ -1,4 +1,6 @@
-#!/usr/bin/ruby
+#!/usr/local/bin/ruby
+
+# 12/3/17-- not sure why, but the path `/usr/bin/ruby` isn't working any more. More specifically, require 'xcodeproj' fails. Perhaps because of a High Sierra install?
 
 # Tweak the .xcodeproj after creating with the swift package manager.
 
@@ -50,6 +52,8 @@ project.targets.each do |target|
 	end
 
 	target.build_settings('Debug')['OTHER_SWIFT_FLAGS'] << '-DDEBUG -DSERVER'
+	
+	# target.build_settings('Debug')['SWIFT_VERSION'] = '4.0'
 end
 
 project.save()

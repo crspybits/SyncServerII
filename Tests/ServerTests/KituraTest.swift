@@ -45,20 +45,23 @@ func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
 
 struct TestAccount {
     // These String's are keys into a .json file.
-    let tokenKey:String // key values: Google: a refresh token; Facebook:long-lived access token.
+    let tokenKey:String // key values: e.g., Google: a refresh token; Facebook:long-lived access token.
     let idKey:String
     
     let type:AccountType
+    let tokenType:ServerConstants.AuthTokenType
     
-    static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google)
-    static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google)
-    static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google)
+    static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google, tokenType: .GoogleToken)
+    static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google, tokenType: .GoogleToken)
+    static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google, tokenType: .GoogleToken)
     
     static func isGoogle(_ account: TestAccount) -> Bool {
-        return account == google1 || account == google2 || account == google3
+        return account.type == .Google
     }
     
-    static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", type: .Facebook)
+    static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", type: .Facebook, tokenType: .FacebookToken)
+    
+    static let dropbox1 = TestAccount(tokenKey: "DropboxAccessToken1", idKey: "DropboxId1", type: .Dropbox, tokenType: .DropboxToken)
     
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     private func configValue(key:String) -> String {
@@ -84,18 +87,15 @@ struct TestAccount {
 
 extension KituraTest {
     func performServerTest(testAccount:TestAccount = .google1,
-        asyncTasks: @escaping (XCTestExpectation, Account) -> Void...) {
+        asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
         
         func runTest(usingCreds creds:Account) {
             ServerMain.startup(type: .nonBlocking)
             
             let requestQueue = DispatchQueue(label: "Request queue")
-
-            for (index, asyncTask) in asyncTasks.enumerated() {
-                let expectation = self.expectation(index)
-                requestQueue.async() {
-                    asyncTask(expectation, creds)
-                }
+            let expectation = self.expectation(0)
+            requestQueue.async() {
+                asyncTask(expectation, creds)
             }
 
             // blocks test until request completes
@@ -117,6 +117,12 @@ extension KituraTest {
         case .Facebook:
             let creds = FacebookCreds()
             creds.accessToken = testAccount.token()
+            runTest(usingCreds: creds)
+            
+        case .Dropbox:
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
             runTest(usingCreds: creds)
         }
     }
@@ -210,13 +216,16 @@ extension KituraTest {
         return jsonDict
     }
     
-    func setupHeaders(tokenType: ServerConstants.AuthTokenType = ServerConstants.AuthTokenType.GoogleToken, accessToken: String, deviceUUID:String) -> [String: String] {
+    func setupHeaders(testUser: TestAccount, accessToken:String, deviceUUID:String) -> [String: String] {
         var headers = [String: String]()
         
-        headers[ServerConstants.XTokenTypeKey] = tokenType.rawValue
+        headers[ServerConstants.XTokenTypeKey] = testUser.tokenType.rawValue
         headers[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
-        
         headers[ServerConstants.httpRequestDeviceUUID] = deviceUUID
+        
+        if testUser.type == .Dropbox {
+            headers[ServerConstants.HTTPAccountIdKey] = testUser.id()
+        }
 
         return headers
     }

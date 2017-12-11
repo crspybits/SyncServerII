@@ -150,8 +150,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         let deviceUUID = PerfectLib.UUID().string
             
         performServerTest(testAccount: sharingUser) { expectation, testCreds in
-            let tokenType = sharingUser.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType: tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser:sharingUser, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -180,7 +179,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         self.addNewUser(deviceUUID:deviceUUID)
         
         performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

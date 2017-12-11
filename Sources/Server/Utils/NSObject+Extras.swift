@@ -11,9 +11,9 @@ import Foundation
 extension NSObject {
     //returns the property type
     func typeOfProperty(name:String) -> Any.Type? {
-        let type: Mirror = Mirror(reflecting:self)
+        let selfType: Mirror = Mirror(reflecting:self)
 
-        for child in type.children {
+        for child in selfType.children {
             if child.label! == name {
                 return type(of: child.value)
             }

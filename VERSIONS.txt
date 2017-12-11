@@ -1,5 +1,10 @@
 SyncServer
 
+Version 0.8.0 (TBD)
+	* Using ServerConstants.HTTPOAuth2AuthorizationCodeKey instead of ServerConstants.GoogleHTTPServerAuthCodeKey
+		- This is going to require an iOS app update-- the prior version isn't going to work.
+	* Adding Dropbox authorization and cloud storage access.
+
 Version 0.7.7 (12/2/17)
 	* Fixed issue: When doing DoneUploads for upload deletions, previously I was using the params.currentSignedInUser!.userId and not the effective user id to lookup info in the FileIndex. As a result, when sharing users did an upload deletion, the files got marked as deleted in the file index, but didn't get deleted from cloud storage.
 	

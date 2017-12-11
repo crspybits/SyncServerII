@@ -5,12 +5,18 @@ docker build -t swift-ubuntu-runtime:latest .
 # docker push crspybits/swift-ubuntu-runtime:latest
 
 # Build SyncServer 
-docker run --rm -i -t -v /Users/chris/Desktop/Apps/SyncServerII/SyncServerII/:/root/SyncServerII swift-ubuntu:latest
+docker run --rm -i -t -v /Users/chris/Desktop/Apps/:/root/Apps swift-ubuntu:latest
 
 # In the container, build with:
-cd root/SyncServerII/
+cd root/Apps/SyncServerII/SyncServerII/
 /bin/rm -rf .build
 swift build -Xswiftc -DDEBUG -Xswiftc -DSERVER 
+
+# Run tests
+swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER --filter ServerTests.AccountAuthenticationTests_Dropbox
+	or
+swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER --filter ServerTests.AccountAuthenticationTests_Dropbox/testGoodEndpointWithBadCredsFails
+ 
 
 # Make the server runtime-image Dockerfile, e.g., see https://developer.ibm.com/swift/2017/02/14/new-runtime-docker-image-for-swift-applications/#comment-2962
 

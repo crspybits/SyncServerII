@@ -153,8 +153,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let deviceUUID2 = PerfectLib.UUID().string
 
         self.performServerTest(testAccount: sharingUser) { expectation, testCreds in
-            let tokenType = sharingUser.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType: tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID2)
+            let headers = self.setupHeaders(testUser: sharingUser, accessToken: testCreds.accessToken, deviceUUID:deviceUUID2)
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

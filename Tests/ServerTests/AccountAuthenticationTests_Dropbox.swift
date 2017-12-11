@@ -1,32 +1,20 @@
-//
-//  AccountAuthenticationTests_Facebook.swift
-//  ServerTests
-//
-//  Created by Christopher Prince on 7/19/17.
-//
-
 import XCTest
-import PerfectLib
-import SyncServerShared
-import LoggerAPI
+import Kitura
+import KituraNet
 @testable import Server
+import LoggerAPI
+import CredentialsDropbox
+import PerfectLib
+import Foundation
+import SyncServerShared
 
-class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
-    
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-    
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
-    }
+class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
+    let serverResponseTime:TimeInterval = 10
 
     func testGoodEndpointWithBadCredsFails() {
         let deviceUUID = PerfectLib.UUID().string
-        performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: "foobar", deviceUUID:deviceUUID)
+        performServerTest(testAccount: .dropbox1) { expectation, dropboxCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode.rawValue)")
                 XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
@@ -34,13 +22,13 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
             }
         }
     }
-    
-    // Good Facebook creds, not creds that are necessarily on the server.
+
+    // Good Dropbox creds, not creds that are necessarily on the server.
     func testGoodEndpointWithGoodCredsWorks() {
         let deviceUUID = PerfectLib.UUID().string
         
-        self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount: .dropbox1) { expectation, dropboxCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dropboxCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
@@ -53,22 +41,22 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
         let badRoute = ServerEndpoint("foobar", method: .post)
         let deviceUUID = PerfectLib.UUID().string
         
-        performServerTest(testAccount: .facebook1) { expectation, fbCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
+        performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
                 expectation.fulfill()
             }
         }
     }
-    
+
     func testGoodPathWithBadMethodWithGoodCredsFails() {
         let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post)
         XCTAssert(ServerEndpoints.checkCreds.method != .post)
         let deviceUUID = PerfectLib.UUID().string
         
-        self.performServerTest(testAccount: .facebook1) { expectation, fbCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
                 expectation.fulfill()
@@ -76,13 +64,13 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
         }
     }
     
-    func testThatFacebookUserHasValidCreds() {
-        createSharingUser(withSharingPermission: .read, sharingUser: .facebook1)
-        
+    func testThatDropboxUserHasValidCreds() {
         let deviceUUID = PerfectLib.UUID().string
         
-        self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
+        addNewUser(testAccount: .dropbox1, deviceUUID:deviceUUID)
+        
+        self.performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
@@ -92,20 +80,20 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     }
 }
 
-extension AccountAuthenticationTests_Facebook {
-    static var allTests : [(String, (AccountAuthenticationTests_Facebook) -> () throws -> Void)] {
-        let result:[(String, (AccountAuthenticationTests_Facebook) -> () throws -> Void)] = [
+extension AccountAuthenticationTests_Dropbox {
+    static var allTests : [(String, (AccountAuthenticationTests_Dropbox) -> () throws -> Void)] {
+        let result:[(String, (AccountAuthenticationTests_Dropbox) -> () throws -> Void)] = [
             ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
             ("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks),
             ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
             ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
-            ("testThatFacebookUserHasValidCreds", testThatFacebookUserHasValidCreds),
-        ]
+            ("testThatDropboxUserHasValidCreds", testThatDropboxUserHasValidCreds),
+            ]
         
         return result
     }
     
     func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Facebook.self)
+        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Dropbox.self)
     }
 }

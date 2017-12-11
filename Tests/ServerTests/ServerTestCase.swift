@@ -76,8 +76,8 @@ class ServerTestCase : XCTestCase {
     }
     
     func addNewUser(testAccount:TestAccount = .google1, deviceUUID:String) {
-        self.performServerTest(testAccount:testAccount) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount:testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request: \(response!.statusCode)")
@@ -121,8 +121,7 @@ class ServerTestCase : XCTestCase {
     func runUploadTest(testAccount:TestAccount = .google1, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
-            let tokenType = testAccount.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType:tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
             XCTAssert(ServerEndpoints.uploadFile.method == .post)
@@ -211,8 +210,7 @@ class ServerTestCase : XCTestCase {
     func sendDoneUploads(testAccount:TestAccount = .google1, expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
-            let tokenType = testAccount.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType:tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
                 DoneUploadsRequest.masterVersionKey : "\(masterVersion)"
@@ -248,7 +246,7 @@ class ServerTestCase : XCTestCase {
         XCTAssert(expectedFiles.count == expectedFileSizes.count)
         
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -298,7 +296,7 @@ class ServerTestCase : XCTestCase {
     func getFileIndex(deviceUUID:String = PerfectLib.UUID().string, completion: @escaping ([FileInfo]?) -> ()) {
         
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -324,7 +322,7 @@ class ServerTestCase : XCTestCase {
         }
         
         self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.getUploads, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -386,7 +384,7 @@ class ServerTestCase : XCTestCase {
     func createSharingInvitation(testAccount: TestAccount = .google1, permission: SharingPermission? = nil, deviceUUID:String = PerfectLib.UUID().string, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
-            let headers = self.setupHeaders(tokenType: testAccount.type.toAuthTokenType(), accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             var request:CreateSharingInvitationRequest!
             if permission == nil {
@@ -457,8 +455,7 @@ class ServerTestCase : XCTestCase {
     func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = PerfectLib.UUID().string, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ expectation: XCTestExpectation)->()) {
 
         self.performServerTest(testAccount:sharingUser) { expectation, accountCreds in
-            let tokenType = sharingUser.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType:tokenType, accessToken: accountCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: sharingUser, accessToken: accountCreds.accessToken, deviceUUID:deviceUUID)
             
             var urlParameters:String?
             
@@ -491,8 +488,7 @@ class ServerTestCase : XCTestCase {
         }
 
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
-            let tokenType = testAccount.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType:tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.uploadDeletion, headers: headers, urlParameters: "?" + uploadDeletionRequest.urlParameters()!) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -544,8 +540,7 @@ class ServerTestCase : XCTestCase {
         }
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
-            let tokenType = testAccount.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType: tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let downloadFileRequest = DownloadFileRequest(json: [
                 DownloadFileRequest.fileUUIDKey: actualUploadFileRequest!.fileUUID,

@@ -56,6 +56,10 @@ protocol Account {
     static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account?
 }
 
+enum FromJSONError : Swift.Error {
+    case noRequiredKeyValue
+}
+
 extension Account {
     var signInType: SignInType {
         return type(of: self).signInType
@@ -78,11 +82,27 @@ extension Account {
             success()
         }
     }
+    
+    static func setProperty(jsonDict: [String:Any], key:String, required:Bool=true, setWithValue:(String)->()) throws {
+        guard let keyValue = jsonDict[key] as? String else {
+            if required {
+                Log.error("No \(key) value present.")
+                throw FromJSONError.noRequiredKeyValue
+            }
+            else {
+                Log.warning("No \(key) value present.")
+            }
+            return
+        }
+
+        setWithValue(keyValue)
+    }
 }
 
 enum AccountType : String {
     case Google
     case Facebook
+    case Dropbox
     
     static func `for`(userProfile:UserProfile) -> AccountType? {
         guard let accountTypeString = userProfile.extendedProperties[SyncServerAccountType] as? String else {
@@ -98,6 +118,8 @@ enum AccountType : String {
                 return .GoogleToken
             case .Facebook:
                 return .FacebookToken
+            case .Dropbox:
+                return .DropboxToken
         }
     }
     
@@ -107,6 +129,8 @@ enum AccountType : String {
                 return .Google
             case .FacebookToken:
                 return .Facebook
+            case .DropboxToken:
+                return .Dropbox
         }
     }
 }
@@ -119,6 +143,13 @@ enum APICallBody {
 enum APICallResult {
     case json(JSON)
     case data(Data)
+}
+
+enum GenerateTokensError : Swift.Error {
+    case badStatusCode(HTTPStatusCode?)
+    case couldNotObtainParameterFromJSON
+    case nilAPIResult
+    case errorSavingCredsToDatabase
 }
 
 // I didn't just use a protocol extension for this because I want to be able to override `apiCall` and call "super to get the base definition.
@@ -200,7 +231,7 @@ class AccountAPICall {
                     completion(result, statusCode)
                     return
                 } catch (let error) {
-                    Log.error("Failed to read Google response: \(error)")
+                    Log.error("Failed to read response: \(error)")
                 }
             }
             

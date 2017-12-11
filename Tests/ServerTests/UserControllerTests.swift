@@ -29,7 +29,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         self.addNewUser(deviceUUID:deviceUUID)
             
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .internalServerError, "Worked on addUser request")
@@ -43,7 +43,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         self.addNewUser(deviceUUID:deviceUUID)
             
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -57,7 +57,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
 
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -71,7 +71,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
 
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: "Some junk for access token", deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: "Some junk for access token", deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -86,7 +86,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
 
         // Don't create the user first.
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -101,7 +101,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         self.addNewUser(deviceUUID:deviceUUID)
 
         performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

@@ -75,34 +75,14 @@ class GoogleCreds : AccountAPICall, Account {
     }
     
     static func updateUserProfile(_ userProfile: UserProfile, fromRequest request: RouterRequest) {
-        userProfile.extendedProperties[ServerConstants.GoogleHTTPServerAuthCodeKey] = request.headers[ServerConstants.GoogleHTTPServerAuthCodeKey]
+        userProfile.extendedProperties[ServerConstants.HTTPOAuth2AuthorizationCodeKey] = request.headers[ServerConstants.HTTPOAuth2AuthorizationCodeKey]
         userProfile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey]
-    }
-    
-    enum FromJSONError : Swift.Error {
-    case noRequiredKeyValue
     }
     
     static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
         guard let jsonDict = json.toJSONDictionary() as? [String:String] else {
             Log.error("Could not convert string to JSON [String:String]: \(json)")
             return nil
-        }
-        
-        func setProperty(key:String, required:Bool=true, setWithValue:(String)->()) throws {
-            let keyValue = jsonDict[key]
-            if keyValue == nil {
-                if required {
-                    Log.error("No \(key) value present.")
-                    throw FromJSONError.noRequiredKeyValue
-                }
-                else {
-                    Log.warning("No \(key) value present.")
-                }
-            }
-            else {
-                setWithValue(keyValue!)
-            }
         }
         
         let result = GoogleCreds()
@@ -114,7 +94,7 @@ class GoogleCreds : AccountAPICall, Account {
         case .user(let user) where user.userType == .owning:
             fallthrough
         case .userId(_, .owning):
-            try setProperty(key: accessTokenKey) { value in
+            try setProperty(jsonDict:jsonDict, key: accessTokenKey) { value in
                 result.accessToken = value
             }
             
@@ -124,11 +104,11 @@ class GoogleCreds : AccountAPICall, Account {
         
         // Considering the refresh token and serverAuthCode as optional because (a) I think I don't always get these from the client, and (b) during testing, I don't always have these.
         
-        try setProperty(key: refreshTokenKey, required:false) { value in
+        try setProperty(jsonDict:jsonDict, key: refreshTokenKey, required:false) { value in
             result.refreshToken = value
         }
         
-        try setProperty(key: serverAuthCodeKey, required:false) { value in
+        try setProperty(jsonDict:jsonDict, key: serverAuthCodeKey, required:false) { value in
             result.serverAuthCode = value
         }
         
@@ -156,19 +136,12 @@ class GoogleCreds : AccountAPICall, Account {
         creds.accessToken =
             profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
         creds.serverAuthCode =
-            profile.extendedProperties[ServerConstants.GoogleHTTPServerAuthCodeKey] as? String
+            profile.extendedProperties[ServerConstants.HTTPOAuth2AuthorizationCodeKey] as? String
         return creds
     }
     
     static let googleAPIAccessTokenKey = "access_token"
     static let googleAPIRefreshTokenKey = "refresh_token"
-    
-    enum GenerateTokensError : Swift.Error {
-    case badStatusCode(HTTPStatusCode?)
-    case couldNotObtainParameterFromJSON
-    case nilAPIResult
-    case errorSavingCredsToDatabase
-    }
     
     func needToGenerateTokens(userType:UserType, dbCreds:Account? = nil) -> Bool {
         var result:Bool
@@ -193,7 +166,7 @@ class GoogleCreds : AccountAPICall, Account {
         return result
     }
     
-    // Use the serverAuthCode to generate a refresh and access token if there is one. If no error occurs, success is true iff the generation occurred successfully.
+    // Use the serverAuthCode to generate a refresh and access token if there is one.
     func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->()) {
         if self.serverAuthCode == nil {
             Log.info("No serverAuthCode from client.")
