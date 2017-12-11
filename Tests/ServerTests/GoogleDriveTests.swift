@@ -248,7 +248,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             XCTAssert(error == nil)
             XCTAssert(creds.accessToken != nil)
             
-            creds.downloadSmallFile(cloudFolderName: self.knownPresentFolder, cloudFileName: cloudFileName, mimeType: "text/plain") { (data, error) in
+            creds.downloadFile(cloudFolderName: self.knownPresentFolder, cloudFileName: cloudFileName, mimeType: "text/plain") { (data, error) in
                 
                 if expectError {
                     XCTAssert(error != nil)
@@ -282,7 +282,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         // Use a known incorrect access token. We expect this to generate a 401 unauthorized, and thus cause an access token refresh.
         creds.accessToken = "foobar"
             
-        creds.downloadSmallFile(cloudFolderName: self.knownPresentFolder, cloudFileName: self.knownPresentFile, mimeType: "text/plain") { (data, error) in
+        creds.downloadFile(cloudFolderName: self.knownPresentFolder, cloudFileName: self.knownPresentFile, mimeType: "text/plain") { (data, error) in
 
             XCTAssert(error == nil)
             

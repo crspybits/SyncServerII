@@ -91,7 +91,7 @@ extension FileController {
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
             let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:fileIndexObj!.deviceUUID)
             
-            googleCreds.downloadSmallFile(
+            googleCreds.downloadFile(
                 cloudFolderName: fileIndexObj!.cloudFolderName, cloudFileName: cloudFileName, mimeType: fileIndexObj!.mimeType) { (data, error) in
                 if error == nil {
                     if Int64(data!.count) != fileIndexObj!.fileSizeBytes {

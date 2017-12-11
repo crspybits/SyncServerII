@@ -111,7 +111,7 @@ extension FileController {
             
             Log.info("File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
             
-            googleCreds.uploadSmallFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
+            googleCreds.uploadFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
                 if error == nil {
                     upload.fileSizeBytes = Int64(fileSize!)
                     upload.state = .uploaded

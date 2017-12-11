@@ -22,7 +22,7 @@ import PerfectLib
 
 private let folderMimeType = "application/vnd.google-apps.folder"
 
-extension GoogleCreds {    
+extension GoogleCreds : CloudStorage {
     enum ListFilesError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case nilAPIResult
@@ -40,6 +40,7 @@ extension GoogleCreds {
             E.g., "files/id,files/size"
         See also see http://stackoverflow.com/questions/35143283/google-drive-api-v3-migration
     */
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func listFiles(query:String? = nil, fieldsReturned:String? = nil, completion:@escaping (_ fileListing:JSON?, Swift.Error?)->()) {
         
         var urlParameters = ""
@@ -106,6 +107,7 @@ extension GoogleCreds {
     }
     
     // Considers it an error for there to be more than one item with the given name.
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func searchFor(_ searchType: SearchType, itemName:String,
         completion:@escaping (_ result:SearchResult?, Swift.Error?)->()) {
         
@@ -181,6 +183,7 @@ extension GoogleCreds {
     }
     
     // Create a folder-- assumes it doesn't yet exist. This won't fail if you use it more than once with the same folder name, you just get multiple instances of a folder with the same name.
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func createFolder(rootFolderName folderName:String,
         completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
         
@@ -234,6 +237,7 @@ extension GoogleCreds {
     }
     
     // Creates a root level folder if it doesn't exist. Returns the folderId in the completion if no error.
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func createFolderIfDoesNotExist(rootFolderName folderName:String,
         completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
         self.searchFor(.folder, itemName: folderName) { (result, error) in
@@ -293,6 +297,7 @@ extension GoogleCreds {
     }
     
     // Permanently delete a file or folder
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func deleteFile(fileId:String, completion:@escaping (Swift.Error?)->()) {
         // See https://developers.google.com/drive/v3/reference/files/delete
         
@@ -319,7 +324,7 @@ extension GoogleCreds {
     
     // TODO: *1* It would be good to put some retry logic in here. With a timed fallback as well. e.g., if an upload fails the first time around, retry after a period of time. OR, do this when I generalize this scheme to use other cloud storage services-- thus the retry logic could work across each scheme.
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
-    func uploadSmallFile(deviceUUID:String, request:UploadFileRequest,
+    func uploadFile(deviceUUID:String, request:UploadFileRequest,
         completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
         
         // See https://developers.google.com/drive/v3/web/manage-uploads
@@ -419,6 +424,7 @@ extension GoogleCreds {
     case cloudFileDoesNotExist(cloudFileName:String)
     }
     
+    // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
     func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
         
         self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in
@@ -447,8 +453,8 @@ extension GoogleCreds {
     case nilAPIResult
     case noDataInAPIResult
     }
-    
-    func downloadSmallFile(cloudFolderName:String, cloudFileName:String, mimeType:String,
+
+    func downloadFile(cloudFolderName:String, cloudFileName:String, mimeType:String,
         completion:@escaping (_ fileData:Data?, Swift.Error?)->()) {
         
         searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: mimeType) { (cloudFileId, error) in
