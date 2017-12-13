@@ -109,16 +109,21 @@ extension FileController {
                 return
             }
             
-            Log.info("File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
+            let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!)
+            Log.info("File being sent to cloud storage: \(cloudFileName)")
             
-            googleCreds.uploadFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
-                if error == nil {
-                    upload.fileSizeBytes = Int64(fileSize!)
+            // TODO: Condition this based on Google Drive
+            let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest.cloudFolderName!, mimeType: uploadRequest.mimeType)
+            
+            googleCreds.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) { result in
+                switch result {
+                case .success(let fileSize):
+                    upload.fileSizeBytes = Int64(fileSize)
                     upload.state = .uploaded
                     upload.uploadId = uploadId
                     if params.repos.upload.update(upload: upload) {
                         let response = UploadFileResponse()!
-                        response.size = Int64(fileSize!)
+                        response.size = Int64(fileSize)
                         params.completion(response)
                     }
                     else {
@@ -126,10 +131,9 @@ extension FileController {
                         Log.error("Could not update UploadRepository: \(String(describing: error))")
                         params.completion(nil)
                     }
-                }
-                else {
+                case .failure(let error):
                     // TODO: *0* It could be useful to remove the file from the cloud server. It might be there.
-                    Log.error("Could not uploadSmallFile: error: \(String(describing: error))")
+                    Log.error("Could not uploadSmallFile: error: \(error)")
                     params.completion(nil)
                 }
             }

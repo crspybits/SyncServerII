@@ -15,6 +15,7 @@ XCTMain([
     testCase(GeneralAuthTests.allTests),
     testCase(GeneralDatabaseTests.allTests),
     testCase(GoogleDriveTests.allTests),
+    testCase(DropboxTests.allTests),
     testCase(MessageTests.allTests),
     testCase(Sharing_FileManipulationTests.allTests),
     testCase(SharingAccountsController_CreateSharingInvitation.allTests),

@@ -10,10 +10,7 @@ import SyncServerShared
 import Kitura
 import Credentials
 import LoggerAPI
-
-//import PerfectLib
 import KituraNet
-//import SwiftyJSON
 
 class DropboxCreds : AccountAPICall, Account {
     static var accountType:AccountType {

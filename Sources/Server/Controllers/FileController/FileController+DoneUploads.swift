@@ -248,7 +248,10 @@ extension FileController {
 
         Log.info("Deleting file: \(cloudFileName)")
         
-        googleCreds.deleteFile(cloudFolderName: uploadDeletion.cloudFolderName!, cloudFileName: cloudFileName, mimeType: uploadDeletion.mimeType!) { error in
+        // TODO: Condition this based on Google Drive
+        let options = CloudStorageFileNameOptions(cloudFolderName: uploadDeletion.cloudFolderName!, mimeType: uploadDeletion.mimeType!)
+        
+        googleCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
 
             let tail = (uploadDeletions!.count > 0) ?
                 Array(uploadDeletions![1..<uploadDeletions!.count]) : nil

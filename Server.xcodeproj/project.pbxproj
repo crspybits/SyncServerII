@@ -25,6 +25,8 @@
 		6B87914039639D2D443D88AC /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = DFFBF76C45D98D3492ECBF49 /* Server.json */; };
 		83C5CE121FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */; };
 		83C5CE141FDDBD880024979A /* LinuxMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE131FDDBD880024979A /* LinuxMain.swift */; };
+		83C5CE161FDE2E170024979A /* DropboxCreds+CloudStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE151FDE2E170024979A /* DropboxCreds+CloudStorage.swift */; };
+		83C5CE181FDE38D50024979A /* DropboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE171FDE38D50024979A /* DropboxTests.swift */; };
 		OBJ_100 /* AccountAuthenticationTests_Facebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_55 /* AccountAuthenticationTests_Facebook.swift */; };
 		OBJ_101 /* AccountAuthenticationTests_Google.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* AccountAuthenticationTests_Google.swift */; };
 		OBJ_102 /* DatabaseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_57 /* DatabaseModelTests.swift */; };
@@ -58,7 +60,7 @@
 		OBJ_145 /* CloudStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* CloudStorage.swift */; };
 		OBJ_146 /* DropboxCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* DropboxCreds.swift */; };
 		OBJ_147 /* FacebookCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* FacebookCreds.swift */; };
-		OBJ_148 /* GoogleCreds+GoogleDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* GoogleCreds+GoogleDrive.swift */; };
+		OBJ_148 /* GoogleCreds+CloudStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* GoogleCreds+CloudStorage.swift */; };
 		OBJ_149 /* GoogleCreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* GoogleCreds.swift */; };
 		OBJ_150 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Constants.swift */; };
 		OBJ_151 /* Controllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Controllers.swift */; };
@@ -139,6 +141,8 @@
 /* Begin PBXFileReference section */
 		83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Dropbox.swift; sourceTree = "<group>"; };
 		83C5CE131FDDBD880024979A /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
+		83C5CE151FDE2E170024979A /* DropboxCreds+CloudStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxCreds+CloudStorage.swift"; sourceTree = "<group>"; };
+		83C5CE171FDE38D50024979A /* DropboxTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DropboxTests.swift; sourceTree = "<group>"; };
 		C1EDB63C587EF0F67A4734CA /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		DFFBF76C45D98D3492ECBF49 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -146,7 +150,7 @@
 		OBJ_12 /* CloudStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudStorage.swift; sourceTree = "<group>"; };
 		OBJ_13 /* DropboxCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxCreds.swift; sourceTree = "<group>"; };
 		OBJ_14 /* FacebookCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacebookCreds.swift; sourceTree = "<group>"; };
-		OBJ_15 /* GoogleCreds+GoogleDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleCreds+GoogleDrive.swift"; sourceTree = "<group>"; };
+		OBJ_15 /* GoogleCreds+CloudStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleCreds+CloudStorage.swift"; sourceTree = "<group>"; };
 		OBJ_16 /* GoogleCreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCreds.swift; sourceTree = "<group>"; };
 		OBJ_18 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_19 /* Controllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controllers.swift; sourceTree = "<group>"; };
@@ -371,6 +375,7 @@
 				OBJ_65 /* GeneralAuthTests.swift */,
 				OBJ_66 /* GeneralDatabaseTests.swift */,
 				OBJ_67 /* GoogleDriveTests.swift */,
+				83C5CE171FDE38D50024979A /* DropboxTests.swift */,
 				OBJ_68 /* KituraTest.swift */,
 				OBJ_69 /* MessageTests.swift */,
 				OBJ_70 /* ServerTestCase.swift */,
@@ -436,8 +441,9 @@
 				OBJ_12 /* CloudStorage.swift */,
 				OBJ_13 /* DropboxCreds.swift */,
 				OBJ_14 /* FacebookCreds.swift */,
-				OBJ_15 /* GoogleCreds+GoogleDrive.swift */,
 				OBJ_16 /* GoogleCreds.swift */,
+				OBJ_15 /* GoogleCreds+CloudStorage.swift */,
+				83C5CE151FDE2E170024979A /* DropboxCreds+CloudStorage.swift */,
 			);
 			path = "Account Specifics";
 			sourceTree = "<group>";
@@ -575,7 +581,7 @@
 				OBJ_145 /* CloudStorage.swift in Sources */,
 				OBJ_146 /* DropboxCreds.swift in Sources */,
 				OBJ_147 /* FacebookCreds.swift in Sources */,
-				OBJ_148 /* GoogleCreds+GoogleDrive.swift in Sources */,
+				OBJ_148 /* GoogleCreds+CloudStorage.swift in Sources */,
 				OBJ_149 /* GoogleCreds.swift in Sources */,
 				OBJ_150 /* Constants.swift in Sources */,
 				OBJ_151 /* Controllers.swift in Sources */,
@@ -594,7 +600,9 @@
 				OBJ_164 /* LockRepository.swift in Sources */,
 				OBJ_165 /* MasterVersionRepository.swift in Sources */,
 				OBJ_166 /* Model.swift in Sources */,
+				83C5CE161FDE2E170024979A /* DropboxCreds+CloudStorage.swift in Sources */,
 				OBJ_167 /* Repositories.swift in Sources */,
+				83C5CE181FDE38D50024979A /* DropboxTests.swift in Sources */,
 				OBJ_168 /* Repository.swift in Sources */,
 				OBJ_169 /* SharingInvitationRepository.swift in Sources */,
 				OBJ_170 /* UserRepository.swift in Sources */,

@@ -91,25 +91,28 @@ extension FileController {
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
             let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:fileIndexObj!.deviceUUID)
             
-            googleCreds.downloadFile(
-                cloudFolderName: fileIndexObj!.cloudFolderName, cloudFileName: cloudFileName, mimeType: fileIndexObj!.mimeType) { (data, error) in
-                if error == nil {
-                    if Int64(data!.count) != fileIndexObj!.fileSizeBytes {
-                        Log.error("Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
+            // TODO: Condition this on Google Drive
+            let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj!.cloudFolderName!, mimeType: fileIndexObj!.mimeType)
+            
+            googleCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
+                switch result {
+                case .success(let data):
+                    if Int64(data.count) != fileIndexObj!.fileSizeBytes {
+                        Log.error("Actual file size \(data.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
                         params.completion(nil)
                         return
                     }
                     
                     let response = DownloadFileResponse()!
                     response.appMetaData = fileIndexObj!.appMetaData
-                    response.data = data!
-                    response.fileSizeBytes = Int64(data!.count)
+                    response.data = data
+                    response.fileSizeBytes = Int64(data.count)
                     
                     params.completion(response)
                     return
-                }
-                else {
-                    Log.error("Failed downloading file: \(String(describing: error))")
+                
+                case .failure(let error):
+                    Log.error("Failed downloading file: \(error)")
                     params.completion(nil)
                     return
                 }

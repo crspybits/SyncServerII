@@ -223,7 +223,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             
             let googleCreds = creds as! GoogleCreds
             
-            googleCreds.searchFor(cloudFileName: cloudFileName, inCloudFolder: uploadRequest1.cloudFolderName, fileMimeType: uploadRequest1.mimeType) { (cloudFileId, error) in
+            googleCreds.searchFor(cloudFileName: cloudFileName, inCloudFolder: uploadRequest1.cloudFolderName!, fileMimeType: uploadRequest1.mimeType) { (cloudFileId, error) in
                 XCTAssert(error != nil)
                 
                 guard case GoogleCreds.SearchForFileError.cloudFileDoesNotExist(_) = error as! GoogleCreds.SearchForFileError else {

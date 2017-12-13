@@ -248,15 +248,20 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             XCTAssert(error == nil)
             XCTAssert(creds.accessToken != nil)
             
-            creds.downloadFile(cloudFolderName: self.knownPresentFolder, cloudFileName: cloudFileName, mimeType: "text/plain") { (data, error) in
-                
-                if expectError {
-                    XCTAssert(error != nil)
+            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+            
+            creds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
+                switch result {
+                case .success:
+                    if expectError {
+                        XCTFail()
+                    }
+                case .failure:
+                    if !expectError {
+                        XCTFail()
+                    }
                 }
-                else {
-                    XCTAssert(error == nil)
-                }
-                
+
                 // A different unit test will check to see if the contents of the file are correct.
                 
                 exp.fulfill()
@@ -281,10 +286,16 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         
         // Use a known incorrect access token. We expect this to generate a 401 unauthorized, and thus cause an access token refresh.
         creds.accessToken = "foobar"
-            
-        creds.downloadFile(cloudFolderName: self.knownPresentFolder, cloudFileName: self.knownPresentFile, mimeType: "text/plain") { (data, error) in
-
-            XCTAssert(error == nil)
+        
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        creds.downloadFile(cloudFileName: self.knownPresentFile, options:options) { result in
+            switch result {
+            case .success:
+                break
+            case .failure:
+                XCTFail()
+            }
             
             exp.fulfill()
         }

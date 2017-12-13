@@ -159,7 +159,9 @@ class AccountAPICall {
     
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
     func apiCall(method:String, baseURL:String? = nil, path:String,
-        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:APICallBody? = nil,
+                 additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
+                 body:APICallBody? = nil,
+                 returnResultWhenNon200Code:Bool = false,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
         var hostname = baseURL
@@ -211,8 +213,11 @@ class AccountAPICall {
                     // I just created a new refresh token, and this works again. My hypothesis above seems correct on this basis.
                     // I suspect the "expiration" of the refresh token comes about here because of the method I'm using to authenticate on the client side-- I sign in again from the client, and generate a new access token, which also causes the server to generate a new refresh token (which is stored in the db, not in the Server.json file used in unit tests). And I believe there's a limit on the number of active refresh tokens.
                     // The actual `TODO` item here is to respond to the client in such a way so the client can prompt the user to re-sign in to generate an updated refresh token.
-                    completion(nil, statusCode)
-                    return
+                    
+                    if !returnResultWhenNon200Code {
+                        completion(nil, statusCode)
+                        return
+                    }
                 }
                 
                 var body = Data()
