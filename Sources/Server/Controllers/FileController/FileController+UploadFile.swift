@@ -33,14 +33,11 @@ extension FileController {
                 return
             }
             
-            // TODO: *3* Needs generalization for multiple cloud services.
-            guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-                Log.error("Could not obtain Google Creds")
+            guard let cloudStorage = params.effectiveOwningUserCreds as? CloudStorage else {
+                Log.error("Could not obtain CloudStorage creds")
                 params.completion(nil)
                 return
             }
-                    
-            // TODO: *5* This needs to be generalized to enabling uploads to various kinds of cloud services. E.g., including Dropbox. Right now, it's just specific to Google Drive.
             
             // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
             
@@ -55,7 +52,6 @@ extension FileController {
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadRequest.appMetaData
             upload.cloudFolderName = uploadRequest.cloudFolderName
-            
             
             // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
             // https://github.com/crspybits/SyncServerII/issues/4
@@ -112,10 +108,9 @@ extension FileController {
             let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!)
             Log.info("File being sent to cloud storage: \(cloudFileName)")
             
-            // TODO: Condition this based on Google Drive
             let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest.cloudFolderName!, mimeType: uploadRequest.mimeType)
             
-            googleCreds.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) { result in
+            cloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) { result in
                 switch result {
                 case .success(let fileSize):
                     upload.fileSizeBytes = Int64(fileSize)
@@ -133,7 +128,7 @@ extension FileController {
                     }
                 case .failure(let error):
                     // TODO: *0* It could be useful to remove the file from the cloud server. It might be there.
-                    Log.error("Could not uploadSmallFile: error: \(error)")
+                    Log.error("Could not uploadFile: error: \(error)")
                     params.completion(nil)
                 }
             }

@@ -51,6 +51,9 @@ struct TestAccount {
     let type:AccountType
     let tokenType:ServerConstants.AuthTokenType
     
+    // This is the main owning account on which tests are conducted.
+    static let primaryOwningAccount:TestAccount = .dropbox1
+    
     static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google, tokenType: .GoogleToken)
     static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google, tokenType: .GoogleToken)
     static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google, tokenType: .GoogleToken)
@@ -86,7 +89,7 @@ struct TestAccount {
 // TODO: *0* Why do I have to have both Server.json and ServerTests.json for testing??
 
 extension KituraTest {
-    func performServerTest(testAccount:TestAccount = .google1,
+    func performServerTest(testAccount:TestAccount = .primaryOwningAccount,
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
         
         func runTest(usingCreds creds:Account) {

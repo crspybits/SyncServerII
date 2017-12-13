@@ -75,7 +75,7 @@ class ServerTestCase : XCTestCase {
         self.db.close()
     }
     
-    func addNewUser(testAccount:TestAccount = .google1, deviceUUID:String) {
+    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String) {
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
@@ -86,7 +86,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadTextFile(testAccount:TestAccount = .google1, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = "CloudFolder", appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = "CloudFolder", appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
         }
@@ -118,7 +118,7 @@ class ServerTestCase : XCTestCase {
         return (request:uploadRequest, fileSize: Int64(stringToUpload.characters.count))
     }
     
-    func runUploadTest(testAccount:TestAccount = .google1, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
+    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -207,7 +207,7 @@ class ServerTestCase : XCTestCase {
         return (uploadRequest!, sizeOfCatFileInBytes)
     }
     
-    func sendDoneUploads(testAccount:TestAccount = .google1, expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
+    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -245,8 +245,8 @@ class ServerTestCase : XCTestCase {
     
         XCTAssert(expectedFiles.count == expectedFileSizes.count)
         
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -295,8 +295,8 @@ class ServerTestCase : XCTestCase {
     
     func getFileIndex(deviceUUID:String = PerfectLib.UUID().string, completion: @escaping ([FileInfo]?) -> ()) {
         
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -321,8 +321,8 @@ class ServerTestCase : XCTestCase {
             XCTAssert(expectedFiles.count == expectedFileSizes!.count)
         }
         
-        self.performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.getUploads, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -482,7 +482,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadDeletion(testAccount:TestAccount = .google1, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
+    func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
         }
@@ -514,7 +514,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func downloadTextFile(testAccount:TestAccount = .google1, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) {
+    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) {
     
         let deviceUUID = PerfectLib.UUID().string
         let masterVersion:Int64 = 0

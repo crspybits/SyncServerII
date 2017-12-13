@@ -133,7 +133,6 @@ extension DropboxCreds : CloudStorage {
     }
     
     func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions? = nil, completion:@escaping (Result<Int>)->()) {
-        assert(options == nil)
         
         // First, look to see if the file exists on Dropbox. Don't want to upload it more than once.
 
@@ -156,9 +155,7 @@ extension DropboxCreds : CloudStorage {
     }
     
     func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions? = nil, completion:@escaping (Result<Data>)->()) {
-    
-        assert(options == nil)
-    
+        
         // https://www.dropbox.com/developers/documentation/http/documentation#files-download
         /*
         curl -X POST https://content.dropboxapi.com/2/files/download \
@@ -232,6 +229,14 @@ extension DropboxCreds : CloudStorage {
             else {
                 completion(DropboxError.couldNotGetId)
             }
+        }
+    }
+    
+    func lookupFile(cloudFileName:String, options:CloudStorageFileNameOptions? = nil,
+        completion:@escaping (Result<Bool>)->()) {
+        
+        checkForFile(fileName: cloudFileName) { result in
+            completion(result)
         }
     }
 }

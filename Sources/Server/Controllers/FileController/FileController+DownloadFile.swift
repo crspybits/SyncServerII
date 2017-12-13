@@ -37,8 +37,8 @@ extension FileController {
             }
 
             // TODO: *5* Generalize this to use other cloud storage services.
-            guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-                Log.error("Could not obtain Google Creds")
+            guard let cloudStorageCreds = params.effectiveOwningUserCreds as? CloudStorage else {
+                Log.error("Could not obtain CloudStorage Creds")
                 params.completion(nil)
                 return
             }
@@ -47,7 +47,7 @@ extension FileController {
             
             // First, lookup the file in the FileIndex. This does an important security check too-- makes sure the owning userId corresponds to the fileUUID.
             let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: downloadRequest.fileUUID)
-            
+
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
             var fileIndexObj:FileIndex?
@@ -87,14 +87,14 @@ extension FileController {
             // TODO: *5*: Eventually, this should bypass the middle man and stream from the cloud storage service directly to the client.
             
             // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex. This is because the file, once stored, is really in a specific place in cloud storage.
+            // And, some cloud storage systems don't use the cloudFolderName.
             
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
             let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:fileIndexObj!.deviceUUID)
             
-            // TODO: Condition this on Google Drive
             let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj!.cloudFolderName!, mimeType: fileIndexObj!.mimeType)
             
-            googleCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
+            cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
                 switch result {
                 case .success(let data):
                     if Int64(data.count) != fileIndexObj!.fileSizeBytes {

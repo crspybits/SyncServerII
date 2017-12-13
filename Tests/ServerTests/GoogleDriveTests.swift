@@ -302,6 +302,52 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         
         waitForExpectations(timeout: 10, handler: nil)
     }
+    
+    func lookupFile(cloudFileName: String, expectError:Bool = false) -> Bool? {
+        var foundResult: Bool?
+        
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.google1.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            
+            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+            
+            creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                switch result {
+                case .success(let found):
+                    if expectError {
+                        XCTFail()
+                    }
+                    else {
+                       foundResult = found
+                    }
+                case .failure:
+                    if !expectError {
+                        XCTFail()
+                    }
+                }
+                
+                exp.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+        return foundResult
+    }
+
+    func testLookupFileThatDoesNotExist() {
+        let result = lookupFile(cloudFileName: knownPresentFile)
+        XCTAssert(result == true)
+    }
+    
+    func testLookupFileThatExists() {
+        let result = lookupFile(cloudFileName: knownAbsentFile)
+        XCTAssert(result == false)
+    }
 }
 
 extension GoogleDriveTests {
@@ -319,7 +365,9 @@ extension GoogleDriveTests {
             ("testCreateFolderIfDoesNotExist", testCreateFolderIfDoesNotExist),
             ("testBasicFileDownloadWorks", testBasicFileDownloadWorks),
             ("testFileDownloadOfNonExistentFileFails", testFileDownloadOfNonExistentFileFails),
-            ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken)
+            ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken),
+            ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
+            ("testLookupFileThatExists", testLookupFileThatExists)
         ]
     }
     

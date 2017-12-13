@@ -268,6 +268,47 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         
         deleteFile(creds: creds, cloudFileName: fileName)
     }
+    
+    func lookupFile(cloudFileName: String, expectError:Bool = false) -> Bool? {
+        var foundResult: Bool?
+        
+        let creds = DropboxCreds()
+        creds.accessToken = TestAccount.dropbox1.token()
+        creds.accountId = TestAccount.dropbox1.id()
+        
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.lookupFile(cloudFileName:cloudFileName) { result in
+            switch result {
+            case .success(let found):
+                if expectError {
+                    XCTFail()
+                }
+                else {
+                   foundResult = found
+                }
+            case .failure:
+                if !expectError {
+                    XCTFail()
+                }
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+        return foundResult
+    }
+    
+    func testLookupFileThatDoesNotExist() {
+        let result = lookupFile(cloudFileName: knownPresentFile)
+        XCTAssert(result == true)
+    }
+    
+    func testLookupFileThatExists() {
+        let result = lookupFile(cloudFileName: knownAbsentFile)
+        XCTAssert(result == false)
+    }
 }
 
 extension DropboxTests {
@@ -281,7 +322,9 @@ extension DropboxTests {
             ("testSimpleDownloadWorks", testSimpleDownloadWorks),
             ("testUploadAndDownloadWorks", testUploadAndDownloadWorks),
             ("testDeletionOfNonExistingFileFails", testDeletionOfNonExistingFileFails),
-            ("testDeletionOfExistingFileWorks", testDeletionOfExistingFileWorks)
+            ("testDeletionOfExistingFileWorks", testDeletionOfExistingFileWorks),
+            ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
+            ("testLookupFileThatExists", testLookupFileThatExists)
         ]
     }
     

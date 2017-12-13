@@ -428,7 +428,33 @@ extension GoogleCreds : CloudStorage {
     case cloudFileDoesNotExist(cloudFileName:String)
     }
     
-    // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
+    enum LookupFileError: Swift.Error {
+    case noOptions
+    }
+    
+    func lookupFile(cloudFileName:String, options:CloudStorageFileNameOptions?,
+        completion:@escaping (Result<Bool>)->()) {
+        
+        guard let options = options else {
+            completion(.failure(LookupFileError.noOptions))
+            return
+        }
+        
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: options.cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, error) in
+
+            switch error {
+            case .none:
+                completion(.success(true))
+                
+            case .some(SearchForFileError.cloudFileDoesNotExist):
+                 completion(.success(false))
+                
+            default:
+                 completion(.failure(error!))
+            }
+        }
+    }
+    
     func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
         
         self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in

@@ -221,17 +221,17 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         self.performServerTest { expectation, creds in
             let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID)
             
-            let googleCreds = creds as! GoogleCreds
+            let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest1.cloudFolderName!, mimeType: uploadRequest1.mimeType)
             
-            googleCreds.searchFor(cloudFileName: cloudFileName, inCloudFolder: uploadRequest1.cloudFolderName!, fileMimeType: uploadRequest1.mimeType) { (cloudFileId, error) in
-                XCTAssert(error != nil)
-                
-                guard case GoogleCreds.SearchForFileError.cloudFileDoesNotExist(_) = error as! GoogleCreds.SearchForFileError else {
+            let cloudStorageCreds = creds as! CloudStorage
+            cloudStorageCreds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                switch result {
+                case .success(let found):
+                    XCTAssert(!found)
+                case .failure:
                     XCTFail()
-                    return
                 }
                 
-                XCTAssert(cloudFileId == nil)
                 expectation.fulfill()
             }
         }
