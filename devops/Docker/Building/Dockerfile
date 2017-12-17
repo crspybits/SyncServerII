@@ -22,6 +22,7 @@ RUN apt-get -q update && \
     uuid-dev \
     libmysqlclient-dev \
     tzdata \
+    jq \
     pkg-config \
     && update-alternatives --quiet --install /usr/bin/clang clang /usr/bin/clang-3.8 100 \
     && update-alternatives --quiet --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100 \

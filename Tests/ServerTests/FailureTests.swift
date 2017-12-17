@@ -25,7 +25,7 @@ class FailureTests: ServerTestCase, LinuxTestable {
     }
 
     func testThatHealthCheckFailsWhenRequested() {
-        performServerTest { expectation, googleCreds in
+        performServerTest { expectation, creds in
             let headers = [
                 ServerConstants.httpRequestEndpointFailureTestKey: "true"
             ]

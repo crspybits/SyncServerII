@@ -51,7 +51,6 @@
 		OBJ_121 /* SpecificDatabaseTests_Uploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_76 /* SpecificDatabaseTests_Uploads.swift */; };
 		OBJ_122 /* SpecificDatabaseTests_UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_77 /* SpecificDatabaseTests_UserRepository.swift */; };
 		OBJ_123 /* UserControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* UserControllerTests.swift */; };
-		OBJ_124 /* UtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_79 /* UtilsTests.swift */; };
 		OBJ_126 /* Server.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Server::Server::Product" /* Server.framework */; };
 		OBJ_135 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* main.swift */; };
 		OBJ_137 /* Server.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Server::Server::Product" /* Server.framework */; };
@@ -89,7 +88,6 @@
 		OBJ_174 /* ServerRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* ServerRoutes.swift */; };
 		OBJ_175 /* ServerSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* ServerSetup.swift */; };
 		OBJ_176 /* AsyncTailRecursion.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* AsyncTailRecursion.swift */; };
-		OBJ_177 /* NSObject+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* NSObject+Extras.swift */; };
 		OBJ_94 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 /* End PBXBuildFile section */
 
@@ -179,7 +177,6 @@
 		OBJ_46 /* ServerRoutes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerRoutes.swift; sourceTree = "<group>"; };
 		OBJ_47 /* ServerSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSetup.swift; sourceTree = "<group>"; };
 		OBJ_49 /* AsyncTailRecursion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncTailRecursion.swift; sourceTree = "<group>"; };
-		OBJ_50 /* NSObject+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSObject+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_52 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_55 /* AccountAuthenticationTests_Facebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Facebook.swift; sourceTree = "<group>"; };
 		OBJ_56 /* AccountAuthenticationTests_Google.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Google.swift; sourceTree = "<group>"; };
@@ -206,7 +203,6 @@
 		OBJ_76 /* SpecificDatabaseTests_Uploads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_Uploads.swift; sourceTree = "<group>"; };
 		OBJ_77 /* SpecificDatabaseTests_UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_UserRepository.swift; sourceTree = "<group>"; };
 		OBJ_78 /* UserControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserControllerTests.swift; sourceTree = "<group>"; };
-		OBJ_79 /* UtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilsTests.swift; sourceTree = "<group>"; };
 		OBJ_80 /* devops */ = {isa = PBXFileReference; lastKnownFileType = folder; path = devops; sourceTree = SOURCE_ROOT; };
 		OBJ_81 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = SOURCE_ROOT; };
 		OBJ_82 /* Docs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Docs; sourceTree = SOURCE_ROOT; };
@@ -318,12 +314,11 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_49 /* AsyncTailRecursion.swift */,
-				OBJ_50 /* NSObject+Extras.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -337,7 +332,6 @@
 				OBJ_85 /* Products */,
 				83C5CE0C1FDBB70A0024979A /* Recovered References */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* Main */ = {
@@ -387,7 +381,6 @@
 				OBJ_76 /* SpecificDatabaseTests_Uploads.swift */,
 				OBJ_77 /* SpecificDatabaseTests_UserRepository.swift */,
 				OBJ_78 /* UserControllerTests.swift */,
-				OBJ_79 /* UtilsTests.swift */,
 			);
 			name = ServerTests;
 			path = Tests/ServerTests;
@@ -533,7 +526,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_85 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -612,7 +605,6 @@
 				OBJ_174 /* ServerRoutes.swift in Sources */,
 				OBJ_175 /* ServerSetup.swift in Sources */,
 				OBJ_176 /* AsyncTailRecursion.swift in Sources */,
-				OBJ_177 /* NSObject+Extras.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -654,7 +646,6 @@
 				OBJ_122 /* SpecificDatabaseTests_UserRepository.swift in Sources */,
 				OBJ_123 /* UserControllerTests.swift in Sources */,
 				83C5CE121FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift in Sources */,
-				OBJ_124 /* UtilsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

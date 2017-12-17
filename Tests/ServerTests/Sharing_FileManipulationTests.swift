@@ -25,11 +25,10 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     @discardableResult
-    func uploadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .google2, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
         let deviceUUID1 = PerfectLib.UUID().string
         
-        // Create a user identified by googleRefreshToken1
-        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
+        addNewUser(deviceUUID:deviceUUID1)
         
         var sharingInvitationUUID:String!
         
@@ -39,7 +38,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        // Redeem that sharing invitation with a new user: googleRefreshToken2
+        // Redeem that sharing invitation with a new user
         redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { expectation in
             expectation.fulfill()
         }
@@ -54,15 +53,14 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         return (request, fileSize)
     }
     
-    func uploadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .google2, failureExpected:Bool = false) {
+    func uploadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
         let deviceUUID1 = PerfectLib.UUID().string
         
-        // Create a user identified by googleRefreshToken1
-        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
+        addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
         
         // And upload a file by that user.
-        let (uploadRequest, _) = uploadTextFile(testAccount: .google1, deviceUUID:deviceUUID1, addUser:false)
-        sendDoneUploads(testAccount: .google1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        let (uploadRequest, _) = uploadTextFile(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1, addUser:false)
+        sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
         var sharingInvitationUUID:String!
         
@@ -89,15 +87,14 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1), failureExpected:failureExpected)
     }
     
-    func downloadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .google2, failureExpected:Bool = false) {
+    func downloadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
         let deviceUUID1 = PerfectLib.UUID().string
         
-        // Create a user identified by googleRefreshToken1
-        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
+        addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
         
         // And upload a file by that user.
-        let (uploadRequest, fileSize) = uploadTextFile(testAccount: .google1, deviceUUID:deviceUUID1, addUser:false)
-        sendDoneUploads(testAccount: .google1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        let (uploadRequest, fileSize) = uploadTextFile(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1, addUser:false)
+        sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
         var sharingInvitationUUID:String!
         
@@ -115,16 +112,15 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:failureExpected)
     }
     
-    func downloadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .google2, failureExpected:Bool = false) {
+    func downloadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
     
         let deviceUUID1 = PerfectLib.UUID().string
         
-        // Create a user identified by googleRefreshToken1
-        addNewUser(testAccount: .google1, deviceUUID:deviceUUID1)
+        addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
         
         // And upload a file by that user.
-        let (uploadRequest, _) = uploadTextFile(testAccount: .google1, deviceUUID:deviceUUID1, addUser:false)
-        sendDoneUploads(testAccount: .google1, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        let (uploadRequest, _) = uploadTextFile(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1, addUser:false)
+        sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
@@ -175,120 +171,69 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     // MARK: Read sharing user
-    func testThatReadSharingGoogleUserCannotUploadAFile() {
+    func testThatReadSharingUserCannotUploadAFile() {
         uploadFileBySharingUser(withPermission: .read, failureExpected:true)
     }
     
-    func testThatReadSharingFacebookUserCannotUploadAFile() {
-        uploadFileBySharingUser(withPermission: .read, sharingUser: .facebook1, failureExpected:true)
-    }
-    
-    func testThatReadSharingGoogleUserCannotUploadDeleteAFile() {
+    func testThatReadSharingUserCannotUploadDeleteAFile() {
         uploadDeleteFileBySharingUser(withPermission: .read, failureExpected:true)
     }
     
-    func testThatReadSharingFacebookUserCannotUploadDeleteAFile() {
-        uploadDeleteFileBySharingUser(withPermission: .read, sharingUser: .facebook1, failureExpected:true)
-    }
-    
-    func testThatReadSharingGoogleUserCanDownloadAFile() {
+    func testThatReadSharingUserCanDownloadAFile() {
         downloadFileBySharingUser(withPermission: .read)
     }
     
-    func testThatReadSharingFacebookUserCanDownloadAFile() {
-        downloadFileBySharingUser(withPermission: .read, sharingUser: .facebook1)
-    }
-    
-    func testThatReadSharingGoogleUserCanDownloadDeleteAFile() {
+    func testThatReadSharingUserCanDownloadDeleteAFile() {
         downloadDeleteFileBySharingUser(withPermission: .read)
     }
     
-    func testThatReadSharingFacebookUserCanDownloadDeleteAFile() {
-        downloadDeleteFileBySharingUser(withPermission: .read, sharingUser: .facebook1)
-    }
-    
     // MARK: Write sharing user
-    func testThatWriteSharingGoogleUserCanUploadAFile() {
+    func testThatWriteSharingUserCanUploadAFile() {
         uploadFileBySharingUser(withPermission: .write)
     }
     
-    func testThatWriteSharingFacebookUserCanUploadAFile() {
-        uploadFileBySharingUser(withPermission: .write, sharingUser: .facebook1)
-    }
-    
-    func testThatWriteSharingGoogleUserCanUploadDeleteAFile() {
+    func testThatWriteSharingUserCanUploadDeleteAFile() {
         uploadDeleteFileBySharingUser(withPermission: .write)
     }
     
-    func testThatWriteSharingFacebookUserCanUploadDeleteAFile() {
-        uploadDeleteFileBySharingUser(withPermission: .write, sharingUser: .facebook1)
-    }
-    
-    func testThatWriteSharingGoogleUserCanDownloadAFile() {
+    func testThatWriteSharingUserCanDownloadAFile() {
         downloadFileBySharingUser(withPermission: .write)
     }
     
-    func testThatWriteSharingFacebookUserCanDownloadAFile() {
-        downloadFileBySharingUser(withPermission: .write, sharingUser: .facebook1)
-    }
-    
-    func testThatWriteSharingGoogleUserCanDownloadDeleteAFile() {
+    func testThatWriteSharingUserCanDownloadDeleteAFile() {
         downloadDeleteFileBySharingUser(withPermission: .write)
     }
     
-    func testThatWriteSharingFacebookUserCanDownloadDeleteAFile() {
-        downloadDeleteFileBySharingUser(withPermission: .write, sharingUser: .facebook1)
-    }
-    
     // MARK: Admin sharing user
-    func testThatAdminSharingGoogleUserCanUploadAFile() {
+    func testThatAdminSharingUserCanUploadAFile() {
         uploadFileBySharingUser(withPermission: .admin)
     }
     
-    func testThatAdminSharingFacebookUserCanUploadAFile() {
-        uploadFileBySharingUser(withPermission: .admin, sharingUser: .facebook1)
-    }
-    
-    func testThatAdminSharingGoogleUserCanUploadDeleteAFile() {
+    func testThatAdminSharingUserCanUploadDeleteAFile() {
         uploadDeleteFileBySharingUser(withPermission: .admin)
     }
     
-    func testThatAdminSharingFacebookUserCanUploadDeleteAFile() {
-        uploadDeleteFileBySharingUser(withPermission: .admin, sharingUser: .facebook1)
-    }
-    
-    func testThatAdminSharingGoogleUserCanDownloadAFile() {
+    func testThatAdminSharingUserCanDownloadAFile() {
         downloadFileBySharingUser(withPermission: .admin)
     }
     
-    func testThatAdminSharingFacebookUserCanDownloadAFile() {
-        downloadFileBySharingUser(withPermission: .admin, sharingUser: .facebook1)
-    }
-    
-    func testThatAdminSharingGoogleUserCanDownloadDeleteAFile() {
+    func testThatAdminSharingUserCanDownloadDeleteAFile() {
         downloadDeleteFileBySharingUser(withPermission: .admin)
     }
     
-    func testThatAdminSharingFacebookUserCanDownloadDeleteAFile() {
-        downloadDeleteFileBySharingUser(withPermission: .admin, sharingUser: .facebook1)
-    }
-    
     // MARK: Across sharing and owning users.
-    func owningUserCanDownloadSharingUserFile(sharingUser: TestAccount = .google2) {
+    func owningUserCanDownloadSharingUserFile(sharingUser: TestAccount = .primarySharingAccount) {
         let (uploadRequest, fileSize) = uploadFileBySharingUser(withPermission: .write, sharingUser: sharingUser)
         
-        downloadTextFile(testAccount: .google1, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
+        downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
     }
     
-    func testThatOwningUserCanDownloadSharingGoogleUserFile() {
+    func testThatOwningUserCanDownloadSharingUserFile() {
         owningUserCanDownloadSharingUserFile()
     }
     
-    func testThatOwningUserCanDownloadSharingFacebookUserFile() {
-        owningUserCanDownloadSharingUserFile(sharingUser: .facebook1)
-    }
-    
-    func sharingUserCanDownloadSharingUserFile(sharingUser: TestAccount = .google3) {
+    func sharingUserCanDownloadSharingUserFile(sharingUser: TestAccount = .secondarySharingAccount) {
+        // uploaded by primarySharingAccount
         let (uploadRequest, fileSize) = uploadFileBySharingUser(withPermission: .write)
             
         var sharingInvitationUUID:String!
@@ -306,47 +251,41 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
     }
     
-    func testThatSharingUserCanDownloadSharingGoogleUserFile() {
+    func testThatSharingUserCanDownloadSharingUserFile() {
         sharingUserCanDownloadSharingUserFile()
-    }
-    
-    func testThatSharingUserCanDownloadSharingFacebookUserFile() {
-        sharingUserCanDownloadSharingUserFile(sharingUser: .facebook1)
     }
 }
 
 extension Sharing_FileManipulationTests {
     static var allTests : [(String, (Sharing_FileManipulationTests) -> () throws -> Void)] {
         return [
-            ("testThatReadSharingGoogleUserCannotUploadAFile", testThatReadSharingGoogleUserCannotUploadAFile),
-            ("testThatReadSharingFacebookUserCannotUploadAFile", testThatReadSharingFacebookUserCannotUploadAFile),
-            ("testThatReadSharingGoogleUserCannotUploadDeleteAFile", testThatReadSharingGoogleUserCannotUploadDeleteAFile),
-            ("testThatReadSharingFacebookUserCannotUploadDeleteAFile", testThatReadSharingFacebookUserCannotUploadDeleteAFile),
-            ("testThatReadSharingGoogleUserCanDownloadAFile", testThatReadSharingGoogleUserCanDownloadAFile),
-            ("testThatReadSharingFacebookUserCanDownloadAFile",
-             testThatReadSharingFacebookUserCanDownloadAFile),
-            ("testThatReadSharingGoogleUserCanDownloadDeleteAFile", testThatReadSharingGoogleUserCanDownloadDeleteAFile),
-            ("testThatReadSharingFacebookUserCanDownloadDeleteAFile", testThatReadSharingFacebookUserCanDownloadDeleteAFile),
-            ("testThatWriteSharingGoogleUserCanUploadAFile", testThatWriteSharingGoogleUserCanUploadAFile),
-            ("testThatWriteSharingFacebookUserCanUploadAFile", testThatWriteSharingFacebookUserCanUploadAFile),
-            ("testThatWriteSharingGoogleUserCanUploadDeleteAFile", testThatWriteSharingGoogleUserCanUploadDeleteAFile),
-            ("testThatWriteSharingFacebookUserCanUploadDeleteAFile", testThatWriteSharingFacebookUserCanUploadDeleteAFile),
-            ("testThatWriteSharingGoogleUserCanDownloadAFile", testThatWriteSharingGoogleUserCanDownloadAFile),
-            ("testThatWriteSharingFacebookUserCanDownloadAFile", testThatWriteSharingFacebookUserCanDownloadAFile),
-            ("testThatWriteSharingGoogleUserCanDownloadDeleteAFile", testThatWriteSharingGoogleUserCanDownloadDeleteAFile),
-            ("testThatWriteSharingFacebookUserCanDownloadDeleteAFile", testThatWriteSharingFacebookUserCanDownloadDeleteAFile),
-            ("testThatAdminSharingGoogleUserCanUploadAFile", testThatAdminSharingGoogleUserCanUploadAFile),
-            ("testThatAdminSharingFacebookUserCanUploadAFile", testThatAdminSharingFacebookUserCanUploadAFile),
-            ("testThatAdminSharingGoogleUserCanUploadDeleteAFile", testThatAdminSharingGoogleUserCanUploadDeleteAFile),
-            ("testThatAdminSharingFacebookUserCanUploadDeleteAFile", testThatAdminSharingFacebookUserCanUploadDeleteAFile),
-            ("testThatAdminSharingGoogleUserCanDownloadAFile", testThatAdminSharingGoogleUserCanDownloadAFile),
-            ("testThatAdminSharingFacebookUserCanDownloadAFile", testThatAdminSharingFacebookUserCanDownloadAFile),
-            ("testThatAdminSharingGoogleUserCanDownloadDeleteAFile", testThatAdminSharingGoogleUserCanDownloadDeleteAFile),
-            ("testThatAdminSharingFacebookUserCanDownloadDeleteAFile", testThatAdminSharingFacebookUserCanDownloadDeleteAFile),
-            ("testThatOwningUserCanDownloadSharingGoogleUserFile", testThatOwningUserCanDownloadSharingGoogleUserFile),
-            ("testThatOwningUserCanDownloadSharingFacebookUserFile", testThatOwningUserCanDownloadSharingFacebookUserFile),
-            ("testThatSharingUserCanDownloadSharingGoogleUserFile", testThatSharingUserCanDownloadSharingGoogleUserFile),
-            ("testThatSharingUserCanDownloadSharingFacebookUserFile", testThatSharingUserCanDownloadSharingFacebookUserFile),
+            ("testThatReadSharingUserCannotUploadAFile", testThatReadSharingUserCannotUploadAFile),
+
+            ("testThatReadSharingUserCannotUploadDeleteAFile", testThatReadSharingUserCannotUploadDeleteAFile),
+
+            ("testThatReadSharingUserCanDownloadAFile", testThatReadSharingUserCanDownloadAFile),
+            
+            ("testThatReadSharingUserCanDownloadDeleteAFile", testThatReadSharingUserCanDownloadDeleteAFile),
+            
+            ("testThatWriteSharingUserCanUploadAFile", testThatWriteSharingUserCanUploadAFile),
+            
+            ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
+            
+            ("testThatWriteSharingUserCanDownloadAFile", testThatWriteSharingUserCanDownloadAFile),
+            
+            ("testThatWriteSharingUserCanDownloadDeleteAFile", testThatWriteSharingUserCanDownloadDeleteAFile),
+            
+            ("testThatAdminSharingUserCanUploadAFile", testThatAdminSharingUserCanUploadAFile),
+            
+            ("testThatAdminSharingUserCanUploadDeleteAFile", testThatAdminSharingUserCanUploadDeleteAFile),
+            
+            ("testThatAdminSharingUserCanDownloadAFile", testThatAdminSharingUserCanDownloadAFile),
+            
+            ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
+            
+            ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
+            
+            ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile),
         ]
     }
     

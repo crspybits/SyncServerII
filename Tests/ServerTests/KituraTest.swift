@@ -51,9 +51,49 @@ struct TestAccount {
     let type:AccountType
     let tokenType:ServerConstants.AuthTokenType
     
-    // This is the main owning account on which tests are conducted.
+    // The main owning account on which tests are conducted.
+#if PRIMARY_OWNING_GOOGLE1
+    static let primaryOwningAccount:TestAccount = .google1
+#elseif PRIMARY_OWNING_DROPBOX1
     static let primaryOwningAccount:TestAccount = .dropbox1
+#else
+    static let primaryOwningAccount:TestAccount = .google1
+#endif
     
+    // Secondary owning account-- must be different than primary.
+#if SECONDARY_OWNING_GOOGLE2
+    static let secondaryOwningAccount:TestAccount = .google2
+#elseif SECONDARY_OWNING_DROPBOX2
+    static let secondaryOwningAccount:TestAccount = .dropbox2
+#else
+    static let secondaryOwningAccount:TestAccount = .google2
+#endif
+
+    // Main account, for sharing, on which tests are conducted. This account must allow sharing (e.g., not for Dropbox). It should be a different specific account than primaryOwningAccount.
+#if PRIMARY_SHARING_GOOGLE2
+    static let primarySharingAccount:TestAccount = .google2
+#elseif PRIMARY_SHARING_FACEBOOK1
+    static let primarySharingAccount:TestAccount = .facebook1
+#else
+    static let primarySharingAccount:TestAccount = .google2
+#endif
+
+    // Another sharing account -- different than the primary owning, and primary sharing accounts.
+#if SECONDARY_SHARING_GOOGLE3
+    static let secondarySharingAccount:TestAccount = .google3
+#elseif SECONDARY_SHARING_FACEBOOK2
+    static let secondarySharingAccount:TestAccount = .facebook2
+#else
+    static let secondarySharingAccount:TestAccount = .google3
+#endif
+
+    // Account which doesn't allow sharing.
+#if PRIMARY_NON_SHARING_DROPBOX1
+    static let primaryNonSharingAccount:TestAccount = .dropbox1
+#else
+    static let primaryNonSharingAccount:TestAccount = .dropbox1
+#endif
+
     static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google, tokenType: .GoogleToken)
     static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google, tokenType: .GoogleToken)
     static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google, tokenType: .GoogleToken)

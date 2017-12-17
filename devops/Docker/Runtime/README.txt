@@ -15,8 +15,12 @@ swift build -Xswiftc -DDEBUG -Xswiftc -DSERVER
 # Run tests
 swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER --filter ServerTests.AccountAuthenticationTests_Dropbox
 	or
-swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER --filter ServerTests.AccountAuthenticationTests_Dropbox/testGoodEndpointWithBadCredsFails
+swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER --filter ServerTests.FileControllerTests_GetUploads/testForZeroUploads
+
+# OR-- use the script runTests.sh
+# See the top of that file for instructions.
  
+ grep  ' failure' output.txt | grep -Ev ' 0 failure' | grep -Ev ERROR
 
 # Make the server runtime-image Dockerfile, e.g., see https://developer.ibm.com/swift/2017/02/14/new-runtime-docker-image-for-swift-applications/#comment-2962
 

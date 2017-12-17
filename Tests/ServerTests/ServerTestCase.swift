@@ -381,7 +381,7 @@ class ServerTestCase : XCTestCase {
         }
     }
 
-    func createSharingInvitation(testAccount: TestAccount = .google1, permission: SharingPermission? = nil, deviceUUID:String = PerfectLib.UUID().string, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: SharingPermission? = nil, deviceUUID:String = PerfectLib.UUID().string, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -412,8 +412,8 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    // This also creates the owning user.
-    func createSharingUser(withSharingPermission permission:SharingPermission = .read, sharingUser:TestAccount = .google2, completion:((_ newUserId:UserId)->())? = nil) {
+    // This also creates the owning user-- using .primaryOwningAccount
+    func createSharingUser(withSharingPermission permission:SharingPermission = .read, sharingUser:TestAccount = .google2, failureExpected: Bool = false, completion:((_ newUserId:UserId?)->())? = nil) {
         // a) Create sharing invitation with one Google account.
         // b) Next, need to "sign out" of that account, and sign into another Google account
         // c) And, redeem sharing invitation with that new Google account.
@@ -429,27 +429,32 @@ class ServerTestCase : XCTestCase {
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { expectation in
             expectation.fulfill()
         }
 
-        // Check to make sure we have a new user:
-        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
-        let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
-        guard case .found(let model) = userResults else {
-            XCTFail()
-            return
+        if failureExpected {
+            completion?(nil)
         }
-        
-        let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
-        let results = SharingInvitationRepository(self.db).lookup(key: key, modelInit: SharingInvitation.init)
-        
-        guard case .noObjectFound = results else {
-            XCTFail()
-            return
+        else {
+            // Check to make sure we have a new user:
+            let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
+            let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
+            guard case .found(let model) = userResults else {
+                XCTFail()
+                return
+            }
+            
+            let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
+            let results = SharingInvitationRepository(self.db).lookup(key: key, modelInit: SharingInvitation.init)
+            
+            guard case .noObjectFound = results else {
+                XCTFail()
+                return
+            }
+            
+            completion?((model as! User).userId)
         }
-        
-        completion?((model as! User).userId)
     }
     
     func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = PerfectLib.UUID().string, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ expectation: XCTestExpectation)->()) {
@@ -589,7 +594,7 @@ class ServerTestCase : XCTestCase {
             let comp1 = file.creationDate!.compare(start)
             
             switch comp1 {
-            case .orderedDescending:
+            case .orderedDescending, .orderedSame:
                 break
             default:
                 XCTAssert(false)
@@ -598,7 +603,7 @@ class ServerTestCase : XCTestCase {
             let comp2 = file.creationDate!.compare(end)
             
             switch comp2 {
-            case .orderedAscending:
+            case .orderedAscending, .orderedSame:
                 break
             default:
                 XCTAssert(false)

@@ -13,7 +13,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
 
     func testGoodEndpointWithBadCredsFails() {
         let deviceUUID = PerfectLib.UUID().string
-        performServerTest { expectation, googleCreds in
+        performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode.rawValue)")
@@ -27,7 +27,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     func testGoodEndpointWithGoodCredsWorks() {
         let deviceUUID = PerfectLib.UUID().string
         
-        self.performServerTest { expectation, googleCreds in
+        self.performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -41,7 +41,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
         let badRoute = ServerEndpoint("foobar", method: .post)
         let deviceUUID = PerfectLib.UUID().string
 
-        performServerTest { expectation, googleCreds in
+        performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
@@ -55,7 +55,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
         XCTAssert(ServerEndpoints.checkCreds.method != .post)
         let deviceUUID = PerfectLib.UUID().string
             
-        self.performServerTest { expectation, googleCreds in
+        self.performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
