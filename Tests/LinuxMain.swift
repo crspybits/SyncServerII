@@ -2,6 +2,7 @@ import XCTest
 @testable import ServerTests
 
 XCTMain([
+    testCase(AccountAuthenticationTests_Dropbox.allTests),
     testCase(AccountAuthenticationTests_Facebook.allTests),
     testCase(AccountAuthenticationTests_Google.allTests),
     testCase(DatabaseModelTests.allTests),
@@ -14,6 +15,7 @@ XCTMain([
     testCase(GeneralAuthTests.allTests),
     testCase(GeneralDatabaseTests.allTests),
     testCase(GoogleDriveTests.allTests),
+    testCase(DropboxTests.allTests),
     testCase(MessageTests.allTests),
     testCase(Sharing_FileManipulationTests.allTests),
     testCase(SharingAccountsController_CreateSharingInvitation.allTests),
@@ -22,6 +24,5 @@ XCTMain([
     testCase(SpecificDatabaseTests_SharingInvitationRepository.allTests),
     testCase(SpecificDatabaseTests_Uploads.allTests),
     testCase(SpecificDatabaseTests_UserRepository.allTests),
-    testCase(UserControllerTests.allTests),
-    testCase(UtilsTests.allTests)
+    testCase(UserControllerTests.allTests)
 ])

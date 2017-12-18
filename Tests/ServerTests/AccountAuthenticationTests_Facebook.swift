@@ -26,7 +26,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     func testGoodEndpointWithBadCredsFails() {
         let deviceUUID = PerfectLib.UUID().string
         performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(tokenType: ServerConstants.AuthTokenType.FacebookToken, accessToken: "foobar", deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .facebook1, accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode.rawValue)")
                 XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
@@ -40,7 +40,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         
         self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(tokenType: ServerConstants.AuthTokenType.FacebookToken, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
@@ -54,7 +54,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         
         performServerTest(testAccount: .facebook1) { expectation, fbCreds in
-            let headers = self.setupHeaders(tokenType: ServerConstants.AuthTokenType.FacebookToken, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
                 expectation.fulfill()
@@ -68,7 +68,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         
         self.performServerTest(testAccount: .facebook1) { expectation, fbCreds in
-            let headers = self.setupHeaders(tokenType: ServerConstants.AuthTokenType.FacebookToken, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
                 expectation.fulfill()
@@ -82,7 +82,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         
         self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(tokenType: ServerConstants.AuthTokenType.FacebookToken, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")

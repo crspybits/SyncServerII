@@ -13,8 +13,8 @@ import PerfectLib
 import Foundation
 import SyncServerShared
 
+// You can run this with primarySharingAccount set to any account that allows sharing.
 class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTestable {
-
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -55,11 +55,14 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         }
     }
     
-    func sharingInvitationCreationByAnAdminSharingUser(sharingUser:TestAccount) {
+    func sharingInvitationCreationByAnAdminSharingUser(sharingUser:TestAccount, failureExpected: Bool = false) {
+        // .primaryOwningAccount owning user is created as part of this.
+        let testAccount:TestAccount = .primaryOwningAccount
         createSharingUser(withSharingPermission: .admin, sharingUser: sharingUser)
         
         // Lookup the userId for the freshly created owning user.
-        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: .Google, credsId: TestAccount.google1.id())
+        
+        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: testAccount.type, credsId: testAccount.id())
         let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
         guard case .found(let model) = userResults,
             let owningUserId = (model as? User)?.userId else {
@@ -69,7 +72,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(testAccount: sharingUser, permission: .write) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: sharingUser, permission: .write, errorExpected: false) { expectation, invitationUUID in
             XCTAssert(invitationUUID != nil)
             guard let _ = UUID(uuidString: invitationUUID!) else {
                 XCTFail()
@@ -96,12 +99,8 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         XCTAssert(invitation.owningUserId == owningUserId, "ERROR: invitation.owningUserId: \(invitation.owningUserId) was not equal to \(owningUserId)")
     }
     
-    func testSuccessfulSharingInvitationCreationByAnAdminGoogleSharingUser() {
-        sharingInvitationCreationByAnAdminSharingUser(sharingUser: .google2)
-    }
-    
-    func testSuccessfulSharingInvitationCreationByAnAdminFacebookSharingUser() {
-        sharingInvitationCreationByAnAdminSharingUser(sharingUser: .facebook1)
+    func testSuccessfulSharingInvitationCreationByAnAdminSharingUser() {
+        sharingInvitationCreationByAnAdminSharingUser(sharingUser: .primarySharingAccount)
     }
     
     func failureOfSharingInvitationCreationByAReadSharingUser(sharingUser: TestAccount) {
@@ -114,12 +113,8 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         }
     }
     
-    func testFailureOfSharingInvitationCreationByAReadGoogleSharingUser() {
-        failureOfSharingInvitationCreationByAReadSharingUser(sharingUser: .google2)
-    }
-    
-    func testFailureOfSharingInvitationCreationByAReadFacebookSharingUser() {
-        failureOfSharingInvitationCreationByAReadSharingUser(sharingUser: .facebook1)
+    func testFailureOfSharingInvitationCreationByAReadSharingUser() {
+        failureOfSharingInvitationCreationByAReadSharingUser(sharingUser: .primarySharingAccount)
     }
     
     func failureOfSharingInvitationCreationByAWriteSharingUser(sharingUser: TestAccount) {
@@ -130,16 +125,12 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         }
     }
     
-    func testFailureOfSharingInvitationCreationByAGoogleWriteSharingUser() {
-        failureOfSharingInvitationCreationByAWriteSharingUser(sharingUser: .google2)
-    }
-    
-    func testFailureOfSharingInvitationCreationByAFacebookWriteSharingUser() {
-        failureOfSharingInvitationCreationByAWriteSharingUser(sharingUser: .facebook1)
+    func testFailureOfSharingInvitationCreationByAWriteSharingUser() {
+        failureOfSharingInvitationCreationByAWriteSharingUser(sharingUser: .primarySharingAccount)
     }
     
     func testSharingInvitationCreationFailsWithNoAuthorization() {
-        self.performServerTest { expectation, googleCreds in
+        self.performServerTest { expectation, creds in
             let request = CreateSharingInvitationRequest(json: [
                 CreateSharingInvitationRequest.sharingPermissionKey : SharingPermission.read
             ])
@@ -158,12 +149,13 @@ extension SharingAccountsController_CreateSharingInvitation {
         return [
             ("testSuccessfulReadSharingInvitationCreationByAnOwningUser", testSuccessfulReadSharingInvitationCreationByAnOwningUser),
             ("testSuccessfulWriteSharingInvitationCreationByAnOwningUser", testSuccessfulWriteSharingInvitationCreationByAnOwningUser),
-            ("testSuccessfulSharingInvitationCreationByAnAdminGoogleSharingUser", testSuccessfulSharingInvitationCreationByAnAdminGoogleSharingUser),
-            ("testSuccessfulSharingInvitationCreationByAnAdminFacebookSharingUser", testSuccessfulSharingInvitationCreationByAnAdminFacebookSharingUser),
-            ("testFailureOfSharingInvitationCreationByAReadGoogleSharingUser", testFailureOfSharingInvitationCreationByAReadGoogleSharingUser),
-            ("testFailureOfSharingInvitationCreationByAReadFacebookSharingUser", testFailureOfSharingInvitationCreationByAReadFacebookSharingUser),
-            ("testFailureOfSharingInvitationCreationByAGoogleWriteSharingUser", testFailureOfSharingInvitationCreationByAGoogleWriteSharingUser),
-            ("testFailureOfSharingInvitationCreationByAFacebookWriteSharingUser", testFailureOfSharingInvitationCreationByAFacebookWriteSharingUser),
+    
+            ("testSuccessfulSharingInvitationCreationByAnAdminSharingUser", testSuccessfulSharingInvitationCreationByAnAdminSharingUser),
+            
+            ("testFailureOfSharingInvitationCreationByAReadSharingUser", testFailureOfSharingInvitationCreationByAReadSharingUser),
+            
+            ("testFailureOfSharingInvitationCreationByAWriteSharingUser", testFailureOfSharingInvitationCreationByAWriteSharingUser),
+            
             ("testSharingInvitationCreationFailsWithNoAuthorization", testSharingInvitationCreationFailsWithNoAuthorization)
         ]
     }

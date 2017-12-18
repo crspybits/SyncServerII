@@ -202,8 +202,8 @@ extension FileController {
         
         // Next: If there are any upload deletions, we need to actually do the file deletions. We are doing this *without* the lock held. I'm assuming it takes far longer to contact the cloud storage service than the other operations we are doing (e.g., mySQL operations).
         
-        guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-            Log.error("Could not obtain Google Creds")
+        guard let cloudStorageCreds = params.effectiveOwningUserCreds as? CloudStorage else {
+            Log.error("Could not obtain CloudStorage Creds")
             params.completion(nil)
             return
         }
@@ -218,11 +218,11 @@ extension FileController {
         
         let async = AsyncTailRecursion()
         async.start {
-            self.finishDoneUploads(uploadDeletions: uploadDeletions, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, async:async)
+            self.finishDoneUploads(uploadDeletions: uploadDeletions, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async)
         }
     }
 
-     private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, googleCreds:GoogleCreds, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
+     private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, cloudStorageCreds:CloudStorage, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
     
         Log.info("Enter finishDoneUploads")
 
@@ -248,7 +248,10 @@ extension FileController {
 
         Log.info("Deleting file: \(cloudFileName)")
         
-        googleCreds.deleteFile(cloudFolderName: uploadDeletion.cloudFolderName!, cloudFileName: cloudFileName, mimeType: uploadDeletion.mimeType!) { error in
+        // TODO: Condition this based on Google Drive
+        let options = CloudStorageFileNameOptions(cloudFolderName: uploadDeletion.cloudFolderName!, mimeType: uploadDeletion.mimeType!)
+        
+        cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
 
             let tail = (uploadDeletions!.count > 0) ?
                 Array(uploadDeletions![1..<uploadDeletions!.count]) : nil
@@ -262,7 +265,7 @@ extension FileController {
             }
             
             async.next() {
-                self.finishDoneUploads(uploadDeletions: tail, params: params, googleCreds: googleCreds, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+                self.finishDoneUploads(uploadDeletions: tail, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
             }
         }
     }

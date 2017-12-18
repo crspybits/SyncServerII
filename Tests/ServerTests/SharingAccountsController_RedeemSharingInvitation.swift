@@ -33,32 +33,29 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             Not exactly, but close: Look at Long Lived Token's -- last about 60 days.
     }*/
     
-    func testThatRedeemingWithAnotherGoogleAccountWorks() {
-        createSharingUser(sharingUser: .google2)
+    func testThatRedeemingWithASharingAccountWorks() {
+        createSharingUser(sharingUser: .primarySharingAccount)
     }
     
-    func testThatRedeemingWithAFacebookAccountWorks() {
-        createSharingUser(sharingUser: .facebook1)
+    func testThatRedeemingWithANonSharingAccountFails() {
+        createSharingUser(sharingUser: .primaryNonSharingAccount, failureExpected: true)
     }
     
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
-            
+
         redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
     
-    func testThatRedeemingASharingInvitationByAGoogleUserWithoutGivingTheInvitationUUIDFails() {
-        redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: .google2)
+    func testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails() {
+        redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser:
+            .primarySharingAccount)
     }
-    
-    func testThatRedeemingASharingInvitationByAFacebookUserWithoutGivingTheInvitationUUIDFails() {
-        redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: .facebook1)
-    }
-    
-    func testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails() {
+
+    func testThatRedeemingWithTheSameAccountAsTheOwningAccountFails() {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
         
@@ -69,12 +66,12 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(sharingUser: .google1, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
     
-    func testThatRedeemingWithAnExistingOtherOwningGoogleAccountFails() {
+    func testThatRedeemingWithAnExistingOtherOwningAccountFails() {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
         
@@ -86,9 +83,9 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
         
         let deviceUUID2 = PerfectLib.UUID().string
-        addNewUser(testAccount: .google3, deviceUUID:deviceUUID2)
+        addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(sharingUser: .google3, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
             expectation.fulfill()
         }
     }
@@ -135,12 +132,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
     }
     
-    func testThatRedeemingWithAnExistingSharingGoogleAccountFails() {
-        redeemingWithAnExistingOtherSharingAccountFails(sharingUser: .google2)
-    }
-    
-    func testThatRedeemingWithAnExistingSharingFacebookAccountFails() {
-        redeemingWithAnExistingOtherSharingAccountFails(sharingUser: .facebook1)
+    func testThatRedeemingWithAnExistingSharingAccountFails() {
+        redeemingWithAnExistingOtherSharingAccountFails(sharingUser: .primarySharingAccount)
     }
     
     func checkingCredsOnASharingUserGivesSharingPermission(sharingUser: TestAccount) {
@@ -150,8 +143,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         let deviceUUID = PerfectLib.UUID().string
             
         performServerTest(testAccount: sharingUser) { expectation, testCreds in
-            let tokenType = sharingUser.type.toAuthTokenType()
-            let headers = self.setupHeaders(tokenType: tokenType, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            let headers = self.setupHeaders(testUser:sharingUser, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -167,20 +159,16 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
     }
     
-    func testThatCheckingCredsOnAGoogleSharingUserGivesSharingPermission() {
-        checkingCredsOnASharingUserGivesSharingPermission(sharingUser: .google2)
-    }
-    
-    func testThatCheckingCredsOnAFacebookSharingUserGivesSharingPermission() {
-        checkingCredsOnASharingUserGivesSharingPermission(sharingUser: .facebook1)
+    func testThatCheckingCredsOnASharingUserGivesSharingPermission() {
+        checkingCredsOnASharingUserGivesSharingPermission(sharingUser: .primarySharingAccount)
     }
     
     func testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission() {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
         
-        performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        performServerTest(testAccount: .primaryOwningAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -200,16 +188,17 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
 extension SharingAccountsController_RedeemSharingInvitation {
     static var allTests : [(String, (SharingAccountsController_RedeemSharingInvitation) -> () throws -> Void)] {
         return [
-            ("testThatRedeemingWithAnotherGoogleAccountWorks", testThatRedeemingWithAnotherGoogleAccountWorks),
-            ("testThatRedeemingWithAFacebookAccountWorks", testThatRedeemingWithAFacebookAccountWorks),
-            ("testThatRedeemingASharingInvitationByAGoogleUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAGoogleUserWithoutGivingTheInvitationUUIDFails),
-            ("testThatRedeemingASharingInvitationByAFacebookUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAFacebookUserWithoutGivingTheInvitationUUIDFails),
-            ("testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameGoogleAccountAsTheOwningAccountFails),
-            ("testThatRedeemingWithAnExistingOtherOwningGoogleAccountFails", testThatRedeemingWithAnExistingOtherOwningGoogleAccountFails),
-            ("testThatRedeemingWithAnExistingSharingGoogleAccountFails", testThatRedeemingWithAnExistingSharingGoogleAccountFails),
-            ("testThatRedeemingWithAnExistingSharingFacebookAccountFails", testThatRedeemingWithAnExistingSharingFacebookAccountFails),
-            ("testThatCheckingCredsOnAGoogleSharingUserGivesSharingPermission", testThatCheckingCredsOnAGoogleSharingUserGivesSharingPermission),
-            ("testThatCheckingCredsOnAFacebookSharingUserGivesSharingPermission", testThatCheckingCredsOnAFacebookSharingUserGivesSharingPermission),
+            ("testThatRedeemingWithASharingAccountWorks", testThatRedeemingWithASharingAccountWorks),
+            ("testThatRedeemingWithANonSharingAccountFails", testThatRedeemingWithANonSharingAccountFails),
+            ("testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails),
+            
+            ("testThatRedeemingWithTheSameAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameAccountAsTheOwningAccountFails),
+            
+            ("testThatRedeemingWithAnExistingOtherOwningAccountFails", testThatRedeemingWithAnExistingOtherOwningAccountFails),
+            ("testThatRedeemingWithAnExistingSharingAccountFails", testThatRedeemingWithAnExistingSharingAccountFails),
+            
+            ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
+            
             ("testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission", testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission)
         ]
     }

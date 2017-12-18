@@ -1,5 +1,0 @@
-For building on Linux, may need to make a script or Makefile that copies Server.plist to an appropriate place. 
-
-See also:
-https://github.com/IBM-Swift/GRMustache.swift/blob/master/Makefile
-http://stackoverflow.com/questions/41527782/swift-package-manager-and-xcode-retaining-xcode-settings/41612477#41612477

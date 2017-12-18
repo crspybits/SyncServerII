@@ -12,6 +12,7 @@ import KituraSession
 import Credentials
 import CredentialsGoogle
 import CredentialsFacebook
+import CredentialsDropbox
 import PerfectLib
 import SyncServerShared
 
@@ -59,6 +60,12 @@ class ServerSetup {
             let facebookCredentials = CredentialsFacebookToken()
             credentials.register(plugin: facebookCredentials)
             AccountManager.session.addAccountType(FacebookCreds.self)
+        }
+
+        if Constants.session.allowedSignInTypes.Dropbox {
+            let dropboxCredentials = CredentialsDropboxToken()
+            credentials.register(plugin: dropboxCredentials)
+            AccountManager.session.addAccountType(DropboxCreds.self)
         }
         
         // 8/8/17; There needs to be at least one sign-in type configured for the server to do anything. And at least one of these needs to allow owning users. If there can be no owning users, how do you create anything to share? https://github.com/crspybits/SyncServerII/issues/9

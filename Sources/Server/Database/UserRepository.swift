@@ -218,7 +218,7 @@ class UserRepository : Repository {
         let (owningUserIdFieldValue, owningUserIdFieldName) = getInsertFieldValueAndName(fieldValue: user.owningUserId, fieldName: "owningUserId", fieldIsString: false)
         let (sharingPermissionFieldValue, sharingPermissionFieldName) = getInsertFieldValueAndName(fieldValue: user.sharingPermission, fieldName: User.sharingPermissionKey)
         
-        let query = "INSERT INTO \(tableName) (username, accountType, userType, credsId, creds \(owningUserIdFieldName) \(sharingPermissionFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.userType.rawValue)', \(user.credsId!), '\(user.creds!)' \(owningUserIdFieldValue) \(sharingPermissionFieldValue));"
+        let query = "INSERT INTO \(tableName) (username, accountType, userType, credsId, creds \(owningUserIdFieldName) \(sharingPermissionFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.userType.rawValue)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(sharingPermissionFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -226,6 +226,7 @@ class UserRepository : Repository {
         else {
             let error = db.error
             Log.error("Could not insert into \(tableName): \(error)")
+            Log.error("query: \(query)")
             return nil
         }
     }

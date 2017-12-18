@@ -101,7 +101,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         let delayInSeconds:UInt64 = 5
         let deadline = DispatchTime(uptimeNanoseconds:
             now.uptimeNanoseconds + delayInSeconds*UInt64(1e9))
-        timer.scheduleOneshot(deadline: deadline)
+        timer.schedule(deadline: deadline)
         
         if #available(OSX 10.12, *) {
             timer.activate()
@@ -151,7 +151,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         let delayInSeconds:UInt64 = 5
         let deadline = DispatchTime(uptimeNanoseconds:
             now.uptimeNanoseconds + delayInSeconds*UInt64(1e9))
-        timer.scheduleOneshot(deadline: deadline)
+        timer.schedule(deadline: deadline)
         
         if #available(OSX 10.12, *) {
             timer.activate()

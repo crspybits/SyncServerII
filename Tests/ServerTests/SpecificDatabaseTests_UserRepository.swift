@@ -84,6 +84,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
             user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         case .Facebook:
             user1.creds = "{}"
+        case .Dropbox:
+            user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         }
         
         user1.credsId = "100"
@@ -101,6 +103,10 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
     
     func testAddSharingFacebookUser() {
         addSharingUser(accountType: .Facebook)
+    }
+    
+    func testAddSharingDropboxUser() {
+        addSharingUser(accountType: .Dropbox)
     }
     
     func testUserLookup1() {
@@ -182,7 +188,8 @@ extension SpecificDatabaseTests_UserRepository {
             
             ("testAddSharingGoogleUser", testAddSharingGoogleUser),
             ("testAddSharingFacebookUser", testAddSharingFacebookUser),
-                        
+            ("testAddSharingDropboxUser", testAddSharingDropboxUser),
+            
             ("testUserLookup1", testUserLookup1),
             ("testUserLookup1b", testUserLookup1b),
             ("testUserLookup2", testUserLookup2)

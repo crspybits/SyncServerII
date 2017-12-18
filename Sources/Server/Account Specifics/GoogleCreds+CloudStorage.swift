@@ -22,7 +22,7 @@ import PerfectLib
 
 private let folderMimeType = "application/vnd.google-apps.folder"
 
-extension GoogleCreds {    
+extension GoogleCreds : CloudStorage {
     enum ListFilesError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case nilAPIResult
@@ -40,6 +40,7 @@ extension GoogleCreds {
             E.g., "files/id,files/size"
         See also see http://stackoverflow.com/questions/35143283/google-drive-api-v3-migration
     */
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func listFiles(query:String? = nil, fieldsReturned:String? = nil, completion:@escaping (_ fileListing:JSON?, Swift.Error?)->()) {
         
         var urlParameters = ""
@@ -106,6 +107,7 @@ extension GoogleCreds {
     }
     
     // Considers it an error for there to be more than one item with the given name.
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func searchFor(_ searchType: SearchType, itemName:String,
         completion:@escaping (_ result:SearchResult?, Swift.Error?)->()) {
         
@@ -181,6 +183,7 @@ extension GoogleCreds {
     }
     
     // Create a folder-- assumes it doesn't yet exist. This won't fail if you use it more than once with the same folder name, you just get multiple instances of a folder with the same name.
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func createFolder(rootFolderName folderName:String,
         completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
         
@@ -234,6 +237,7 @@ extension GoogleCreds {
     }
     
     // Creates a root level folder if it doesn't exist. Returns the folderId in the completion if no error.
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func createFolderIfDoesNotExist(rootFolderName folderName:String,
         completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
         self.searchFor(.folder, itemName: folderName) { (result, error) in
@@ -293,6 +297,7 @@ extension GoogleCreds {
     }
     
     // Permanently delete a file or folder
+    // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
     func deleteFile(fileId:String, completion:@escaping (Swift.Error?)->()) {
         // See https://developers.google.com/drive/v3/reference/files/delete
         
@@ -315,43 +320,49 @@ extension GoogleCreds {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainFileSize
     case fileAlreadyExists
+    case noCloudFolderName
+    case noOptions
     }
     
     // TODO: *1* It would be good to put some retry logic in here. With a timed fallback as well. e.g., if an upload fails the first time around, retry after a period of time. OR, do this when I generalize this scheme to use other cloud storage services-- thus the retry logic could work across each scheme.
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
-    func uploadSmallFile(deviceUUID:String, request:UploadFileRequest,
-        completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
+    func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions?,
+        completion:@escaping (Result<Int>)->()) {
         
         // See https://developers.google.com/drive/v3/web/manage-uploads
+
+        guard let options = options else {
+            completion(.failure(UploadError.noOptions))
+            return
+        }
         
-        self.createFolderIfDoesNotExist(rootFolderName: request.cloudFolderName) { (folderId, error) in
+        self.createFolderIfDoesNotExist(rootFolderName: options.cloudFolderName) { (folderId, error) in
             if error != nil {
-                completion(nil, error)
+                completion(.failure(error!))
                 return
             }
             
-            let searchType = SearchType.file(mimeType: request.mimeType, parentFolderId: folderId)
+            let searchType = SearchType.file(mimeType: options.mimeType, parentFolderId: folderId)
             
             // I'm going to do this before I attempt the upload-- because I don't want to upload the same file twice. This results in google drive doing odd things with the file names. E.g., 5200B98F-8CD8-4248-B41E-4DA44087AC3C.950DBB91-B152-4D5C-B344-9BAFF49021B7 (1).0
-            self.searchFor(searchType, itemName: request.cloudFileName(deviceUUID:deviceUUID)) { (result, error) in
+            self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
                 if error == nil {
                     if result == nil {
-                        self.completeSmallFileUpload(deviceUUID:deviceUUID, folderId: folderId!, searchType:searchType, request: request, completion: completion)
+                        self.completeSmallFileUpload(folderId: folderId!, searchType:searchType, cloudFileName: cloudFileName, data: data, mimeType: options.mimeType, completion: completion)
                     }
                     else {
-                        completion(nil, UploadError.fileAlreadyExists)
+                        completion(.failure(UploadError.fileAlreadyExists))
                     }
                 }
                 else {
                     Log.error("Error in searchFor: \(String(describing: error))")
-                    completion(nil, error)
+                    completion(.failure(error!))
                 }
             }
         }
     }
     
-    private func completeSmallFileUpload(deviceUUID:String, folderId:String, searchType:SearchType, request:UploadFileRequest,
-        completion:@escaping (_ fileSizeOnServerInBytes:Int?, Swift.Error?)->()) {
+    private func completeSmallFileUpload(folderId:String, searchType:SearchType, cloudFileName: String, data: Data, mimeType:String, completion:@escaping (Result<Int>)->()) {
         
         let boundary = PerfectLib.UUID().string
 
@@ -366,48 +377,46 @@ extension GoogleCreds {
             "Content-Type: application/json; charset=UTF-8\r\n" +
             "\r\n" +
             "{\r\n" +
-                "\"name\": \"\(request.cloudFileName(deviceUUID:deviceUUID))\",\r\n" +
+                "\"name\": \"\(cloudFileName)\",\r\n" +
                 "\"parents\": [\r\n" +
                     "\"\(folderId)\"\r\n" +
                 "]\r\n" +
             "}\r\n" +
             "\r\n" +
             "--\(boundary)\r\n" +
-            "Content-Type: \(request.mimeType!)\r\n" +
+            "Content-Type: \(mimeType)\r\n" +
             "\r\n"
         
         var multiPartData = firstPart.data(using: .utf8)!
-        multiPartData.append(request.data)
+        multiPartData.append(data)
         
         let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
         multiPartData.append(endBoundary)
 
         self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode) in
-            var resultError:Swift.Error?
 
             if statusCode != HTTPStatusCode.OK {
                 // Error case
                 Log.error("Error in completeSmallFileUpload: statusCode=\(String(describing: statusCode))")
-                resultError = UploadError.badStatusCode(statusCode)
-                completion(nil, resultError)
+                completion(.failure(UploadError.badStatusCode(statusCode)))
             }
             else {
                 // Success case
                 // TODO: *4* This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
 
-                self.searchFor(searchType, itemName: request.cloudFileName(deviceUUID:deviceUUID)) { (result, error) in
+                self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
                     if error == nil {
                         if let sizeString = result?.json["size"]?.string,
                             let size = Int(sizeString) {
-                            completion(size, resultError)
+                            completion(.success(size))
                         }
                         else {
-                            completion(nil, UploadError.couldNotObtainFileSize)
+                            completion(.failure(UploadError.couldNotObtainFileSize))
                         }
                     }
                     else {
                         Log.error("Error in completeSmallFileUpload.searchFor: statusCode=\(String(describing: error))")
-                        completion(nil, error)
+                        completion(.failure(error!))
                     }
                 }
             }
@@ -417,6 +426,33 @@ extension GoogleCreds {
     enum SearchForFileError : Swift.Error {
     case cloudFolderDoesNotExist
     case cloudFileDoesNotExist(cloudFileName:String)
+    }
+    
+    enum LookupFileError: Swift.Error {
+    case noOptions
+    }
+    
+    func lookupFile(cloudFileName:String, options:CloudStorageFileNameOptions?,
+        completion:@escaping (Result<Bool>)->()) {
+        
+        guard let options = options else {
+            completion(.failure(LookupFileError.noOptions))
+            return
+        }
+        
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: options.cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, error) in
+
+            switch error {
+            case .none:
+                completion(.success(true))
+                
+            case .some(SearchForFileError.cloudFileDoesNotExist):
+                 completion(.success(false))
+                
+            default:
+                 completion(.failure(error!))
+            }
+        }
     }
     
     func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
@@ -446,25 +482,30 @@ extension GoogleCreds {
     case badStatusCode(HTTPStatusCode?)
     case nilAPIResult
     case noDataInAPIResult
+    case noOptions
     }
-    
-    func downloadSmallFile(cloudFolderName:String, cloudFileName:String, mimeType:String,
-        completion:@escaping (_ fileData:Data?, Swift.Error?)->()) {
+
+    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<Data>)->()) {
         
-        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: mimeType) { (cloudFileId, error) in
+        guard let options = options else {
+            completion(.failure(DownloadSmallFileError.noOptions))
+            return
+        }
+        
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: options.cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, error) in
             if error == nil {
                 // File was found! Need to download it now.
                 self.completeSmallFileDownload(fileId: cloudFileId!) { (data, error) in
                     if error == nil {
-                        completion(data, nil)
+                        completion(.success(data!))
                     }
                     else {
-                        completion(nil, error)
+                        completion(.failure(error!))
                     }
                 }
             }
             else {
-                completion(nil, error)
+                completion(.failure(error!))
             }
         }
     }
@@ -499,10 +540,19 @@ extension GoogleCreds {
         }
     }
     
-    func deleteFile(cloudFolderName:String, cloudFileName:String, mimeType:String,
+    enum DeletionError : Swift.Error {
+        case noOptions
+    }
+    
+    func deleteFile(cloudFileName:String, options:CloudStorageFileNameOptions?,
         completion:@escaping (Swift.Error?)->()) {
         
-        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: mimeType) { (cloudFileId, error) in
+        guard let options = options else {
+            completion(DeletionError.noOptions)
+            return
+        }
+        
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: options.cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, error) in
             if error == nil {
                 // File was found! Need to delete it now.
                 self.deleteFile(fileId: cloudFileId!) { error in

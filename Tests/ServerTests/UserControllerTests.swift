@@ -28,8 +28,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
             
-        performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .internalServerError, "Worked on addUser request")
@@ -42,8 +42,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
             
-        performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -56,8 +56,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     func testCheckCredsWhenUserDoesNotExist() {
         let deviceUUID = PerfectLib.UUID().string
 
-        performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -70,8 +70,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     func testCheckCredsWithBadAccessToken() {
         let deviceUUID = PerfectLib.UUID().string
 
-        performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: "Some junk for access token", deviceUUID:deviceUUID)
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: "Some junk for access token", deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -85,8 +85,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
 
         // Don't create the user first.
-        performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -100,8 +100,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
 
-        performServerTest { expectation, googleCreds in
-            let headers = self.setupHeaders(accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

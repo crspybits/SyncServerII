@@ -1,5 +1,21 @@
 SyncServer
 
+Version 0.8.0 (TBD)
+	* Using ServerConstants.HTTPOAuth2AuthorizationCodeKey instead of ServerConstants.GoogleHTTPServerAuthCodeKey
+		- This is going to require an iOS app update-- the prior version isn't going to work.
+	* Adding Dropbox authorization and cloud storage access.
+		- Using Swift/Kitura credentials Dropbox authorization from 
+			https://github.com/crspybits/CredentialsDropbox.git
+		- Added test cases for this
+	* Package.swift is now using Swift 4 format.
+	* Added `runTests.sh` script to make running tests easier. As part of this:
+		- Added `jq` to Dockerfile image for building SyncServer
+		- Generalized test cases and removed some to make adding other cloud storage services
+			and other account sign-ins easier.
+		- TestSuites.json is the file that describes all of the tests run by runTests.sh
+	* Removed unused code and related tests: NSObject+Extras.swift
+		Seems that changes in Swift broke this and I'm not using those methods any more.
+
 Version 0.7.7 (12/2/17)
 	* Fixed issue: When doing DoneUploads for upload deletions, previously I was using the params.currentSignedInUser!.userId and not the effective user id to lookup info in the FileIndex. As a result, when sharing users did an upload deletion, the files got marked as deleted in the file index, but didn't get deleted from cloud storage.
 	

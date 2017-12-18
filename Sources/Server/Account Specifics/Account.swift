@@ -56,6 +56,10 @@ protocol Account {
     static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account?
 }
 
+enum FromJSONError : Swift.Error {
+    case noRequiredKeyValue
+}
+
 extension Account {
     var signInType: SignInType {
         return type(of: self).signInType
@@ -78,11 +82,27 @@ extension Account {
             success()
         }
     }
+    
+    static func setProperty(jsonDict: [String:Any], key:String, required:Bool=true, setWithValue:(String)->()) throws {
+        guard let keyValue = jsonDict[key] as? String else {
+            if required {
+                Log.error("No \(key) value present.")
+                throw FromJSONError.noRequiredKeyValue
+            }
+            else {
+                Log.warning("No \(key) value present.")
+            }
+            return
+        }
+
+        setWithValue(keyValue)
+    }
 }
 
 enum AccountType : String {
     case Google
     case Facebook
+    case Dropbox
     
     static func `for`(userProfile:UserProfile) -> AccountType? {
         guard let accountTypeString = userProfile.extendedProperties[SyncServerAccountType] as? String else {
@@ -98,6 +118,8 @@ enum AccountType : String {
                 return .GoogleToken
             case .Facebook:
                 return .FacebookToken
+            case .Dropbox:
+                return .DropboxToken
         }
     }
     
@@ -107,6 +129,8 @@ enum AccountType : String {
                 return .Google
             case .FacebookToken:
                 return .Facebook
+            case .DropboxToken:
+                return .Dropbox
         }
     }
 }
@@ -121,6 +145,13 @@ enum APICallResult {
     case data(Data)
 }
 
+enum GenerateTokensError : Swift.Error {
+    case badStatusCode(HTTPStatusCode?)
+    case couldNotObtainParameterFromJSON
+    case nilAPIResult
+    case errorSavingCredsToDatabase
+}
+
 // I didn't just use a protocol extension for this because I want to be able to override `apiCall` and call "super to get the base definition.
 class AccountAPICall {
     // Used by `apiCall` function to make a REST call to an Account service.
@@ -128,7 +159,9 @@ class AccountAPICall {
     
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
     func apiCall(method:String, baseURL:String? = nil, path:String,
-        additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:APICallBody? = nil,
+                 additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
+                 body:APICallBody? = nil,
+                 returnResultWhenNon200Code:Bool = false,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
         var hostname = baseURL
@@ -180,8 +213,11 @@ class AccountAPICall {
                     // I just created a new refresh token, and this works again. My hypothesis above seems correct on this basis.
                     // I suspect the "expiration" of the refresh token comes about here because of the method I'm using to authenticate on the client side-- I sign in again from the client, and generate a new access token, which also causes the server to generate a new refresh token (which is stored in the db, not in the Server.json file used in unit tests). And I believe there's a limit on the number of active refresh tokens.
                     // The actual `TODO` item here is to respond to the client in such a way so the client can prompt the user to re-sign in to generate an updated refresh token.
-                    completion(nil, statusCode)
-                    return
+                    
+                    if !returnResultWhenNon200Code {
+                        completion(nil, statusCode)
+                        return
+                    }
                 }
                 
                 var body = Data()
@@ -200,7 +236,7 @@ class AccountAPICall {
                     completion(result, statusCode)
                     return
                 } catch (let error) {
-                    Log.error("Failed to read Google response: \(error)")
+                    Log.error("Failed to read response: \(error)")
                 }
             }
             

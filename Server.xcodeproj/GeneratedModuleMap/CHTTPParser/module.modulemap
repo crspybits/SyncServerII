@@ -1,4 +1,4 @@
 module CHTTPParser {
-    umbrella header "/Users/chris/Dropbox/Ubuntu/SyncServerII/SyncServerII/.build/checkouts/Kitura-net.git--7410958935072501107/Sources/CHTTPParser/include/CHTTPParser.h"
+    umbrella header "/Users/chris/Desktop/Apps/SyncServerII/SyncServerII/.build/checkouts/Kitura-net.git--7410958935072501107/Sources/CHTTPParser/include/CHTTPParser.h"
     export *
 }

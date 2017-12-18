@@ -3,18 +3,18 @@ import Kitura
 import KituraNet
 @testable import Server
 import LoggerAPI
-import CredentialsGoogle
+import CredentialsDropbox
 import PerfectLib
 import Foundation
 import SyncServerShared
 
-class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
+class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
     let serverResponseTime:TimeInterval = 10
 
     func testGoodEndpointWithBadCredsFails() {
         let deviceUUID = PerfectLib.UUID().string
-        performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: "foobar", deviceUUID:deviceUUID)
+        performServerTest(testAccount: .dropbox1) { expectation, dropboxCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode.rawValue)")
                 XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
@@ -23,12 +23,12 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
         }
     }
 
-    // Good Google creds, not creds that are necessarily on the server.
+    // Good Dropbox creds, not creds that are necessarily on the server.
     func testGoodEndpointWithGoodCredsWorks() {
         let deviceUUID = PerfectLib.UUID().string
         
-        self.performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount: .dropbox1) { expectation, dropboxCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dropboxCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
@@ -40,9 +40,9 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     func testBadPathWithGoodCredsFails() {
         let badRoute = ServerEndpoint("foobar", method: .post)
         let deviceUUID = PerfectLib.UUID().string
-
-        performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        
+        performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
                 expectation.fulfill()
@@ -54,9 +54,9 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
         let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post)
         XCTAssert(ServerEndpoints.checkCreds.method != .post)
         let deviceUUID = PerfectLib.UUID().string
-            
-        self.performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
+        
+        self.performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: badRoute, headers: headers) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
                 expectation.fulfill()
@@ -64,39 +64,36 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
         }
     }
     
-    func testRefreshGoogleAccessTokenWorks() {
-        let creds = GoogleCreds()
-        creds.refreshToken = TestAccount.google1.token()
+    func testThatDropboxUserHasValidCreds() {
+        let deviceUUID = PerfectLib.UUID().string
         
-        let exp = expectation(description: "\(#function)\(#line)")
-
-        creds.refresh { error in
-            XCTAssert(error == nil)
-            XCTAssert(creds.accessToken != nil)
-            exp.fulfill()
+        addNewUser(testAccount: .dropbox1, deviceUUID:deviceUUID)
+        
+        self.performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
+            let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)
+            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
+                expectation.fulfill()
+            }
         }
-
-        waitForExpectations(timeout: 10, handler: nil)
     }
 }
 
-extension AccountAuthenticationTests_Google {
-    static var allTests : [(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] {
-        var result:[(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] = [
+extension AccountAuthenticationTests_Dropbox {
+    static var allTests : [(String, (AccountAuthenticationTests_Dropbox) -> () throws -> Void)] {
+        let result:[(String, (AccountAuthenticationTests_Dropbox) -> () throws -> Void)] = [
             ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
+            ("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks),
             ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
             ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
-            ("testRefreshGoogleAccessTokenWorks", testRefreshGoogleAccessTokenWorks)
-        ]
+            ("testThatDropboxUserHasValidCreds", testThatDropboxUserHasValidCreds),
+            ]
         
-#if DEBUG
-        result += [("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks)]
-#endif
-
         return result
     }
     
     func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Google.self)
+        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Dropbox.self)
     }
 }

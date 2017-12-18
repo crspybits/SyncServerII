@@ -37,8 +37,8 @@ extension FileController {
             }
 
             // TODO: *5* Generalize this to use other cloud storage services.
-            guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-                Log.error("Could not obtain Google Creds")
+            guard let cloudStorageCreds = params.effectiveOwningUserCreds as? CloudStorage else {
+                Log.error("Could not obtain CloudStorage Creds")
                 params.completion(nil)
                 return
             }
@@ -47,7 +47,7 @@ extension FileController {
             
             // First, lookup the file in the FileIndex. This does an important security check too-- makes sure the owning userId corresponds to the fileUUID.
             let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: downloadRequest.fileUUID)
-            
+
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
             var fileIndexObj:FileIndex?
@@ -87,29 +87,32 @@ extension FileController {
             // TODO: *5*: Eventually, this should bypass the middle man and stream from the cloud storage service directly to the client.
             
             // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex. This is because the file, once stored, is really in a specific place in cloud storage.
+            // And, some cloud storage systems don't use the cloudFolderName.
             
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
             let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:fileIndexObj!.deviceUUID)
             
-            googleCreds.downloadSmallFile(
-                cloudFolderName: fileIndexObj!.cloudFolderName, cloudFileName: cloudFileName, mimeType: fileIndexObj!.mimeType) { (data, error) in
-                if error == nil {
-                    if Int64(data!.count) != fileIndexObj!.fileSizeBytes {
-                        Log.error("Actual file size \(data!.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
+            let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj!.cloudFolderName!, mimeType: fileIndexObj!.mimeType)
+            
+            cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
+                switch result {
+                case .success(let data):
+                    if Int64(data.count) != fileIndexObj!.fileSizeBytes {
+                        Log.error("Actual file size \(data.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
                         params.completion(nil)
                         return
                     }
                     
                     let response = DownloadFileResponse()!
                     response.appMetaData = fileIndexObj!.appMetaData
-                    response.data = data!
-                    response.fileSizeBytes = Int64(data!.count)
+                    response.data = data
+                    response.fileSizeBytes = Int64(data.count)
                     
                     params.completion(response)
                     return
-                }
-                else {
-                    Log.error("Failed downloading file: \(String(describing: error))")
+                
+                case .failure(let error):
+                    Log.error("Failed downloading file: \(error)")
                     params.completion(nil)
                     return
                 }

@@ -39,63 +39,19 @@ case body
 case header
 }
 
-func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
-    return lhs.tokenKey == rhs.tokenKey && lhs.idKey == rhs.idKey
-}
-
-struct TestAccount {
-    // These String's are keys into a .json file.
-    let tokenKey:String // key values: Google: a refresh token; Facebook:long-lived access token.
-    let idKey:String
-    
-    let type:AccountType
-    
-    static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google)
-    static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google)
-    static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google)
-    
-    static func isGoogle(_ account: TestAccount) -> Bool {
-        return account == google1 || account == google2 || account == google3
-    }
-    
-    static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", type: .Facebook)
-    
-    // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
-    private func configValue(key:String) -> String {
-#if os(macOS)
-        let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "Server.json", forConfigType: .jsonDictionary)
-#else // Linux
-        let config = try! ConfigLoader(usingPath: "./", andFileName: "Server.json", forConfigType: .jsonDictionary)
-#endif
-        let token = try! config.getString(varName: key)
-        return token
-    }
-    
-    func token() -> String {
-        return configValue(key: tokenKey)
-    }
-    
-    func id() -> String {
-        return configValue(key: idKey)
-    }
-}
-
 // TODO: *0* Why do I have to have both Server.json and ServerTests.json for testing??
 
 extension KituraTest {
-    func performServerTest(testAccount:TestAccount = .google1,
-        asyncTasks: @escaping (XCTestExpectation, Account) -> Void...) {
+    func performServerTest(testAccount:TestAccount = .primaryOwningAccount,
+        asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
         
         func runTest(usingCreds creds:Account) {
             ServerMain.startup(type: .nonBlocking)
             
             let requestQueue = DispatchQueue(label: "Request queue")
-
-            for (index, asyncTask) in asyncTasks.enumerated() {
-                let expectation = self.expectation(index)
-                requestQueue.async() {
-                    asyncTask(expectation, creds)
-                }
+            let expectation = self.expectation(0)
+            requestQueue.async() {
+                asyncTask(expectation, creds)
             }
 
             // blocks test until request completes
@@ -117,6 +73,12 @@ extension KituraTest {
         case .Facebook:
             let creds = FacebookCreds()
             creds.accessToken = testAccount.token()
+            runTest(usingCreds: creds)
+            
+        case .Dropbox:
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
             runTest(usingCreds: creds)
         }
     }
@@ -210,13 +172,16 @@ extension KituraTest {
         return jsonDict
     }
     
-    func setupHeaders(tokenType: ServerConstants.AuthTokenType = ServerConstants.AuthTokenType.GoogleToken, accessToken: String, deviceUUID:String) -> [String: String] {
+    func setupHeaders(testUser: TestAccount, accessToken:String, deviceUUID:String) -> [String: String] {
         var headers = [String: String]()
         
-        headers[ServerConstants.XTokenTypeKey] = tokenType.rawValue
+        headers[ServerConstants.XTokenTypeKey] = testUser.tokenType.rawValue
         headers[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
-        
         headers[ServerConstants.httpRequestDeviceUUID] = deviceUUID
+        
+        if testUser.type == .Dropbox {
+            headers[ServerConstants.HTTPAccountIdKey] = testUser.id()
+        }
 
         return headers
     }

@@ -33,14 +33,11 @@ extension FileController {
                 return
             }
             
-            // TODO: *3* Needs generalization for multiple cloud services.
-            guard let googleCreds = params.effectiveOwningUserCreds as? GoogleCreds else {
-                Log.error("Could not obtain Google Creds")
+            guard let cloudStorage = params.effectiveOwningUserCreds as? CloudStorage else {
+                Log.error("Could not obtain CloudStorage creds")
                 params.completion(nil)
                 return
             }
-                    
-            // TODO: *5* This needs to be generalized to enabling uploads to various kinds of cloud services. E.g., including Dropbox. Right now, it's just specific to Google Drive.
             
             // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
             
@@ -55,7 +52,6 @@ extension FileController {
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadRequest.appMetaData
             upload.cloudFolderName = uploadRequest.cloudFolderName
-            
             
             // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
             // https://github.com/crspybits/SyncServerII/issues/4
@@ -109,16 +105,20 @@ extension FileController {
                 return
             }
             
-            Log.info("File being sent to cloud storage: \(uploadRequest.cloudFileName(deviceUUID: params.deviceUUID!))")
+            let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!)
+            Log.info("File being sent to cloud storage: \(cloudFileName)")
             
-            googleCreds.uploadSmallFile(deviceUUID:params.deviceUUID!, request: uploadRequest) { fileSize, error in
-                if error == nil {
-                    upload.fileSizeBytes = Int64(fileSize!)
+            let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest.cloudFolderName!, mimeType: uploadRequest.mimeType)
+            
+            cloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) { result in
+                switch result {
+                case .success(let fileSize):
+                    upload.fileSizeBytes = Int64(fileSize)
                     upload.state = .uploaded
                     upload.uploadId = uploadId
                     if params.repos.upload.update(upload: upload) {
                         let response = UploadFileResponse()!
-                        response.size = Int64(fileSize!)
+                        response.size = Int64(fileSize)
                         params.completion(response)
                     }
                     else {
@@ -126,10 +126,9 @@ extension FileController {
                         Log.error("Could not update UploadRepository: \(String(describing: error))")
                         params.completion(nil)
                     }
-                }
-                else {
+                case .failure(let error):
                     // TODO: *0* It could be useful to remove the file from the cloud server. It might be there.
-                    Log.error("Could not uploadSmallFile: error: \(String(describing: error))")
+                    Log.error("Could not uploadFile: error: \(error)")
                     params.completion(nil)
                 }
             }

@@ -248,15 +248,20 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             XCTAssert(error == nil)
             XCTAssert(creds.accessToken != nil)
             
-            creds.downloadSmallFile(cloudFolderName: self.knownPresentFolder, cloudFileName: cloudFileName, mimeType: "text/plain") { (data, error) in
-                
-                if expectError {
-                    XCTAssert(error != nil)
+            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+            
+            creds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
+                switch result {
+                case .success:
+                    if expectError {
+                        XCTFail()
+                    }
+                case .failure:
+                    if !expectError {
+                        XCTFail()
+                    }
                 }
-                else {
-                    XCTAssert(error == nil)
-                }
-                
+
                 // A different unit test will check to see if the contents of the file are correct.
                 
                 exp.fulfill()
@@ -281,15 +286,67 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         
         // Use a known incorrect access token. We expect this to generate a 401 unauthorized, and thus cause an access token refresh.
         creds.accessToken = "foobar"
-            
-        creds.downloadSmallFile(cloudFolderName: self.knownPresentFolder, cloudFileName: self.knownPresentFile, mimeType: "text/plain") { (data, error) in
-
-            XCTAssert(error == nil)
+        
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        creds.downloadFile(cloudFileName: self.knownPresentFile, options:options) { result in
+            switch result {
+            case .success:
+                break
+            case .failure:
+                XCTFail()
+            }
             
             exp.fulfill()
         }
         
         waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func lookupFile(cloudFileName: String, expectError:Bool = false) -> Bool? {
+        var foundResult: Bool?
+        
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.google1.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            
+            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+            
+            creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                switch result {
+                case .success(let found):
+                    if expectError {
+                        XCTFail()
+                    }
+                    else {
+                       foundResult = found
+                    }
+                case .failure:
+                    if !expectError {
+                        XCTFail()
+                    }
+                }
+                
+                exp.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+        return foundResult
+    }
+
+    func testLookupFileThatDoesNotExist() {
+        let result = lookupFile(cloudFileName: knownPresentFile)
+        XCTAssert(result == true)
+    }
+    
+    func testLookupFileThatExists() {
+        let result = lookupFile(cloudFileName: knownAbsentFile)
+        XCTAssert(result == false)
     }
 }
 
@@ -308,7 +365,9 @@ extension GoogleDriveTests {
             ("testCreateFolderIfDoesNotExist", testCreateFolderIfDoesNotExist),
             ("testBasicFileDownloadWorks", testBasicFileDownloadWorks),
             ("testFileDownloadOfNonExistentFileFails", testFileDownloadOfNonExistentFileFails),
-            ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken)
+            ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken),
+            ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
+            ("testLookupFileThatExists", testLookupFileThatExists)
         ]
     }
     

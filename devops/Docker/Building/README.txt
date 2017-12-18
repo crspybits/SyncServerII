@@ -9,7 +9,9 @@ I added: `libmysqlclient-dev`
 3) TimeZone returns nil in my tests. See https://bugs.swift.org/browse/SR-4921
 I added: `tzdata`
 
-Create the image based on the Docker file using:
+4) I'm also adding `jq` because my test case runner (see runTests.sh) uses it. Note that this does *not* need to be in the run time image.
+
+Create the image based on the Dockerfile using:
 docker build -t swift-ubuntu:latest .
 
 # docker tag swift-ubuntu:latest crspybits/swift-ubuntu:latest 

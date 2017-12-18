@@ -44,6 +44,11 @@ class Constants {
     var facebookClientId:String? = "" // This is the AppId from Facebook
     var facebookClientSecret:String? = "" // App Secret from Facebook
     
+    // If you are using Dropbox Accounts
+    // See https://www.dropbox.com/developers/apps
+    var dropboxClientId:String? = "" // app's key (found in the App Console).
+    var dropboxClientSecret:String? = "" // app's secret
+
     var maxNumberDeviceUUIDPerUser:Int?
     
     struct SSL {
@@ -66,6 +71,7 @@ class Constants {
     struct AllowedSignInTypes {
         var Google = false
         var Facebook = false
+        var Dropbox = false
     }
     var allowedSignInTypes = AllowedSignInTypes()
     
@@ -115,6 +121,9 @@ class Constants {
         facebookClientId = try? config.getString(varName: "FacebookClientId")
         facebookClientSecret = try? config.getString(varName: "FacebookClientSecret")
         
+        dropboxClientId = try? config.getString(varName: "DropboxClientId")
+        dropboxClientSecret = try? config.getString(varName: "DropboxClientSecret")
+        
         db.host = try! config.getString(varName: "mySQL.host")
         db.user = try! config.getString(varName: "mySQL.user")
         db.password = try! config.getString(varName: "mySQL.password")
@@ -148,6 +157,10 @@ class Constants {
         
         if let facebookSignIn = try? config.getBool(varName: "allowedSignInTypes.Facebook"), facebookSignIn {
             allowedSignInTypes.Facebook = true
+        }
+        
+        if let dropboxSignIn = try? config.getBool(varName: "allowedSignInTypes.Dropbox"), dropboxSignIn {
+            allowedSignInTypes.Dropbox = true
         }
     }
 }
