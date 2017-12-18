@@ -4,10 +4,11 @@ import PackageDescription
 let package = Package(
     name: "Server",
     dependencies: [
-        .package(url: "../../repos/CredentialsDropbox", .branch("master")),
-
-        .package(url: "../../repos/SyncServer-Shared", .branch("master")),
-        //.package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMinor(from: "2.1.0")),
+         // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
+        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", .upToNextMinor(from: "0.1.0")),
+        
+        // .package(url: "../../repos/SyncServer-Shared", .branch("master")),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMinor(from: "3.0.0")),
 
         .package(url: "https://github.com/crspybits/SMServerLib.git", .upToNextMinor(from: "0.0.0")),
         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "1.7.0")),

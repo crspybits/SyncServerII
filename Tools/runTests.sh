@@ -24,13 +24,15 @@
 #               Y is the number of lines that had non-zero failures
 #               Z is the cummulative sum of N in the failure cases.
 
+# Assumption: This assumes it's run from the root of the repo.
+
 # Examples
 #   ./runTests.sh filter ServerTests.DatabaseModelTests
 #   ./runTests.sh suites google
 #   ./runTests.sh suites sharing
 #   ./runTests.sh suites owning
 
-TEST_JSON="TestSuites.json"
+TEST_JSON="Tools/TestSuites.json"
 COMMAND=$1
 OPTION=$2
 ALL_COUNT=`jq -r '.all | length' < ${TEST_JSON}`

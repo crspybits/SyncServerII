@@ -21,11 +21,11 @@
       },
       {
         "package": "CredentialsDropbox",
-        "repositoryURL": "/root/Apps/repos/CredentialsDropbox",
+        "repositoryURL": "https://github.com/crspybits/CredentialsDropbox.git",
         "state": {
-          "branch": "master",
-          "revision": "396627df2d3d29204ef34f7eaac1410fe091eaf1",
-          "version": null
+          "branch": null,
+          "revision": "fd8dbac145674f6dff1f425aa89b362983e2bf02",
+          "version": "0.1.0"
         }
       },
       {
