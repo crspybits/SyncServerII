@@ -23,6 +23,7 @@
 /* Begin PBXBuildFile section */
 		50E0C44D595F6DB74E9372EF /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = C1EDB63C587EF0F67A4734CA /* ServerTests.json */; };
 		6B87914039639D2D443D88AC /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = DFFBF76C45D98D3492ECBF49 /* Server.json */; };
+		835FC7A11FE76C840067FD83 /* TestAccounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835FC7A01FE76C840067FD83 /* TestAccounts.swift */; };
 		83C5CE121FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */; };
 		83C5CE141FDDBD880024979A /* LinuxMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE131FDDBD880024979A /* LinuxMain.swift */; };
 		83C5CE161FDE2E170024979A /* DropboxCreds+CloudStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE151FDE2E170024979A /* DropboxCreds+CloudStorage.swift */; };
@@ -137,6 +138,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		835FC7A01FE76C840067FD83 /* TestAccounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAccounts.swift; sourceTree = "<group>"; };
 		83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Dropbox.swift; sourceTree = "<group>"; };
 		83C5CE131FDDBD880024979A /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		83C5CE151FDE2E170024979A /* DropboxCreds+CloudStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxCreds+CloudStorage.swift"; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 				OBJ_67 /* GoogleDriveTests.swift */,
 				83C5CE171FDE38D50024979A /* DropboxTests.swift */,
 				OBJ_68 /* KituraTest.swift */,
+				835FC7A01FE76C840067FD83 /* TestAccounts.swift */,
 				OBJ_69 /* MessageTests.swift */,
 				OBJ_70 /* ServerTestCase.swift */,
 				OBJ_71 /* SharingAccountsController_CreateSharingInvitation.swift */,
@@ -645,6 +648,7 @@
 				OBJ_121 /* SpecificDatabaseTests_Uploads.swift in Sources */,
 				OBJ_122 /* SpecificDatabaseTests_UserRepository.swift in Sources */,
 				OBJ_123 /* UserControllerTests.swift in Sources */,
+				835FC7A11FE76C840067FD83 /* TestAccounts.swift in Sources */,
 				83C5CE121FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

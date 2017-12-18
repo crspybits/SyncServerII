@@ -1,3 +1,9 @@
 #!/bin/bash
 
-swift build -Xswiftc -DDEBUG -Xswiftc -DSERVER
+# Usage: build [verbose]
+VERBOSE=""
+if [ "$1empty" == "verboseempty" ]; then
+	VERBOSE="-v"
+fi
+
+swift build $VERBOSE -Xswiftc -DDEBUG -Xswiftc -DSERVER

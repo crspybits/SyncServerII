@@ -9,7 +9,9 @@
 #       dropbox -- run tests for Dropbox specific accounts
 #       facebook -- run tests for Facebook specific accounts
 #       owning -- run tests that depend only on owning account parameter
-#       sharing -- run sharing tests-- these depend on several parameters
+#       sharing-create -- run sharing tests-- these depend on several parameters
+#       sharing-redeem
+#       sharing-file
 #   filter -- pass along the <Option> argument to swift tests as the --filter
 #
 # Output in each case is in two parts:
@@ -64,6 +66,7 @@ generateOutput () {
     local resultsFileName=$1
     local testDescription=$2
     local outputPrefix=$3
+    local compilerResult=$4
 
     # The following depends on the assumption: That when a Swift test passes, there is a line containing the text " 0 failure", and that each test, pass or fail has lines "failure" in them (e.g., 0 failures or N failures). And further, that there are two of these lines per test. Of course, changes in the Swift testing output could change this and break this assumption.
 
@@ -75,7 +78,10 @@ generateOutput () {
     local failures=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ' 0 failure' | grep -Ev ERROR | wc -l`
     failures=`expr $failures / 2`
 
-    if [ "$failures" == "0" ]; then
+    if [ $compilerResult -ne 0 ]; then
+        printf "${outputPrefix}${RED}Compiler failure${NC}: $testDescription\n"
+        TOTAL_SUITES_FAILED=`expr $TOTAL_SUITES_FAILED + 1`
+    elif [ "$failures" == "0" ]; then
         printf "${outputPrefix}${GREEN}Passed${NC} ($totalTests tests): $testDescription\n"
         TOTAL_SUITES_PASSED=`expr $TOTAL_SUITES_PASSED + 1`
     else
@@ -120,7 +126,11 @@ runSpecificSuite () {
 
         local outputFileName="$TEST_OUT_DIR"/$testCaseName.$fileNameCounter
         $BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName > $outputFileName
-        generateOutput $outputFileName "$testCaseName.$fileNameCounter" $outputPrefix
+
+        # For testing to see if the compiler failed.
+        local compilerResult=$?
+
+        generateOutput $outputFileName "$testCaseName.$fileNameCounter" $outputPrefix $compilerResult
 
         fileNameCounter=`expr $fileNameCounter + 1`
     done

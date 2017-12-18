@@ -5,7 +5,9 @@
     "facebook",
     "dropbox",
     "owning",
-    "sharing"
+    "sharing-create",
+    "sharing-redeem",
+    "sharing-file"
   ],
   "basic": [
     {
@@ -149,7 +151,7 @@
       ]
     }
   ],
-  "sharing": [
+  "sharing-create": [
     {
       "name": "SharingAccountsController_CreateSharingInvitation",
       "parameters": [
@@ -176,6 +178,146 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    }
+  ],
+  "sharing-redeem": [
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "PRIMARY_NON_SHARING_DROPBOX1"
+      ]
+    }
+  ],
+  "sharing-file": [
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_FACEBOOK2"
       ]
     }
   ]

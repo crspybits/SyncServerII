@@ -1,0 +1,57 @@
+group basic
+	DatabaseModelTests
+	GeneralDatabaseTests
+	MessageTests
+	SpecificDatabaseTests
+	SpecificDatabaseTests_SharingInvitationRepository
+	SpecificDatabaseTests_Uploads
+	SpecificDatabaseTests_UserRepository
+
+google
+	AccountAuthenticationTests_Google (google only)
+	GoogleDriveTests (google only)
+	
+facebook
+	AccountAuthenticationTests_Facebook (facebook only)
+
+dropbox
+	AccountAuthenticationTests_Dropbox (dropbox only)
+	DropboxTests (dropbox only)
+	
+owning
+	// Parameters: primaryOwningAccount
+	FailureTests
+	FileController_UploadTests
+	FileController_DoneUploadsTests
+	FileControllerTests_UploadDeletion
+	FileControllerTests_GetUploads
+	FileControllerTests
+	GeneralAuthTests
+	UserControllerTests
+
+sharing
+	// Parameters: primaryOwningAccount, primarySharingAccount
+	SharingAccountsController_CreateSharingInvitation
+	
+	// Parameters: primaryOwningAccount, secondaryOwningAccount, primarySharingAccount, primaryNonSharingAccount
+	SharingAccountsController_RedeemSharingInvitation
+	
+	// Parameters: primaryOwningAccount, primarySharingAccount, secondarySharingAccount
+	Sharing_FileManipulationTests
+
+
+PRIMARY_OWNING_GOOGLE1
+PRIMARY_OWNING_DROPBOX1
+
+SECONDARY_OWNING_GOOGLE2
+SECONDARY_OWNING_DROPBOX2
+
+PRIMARY_SHARING_GOOGLE2
+PRIMARY_SHARING_FACEBOOK1
+
+SECONDARY_SHARING_GOOGLE3
+SECONDARY_SHARING_FACEBOOK2
+
+PRIMARY_NON_SHARING_DROPBOX1
+
+
