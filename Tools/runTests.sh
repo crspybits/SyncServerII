@@ -41,7 +41,10 @@ ALL_COUNT=`jq -r '.all | length' < ${TEST_JSON}`
 BASIC_SWIFT_TEST_CMD="swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER"
 SWIFT_DEFINE="-Xswiftc -D"
 SYNCSERVER_TEST_MODULE="ServerTests"
-TEST_OUT_DIR="/tmp/SyncServer/"
+TEST_OUT_DIR=".testing"
+
+# To get rid of build products except for packages downloaded. See comments below.
+BUILD_PRODUCTS_CLEAN=".build/debug .build/x86_64-unknown-linux build.db debug.yaml"
 
 # Final stats
 TOTAL_SUITES_PASSED=0
@@ -77,17 +80,25 @@ generateOutput () {
     # This gives failures-- the number of lines divided by 2 is N, the number of failures.
     local failures=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ' 0 failure' | grep -Ev ERROR | wc -l`
     failures=`expr $failures / 2`
+    TOTAL_FAILED_TEST_CASES=`expr $TOTAL_FAILED_TEST_CASES + $failures`
 
-    if [ $compilerResult -ne 0 ]; then
-        printf "${outputPrefix}${RED}Compiler failure${NC}: $testDescription\n"
-        TOTAL_SUITES_FAILED=`expr $TOTAL_SUITES_FAILED + 1`
-    elif [ "$failures" == "0" ]; then
+    local possibleCompileFailure="false"
+
+    if [ "${compilerResult}empty" != "empty" ] && [ $compilerResult -ne 0 ]; then
+        possibleCompileFailure="true"
+    fi
+
+    if [ $possibleCompileFailure == "false" ] && [ "$failures" == "0" ]; then
         printf "${outputPrefix}${GREEN}Passed${NC} ($totalTests tests): $testDescription\n"
         TOTAL_SUITES_PASSED=`expr $TOTAL_SUITES_PASSED + 1`
     else
-        printf "${outputPrefix}${RED}$failures FAILURES${NC} (out of $totalTests tests): $testDescription\n"
-        TOTAL_FAILED_TEST_CASES=`expr $TOTAL_FAILED_TEST_CASES + $failures`
         TOTAL_SUITES_FAILED=`expr $TOTAL_SUITES_FAILED + 1`
+
+        if [ $possibleCompileFailure == "true" ] && [ "$failures" == "0" ]; then
+             printf "${outputPrefix}${RED}Compile failure${NC}: $testDescription\n"
+        else
+            printf "${outputPrefix}${RED}$failures FAILURES${NC} (out of $totalTests tests): $testDescription\n"
+        fi
     fi
 }
 
@@ -120,6 +131,9 @@ runSpecificSuite () {
 
             printf "\trunning $testCaseName with parameters:\n\t\t$commandParams\n"
             outputPrefix="\t\t"
+
+            # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
+            /bin/rm -rf $BUILD_PRODUCTS_CLEAN
         else
             outputPrefix="\t"
         fi
@@ -140,8 +154,6 @@ if [ "${COMMAND}" != "suites" ] && [ "${COMMAND}" != "filter" ]; then
     echo "Command was not 'suites' or 'filter'-- see Usage at the top of this script file."
     exit 1
 fi
-
-mkdir "$TEST_OUT_DIR" >& /dev/null
 
 if  [ "${COMMAND}" == "suites" ] ; then
     # option must be 'all' or from the all list.

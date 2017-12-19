@@ -5,9 +5,9 @@
     "facebook",
     "dropbox",
     "owning",
-    "sharing-create",
-    "sharing-redeem",
-    "sharing-file"
+    "sharing_create",
+    "sharing_redeem",
+    "sharing_file"
   ],
   "basic": [
     {
@@ -151,21 +151,7 @@
       ]
     }
   ],
-  "sharing-create": [
-    {
-      "name": "SharingAccountsController_CreateSharingInvitation",
-      "parameters": [
-        "PRIMARY_OWNING_GOOGLE1",
-        "PRIMARY_SHARING_GOOGLE2"
-      ]
-    },
-    {
-      "name": "SharingAccountsController_CreateSharingInvitation",
-      "parameters": [
-        "PRIMARY_OWNING_DROPBOX1",
-        "PRIMARY_SHARING_GOOGLE2"
-      ]
-    },
+  "sharing_create": [
     {
       "name": "SharingAccountsController_CreateSharingInvitation",
       "parameters": [
@@ -176,12 +162,26 @@
     {
       "name": "SharingAccountsController_CreateSharingInvitation",
       "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "PRIMARY_SHARING_FACEBOOK1"
       ]
     }
   ],
-  "sharing-redeem": [
+  "sharing_redeem": [
     {
       "name": "SharingAccountsController_RedeemSharingInvitation",
       "parameters": [
@@ -255,7 +255,7 @@
       ]
     }
   ],
-  "sharing-file": [
+  "sharing_file": [
     {
       "name": "Sharing_FileManipulationTests",
       "parameters": [

@@ -39,8 +39,6 @@ case body
 case header
 }
 
-// TODO: *0* Why do I have to have both Server.json and ServerTests.json for testing??
-
 extension KituraTest {
     func performServerTest(testAccount:TestAccount = .primaryOwningAccount,
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {

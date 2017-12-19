@@ -1,5 +1,8 @@
 SyncServer
 
+Version X.Y.Z 
+	* Updates to testing-- getting testing script working better.
+	
 Version 0.8.0 (12/17/17)
 	* Using ServerConstants.HTTPOAuth2AuthorizationCodeKey instead of ServerConstants.GoogleHTTPServerAuthCodeKey
 		- This is going to require an iOS app update-- the prior version isn't going to work.

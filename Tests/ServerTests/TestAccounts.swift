@@ -84,9 +84,9 @@ struct TestAccount {
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     private func configValue(key:String) -> String {
 #if os(macOS)
-        let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "Server.json", forConfigType: .jsonDictionary)
+        let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "ServerTests.json", forConfigType: .jsonDictionary)
 #else // Linux
-        let config = try! ConfigLoader(usingPath: "./", andFileName: "Server.json", forConfigType: .jsonDictionary)
+        let config = try! ConfigLoader(usingPath: "./", andFileName: "ServerTests.json", forConfigType: .jsonDictionary)
 #endif
         let token = try! config.getString(varName: key)
         return token
