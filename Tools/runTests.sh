@@ -44,7 +44,7 @@ SYNCSERVER_TEST_MODULE="ServerTests"
 TEST_OUT_DIR=".testing"
 
 # To get rid of build products except for packages downloaded. See comments below.
-BUILD_PRODUCTS_CLEAN=".build/debug .build/x86_64-unknown-linux build.db debug.yaml"
+BUILD_PRODUCTS_CLEAN=".build/debug .build/x86_64-unknown-linux .build/build.db .build/debug.yaml"
 
 # Final stats
 TOTAL_SUITES_PASSED=0
@@ -81,6 +81,8 @@ generateOutput () {
     local failures=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ' 0 failure' | grep -Ev ERROR | wc -l`
     failures=`expr $failures / 2`
     TOTAL_FAILED_TEST_CASES=`expr $TOTAL_FAILED_TEST_CASES + $failures`
+    local passLines=`cat "$resultsFileName" | grep ' passed at ' | wc -l`
+    local testsPassed=`expr $passLines / 2`
 
     local possibleCompileFailure="false"
 
@@ -88,8 +90,8 @@ generateOutput () {
         possibleCompileFailure="true"
     fi
 
-    if [ $possibleCompileFailure == "false" ] && [ "$failures" == "0" ]; then
-        printf "${outputPrefix}${GREEN}Passed${NC} ($totalTests tests): $testDescription\n"
+    if [ $possibleCompileFailure == "false" ] && [ "$failures" == "0" ] && [ $testsPassed == $totalTests ]; then
+        printf "${outputPrefix}${GREEN}Passed${NC} ($testsPassed/$totalTests tests): $testDescription\n"
         TOTAL_SUITES_PASSED=`expr $TOTAL_SUITES_PASSED + 1`
     else
         TOTAL_SUITES_FAILED=`expr $TOTAL_SUITES_FAILED + 1`

@@ -564,7 +564,8 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode == .OK, "Did not work on downloadFileRequest request")
                     XCTAssert(dict != nil)
                     
-                    if let downloadFileResponse = DownloadFileResponse(json: dict!) {
+                    if let dict = dict,
+                        let downloadFileResponse = DownloadFileResponse(json: dict) {
                         if expectUpdatedMasterUpdate {
                             XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
                         }

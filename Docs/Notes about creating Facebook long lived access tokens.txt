@@ -1,0 +1,20 @@
+I'm using these for server side testing. I.e., for the XCTests within the server.
+
+1) I'm using the "Create sharing invitation" mechanism of the SyncServer iOS testing app. You first sign in as an owning user, creating the sharing invitation, then redeem it as a sharing (e.g., Facebook) user.
+
+2) When you first redeem the sharing user or subsequently sign in as the sharing user, a long-lived access token is sent back to the client. Save that. I'm putting those in ServerTests.json
+
+3) You can see if the app is authorized here: https://www.facebook.com/settings?tab=applications
+
+4) I was having problems trying to create long-lived access tokens for two separate Facebook accounts. It seems what I need to do is to use two different devices or two different simulator instances. And run the SyncServer iOS testing app on both of those, one for each account. I was having problems trying to get the first account authorized, and then sign-out of the first, to authorize the first. But, it seems that signing out of the first deauthorizes it. Deauthorizing its long-lived access token. Whoops.
+
+See also https://stackoverflow.com/questions/10467272/get-long-live-access-token-from-facebook
+
+5) I just learned one more thing: Facebook allows test user accounts-- https://developers.facebook.com/apps/1878607642387498/roles/test-users/
+
+I just created one: npjxqwhgom_1513727437@tfbnw.net
+And it lets you get access tokens:
+
+EAAaslW0yZACoBAMNMUqj0ZCxqXQc7pCQMA9ZCv7dkt8Y5ZApO3MVZCi5B3BzshAxAkYdtZCgZAZA54iS6HxLu495OLVXjTp96A4KoeumOBIxyvqnfMAczsZB8XKZBBkdNImb3W7AR2w2BLtbzwRZABKrJZByZCUEHrBfsevmz8YB9XQaSAuoWXXNyjrDh9smLPENDXQ4n0gySZC1MokfiyoQwqNONZB3dR3x7XlTR2QTw93h0QxwQZDZD
+
+(I assume these are long-lived.)
