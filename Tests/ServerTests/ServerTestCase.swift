@@ -178,7 +178,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0) -> (request: UploadFileRequest, fileSize:Int64)? {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
@@ -191,20 +191,26 @@ class ServerTestCase : XCTestCase {
 #endif
 
         let sizeOfCatFileInBytes:Int64 = 1162662
-        let data = try! Data(contentsOf: fileURL)
+        guard let data = try? Data(contentsOf: fileURL) else {
+            XCTFail()
+            return nil
+        }
 
-        let uploadRequest = UploadFileRequest(json: [
+        guard let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
             UploadFileRequest.mimeTypeKey: "image/jpeg",
             UploadFileRequest.cloudFolderNameKey: testFolder,
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.masterVersionKey: MasterVersionInt(0)
-        ])
+            ]) else {
+            XCTFail()
+            return nil
+        }
         
         Log.info("Starting runUploadTest: uploadJPEGFile")
-        runUploadTest(data:data, uploadRequest:uploadRequest!, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID)
+        runUploadTest(data:data, uploadRequest:uploadRequest, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID)
         Log.info("Completed runUploadTest: uploadJPEGFile")
-        return (uploadRequest!, sizeOfCatFileInBytes)
+        return (uploadRequest, sizeOfCatFileInBytes)
     }
     
     func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
@@ -592,8 +598,32 @@ class ServerTestCase : XCTestCase {
     func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date) {
         getFileIndex() { fileInfo in
             let file = fileInfo!.filter({$0.fileUUID == fileUUID})[0]
-            let comp1 = file.creationDate!.compare(start)
+            // let comp1 = file.creationDate!.compare(start)
             
+            // I've been having problems here comparing dates. It seems that this is akin to the problem of comparing real numbers, and the general rule that you shouldn't test real numbers for equality. To help in this, I'm going to just use the mm/dd/yy and hh:mm:ss components of the dates.
+            func clean(_ date: Date) -> Date {
+                let orig = Calendar.current.dateComponents(
+                    [.day, .month, .year, .hour, .minute, .second], from: date)
+
+                var new = DateComponents()
+                new.day = orig.day
+                new.month = orig.month
+                new.year = orig.year
+                new.hour = orig.hour
+                new.minute = orig.minute
+                new.second = orig.second
+
+                return Calendar.current.date(from: new)!
+            }
+            
+            let cleanCreationDate = clean(file.creationDate!)
+            let cleanStart = clean(start)
+            let cleanEnd = clean(end)
+            
+            XCTAssert(cleanStart <= cleanCreationDate, "start: \(cleanStart); file.creationDate: \(cleanCreationDate)")
+            XCTAssert(cleanCreationDate <= cleanEnd, "file.creationDate: \(cleanCreationDate); end: \(cleanEnd)")
+            
+            /*
             switch comp1 {
             case .orderedDescending, .orderedSame:
                 break
@@ -608,7 +638,7 @@ class ServerTestCase : XCTestCase {
                 break
             default:
                 XCTAssert(false)
-            }
+            }*/
         }
     }
 }

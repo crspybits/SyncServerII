@@ -359,7 +359,10 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         
         select.forEachRow { rowModel in
             rows += 1
-            let rowModel = rowModel as! model2
+            guard let rowModel = rowModel as? model2 else {
+                XCTFail()
+                return
+            }
             
             XCTAssert(rowModel.c1 == .TestEnum1, "TestEnum value was wrong")
             

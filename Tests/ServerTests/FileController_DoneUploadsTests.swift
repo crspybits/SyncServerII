@@ -40,7 +40,12 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         let deviceUUID = PerfectLib.UUID().string
         _ = uploadTextFile(deviceUUID:deviceUUID)
         Log.info(message: "Done uploadTextFile")
-        _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
+        
+        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
+            XCTFail()
+            return
+        }
+        
         Log.info(message: "Done uploadJPEGFile")
         self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
         Log.info(message: "Done sendDoneUploads")

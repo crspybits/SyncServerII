@@ -5,7 +5,7 @@ docker build -t swift-ubuntu-runtime:latest .
 # docker push crspybits/swift-ubuntu-runtime:latest
 
 # Build SyncServer 
-docker run --rm -i -t -v /Users/chris/Desktop/Apps/:/root/Apps swift-ubuntu:latest
+docker run --rm -i -t -v /Users/chris/Desktop/Apps/:/root/Apps crspybits/swift-ubuntu:4.0.0
 
 # In the container, build with:
 cd root/Apps/SyncServerII/SyncServerII/

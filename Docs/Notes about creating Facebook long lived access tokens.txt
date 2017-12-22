@@ -13,8 +13,5 @@ See also https://stackoverflow.com/questions/10467272/get-long-live-access-token
 5) I just learned one more thing: Facebook allows test user accounts-- https://developers.facebook.com/apps/1878607642387498/roles/test-users/
 
 I just created one: npjxqwhgom_1513727437@tfbnw.net
-And it lets you get access tokens:
 
-EAAaslW0yZACoBAMNMUqj0ZCxqXQc7pCQMA9ZCv7dkt8Y5ZApO3MVZCi5B3BzshAxAkYdtZCgZAZA54iS6HxLu495OLVXjTp96A4KoeumOBIxyvqnfMAczsZB8XKZBBkdNImb3W7AR2w2BLtbzwRZABKrJZByZCUEHrBfsevmz8YB9XQaSAuoWXXNyjrDh9smLPENDXQ4n0gySZC1MokfiyoQwqNONZB3dR3x7XlTR2QTw93h0QxwQZDZD
-
-(I assume these are long-lived.)
+I initially had assumed these were long-lived. But, no. After a day I had to generate a new one.

@@ -14,13 +14,15 @@ I added: `tzdata`
 Create the image based on the Dockerfile using:
 docker build -t swift-ubuntu:latest .
 
-# docker tag swift-ubuntu:latest crspybits/swift-ubuntu:latest 
-# docker push crspybits/swift-ubuntu:latest
+docker tag swift-ubuntu:latest crspybits/swift-ubuntu:latest 
+docker tag swift-ubuntu:latest crspybits/swift-ubuntu:4.0.2
+docker push crspybits/swift-ubuntu:latest
+docker push crspybits/swift-ubuntu:4.0.2
 
 Also relying on https://github.com/hopsoft/relay/wiki/How-to-Deploy-Docker-apps-to-Elastic-Beanstalk
 
 Run this with:
-docker run -i -t -v /Users/chris/Dropbox/Ubuntu/SyncServerII/SyncServerII/:/root/SyncServerII swift-ubuntu:latest
+docker run -i -t -v /Users/chris/Dropbox/Ubuntu/SyncServerII/SyncServerII/:/root/SyncServerII swift-ubuntu:4.0.0
 
 To figure out the IP address of the docker host:
 ip addr show eth0
@@ -30,3 +32,5 @@ https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-h
 
 # To access mysql running on Docker host on MacOS for testing, use docker.for.mac.localhost for the mysql host.
 See https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach?noredirect=1&lq=1
+
+# 12/20/17-- I'm now going to see if I can build my Docker build image from https://github.com/swiftdocker/docker-swift in my Dockerfile so I can more easily stay up with changes in the Swift compiler. E.g., the change to 4.0.3

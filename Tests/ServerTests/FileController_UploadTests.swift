@@ -35,7 +35,11 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     func testUploadTextAndJPEGFile() {
         let deviceUUID = PerfectLib.UUID().string
         _ = uploadTextFile(deviceUUID:deviceUUID)
-        _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
+        
+        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
+            XCTFail()
+            return
+        }
     }
     
     func testUploadingSameFileTwiceWorks() {

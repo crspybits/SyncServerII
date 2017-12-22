@@ -39,6 +39,29 @@ case body
 case header
 }
 
+// 12/20/17; I'm doing this because I suspect that I get test failures that occur simply because I'm asking to generate an access token from a refresh token too frequently in my tests.
+class GoogleCredsCache {
+    // The key is the `sub` or id for the particular account.
+    static var cache = [String: GoogleCreds]()
+    
+    static func credsFor(googleAccount:TestAccount,
+                         completion: @escaping (_ creds: GoogleCreds)->()) {
+        
+        if let creds = cache[googleAccount.id()] {
+            completion(creds)
+        }
+        else {
+            let creds = GoogleCreds()
+            cache[googleAccount.id()] = creds
+            creds.refreshToken = googleAccount.token()
+            creds.refresh {[unowned creds] error in
+                XCTAssert(error == nil)
+                completion(creds)
+            }
+        }
+    }
+}
+
 extension KituraTest {
     func performServerTest(testAccount:TestAccount = .primaryOwningAccount,
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
@@ -57,14 +80,16 @@ extension KituraTest {
                 ServerMain.shutdown()
                 XCTAssertNil(error)
             }
+            
+            // At least with Google accounts, I'm having problems with periodic `unauthorized` responses. Could be due to some form of throttling?
+            if testAccount.type == .Google {
+                sleep(5)
+            }
         }
         
         switch testAccount.type {
         case .Google:
-            let creds = GoogleCreds()
-            creds.refreshToken = testAccount.token()
-            creds.refresh { error in
-                XCTAssert(error == nil)
+            GoogleCredsCache.credsFor(googleAccount: testAccount) { creds in
                 runTest(usingCreds: creds)
             }
             

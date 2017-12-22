@@ -2,6 +2,8 @@ SyncServer
 
 Version X.Y.Z 
 	* Updates to testing-- getting testing script working better.
+	* More updates to testing-- getting tests to work without failing.
+	* New Dockerfile for building-- based off of standard Docker image
 	
 Version 0.8.0 (12/17/17)
 	* Using ServerConstants.HTTPOAuth2AuthorizationCodeKey instead of ServerConstants.GoogleHTTPServerAuthCodeKey

@@ -44,7 +44,7 @@ SYNCSERVER_TEST_MODULE="ServerTests"
 TEST_OUT_DIR=".testing"
 
 # To get rid of build products except for packages downloaded. See comments below.
-BUILD_PRODUCTS_CLEAN=".build/debug .build/x86_64-unknown-linux .build/build.db .build/debug.yaml"
+# BUILD_PRODUCTS_CLEAN=".build/debug .build/x86_64-unknown-linux .build/build.db .build/debug.yaml"
 
 # Final stats
 TOTAL_SUITES_PASSED=0
@@ -135,7 +135,8 @@ runSpecificSuite () {
             outputPrefix="\t\t"
 
             # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
-            /bin/rm -rf $BUILD_PRODUCTS_CLEAN
+            # /bin/rm -rf $BUILD_PRODUCTS_CLEAN
+            swift package clean
         else
             outputPrefix="\t"
         fi

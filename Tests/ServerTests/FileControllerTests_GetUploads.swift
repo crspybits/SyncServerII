@@ -68,7 +68,11 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         
         let deviceUUID = PerfectLib.UUID().string
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
-        let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
+        
+        guard let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
+            XCTFail()
+            return
+        }
 
         let expectedSizes = [
             uploadRequest1.fileUUID: fileSize1,

@@ -73,7 +73,11 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     func testFileIndexWithTwoFiles() {
         let deviceUUID = PerfectLib.UUID().string
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
-        let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false)
+        
+        guard let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
+            XCTFail()
+            return
+        }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
