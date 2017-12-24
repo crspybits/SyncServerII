@@ -64,8 +64,6 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     }
     
     func testForTwoUploads() {
-        //let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID)
-        
         let deviceUUID = PerfectLib.UUID().string
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
         

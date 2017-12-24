@@ -13,7 +13,7 @@
 #       sharing-redeem
 #       sharing-file
 #   filter -- pass along the <Option> argument to swift tests as the --filter
-#
+#   run -- the <Option> is the complete swift test run command
 # Output in each case is in two parts:
 #   1) A series of lines of the format
 #       Passed | N Failures ([out of] K tests): <Test suite name>[, <Parameters if any>]
@@ -43,9 +43,6 @@ SWIFT_DEFINE="-Xswiftc -D"
 SYNCSERVER_TEST_MODULE="ServerTests"
 TEST_OUT_DIR=".testing"
 
-# To get rid of build products except for packages downloaded. See comments below.
-# BUILD_PRODUCTS_CLEAN=".build/debug .build/x86_64-unknown-linux .build/build.db .build/debug.yaml"
-
 # Final stats
 TOTAL_SUITES_PASSED=0
 TOTAL_SUITES_FAILED=0
@@ -67,9 +64,8 @@ generateFinalOutput () {
 generateOutput () {
     # Parameters:
     local resultsFileName=$1
-    local testDescription=$2
-    local outputPrefix=$3
-    local compilerResult=$4
+    local outputPrefix=$2
+    local compilerResult=$3
 
     # The following depends on the assumption: That when a Swift test passes, there is a line containing the text " 0 failure", and that each test, pass or fail has lines "failure" in them (e.g., 0 failures or N failures). And further, that there are two of these lines per test. Of course, changes in the Swift testing output could change this and break this assumption.
 
@@ -91,15 +87,15 @@ generateOutput () {
     fi
 
     if [ $possibleCompileFailure == "false" ] && [ "$failures" == "0" ] && [ $testsPassed == $totalTests ]; then
-        printf "${outputPrefix}${GREEN}Passed${NC} ($testsPassed/$totalTests tests): $testDescription\n"
+        printf "${outputPrefix}${GREEN}Passed${NC} ($testsPassed/$totalTests tests): $resultsFileName\n"
         TOTAL_SUITES_PASSED=`expr $TOTAL_SUITES_PASSED + 1`
     else
         TOTAL_SUITES_FAILED=`expr $TOTAL_SUITES_FAILED + 1`
 
         if [ $possibleCompileFailure == "true" ] && [ "$failures" == "0" ]; then
-             printf "${outputPrefix}${RED}Compile failure${NC}: $testDescription\n"
+             printf "${outputPrefix}${RED}Compile failure${NC}: $resultsFileName\n"
         else
-            printf "${outputPrefix}${RED}$failures FAILURES${NC} (out of $totalTests tests): $testDescription\n"
+            printf "${outputPrefix}${RED}$failures FAILURES${NC} (out of $totalTests tests): $resultsFileName\n"
         fi
     fi
 }
@@ -131,30 +127,32 @@ runSpecificSuite () {
                 commandParams="$commandParams ${SWIFT_DEFINE}$parameter"
             done
 
-            printf "\trunning $testCaseName with parameters:\n\t\t$commandParams\n"
+            printf "\trunning $testCaseName with command:\n"
             outputPrefix="\t\t"
 
             # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
-            # /bin/rm -rf $BUILD_PRODUCTS_CLEAN
             swift package clean
         else
             outputPrefix="\t"
         fi
 
         local outputFileName="$TEST_OUT_DIR"/$testCaseName.$fileNameCounter
-        $BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName > $outputFileName
+        local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName"
+
+        printf "$outputPrefix$command\n"
+        $command > $outputFileName
 
         # For testing to see if the compiler failed.
         local compilerResult=$?
 
-        generateOutput $outputFileName "$testCaseName.$fileNameCounter" $outputPrefix $compilerResult
+        generateOutput $outputFileName $outputPrefix $compilerResult
 
         fileNameCounter=`expr $fileNameCounter + 1`
     done
 }
 
-if [ "${COMMAND}" != "suites" ] && [ "${COMMAND}" != "filter" ]; then
-    echo "Command was not 'suites' or 'filter'-- see Usage at the top of this script file."
+if [ "${COMMAND}" != "suites" ] && [ "${COMMAND}" != "filter" ] && [ "${COMMAND}" != "run" ]; then
+    echo "Command was not 'suites', 'filter', or 'run' -- see Usage at the top of this script file."
     exit 1
 fi
 
@@ -184,11 +182,29 @@ if  [ "${COMMAND}" == "suites" ] ; then
     else 
         runSpecificSuite ${OPTION}
     fi
-else
-    # filter command
+elif [ "${COMMAND}" == "filter" ] ; then
     OUTPUT_FILE_NAME="$TEST_OUT_DIR"/filter.txt
     $BASIC_SWIFT_TEST_CMD --filter ${OPTION} > $OUTPUT_FILE_NAME
-    generateOutput $OUTPUT_FILE_NAME "${OPTION}"
+
+    # For testing to see if the compiler failed.
+    compilerResult=$?
+
+    generateOutput $OUTPUT_FILE_NAME "\t" $compilerResult
+else
+    # run command
+
+    # See https://stackoverflow.com/questions/9057387/process-all-arguments-except-the-first-one-in-a-bash-script
+    COMMAND=${@:2}
+
+    TMPFILE=`mktemp $TEST_OUT_DIR/tmp.XXXXXXXX`
+
+    echo "Running: $COMMAND"
+    $COMMAND > $TMPFILE
+
+    # For testing to see if the compiler failed.
+    compilerResult=$?
+
+    generateOutput $TMPFILE "\t" $compilerResult
 fi
 
 generateFinalOutput
