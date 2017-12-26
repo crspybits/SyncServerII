@@ -1,6 +1,6 @@
 SyncServer
 
-Version X.Y.Z 
+Version 0.8.1 (12/24/17)
 	* Updates to testing-- getting testing script working better.
 	* More updates to testing-- getting tests to work without failing.
 	* New Dockerfile for building-- based off of standard Docker image
