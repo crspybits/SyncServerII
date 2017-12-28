@@ -119,6 +119,11 @@ extension FileController {
                     if params.repos.upload.update(upload: upload) {
                         let response = UploadFileResponse()!
                         response.size = Int64(fileSize)
+                        
+                        // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
+                        response.creationDate = upload.creationDate
+                        response.updateDate = upload.updateDate
+                        
                         params.completion(response)
                     }
                     else {
