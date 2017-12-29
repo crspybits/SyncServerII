@@ -22,6 +22,7 @@ class UtilController : ControllerProtocol {
     func healthCheck(params:RequestProcessingParameters) {
         let response = HealthCheckResponse()!
         
+        response.currentServerDateTime = Date()
         response.serverUptime = -UtilController.serverStart.timeIntervalSinceNow
         response.deployedGitTag = Constants.session.deployedGitTag
         

@@ -30,7 +30,8 @@ class HealthCheckTests: ServerTestCase, LinuxTestable {
                 
                 XCTAssert(healthCheckResponse.serverUptime > 0)
                 XCTAssert(healthCheckResponse.deployedGitTag.count > 0)
-                
+                XCTAssert(healthCheckResponse.currentServerDateTime != nil)
+
                 expectation.fulfill()
             }
         }
