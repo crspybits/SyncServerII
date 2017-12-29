@@ -168,6 +168,6 @@ class Constants {
         deployedGitTag = try file.readString()
         
         // In case the line in the file had trailing white space (e.g., a new line)
-        deployedGitTag = deployedGitTag.trimmingCharacters(in: NSCharacterSet.whitespaces)
+        deployedGitTag = deployedGitTag.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines)
     }
 }
