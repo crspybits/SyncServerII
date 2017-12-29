@@ -1,1 +1,3 @@
 The files `Server.json` and `ServerTests.json` contain private info, and so are not contained in the public repo. For now, search the code for this file name to find out the keys/values it contains. Hopefully later, I document this better! :).
+
+The file `VERSION` contains the git tag of version pushed to Docker, is put there and updated by the devops/release.sh script, and is read by the server when it starts. It is reported by the healthcheck endpoint.

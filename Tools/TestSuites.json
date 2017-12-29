@@ -11,6 +11,9 @@
   ],
   "basic": [
     {
+      "name": "HealthCheckTests"
+    },
+    {
       "name": "DatabaseModelTests"
     },
     {

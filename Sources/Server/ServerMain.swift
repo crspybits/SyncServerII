@@ -44,14 +44,19 @@ public class ServerMain {
         //smd = try? SwiftMetricsDash(swiftMetricsInstance : sm)
         
         if type == .blocking {
-            // When we launch the server from within Xcode (or just with no explicit arguments), we have 1 "argument" (CommandLine.arguments[0]).
-            if CommandLine.arguments.count == 1 {
-                Constants.setup(configFileName: Constants.serverConfigFile)
-            }
-            else {
-                let configFile = CommandLine.arguments[1]
-                Log.info("Loading server config file from: \(configFile)")
-                Constants.setup(configFileFullPath: configFile)
+            do {
+                // When we launch the server from within Xcode (or just with no explicit arguments), we have 1 "argument" (CommandLine.arguments[0]).
+                if CommandLine.arguments.count == 1 {
+                    try Constants.setup(configFileName: Constants.serverConfigFile)
+                }
+                else {
+                    let configFile = CommandLine.arguments[1]
+                    Log.info("Loading server config file from: \(configFile)")
+                    try Constants.setup(configFileFullPath: configFile)
+                }
+            } catch (let error) {
+                Log.error("Failed during startup: Could not load config file: \(error)")
+                exit(1)
             }
         }
         

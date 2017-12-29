@@ -46,9 +46,9 @@ class ServerTestCase : XCTestCase {
         super.setUp()
 #if os(macOS)
         Constants.delegate = self
-        Constants.setup(configFileName: "ServerTests.json")
+        try! Constants.setup(configFileName: "ServerTests.json")
 #else // Linux
-        Constants.setup(configFileFullPath: "./ServerTests.json")
+        try! Constants.setup(configFileFullPath: "./ServerTests.json")
 #endif
         self.db = Database()
         

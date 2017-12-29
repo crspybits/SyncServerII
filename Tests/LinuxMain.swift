@@ -2,6 +2,7 @@ import XCTest
 @testable import ServerTests
 
 XCTMain([
+    testCase(HealthCheckTests.allTests),
     testCase(AccountAuthenticationTests_Dropbox.allTests),
     testCase(AccountAuthenticationTests_Facebook.allTests),
     testCase(AccountAuthenticationTests_Google.allTests),

@@ -23,6 +23,9 @@
 /* Begin PBXBuildFile section */
 		50E0C44D595F6DB74E9372EF /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = C1EDB63C587EF0F67A4734CA /* ServerTests.json */; };
 		6B87914039639D2D443D88AC /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = DFFBF76C45D98D3492ECBF49 /* Server.json */; };
+		8303752B1FF5EE8E008DCF54 /* ServerStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752A1FF5EE8E008DCF54 /* ServerStats.swift */; };
+		8303752D1FF5F270008DCF54 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752C1FF5F270008DCF54 /* Synchronized.swift */; };
+		8303752F1FF5FEF7008DCF54 /* HealthCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */; };
 		835FC7A11FE76C840067FD83 /* TestAccounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835FC7A01FE76C840067FD83 /* TestAccounts.swift */; };
 		83C5CE121FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */; };
 		83C5CE141FDDBD880024979A /* LinuxMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE131FDDBD880024979A /* LinuxMain.swift */; };
@@ -138,6 +141,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8303752A1FF5EE8E008DCF54 /* ServerStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerStats.swift; sourceTree = "<group>"; };
+		8303752C1FF5F270008DCF54 /* Synchronized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
+		8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthCheckTests.swift; sourceTree = "<group>"; };
 		835FC7A01FE76C840067FD83 /* TestAccounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAccounts.swift; sourceTree = "<group>"; };
 		83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Dropbox.swift; sourceTree = "<group>"; };
 		83C5CE131FDDBD880024979A /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
@@ -316,6 +322,8 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_49 /* AsyncTailRecursion.swift */,
+				8303752A1FF5EE8E008DCF54 /* ServerStats.swift */,
+				8303752C1FF5F270008DCF54 /* Synchronized.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -384,6 +392,7 @@
 				OBJ_76 /* SpecificDatabaseTests_Uploads.swift */,
 				OBJ_77 /* SpecificDatabaseTests_UserRepository.swift */,
 				OBJ_78 /* UserControllerTests.swift */,
+				8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */,
 			);
 			name = ServerTests;
 			path = Tests/ServerTests;
@@ -573,6 +582,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_143 /* Account.swift in Sources */,
+				8303752D1FF5F270008DCF54 /* Synchronized.swift in Sources */,
 				OBJ_144 /* AccountManager.swift in Sources */,
 				OBJ_145 /* CloudStorage.swift in Sources */,
 				OBJ_146 /* DropboxCreds.swift in Sources */,
@@ -588,6 +598,7 @@
 				OBJ_156 /* FileController.swift in Sources */,
 				OBJ_157 /* SharingAccountsController.swift in Sources */,
 				OBJ_158 /* UserController.swift in Sources */,
+				8303752B1FF5EE8E008DCF54 /* ServerStats.swift in Sources */,
 				OBJ_159 /* UtilController.swift in Sources */,
 				OBJ_160 /* Database.swift in Sources */,
 				OBJ_161 /* DeviceUUIDRepository.swift in Sources */,
@@ -608,6 +619,7 @@
 				OBJ_174 /* ServerRoutes.swift in Sources */,
 				OBJ_175 /* ServerSetup.swift in Sources */,
 				OBJ_176 /* AsyncTailRecursion.swift in Sources */,
+				8303752F1FF5FEF7008DCF54 /* HealthCheckTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

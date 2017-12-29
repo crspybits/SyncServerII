@@ -9,17 +9,32 @@
 import LoggerAPI
 import Credentials
 import SyncServerShared
+import Foundation
 
 class UtilController : ControllerProtocol {
+    static var serverStart:Date!
+    
     class func setup(db:Database) -> Bool {
+        serverStart = Date()
         return true
     }
     
-    init() {
-    }
-    
     func healthCheck(params:RequestProcessingParameters) {
-        let response = HealthCheckResponse()
+        let response = HealthCheckResponse()!
+        
+        response.serverUptime = -UtilController.serverStart.timeIntervalSinceNow
+        response.deployedGitTag = Constants.session.deployedGitTag
+        
+        let stats = ServerStatsKeeper.session.stats
+        var diagnostics = ""
+        for (key, value) in stats {
+            diagnostics += "\(key.rawValue): \(value); "
+        }
+        
+        if diagnostics.count > 0 {
+            response.diagnostics = diagnostics
+        }
+        
         params.completion(response)
     }
     

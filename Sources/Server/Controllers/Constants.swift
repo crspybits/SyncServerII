@@ -8,10 +8,9 @@
 
 import Foundation
 import SMServerLib
+import PerfectLib
 
-// Server-internal constants
-
-// TODO: *1* This should be renamed to something like ServerConfig. They are not exactly "constants".
+// Server-internal configuration info. Mostly pulled from the Server.json file.
 
 protocol ConstantsDelegate {
 func configFilePath(forConstants:Constants) -> String
@@ -43,11 +42,6 @@ class Constants {
     // If you are using Facebook Accounts
     var facebookClientId:String? = "" // This is the AppId from Facebook
     var facebookClientSecret:String? = "" // App Secret from Facebook
-    
-    // If you are using Dropbox Accounts
-    // See https://www.dropbox.com/developers/apps
-    var dropboxClientId:String? = "" // app's key (found in the App Console).
-    var dropboxClientSecret:String? = "" // app's secret
 
     var maxNumberDeviceUUIDPerUser:Int?
     
@@ -75,21 +69,27 @@ class Constants {
     }
     var allowedSignInTypes = AllowedSignInTypes()
     
+    // MARK: These are not obtained from the Server.json file, but are basically configuration items.
+
+    var deployedGitTag:String!
+    // The following file is assumed to be at the root of the running, deployed server-- e.g., I'm putting it there when I build the Docker image. File is assumed to contain one line of text.
+    private let deployedGitTagFilename = "VERSION"
+    
     static var session:Constants!
 
     // If there is a delegate, then use this to get the config file path. This is purely a hack for testing-- because I've not been able to get access to the Server.config file otherwise.
     static var delegate:ConstantsDelegate?
     
-    class func setup(configFileName:String) {
-        session = Constants(configFileName:configFileName)
+    class func setup(configFileName:String) throws {
+        session = try Constants(configFileName:configFileName)
     }
     
-    class func setup(configFileFullPath:String) {
-        session = Constants(configFileName:configFileFullPath, fileNameHasPath: true)
+    class func setup(configFileFullPath:String) throws {
+        session = try Constants(configFileName:configFileFullPath, fileNameHasPath: true)
     }
     
-    fileprivate init(configFileName:String, fileNameHasPath:Bool = false) {
-        print("loading config file: \(configFileName)")
+    fileprivate init(configFileName:String, fileNameHasPath:Bool = false) throws {
+        print("Loading config file: \(configFileName)")
 
         var config:ConfigLoader!
         
@@ -101,18 +101,18 @@ class Constants {
                 let cfnNSString = NSString(string: configFileName)
                 let filename = cfnNSString.lastPathComponent
                 let path = cfnNSString.deletingLastPathComponent
-                config = try! ConfigLoader(usingPath: path, andFileName: filename, forConfigType: .jsonDictionary)
+                config = try ConfigLoader(usingPath: path, andFileName: filename, forConfigType: .jsonDictionary)
             }
             
 #if os(macOS)
             if !fileNameHasPath {
-                config = try! ConfigLoader(fileNameInBundle: configFileName, forConfigType: .jsonDictionary)
+                config = try ConfigLoader(fileNameInBundle: configFileName, forConfigType: .jsonDictionary)
             }
 #endif
         }
         else {
             let path = Constants.delegate!.configFilePath(forConstants: self)
-            config = try! ConfigLoader(usingPath: path, andFileName: configFileName, forConfigType: .jsonDictionary)
+            config = try ConfigLoader(usingPath: path, andFileName: configFileName, forConfigType: .jsonDictionary)
         }
         
         googleClientId = try? config.getString(varName: "GoogleServerClientId")
@@ -121,15 +121,12 @@ class Constants {
         facebookClientId = try? config.getString(varName: "FacebookClientId")
         facebookClientSecret = try? config.getString(varName: "FacebookClientSecret")
         
-        dropboxClientId = try? config.getString(varName: "DropboxClientId")
-        dropboxClientSecret = try? config.getString(varName: "DropboxClientSecret")
+        db.host = try config.getString(varName: "mySQL.host")
+        db.user = try config.getString(varName: "mySQL.user")
+        db.password = try config.getString(varName: "mySQL.password")
+        db.database = try config.getString(varName: "mySQL.database")
         
-        db.host = try! config.getString(varName: "mySQL.host")
-        db.user = try! config.getString(varName: "mySQL.user")
-        db.password = try! config.getString(varName: "mySQL.password")
-        db.database = try! config.getString(varName: "mySQL.database")
-        
-        port = try! config.getInt(varName: "port")
+        port = try config.getInt(varName: "port")
         
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
         print("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")
@@ -162,5 +159,15 @@ class Constants {
         if let dropboxSignIn = try? config.getBool(varName: "allowedSignInTypes.Dropbox"), dropboxSignIn {
             allowedSignInTypes.Dropbox = true
         }
+        
+        // MARK: Items not obtained from the Server.json file.
+        
+        let file = File(deployedGitTagFilename)
+        try file.open(.read, permissions: .readUser)
+        defer { file.close() }
+        deployedGitTag = try file.readString()
+        
+        // In case the line in the file had trailing white space (e.g., a new line)
+        deployedGitTag = deployedGitTag.trimmingCharacters(in: NSCharacterSet.whitespaces)
     }
 }

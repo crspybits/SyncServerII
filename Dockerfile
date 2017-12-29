@@ -9,7 +9,7 @@ USER root
 # This depends on the Server.json file using port 8080 for SyncServer.
 EXPOSE 8080
 
-# The version number of SyncServer-- just for documentation.
+# The git tag of the deployed SyncServer -- this is for documentation, *and* is read when the server launches-- the server reports this back in healthchecks.
 ADD VERSION .
 
 # Binaries should have been compiled against the correct platform (i.e. Ubuntu 16.04).

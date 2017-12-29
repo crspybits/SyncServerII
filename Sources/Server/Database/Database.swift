@@ -27,9 +27,6 @@ class Database {
     private var closed = false
     public private(set) var connection: MySQL!
 
-    private static var numberOpened = 0
-    private static var numberClosed = 0
-
     var error: String {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
     }
@@ -44,13 +41,13 @@ class Database {
             return
         }
         
-        Database.numberOpened += 1
+        ServerStatsKeeper.session.increment(stat: .dbConnectionsOpened)
 
         if showStartupInfo {
             Log.info("Connecting to database named: \(Constants.session.db.database)...")
         }
         
-        Log.info("DB CONNECTION STATS: opened: \(Database.numberOpened); closed: \(Database.numberClosed)")
+        Log.info("DB CONNECTION STATS: opened: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsOpened)); closed: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsClosed))")
 
         guard self.connection.selectDatabase(named: Constants.session.db.database) else {
             Log.error("Failure: \(self.error)")
@@ -65,8 +62,8 @@ class Database {
     // Do not close the database connection until rollback or commit have been called.
     func close() {
         if !closed {
-            Database.numberClosed += 1
-            Log.info("CLOSING DB CONNECTION (opened: \(Database.numberOpened); closed: \(Database.numberClosed))")
+            ServerStatsKeeper.session.increment(stat: .dbConnectionsClosed)
+            Log.info("CLOSING DB CONNECTION: opened: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsOpened)); closed: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsClosed))")
             connection.close()
             closed = true
         }

@@ -3,7 +3,13 @@ SyncServer
 Version 0.9.0
 	* Upload response now includes actual dates used.
 		https://github.com/crspybits/SharedImages/issues/44
-		
+	* Healthcheck improvements
+		https://github.com/crspybits/SyncServerII/issues/32
+		Added a test for this.
+	* Removed dropboxClientId, dropboxClientSecret from Constants.swift-- these are not used. Dropbox doesn't require server-specific creds.
+	* Added `deployedGitTag` to Constants.swift
+	* Improved tracking of internal server statistics.
+	
 Version 0.8.1 (12/24/17)
 	* Updates to testing-- getting testing script working better.
 	* More updates to testing-- getting tests to work without failing.

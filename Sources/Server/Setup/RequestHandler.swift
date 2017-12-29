@@ -32,8 +32,6 @@ class RequestHandler : AccountDelegate {
     private var currentSignedInUser:User?
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
-    private static var numberCreated = 0
-    private static var numberDeleted = 0
     
     init(request:RouterRequest, response:RouterResponse, endpoint:ServerEndpoint? = nil) {
         self.request = request
@@ -45,14 +43,14 @@ class RequestHandler : AccountDelegate {
             self.authenticationLevel = endpoint!.authenticationLevel
         }
         self.endpoint = endpoint
+        ServerStatsKeeper.session.increment(stat: .apiRequestsCreated)
         
-        RequestHandler.numberCreated += 1
-        Log.info("RequestHandler.init: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
+        Log.info("RequestHandler.init: numberCreated: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsCreated)); numberDeleted: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsDeleted));")
     }
     
     deinit {
-        RequestHandler.numberDeleted += 1
-        Log.info("RequestHandler.deinit: numberCreated: \(RequestHandler.numberCreated); numberDeleted: \(RequestHandler.numberDeleted);")
+        ServerStatsKeeper.session.increment(stat: .apiRequestsDeleted)
+        Log.info("RequestHandler.deinit: numberCreated: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsCreated)); numberDeleted: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsDeleted));")
     }
 
     public func failWithError(message:String, statusCode:HTTPStatusCode = .internalServerError) {
