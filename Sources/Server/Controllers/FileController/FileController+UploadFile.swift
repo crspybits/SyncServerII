@@ -11,6 +11,17 @@ import LoggerAPI
 import SyncServerShared
 
 extension FileController {
+    private func success(params:RequestProcessingParameters, upload:Upload) {
+        let response = UploadFileResponse()!
+        response.size = Int64(upload.fileSizeBytes!)
+
+        // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
+        response.creationDate = upload.creationDate
+        response.updateDate = upload.updateDate
+        
+        params.completion(response)
+    }
+    
     func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
             Log.error("Did not receive UploadFileRequest")
@@ -80,9 +91,7 @@ extension FileController {
                 case .found(let model):
                     Log.info("File was already present: Not uploading again.")
                     let upload = model as! Upload
-                    let response = UploadFileResponse()!
-                    response.size = Int64(upload.fileSizeBytes!)
-                    params.completion(response)
+                    success(params: params, upload: upload)
                     return
                     
                 case .noObjectFound:
@@ -110,21 +119,14 @@ extension FileController {
             
             let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest.cloudFolderName!, mimeType: uploadRequest.mimeType)
             
-            cloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) { result in
+            cloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
                 switch result {
                 case .success(let fileSize):
                     upload.fileSizeBytes = Int64(fileSize)
                     upload.state = .uploaded
                     upload.uploadId = uploadId
                     if params.repos.upload.update(upload: upload) {
-                        let response = UploadFileResponse()!
-                        response.size = Int64(fileSize)
-                        
-                        // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
-                        response.creationDate = upload.creationDate
-                        response.updateDate = upload.updateDate
-                        
-                        params.completion(response)
+                        self.success(params: params, upload: upload)
                     }
                     else {
                         // TODO: *0* Need to remove the file from the cloud server.
