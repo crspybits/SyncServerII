@@ -69,6 +69,7 @@ class RequestHandler : AccountDelegate {
     enum EndWithResponse {
     case json(JSON)
     case data(data:Data?, headers:[String:String])
+    case headers([String:String])
     }
     
     private func endWith(clientResponse:EndWithResponse) {
@@ -98,6 +99,11 @@ class RequestHandler : AccountDelegate {
             if data != nil {
                 self.response.send(data: data!)
             }
+            
+        case .headers(let headers):
+            for (key, value) in headers {
+                self.response.headers.append(key, value: value)
+            }
         }
         
         Log.info("REQUEST \(request.urlURL.path): ABOUT TO END ...")
@@ -119,6 +125,7 @@ class RequestHandler : AccountDelegate {
     enum SuccessResult {
         case json(JSON)
         case dataWithHeaders(Data?, headers:[String:String])
+        case headers([String:String])
         case nothing
     }
     
@@ -322,6 +329,9 @@ class RequestHandler : AccountDelegate {
         case .success(.dataWithHeaders(let data, headers: let headers)):
             endWith(clientResponse: .data(data: data, headers: headers))
         
+        case .success(.headers(let headers)):
+            endWith(clientResponse: .headers(headers))
+        
         case .success(.nothing):
             endWith(clientResponse: .json([:]))
             
@@ -392,21 +402,32 @@ class RequestHandler : AccountDelegate {
                 return
             }
             
+            func getJSONString() -> String? {
+                var result:String?
+                
+                do {
+                    result = try jsonDict!.jsonEncodedString()
+                } catch (let error) {
+                    handleResult(.failure(.message("Could not convert json dict to string: \(error)")))
+                }
+                
+                return result
+            }
+            
             switch responseObject!.responseType {
             case .json:
                 handleResult(.success(.json(jsonDict!)))
 
             case .data(let data):
-                var jsonString:String?
-                
-                do {
-                    jsonString = try jsonDict!.jsonEncodedString()
-                } catch (let error) {
-                    handleResult(.failure(.message("Could not convert json dict to string: \(error)")))
-                    return
+                if let jsonString = getJSONString() {
+                    handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString])))
                 }
                 
-                handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString!])))
+            case .header:
+                if let jsonString = getJSONString() {
+                    handleResult(.success(.headers(
+                        [ServerConstants.httpResponseMessageParams:jsonString])))
+                }
             }
         }
 

@@ -126,7 +126,7 @@ class ServerTestCase : XCTestCase {
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
             XCTAssert(ServerEndpoints.uploadFile.method == .post)
             
-            self.performRequest(route: ServerEndpoints.uploadFile, headers: headers, urlParameters: "?" + uploadRequest.urlParameters()!, body:data) { response, dict in
+            self.performRequest(route: ServerEndpoints.uploadFile, responseDictFrom: .header, headers: headers, urlParameters: "?" + uploadRequest.urlParameters()!, body:data) { response, dict in
                 
                 Log.info("Status code: \(response!.statusCode)")
 
@@ -143,6 +143,8 @@ class ServerTestCase : XCTestCase {
                         if updatedMasterVersionExpected == nil {
                             XCTAssert(uploadResponse.size != nil)
                             XCTAssert(uploadResponse.size == expectedUploadSize)
+                            XCTAssert(uploadResponse.creationDate != nil)
+                            XCTAssert(uploadResponse.updateDate != nil)
                         }
                         else {
                             XCTAssert(uploadResponse.masterVersionUpdate == updatedMasterVersionExpected)

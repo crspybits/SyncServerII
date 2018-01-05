@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.10.0
+	* New response type for uploads-- response fields now in a header key.
+		This to deal with iOS client issues for background downloading.
+	
 Version 0.9.0 (12/29/17)
 	* Upload response now includes actual dates used.
 		https://github.com/crspybits/SharedImages/issues/44
