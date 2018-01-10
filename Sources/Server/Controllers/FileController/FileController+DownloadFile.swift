@@ -90,7 +90,13 @@ extension FileController {
             // And, some cloud storage systems don't use the cloudFolderName.
             
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
-            let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:fileIndexObj!.deviceUUID)
+            guard let deviceUUID = fileIndexObj!.deviceUUID else {
+                Log.error("No deviceUUID!")
+                params.completion(nil)
+                return
+            }
+            
+            let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID)
             
             let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj!.cloudFolderName!, mimeType: fileIndexObj!.mimeType)
             

@@ -11,15 +11,48 @@ import LoggerAPI
 import SyncServerShared
 
 extension FileController {
-    private func success(params:RequestProcessingParameters, upload:Upload) {
+    private func success(params:RequestProcessingParameters, upload:Upload, creationDate:Date) {
         let response = UploadFileResponse()!
         response.size = Int64(upload.fileSizeBytes!)
 
         // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
-        response.creationDate = upload.creationDate
+        response.creationDate = creationDate
         response.updateDate = upload.updateDate
         
         params.completion(response)
+    }
+    
+    enum CheckError : Error {
+        case couldNotConvertModelObject
+        case errorLookingUpInFileIndex
+    }
+    
+    // Result is nil if there is no existing file. Throws an error if there is an error.
+    private func checkForExistingFile(params:RequestProcessingParameters, uploadRequest:UploadFileRequest) throws -> FileIndex? {
+        let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadRequest.fileUUID)
+
+        let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
+    
+        var fileIndexObj:FileIndex?
+    
+        switch lookupResult {
+        case .found(let modelObj):
+            fileIndexObj = modelObj as? FileIndex
+            if fileIndexObj == nil {
+                Log.error("Could not convert model object to FileIndex")
+                throw CheckError.couldNotConvertModelObject
+            }
+            else {
+                return fileIndexObj
+            }
+            
+        case .noObjectFound:
+            return nil
+            
+        case .error(let error):
+            Log.error("Error looking up file in FileIndex: \(error)")
+            throw CheckError.errorLookingUpInFileIndex
+        }
     }
     
     func uploadFile(params:RequestProcessingParameters) {
@@ -50,6 +83,45 @@ extension FileController {
                 return
             }
             
+            // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
+            var existingFileInFileIndex:FileIndex?
+            do {
+                existingFileInFileIndex = try checkForExistingFile(params:params, uploadRequest:uploadRequest)
+            } catch (let error) {
+                Log.error("Could not lookup file in FileIndex: \(error)")
+                params.completion(nil)
+                return
+            }
+            
+            // To send back to client.
+            var creationDate:Date!
+            
+            let todaysDate = Date()
+            
+            var newFile = true
+            if let existingFileInFileIndex = existingFileInFileIndex {
+                newFile = false
+                guard existingFileInFileIndex.fileVersion + 1 == uploadRequest.fileVersion else {
+                    Log.error("File version being uploaded (\(uploadRequest.fileVersion)) is not +1 of current version: \(existingFileInFileIndex.fileVersion)")
+                    params.completion(nil)
+                    return
+                }
+                
+                creationDate = existingFileInFileIndex.creationDate
+            }
+            else {
+                // File isn't yet in the FileIndex-- must be a new file. Thus, must be version 0.
+                guard uploadRequest.fileVersion == 0 else {
+                    Log.error("File is new, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0")
+                    params.completion(nil)
+                    return
+                }
+                
+                // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
+                // https://github.com/crspybits/SyncServerII/issues/4
+                creationDate = todaysDate
+            }
+            
             // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
             
             // I'm going to create the entry in the Upload repo first because otherwise, there's a (albeit unlikely) race condition-- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload table entry will be the gatekeeper.
@@ -63,12 +135,12 @@ extension FileController {
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadRequest.appMetaData
             upload.cloudFolderName = uploadRequest.cloudFolderName
+
+            if newFile {
+                upload.creationDate = creationDate
+            }
             
-            // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
-            // https://github.com/crspybits/SyncServerII/issues/4
-            let currentDate = Date()
-            upload.creationDate = currentDate
-            upload.updateDate = currentDate
+            upload.updateDate = todaysDate
             
             // In order to allow for client retries (both due to error conditions, and when the master version is updated), I need to enable this call to not fail on a retry. However, I don't have to actually upload the file a second time to cloud storage. 
             // If we have the entry for the file in the Upload table, then we can be assume we did not get an error uploading the file to cloud storage. This is because if we did get an error uploading the file, we would have done a rollback on the Upload table `add`.
@@ -76,7 +148,7 @@ extension FileController {
             var uploadId:Int64!
             var errorString:String?
             
-            let addUploadResult = params.repos.upload.add(upload: upload)
+            let addUploadResult = params.repos.upload.add(upload: upload, fileInFileIndex: !newFile)
             
             switch addUploadResult {
             case .success(uploadId: let id):
@@ -91,7 +163,7 @@ extension FileController {
                 case .found(let model):
                     Log.info("File was already present: Not uploading again.")
                     let upload = model as! Upload
-                    success(params: params, upload: upload)
+                    success(params: params, upload: upload, creationDate: creationDate)
                     return
                     
                 case .noObjectFound:
@@ -125,8 +197,8 @@ extension FileController {
                     upload.fileSizeBytes = Int64(fileSize)
                     upload.state = .uploaded
                     upload.uploadId = uploadId
-                    if params.repos.upload.update(upload: upload) {
-                        self.success(params: params, upload: upload)
+                    if params.repos.upload.update(upload: upload, fileInFileIndex: !newFile) {
+                        self.success(params: params, upload: upload, creationDate: creationDate)
                     }
                     else {
                         // TODO: *0* Need to remove the file from the cloud server.

@@ -22,7 +22,7 @@ docker push crspybits/swift-ubuntu:4.0.2
 Also relying on https://github.com/hopsoft/relay/wiki/How-to-Deploy-Docker-apps-to-Elastic-Beanstalk
 
 Run this with:
-docker run -i -t -v /Users/chris/Dropbox/Ubuntu/SyncServerII/SyncServerII/:/root/SyncServerII swift-ubuntu:4.0.0
+docker run -i -t -v /Users/chris/Dropbox/Ubuntu/SyncServerII/SyncServerII/:/root/SyncServerII crspybits/swift-ubuntu:4.0.0
 
 To figure out the IP address of the docker host:
 ip addr show eth0

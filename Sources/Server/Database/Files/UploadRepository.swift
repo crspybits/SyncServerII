@@ -161,7 +161,7 @@ class UploadRepository : Repository {
             // identifies a specific mobile device (assigned by app)
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
-            // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates. Plus, upload deletions need not have dates.
+            // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates. Plus, upload deletions need not have dates. And when uploading a new version of a file we won't give the creationDate.
             "creationDate DATETIME," +
             "updateDate DATETIME," +
                 
@@ -180,7 +180,9 @@ class UploadRepository : Repository {
             // Can be null if we create the Upload entry before actually uploading the file.
             "fileSizeBytes BIGINT, " +
 
+            // Not including fileVersion in the key because I don't want to allow the possiblity of uploading vN of a file and vM of a file at the same time.
             "UNIQUE (fileUUID, userId, deviceUUID), " +
+            
             "UNIQUE (uploadId))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -207,7 +209,7 @@ class UploadRepository : Repository {
         return result
     }
     
-    private func haveNilField(upload:Upload) -> Bool {
+    private func haveNilField(upload:Upload, fileInFileIndex: Bool) -> Bool {
         // Basic criteria-- applies across uploads and upload deletion.
         if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.fileVersion == nil || upload.state == nil {
             return true
@@ -217,9 +219,14 @@ class UploadRepository : Repository {
         }
         
         // We're uploading a file if we get to here. Criteria only for file uploads:
-        if upload.mimeType == nil || upload.cloudFolderName == nil || upload.creationDate == nil || upload.updateDate == nil {
+        if upload.mimeType == nil || upload.cloudFolderName == nil || upload.updateDate == nil {
             return true
         }
+        
+        if !fileInFileIndex && upload.creationDate == nil {
+            return true
+        }
+        
         if upload.state == .uploading {
             return false
         }
@@ -236,8 +243,8 @@ class UploadRepository : Repository {
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
-    func add(upload:Upload) -> AddResult {
-        if haveNilField(upload: upload) {
+    func add(upload:Upload, fileInFileIndex:Bool=false) -> AddResult {
+        if haveNilField(upload: upload, fileInFileIndex:fileInFileIndex) {
             Log.error(message: "One of the model values was nil!")
             return .aModelValueWasNil
         }
@@ -283,8 +290,8 @@ class UploadRepository : Repository {
     }
     
     // The Upload model *must* have an uploadId
-    func update(upload:Upload) -> Bool {
-        if upload.uploadId == nil || haveNilField(upload: upload) {
+    func update(upload:Upload, fileInFileIndex:Bool=false) -> Bool {
+        if upload.uploadId == nil || haveNilField(upload: upload, fileInFileIndex:fileInFileIndex) {
             Log.error(message: "One of the model values was nil!")
             return false
         }
@@ -372,6 +379,7 @@ class UploadRepository : Repository {
     }
     
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
+    // The FileInfo object has its .deleted property set to true iff the state of the Upload object is .toDeleteFromFileIndex.
     func uploadedFiles(forUserId userId: UserId, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
         let selectUploadedFiles = select(forUserId: userId, deviceUUID: deviceUUID, andState: state)
 

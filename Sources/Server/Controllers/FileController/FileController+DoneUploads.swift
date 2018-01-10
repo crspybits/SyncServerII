@@ -13,7 +13,34 @@ import LoggerAPI
 import SyncServerShared
 
 extension FileController {
-    private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?)? {
+    // Returns nil on an error.
+    private func getFileIndexEntries(forUploadFiles uploadFiles:[FileInfo], params:RequestProcessingParameters) -> [FileInfo]? {
+        var primaryFileIndexKeys = [FileIndexRepository.LookupKey]()
+    
+        for uploadFile in uploadFiles {
+            // 12/1/17; Up until today, I was using the params.currentSignedInUser!.userId in here and not the effective user id. Thus, when sharing users did an upload deletion, the files got deleted from the file index, but didn't get deleted from cloud storage.
+            primaryFileIndexKeys += [.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadFile.fileUUID)]
+        }
+    
+        var fileIndexObjs = [FileInfo]()
+    
+        if primaryFileIndexKeys.count > 0 {
+            let fileIndexResult = params.repos.fileIndex.fileIndex(forKeys: primaryFileIndexKeys)
+            switch fileIndexResult {
+            case .fileIndex(let fileIndex):
+                fileIndexObjs = fileIndex
+    
+            case .error(let error):
+                Log.error("Failed to get fileIndex: \(error)")
+                return nil
+            }
+        }
+        
+        return fileIndexObjs
+    }
+    
+    // staleVersionsToDelete gives info, if any, on files that we're uploading new versions of.
+    private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)? {
         
         guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
             Log.error("Did not receive DoneUploadsRequest")
@@ -52,10 +79,43 @@ extension FileController {
         
         // Now, start the heavy lifting. This has to accomodate both file uploads, and upload deletions-- because these both need to alter the masterVersion (i.e., they change the file index).
         
-        // 1) Transfer info to the FileIndex repository from Upload.
+        // 1) See if any of the file uploads are for file versions > 0. Later, we'll have to delete stale versions of the file(s) in cloud storage if so.
+        // 2) Get the upload deletions, if any.
+        
+        var staleVersionsFromUploads:[FileInfo]
+        var uploadDeletions:[FileInfo]
+        
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        switch fileUploadsResult {
+        case .uploads(let fileInfoArray):
+            Log.debug("fileInfoArray.count for file uploads and upload deletions: \(fileInfoArray.count)")
+            // 1) Filter out uploaded files with versions > 0 -- for the stale file versions.
+            staleVersionsFromUploads = fileInfoArray.filter({$0.fileVersion > 0 && !$0.deleted})
+            
+            // 2) Filter out upload deletions
+            uploadDeletions = fileInfoArray.filter({$0.deleted})
+
+        case .error(let error):
+            Log.error("Failed to get file uploads: \(error)")
+            params.completion(nil)
+            return nil
+        }
+
+        // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
+        guard let staleVersionsToDelete = getFileIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
+            params.completion(nil)
+            return nil
+        }
+        
+        guard let fileIndexDeletions = getFileIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
+            params.completion(nil)
+            return nil
+        }
+        
+        // 3) Transfer info to the FileIndex repository from Upload.
         let numberTransferred =
             params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: params.currentSignedInUser!.effectiveOwningUserId,
-                deviceUUID: params.deviceUUID!,
+                uploadingDeviceUUID: params.deviceUUID!,
                 uploadRepo: params.repos.upload)
         
         if numberTransferred == nil  {
@@ -64,46 +124,7 @@ extension FileController {
             return nil
         }
         
-        // 2) Get the upload deletions, if any. This is somewhat tricky. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
-        
-        var uploadDeletions:[FileInfo]
-        
-        let uploadDeletionsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!, andState: .toDeleteFromFileIndex)
-        switch uploadDeletionsResult {
-        case .uploads(let fileInfoArray):
-            Log.debug("fileInfoArray.count for deletions: \(fileInfoArray.count)")
-            uploadDeletions = fileInfoArray
-
-        case .error(let error):
-            Log.error("Failed to get upload deletions: \(error)")
-            params.completion(nil)
-            return nil
-        }
-        
-        
-        var primaryFileIndexKeys:[FileIndexRepository.LookupKey] = []
-        
-        for uploadDeletion in uploadDeletions {
-            // 12/1/17; Up until today, I was using the params.currentSignedInUser!.userId in here and not the effective user id. Thus, when sharing users did an upload deletion, the files got deleted from the file index, but didn't get deleted from cloud storage.
-            primaryFileIndexKeys += [.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadDeletion.fileUUID)]
-        }
-        
-        var fileIndexDeletions:[FileInfo]?
-        
-        if primaryFileIndexKeys.count > 0 {
-            let fileIndexResult = params.repos.fileIndex.fileIndex(forKeys: primaryFileIndexKeys)
-            switch fileIndexResult {
-            case .fileIndex(let fileIndex):
-                fileIndexDeletions = fileIndex
-                
-            case .error(let error):
-                Log.error("Failed to get fileIndex: \(error)")
-                params.completion(nil)
-                return nil
-            }
-        }
-        
-        // 3) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
+        // 4) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
         let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
         
         // 5/28/17; I just got an error on this: 
@@ -124,7 +145,7 @@ extension FileController {
             return nil
         }
         
-        return (numberTransferred!, fileIndexDeletions)
+        return (numberTransferred!, fileIndexDeletions, staleVersionsToDelete)
     }
     
     enum UpdateMasterVersionResult : Error {
@@ -194,8 +215,8 @@ extension FileController {
             return
         }
 
-        guard let (numberTransferred, uploadDeletions) = result else {
-            Log.debug("Error in doInitialDoneUploads!")
+        guard let (numberTransferred, uploadDeletions, staleVersionsToDelete) = result else {
+            Log.error("Error in doInitialDoneUploads!")
             // Don't do `params.completion(nil)` because we may not be passing back nil, i.e., for a master version update. The params.completion call was made in doInitialDoneUploads if needed.
             return
         }
@@ -208,26 +229,32 @@ extension FileController {
             return
         }
         
-        if uploadDeletions == nil || uploadDeletions!.count == 0 {
+        var cloudDeletions = [FileInfo]()
+        if let uploadDeletions = uploadDeletions {
+            cloudDeletions += uploadDeletions
+        }
+        if let staleVersionsToDelete = staleVersionsToDelete {
+            cloudDeletions += staleVersionsToDelete
+        }
+        
+        if cloudDeletions.count == 0  {
             let response = DoneUploadsResponse()!
             response.numberUploadsTransferred = numberTransferred
-            Log.debug("no upload deletions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
+            Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
             params.completion(response)
             return
         }
         
         let async = AsyncTailRecursion()
         async.start {
-            self.finishDoneUploads(uploadDeletions: uploadDeletions, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async)
+            self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async)
         }
     }
 
-     private func finishDoneUploads(uploadDeletions:[FileInfo]?, params:RequestProcessingParameters, cloudStorageCreds:CloudStorage, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
+     private func finishDoneUploads(cloudDeletions:[FileInfo], params:RequestProcessingParameters, cloudStorageCreds:CloudStorage, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
     
-        Log.info("Enter finishDoneUploads")
-
         // Base case.
-        if uploadDeletions == nil || uploadDeletions!.count == 0 {
+        if cloudDeletions.count == 0 {
             let response = DoneUploadsResponse()!
             
             if numberErrorsDeletingFiles > 0 {
@@ -243,18 +270,17 @@ extension FileController {
         }
         
         // Recursive case.
-        let uploadDeletion = uploadDeletions![0]
-        let cloudFileName = uploadDeletion.cloudFileName(deviceUUID: uploadDeletion.deviceUUID!)
+        let cloudDeletion = cloudDeletions[0]
+        let cloudFileName = cloudDeletion.cloudFileName(deviceUUID: cloudDeletion.deviceUUID!)
 
         Log.info("Deleting file: \(cloudFileName)")
         
-        // TODO: Condition this based on Google Drive
-        let options = CloudStorageFileNameOptions(cloudFolderName: uploadDeletion.cloudFolderName!, mimeType: uploadDeletion.mimeType!)
+        let options = CloudStorageFileNameOptions(cloudFolderName: cloudDeletion.cloudFolderName!, mimeType: cloudDeletion.mimeType!)
         
         cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
 
-            let tail = (uploadDeletions!.count > 0) ?
-                Array(uploadDeletions![1..<uploadDeletions!.count]) : nil
+            let tail = (cloudDeletions.count > 0) ?
+                Array(cloudDeletions[1..<cloudDeletions.count]) : []
             var numberAdditionalErrors:Int32 = 0
             
             if error != nil {
@@ -265,7 +291,7 @@ extension FileController {
             }
             
             async.next() {
-                self.finishDoneUploads(uploadDeletions: tail, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+                self.finishDoneUploads(cloudDeletions: tail, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
             }
         }
     }

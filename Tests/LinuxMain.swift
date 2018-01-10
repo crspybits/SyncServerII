@@ -13,6 +13,7 @@ XCTMain([
     testCase(FileControllerTests.allTests),
     testCase(FileControllerTests_GetUploads.allTests),
     testCase(FileControllerTests_UploadDeletion.allTests),
+    testCase(FileController_MultiVersionFiles.allTests),
     testCase(GeneralAuthTests.allTests),
     testCase(GeneralDatabaseTests.allTests),
     testCase(GoogleDriveTests.allTests),

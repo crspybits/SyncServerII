@@ -39,9 +39,6 @@ extension LinuxTestable {
 class ServerTestCase : XCTestCase {
     var db:Database!
     
-    // A cloud folder name
-    let testFolder = "Test.Folder"
-    
     override func setUp() {
         super.setUp()
 #if os(macOS)
@@ -75,6 +72,31 @@ class ServerTestCase : XCTestCase {
         self.db.close()
     }
     
+    @discardableResult
+    func healthCheck() -> HealthCheckResponse? {
+        var result:HealthCheckResponse?
+        
+        performServerTest { expectation, creds in
+            self.performRequest(route: ServerEndpoints.healthCheck) { response, dict in
+                XCTAssert(response!.statusCode == .OK, "Failed on healthcheck request")
+                
+                guard let dict = dict, let healthCheckResponse = HealthCheckResponse(json: dict) else {
+                    XCTFail()
+                    return
+                }
+                
+                XCTAssert(healthCheckResponse.serverUptime > 0)
+                XCTAssert(healthCheckResponse.deployedGitTag.count > 0)
+                XCTAssert(healthCheckResponse.currentServerDateTime != nil)
+    
+                result = healthCheckResponse
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
     func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String) {
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -86,7 +108,9 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = "CloudFolder", appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
+    static let cloudFolderName = "CloudFolder"
+    
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
         }
@@ -180,7 +204,9 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0) -> (request: UploadFileRequest, fileSize:Int64)? {
+    static let jpegMimeType = "image/jpeg"
+    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string,
+        fileUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil) -> (request: UploadFileRequest, fileSize:Int64)? {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
@@ -199,11 +225,12 @@ class ServerTestCase : XCTestCase {
         }
 
         guard let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : PerfectLib.UUID().string,
-            UploadFileRequest.mimeTypeKey: "image/jpeg",
-            UploadFileRequest.cloudFolderNameKey: testFolder,
+            UploadFileRequest.fileUUIDKey : fileUUID,
+            UploadFileRequest.mimeTypeKey: ServerTestCase.jpegMimeType,
+            UploadFileRequest.cloudFolderNameKey: ServerTestCase.cloudFolderName,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: MasterVersionInt(0)
+            UploadFileRequest.appMetaDataKey: appMetaData as Any,
+            UploadFileRequest.masterVersionKey: expectedMasterVersion
             ]) else {
             XCTFail()
             return nil
@@ -527,7 +554,8 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) {
+    @discardableResult
+    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) -> DownloadFileResponse? {
     
         let deviceUUID = PerfectLib.UUID().string
         let masterVersion:Int64 = 0
@@ -540,7 +568,7 @@ class ServerTestCase : XCTestCase {
         var fileUUID:String!
         
         if uploadFileRequest == nil {
-            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: self.testFolder, appMetaData:appMetaData)
+            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData)
             fileUUID = uploadRequest.fileUUID
             actualUploadFileRequest = uploadRequest
             actualFileSize = size
@@ -551,6 +579,8 @@ class ServerTestCase : XCTestCase {
             actualUploadFileRequest = uploadFileRequest
             actualFileSize = fileSize
         }
+        
+        var result:DownloadFileResponse?
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -574,6 +604,7 @@ class ServerTestCase : XCTestCase {
                     
                     if let dict = dict,
                         let downloadFileResponse = DownloadFileResponse(json: dict) {
+                        result = downloadFileResponse
                         if expectUpdatedMasterUpdate {
                             XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
                         }
@@ -595,6 +626,8 @@ class ServerTestCase : XCTestCase {
         if let afterUploadTime = afterUploadTime, let fileUUID = fileUUID {
             checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime)
         }
+        
+        return result
     }
     
     func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date) {

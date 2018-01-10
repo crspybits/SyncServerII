@@ -22,12 +22,13 @@ class FileIndex : NSObject, Model, Filenaming {
     var fileUUID: String!
     
     static let deviceUUIDKey = "deviceUUID"
-    var deviceUUID:String!
+    // We don't give the deviceUUID when updating the fileIndex for an upload deletion.
+    var deviceUUID:String?
     
     static let creationDateKey = "creationDate"
-    var creationDate:Date!
+    // We don't give the `creationDate` when updating the fileIndex for versions > 0.
+    var creationDate:Date?
     
-    // Mostly for future use since we're not yet allowing multiple file versions.
     static let updateDateKey = "updateDate"
     var updateDate:Date!
     
@@ -129,7 +130,7 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID); creationDate: \(creationDate); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
     }
 }
 
@@ -232,7 +233,7 @@ class FileIndexRepository : Repository {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
-        let creationDateValue = DateExtras.date(fileIndex.creationDate, toFormat: .DATETIME)
+        let creationDateValue = DateExtras.date(fileIndex.creationDate!, toFormat: .DATETIME)
         let updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
 
         let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), '\(fileIndex.cloudFolderName!)');"
@@ -247,14 +248,21 @@ class FileIndexRepository : Repository {
         }
     }
     
-    private func haveNilFieldForUpdate(fileIndex:FileIndex) -> Bool {
-        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil
+    private func haveNilFieldForUpdate(fileIndex:FileIndex, deleting:Bool = false) -> Bool {
+        let result = fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil
+        
+        if deleting {
+            return result
+        }
+        else {
+            return result || fileIndex.deviceUUID == nil
+        }
     }
     
     // The FileIndex model *must* have a fileIndexId
-    func update(fileIndex:FileIndex) -> Bool {
+    func update(fileIndex:FileIndex, deleting:Bool = false) -> Bool {
         if fileIndex.fileIndexId == nil ||
-            haveNilFieldForUpdate(fileIndex: fileIndex) {
+            haveNilFieldForUpdate(fileIndex: fileIndex, deleting:deleting) {
             Log.error("One of the model values was nil: \(fileIndex)")
             return false
         }
@@ -266,11 +274,19 @@ class FileIndexRepository : Repository {
         
         let mimeTypeField = getUpdateFieldSetter(fieldValue: fileIndex.mimeType, fieldName: "mimeType")
         
+        let deviceUUIDField = getUpdateFieldSetter(fieldValue: fileIndex.deviceUUID, fieldName: "deviceUUID")
+        
+        var updateDateValue:String?
+        if fileIndex.updateDate != nil {
+            updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
+        }
+        let updateDateField = getUpdateFieldSetter(fieldValue: updateDateValue, fieldName: "updateDate")
+
         let cloudFolderNameField = getUpdateFieldSetter(fieldValue: fileIndex.cloudFolderName, fieldName: "cloudFolderName")
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deviceUUID='\(fileIndex.deviceUUID!)', deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(cloudFolderNameField) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(cloudFolderNameField) \(deviceUUIDField) \(updateDateField) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -319,16 +335,19 @@ class FileIndexRepository : Repository {
     
     /* For each entry in Upload for the userId/deviceUUID that is in the uploaded state, we need to do the following:
     
-        1) If there is no file in the FileIndex for the userId/fileUUID, then a new entry needs to be inserted into the FileIndex. This should be version 0 of the file.
-        2) If there is already a file in the FileIndex for the userId/deviceUUID, then the version number we have in Uploads should be the version number in the FileIndex + 1 (if not, it is an error). Update the FileIndex with the new info from Upload, if no error.
+        1) If there is no file in the FileIndex for the userId/fileUUID, then a new entry needs to be inserted into the FileIndex. This should be version 0 of the file. The deviceUUID is taken from the device uploading the file.
+        2) If there is already a file in the FileIndex for the userId/fileUUID, then the version number we have in Uploads should be the version number in the FileIndex + 1 (if not, it is an error). Update the FileIndex with the new info from Upload, if no error. More specifically, the deviceUUID of the uploading device will replace that currently in the FileIndex-- because the new file in cloud storage is named:
+                <fileUUID>.<Uploading-deviceUUID>.<fileVersion>
+            where <fileVersion> is the new file version, and
+                <Uploading-deviceUUID> is the device UUID of the uploading device.
     */
     // Returns nil on failure, and on success returns the number of uploads transferred.
-    func transferUploads(uploadUserId: UserId, owningUserId: UserId, deviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
+    func transferUploads(uploadUserId: UserId, owningUserId: UserId, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
         
         var error = false
         var numberTransferred:Int32 = 0
         
-        let uploadSelect = uploadRepo.select(forUserId: uploadUserId, deviceUUID: deviceUUID)
+        let uploadSelect = uploadRepo.select(forUserId: uploadUserId, deviceUUID: uploadingDeviceUUID)
         uploadSelect.forEachRow { rowModel in
             if error {
                 return
@@ -342,13 +361,22 @@ class FileIndexRepository : Repository {
             fileIndex.fileSizeBytes = upload.fileSizeBytes
             fileIndex.deleted = uploadDeletion
             fileIndex.fileUUID = upload.fileUUID
-            fileIndex.deviceUUID = deviceUUID
+            
+            // If this an uploadDeletion, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
+            if !uploadDeletion {
+                fileIndex.deviceUUID = uploadingDeviceUUID
+            }
+            
             fileIndex.fileVersion = upload.fileVersion
             fileIndex.mimeType = upload.mimeType
             fileIndex.userId = owningUserId
             fileIndex.appMetaData = upload.appMetaData
             fileIndex.cloudFolderName = upload.cloudFolderName
-            fileIndex.creationDate = upload.creationDate
+            
+            if upload.fileVersion == 0 {
+                fileIndex.creationDate = upload.creationDate
+            }
+            
             fileIndex.updateDate = upload.updateDate
             
             let key = LookupKey.primaryKeys(userId: "\(owningUserId)", fileUUID: upload.fileUUID)
@@ -376,13 +404,10 @@ class FileIndexRepository : Repository {
                         return
                     }
                 }
-                
-                // The file we are deleting (or eventually, updating) is named in cloud storage by the fileUUID, deviceUUID *currently in the file index*, and the version. So we have to keep the existing deviceUUID.
-                fileIndex.deviceUUID = existingFileIndex.deviceUUID
-                
+
                 fileIndex.fileIndexId = existingFileIndex.fileIndexId
                 
-                guard self.update(fileIndex: fileIndex) else {
+                guard self.update(fileIndex: fileIndex, deleting: uploadDeletion) else {
                     Log.error("Could not update FileIndex!")
                     error = true
                     return
