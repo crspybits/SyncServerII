@@ -148,10 +148,9 @@ class RequestHandler : AccountDelegate {
         }
         
         // Waiting until this point to call `checkDeviceUUID` because it may create a db record.
-        let result = checkDeviceUUID()
-        if result != nil && !result! {
+        if case .error(let errorMessage) = checkDeviceUUID() {
             _ = db.rollback()
-            handleResult(.failure(.message("No Device UUID with header!")))
+            handleResult(.failure(.message("Failed checkDeviceUUID: \(errorMessage)")))
             return
         }
 
@@ -444,48 +443,47 @@ class RequestHandler : AccountDelegate {
         return result
     }
     
-    // MARK:
+    enum CheckDeviceUUIDResult {
+        case success
+        case uuidNotNeeded
+        case error(message: String)
+    }
     
-    // Returns true success, nil if a UUID is not needed, and false if failure.
-    private func checkDeviceUUID() -> Bool? {
+    private func checkDeviceUUID() -> CheckDeviceUUIDResult {
         switch authenticationLevel! {
         case .none:
-            return nil
+            return .uuidNotNeeded
             
         case .primary, .secondary:
             if self.deviceUUID == nil {
-                self.failWithError(message: "Did not provide a Device UUID with header \(ServerConstants.httpRequestDeviceUUID)")
-                return false
+                return .error(message: "Did not provide a Device UUID with header \(ServerConstants.httpRequestDeviceUUID)")
             }
             else if currentSignedInUser == nil && authenticationLevel == .primary {
                 // If we don't have a signed in user, we can't search for existing deviceUUID's. But that's not an error.
-                return true
+                return .success
             }
             else {
                 let key = DeviceUUIDRepository.LookupKey.deviceUUID(self.deviceUUID!)
                 let result = repositories.deviceUUID.lookup(key: key, modelInit: DeviceUUID.init)
                 switch result {
                 case .error(let error):
-                    failWithError(message: "Error looking up device UUID: \(error)")
-                    return false
+                    return .error(message: "Error looking up device UUID: \(error)")
                     
                 case .found(_):
-                    return true
+                    return .success
                     
                 case .noObjectFound:
                     let newDeviceUUID = DeviceUUID(userId: currentSignedInUser!.userId, deviceUUID: self.deviceUUID!)
                     let addResult = repositories.deviceUUID.add(deviceUUID: newDeviceUUID)
                     switch addResult {
                     case .error(let error):
-                        failWithError(message: "Error adding new device UUID: \(error)")
-                        return false
+                        return .error(message: "Error adding new device UUID: \(error)")
                         
                     case .exceededMaximumUUIDsPerUser:
-                        failWithError(message: "Exceeded maximum UUIDs per user: \(String(describing: repositories.deviceUUID.maximumNumberOfDeviceUUIDsPerUser))")
-                        return false
+                        return .error(message: "Exceeded maximum UUIDs per user: \(String(describing: repositories.deviceUUID.maximumNumberOfDeviceUUIDsPerUser))")
                         
                     case .success:
-                        return true
+                        return .success
                     }
                 }
             }

@@ -109,6 +109,7 @@ class ServerTestCase : XCTestCase {
     }
     
     static let cloudFolderName = "CloudFolder"
+    static let uploadTextFileContents = "Hello World!"
     
     func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
         if addUser {
@@ -123,8 +124,7 @@ class ServerTestCase : XCTestCase {
             fileUUIDToSend = fileUUID!
         }
         
-        let stringToUpload = "Hello World!"
-        let data = stringToUpload.data(using: .utf8)
+        let data = ServerTestCase.uploadTextFileContents.data(using: .utf8)
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUIDToSend,
@@ -137,9 +137,9 @@ class ServerTestCase : XCTestCase {
         uploadRequest.appMetaData = appMetaData
         
         Log.info("Starting runUploadTest: uploadTextFile")
-        runUploadTest(testAccount:testAccount, data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(stringToUpload.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
+        runUploadTest(testAccount:testAccount, data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(ServerTestCase.uploadTextFileContents.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
-        return (request:uploadRequest, fileSize: Int64(stringToUpload.characters.count))
+        return (request:uploadRequest, fileSize: Int64(ServerTestCase.uploadTextFileContents.characters.count))
     }
     
     func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
@@ -610,7 +610,7 @@ class ServerTestCase : XCTestCase {
                         }
                         else {
                             XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
-                            XCTAssert(downloadFileResponse.fileSizeBytes == actualFileSize)
+                            XCTAssert(downloadFileResponse.fileSizeBytes == actualFileSize, "downloadFileResponse.fileSizeBytes: \(String(describing: downloadFileResponse.fileSizeBytes)); actualFileSize: \(actualFileSize)")
                             XCTAssert(downloadFileResponse.appMetaData == appMetaData)
                         }
                     }

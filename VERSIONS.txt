@@ -3,7 +3,8 @@ SyncServer
 Version 0.11.0
 	* Added multi-version files
 		https://github.com/crspybits/SyncServerII/issues/12
-
+	* Fixed a long-standing bug in error handling in certain cases of problems with a deviceUUID
+	
 Version 0.10.0
 	* New response type for uploads-- response fields now in a header key.
 		This to deal with iOS client issues for background downloading.

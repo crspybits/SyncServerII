@@ -34,6 +34,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             return
         }
         
+        // The use of a different device UUID here is part of this test-- that the second version can be uploaded with a different device UUID.
         let deviceUUID = PerfectLib.UUID().string
         _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion:fileVersionToUpload, masterVersion: masterVersion)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
@@ -71,16 +72,15 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             XCTAssert(result[0].deleted == false)
             XCTAssert(result[0].fileVersion == fileVersionToUpload)
             XCTAssert(result[0].fileSizeBytes == fileSize)
-            
-            guard let downloadResponse = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest, fileSize: fileSize), let downloadData = downloadResponse.data else {
-                XCTFail()
-                return
-            }
-
-            XCTAssert(uploadRequest.data == downloadData)
+        }
+        
+        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest, fileSize: fileSize) else {
+            XCTFail()
+            return
         }
     }
     
+    // Also tests to make sure a different device UUID can upload the second version.
     func testUploadVersion1AfterVersion0Works() {
         let mimeType = "text/plain"
         let appMetaData = "Some-App-Meta-Data"
@@ -152,29 +152,30 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         _ = uploadTextFile(fileVersion:1, errorExpected: true)
     }
     
+    let appMetaData = "Some-App-Meta-Data"
+    
     @discardableResult
     // Master version after this call is sent back.
-    func uploadVersion(_ version: FileVersionInt, fileUUID:String) -> MasterVersionInt {
-        let appMetaData = "Some-App-Meta-Data"
-        let deviceUUID1 = PerfectLib.UUID().string
+    func uploadVersion(_ version: FileVersionInt, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String, startMasterVersion: MasterVersionInt = 0, addUser:Bool = true) -> (MasterVersionInt, UploadFileRequest) {
         
-        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:fileUUID, appMetaData:appMetaData)
+        var masterVersion:MasterVersionInt = startMasterVersion
+
+        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID, fileUUID:fileUUID, addUser:addUser, masterVersion:masterVersion, appMetaData:appMetaData)
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion:masterVersion)
         
+        masterVersion += 1
         var fileVersion:FileVersionInt = 1
-        var masterVersion:MasterVersionInt = 1
-        
+
         for _ in 1...version {
-            let deviceUUID2 = PerfectLib.UUID().string
-            _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion:fileVersion, masterVersion: masterVersion)
-            sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion)
+            _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion:fileVersion, masterVersion: masterVersion)
+            sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
             
             fileVersion += 1
             masterVersion += 1
         }
         
-        return masterVersion
+        return (masterVersion, uploadRequest)
     }
     
     // Upload some number (e.g., 5) of new versions.
@@ -185,7 +186,6 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     
     func testUploadDifferentFileContentsForSecondVersionWorks() {
         // Upload small text file first.
-        let appMetaData = "Some-App-Meta-Data"
         let deviceUUID1 = PerfectLib.UUID().string
         
         let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID1, appMetaData:appMetaData)
@@ -215,13 +215,11 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             }
 
             XCTAssert(result[0].mimeType == ServerTestCase.jpegMimeType)
-            
-            guard let downloadResponse = self.downloadTextFile(masterVersionExpectedWithDownload: 2, appMetaData: appMetaData, downloadFileVersion: 1, uploadFileRequest: uploadRequest2, fileSize: fileSize2), let downloadData = downloadResponse.data else {
-                XCTFail()
-                return
-            }
-
-            XCTAssert(uploadRequest2.data == downloadData)
+        }
+        
+        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: 2, appMetaData: self.appMetaData, downloadFileVersion: 1, uploadFileRequest: uploadRequest2, fileSize: fileSize2) else {
+            XCTFail()
+            return
         }
     }
     
@@ -268,7 +266,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     
     func testUploadDeletionOfVersionThatExistsWorks() {
         let fileUUID = PerfectLib.UUID().string
-        let masterVersion = uploadVersion(2, fileUUID:fileUUID)
+        let (masterVersion, _) = uploadVersion(2, fileUUID:fileUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: fileUUID,
@@ -281,18 +279,63 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion)
     }
     
-#if false
+    func checkFileIndex(deviceUUID:String, fileUUID:String, fileVersion:Int32) {
+        getFileIndex(deviceUUID: deviceUUID) { fileInfoArray in
+            guard let fileInfoArray = fileInfoArray else {
+                XCTFail()
+                return
+            }
+            
+            let result = fileInfoArray.filter({$0.fileUUID == fileUUID})
+            guard result.count == 1 else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(result[0].deviceUUID == deviceUUID)
+            XCTAssert(result[0].fileVersion == fileVersion)
+        }
+    }
+    
+    // MARK: File Index
+
     func testFileIndexReportsVariousFileVersions() {
+        let fileUUID1 = PerfectLib.UUID().string
+        let fileUUID2 = PerfectLib.UUID().string
+        let fileUUID3 = PerfectLib.UUID().string
+        let deviceUUID = PerfectLib.UUID().string
+
+        var (masterVersion, _) = uploadVersion(2, deviceUUID: deviceUUID, fileUUID:fileUUID1)
+        (masterVersion, _) = uploadVersion(3, deviceUUID: deviceUUID, fileUUID:fileUUID2, startMasterVersion: masterVersion, addUser: false)
+        (masterVersion, _) = uploadVersion(5, deviceUUID: deviceUUID, fileUUID:fileUUID3, startMasterVersion: masterVersion, addUser: false)
+
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID1, fileVersion:2)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID2, fileVersion:3)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID3, fileVersion:5)
     }
     
     // MARK: Download
     
-    func testDownloadOfFileVersion1Works() {
+    func testDownloadOfFileVersion3Works() {
+        let fileUUID1 = PerfectLib.UUID().string
+        let deviceUUID = PerfectLib.UUID().string
+        let fileVersion:FileVersionInt = 3
+        let (masterVersion, uploadRequest) = uploadVersion(fileVersion, deviceUUID: deviceUUID, fileUUID:fileUUID1)
+        
+        guard let _ = downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion), appMetaData: appMetaData, downloadFileVersion: fileVersion, uploadFileRequest: uploadRequest, fileSize: Int64(ServerTestCase.uploadTextFileContents.count)) else {
+            XCTFail()
+            return
+        }
     }
     
     func testDownloadOfBadVersionFails() {
+        let fileUUID1 = PerfectLib.UUID().string
+        let deviceUUID = PerfectLib.UUID().string
+        let fileVersion:FileVersionInt = 3
+        let (masterVersion, uploadRequest) = uploadVersion(fileVersion, deviceUUID: deviceUUID, fileUUID:fileUUID1)
+        
+        downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion), appMetaData: appMetaData, downloadFileVersion: fileVersion+1, uploadFileRequest: uploadRequest, fileSize: Int64(ServerTestCase.uploadTextFileContents.count), expectedError: true)
     }
-#endif
 }
 
 extension FileController_MultiVersionFiles {
@@ -307,7 +350,11 @@ extension FileController_MultiVersionFiles {
             ("testUploadOfVersion2OfVersion0FileFails", testUploadOfVersion2OfVersion0FileFails),
             ("testUploadOfTwoConsecutiveVersionsWithoutADoneUploadsAfterVersion0IsUploadedFails", testUploadOfTwoConsecutiveVersionsWithoutADoneUploadsAfterVersion0IsUploadedFails),
             ("testUploadDeletionOfVersionThatDoesNotExistFails", testUploadDeletionOfVersionThatDoesNotExistFails),
-            ("testUploadDeletionOfVersionThatExistsWorks", testUploadDeletionOfVersionThatExistsWorks)
+            ("testUploadDeletionOfVersionThatExistsWorks", testUploadDeletionOfVersionThatExistsWorks),
+            ("testFileIndexReportsVariousFileVersions", testFileIndexReportsVariousFileVersions),
+            ("testDownloadOfFileVersion3Works", testDownloadOfFileVersion3Works),
+            ("testDownloadOfBadVersionFails", testDownloadOfBadVersionFails),
+            ("testDownloadOfBadVersionFails", testDownloadOfBadVersionFails)
         ]
     }
     
