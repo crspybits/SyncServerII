@@ -14,7 +14,7 @@ import SyncServerShared
 
 extension FileController {
     // Returns nil on an error.
-    private func getFileIndexEntries(forUploadFiles uploadFiles:[FileInfo], params:RequestProcessingParameters) -> [FileInfo]? {
+    private func getFileIndexEntries(forUploadFiles uploadFiles:[Upload], params:RequestProcessingParameters) -> [FileInfo]? {
         var primaryFileIndexKeys = [FileIndexRepository.LookupKey]()
     
         for uploadFile in uploadFiles {
@@ -62,7 +62,7 @@ extension FileController {
         switch updateResult {
         case .success:
             break
-            
+
         case .masterVersionUpdate(let updatedMasterVersion):
             // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
             Log.warning("Master version update: \(updatedMasterVersion)")
@@ -82,18 +82,18 @@ extension FileController {
         // 1) See if any of the file uploads are for file versions > 0. Later, we'll have to delete stale versions of the file(s) in cloud storage if so.
         // 2) Get the upload deletions, if any.
         
-        var staleVersionsFromUploads:[FileInfo]
-        var uploadDeletions:[FileInfo]
+        var staleVersionsFromUploads:[Upload]
+        var uploadDeletions:[Upload]
         
         let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
         switch fileUploadsResult {
-        case .uploads(let fileInfoArray):
-            Log.debug("fileInfoArray.count for file uploads and upload deletions: \(fileInfoArray.count)")
-            // 1) Filter out uploaded files with versions > 0 -- for the stale file versions.
-            staleVersionsFromUploads = fileInfoArray.filter({$0.fileVersion > 0 && !$0.deleted})
+        case .uploads(let uploads):
+            Log.debug("Number of file uploads and upload deletions: \(uploads.count)")
+            // 1) Filter out uploaded files with versions > 0 -- for the stale file versions. Note that we're not including files with status `uploadedUndelete`-- we don't need to delete any stale versions for these.
+            staleVersionsFromUploads = uploads.filter({$0.fileVersion > 0 && $0.state == .uploaded})
             
             // 2) Filter out upload deletions
-            uploadDeletions = fileInfoArray.filter({$0.deleted})
+            uploadDeletions = uploads.filter({$0.state == .toDeleteFromFileIndex})
 
         case .error(let error):
             Log.error("Failed to get file uploads: \(error)")
@@ -102,6 +102,7 @@ extension FileController {
         }
 
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
+        
         guard let staleVersionsToDelete = getFileIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
             params.completion(nil)
             return nil

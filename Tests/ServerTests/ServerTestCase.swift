@@ -111,7 +111,8 @@ class ServerTestCase : XCTestCase {
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0) -> (request: UploadFileRequest, fileSize:Int64) {
+    
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
         }
@@ -131,7 +132,8 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.cloudFolderNameKey: cloudFolderName as Any,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: masterVersion
+            UploadFileRequest.masterVersionKey: masterVersion,
+            UploadFileRequest.undeleteServerFileKey: undelete
         ])!
         
         uploadRequest.appMetaData = appMetaData

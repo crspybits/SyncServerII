@@ -268,6 +268,60 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
 
         self.getFileIndex(expectedFiles: [uploadRequest1], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
+    
+    // MARK: Undeletion tests
+    
+    func uploadUndelete(twice: Bool = false) {
+        let deviceUUID = PerfectLib.UUID().string
+        
+        // This file is going to be deleted.
+        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        
+        var masterVersion:MasterVersionInt = uploadRequest.masterVersion + MasterVersionInt(1)
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion
+        ])!
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+        
+        masterVersion += 1
+        
+        // Upload undeletion
+        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: masterVersion, undelete: 1)
+        
+        if twice {
+            let (request, fileSize) = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: masterVersion, undelete: 1)
+            
+            // Check uploads-- make sure there is only one.
+            getUploads(expectedFiles: [request], deviceUUID:deviceUUID, expectedFileSizes: [uploadRequest.fileUUID: fileSize])
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+        
+        // Get the file index and make sure the file is not marked as deleted.
+        getFileIndex(deviceUUID: deviceUUID) { fileIndex in
+            guard let fileIndex = fileIndex, fileIndex.count == 1 else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(fileIndex[0].fileUUID == uploadRequest.fileUUID)
+            XCTAssert(fileIndex[0].deleted == false)
+        }
+    }
+    
+    func testUploadUndeleteWorks() {
+        uploadUndelete()
+    }
+    
+    // Test that upload undelete 2x (without done uploads) doesn't fail.
+    func textThatUploadUndeleteUploadTwiceWorks() {
+        uploadUndelete(twice: true)
+    }
 }
 
 extension FileControllerTests_UploadDeletion {
@@ -281,7 +335,9 @@ extension FileControllerTests_UploadDeletion {
             ("testThatDeletionOfUnknownFileUUIDFails", testThatDeletionOfUnknownFileUUIDFails),
             ("testThatDeletionFailsWhenMasterVersionDoesNotMatch", testThatDeletionFailsWhenMasterVersionDoesNotMatch),
             ("testThatDebugDeletionFromServerWorks", testThatDebugDeletionFromServerWorks),
-            ("testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes", testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes)
+            ("testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes", testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes),
+            ("testUploadUndeleteWorks", testUploadUndeleteWorks),
+            ("textThatUploadUndeleteUploadTwiceWorks", textThatUploadUndeleteUploadTwiceWorks)
         ]
     }
     

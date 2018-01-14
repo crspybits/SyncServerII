@@ -27,24 +27,20 @@ extension FileController {
         case errorLookingUpInFileIndex
     }
     
-    // Result is nil if there is no existing file. Throws an error if there is an error.
+    // Result is nil if there is no existing file in the FileIndex. Throws an error if there is an error.
     private func checkForExistingFile(params:RequestProcessingParameters, uploadRequest:UploadFileRequest) throws -> FileIndex? {
         let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadRequest.fileUUID)
 
         let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
-    
-        var fileIndexObj:FileIndex?
-    
+
         switch lookupResult {
         case .found(let modelObj):
-            fileIndexObj = modelObj as? FileIndex
-            if fileIndexObj == nil {
+            guard let fileIndexObj = modelObj as? FileIndex else {
                 Log.error("Could not convert model object to FileIndex")
                 throw CheckError.couldNotConvertModelObject
             }
-            else {
-                return fileIndexObj
-            }
+            
+            return fileIndexObj
             
         case .noObjectFound:
             return nil
@@ -100,6 +96,12 @@ extension FileController {
             
             var newFile = true
             if let existingFileInFileIndex = existingFileInFileIndex {
+                if existingFileInFileIndex.deleted && (uploadRequest.undeleteServerFile == nil || uploadRequest.undeleteServerFile == 0) {
+                    Log.error("Attempt to upload an existing file, but it has already been deleted.")
+                    params.completion(nil)
+                    return
+                }
+            
                 newFile = false
                 guard existingFileInFileIndex.fileVersion + 1 == uploadRequest.fileVersion else {
                     Log.error("File version being uploaded (\(uploadRequest.fileVersion)) is not +1 of current version: \(existingFileInFileIndex.fileVersion)")
@@ -110,6 +112,12 @@ extension FileController {
                 creationDate = existingFileInFileIndex.creationDate
             }
             else {
+                if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile != 0  {
+                    Log.error("Attempt to undelete a file but it's a new file!")
+                    params.completion(nil)
+                    return
+                }
+                
                 // File isn't yet in the FileIndex-- must be a new file. Thus, must be version 0.
                 guard uploadRequest.fileVersion == 0 else {
                     Log.error("File is new, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0")
@@ -131,7 +139,15 @@ extension FileController {
             upload.fileUUID = uploadRequest.fileUUID
             upload.fileVersion = uploadRequest.fileVersion
             upload.mimeType = uploadRequest.mimeType
-            upload.state = .uploading
+            
+            if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile != 0 {
+                Log.info("Undeleting server file.")
+                upload.state = .uploadingUndelete
+            }
+            else {
+                upload.state = .uploading
+            }
+            
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadRequest.appMetaData
             upload.cloudFolderName = uploadRequest.cloudFolderName
@@ -195,7 +211,19 @@ extension FileController {
                 switch result {
                 case .success(let fileSize):
                     upload.fileSizeBytes = Int64(fileSize)
-                    upload.state = .uploaded
+                    
+                    switch upload.state! {
+                    case .uploading:
+                        upload.state = .uploaded
+                        
+                    case .uploadingUndelete:
+                        upload.state = .uploadedUndelete
+                        
+                    default:
+                        Log.error("Bad upload state: \(upload.state!)")
+                        params.completion(nil)
+                    }
+                    
                     upload.uploadId = uploadId
                     if params.repos.upload.update(upload: upload, fileInFileIndex: !newFile) {
                         self.success(params: params, upload: upload, creationDate: creationDate)

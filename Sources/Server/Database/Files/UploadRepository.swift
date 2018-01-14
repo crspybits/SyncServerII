@@ -14,7 +14,9 @@ import SyncServerShared
 
 enum UploadState : String {
 case uploading
+case uploadingUndelete
 case uploaded
+case uploadedUndelete
 case toDeleteFromFileIndex
 
 static func maxCharacterLength() -> Int { return 22 }
@@ -227,7 +229,7 @@ class UploadRepository : Repository {
             return true
         }
         
-        if upload.state == .uploading {
+        if upload.state == .uploading || upload.state == .uploadingUndelete {
             return false
         }
         
@@ -374,39 +376,48 @@ class UploadRepository : Repository {
     }
     
     enum UploadedFilesResult {
-    case uploads([FileInfo])
+    case uploads([Upload])
     case error(Swift.Error)
     }
     
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
-    // The FileInfo object has its .deleted property set to true iff the state of the Upload object is .toDeleteFromFileIndex.
     func uploadedFiles(forUserId userId: UserId, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
         let selectUploadedFiles = select(forUserId: userId, deviceUUID: deviceUUID, andState: state)
 
-        var fileInfoResult:[FileInfo] = []
+        var result:[Upload] = []
         
         selectUploadedFiles.forEachRow { rowModel in
             let rowModel = rowModel as! Upload
-
-            let fileInfo = FileInfo()!
-            fileInfo.fileUUID = rowModel.fileUUID
-            fileInfo.appMetaData = rowModel.appMetaData
-            fileInfo.fileVersion = rowModel.fileVersion
-            fileInfo.deleted = rowModel.state == .toDeleteFromFileIndex
-            fileInfo.fileSizeBytes = rowModel.fileSizeBytes
-            fileInfo.mimeType = rowModel.mimeType
-            fileInfo.cloudFolderName = rowModel.cloudFolderName
-            fileInfo.creationDate = rowModel.creationDate
-            fileInfo.updateDate = rowModel.creationDate
-            
-            fileInfoResult.append(fileInfo)
+            result.append(rowModel)
         }
         
         if selectUploadedFiles.forEachRowStatus == nil {
-            return .uploads(fileInfoResult)
+            return .uploads(result)
         }
         else {
             return .error(selectUploadedFiles.forEachRowStatus!)
         }
+    }
+    
+    static func uploadsToFileInfo(uploads: [Upload]) -> [FileInfo] {
+        var result = [FileInfo]()
+        
+        for upload in uploads {
+            let fileInfo = FileInfo()!
+            
+            fileInfo.fileUUID = upload.fileUUID
+            fileInfo.appMetaData = upload.appMetaData
+            fileInfo.fileVersion = upload.fileVersion
+            fileInfo.deleted = upload.state == .toDeleteFromFileIndex
+            fileInfo.fileSizeBytes = upload.fileSizeBytes
+            fileInfo.mimeType = upload.mimeType
+            fileInfo.cloudFolderName = upload.cloudFolderName
+            fileInfo.creationDate = upload.creationDate
+            fileInfo.updateDate = upload.updateDate
+            
+            result += [fileInfo]
+        }
+        
+        return result
     }
 }

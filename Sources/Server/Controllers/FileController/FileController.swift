@@ -101,7 +101,7 @@ class FileController : ControllerProtocol {
             }
         }
     }
-        
+    
     func getUploads(params:RequestProcessingParameters) {
         guard params.request is GetUploadsRequest else {
             Log.error("Did not receive GetUploadsRequest")
@@ -113,8 +113,9 @@ class FileController : ControllerProtocol {
 
         switch uploadsResult {
         case .uploads(let uploads):
+            let fileInfo = UploadRepository.uploadsToFileInfo(uploads: uploads)
             let response = GetUploadsResponse()!
-            response.uploads = uploads
+            response.uploads = fileInfo
             params.completion(response)
             
         case .error(let error):

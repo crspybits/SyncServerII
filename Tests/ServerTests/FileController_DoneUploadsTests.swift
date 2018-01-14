@@ -11,6 +11,7 @@ import XCTest
 import LoggerAPI
 import Foundation
 import PerfectLib
+import SyncServerShared
 
 class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
 
@@ -69,6 +70,29 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         
         self.sendDoneUploads(expectedNumberOfUploads: 0, masterVersion: 1)
     }
+    
+    // If you first upload a file (followed by a DoneUploads), then delete it, and then upload again the last upload fails.
+    func testThatUploadAfterUploadDeletionFails() {
+        let deviceUUID = PerfectLib.UUID().string
+        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        
+        var masterVersion:MasterVersionInt = uploadRequest.masterVersion + MasterVersionInt(1)
+        
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion
+        ])!
+
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
+
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+        masterVersion += 1
+        
+        // Try upload again. This should fail.
+        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: masterVersion, errorExpected: true)
+    }
 }
 
 extension FileController_DoneUploadsTests {
@@ -78,7 +102,8 @@ extension FileController_DoneUploadsTests {
             ("testDoneUploadsWithSingleUpload", testDoneUploadsWithSingleUpload),
             ("testDoneUploadsWithTwoUploads", testDoneUploadsWithTwoUploads),
             ("testDoneUploadsThatUpdatesFileVersion", testDoneUploadsThatUpdatesFileVersion),
-            ("testDoneUploadsTwiceDoesNothingSecondTime", testDoneUploadsTwiceDoesNothingSecondTime)
+            ("testDoneUploadsTwiceDoesNothingSecondTime", testDoneUploadsTwiceDoesNothingSecondTime),
+            ("testThatUploadAfterUploadDeletionFails", testThatUploadAfterUploadDeletionFails)
         ]
     }
     

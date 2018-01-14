@@ -355,6 +355,7 @@ class FileIndexRepository : Repository {
             
             let upload = rowModel as! Upload
             
+            // This will a) mark the FileIndex entry as deleted for toDeleteFromFileIndex, and b) mark it as not deleted for *both* uploadingUndelete and uploading files. So, effectively, it does part of our upload undelete for us.
             let uploadDeletion = upload.state == .toDeleteFromFileIndex
 
             let fileIndex = FileIndex()
