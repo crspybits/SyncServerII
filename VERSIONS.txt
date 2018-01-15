@@ -1,13 +1,13 @@
 SyncServer
 
-Version 0.11.0
+Version 0.11.0 (1/14/18)
 	* Added multi-version files
 		https://github.com/crspybits/SyncServerII/issues/12
 	* Fixed a long-standing bug in error handling in certain cases of problems with a deviceUUID
 	* Fixed a long-standing bug: Was allowing a file to be uploaded when it was was previously deleted.
 	* Added upload undeletion-- to deal with conflict resolution on clients.
 	
-Version 0.10.0
+Version 0.10.0 (1/7/18)
 	* New response type for uploads-- response fields now in a header key.
 		This to deal with iOS client issues for background downloading.
 	
