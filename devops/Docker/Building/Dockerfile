@@ -1,9 +1,8 @@
-# Docker image for building the SyncServer Swift server
 # Adapted from https://github.com/swiftdocker/docker-swift/blob/84d2f69c035204bc2dc077f330deb7a393255a18/Dockerfile
 
 FROM ubuntu:16.04
-LABEL maintainer="Haris Amin <aminharis7@gmail.com>"
-LABEL Description="Docker Container for the Apple's Swift programming language"
+LABEL maintainer="Christopher Prince <chris@SpasticMuffin.biz>"
+LABEL Description="Docker image for building the SyncServer Swift server"
 
 # Install related packages and set LLVM 3.6 as the compiler
 RUN apt-get -q update && \
