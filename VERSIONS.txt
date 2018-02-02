@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.11.1 (2/1/18)
+	* Added server version to response headers so client can defend itself against incorrect server versions.
+
 Version 0.11.0 (1/14/18)
 	* Added multi-version files
 		https://github.com/crspybits/SyncServerII/issues/12
