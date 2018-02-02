@@ -75,6 +75,8 @@ class RequestHandler : AccountDelegate {
     private func endWith(clientResponse:EndWithResponse) {
         var jsonString:String?
         
+        self.response.headers.append(ServerConstants.httpResponseCurrentServerVersion, value: Constants.session.deployedGitTag)
+        
         switch clientResponse {
         case .json(let jsonDict):
             
@@ -112,7 +114,7 @@ class RequestHandler : AccountDelegate {
             try self.response.end()
             Log.info("REQUEST \(request.urlURL.path): STATUS CODE: \(response.statusCode)")
         } catch (let error) {
-            Log.error("Failed on `end` in failWithError: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
+            Log.error("Failed on `end` in endWith: \(error.localizedDescription); HTTP status code: \(response.statusCode)")
         }
         
         Log.info("REQUEST \(request.urlURL.path): COMPLETED")
