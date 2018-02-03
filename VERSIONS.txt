@@ -1,5 +1,8 @@
 SyncServer
 
+Version X.Y.Z
+	* Added a test case for version returned in headers.
+	
 Version 0.11.1 (2/1/18)
 	* Added server version to response headers so client can defend itself against incorrect server versions.
 

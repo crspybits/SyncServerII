@@ -27,6 +27,7 @@
 		8303752D1FF5F270008DCF54 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752C1FF5F270008DCF54 /* Synchronized.swift */; };
 		8303752F1FF5FEF7008DCF54 /* HealthCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */; };
 		831EEC502002FE72001821B9 /* FileController_MultiVersionFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831EEC4F2002FE72001821B9 /* FileController_MultiVersionFiles.swift */; };
+		834125BA20260BA400AA8FC4 /* VersionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834125B920260BA300AA8FC4 /* VersionTests.swift */; };
 		835FC7A11FE76C840067FD83 /* TestAccounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835FC7A01FE76C840067FD83 /* TestAccounts.swift */; };
 		83C5CE121FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */; };
 		83C5CE141FDDBD880024979A /* LinuxMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE131FDDBD880024979A /* LinuxMain.swift */; };
@@ -146,6 +147,7 @@
 		8303752C1FF5F270008DCF54 /* Synchronized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
 		8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthCheckTests.swift; sourceTree = "<group>"; };
 		831EEC4F2002FE72001821B9 /* FileController_MultiVersionFiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileController_MultiVersionFiles.swift; sourceTree = "<group>"; };
+		834125B920260BA300AA8FC4 /* VersionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionTests.swift; sourceTree = "<group>"; };
 		835FC7A01FE76C840067FD83 /* TestAccounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAccounts.swift; sourceTree = "<group>"; };
 		83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountAuthenticationTests_Dropbox.swift; sourceTree = "<group>"; };
 		83C5CE131FDDBD880024979A /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
@@ -396,6 +398,7 @@
 				OBJ_77 /* SpecificDatabaseTests_UserRepository.swift */,
 				OBJ_78 /* UserControllerTests.swift */,
 				8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */,
+				834125B920260BA300AA8FC4 /* VersionTests.swift */,
 			);
 			name = ServerTests;
 			path = Tests/ServerTests;
@@ -650,6 +653,7 @@
 				OBJ_107 /* FileControllerTests_UploadDeletion.swift in Sources */,
 				OBJ_108 /* FileController_DoneUploadsTests.swift in Sources */,
 				OBJ_109 /* FileController_UploadTests.swift in Sources */,
+				834125BA20260BA400AA8FC4 /* VersionTests.swift in Sources */,
 				OBJ_110 /* GeneralAuthTests.swift in Sources */,
 				OBJ_111 /* GeneralDatabaseTests.swift in Sources */,
 				OBJ_112 /* GoogleDriveTests.swift in Sources */,

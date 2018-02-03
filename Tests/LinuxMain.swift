@@ -26,5 +26,6 @@ XCTMain([
     testCase(SpecificDatabaseTests_SharingInvitationRepository.allTests),
     testCase(SpecificDatabaseTests_Uploads.allTests),
     testCase(SpecificDatabaseTests_UserRepository.allTests),
-    testCase(UserControllerTests.allTests)
+    testCase(UserControllerTests.allTests),
+    testCase(VersionTests.allTests),
 ])
