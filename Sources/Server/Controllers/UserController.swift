@@ -107,7 +107,8 @@ class UserController : ControllerProtocol {
         profileCreds.accountCreationUser = .userId(userId!, userType)
         
         let response = AddUserResponse()!
-
+        response.userId = userId
+        
         Log.info("About to check if we need to generate tokens...")
         
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
@@ -122,7 +123,10 @@ class UserController : ControllerProtocol {
         assert(params.ep.authenticationLevel == .secondary)
 
         let sharingUser = params.currentSignedInUser!.userType == .sharing
+        
         let response = CheckCredsResponse()!
+        response.userId = params.currentSignedInUser!.userId
+        
         if sharingUser {
             response.sharingPermission = params.currentSignedInUser!.sharingPermission
         }

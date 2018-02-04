@@ -103,6 +103,14 @@ class ServerTestCase : XCTestCase {
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request: \(response!.statusCode)")
+                
+                if let dict = dict, let addUserResponse = AddUserResponse(json: dict) {
+                    XCTAssert(addUserResponse.userId != nil)
+                }
+                else {
+                    XCTFail()
+                }
+                
                 expectation.fulfill()
             }
         }

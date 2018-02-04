@@ -231,8 +231,8 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "4c07b5cceb3f885e9b70113b0d1f669ad2caf6e5",
-          "version": "4.2.0"
+          "revision": "e7d324fe43dd15f351b8d4d97a8a1ceec2519aef",
+          "version": "4.3.0"
         }
       }
     ]

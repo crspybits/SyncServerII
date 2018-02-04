@@ -48,6 +48,14 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "checkCreds failed")
+                
+                if let dict = dict, let checkCredsResponse = CheckCredsResponse(json: dict) {
+                    XCTAssert(checkCredsResponse.userId != nil)
+                }
+                else {
+                    XCTFail()
+                }
+                
                 expectation.fulfill()
             }
         }
