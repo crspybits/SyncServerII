@@ -1,6 +1,6 @@
 SyncServer
 
-Version X.Y.Z
+Version 0.12.0 (2/4/18)
 	* Added a test case for version returned in headers.
 	* Added userId to response when creating a user and when checking creds for a user.
 	
