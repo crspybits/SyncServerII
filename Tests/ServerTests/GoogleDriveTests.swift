@@ -9,11 +9,16 @@
 import XCTest
 @testable import Server
 import Foundation
+import HeliumLogger
+import LoggerAPI
 
 class GoogleDriveTests: ServerTestCase, LinuxTestable {
-    // In my Google Drive:
+    // In my Google Drive, at the top-level:
     let knownPresentFolder = "Programming"
     let knownPresentFile = "DO-NOT-REMOVE.txt"
+
+    // This is special in that (a) it contains only two characters, and (b) it was causing me problems for downloading on 2/4/18.
+    let knownPresentFile2 = "DO-NOT-REMOVE2.txt"
     
     let knownAbsentFolder = "Markwa.Farkwa.Blarkwa"
     let knownAbsentFile = "Markwa.Farkwa.Blarkwa"
@@ -275,6 +280,14 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         downloadFile(cloudFileName: self.knownPresentFile)
     }
     
+    func testSearchForPresentFile2() {
+        searchForFile(name: knownPresentFile2, withMimeType: "text/plain", inFolder: nil, presentExpected: true)
+    }
+    
+    func testBasicFileDownloadWorks2() {
+        downloadFile(cloudFileName: self.knownPresentFile2)
+    }
+    
     func testFileDownloadOfNonExistentFileFails() {
         downloadFile(cloudFileName: self.knownAbsentFile, expectError: true)
     }
@@ -364,6 +377,8 @@ extension GoogleDriveTests {
             ("testDeleteFolderThatDoesNotExistFailure", testDeleteFolderThatDoesNotExistFailure),
             ("testCreateFolderIfDoesNotExist", testCreateFolderIfDoesNotExist),
             ("testBasicFileDownloadWorks", testBasicFileDownloadWorks),
+            ("testSearchForPresentFile2", testSearchForPresentFile2),
+            ("testBasicFileDownloadWorks2", testBasicFileDownloadWorks2),
             ("testFileDownloadOfNonExistentFileFails", testFileDownloadOfNonExistentFileFails),
             ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken),
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),

@@ -17,6 +17,8 @@ import SyncServerShared
 class DropboxTests: ServerTestCase, LinuxTestable {
     // In my Dropbox:
     let knownPresentFile = "DO-NOT-REMOVE.txt"
+    let knownPresentFile2 = "DO-NOT-REMOVE2.txt"
+
     let knownAbsentFile = "Markwa.Farkwa.Blarkwa"
 
     override func setUp() {
@@ -194,6 +196,14 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         downloadFile(creds: creds, cloudFileName: knownPresentFile)
     }
     
+    func testSimpleDownloadWorks2() {
+        let creds = DropboxCreds()
+        creds.accessToken = TestAccount.dropbox1.token()
+        creds.accountId = TestAccount.dropbox1.id()
+        
+        downloadFile(creds: creds, cloudFileName: knownPresentFile2)
+    }
+    
     func testUploadAndDownloadWorks() {
         let deviceUUID = PerfectLib.UUID().string
         let fileUUID = PerfectLib.UUID().string
@@ -320,6 +330,7 @@ extension DropboxTests {
             ("testFullUploadWorks", testFullUploadWorks),
             ("testDownloadOfNonExistingFileFails", testDownloadOfNonExistingFileFails),
             ("testSimpleDownloadWorks", testSimpleDownloadWorks),
+            ("testSimpleDownloadWorks2", testSimpleDownloadWorks2),
             ("testUploadAndDownloadWorks", testUploadAndDownloadWorks),
             ("testDeletionOfNonExistingFileFails", testDeletionOfNonExistingFileFails),
             ("testDeletionOfExistingFileWorks", testDeletionOfExistingFileWorks),

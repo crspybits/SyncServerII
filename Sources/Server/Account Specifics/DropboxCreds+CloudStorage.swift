@@ -168,7 +168,7 @@ extension DropboxCreds : CloudStorage {
         var headers = basicHeaders(withContentTypeHeader: "")
         headers["Dropbox-API-Arg"] = "{\"path\": \"/\(cloudFileName)\"}"
 
-        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/download", additionalHeaders: headers) { (apiResult, statusCode) in
+        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/download", additionalHeaders: headers, expectingData: true) { (apiResult, statusCode) in
             
             guard statusCode == HTTPStatusCode.OK else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))

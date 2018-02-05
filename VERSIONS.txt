@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.12.1
+	* Fixed long-standing bug in Google Drive file download-- where file would get interpreted as JSON if it contained JSON, but actually we needed data. Download would fail in that case. 
+	* Also fixed corresponding problem with Dropbox download.
+
 Version 0.12.0 (2/4/18)
 	* Added a test case for version returned in headers.
 	* Added userId to response when creating a user and when checking creds for a user.

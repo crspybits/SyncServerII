@@ -158,10 +158,12 @@ class AccountAPICall {
     var baseURL:String?
     
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
+    // expectingData == true means return Data. false or nil just look for Data or JSON result.
     func apiCall(method:String, baseURL:String? = nil, path:String,
                  additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
                  body:APICallBody? = nil,
                  returnResultWhenNon200Code:Bool = false,
+                 expectingData:Bool? = nil,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
         var hostname = baseURL
@@ -223,14 +225,20 @@ class AccountAPICall {
                 var body = Data()
                 do {
                     try response.readAllData(into: &body)
-                    let jsonBody = JSON(data: body)
                     var result:APICallResult?
-                    
-                    if jsonBody.type == .null {
+
+                    if let expectingData = expectingData, expectingData {
                         result = .data(body)
                     }
                     else {
-                        result = .json(jsonBody)
+                        let jsonBody = JSON(data: body)
+                        
+                        if jsonBody.type == .null {
+                            result = .data(body)
+                        }
+                        else {
+                            result = .json(jsonBody)
+                        }
                     }
                     
                     completion(result, statusCode)

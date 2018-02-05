@@ -519,7 +519,7 @@ extension GoogleCreds : CloudStorage {
         
         let path = "/drive/v3/files/\(fileId)?alt=media"
         
-        self.apiCall(method: "GET", path: path) { (apiResult, statusCode) in
+        self.apiCall(method: "GET", path: path, expectingData: true) { (apiResult, statusCode) in
         
             if statusCode != HTTPStatusCode.OK {
                 completion(nil, DownloadSmallFileError.badStatusCode(statusCode))

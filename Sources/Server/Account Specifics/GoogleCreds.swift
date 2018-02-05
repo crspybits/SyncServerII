@@ -300,9 +300,10 @@ class GoogleCreds : AccountAPICall, Account {
             completion(RefreshError.couldNotObtainParameterFromJSON)
         }
     }
-    
+
     override func apiCall(method:String, baseURL:String? = nil, path:String,
         additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:APICallBody? = nil, returnResultWhenNon200Code:Bool = false,
+            expectingData:Bool? = nil,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
         
         var headers:[String:String] = additionalHeaders ?? [:]
@@ -312,7 +313,7 @@ class GoogleCreds : AccountAPICall, Account {
             headers["Authorization"] = "Bearer \(self.accessToken!)"
         }
 
-        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body) { (apiCallResult, statusCode) in
+        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectingData: expectingData) { (apiCallResult, statusCode) in
         
             if statusCode == self.expiredAccessTokenHTTPCode && !self.alreadyRefreshed {
                 self.alreadyRefreshed = true
@@ -325,7 +326,7 @@ class GoogleCreds : AccountAPICall, Account {
                         // Refresh was successful, update the authorization header and try the operation again.
                         headers["Authorization"] = "Bearer \(self.accessToken!)"
 
-                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, completion: completion)
+                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectingData: expectingData, completion: completion)
                     }
                     else {
                         Log.error("Failed to refresh access token: \(String(describing: error))")
