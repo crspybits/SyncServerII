@@ -19,7 +19,7 @@
 # ./make.sh 0.7.6 ../Environments/sharedimages-staging/Server.json ../Environments/sharedimages-staging/configure.yml
 
 # iOS Client testing server
-# ./make.sh latest ../Environments/syncserver-testing/Server.json ../Environments/syncserver-testing/configure.yml
+# ./make.sh 0.12.1 ../Environments/syncserver-testing/Server.json ../Environments/syncserver-testing/configure.yml
 
 DOCKER_IMAGE_TAG=$1
 SERVER_JSON=$2
