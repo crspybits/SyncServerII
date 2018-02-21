@@ -138,7 +138,7 @@ extension FileController {
             return
         }
 
-        let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: fileIndexObj.deviceUUID!)
+        let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: fileIndexObj.deviceUUID!, mimeType: fileIndexObj.mimeType!)
 
         let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj.cloudFolderName!, mimeType: fileIndexObj.mimeType!)
         

@@ -272,7 +272,7 @@ extension FileController {
         
         // Recursive case.
         let cloudDeletion = cloudDeletions[0]
-        let cloudFileName = cloudDeletion.cloudFileName(deviceUUID: cloudDeletion.deviceUUID!)
+        let cloudFileName = cloudDeletion.cloudFileName(deviceUUID: cloudDeletion.deviceUUID!, mimeType: cloudDeletion.mimeType!)
 
         Log.info("Deleting file: \(cloudFileName)")
         

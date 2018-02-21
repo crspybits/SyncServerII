@@ -192,16 +192,14 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 0)
         
-        // Then upload large image file-- as version 1 of the same file.
-        guard let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID1,
-            fileUUID:uploadRequest.fileUUID, addUser:false, fileVersion:1, expectedMasterVersion: 1) else {
-            XCTFail()
-            return
-        }
+        let fileContentsV2 = "This is some longer text that I'm typing here and hopefullly I don't get too bored"
+        
+        // Then upload some other text contents -- as version 1 of the same file.
+        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: 1, appMetaData:appMetaData, contents: fileContentsV2)
         
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 1)
         
-        // Make sure the mime type changed and file contents is right.
+        // Make sure the file contents are right.
         getFileIndex(deviceUUID: deviceUUID1) { fileInfoArray in
             guard let fileInfoArray = fileInfoArray, fileInfoArray.count == 1 else {
                 XCTFail()
@@ -213,8 +211,6 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
                 XCTFail()
                 return
             }
-
-            XCTAssert(result[0].mimeType == ServerTestCase.jpegMimeType)
         }
         
         guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: 2, appMetaData: self.appMetaData, downloadFileVersion: 1, uploadFileRequest: uploadRequest2, fileSize: fileSize2) else {

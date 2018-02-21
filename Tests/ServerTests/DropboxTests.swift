@@ -102,7 +102,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
     func uploadFile(creds: DropboxCreds, deviceUUID:String, fileContents: String, uploadRequest:UploadFileRequest, failureExpected: Bool = false) -> String {
         
         let fileContentsData = fileContents.data(using: .ascii)!
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID)
+        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         
         let exp = expectation(description: "\(#function)\(#line)")
 
@@ -223,7 +223,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         
         uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)
         
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID)
+        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         Log.debug("cloudFileName: \(cloudFileName)")
         downloadFile(creds: creds, cloudFileName: cloudFileName, expectedContents: fileContents)
     }

@@ -219,7 +219,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         self.getFileIndex(expectedFiles: [], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(1), expectedFileSizes: [:], expectedDeletionState:[:])
         
         self.performServerTest { expectation, creds in
-            let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID)
+            let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID, mimeType: uploadRequest1.mimeType)
             
             let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest1.cloudFolderName!, mimeType: uploadRequest1.mimeType)
             

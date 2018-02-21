@@ -96,7 +96,7 @@ extension FileController {
                 return
             }
             
-            let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID)
+            let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID, mimeType: fileIndexObj!.mimeType)
             
             let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj!.cloudFolderName!, mimeType: fileIndexObj!.mimeType)
             

@@ -119,7 +119,7 @@ class ServerTestCase : XCTestCase {
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
@@ -133,7 +133,15 @@ class ServerTestCase : XCTestCase {
             fileUUIDToSend = fileUUID!
         }
         
-        let data = ServerTestCase.uploadTextFileContents.data(using: .utf8)
+        var data:Data!
+        var uploadString = ServerTestCase.uploadTextFileContents
+        if let contents = contents {
+            data = contents.data(using: .utf8)!
+            uploadString = contents
+        }
+        else {
+            data = ServerTestCase.uploadTextFileContents.data(using: .utf8)!
+        }
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUIDToSend,
@@ -147,9 +155,9 @@ class ServerTestCase : XCTestCase {
         uploadRequest.appMetaData = appMetaData
         
         Log.info("Starting runUploadTest: uploadTextFile")
-        runUploadTest(testAccount:testAccount, data:data!, uploadRequest:uploadRequest, expectedUploadSize:Int64(ServerTestCase.uploadTextFileContents.characters.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
+        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
-        return (request:uploadRequest, fileSize: Int64(ServerTestCase.uploadTextFileContents.characters.count))
+        return (request:uploadRequest, fileSize: Int64(uploadString.count))
     }
     
     func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {

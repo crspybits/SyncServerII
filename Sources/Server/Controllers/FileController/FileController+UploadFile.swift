@@ -58,6 +58,12 @@ extension FileController {
             return
         }
         
+        guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
+            Log.error("Unknown mime type passed: \(uploadRequest.mimeType) (see SyncServer-Shared)")
+            params.completion(nil)
+            return
+        }
+        
         getMasterVersion(params: params) { error, masterVersion in
             if error != nil {
                 Log.error("Error: \(String(describing: error))")
@@ -105,6 +111,12 @@ extension FileController {
                 newFile = false
                 guard existingFileInFileIndex.fileVersion + 1 == uploadRequest.fileVersion else {
                     Log.error("File version being uploaded (\(uploadRequest.fileVersion)) is not +1 of current version: \(existingFileInFileIndex.fileVersion)")
+                    params.completion(nil)
+                    return
+                }
+                
+                guard existingFileInFileIndex.mimeType == uploadRequest.mimeType else {
+                    Log.error("File being uploaded(\(uploadRequest.mimeType)) doesn't have the same mime type as current version: \(existingFileInFileIndex.mimeType)")
                     params.completion(nil)
                     return
                 }
@@ -202,7 +214,7 @@ extension FileController {
                 return
             }
             
-            let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!)
+            let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!, mimeType: uploadRequest.mimeType)
             Log.info("File being sent to cloud storage: \(cloudFileName)")
             
             let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest.cloudFolderName!, mimeType: uploadRequest.mimeType)

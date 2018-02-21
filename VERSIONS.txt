@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.13.0
+	* Add: File name extensions in cloud storage
+		https://github.com/crspybits/SyncServerII/issues/10
+
 Version 0.12.1 (2/4/18)
 	* Fixed long-standing bug in Google Drive file download-- where file would get interpreted as JSON if it contained JSON, but actually we needed data. Download would fail in that case. 
 	* Also fixed corresponding problem with Dropbox download.
