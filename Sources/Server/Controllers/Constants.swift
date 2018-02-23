@@ -10,7 +10,9 @@ import Foundation
 import SMServerLib
 import PerfectLib
 
-// Server-internal configuration info. Mostly pulled from the Server.json file.
+// Server startup configuration info. Mostly pulled from the Server.json file.
+
+// TODO: *1* This should be renamed to something like ServerConfig. They are not exactly "constants".
 
 protocol ConstantsDelegate {
 func configFilePath(forConstants:Constants) -> String
@@ -68,6 +70,12 @@ class Constants {
         var Dropbox = false
     }
     var allowedSignInTypes = AllowedSignInTypes()
+    
+    struct OwningUserAccountCreation {
+        var initialFileName:String?
+        var initialFileContents:String?
+    }
+    var owningUserAccountCreation = OwningUserAccountCreation()
     
     // MARK: These are not obtained from the Server.json file, but are basically configuration items.
 
@@ -159,6 +167,9 @@ class Constants {
         if let dropboxSignIn = try? config.getBool(varName: "allowedSignInTypes.Dropbox"), dropboxSignIn {
             allowedSignInTypes.Dropbox = true
         }
+        
+        owningUserAccountCreation.initialFileName = try? config.getString(varName: "owningUserAccountCreation.initialFileName")
+        owningUserAccountCreation.initialFileContents = try? config.getString(varName: "owningUserAccountCreation.initialFileContents")
         
         // MARK: Items not obtained from the Server.json file.
         

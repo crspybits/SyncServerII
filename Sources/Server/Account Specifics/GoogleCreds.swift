@@ -55,6 +55,10 @@ class GoogleCreds : AccountAPICall, Account {
     
     let expiredAccessTokenHTTPCode = HTTPStatusCode.unauthorized
     
+    var owningAccountsNeedCloudFolderName: Bool {
+        return true
+    }
+    
     static var accountType:AccountType {
         return .Google
     }

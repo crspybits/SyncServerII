@@ -139,8 +139,15 @@ extension FileController {
         }
 
         let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: fileIndexObj.deviceUUID!, mimeType: fileIndexObj.mimeType!)
-
-        let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj.cloudFolderName!, mimeType: fileIndexObj.mimeType!)
+        
+        // Because we need this to get the cloudFolderName
+        guard params.effectiveOwningUserCreds != nil else {
+            Log.debug("No effectiveOwningUserCreds")
+            params.completion(nil)
+            return
+        }
+        
+        let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: fileIndexObj.mimeType!)
         
         cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
             if error != nil  {

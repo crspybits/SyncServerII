@@ -26,6 +26,7 @@
 		8303752B1FF5EE8E008DCF54 /* ServerStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752A1FF5EE8E008DCF54 /* ServerStats.swift */; };
 		8303752D1FF5F270008DCF54 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752C1FF5F270008DCF54 /* Synchronized.swift */; };
 		8303752F1FF5FEF7008DCF54 /* HealthCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */; };
+		83161B5F203E81AD00207DBD /* UserController+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83161B5E203E81AD00207DBD /* UserController+Extras.swift */; };
 		831EEC502002FE72001821B9 /* FileController_MultiVersionFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831EEC4F2002FE72001821B9 /* FileController_MultiVersionFiles.swift */; };
 		834125BA20260BA400AA8FC4 /* VersionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834125B920260BA300AA8FC4 /* VersionTests.swift */; };
 		835FC7A11FE76C840067FD83 /* TestAccounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835FC7A01FE76C840067FD83 /* TestAccounts.swift */; };
@@ -146,6 +147,7 @@
 		8303752A1FF5EE8E008DCF54 /* ServerStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerStats.swift; sourceTree = "<group>"; };
 		8303752C1FF5F270008DCF54 /* Synchronized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
 		8303752E1FF5FEF7008DCF54 /* HealthCheckTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthCheckTests.swift; sourceTree = "<group>"; };
+		83161B5E203E81AD00207DBD /* UserController+Extras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserController+Extras.swift"; sourceTree = "<group>"; };
 		831EEC4F2002FE72001821B9 /* FileController_MultiVersionFiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileController_MultiVersionFiles.swift; sourceTree = "<group>"; };
 		834125B920260BA300AA8FC4 /* VersionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionTests.swift; sourceTree = "<group>"; };
 		835FC7A01FE76C840067FD83 /* TestAccounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAccounts.swift; sourceTree = "<group>"; };
@@ -218,7 +220,6 @@
 		OBJ_80 /* devops */ = {isa = PBXFileReference; lastKnownFileType = folder; path = devops; sourceTree = SOURCE_ROOT; };
 		OBJ_81 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = SOURCE_ROOT; };
 		OBJ_82 /* Docs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Docs; sourceTree = SOURCE_ROOT; };
-		OBJ_83 /* Database migrations */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Database migrations"; sourceTree = SOURCE_ROOT; };
 		"Server::Main::Product" /* Main */ = {isa = PBXFileReference; lastKnownFileType = text; path = Main; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Server::Server::Product" /* Server.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Server.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Server::ServerTests::Product" /* ServerTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = ServerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -268,6 +269,7 @@
 				OBJ_20 /* FileController */,
 				OBJ_26 /* SharingAccountsController.swift */,
 				OBJ_27 /* UserController.swift */,
+				83161B5E203E81AD00207DBD /* UserController+Extras.swift */,
 				OBJ_28 /* UtilController.swift */,
 			);
 			path = Controllers;
@@ -341,7 +343,6 @@
 				OBJ_80 /* devops */,
 				OBJ_81 /* Resources */,
 				OBJ_82 /* Docs */,
-				OBJ_83 /* Database migrations */,
 				OBJ_84 /* Dependencies */,
 				OBJ_85 /* Products */,
 				83C5CE0C1FDBB70A0024979A /* Recovered References */,
@@ -598,6 +599,7 @@
 				OBJ_150 /* Constants.swift in Sources */,
 				OBJ_151 /* Controllers.swift in Sources */,
 				OBJ_152 /* FileController+DoneUploads.swift in Sources */,
+				83161B5F203E81AD00207DBD /* UserController+Extras.swift in Sources */,
 				OBJ_153 /* FileController+DownloadFile.swift in Sources */,
 				OBJ_154 /* FileController+UploadDeletion.swift in Sources */,
 				OBJ_155 /* FileController+UploadFile.swift in Sources */,

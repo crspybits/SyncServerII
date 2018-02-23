@@ -162,7 +162,6 @@ extension FileController {
             
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadRequest.appMetaData
-            upload.cloudFolderName = uploadRequest.cloudFolderName
 
             if newFile {
                 upload.creationDate = creationDate
@@ -217,7 +216,14 @@ extension FileController {
             let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!, mimeType: uploadRequest.mimeType)
             Log.info("File being sent to cloud storage: \(cloudFileName)")
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest.cloudFolderName!, mimeType: uploadRequest.mimeType)
+            // Because we need this to get the cloudFolderName
+            guard params.effectiveOwningUserCreds != nil else {
+                Log.debug("No effectiveOwningUserCreds")
+                params.completion(nil)
+                return
+            }
+            
+            let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: uploadRequest.mimeType)
             
             cloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
                 switch result {

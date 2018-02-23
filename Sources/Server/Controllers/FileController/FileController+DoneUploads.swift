@@ -246,6 +246,13 @@ extension FileController {
             return
         }
         
+        // Because we need this to get the cloudFolderName
+        guard params.effectiveOwningUserCreds != nil else {
+            Log.debug("No effectiveOwningUserCreds")
+            params.completion(nil)
+            return
+        }
+        
         let async = AsyncTailRecursion()
         async.start {
             self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async)
@@ -276,7 +283,7 @@ extension FileController {
 
         Log.info("Deleting file: \(cloudFileName)")
         
-        let options = CloudStorageFileNameOptions(cloudFolderName: cloudDeletion.cloudFolderName!, mimeType: cloudDeletion.mimeType!)
+        let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: cloudDeletion.mimeType!)
         
         cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
 

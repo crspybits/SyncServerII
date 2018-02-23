@@ -39,9 +39,6 @@ class FileIndex : NSObject, Model, Filenaming {
     static let mimeTypeKey = "mimeType"
     var mimeType: String!
     
-    static let cloudFolderNameKey = "cloudFolderName"
-    var cloudFolderName: String!
-    
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
     
@@ -77,9 +74,6 @@ class FileIndex : NSObject, Model, Filenaming {
                 
             case FileIndex.mimeTypeKey:
                 mimeType = newValue as! String?
-                
-            case FileIndex.cloudFolderNameKey:
-                cloudFolderName = newValue as! String?
                 
             case FileIndex.appMetaDataKey:
                 appMetaData = newValue as! String?
@@ -130,7 +124,7 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes); cloudFolderName: \(cloudFolderName)"
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes)"
     }
 }
 
@@ -166,8 +160,6 @@ class FileIndexRepository : Repository {
 
             // MIME type of the file
             "mimeType VARCHAR(\(Database.maxMimeTypeLength)) NOT NULL, " +
-
-            "cloudFolderName VARCHAR(\(Database.maxCloudFolderNameLength)) NOT NULL, " +
 
             // App-specific meta data
             "appMetaData TEXT, " +
@@ -207,11 +199,11 @@ class FileIndexRepository : Repository {
     }
     
     private func columnNames(appMetaDataFieldName:String = "appMetaData,") -> String {
-        return "fileUUID, userId, deviceUUID, creationDate, updateDate, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes, cloudFolderName"
+        return "fileUUID, userId, deviceUUID, creationDate, updateDate, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes"
     }
     
     private func haveNilFieldForAdd(fileIndex:FileIndex) -> Bool {
-        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil || fileIndex.cloudFolderName == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
@@ -236,7 +228,7 @@ class FileIndexRepository : Repository {
         let creationDateValue = DateExtras.date(fileIndex.creationDate!, toFormat: .DATETIME)
         let updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
 
-        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), '\(fileIndex.cloudFolderName!)');"
+        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -281,12 +273,10 @@ class FileIndexRepository : Repository {
             updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
         }
         let updateDateField = getUpdateFieldSetter(fieldValue: updateDateValue, fieldName: "updateDate")
-
-        let cloudFolderNameField = getUpdateFieldSetter(fieldValue: fileIndex.cloudFolderName, fieldName: "cloudFolderName")
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(cloudFolderNameField) \(deviceUUIDField) \(updateDateField) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -372,7 +362,6 @@ class FileIndexRepository : Repository {
             fileIndex.mimeType = upload.mimeType
             fileIndex.userId = owningUserId
             fileIndex.appMetaData = upload.appMetaData
-            fileIndex.cloudFolderName = upload.cloudFolderName
             
             if upload.fileVersion == 0 {
                 fileIndex.creationDate = upload.creationDate
@@ -477,7 +466,6 @@ class FileIndexRepository : Repository {
             fileInfo.deleted = rowModel.deleted
             fileInfo.fileSizeBytes = rowModel.fileSizeBytes
             fileInfo.mimeType = rowModel.mimeType
-            fileInfo.cloudFolderName = rowModel.cloudFolderName
             fileInfo.creationDate = rowModel.creationDate
             fileInfo.updateDate = rowModel.updateDate
             

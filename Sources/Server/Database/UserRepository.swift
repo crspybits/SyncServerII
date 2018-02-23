@@ -42,6 +42,10 @@ class User : NSObject, Model {
     static let credsKey = "creds"
     var creds:String! // Stored as JSON
     
+    // Only used by some owning user accounts (e.g., Google Drive).
+    static let cloudFolderNameKey = "cloudFolderName"
+    var cloudFolderName: String?
+    
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -68,6 +72,9 @@ class User : NSObject, Model {
             
             case User.credsKey:
                 creds = newValue as! String?
+            
+            case User.cloudFolderNameKey:
+                cloudFolderName = newValue as! String?
                 
             default:
                 assert(false)
@@ -156,6 +163,9 @@ class UserRepository : Repository {
             // Stored as JSON
             "creds TEXT NOT NULL, " +
             
+            // Can be null because only some cloud storage accounts use this and only owning user accounts use this.
+            "cloudFolderName VARCHAR(\(AddUserRequest.maxCloudFolderNameLength)), " +
+            
             // I'm not going to require that the username be unique. The userId is unique.
             
             "UNIQUE (accountType, credsId), " +
@@ -217,8 +227,9 @@ class UserRepository : Repository {
         
         let (owningUserIdFieldValue, owningUserIdFieldName) = getInsertFieldValueAndName(fieldValue: user.owningUserId, fieldName: "owningUserId", fieldIsString: false)
         let (sharingPermissionFieldValue, sharingPermissionFieldName) = getInsertFieldValueAndName(fieldValue: user.sharingPermission, fieldName: User.sharingPermissionKey)
+        let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: user.cloudFolderName, fieldName: User.cloudFolderNameKey)
         
-        let query = "INSERT INTO \(tableName) (username, accountType, userType, credsId, creds \(owningUserIdFieldName) \(sharingPermissionFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.userType.rawValue)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(sharingPermissionFieldValue));"
+        let query = "INSERT INTO \(tableName) (username, accountType, userType, credsId, creds \(owningUserIdFieldName) \(sharingPermissionFieldName) \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.userType.rawValue)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(sharingPermissionFieldValue) \(cloudFolderNameFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()

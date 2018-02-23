@@ -17,6 +17,10 @@ class DropboxCreds : AccountAPICall, Account {
         return .Dropbox
     }
     
+    var owningAccountsNeedCloudFolderName: Bool {
+        return false
+    }
+    
     weak var delegate:AccountDelegate?
     var accountCreationUser:AccountCreationUser?
     

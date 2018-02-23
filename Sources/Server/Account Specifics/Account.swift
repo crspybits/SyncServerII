@@ -29,6 +29,10 @@ protocol AccountDelegate : class {
 protocol Account {
     static var accountType:AccountType {get}
     
+    // Accounts that can only be sharing always need to return false.
+    // Accounts that can be both or can be owning return true iff they need a cloud folder name (e.g., Google Drive).
+    var owningAccountsNeedCloudFolderName: Bool {get}
+    
     weak var delegate:AccountDelegate? {get set}
     
     var accountCreationUser:AccountCreationUser? {get set}
@@ -63,6 +67,19 @@ enum FromJSONError : Swift.Error {
 extension Account {
     var signInType: SignInType {
         return type(of: self).signInType
+    }
+    
+    // Only use this for owning accounts.
+    var cloudFolderName: String? {
+        guard let accountCreationUser = accountCreationUser,
+            case .user(let user) = accountCreationUser,
+            let cloudFolderName = user.cloudFolderName else {
+            assert(!owningAccountsNeedCloudFolderName)
+            return nil
+        }
+        
+        assert(owningAccountsNeedCloudFolderName)
+        return cloudFolderName
     }
     
     func generateTokensIfNeeded(userType:UserType, dbCreds:Account?, routerResponse:RouterResponse, success:@escaping ()->(), failure: @escaping ()->()) {

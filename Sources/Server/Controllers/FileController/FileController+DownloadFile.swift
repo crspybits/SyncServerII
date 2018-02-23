@@ -36,7 +36,6 @@ extension FileController {
                 return
             }
 
-            // TODO: *5* Generalize this to use other cloud storage services.
             guard let cloudStorageCreds = params.effectiveOwningUserCreds as? CloudStorage else {
                 Log.error("Could not obtain CloudStorage Creds")
                 params.completion(nil)
@@ -86,9 +85,6 @@ extension FileController {
             
             // TODO: *5*: Eventually, this should bypass the middle man and stream from the cloud storage service directly to the client.
             
-            // TODO: *1* Hmmm. It seems odd to have the DownloadRequest actually give the cloudFolderName-- seems it should really be stored in the FileIndex. This is because the file, once stored, is really in a specific place in cloud storage.
-            // And, some cloud storage systems don't use the cloudFolderName.
-            
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
             guard let deviceUUID = fileIndexObj!.deviceUUID else {
                 Log.error("No deviceUUID!")
@@ -98,7 +94,14 @@ extension FileController {
             
             let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID, mimeType: fileIndexObj!.mimeType)
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: fileIndexObj!.cloudFolderName!, mimeType: fileIndexObj!.mimeType)
+            // Because we need this to get the cloudFolderName
+            guard params.effectiveOwningUserCreds != nil else {
+                Log.debug("No effectiveOwningUserCreds")
+                params.completion(nil)
+                return
+            }
+            
+            let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: fileIndexObj!.mimeType)
             
             cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
                 switch result {

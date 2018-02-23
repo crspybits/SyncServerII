@@ -204,7 +204,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(fileIndex.deviceUUID == newDeviceUUID)
         XCTAssert(fileIndex.userId == newUserId)
         XCTAssert(fileIndex.mimeType == newMimeType)
-        XCTAssert(fileIndex.cloudFolderName == newCloudFolderName)
         XCTAssert(fileIndex.appMetaData == newAppMetaData)
         XCTAssert(fileIndex.deleted == newDeleted)
         XCTAssert(fileIndex.fileVersion == newFileVersion)
@@ -230,7 +229,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(fileIndex.deviceUUID == nil)
         XCTAssert(fileIndex.userId == nil)
         XCTAssert(fileIndex.mimeType == nil)
-        XCTAssert(fileIndex.cloudFolderName == nil)
         XCTAssert(fileIndex.appMetaData == nil)
         XCTAssert(fileIndex.deleted == nil)
         XCTAssert(fileIndex.fileVersion == nil)
@@ -264,7 +262,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         upload[Upload.appMetaDataKey] = appMetaData
         upload[Upload.fileSizeBytesKey] = fileSizeBytes
         upload[Upload.mimeTypeKey] = mimeType
-        upload[Upload.cloudFolderNameKey] = cloudFolderName
         upload[Upload.creationDateKey] = creationDate
         upload[Upload.updateDateKey] = updateDate
         
@@ -277,7 +274,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(upload.appMetaData == appMetaData)
         XCTAssert(upload.fileSizeBytes == fileSizeBytes)
         XCTAssert(upload.mimeType == mimeType)
-        XCTAssert(upload.cloudFolderName == cloudFolderName)
         XCTAssert(upload.creationDate == creationDate)
         XCTAssert(upload.updateDate == updateDate)
         
@@ -303,7 +299,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(upload.appMetaData == nil)
         XCTAssert(upload.fileSizeBytes == nil)
         XCTAssert(upload.mimeType == nil)
-        XCTAssert(upload.cloudFolderName == nil)
         XCTAssert(upload.creationDate == nil)
         XCTAssert(upload.updateDate == nil)
     }

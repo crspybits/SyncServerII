@@ -61,8 +61,6 @@ class Upload : NSObject, Model, Filenaming {
     // These two are not present in upload deletions.
     static let mimeTypeKey = "mimeType"
     var mimeType: String?
-    static let cloudFolderNameKey = "cloudFolderName"
-    var cloudFolderName: String?
     
     subscript(key:String) -> Any? {
         set {
@@ -99,9 +97,6 @@ class Upload : NSObject, Model, Filenaming {
                 
             case Upload.mimeTypeKey:
                 mimeType = newValue as! String?
-                
-            case Upload.cloudFolderNameKey:
-                cloudFolderName = newValue as! String?
 
             default:
                 assert(false)
@@ -169,9 +164,6 @@ class UploadRepository : Repository {
                 
             // MIME type of the file; will be nil for UploadDeletion's.
             "mimeType VARCHAR(\(Database.maxMimeTypeLength)), " +
-            
-            // Cloud folder name; will be nil for UploadDeletion's.
-            "cloudFolderName VARCHAR(\(Database.maxCloudFolderNameLength)), " +
 
             // Optional app-specific meta data
             "appMetaData TEXT, " +
@@ -221,7 +213,7 @@ class UploadRepository : Repository {
         }
         
         // We're uploading a file if we get to here. Criteria only for file uploads:
-        if upload.mimeType == nil || upload.cloudFolderName == nil || upload.updateDate == nil {
+        if upload.mimeType == nil || upload.updateDate == nil {
             return true
         }
         
@@ -258,8 +250,6 @@ class UploadRepository : Repository {
  
         let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
         
-        let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: upload.cloudFolderName, fieldName: Upload.cloudFolderNameKey)
-        
         var creationDateValue:String?
         var updateDateValue:String?
         
@@ -275,7 +265,7 @@ class UploadRepository : Repository {
         
          let (updateDateFieldValue, updateDateFieldName) = getInsertFieldValueAndName(fieldValue: updateDateValue, fieldName: Upload.updateDateKey)
         
-        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.fileVersionKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(cloudFolderNameFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', \(upload.fileVersion!), '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(cloudFolderNameFieldValue));"
+        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.fileVersionKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', \(upload.fileVersion!), '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue));"
         
         if db.connection.query(statement: query) {
             return .success(uploadId: db.connection.lastInsertId())
@@ -305,9 +295,7 @@ class UploadRepository : Repository {
         
         let mimeTypeField = getUpdateFieldSetter(fieldValue: upload.mimeType, fieldName: "mimeType")
         
-        let cloudFolderNameField = getUpdateFieldSetter(fieldValue: upload.cloudFolderName, fieldName: "cloudFolderName")
-        
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(fileSizeBytesField) \(appMetaDataField) \(mimeTypeField) \(cloudFolderNameField) WHERE uploadId=\(upload.uploadId!)"
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(fileSizeBytesField) \(appMetaDataField) \(mimeTypeField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -411,7 +399,6 @@ class UploadRepository : Repository {
             fileInfo.deleted = upload.state == .toDeleteFromFileIndex
             fileInfo.fileSizeBytes = upload.fileSizeBytes
             fileInfo.mimeType = upload.mimeType
-            fileInfo.cloudFolderName = upload.cloudFolderName
             fileInfo.creationDate = upload.creationDate
             fileInfo.updateDate = upload.updateDate
             

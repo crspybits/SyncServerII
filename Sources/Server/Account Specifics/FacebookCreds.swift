@@ -18,6 +18,10 @@ class FacebookCreds : AccountAPICall,  Account {
     static var accountType:AccountType {
         return .Facebook
     }
+    
+    var owningAccountsNeedCloudFolderName: Bool {
+        return false
+    }
 
     weak var delegate:AccountDelegate?
     

@@ -348,6 +348,7 @@ class RequestHandler : AccountDelegate {
         
         var effectiveOwningUserCreds:Account?
         
+        // For secondary authentication, we'll have a current signed in user.
         if currentSignedInUser != nil {
             let effectiveOwningUserKey = UserRepository.LookupKey.userId(currentSignedInUser!.effectiveOwningUserId)
             Log.debug("currentSignedInUser!.effectiveOwningUserId: \(currentSignedInUser!.effectiveOwningUserId)")

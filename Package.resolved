@@ -204,8 +204,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "57d7e388dfc985a2fc301ed810752b707462294c",
-          "version": "0.12.91"
+          "revision": "3101b94ece6e31d1bac269fd3ebaa7c30a3ed098",
+          "version": "0.12.92"
         }
       },
       {
@@ -213,8 +213,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
         "state": {
           "branch": null,
-          "revision": "712913404fe70ac78f0b7452671659b2b6afe1ae",
-          "version": "0.12.81"
+          "revision": "b04768f4d39c3c3b897eb7614396cb5c847980d0",
+          "version": "0.12.82"
         }
       },
       {
@@ -231,7 +231,7 @@
         "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
           "branch": "master",
-          "revision": "9065af992b800243d63a28d3a1f204b81c2d3118",
+          "revision": "004d865346c2ae840ebaa10c670b6e46c60f2ee6",
           "version": null
         }
       }
