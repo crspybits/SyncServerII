@@ -156,7 +156,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         fileIndex.mimeType = "text/plain"
         fileIndex.userId = userId
         fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
-        fileIndex.cloudFolderName = "Test.Folder"
         fileIndex.creationDate = Date()
         fileIndex.updateDate = Date()
         

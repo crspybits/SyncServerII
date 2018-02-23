@@ -30,7 +30,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
@@ -48,14 +47,13 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersWithIntegersAsStrings() {
@@ -64,14 +62,13 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: "1",
             UploadFileRequest.masterVersionKey: "42"
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(UploadFileRequest.cloudFolderNameKey)=CloudFolder", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersForUploadDeletion() {
@@ -99,7 +96,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
@@ -112,14 +108,12 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: "CloudFolder",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42)
         ])
         
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileUUIDKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.mimeTypeKey))
-        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.cloudFolderNameKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileVersionKey))
         XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.masterVersionKey))
     }

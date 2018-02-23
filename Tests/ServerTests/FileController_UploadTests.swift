@@ -47,7 +47,7 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         let (request, _) = uploadTextFile(deviceUUID:deviceUUID)
         
         // Second upload.
-        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: request.fileUUID, addUser: false, fileVersion: request.fileVersion, masterVersion: request.masterVersion, cloudFolderName: request.cloudFolderName, appMetaData: request.appMetaData)
+        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: request.fileUUID, addUser: false, fileVersion: request.fileVersion, masterVersion: request.masterVersion, appMetaData: request.appMetaData)
     }
 
     func testUploadTextFileWithStringWithSpacesAppMetaData() {

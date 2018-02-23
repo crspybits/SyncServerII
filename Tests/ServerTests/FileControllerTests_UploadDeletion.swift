@@ -221,7 +221,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         self.performServerTest { expectation, creds in
             let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID, mimeType: uploadRequest1.mimeType)
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: uploadRequest1.cloudFolderName!, mimeType: uploadRequest1.mimeType)
+            let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: uploadRequest1.mimeType)
             
             let cloudStorageCreds = creds as! CloudStorage
             cloudStorageCreds.lookupFile(cloudFileName:cloudFileName, options:options) { result in

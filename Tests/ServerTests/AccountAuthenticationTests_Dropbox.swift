@@ -67,7 +67,7 @@ class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
     func testThatDropboxUserHasValidCreds() {
         let deviceUUID = PerfectLib.UUID().string
         
-        addNewUser(testAccount: .dropbox1, deviceUUID:deviceUUID)
+        addNewUser(testAccount: .dropbox1, deviceUUID:deviceUUID, cloudFolderName: nil)
         
         self.performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
             let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)

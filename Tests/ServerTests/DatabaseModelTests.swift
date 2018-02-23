@@ -178,7 +178,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let newDeviceUUID = PerfectLib.UUID().string
         let newUserId = UserId(3226453)
         let newMimeType = "text/plain"
-        let newCloudFolderName = "someFolderName"
         let newAppMetaData = "whatever"
         let newDeleted = false
         let newFileVersion = FileVersionInt(100)
@@ -191,7 +190,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         fileIndex[FileIndex.deviceUUIDKey] = newDeviceUUID
         fileIndex[FileIndex.userIdKey] = newUserId
         fileIndex[FileIndex.mimeTypeKey] = newMimeType
-        fileIndex[FileIndex.cloudFolderNameKey] = newCloudFolderName
         fileIndex[FileIndex.appMetaDataKey] = newAppMetaData
         fileIndex[FileIndex.deletedKey] = newDeleted
         fileIndex[FileIndex.fileVersionKey] = newFileVersion
@@ -216,7 +214,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         fileIndex[FileIndex.deviceUUIDKey] = nil
         fileIndex[FileIndex.userIdKey] = nil
         fileIndex[FileIndex.mimeTypeKey] = nil
-        fileIndex[FileIndex.cloudFolderNameKey] = nil
         fileIndex[FileIndex.appMetaDataKey] = nil
         fileIndex[FileIndex.deletedKey] = nil
         fileIndex[FileIndex.fileVersionKey] = nil
@@ -249,7 +246,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let appMetaData = "arba"
         let fileSizeBytes = Int64(4211)
         let mimeType = "text/plain"
-        let cloudFolderName = "folder"
         let creationDate = Date()
         let updateDate = Date()
         
@@ -286,7 +282,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         upload[Upload.appMetaDataKey] = nil
         upload[Upload.fileSizeBytesKey] = nil
         upload[Upload.mimeTypeKey] = nil
-        upload[Upload.cloudFolderNameKey] = nil
         upload[Upload.creationDateKey] = nil
         upload[Upload.updateDateKey] = nil
         

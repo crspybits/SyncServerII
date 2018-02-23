@@ -66,7 +66,6 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             
             XCTAssert(result[0].creationDate == creationDate)
             
-            XCTAssert(result[0].cloudFolderName == ServerTestCase.cloudFolderName)
             XCTAssert(result[0].mimeType == mimeType)
             XCTAssert(result[0].appMetaData == appMetaData)
             XCTAssert(result[0].deleted == false)

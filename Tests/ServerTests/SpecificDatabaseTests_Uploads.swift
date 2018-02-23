@@ -42,7 +42,6 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.state = .uploading
         upload.userId = userId
         upload.appMetaData = appMetaData
-        upload.cloudFolderName = ServerTestCase.cloudFolderName
         upload.creationDate = Date()
         upload.updateDate = Date()
         

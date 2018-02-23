@@ -97,10 +97,15 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String) {
+    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName) {
+    
+        let addUserRequest = AddUserRequest(json: [
+            AddUserRequest.cloudFolderNameKey : cloudFolderName as Any
+        ])!
+        
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
+            self.performRequest(route: ServerEndpoints.addUser, headers: headers, urlParameters: "?" + addUserRequest.urlParameters()!) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request: \(response!.statusCode)")
                 
@@ -122,7 +127,7 @@ class ServerTestCase : XCTestCase {
     func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
-            self.addNewUser(deviceUUID:deviceUUID)
+            self.addNewUser(deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
         }
         
         var fileUUIDToSend = ""
@@ -146,7 +151,6 @@ class ServerTestCase : XCTestCase {
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUIDToSend,
             UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.cloudFolderNameKey: cloudFolderName as Any,
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.masterVersionKey: masterVersion,
             UploadFileRequest.undeleteServerFileKey: undelete
@@ -245,7 +249,6 @@ class ServerTestCase : XCTestCase {
         guard let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: ServerTestCase.jpegMimeType,
-            UploadFileRequest.cloudFolderNameKey: ServerTestCase.cloudFolderName,
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.appMetaDataKey: appMetaData as Any,
             UploadFileRequest.masterVersionKey: expectedMasterVersion
@@ -332,8 +335,6 @@ class ServerTestCase : XCTestCase {
                             XCTAssert(fileInfo.deleted == expectedDeletionState![fileInfo.fileUUID])
                         }
                         
-                        XCTAssert(expectedFile.cloudFolderName == fileInfo.cloudFolderName)
-                        
                         XCTAssert(expectedFileSizes[fileInfo.fileUUID] == fileInfo.fileSizeBytes)
                     }
                 }
@@ -412,8 +413,6 @@ class ServerTestCase : XCTestCase {
                                 if expectedFileSizes != nil {
                                     XCTAssert(expectedFileSizes![fileInfo.fileUUID] == fileInfo.fileSizeBytes)
                                 }
-                                
-                                XCTAssert(expectedFile.cloudFolderName == fileInfo.cloudFolderName)
                             }
                             
                             if expectedDeletionState == nil {
