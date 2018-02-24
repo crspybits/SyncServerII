@@ -21,7 +21,44 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     
     func testAddUserSucceedsWhenAddingNewUser() {
         let deviceUUID = PerfectLib.UUID().string
-        self.addNewUser(deviceUUID:deviceUUID)
+        let testAccount:TestAccount = .primaryOwningAccount
+        
+        addNewUser(testAccount:testAccount, deviceUUID:deviceUUID) { addUserResponse in
+            guard let addUserResponse = addUserResponse else {
+                XCTFail()
+                return
+            }
+            
+            // Make sure that the database has a cloud folder name-- but only if that account type needs it.
+            if TestAccount.needsCloudFolder(testAccount) {
+                let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)
+                switch result {
+                case .error(let error):
+                    XCTFail("\(error)")
+                    
+                case .found(let object):
+                    let user = object as! User
+                    XCTAssert(user.cloudFolderName == ServerTestCase.cloudFolderName)
+                    
+                case .noObjectFound:
+                    XCTFail("No User Found")
+                }
+            }
+            
+            // Make sure the initial file was created in users cloud storage, if one is configured.
+            if let fileName = Constants.session.owningUserAccountCreation.initialFileName {
+                let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
+                
+                self.lookupFile(testAccount: testAccount, cloudFileName: fileName, options: options) { result in
+                    switch result {
+                    case .success:
+                        break
+                    case .failure:
+                        XCTFail()
+                    }
+                }
+            }
+        }
     }
     
     func testAddUserFailsWhenAddingExistingUser() {

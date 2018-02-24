@@ -73,6 +73,10 @@ struct TestAccount {
         return account.type == .Google
     }
     
+    static func needsCloudFolder(_ account: TestAccount) -> Bool {
+        return account.type == .Google
+    }
+    
     static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", type: .Facebook, tokenType: .FacebookToken)
 
     static let facebook2 = TestAccount(tokenKey: "FacebookLongLivedToken2", idKey: "FacebookId2", type: .Facebook, tokenType: .FacebookToken)

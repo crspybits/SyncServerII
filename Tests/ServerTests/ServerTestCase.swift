@@ -103,8 +103,10 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    private func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions, completion: @escaping ()->()) {
-    
+    private func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) {
+        
+        let expectation = self.expectation(description: "expectation")
+
         switch testAccount.type {
         case .Google:
             let creds = GoogleCreds()
@@ -112,12 +114,12 @@ class ServerTestCase : XCTestCase {
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
                     XCTFail()
-                    completion()
+                    expectation.fulfill()
                     return
                 }
                 
                 creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
-                    completion()
+                    expectation.fulfill()
                 }
             }
             
@@ -126,33 +128,76 @@ class ServerTestCase : XCTestCase {
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
-                completion()
+                expectation.fulfill()
             }
             
         default:
             assert(false)
         }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
     }
     
-    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName) {
+    enum LookupFileError : Error {
+    case errorOrNoAccessToken
+    }
+    
+    func lookupFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions,
+        completion: @escaping (Result<Bool>)->()) {
+    
+        let expectation = self.expectation(description: "expectation")
+    
+        switch testAccount.type {
+        case .Google:
+            let creds = GoogleCreds()
+            creds.refreshToken = testAccount.token()
+            creds.refresh { error in
+                guard error == nil, creds.accessToken != nil else {
+                    XCTFail()
+                    expectation.fulfill()
+                    completion(.failure(LookupFileError.errorOrNoAccessToken))
+                    return
+                }
+            
+                creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                    expectation.fulfill()
+                    completion(result)
+                }
+            }
+            
+        case .Dropbox:
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
+            
+            creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                expectation.fulfill()
+                completion(result)
+            }
+            
+        default:
+            assert(false)
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+    }
+    
+    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName, completion: ((AddUserResponse?)->())? = nil) {
     
         if let fileName = Constants.session.owningUserAccountCreation.initialFileName {
             // Need to delete the initialization file in the test account, so that if we're creating the user test account for a 2nd, 3rd etc time, we don't fail.
             let options = CloudStorageFileNameOptions(cloudFolderName: cloudFolderName, mimeType: "text/plain")
             
-            deleteFile(testAccount: testAccount, cloudFileName: fileName, options: options) {
-                self.addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
-            }
+            deleteFile(testAccount: testAccount, cloudFileName: fileName, options: options)
+            addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, completion:completion)
         }
         else {
-            addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
+            addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, completion:completion)
         }
     }
     
-    private func addNewUser2(testAccount:TestAccount, deviceUUID:String, cloudFolderName: String?) {
+    private func addNewUser2(testAccount:TestAccount, deviceUUID:String, cloudFolderName: String?, completion: ((AddUserResponse?)->())? = nil) {
     
-        // Need to delete the initialization file in the test account, so that when we create the user test account again, we don't fail.
-        
         let addUserRequest = AddUserRequest(json: [
             AddUserRequest.cloudFolderNameKey : cloudFolderName as Any
         ])!
@@ -171,9 +216,11 @@ class ServerTestCase : XCTestCase {
                 
                 if let dict = dict, let addUserResponse = AddUserResponse(json: dict) {
                     XCTAssert(addUserResponse.userId != nil)
+                    completion?(addUserResponse)
                 }
                 else {
                     XCTFail()
+                    completion?(nil)
                 }
                 
                 expectation.fulfill()

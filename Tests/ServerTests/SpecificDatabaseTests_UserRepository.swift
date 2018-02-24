@@ -29,6 +29,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         user1.userType = .owning
+        user1.cloudFolderName = "folder1"
         
         let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == 1, "Bad credentialsId!")
@@ -39,7 +40,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue2\"}"
         user2.credsId = "200"
         user2.userType = .owning
-
+        user2.cloudFolderName = "folder2"
+        
         let result2 = UserRepository(db).add(user: user2)
         XCTAssert(result2 == 2, "Bad credentialsId!")
     }
@@ -123,6 +125,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
             XCTAssert(user.username == "Chris")
             XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
             XCTAssert(user.userId == 1)
+            XCTAssert(user.cloudFolderName == "folder1")
             
         case .noObjectFound:
             XCTFail("No User Found")
@@ -143,6 +146,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
             XCTAssert(user.username == "Chris")
             XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
             XCTAssert(user.userId == 1)
+            XCTAssert(user.cloudFolderName == "folder1")
             
         case .noObjectFound:
             XCTFail("No User Found")
@@ -166,6 +170,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
             XCTAssert(user.username == "Chris")
             XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
             XCTAssert(user.userId == 1)
+            XCTAssert(user.cloudFolderName == "folder1")
+
             guard let credsObject = user.credsObject as? GoogleCreds else {
                 XCTFail()
                 return
