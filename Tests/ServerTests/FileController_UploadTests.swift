@@ -11,6 +11,7 @@ import XCTest
 import LoggerAPI
 import Foundation
 import PerfectLib
+import SyncServerShared
 
 class FileController_UploadTests: ServerTestCase, LinuxTestable {
 
@@ -57,6 +58,26 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     func testUploadTextFileWithJSONAppMetaData() {
         _ = uploadTextFile(appMetaData:"{ \"foo\": \"bar\" }")
     }
+    
+    func testUploadWithInvalidMimeTypeFails() {
+        let testAccount:TestAccount = .primaryOwningAccount
+        let deviceUUID = PerfectLib.UUID().string
+        addNewUser(deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName)
+        
+        let fileUUIDToSend = PerfectLib.UUID().string
+        
+        let uploadString = ServerTestCase.uploadTextFileContents
+        let data = ServerTestCase.uploadTextFileContents.data(using: .utf8)!
+        
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
+            UploadFileRequest.mimeTypeKey: "foobar",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 0
+        ])!
+        
+        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), deviceUUID:deviceUUID, errorExpected: true)
+    }
 }
 
 extension FileController_UploadTests {
@@ -68,6 +89,7 @@ extension FileController_UploadTests {
             ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
             ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
             ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
+            ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails)
         ]
     }
     

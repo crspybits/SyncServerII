@@ -229,6 +229,19 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: request.fileUUID, addUser: false, fileVersion:2, masterVersion: 1, errorExpected: true)
     }
     
+    // Next version uploaded must have the same mimeType
+    func testUploadDifferentVersionWithDifferentMimeTypeFails() {
+        let deviceUUID1 = PerfectLib.UUID().string
+        let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
+        // Send DoneUploads-- to commit version 0.
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        
+        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID1, fileUUID: request.fileUUID, addUser:false, fileVersion:1, expectedMasterVersion:1, errorExpected: true) else {
+            XCTFail()
+            return
+        }
+    }
+    
     func testUploadOfTwoConsecutiveVersionsWithoutADoneUploadsAfterVersion0IsUploadedFails() {
         let deviceUUID1 = PerfectLib.UUID().string
         let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
@@ -349,7 +362,8 @@ extension FileController_MultiVersionFiles {
             ("testFileIndexReportsVariousFileVersions", testFileIndexReportsVariousFileVersions),
             ("testDownloadOfFileVersion3Works", testDownloadOfFileVersion3Works),
             ("testDownloadOfBadVersionFails", testDownloadOfBadVersionFails),
-            ("testDownloadOfBadVersionFails", testDownloadOfBadVersionFails)
+            ("testDownloadOfBadVersionFails", testDownloadOfBadVersionFails),
+            ("testUploadDifferentVersionWithDifferentMimeTypeFails", testUploadDifferentVersionWithDifferentMimeTypeFails)
         ]
     }
     

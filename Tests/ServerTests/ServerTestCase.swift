@@ -15,6 +15,12 @@ import LoggerAPI
 import PerfectLib
 import SyncServerShared
 
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin.C
+#endif
+
 protocol LinuxTestable {
     associatedtype TestClassType
     static var allTests : [(String, (TestClassType) -> () throws -> Void)] {get}
@@ -97,15 +103,69 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
+    private func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions, completion: @escaping ()->()) {
+    
+        switch testAccount.type {
+        case .Google:
+            let creds = GoogleCreds()
+            creds.refreshToken = testAccount.token()
+            creds.refresh { error in
+                guard error == nil, creds.accessToken != nil else {
+                    XCTFail()
+                    completion()
+                    return
+                }
+                
+                creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
+                    completion()
+                }
+            }
+            
+        case .Dropbox:
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
+            creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
+                completion()
+            }
+            
+        default:
+            assert(false)
+        }
+    }
+    
     func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName) {
     
+        if let fileName = Constants.session.owningUserAccountCreation.initialFileName {
+            // Need to delete the initialization file in the test account, so that if we're creating the user test account for a 2nd, 3rd etc time, we don't fail.
+            let options = CloudStorageFileNameOptions(cloudFolderName: cloudFolderName, mimeType: "text/plain")
+            
+            deleteFile(testAccount: testAccount, cloudFileName: fileName, options: options) {
+                self.addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
+            }
+        }
+        else {
+            addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
+        }
+    }
+    
+    private func addNewUser2(testAccount:TestAccount, deviceUUID:String, cloudFolderName: String?) {
+    
+        // Need to delete the initialization file in the test account, so that when we create the user test account again, we don't fail.
+        
         let addUserRequest = AddUserRequest(json: [
             AddUserRequest.cloudFolderNameKey : cloudFolderName as Any
         ])!
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.addUser, headers: headers, urlParameters: "?" + addUserRequest.urlParameters()!) { response, dict in
+            
+            var queryParams:String?
+            if let params = addUserRequest.urlParameters() {
+                queryParams = "?" + params
+            }
+            
+            self.performRequest(route: ServerEndpoints.addUser, headers: headers, urlParameters: queryParams) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request: \(response!.statusCode)")
                 
@@ -228,7 +288,7 @@ class ServerTestCase : XCTestCase {
     
     static let jpegMimeType = "image/jpeg"
     func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string,
-        fileUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil) -> (request: UploadFileRequest, fileSize:Int64)? {
+        fileUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64)? {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
@@ -258,7 +318,7 @@ class ServerTestCase : XCTestCase {
         }
         
         Log.info("Starting runUploadTest: uploadJPEGFile")
-        runUploadTest(data:data, uploadRequest:uploadRequest, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID)
+        runUploadTest(data:data, uploadRequest:uploadRequest, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadJPEGFile")
         return (uploadRequest, sizeOfCatFileInBytes)
     }
