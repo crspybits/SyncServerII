@@ -88,6 +88,12 @@ class UserController : ControllerProtocol {
         user.userType = userType
         
         if params.profileCreds!.owningAccountsNeedCloudFolderName {
+            guard addUserRequest.cloudFolderName != nil else {
+                Log.error("owningAccountsNeedCloudFolderName but no cloudFolderName")
+                params.completion(nil)
+                return
+            }
+            
             user.cloudFolderName = addUserRequest.cloudFolderName
         }
         
