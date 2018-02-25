@@ -5,6 +5,7 @@ Version 0.13.0
 		https://github.com/crspybits/SyncServerII/issues/10
 	* “Constant” files— that don't download
 		https://github.com/crspybits/SyncServerII/issues/46
+		I'm doing this by adding a single initialization "README" type of file to owning user accounts when they are first created.
 	* Only send the cloud folder name when owning accounts are created
 		https://github.com/crspybits/SyncServerII/issues/64
 		

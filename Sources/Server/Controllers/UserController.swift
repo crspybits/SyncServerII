@@ -86,7 +86,10 @@ class UserController : ControllerProtocol {
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType: userType)
         user.userType = userType
-        user.cloudFolderName = addUserRequest.cloudFolderName
+        
+        if params.profileCreds!.owningAccountsNeedCloudFolderName {
+            user.cloudFolderName = addUserRequest.cloudFolderName
+        }
         
         guard params.profileCreds!.signInType.contains(.owningUser) else {
             Log.error("Attempting to add a user with an Account that only allows sharing users!")
