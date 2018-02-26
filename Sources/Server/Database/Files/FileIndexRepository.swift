@@ -189,7 +189,14 @@ class FileIndexRepository : Repository {
                     return .failure(.columnCreation)
                 }
             }
-            break
+            
+            // 2/25/18; Evolution 2: Remove the cloudFolderName column
+            let cloudFolderNameKey = "cloudFolderName"
+            if db.columnExists(cloudFolderNameKey, in: tableName) == true {
+                if !db.removeColumn(cloudFolderNameKey, from: tableName) {
+                    return .failure(.columnRemoval)
+                }
+            }
             
         default:
             break

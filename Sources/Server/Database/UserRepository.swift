@@ -171,7 +171,24 @@ class UserRepository : Repository {
             "UNIQUE (accountType, credsId), " +
             "UNIQUE (userId))"
         
-        return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
+        
+        switch result {
+        case .success(.alreadyPresent):
+            // Table was already there. Do we need to update it?
+            
+            // 2/25/18; Evolution 2: Add cloudFolderName column
+            if db.columnExists(User.cloudFolderNameKey, in: tableName) == false {
+                if !db.addColumn("\(User.cloudFolderNameKey) VARCHAR(\(AddUserRequest.maxCloudFolderNameLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
+        default:
+            break
+        }
+        
+        return result
     }
     
     enum LookupKey : CustomStringConvertible {

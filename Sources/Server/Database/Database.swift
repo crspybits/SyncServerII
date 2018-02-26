@@ -77,6 +77,7 @@ class Database {
         case query
         case tableCreation
         case columnCreation
+        case columnRemoval
     }
     
     enum TableUpcreateResult {
@@ -139,6 +140,17 @@ class Database {
     // column should be something like "newStrCol VARCHAR(255)"
     func addColumn(_ column:String, to tableName:String) -> Bool {
         let query = "ALTER TABLE \(tableName) ADD \(column)"
+        
+        guard connection.query(statement: query) else {
+            Log.error("Failure: \(self.error)")
+            return false
+        }
+        
+        return true
+    }
+    
+    func removeColumn(_ columnName:String, from tableName:String) -> Bool {
+        let query = "ALTER TABLE \(tableName) DROP \(columnName)"
         
         guard connection.query(statement: query) else {
             Log.error("Failure: \(self.error)")

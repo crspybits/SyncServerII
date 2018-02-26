@@ -384,6 +384,11 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         XCTAssert(db.addColumn("newTextColumn TEXT", to: testTableName))
         XCTAssert(!db.addColumn("newTextColumn TEXT", to: testTableName))
     }
+    
+    func testRemoveColumn() {
+        XCTAssert(db.addColumn("newTextColumn TEXT", to: testTableName))
+        XCTAssert(db.removeColumn("newTextColumn", from: testTableName))
+    }
 }
 
 extension GeneralDatabaseTests {
@@ -393,7 +398,8 @@ extension GeneralDatabaseTests {
             ("testSelectForEachRowNotIgnoringErrors", testSelectForEachRowNotIgnoringErrors),
             ("testTypeConverters", testTypeConverters),
             ("testColumnExists", testColumnExists),
-            ("testAddColumn", testAddColumn)
+            ("testAddColumn", testAddColumn),
+            ("testRemoveColumn", testRemoveColumn)
         ]
     }
     

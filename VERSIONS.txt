@@ -1,6 +1,6 @@
 SyncServer
 
-Version 0.13.0
+Version 0.13.0 (2/25/18)
 	* Add: File name extensions in cloud storage
 		https://github.com/crspybits/SyncServerII/issues/10
 	* “Constant” files— that don't download
