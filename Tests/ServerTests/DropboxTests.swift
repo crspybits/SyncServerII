@@ -98,36 +98,6 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    @discardableResult
-    func uploadFile(creds: DropboxCreds, deviceUUID:String, fileContents: String, uploadRequest:UploadFileRequest, failureExpected: Bool = false) -> String {
-        
-        let fileContentsData = fileContents.data(using: .ascii)!
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
-        
-        let exp = expectation(description: "\(#function)\(#line)")
-
-        creds.uploadFile(cloudFileName: cloudFileName, data: fileContentsData) { result in
-            switch result {
-            case .success(let size):
-                XCTAssert(size == fileContents.count)
-                Log.debug("size: \(size)")
-                if failureExpected {
-                    XCTFail()
-                }
-            case .failure(let error):
-                Log.error("uploadFile: \(error)")
-                if !failureExpected {
-                    XCTFail()
-                }
-            }
-            
-            exp.fulfill()
-        }
-        
-        waitForExpectations(timeout: 10, handler: nil)
-        return cloudFileName
-    }
-    
     func testFullUploadWorks() {
         let deviceUUID = PerfectLib.UUID().string
         let fileUUID = PerfectLib.UUID().string
@@ -147,8 +117,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         
         uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)
         
-        // The second time we try it, it should fail-- same file.
-        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest, failureExpected: true)
+        // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
+        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
     func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedContents:String? = nil, expectedFailure: Bool = false) {

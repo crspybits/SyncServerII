@@ -65,6 +65,27 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    // Purpose is to check if second add user fails because the initial file is there.
+    func testAddRemoveAddWorks() {
+        let deviceUUID = PerfectLib.UUID().string
+        let testAccount:TestAccount = .primaryOwningAccount
+        
+        addNewUser(testAccount:testAccount, deviceUUID:deviceUUID)
+        
+        // remove
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "removeUser failed")
+                expectation.fulfill()
+            }
+        }
+        
+        addNewUser(testAccount:testAccount, deviceUUID:deviceUUID)
+    }
+    
     func testCheckCredsWhenUserDoesExist() {
         let deviceUUID = PerfectLib.UUID().string
         self.addNewUser(deviceUUID:deviceUUID)
@@ -155,6 +176,7 @@ extension UserControllerTests {
         return [
             ("testAddUserSucceedsWhenAddingNewUser", testAddUserSucceedsWhenAddingNewUser),
             ("testAddUserFailsWhenAddingExistingUser", testAddUserFailsWhenAddingExistingUser),
+            ("testAddRemoveAddWorks", testAddRemoveAddWorks),
             ("testCheckCredsWhenUserDoesExist", testCheckCredsWhenUserDoesExist),
             ("testCheckCredsWhenUserDoesNotExist", testCheckCredsWhenUserDoesNotExist),
             ("testCheckCredsWithBadAccessToken", testCheckCredsWithBadAccessToken),

@@ -21,6 +21,11 @@ extension UserController {
             case .success:
                 completion(true)
                 
+            case .failure(CloudStorageError.alreadyUploaded):
+                // Not considering it an error when the initial file is already there-- user might be recreating an account.
+                Log.info("Could not upload initial file: It already exists.")
+                completion(true)
+                
             case .failure(let error):
                 // It's possible the file was successfully uploaded, but we got an error anyways. Delete it.
                 cloudStorage.deleteFile(cloudFileName: cloudFileName, options: options) { _ in

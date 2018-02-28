@@ -21,8 +21,13 @@ struct CloudStorageFileNameOptions {
     let mimeType:String
 }
 
+public enum CloudStorageError : Int, Swift.Error {
+    case alreadyUploaded
+}
+
 protocol CloudStorage {
     // On success, Int in result gives file size in bytes on server.
+    // Returns .failure(CloudStorageError.alreadyUploaded) in completion if the named file already exists.
     func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions?,
         completion:@escaping (Result<Int>)->())
     

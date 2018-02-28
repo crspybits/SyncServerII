@@ -11,6 +11,8 @@ import XCTest
 import Foundation
 import HeliumLogger
 import LoggerAPI
+import SyncServerShared
+import PerfectLib
 
 class GoogleDriveTests: ServerTestCase, LinuxTestable {
     // In my Google Drive, at the top-level:
@@ -244,6 +246,40 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testFullUploadWorks() {
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.google1.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            exp.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+        
+        // Do the upload
+        let deviceUUID = PerfectLib.UUID().string
+        let fileUUID = PerfectLib.UUID().string
+        
+        let fileContents = "Hello World"
+
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : fileUUID,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 1
+        ])!
+        
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest, options: options)
+        
+        // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
+        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest, options: options, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+    }
+    
     func downloadFile(cloudFileName:String, expectError:Bool = false) {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
@@ -376,6 +412,7 @@ extension GoogleDriveTests {
             ("testCreateAndDeleteFolder", testCreateAndDeleteFolder),
             ("testDeleteFolderThatDoesNotExistFailure", testDeleteFolderThatDoesNotExistFailure),
             ("testCreateFolderIfDoesNotExist", testCreateFolderIfDoesNotExist),
+            ("testFullUploadWorks", testFullUploadWorks),
             ("testBasicFileDownloadWorks", testBasicFileDownloadWorks),
             ("testSearchForPresentFile2", testSearchForPresentFile2),
             ("testBasicFileDownloadWorks2", testBasicFileDownloadWorks2),

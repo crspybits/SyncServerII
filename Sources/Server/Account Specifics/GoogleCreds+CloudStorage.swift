@@ -319,7 +319,6 @@ extension GoogleCreds : CloudStorage {
     enum UploadError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainFileSize
-    case fileAlreadyExists
     case noCloudFolderName
     case noOptions
     }
@@ -351,7 +350,7 @@ extension GoogleCreds : CloudStorage {
                         self.completeSmallFileUpload(folderId: folderId!, searchType:searchType, cloudFileName: cloudFileName, data: data, mimeType: options.mimeType, completion: completion)
                     }
                     else {
-                        completion(.failure(UploadError.fileAlreadyExists))
+                        completion(.failure(CloudStorageError.alreadyUploaded))
                     }
                 }
                 else {

@@ -143,7 +143,7 @@ extension DropboxCreds : CloudStorage {
             case .success(let found):
                 if found {
                    // Don't need to upload it again.
-                    completion(.failure(UploadFileError.alreadyUploaded))
+                    completion(.failure(CloudStorageError.alreadyUploaded))
                 }
                 else {
                     self.uploadFile(withName: cloudFileName, data: data) { result in

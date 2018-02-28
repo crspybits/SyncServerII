@@ -816,6 +816,46 @@ class ServerTestCase : XCTestCase {
             }*/
         }
     }
+    
+    @discardableResult
+    func uploadFile(creds: CloudStorage, deviceUUID:String, fileContents: String, uploadRequest:UploadFileRequest, options:CloudStorageFileNameOptions? = nil, failureExpected: Bool = false, errorExpected: CloudStorageError? = nil) -> String {
+        
+        let fileContentsData = fileContents.data(using: .ascii)!
+        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        
+        let exp = expectation(description: "\(#function)\(#line)")
+
+        creds.uploadFile(cloudFileName: cloudFileName, data: fileContentsData, options: options) { result in
+            switch result {
+            case .success(let size):
+                XCTAssert(size == fileContents.count)
+                Log.debug("size: \(size)")
+                if failureExpected {
+                    XCTFail()
+                }
+            case .failure(let error):
+                Log.debug("uploadFile: \(error)")
+                if !failureExpected {
+                    XCTFail()
+                }
+                
+                if let errorExpected = errorExpected {
+                    guard let error = error as? CloudStorageError else {
+                        XCTFail()
+                        exp.fulfill()
+                        return
+                    }
+                    
+                    XCTAssert(error == errorExpected)
+                }
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+        return cloudFileName
+    }
 }
 
 extension ServerTestCase : ConstantsDelegate {
