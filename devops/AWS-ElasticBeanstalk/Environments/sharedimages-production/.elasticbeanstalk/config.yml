@@ -5,7 +5,7 @@ global:
   application_name: sharedimages-production
   branch: null
   default_ec2_keyname: amazon1
-  default_platform: Docker 17.06.2-ce
+  default_platform: Docker 17.09.1-ce
   default_region: us-west-2
   include_git_submodules: true
   instance_profile: null
