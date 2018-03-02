@@ -19,7 +19,7 @@ PER SERVER ENVIRONMENT INSTALLS
 * Configure the eb cli for an environment in a folder. I've put mine in subfolders of EBSEnvironments in the repo. See http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configuration.html
 I get rid of the .gitignore files in these directories. I like to put them under version control.
 
-* In your environment folder, add the following to the .elasticbeanstalk/config.yml file in that folder. It tells the eb cli where to find your application bundle, which the make.sh script is going to place on your desktop.
+* In your environment folder, add the following to the `.elasticbeanstalk/config.yml` file in that folder. It tells the eb cli where to find your application bundle, which the make.sh script is going to place on your desktop.
 
 ```
 deploy:
@@ -27,6 +27,18 @@ deploy:
 ```
 
   See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configuration.html#eb-cli3-artifact
+
+* If you later see a message like:
+![update message](EnvironmentUpdateMessage.png)
+you need to change the version of Amazon Linux your environment is running.
+This version is specified in the `.elasticbeanstalk/config.yml` file. For example:
+
+```
+global:
+  ...
+  default_platform: Docker 17.06.2-ce
+```
+
 
 * Create a Server.json file -- this provides the configuration needed by SyncServer. Put that in your environment folder. (I have just put a sym link because I don't want to expose private info in my repo!). Hold off on putting the database specifics into this file. That comes below.
 
