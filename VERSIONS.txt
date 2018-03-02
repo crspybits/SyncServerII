@@ -1,5 +1,10 @@
 SyncServer
 
+Version 0.13.1 (3/1/18)
+	* Updated Amazon Linux version in environments
+	* Standardized return value on cloud storage upload and finding file already exists.
+	* Added tests.
+	
 Version 0.13.0 (2/25/18)
 	* Add: File name extensions in cloud storage
 		https://github.com/crspybits/SyncServerII/issues/10
