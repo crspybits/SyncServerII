@@ -30,8 +30,8 @@ deploy:
 
 * If you later see a message like:
 ![update message](EnvironmentUpdateMessage.png)
-you need to change the version of Amazon Linux your environment is running.
-This version is specified in the `.elasticbeanstalk/config.yml` file. For example:
+
+you need to change the version of Amazon Linux your environment is running. This version is specified in the `.elasticbeanstalk/config.yml` file. For example:
 
 ```
 global:
