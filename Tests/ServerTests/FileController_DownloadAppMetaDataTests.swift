@@ -24,59 +24,6 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
     
-    @discardableResult
-    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersionExpectedWithDownload:Int64, expectUpdatedMasterUpdate:Bool = false, appMetaDataVersion: AppMetaDataVersionInt? = nil, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
-
-        var result:DownloadAppMetaDataResponse?
-        
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
-            let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
-
-            let downloadAppMetaDataRequest = DownloadAppMetaDataRequest(json: [
-                DownloadAppMetaDataRequest.fileUUIDKey: fileUUID,
-                DownloadAppMetaDataRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadAppMetaDataRequest.appMetaDataVersionKey: appMetaDataVersion as Any
-            ])
-            
-            if downloadAppMetaDataRequest == nil {
-                if !expectedError {
-                    XCTFail()
-                }
-                expectation.fulfill()
-                return
-            }
-            
-            self.performRequest(route: ServerEndpoints.downloadAppMetaData, headers: headers, urlParameters: "?" + downloadAppMetaDataRequest!.urlParameters()!, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                
-                if expectedError {
-                    XCTAssert(response!.statusCode != .OK, "Did not work on failing downloadAppMetaDataRequest request")
-                }
-                else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on downloadAppMetaDataRequest request")
-                    
-                    if let dict = dict,
-                        let downloadAppMetaDataResponse = DownloadAppMetaDataResponse(json: dict) {
-                        result = downloadAppMetaDataResponse
-                        if expectUpdatedMasterUpdate {
-                            XCTAssert(downloadAppMetaDataResponse.masterVersionUpdate != nil)
-                        }
-                        else {
-                            XCTAssert(downloadAppMetaDataResponse.masterVersionUpdate == nil)
-                        }
-                    }
-                    else {
-                        XCTFail()
-                    }
-                }
-                
-                expectation.fulfill()
-            }
-        }
-        
-        return result
-    }
-    
     func testDownloadAppMetaDataForBadUUIDFails() {
         let masterVersion: MasterVersionInt = 0
         let deviceUUID = PerfectLib.UUID().string

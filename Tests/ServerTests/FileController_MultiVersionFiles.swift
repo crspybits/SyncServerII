@@ -45,33 +45,30 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         }
         
         // New upload device UUID will go into the FileIndex as that of the new uploading device.
-        getFileIndex(deviceUUID: deviceUUID) { fileInfoArray in
-            guard let fileInfoArray = fileInfoArray, fileInfoArray.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            let result = fileInfoArray.filter({$0.fileUUID == uploadRequest.fileUUID})
-            guard result.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            XCTAssert(result[0].deviceUUID == deviceUUID)
-            XCTAssert(result[0].fileVersion == 1)
-
-            // Make sure updateDate has changed appropriately (server should establish this). Make sure that creationDate hasn't changed.
-            XCTAssert(healthCheck1.currentServerDateTime <= result[0].updateDate!)
-            XCTAssert(healthCheck2.currentServerDateTime >= result[0].updateDate!)
-            
-            XCTAssert(result[0].creationDate == creationDate)
-            
-            XCTAssert(result[0].mimeType == mimeType)
-            XCTAssert(result[0].deleted == false)
-            XCTAssert(result[0].fileVersion == fileVersionToUpload)
-            XCTAssert(result[0].fileSizeBytes == fileSize)
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID), fileInfoArray.count == 1 else {
+            XCTFail()
+            return
         }
         
+        let result = fileInfoArray.filter({$0.fileUUID == uploadRequest.fileUUID})
+        guard result.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(result[0].deviceUUID == deviceUUID)
+        XCTAssert(result[0].fileVersion == 1)
+
+        // Make sure updateDate has changed appropriately (server should establish this). Make sure that creationDate hasn't changed.
+        XCTAssert(healthCheck1.currentServerDateTime <= result[0].updateDate!)
+        XCTAssert(healthCheck2.currentServerDateTime >= result[0].updateDate!)
+        
+        XCTAssert(result[0].creationDate == creationDate)
+        
+        XCTAssert(result[0].mimeType == mimeType)
+        XCTAssert(result[0].deleted == false)
+        XCTAssert(result[0].fileVersion == fileVersionToUpload)
+        XCTAssert(result[0].fileSizeBytes == fileSize)
         
         guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData.contents, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest, fileSize: fileSize) else {
             XCTFail()
@@ -93,14 +90,12 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         
         var creationDate:Date!
         
-        getFileIndex(deviceUUID: deviceUUID1) { fileInfoArray in
-            guard let fileInfoArray = fileInfoArray, fileInfoArray.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            creationDate = fileInfoArray[0].creationDate
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1), fileInfoArray.count == 1 else {
+            XCTFail()
+            return
         }
+        
+        creationDate = fileInfoArray[0].creationDate
         
         guard creationDate != nil else {
             XCTFail()
@@ -131,21 +126,19 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
 
         _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: request.fileUUID, addUser: false, fileVersion:0, masterVersion: 1, errorExpected: true)
         
-        getFileIndex(deviceUUID: deviceUUID1) { fileInfoArray in
-            guard let fileInfoArray = fileInfoArray, fileInfoArray.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            let result = fileInfoArray.filter({$0.fileUUID == request.fileUUID})
-            guard result.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            XCTAssert(result[0].deviceUUID == deviceUUID1)
-            XCTAssert(result[0].fileVersion == 0)
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1), fileInfoArray.count == 1 else {
+            XCTFail()
+            return
         }
+        
+        let result = fileInfoArray.filter({$0.fileUUID == request.fileUUID})
+        guard result.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(result[0].deviceUUID == deviceUUID1)
+        XCTAssert(result[0].fileVersion == 0)
     }
 
     func testUploadVersion1OfNewFileFails() {
@@ -200,17 +193,15 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 1)
         
         // Make sure the file contents are right.
-        getFileIndex(deviceUUID: deviceUUID1) { fileInfoArray in
-            guard let fileInfoArray = fileInfoArray, fileInfoArray.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            let result = fileInfoArray.filter({$0.fileUUID == uploadRequest.fileUUID})
-            guard result.count == 1 else {
-                XCTFail()
-                return
-            }
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1), fileInfoArray.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        let result = fileInfoArray.filter({$0.fileUUID == uploadRequest.fileUUID})
+        guard result.count == 1 else {
+            XCTFail()
+            return
         }
         
         guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: 2, appMetaData: self.appMetaData, downloadFileVersion: 1, uploadFileRequest: uploadRequest2, fileSize: fileSize2) else {
@@ -289,21 +280,19 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     }
     
     func checkFileIndex(deviceUUID:String, fileUUID:String, fileVersion:Int32) {
-        getFileIndex(deviceUUID: deviceUUID) { fileInfoArray in
-            guard let fileInfoArray = fileInfoArray else {
-                XCTFail()
-                return
-            }
-            
-            let result = fileInfoArray.filter({$0.fileUUID == fileUUID})
-            guard result.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            XCTAssert(result[0].deviceUUID == deviceUUID)
-            XCTAssert(result[0].fileVersion == fileVersion)
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID) else {
+            XCTFail()
+            return
         }
+        
+        let result = fileInfoArray.filter({$0.fileUUID == fileUUID})
+        guard result.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(result[0].deviceUUID == deviceUUID)
+        XCTAssert(result[0].fileVersion == fileVersion)
     }
     
     // MARK: File Index

@@ -90,7 +90,10 @@ extension FileController {
         case .uploads(let uploads):
             Log.debug("Number of file uploads and upload deletions: \(uploads.count)")
             // 1) Filter out uploaded files with versions > 0 -- for the stale file versions. Note that we're not including files with status `uploadedUndelete`-- we don't need to delete any stale versions for these.
-            staleVersionsFromUploads = uploads.filter({$0.fileVersion > 0 && $0.state == .uploadedFile})
+            staleVersionsFromUploads = uploads.filter({
+                // The left to right order of these checks is important-- check the state first. If the state is uploadingAppMetaData, there will be a nil fileVersion and don't want to check that.
+                $0.state == .uploadedFile && $0.fileVersion > 0
+            })
             
             // 2) Filter out upload deletions
             uploadDeletions = uploads.filter({$0.state == .toDeleteFromFileIndex})

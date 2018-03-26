@@ -254,21 +254,31 @@ class FileIndexRepository : Repository {
         }
     }
     
-    private func haveNilFieldForUpdate(fileIndex:FileIndex, deleting:Bool = false) -> Bool {
-        let result = fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil
+    private func haveNilFieldForUpdate(fileIndex:FileIndex, updateType: UpdateType) -> Bool {
+        let result = fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.deleted == nil
         
-        if deleting {
+        switch updateType {
+        case .uploadDeletion:
+            return result || fileIndex.fileVersion == nil
+            
+        case .uploadAppMetaData:
             return result
-        }
-        else {
-            return result || fileIndex.deviceUUID == nil
+            
+        case .uploadFile:
+            return result || fileIndex.fileVersion == nil || fileIndex.deviceUUID == nil
         }
     }
     
+    enum UpdateType {
+        case uploadFile
+        case uploadDeletion
+        case uploadAppMetaData
+    }
+    
     // The FileIndex model *must* have a fileIndexId
-    func update(fileIndex:FileIndex, deleting:Bool = false) -> Bool {
+    func update(fileIndex:FileIndex, updateType: UpdateType = .uploadFile) -> Bool {
         if fileIndex.fileIndexId == nil ||
-            haveNilFieldForUpdate(fileIndex: fileIndex, deleting:deleting) {
+            haveNilFieldForUpdate(fileIndex: fileIndex, updateType:updateType) {
             Log.error("One of the model values was nil: \(fileIndex)")
             return false
         }
@@ -284,6 +294,8 @@ class FileIndexRepository : Repository {
 
         let deviceUUIDField = getUpdateFieldSetter(fieldValue: fileIndex.deviceUUID, fieldName: FileIndex.deviceUUIDKey)
         
+        let fileVersionField = getUpdateFieldSetter(fieldValue: fileIndex.fileVersion, fieldName: FileIndex.fileVersionKey, fieldIsString: false)
+        
         var updateDateValue:String?
         if fileIndex.updateDate != nil {
             updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
@@ -292,7 +304,7 @@ class FileIndexRepository : Repository {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.userIdKey)=\(fileIndex.userId!), \(FileIndex.deletedKey)=\(deletedValue), \(FileIndex.fileVersionKey)=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.userIdKey)=\(fileIndex.userId!), \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -422,7 +434,15 @@ class FileIndexRepository : Repository {
 
                 fileIndex.fileIndexId = existingFileIndex.fileIndexId
                 
-                guard self.update(fileIndex: fileIndex, deleting: uploadDeletion) else {
+                var updateType:UpdateType = .uploadFile
+                if uploadDeletion {
+                    updateType = .uploadDeletion
+                }
+                else if upload.state == .uploadingAppMetaData {
+                    updateType = .uploadAppMetaData
+                }
+                
+                guard self.update(fileIndex: fileIndex, updateType: updateType) else {
                     Log.error("Could not update FileIndex!")
                     error = true
                     return
@@ -497,6 +517,7 @@ class FileIndexRepository : Repository {
             fileInfo.mimeType = rowModel.mimeType
             fileInfo.creationDate = rowModel.creationDate
             fileInfo.updateDate = rowModel.updateDate
+            fileInfo.appMetaDataVersion = rowModel.appMetaDataVersion
             
             result.append(fileInfo)
         }

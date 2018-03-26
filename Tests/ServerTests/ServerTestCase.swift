@@ -79,6 +79,59 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
+    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersionExpectedWithDownload:Int64, expectUpdatedMasterUpdate:Bool = false, appMetaDataVersion: AppMetaDataVersionInt? = nil, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
+
+        var result:DownloadAppMetaDataResponse?
+        
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+
+            let downloadAppMetaDataRequest = DownloadAppMetaDataRequest(json: [
+                DownloadAppMetaDataRequest.fileUUIDKey: fileUUID,
+                DownloadAppMetaDataRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
+                DownloadAppMetaDataRequest.appMetaDataVersionKey: appMetaDataVersion as Any
+            ])
+            
+            if downloadAppMetaDataRequest == nil {
+                if !expectedError {
+                    XCTFail()
+                }
+                expectation.fulfill()
+                return
+            }
+            
+            self.performRequest(route: ServerEndpoints.downloadAppMetaData, headers: headers, urlParameters: "?" + downloadAppMetaDataRequest!.urlParameters()!, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                
+                if expectedError {
+                    XCTAssert(response!.statusCode != .OK, "Did not work on failing downloadAppMetaDataRequest request")
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on downloadAppMetaDataRequest request")
+                    
+                    if let dict = dict,
+                        let downloadAppMetaDataResponse = DownloadAppMetaDataResponse(json: dict) {
+                        result = downloadAppMetaDataResponse
+                        if expectUpdatedMasterUpdate {
+                            XCTAssert(downloadAppMetaDataResponse.masterVersionUpdate != nil)
+                        }
+                        else {
+                            XCTAssert(downloadAppMetaDataResponse.masterVersionUpdate == nil)
+                        }
+                    }
+                    else {
+                        XCTFail()
+                    }
+                }
+                
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
+    @discardableResult
     func healthCheck() -> HealthCheckResponse? {
         var result:HealthCheckResponse?
         
@@ -473,7 +526,8 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(deviceUUID:String = PerfectLib.UUID().string, completion: @escaping ([FileInfo]?) -> ()) {
+    func getFileIndex(deviceUUID:String = PerfectLib.UUID().string) -> [FileInfo]? {
+        var result:[FileInfo]?
         
         self.performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -485,14 +539,16 @@ class ServerTestCase : XCTestCase {
                 
                 guard let fileIndexResponse = FileIndexResponse(json: dict!) else {
                     expectation.fulfill()
-                    completion(nil)
+                    XCTFail()
                     return
                 }
                 
+                result = fileIndexResponse.fileIndex
                 expectation.fulfill()
-                completion(fileIndexResponse.fileIndex)
             }
         }
+        
+        return result
     }
     
     func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = PerfectLib.UUID().string,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil) {
@@ -778,50 +834,36 @@ class ServerTestCase : XCTestCase {
     }
     
     func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date) {
-        getFileIndex() { fileInfo in
-            let file = fileInfo!.filter({$0.fileUUID == fileUUID})[0]
-            // let comp1 = file.creationDate!.compare(start)
-            
-            // I've been having problems here comparing dates. It seems that this is akin to the problem of comparing real numbers, and the general rule that you shouldn't test real numbers for equality. To help in this, I'm going to just use the mm/dd/yy and hh:mm:ss components of the dates.
-            func clean(_ date: Date) -> Date {
-                let orig = Calendar.current.dateComponents(
-                    [.day, .month, .year, .hour, .minute, .second], from: date)
-
-                var new = DateComponents()
-                new.day = orig.day
-                new.month = orig.month
-                new.year = orig.year
-                new.hour = orig.hour
-                new.minute = orig.minute
-                new.second = orig.second
-
-                return Calendar.current.date(from: new)!
-            }
-            
-            let cleanCreationDate = clean(file.creationDate!)
-            let cleanStart = clean(start)
-            let cleanEnd = clean(end)
-            
-            XCTAssert(cleanStart <= cleanCreationDate, "start: \(cleanStart); file.creationDate: \(cleanCreationDate)")
-            XCTAssert(cleanCreationDate <= cleanEnd, "file.creationDate: \(cleanCreationDate); end: \(cleanEnd)")
-            
-            /*
-            switch comp1 {
-            case .orderedDescending, .orderedSame:
-                break
-            default:
-                XCTAssert(false)
-            }
-            
-            let comp2 = file.creationDate!.compare(end)
-            
-            switch comp2 {
-            case .orderedAscending, .orderedSame:
-                break
-            default:
-                XCTAssert(false)
-            }*/
+        guard let fileInfo = getFileIndex() else {
+            XCTFail()
+            return
         }
+
+        let file = fileInfo.filter({$0.fileUUID == fileUUID})[0]
+        // let comp1 = file.creationDate!.compare(start)
+        
+        // I've been having problems here comparing dates. It seems that this is akin to the problem of comparing real numbers, and the general rule that you shouldn't test real numbers for equality. To help in this, I'm going to just use the mm/dd/yy and hh:mm:ss components of the dates.
+        func clean(_ date: Date) -> Date {
+            let orig = Calendar.current.dateComponents(
+                [.day, .month, .year, .hour, .minute, .second], from: date)
+
+            var new = DateComponents()
+            new.day = orig.day
+            new.month = orig.month
+            new.year = orig.year
+            new.hour = orig.hour
+            new.minute = orig.minute
+            new.second = orig.second
+
+            return Calendar.current.date(from: new)!
+        }
+        
+        let cleanCreationDate = clean(file.creationDate!)
+        let cleanStart = clean(start)
+        let cleanEnd = clean(end)
+        
+        XCTAssert(cleanStart <= cleanCreationDate, "start: \(cleanStart); file.creationDate: \(cleanCreationDate)")
+        XCTAssert(cleanCreationDate <= cleanEnd, "file.creationDate: \(cleanCreationDate); end: \(cleanEnd)")
     }
     
     @discardableResult

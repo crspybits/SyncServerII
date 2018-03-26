@@ -303,15 +303,18 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
         
         // Get the file index and make sure the file is not marked as deleted.
-        getFileIndex(deviceUUID: deviceUUID) { fileIndex in
-            guard let fileIndex = fileIndex, fileIndex.count == 1 else {
-                XCTFail()
-                return
-            }
-            
-            XCTAssert(fileIndex[0].fileUUID == uploadRequest.fileUUID)
-            XCTAssert(fileIndex[0].deleted == false)
+        guard let fileIndex = getFileIndex(deviceUUID: deviceUUID) else {
+            XCTFail()
+            return
         }
+        
+        guard fileIndex.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(fileIndex[0].fileUUID == uploadRequest.fileUUID)
+        XCTAssert(fileIndex[0].deleted == false)
     }
     
     func testUploadUndeleteWorks() {

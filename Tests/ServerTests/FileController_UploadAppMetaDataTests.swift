@@ -76,25 +76,61 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     // UploadAppMetaData for a file that doesn't exist.
 
     // UploadAppMetaData, then use regular download to retrieve.
-    // In testing for successful UploadAppMetaData calls, need to make sure the FileIndex has been changed appropriately.
+    // In testing for successful UploadAppMetaData calls, need to make sure the FileIndex has been changed appropriately. Make sure the deviceUUID has *not* changed due to the app meta data update.
     func testSuccessUsingDownloadToCheck() {
         var masterVersion: MasterVersionInt = 0
         let deviceUUID = PerfectLib.UUID().string
         let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
         
-        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1)
+        let (uploadRequest, fileSizeBytes) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
         masterVersion += 1
         
+        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID), fileInfoObjs1.count == 1 else {
+            XCTFail()
+            return
+        }
+        let fileInfo1 = fileInfoObjs1[0]
+        
         let appMetaData2 = AppMetaData(version: 1, contents: "Test2")
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2)
+        let deviceUUID2 = PerfectLib.UUID().string
+
+        // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadRequest.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion)
+        masterVersion += 1
+        
+        guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData2.version, expectedError: false) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(downloadAppMetaDataResponse.appMetaData == appMetaData2.contents)
+    
+        guard let fileInfoObjs2 = getFileIndex(deviceUUID: deviceUUID), fileInfoObjs2.count == 1 else {
+            XCTFail()
+            return
+        }
+        let fileInfo2 = fileInfoObjs2[0]
+        
+        XCTAssert(fileInfo2.fileUUID == uploadRequest.fileUUID)
+        XCTAssert(fileInfo2.deviceUUID == deviceUUID)
+        
+        // Updating app meta data doesn't change dates.
+        XCTAssert(fileInfo2.creationDate == fileInfo1.creationDate)
+        XCTAssert(fileInfo2.updateDate == fileInfo1.updateDate)
+        
+        XCTAssert(fileInfo2.mimeType == uploadRequest.mimeType)
+        XCTAssert(fileInfo2.deleted == false)
+        
+        XCTAssert(fileInfo2.appMetaDataVersion == appMetaData2.version)
+        XCTAssert(fileInfo2.fileVersion == 0)
+        XCTAssert(fileInfo2.fileSizeBytes == fileSizeBytes)
     }
     
     // UploadAppMetaData, then use DownloadAppMetaData to retrieve.
     
     // UploadAppMetaData, of an initially nil app meta data.
-    
-    // Make sure masterVersion gets updated by an app meta data update.
     
 }
 
