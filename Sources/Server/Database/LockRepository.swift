@@ -11,6 +11,7 @@
 import Foundation
 import PerfectLib
 import SyncServerShared
+import LoggerAPI
 
 class Lock : NSObject, Model {
     static let userIdKey = "userId"
@@ -121,13 +122,13 @@ class LockRepository : Repository {
     // removeStale indicates whether to remove any lock, held by the user, past its expiry prior to attempting to obtain lock.
     func lock(lock:Lock, removeStale:Bool = true) -> LockAttemptResult {
         if lock.userId == nil || lock.deviceUUID == nil || lock.expiry == nil {
-            Log.error(message: "One of the model values was nil!")
+            Log.error("One of the model values was nil!")
             return .modelValueWasNil
         }
         
         if removeStale {
             if removeStaleLock(forUserId: lock.userId!) == nil {
-                Log.error(message: "Error removing stale locks!")
+                Log.error("Error removing stale locks!")
                 return .errorRemovingStaleLocks
             }
         }
@@ -140,7 +141,7 @@ class LockRepository : Repository {
         let query = "INSERT INTO \(tableName) (userId, deviceUUID, expiry) VALUES(\(lock.userId!), '\(lock.deviceUUID!)', '\(expiry)');"
         
         if db.connection.query(statement: query) {
-            Log.info(message: "Sucessfully obtained lock!!")
+            Log.info("Sucessfully obtained lock!!")
             return .success
         }
         else if db.connection.errorCode() == Database.duplicateEntryForKey {
@@ -148,7 +149,7 @@ class LockRepository : Repository {
         }
         else {
             let error = db.error
-            Log.error(message: "Could not insert into \(tableName): \(error)")
+            Log.error("Could not insert into \(tableName): \(error)")
             return .otherError
         }
     }
@@ -167,12 +168,12 @@ class LockRepository : Repository {
         
         if db.connection.query(statement: query) {
             let numberLocksRemoved = Int(db.connection.numberAffectedRows())
-            Log.info(message: "Number of stale locks removed: \(numberLocksRemoved)")
+            Log.info("Number of stale locks removed: \(numberLocksRemoved)")
             return numberLocksRemoved
         }
         else {
             let error = db.error
-            Log.error(message: "Could not remove stale lock: \(error)")
+            Log.error("Could not remove stale lock: \(error)")
             return nil
         }
     }
@@ -181,12 +182,12 @@ class LockRepository : Repository {
         let query = "DELETE FROM \(tableName) WHERE userId = \(userId)"
         
         if db.connection.query(statement: query) {
-            Log.info(message: "Sucessfully released lock!!")
+            Log.info("Sucessfully released lock!!")
             return true
         }
         else {
             let error = db.error
-            Log.error(message: "Could not unlock: \(error)")
+            Log.error("Could not unlock: \(error)")
             return false
         }
     }

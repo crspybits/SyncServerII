@@ -97,6 +97,12 @@
       ]
     },
     {
+      "name": "FileController_DownloadAppMetaDataTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
       "name": "FileControllerTests",
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1"
@@ -146,6 +152,12 @@
     },
     {
       "name": "FileController_MultiVersionFiles",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "FileController_DownloadAppMetaDataTests",
       "parameters": [
         "PRIMARY_OWNING_DROPBOX1"
       ]

@@ -256,7 +256,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             XCTAssert(fileIndex.count == 1)
-            XCTAssert(fileIndexInserted.appMetaData == fileIndex[0].appMetaData)
             XCTAssert(fileIndexInserted.fileUUID == fileIndex[0].fileUUID)
             XCTAssert(fileIndexInserted.fileVersion == fileIndex[0].fileVersion)
             XCTAssert(fileIndexInserted.mimeType == fileIndex[0].mimeType)

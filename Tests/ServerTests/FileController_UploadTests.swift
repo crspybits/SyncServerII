@@ -52,11 +52,11 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     }
 
     func testUploadTextFileWithStringWithSpacesAppMetaData() {
-        _ = uploadTextFile(appMetaData:"A Simple String")
+        _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "A Simple String"))
     }
     
     func testUploadTextFileWithJSONAppMetaData() {
-        _ = uploadTextFile(appMetaData:"{ \"foo\": \"bar\" }")
+        _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"))
     }
     
     func testUploadWithInvalidMimeTypeFails() {

@@ -42,6 +42,9 @@ class FileIndex : NSObject, Model, Filenaming {
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
     
+    static let appMetaDataVersionKey = "appMetaDataVersion"
+    var appMetaDataVersion: AppMetaDataVersionInt?
+    
     static let deletedKey = "deleted"
     var deleted:Bool!
     
@@ -77,6 +80,9 @@ class FileIndex : NSObject, Model, Filenaming {
                 
             case FileIndex.appMetaDataKey:
                 appMetaData = newValue as! String?
+                
+            case FileIndex.appMetaDataVersionKey:
+                appMetaDataVersion = newValue as! AppMetaDataVersionInt?
             
             case FileIndex.deletedKey:
                 deleted = newValue as! Bool?
@@ -124,7 +130,7 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes)"
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes)"
     }
 }
 
@@ -168,6 +174,9 @@ class FileIndexRepository : Repository {
             "deleted BOOL NOT NULL, " +
             
             "fileVersion INT NOT NULL, " +
+            
+            // Making this optional because appMetaData is optional. If there is app meta data, this must not be null.
+            "appMetaDataVersion INT, " +
 
             "fileSizeBytes BIGINT NOT NULL, " +
 
@@ -198,15 +207,18 @@ class FileIndexRepository : Repository {
                 }
             }
             
+            // 3/23/18; Evolution 3: Add the appMetaDataVersion column.
+            if db.columnExists(FileIndex.appMetaDataVersionKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.appMetaDataVersionKey) INT", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
         default:
             break
         }
         
         return result
-    }
-    
-    private func columnNames(appMetaDataFieldName:String = "appMetaData,") -> String {
-        return "fileUUID, userId, deviceUUID, creationDate, updateDate, mimeType, \(appMetaDataFieldName) deleted, fileVersion, fileSizeBytes"
     }
     
     private func haveNilFieldForAdd(fileIndex:FileIndex) -> Bool {
@@ -219,23 +231,18 @@ class FileIndexRepository : Repository {
             Log.error("One of the model values was nil: \(fileIndex)")
             return nil
         }
-    
-        var appMetaDataFieldValue = ""
-        var columns = columnNames(appMetaDataFieldName: "")
-        
-        if fileIndex.appMetaData != nil {
-            // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-            appMetaDataFieldValue = ", '\(fileIndex.appMetaData!)'"
-            
-            columns = columnNames()
-        }
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
         let creationDateValue = DateExtras.date(fileIndex.creationDate!, toFormat: .DATETIME)
         let updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
+        
+        // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
+        let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.appMetaData, fieldName: Upload.appMetaDataKey)
 
-        let query = "INSERT INTO \(tableName) (\(columns)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)' \(appMetaDataFieldValue), \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!));"
+        let (appMetaDataVersionFieldValue, appMetaDataVersionFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.appMetaDataVersion, fieldName: Upload.appMetaDataVersionKey, fieldIsString:false)
+        
+        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.fileSizeBytesKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) );"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -267,23 +274,25 @@ class FileIndexRepository : Repository {
         }
         
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-        let appMetaDataField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaData, fieldName: "appMetaData")
+        let appMetaDataField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaData, fieldName: FileIndex.appMetaDataKey)
 
-        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: fileIndex.fileSizeBytes, fieldName: "fileSizeBytes", fieldIsString: false)
+        let appMetaDataVersionField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaDataVersion, fieldName: FileIndex.appMetaDataVersionKey, fieldIsString: false)
         
-        let mimeTypeField = getUpdateFieldSetter(fieldValue: fileIndex.mimeType, fieldName: "mimeType")
+        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: fileIndex.fileSizeBytes, fieldName: FileIndex.fileSizeBytesKey, fieldIsString: false)
         
-        let deviceUUIDField = getUpdateFieldSetter(fieldValue: fileIndex.deviceUUID, fieldName: "deviceUUID")
+        let mimeTypeField = getUpdateFieldSetter(fieldValue: fileIndex.mimeType, fieldName: FileIndex.mimeTypeKey)
+
+        let deviceUUIDField = getUpdateFieldSetter(fieldValue: fileIndex.deviceUUID, fieldName: FileIndex.deviceUUIDKey)
         
         var updateDateValue:String?
         if fileIndex.updateDate != nil {
             updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
         }
-        let updateDateField = getUpdateFieldSetter(fieldValue: updateDateValue, fieldName: "updateDate")
+        let updateDateField = getUpdateFieldSetter(fieldValue: updateDateValue, fieldName: FileIndex.updateDateKey)
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET fileUUID='\(fileIndex.fileUUID!)', userId=\(fileIndex.userId!), deleted=\(deletedValue), fileVersion=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) WHERE fileIndexId=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.userIdKey)=\(fileIndex.userId!), \(FileIndex.deletedKey)=\(deletedValue), \(FileIndex.fileVersionKey)=\(fileIndex.fileVersion!) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -360,21 +369,30 @@ class FileIndexRepository : Repository {
             fileIndex.deleted = uploadDeletion
             fileIndex.fileUUID = upload.fileUUID
             
-            // If this an uploadDeletion, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
-            if !uploadDeletion {
+            // If this an uploadDeletion or updating app meta data, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
+            if !uploadDeletion && upload.state != .uploadingAppMetaData {
                 fileIndex.deviceUUID = uploadingDeviceUUID
             }
             
-            fileIndex.fileVersion = upload.fileVersion
             fileIndex.mimeType = upload.mimeType
             fileIndex.userId = owningUserId
             fileIndex.appMetaData = upload.appMetaData
+            fileIndex.appMetaDataVersion = upload.appMetaDataVersion
             
-            if upload.fileVersion == 0 {
-                fileIndex.creationDate = upload.creationDate
+            if let uploadFileVersion = upload.fileVersion {
+                fileIndex.fileVersion = uploadFileVersion
+
+                if uploadFileVersion == 0 {
+                    fileIndex.creationDate = upload.creationDate
+                }
+                
+                fileIndex.updateDate = upload.updateDate
             }
-            
-            fileIndex.updateDate = upload.updateDate
+            else if upload.state != .uploadingAppMetaData {
+                Log.error("No file version, and not uploading app meta data.")
+                error = true
+                return
+            }
             
             let key = LookupKey.primaryKeys(userId: "\(owningUserId)", fileUUID: upload.fileUUID)
             let result = self.lookup(key: key, modelInit: FileIndex.init)
@@ -394,7 +412,7 @@ class FileIndexRepository : Repository {
                         return
                     }
                 }
-                else {
+                else if upload.state != .uploadingAppMetaData {
                     guard upload.fileVersion == existingFileIndex.fileVersion + FileVersionInt(1) else {
                         Log.error("Did not have next version of file!")
                         error = true
@@ -411,7 +429,12 @@ class FileIndexRepository : Repository {
                 }
                 
             case .noObjectFound:
-                if uploadDeletion {
+                if upload.state == .uploadingAppMetaData {
+                    Log.error("Attempting to upload app meta data for a file not present in the file index: \(key)!")
+                    error = true
+                    return
+                }
+                else if uploadDeletion {
                     Log.error("Attempting to delete a file not present in the file index: \(key)!")
                     error = true
                     return
@@ -468,7 +491,6 @@ class FileIndexRepository : Repository {
             let fileInfo = FileInfo()!
             fileInfo.fileUUID = rowModel.fileUUID
             fileInfo.deviceUUID = rowModel.deviceUUID
-            fileInfo.appMetaData = rowModel.appMetaData
             fileInfo.fileVersion = rowModel.fileVersion
             fileInfo.deleted = rowModel.deleted
             fileInfo.fileSizeBytes = rowModel.fileSizeBytes

@@ -13,6 +13,35 @@ import CredentialsGoogle
 import SyncServerShared
 
 class FileController : ControllerProtocol {
+    enum CheckError : Error {
+        case couldNotConvertModelObject
+        case errorLookingUpInFileIndex
+    }
+    
+    // Result is nil if there is no existing file in the FileIndex. Throws an error if there is an error.
+    static func checkForExistingFile(params:RequestProcessingParameters, fileUUID: String) throws -> FileIndex? {
+        let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: fileUUID)
+
+        let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
+
+        switch lookupResult {
+        case .found(let modelObj):
+            guard let fileIndexObj = modelObj as? FileIndex else {
+                Log.error("Could not convert model object to FileIndex")
+                throw CheckError.couldNotConvertModelObject
+            }
+            
+            return fileIndexObj
+            
+        case .noObjectFound:
+            return nil
+            
+        case .error(let error):
+            Log.error("Error looking up file in FileIndex: \(error)")
+            throw CheckError.errorLookingUpInFileIndex
+        }
+    }
+    
     // Don't do this setup in init so that database initalizations don't have to be done per endpoint call.
     class func setup(db:Database) -> Bool {
         if case .failure(_) = UploadRepository(db).upcreate() {

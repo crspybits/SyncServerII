@@ -40,16 +40,16 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
     func testDoneUploadsWithTwoUploads() {
         let deviceUUID = PerfectLib.UUID().string
         _ = uploadTextFile(deviceUUID:deviceUUID)
-        Log.info(message: "Done uploadTextFile")
+        Log.info("Done uploadTextFile")
         
         guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
             XCTFail()
             return
         }
         
-        Log.info(message: "Done uploadJPEGFile")
+        Log.info("Done uploadJPEGFile")
         self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
-        Log.info(message: "Done sendDoneUploads")
+        Log.info("Done sendDoneUploads")
     }
     
     func testDoneUploadsThatUpdatesFileVersion() {

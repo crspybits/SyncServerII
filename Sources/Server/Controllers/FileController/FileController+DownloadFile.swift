@@ -77,6 +77,12 @@ extension FileController {
                 return
             }
             
+            guard downloadRequest.appMetaDataVersion == fileIndexObj!.appMetaDataVersion else {
+                Log.error("Expected app meta data version \(String(describing: downloadRequest.appMetaDataVersion)) was not the same as the actual version \(String(describing: fileIndexObj!.appMetaDataVersion))")
+                params.completion(nil)
+                return
+            }
+            
             if fileIndexObj!.deleted! {
                 Log.error("The file you are trying to download has been deleted!")
                 params.completion(nil)

@@ -28,4 +28,6 @@ XCTMain([
     testCase(SpecificDatabaseTests_UserRepository.allTests),
     testCase(UserControllerTests.allTests),
     testCase(VersionTests.allTests),
+    testCase(FileController_DownloadAppMetaDataTests.allTests),
+    testCase(FileController_UploadAppMetaDataTests.allTests)
 ])

@@ -1,5 +1,14 @@
 SyncServer
 
+Version 0.14.0
+	* Multi version app meta data per file
+		https://github.com/crspybits/SyncServerII/issues/60
+		This is a breaking change because if you upload a change to the app meta data, you need to also increment the app meta data version.
+		Removing appMetaData from the FileIndex result because it's redundant with that in the file download, and the new endpoints.
+		Adding new endpoints:
+			DownloadAppMetaData
+			UploadAppMetaData
+			
 Version 0.13.1 (3/1/18)
 	* Updated Amazon Linux version in environments
 	* Standardized return value on cloud storage upload and finding file already exists.

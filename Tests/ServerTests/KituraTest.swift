@@ -183,7 +183,7 @@ extension KituraTest {
         }
         
         guard let jsonDict = jsonString!.toJSONDictionary() else {
-            Log.error(message: "Could not convert string to JSON dict")
+            Log.error("Could not convert string to JSON dict")
             return nil
         }
         

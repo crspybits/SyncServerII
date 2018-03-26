@@ -22,35 +22,6 @@ extension FileController {
         params.completion(response)
     }
     
-    enum CheckError : Error {
-        case couldNotConvertModelObject
-        case errorLookingUpInFileIndex
-    }
-    
-    // Result is nil if there is no existing file in the FileIndex. Throws an error if there is an error.
-    private func checkForExistingFile(params:RequestProcessingParameters, uploadRequest:UploadFileRequest) throws -> FileIndex? {
-        let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadRequest.fileUUID)
-
-        let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
-
-        switch lookupResult {
-        case .found(let modelObj):
-            guard let fileIndexObj = modelObj as? FileIndex else {
-                Log.error("Could not convert model object to FileIndex")
-                throw CheckError.couldNotConvertModelObject
-            }
-            
-            return fileIndexObj
-            
-        case .noObjectFound:
-            return nil
-            
-        case .error(let error):
-            Log.error("Error looking up file in FileIndex: \(error)")
-            throw CheckError.errorLookingUpInFileIndex
-        }
-    }
-    
     func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
             Log.error("Did not receive UploadFileRequest")
@@ -60,6 +31,12 @@ extension FileController {
         
         guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
             Log.error("Unknown mime type passed: \(uploadRequest.mimeType) (see SyncServer-Shared)")
+            params.completion(nil)
+            return
+        }
+        
+        guard uploadRequest.fileVersion != nil else {
+            Log.error("File version not given in upload request.")
             params.completion(nil)
             return
         }
@@ -88,9 +65,19 @@ extension FileController {
             // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
             var existingFileInFileIndex:FileIndex?
             do {
-                existingFileInFileIndex = try checkForExistingFile(params:params, uploadRequest:uploadRequest)
+                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, fileUUID:uploadRequest.fileUUID)
             } catch (let error) {
                 Log.error("Could not lookup file in FileIndex: \(error)")
+                params.completion(nil)
+                return
+            }
+        
+            guard UploadRepository.isValidAppMetaDataUpload(
+                currServerAppMetaDataVersion: existingFileInFileIndex?.appMetaDataVersion,
+                currServerAppMetaData:
+                    existingFileInFileIndex?.appMetaData,
+                optionalUpload:uploadRequest.appMetaData) else {
+                Log.error("App meta data or version is not valid for upload.")
                 params.completion(nil)
                 return
             }
@@ -136,7 +123,7 @@ extension FileController {
                     params.completion(nil)
                     return
                 }
-                
+            
                 // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
                 // https://github.com/crspybits/SyncServerII/issues/4
                 creationDate = todaysDate
@@ -157,11 +144,13 @@ extension FileController {
                 upload.state = .uploadingUndelete
             }
             else {
-                upload.state = .uploading
+                upload.state = .uploadingFile
             }
             
             upload.userId = params.currentSignedInUser!.userId
-            upload.appMetaData = uploadRequest.appMetaData
+            
+            upload.appMetaData = uploadRequest.appMetaData?.contents
+            upload.appMetaDataVersion = uploadRequest.appMetaData?.version
 
             if newFile {
                 upload.creationDate = creationDate
@@ -231,8 +220,8 @@ extension FileController {
                     upload.fileSizeBytes = Int64(fileSize)
                     
                     switch upload.state! {
-                    case .uploading:
-                        upload.state = .uploaded
+                    case .uploadingFile:
+                        upload.state = .uploadedFile
                         
                     case .uploadingUndelete:
                         upload.state = .uploadedUndelete

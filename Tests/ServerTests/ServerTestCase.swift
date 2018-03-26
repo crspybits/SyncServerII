@@ -247,7 +247,8 @@ class ServerTestCase : XCTestCase {
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
+    @discardableResult
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
@@ -281,7 +282,7 @@ class ServerTestCase : XCTestCase {
         
         uploadRequest.appMetaData = appMetaData
         
-        Log.info("Starting runUploadTest: uploadTextFile")
+        Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toJSON()))")
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
         return (request:uploadRequest, fileSize: Int64(uploadString.count))
@@ -294,6 +295,8 @@ class ServerTestCase : XCTestCase {
             
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
             XCTAssert(ServerEndpoints.uploadFile.method == .post)
+            
+            Log.debug("uploadRequest.urlParameters(): \(uploadRequest.urlParameters()!)")
             
             self.performRequest(route: ServerEndpoints.uploadFile, responseDictFrom: .header, headers: headers, urlParameters: "?" + uploadRequest.urlParameters()!, body:data) { response, dict in
                 
@@ -351,7 +354,7 @@ class ServerTestCase : XCTestCase {
     
     static let jpegMimeType = "image/jpeg"
     func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string,
-        fileUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64)? {
+        fileUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64)? {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
@@ -373,12 +376,13 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: ServerTestCase.jpegMimeType,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.appMetaDataKey: appMetaData as Any,
             UploadFileRequest.masterVersionKey: expectedMasterVersion
             ]) else {
             XCTFail()
             return nil
         }
+        
+        uploadRequest.appMetaData = appMetaData
         
         Log.info("Starting runUploadTest: uploadJPEGFile")
         runUploadTest(data:data, uploadRequest:uploadRequest, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID, errorExpected: errorExpected)
@@ -446,7 +450,6 @@ class ServerTestCase : XCTestCase {
                         XCTAssert(filterResult.count == 1)
                         let expectedFile = filterResult[0]
                         
-                        XCTAssert(expectedFile.appMetaData == fileInfo.appMetaData)
                         XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
                         XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
                         XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
@@ -531,7 +534,6 @@ class ServerTestCase : XCTestCase {
                             
                             if matchOptionals {
                                 XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
-                                XCTAssert(expectedFile.appMetaData == fileInfo.appMetaData)
                                 
                                 if expectedFileSizes != nil {
                                     XCTAssert(expectedFileSizes![fileInfo.fileUUID] == fileInfo.fileSizeBytes)
@@ -708,7 +710,12 @@ class ServerTestCase : XCTestCase {
         var fileUUID:String!
         
         if uploadFileRequest == nil {
-            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData)
+            var amd:AppMetaData?
+            if let appMetaData = appMetaData {
+                amd = AppMetaData(version: 0, contents: appMetaData)
+            }
+            
+            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:amd)
             fileUUID = uploadRequest.fileUUID
             actualUploadFileRequest = uploadRequest
             actualFileSize = size

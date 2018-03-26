@@ -27,7 +27,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     
     // MARK: Upload
 
-    func uploadNextFileVersion(uploadRequest: UploadFileRequest, masterVersion: MasterVersionInt, fileVersionToUpload:FileVersionInt, creationDate: Date, mimeType: String, appMetaData: String, fileSize:Int64) {
+    func uploadNextFileVersion(uploadRequest: UploadFileRequest, masterVersion: MasterVersionInt, fileVersionToUpload:FileVersionInt, creationDate: Date, mimeType: String, appMetaData: AppMetaData, fileSize:Int64) {
     
         guard let healthCheck1 = healthCheck() else {
             XCTFail()
@@ -36,7 +36,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         
         // The use of a different device UUID here is part of this test-- that the second version can be uploaded with a different device UUID.
         let deviceUUID = PerfectLib.UUID().string
-        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion:fileVersionToUpload, masterVersion: masterVersion)
+        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion:fileVersionToUpload, masterVersion: masterVersion, appMetaData: appMetaData)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
         
         guard let healthCheck2 = healthCheck() else {
@@ -67,13 +67,13 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             XCTAssert(result[0].creationDate == creationDate)
             
             XCTAssert(result[0].mimeType == mimeType)
-            XCTAssert(result[0].appMetaData == appMetaData)
             XCTAssert(result[0].deleted == false)
             XCTAssert(result[0].fileVersion == fileVersionToUpload)
             XCTAssert(result[0].fileSizeBytes == fileSize)
         }
         
-        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest, fileSize: fileSize) else {
+        
+        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData.contents, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest, fileSize: fileSize) else {
             XCTFail()
             return
         }
@@ -82,13 +82,14 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     // Also tests to make sure a different device UUID can upload the second version.
     func testUploadVersion1AfterVersion0Works() {
         let mimeType = "text/plain"
-        let appMetaData = "Some-App-Meta-Data"
         let fileVersion:FileVersionInt = 1
         let deviceUUID1 = PerfectLib.UUID().string
+        var appMetaDataVersion: AppMetaDataVersionInt = 0
         
-        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID: deviceUUID1, appMetaData:appMetaData)
+        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID: deviceUUID1, appMetaData: AppMetaData(version: 0, contents: "Some-App-Meta-Data"))
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        appMetaDataVersion += 1
         
         var creationDate:Date!
         
@@ -106,7 +107,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             return
         }
         
-        uploadNextFileVersion(uploadRequest: uploadRequest, masterVersion: 1, fileVersionToUpload:fileVersion, creationDate: creationDate!, mimeType: mimeType, appMetaData: appMetaData, fileSize:fileSize)
+        uploadNextFileVersion(uploadRequest: uploadRequest, masterVersion: 1, fileVersionToUpload:fileVersion, creationDate: creationDate!, mimeType: mimeType, appMetaData: AppMetaData(version: 1, contents: "Some-Other-App-Meta-Data"), fileSize:fileSize)
     }
     
     // Attempt to upload version 1 when version 0 hasn't yet been committed with DoneUploads-- should fail.
@@ -159,7 +160,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         
         var masterVersion:MasterVersionInt = startMasterVersion
 
-        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID, fileUUID:fileUUID, addUser:addUser, masterVersion:masterVersion, appMetaData:appMetaData)
+        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID, fileUUID:fileUUID, addUser:addUser, masterVersion:masterVersion, appMetaData:AppMetaData(version: 0, contents: appMetaData))
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion:masterVersion)
         
@@ -187,14 +188,14 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         // Upload small text file first.
         let deviceUUID1 = PerfectLib.UUID().string
         
-        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID1, appMetaData:appMetaData)
+        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID1, appMetaData:AppMetaData(version: 0, contents: appMetaData))
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 0)
         
         let fileContentsV2 = "This is some longer text that I'm typing here and hopefullly I don't get too bored"
         
         // Then upload some other text contents -- as version 1 of the same file.
-        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: 1, appMetaData:appMetaData, contents: fileContentsV2)
+        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: 1, appMetaData:AppMetaData(version: 1, contents: appMetaData), contents: fileContentsV2)
         
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 1)
         

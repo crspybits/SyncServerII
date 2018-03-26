@@ -9,6 +9,7 @@
 import Foundation
 import PerfectLib
 import SyncServerShared
+import LoggerAPI
 
 class SharingInvitation : NSObject, Model {
     static let sharingInvitationUUIDKey = "sharingInvitationUUID"
@@ -142,12 +143,12 @@ class SharingInvitationRepository : Repository {
         let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingPermission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(sharingPermission.rawValue)');"
         
         if db.connection.query(statement: query) {
-            Log.info(message: "Sucessfully created sharing invitation!")
+            Log.info("Sucessfully created sharing invitation!")
             return .success(sharingInvitationUUID: uuid)
         }
         else {
             let error = db.error
-            Log.error(message: "Could not insert into \(tableName): \(error)")
+            Log.error("Could not insert into \(tableName): \(error)")
             return .error(error)
         }
     }

@@ -11,12 +11,14 @@
 import Foundation
 import PerfectLib
 import SyncServerShared
+import LoggerAPI
 
 enum UploadState : String {
-case uploading
+case uploadingFile
+case uploadedFile
 case uploadingUndelete
-case uploaded
 case uploadedUndelete
+case uploadingAppMetaData
 case toDeleteFromFileIndex
 
 static func maxCharacterLength() -> Int { return 22 }
@@ -33,6 +35,7 @@ class Upload : NSObject, Model, Filenaming {
     // The userId of the sharing or owning user, i.e., this is not the owning user id.
     var userId: UserId!
     
+    // 3/15/18-- Can now be nil-- when we do an upload app meta data. Keeping it as `!` so it abides by the FileNaming protocol.
     static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
     
@@ -52,13 +55,16 @@ class Upload : NSObject, Model, Filenaming {
     
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
+
+    static let appMetaDataVersionKey = "appMetaDataVersion"
+    var appMetaDataVersion: AppMetaDataVersionInt?
     
     static let fileSizeBytesKey = "fileSizeBytes"
     
     // Required only when the state is .uploaded
     var fileSizeBytes: Int64?
     
-    // These two are not present in upload deletions.
+    // This is not present in upload deletions.
     static let mimeTypeKey = "mimeType"
     var mimeType: String?
     
@@ -91,6 +97,9 @@ class Upload : NSObject, Model, Filenaming {
                 
             case Upload.appMetaDataKey:
                 appMetaData = newValue as! String?
+                
+            case Upload.appMetaDataVersionKey:
+                appMetaDataVersion = newValue as! AppMetaDataVersionInt?
             
             case Upload.fileSizeBytesKey:
                 fileSizeBytes = newValue as! Int64?
@@ -168,7 +177,12 @@ class UploadRepository : Repository {
             // Optional app-specific meta data
             "appMetaData TEXT, " +
             
-            "fileVersion INT NOT NULL, " +
+            // 3/25/18; This used to be `NOT NULL` but now allowing it to be NULL because when we upload an app meta data change, it will be null.
+            "fileVersion INT, " +
+            
+            // Making this optional because appMetaData is optional. If there is app meta data, this must not be null.
+            "appMetaDataVersion INT, " +
+            
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
             // Can be null if we create the Upload entry before actually uploading the file.
@@ -203,6 +217,13 @@ class UploadRepository : Repository {
                 }
             }
             
+            // 3/23/18; Evolution 3: Add the appMetaDataVersion column.
+            if db.columnExists(Upload.appMetaDataVersionKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.appMetaDataVersionKey) INT", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
         default:
             break
         }
@@ -212,11 +233,20 @@ class UploadRepository : Repository {
     
     private func haveNilField(upload:Upload, fileInFileIndex: Bool) -> Bool {
         // Basic criteria-- applies across uploads and upload deletion.
-        if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.fileVersion == nil || upload.state == nil {
+        if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.state == nil {
             return true
         }
+        
+        if upload.fileVersion == nil && upload.state != .uploadingAppMetaData  {
+            return true
+        }
+        
         if upload.state == .toDeleteFromFileIndex {
             return false
+        }
+        
+        if upload.state == .uploadingAppMetaData {
+            return upload.appMetaData == nil || upload.appMetaDataVersion == nil
         }
         
         // We're uploading a file if we get to here. Criteria only for file uploads:
@@ -224,11 +254,18 @@ class UploadRepository : Repository {
             return true
         }
         
+        // The meta data and version must be nil or non-nil *together*.
+        let metaDataNil = upload.appMetaData == nil
+        let metaDataVersionNil = upload.appMetaDataVersion == nil
+        if metaDataNil != metaDataVersionNil {
+            return true
+        }
+        
         if !fileInFileIndex && upload.creationDate == nil {
             return true
         }
         
-        if upload.state == .uploading || upload.state == .uploadingUndelete {
+        if upload.state == .uploadingFile || upload.state == .uploadingUndelete {
             return false
         }
         
@@ -246,13 +283,15 @@ class UploadRepository : Repository {
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     func add(upload:Upload, fileInFileIndex:Bool=false) -> AddResult {
         if haveNilField(upload: upload, fileInFileIndex:fileInFileIndex) {
-            Log.error(message: "One of the model values was nil!")
+            Log.error("One of the model values was nil!")
             return .aModelValueWasNil
         }
     
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
         let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaData, fieldName: Upload.appMetaDataKey)
 
+        let (appMetaDataVersionFieldValue, appMetaDataVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaDataVersion, fieldName: Upload.appMetaDataVersionKey, fieldIsString:false)
+        
         let (fileSizeFieldValue, fileSizeFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileSizeBytes, fieldName: Upload.fileSizeBytesKey, fieldIsString:false)
  
         let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
@@ -268,11 +307,13 @@ class UploadRepository : Repository {
             updateDateValue = DateExtras.date(upload.updateDate!, toFormat: .DATETIME)
         }
         
-         let (creationDateFieldValue, creationDateFieldName) = getInsertFieldValueAndName(fieldValue: creationDateValue, fieldName: Upload.creationDateKey)
+        let (creationDateFieldValue, creationDateFieldName) = getInsertFieldValueAndName(fieldValue: creationDateValue, fieldName: Upload.creationDateKey)
         
-         let (updateDateFieldValue, updateDateFieldName) = getInsertFieldValueAndName(fieldValue: updateDateValue, fieldName: Upload.updateDateKey)
+        let (updateDateFieldValue, updateDateFieldName) = getInsertFieldValueAndName(fieldValue: updateDateValue, fieldName: Upload.updateDateKey)
         
-        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.fileVersionKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', \(upload.fileVersion!), '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue));"
+        let (fileVersionFieldValue, fileVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileVersion, fieldName: Upload.fileVersionKey, fieldIsString:false)
+        
+        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue));"
         
         if db.connection.query(statement: query) {
             return .success(uploadId: db.connection.lastInsertId())
@@ -283,7 +324,7 @@ class UploadRepository : Repository {
         else {
             let error = db.error
             let message = "Could not insert into \(tableName): \(error)"
-            Log.error(message: message)
+            Log.error(message)
             return .otherError(message)
         }
     }
@@ -291,7 +332,7 @@ class UploadRepository : Repository {
     // The Upload model *must* have an uploadId
     func update(upload:Upload, fileInFileIndex:Bool=false) -> Bool {
         if upload.uploadId == nil || haveNilField(upload: upload, fileInFileIndex:fileInFileIndex) {
-            Log.error(message: "One of the model values was nil!")
+            Log.error("One of the model values was nil!")
             return false
         }
     
@@ -310,13 +351,13 @@ class UploadRepository : Repository {
                 return true
             }
             else {
-                Log.error(message: "Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
+                Log.error("Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
                 return false
             }
         }
         else {
             let error = db.error
-            Log.error(message: "Could not update \(tableName): \(error)")
+            Log.error("Could not update \(tableName): \(error)")
             return false
         }
     }
@@ -401,7 +442,6 @@ class UploadRepository : Repository {
             let fileInfo = FileInfo()!
             
             fileInfo.fileUUID = upload.fileUUID
-            fileInfo.appMetaData = upload.appMetaData
             fileInfo.fileVersion = upload.fileVersion
             fileInfo.deleted = upload.state == .toDeleteFromFileIndex
             fileInfo.fileSizeBytes = upload.fileSizeBytes
@@ -413,5 +453,28 @@ class UploadRepository : Repository {
         }
         
         return result
+    }
+
+    static func isValidAppMetaDataUpload(currServerAppMetaDataVersion: AppMetaDataVersionInt?, currServerAppMetaData: String?, optionalUpload appMetaData:AppMetaData?) -> Bool {
+
+        if appMetaData == nil {
+            // Doesn't matter what the current app meta data is-- we're not changing it.
+            return true
+        }
+        else {
+            return isValidAppMetaDataUpload(currServerAppMetaDataVersion: currServerAppMetaDataVersion, currServerAppMetaData: currServerAppMetaData, upload: appMetaData!)
+        }
+    }
+    
+    static func isValidAppMetaDataUpload(currServerAppMetaDataVersion: AppMetaDataVersionInt?, currServerAppMetaData: String?, upload appMetaData:AppMetaData) -> Bool {
+
+        if currServerAppMetaDataVersion == nil {
+            // No app meta data yet on server for this file. Need 0 first version.
+            return appMetaData.version == 0
+        }
+        else {
+            // Already have app meta data on server-- must have next version.
+            return appMetaData.version == currServerAppMetaDataVersion! + 1
+        }
     }
 }

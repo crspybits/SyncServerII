@@ -11,6 +11,7 @@
 import Foundation
 import PerfectLib
 import SyncServerShared
+import LoggerAPI
 
 class MasterVersion : NSObject, Model {
     static let userIdKey = "userId"
@@ -92,7 +93,7 @@ class MasterVersionRepository : Repository {
         }
         else {
             let error = db.error
-            Log.error(message: "Could not initialize MasterVersion: \(error)")
+            Log.error("Could not initialize MasterVersion: \(error)")
             return false
         }
     }
@@ -120,7 +121,7 @@ class MasterVersionRepository : Repository {
         }
         else {
             let message = "Could not updateToNext MasterVersion: \(db.error)"
-            Log.error(message: message)
+            Log.error(message)
             return UpdateToNextResult.error(message)
         }
     }

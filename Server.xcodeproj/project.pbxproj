@@ -34,6 +34,9 @@
 		83C5CE141FDDBD880024979A /* LinuxMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE131FDDBD880024979A /* LinuxMain.swift */; };
 		83C5CE161FDE2E170024979A /* DropboxCreds+CloudStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE151FDE2E170024979A /* DropboxCreds+CloudStorage.swift */; };
 		83C5CE181FDE38D50024979A /* DropboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5CE171FDE38D50024979A /* DropboxTests.swift */; };
+		83F6FE1A2065FE36004FB62A /* FileController+UploadAppMetaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F6FE192065FE36004FB62A /* FileController+UploadAppMetaData.swift */; };
+		83F6FE1C2065FE53004FB62A /* FileController+DownloadAppMetaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F6FE1B2065FE53004FB62A /* FileController+DownloadAppMetaData.swift */; };
+		83F6FE1E20662F0C004FB62A /* FileController_DownloadAppMetaDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F6FE1D20662F0C004FB62A /* FileController_DownloadAppMetaDataTests.swift */; };
 		OBJ_100 /* AccountAuthenticationTests_Facebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_55 /* AccountAuthenticationTests_Facebook.swift */; };
 		OBJ_101 /* AccountAuthenticationTests_Google.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* AccountAuthenticationTests_Google.swift */; };
 		OBJ_102 /* DatabaseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_57 /* DatabaseModelTests.swift */; };
@@ -155,6 +158,10 @@
 		83C5CE131FDDBD880024979A /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		83C5CE151FDE2E170024979A /* DropboxCreds+CloudStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxCreds+CloudStorage.swift"; sourceTree = "<group>"; };
 		83C5CE171FDE38D50024979A /* DropboxTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DropboxTests.swift; sourceTree = "<group>"; };
+		83F6FE192065FE36004FB62A /* FileController+UploadAppMetaData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileController+UploadAppMetaData.swift"; sourceTree = "<group>"; };
+		83F6FE1B2065FE53004FB62A /* FileController+DownloadAppMetaData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileController+DownloadAppMetaData.swift"; sourceTree = "<group>"; };
+		83F6FE1D20662F0C004FB62A /* FileController_DownloadAppMetaDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController_DownloadAppMetaDataTests.swift; sourceTree = "<group>"; };
+		83F6FE212068665F004FB62A /* FileController_UploadAppMetaDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileController_UploadAppMetaDataTests.swift; sourceTree = "<group>"; };
 		C1EDB63C587EF0F67A4734CA /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		DFFBF76C45D98D3492ECBF49 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		OBJ_10 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -280,6 +287,8 @@
 			children = (
 				OBJ_21 /* FileController+DoneUploads.swift */,
 				OBJ_22 /* FileController+DownloadFile.swift */,
+				83F6FE192065FE36004FB62A /* FileController+UploadAppMetaData.swift */,
+				83F6FE1B2065FE53004FB62A /* FileController+DownloadAppMetaData.swift */,
 				OBJ_23 /* FileController+UploadDeletion.swift */,
 				OBJ_24 /* FileController+UploadFile.swift */,
 				OBJ_25 /* FileController.swift */,
@@ -370,6 +379,8 @@
 		OBJ_54 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83F6FE212068665F004FB62A /* FileController_UploadAppMetaDataTests.swift */,
+				83F6FE1D20662F0C004FB62A /* FileController_DownloadAppMetaDataTests.swift */,
 				OBJ_55 /* AccountAuthenticationTests_Facebook.swift */,
 				OBJ_56 /* AccountAuthenticationTests_Google.swift */,
 				83C5CE111FDD004C0024979A /* AccountAuthenticationTests_Dropbox.swift */,
@@ -537,6 +548,11 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 9999;
+				TargetAttributes = {
+					"Server::ServerPackageTests::ProductTarget" = {
+						LastSwiftMigration = 0920;
+					};
+				};
 			};
 			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "Server" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -592,6 +608,7 @@
 				8303752D1FF5F270008DCF54 /* Synchronized.swift in Sources */,
 				OBJ_144 /* AccountManager.swift in Sources */,
 				OBJ_145 /* CloudStorage.swift in Sources */,
+				83F6FE1A2065FE36004FB62A /* FileController+UploadAppMetaData.swift in Sources */,
 				OBJ_146 /* DropboxCreds.swift in Sources */,
 				OBJ_147 /* FacebookCreds.swift in Sources */,
 				OBJ_148 /* GoogleCreds+CloudStorage.swift in Sources */,
@@ -627,6 +644,7 @@
 				OBJ_174 /* ServerRoutes.swift in Sources */,
 				OBJ_175 /* ServerSetup.swift in Sources */,
 				OBJ_176 /* AsyncTailRecursion.swift in Sources */,
+				83F6FE1C2065FE53004FB62A /* FileController+DownloadAppMetaData.swift in Sources */,
 				8303752F1FF5FEF7008DCF54 /* HealthCheckTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -665,6 +683,7 @@
 				OBJ_116 /* SharingAccountsController_CreateSharingInvitation.swift in Sources */,
 				OBJ_117 /* SharingAccountsController_RedeemSharingInvitation.swift in Sources */,
 				OBJ_118 /* Sharing_FileManipulationTests.swift in Sources */,
+				83F6FE1E20662F0C004FB62A /* FileController_DownloadAppMetaDataTests.swift in Sources */,
 				OBJ_119 /* SpecificDatabaseTests.swift in Sources */,
 				OBJ_120 /* SpecificDatabaseTests_SharingInvitationRepository.swift in Sources */,
 				OBJ_121 /* SpecificDatabaseTests_Uploads.swift in Sources */,
@@ -786,13 +805,20 @@
 		OBJ_181 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-DDEBUG -DSERVER";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
 		OBJ_182 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

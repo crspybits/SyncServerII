@@ -18,6 +18,12 @@ extension FileController {
             return
         }
         
+        guard uploadDeletionRequest.fileVersion != nil else {
+            Log.error("File version not given in upload request.")
+            params.completion(nil)
+            return
+        }
+        
         getMasterVersion(params: params) { (error, masterVersion) in
             if error != nil {
                 Log.error("Error: \(String(describing: error))")

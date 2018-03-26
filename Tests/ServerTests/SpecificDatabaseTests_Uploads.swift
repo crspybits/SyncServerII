@@ -39,7 +39,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.fileUUID = PerfectLib.UUID().string
         upload.fileVersion = 1
         upload.mimeType = mimeType
-        upload.state = .uploading
+        upload.state = .uploadingFile
         upload.userId = userId
         upload.appMetaData = appMetaData
         upload.creationDate = Date()
@@ -146,7 +146,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
     func testUpdateUploadToUploadedFailsWithoutFileSizeBytes() {
         let upload = doAddUpload()
         upload.fileSizeBytes = nil
-        upload.state = .uploaded
+        upload.state = .uploadedFile
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
