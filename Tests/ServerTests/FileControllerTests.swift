@@ -11,6 +11,7 @@ import XCTest
 import LoggerAPI
 import Foundation
 import PerfectLib
+import SyncServerShared
 
 class FileControllerTests: ServerTestCase, LinuxTestable {
 
@@ -100,7 +101,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testDownloadFileTextWithAppMetaDataSucceeds() {
         downloadTextFile(masterVersionExpectedWithDownload: 1,
-            appMetaData:"{ \"foo\": \"bar\" }")
+            appMetaData:AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"))
     }
     
     func testDownloadFileTextWithDifferentDownloadVersion() {

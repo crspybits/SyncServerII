@@ -753,7 +753,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) -> DownloadFileResponse? {
+    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:AppMetaData? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) -> DownloadFileResponse? {
     
         let deviceUUID = PerfectLib.UUID().string
         let masterVersion:Int64 = 0
@@ -766,12 +766,7 @@ class ServerTestCase : XCTestCase {
         var fileUUID:String!
         
         if uploadFileRequest == nil {
-            var amd:AppMetaData?
-            if let appMetaData = appMetaData {
-                amd = AppMetaData(version: 0, contents: appMetaData)
-            }
-            
-            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:amd)
+            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData)
             fileUUID = uploadRequest.fileUUID
             actualUploadFileRequest = uploadRequest
             actualFileSize = size
@@ -791,7 +786,8 @@ class ServerTestCase : XCTestCase {
             let downloadFileRequest = DownloadFileRequest(json: [
                 DownloadFileRequest.fileUUIDKey: actualUploadFileRequest!.fileUUID,
                 DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadFileRequest.fileVersionKey : downloadFileVersion
+                DownloadFileRequest.fileVersionKey : downloadFileVersion,
+                DownloadFileRequest.appMetaDataVersionKey: appMetaData?.version as Any
             ])
             
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
@@ -814,7 +810,7 @@ class ServerTestCase : XCTestCase {
                         else {
                             XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
                             XCTAssert(downloadFileResponse.fileSizeBytes == actualFileSize, "downloadFileResponse.fileSizeBytes: \(String(describing: downloadFileResponse.fileSizeBytes)); actualFileSize: \(actualFileSize)")
-                            XCTAssert(downloadFileResponse.appMetaData == appMetaData)
+                            XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
                         }
                     }
                     else {

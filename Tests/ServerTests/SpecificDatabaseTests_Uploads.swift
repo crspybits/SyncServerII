@@ -28,7 +28,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:String? = "{ \"foo\": \"bar\" }", userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string, missingField:Bool = false) -> Upload {
+    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -41,7 +41,8 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.mimeType = mimeType
         upload.state = .uploadingFile
         upload.userId = userId
-        upload.appMetaData = appMetaData
+        upload.appMetaData = appMetaData?.contents
+        upload.appMetaDataVersion = appMetaData?.version
         upload.creationDate = Date()
         upload.updateDate = Date()
         
@@ -153,6 +154,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
     func testUpdateUploadSucceedsWithNilAppMetaData() {
         let upload = doAddUpload()
         upload.appMetaData = nil
+        upload.appMetaDataVersion = nil
         XCTAssert(UploadRepository(db).update(upload: upload))
     }
     

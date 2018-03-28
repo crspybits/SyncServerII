@@ -70,7 +70,8 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         XCTAssert(result[0].fileVersion == fileVersionToUpload)
         XCTAssert(result[0].fileSizeBytes == fileSize)
         
-        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData.contents, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest, fileSize: fileSize) else {
+        
+        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest, fileSize: fileSize) else {
             XCTFail()
             return
         }
@@ -188,7 +189,8 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         let fileContentsV2 = "This is some longer text that I'm typing here and hopefullly I don't get too bored"
         
         // Then upload some other text contents -- as version 1 of the same file.
-        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: 1, appMetaData:AppMetaData(version: 1, contents: appMetaData), contents: fileContentsV2)
+        let appMetaData2 = AppMetaData(version: 1, contents: appMetaData)
+        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: 1, appMetaData:appMetaData2, contents: fileContentsV2)
         
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 1)
         
@@ -204,7 +206,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: 2, appMetaData: self.appMetaData, downloadFileVersion: 1, uploadFileRequest: uploadRequest2, fileSize: fileSize2) else {
+        guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: 2, appMetaData: appMetaData2, downloadFileVersion: 1, uploadFileRequest: uploadRequest2, fileSize: fileSize2) else {
             XCTFail()
             return
         }
@@ -320,6 +322,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         let fileVersion:FileVersionInt = 3
         let (masterVersion, uploadRequest) = uploadVersion(fileVersion, deviceUUID: deviceUUID, fileUUID:fileUUID1)
         
+        let appMetaData = AppMetaData(version: 0, contents: self.appMetaData)
         guard let _ = downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion), appMetaData: appMetaData, downloadFileVersion: fileVersion, uploadFileRequest: uploadRequest, fileSize: Int64(ServerTestCase.uploadTextFileContents.count)) else {
             XCTFail()
             return
@@ -332,6 +335,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         let fileVersion:FileVersionInt = 3
         let (masterVersion, uploadRequest) = uploadVersion(fileVersion, deviceUUID: deviceUUID, fileUUID:fileUUID1)
         
+        let appMetaData = AppMetaData(version: 0, contents: self.appMetaData)
         downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion), appMetaData: appMetaData, downloadFileVersion: fileVersion+1, uploadFileRequest: uploadRequest, fileSize: Int64(ServerTestCase.uploadTextFileContents.count), expectedError: true)
     }
 }

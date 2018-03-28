@@ -56,7 +56,8 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
 
-        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadRequest1.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 1, expectedError: true)
+        let badAppMetaDataVersion = appMetaData.version + 1
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadRequest1.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: badAppMetaDataVersion, expectedError: true)
     }
 
     func testDownloadNilAppMetaDataVersionAs0Fails() {
