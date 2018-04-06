@@ -7,8 +7,8 @@ let package = Package(
         // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", .upToNextMinor(from: "0.1.0")),
         
-        .package(url: "../../repos/SyncServer-Shared", .branch("master")),
-        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMinor(from: "5.0.0")),
+        // .package(url: "../../repos/SyncServer-Shared", .branch("master")),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMinor(from: "6.1.0")),
 
         .package(url: "https://github.com/crspybits/SMServerLib.git", .upToNextMinor(from: "0.0.0")),
         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "1.7.0")),
@@ -21,7 +21,7 @@ let package = Package(
 
 		.package(url:"https://github.com/crspybits/Perfect-MySQL.git", .upToNextMinor(from: "2.1.0")),
 		
-        // .Package(url: "https://github.com/hkellaway/Gloss.git", majorVersion: 1, minor: 2),
+        //.package(url:"https://github.com/hkellaway/Gloss.git", .upToNextMinor(from: "2.0.0")),
 		.package(url: "https://github.com/crspybits/Gloss.git", .upToNextMinor(from: "1.2.0")),
 		
         .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMinor(from: "1.7.0")),

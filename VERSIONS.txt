@@ -1,6 +1,6 @@
 SyncServer
 
-Version 0.14.0
+Version 0.14.0 (4/5/18)
 	* Multi version app meta data per file
 		https://github.com/crspybits/SyncServerII/issues/60
 		This is a breaking change because if you upload a change to the app meta data, you need to also increment the app meta data version.

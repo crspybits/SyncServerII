@@ -228,11 +228,11 @@
       },
       {
         "package": "SyncServer_Shared",
-        "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
+        "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
-          "branch": "master",
-          "revision": "efe3cb630d359a13f571a48c501a9a14b64046a8",
-          "version": null
+          "branch": null,
+          "revision": "fccb5e3d97a4ffe5743c77d65b108a4601fbaf6c",
+          "version": "6.1.0"
         }
       }
     ]
