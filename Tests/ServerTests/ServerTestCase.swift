@@ -166,6 +166,7 @@ class ServerTestCase : XCTestCase {
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
+                    print("Error: \(error!)")
                     XCTFail()
                     expectation.fulfill()
                     return
@@ -301,10 +302,10 @@ class ServerTestCase : XCTestCase {
     static let uploadTextFileContents = "Hello World!"
     
     @discardableResult
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
-            self.addNewUser(deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
+            self.addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
         }
         
         var fileUUIDToSend = ""
@@ -330,7 +331,8 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.masterVersionKey: masterVersion,
-            UploadFileRequest.undeleteServerFileKey: undelete
+            UploadFileRequest.undeleteServerFileKey: undelete,
+            UploadFileRequest.fileGroupUUIDKey: fileGroupUUID as Any
         ])!
         
         uploadRequest.appMetaData = appMetaData
@@ -526,11 +528,11 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(deviceUUID:String = PerfectLib.UUID().string) -> [FileInfo]? {
+    func getFileIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string) -> [FileInfo]? {
         var result:[FileInfo]?
         
-        self.performServerTest { expectation, creds in
-            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount: testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.14.1
+	* Added file group UUID's to file uploads and file index-- to enable client to upload/download files in groups.
+		https://github.com/crspybits/SyncServerII/issues/59
+		
 Version 0.14.0 (4/5/18)
 	* Multi version app meta data per file
 		https://github.com/crspybits/SyncServerII/issues/60

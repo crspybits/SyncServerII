@@ -29,5 +29,6 @@ XCTMain([
     testCase(UserControllerTests.allTests),
     testCase(VersionTests.allTests),
     testCase(FileController_DownloadAppMetaDataTests.allTests),
-    testCase(FileController_UploadAppMetaDataTests.allTests)
+    testCase(FileController_UploadAppMetaDataTests.allTests),
+    testCase(FileController_FileGroupUUIDTests.allTests)
 ])

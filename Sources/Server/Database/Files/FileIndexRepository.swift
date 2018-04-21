@@ -25,6 +25,10 @@ class FileIndex : NSObject, Model, Filenaming {
     // We don't give the deviceUUID when updating the fileIndex for an upload deletion.
     var deviceUUID:String?
     
+    static let fileGroupUUIDKey = "fileGroupUUID"
+    // Not all files have to be associated with a file group.
+    var fileGroupUUID:String?
+    
     static let creationDateKey = "creationDate"
     // We don't give the `creationDate` when updating the fileIndex for versions > 0.
     var creationDate:Date?
@@ -62,6 +66,9 @@ class FileIndex : NSObject, Model, Filenaming {
 
             case FileIndex.fileUUIDKey:
                 fileUUID = newValue as! String?
+
+            case FileIndex.fileGroupUUIDKey:
+                fileGroupUUID = newValue as! String?
                 
             case FileIndex.deviceUUIDKey:
                 deviceUUID = newValue as! String?
@@ -160,6 +167,9 @@ class FileIndexRepository : Repository {
             // This plays a different role than it did in the Upload table. Here, it forms part of the filename in cloud storage, and thus must be retained. We will ignore this field otherwise, i.e., we will not have two entries in this table for the same userId, fileUUID pair.
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
+            // identifies a group of files (assigned by app)
+            "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
+            
             // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates.
             "creationDate DATETIME," +
             "updateDate DATETIME," +
@@ -214,6 +224,13 @@ class FileIndexRepository : Repository {
                 }
             }
             
+            // 4/19/18; Evolution 4: Add in fileGroupUUID
+            if db.columnExists(FileIndex.fileGroupUUIDKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.fileGroupUUIDKey) VARCHAR(\(Database.uuidLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
         default:
             break
         }
@@ -242,7 +259,9 @@ class FileIndexRepository : Repository {
 
         let (appMetaDataVersionFieldValue, appMetaDataVersionFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.appMetaDataVersion, fieldName: Upload.appMetaDataVersionKey, fieldIsString:false)
         
-        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.fileSizeBytesKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName)) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) );"
+        let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
+        
+        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.fileSizeBytesKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -296,6 +315,8 @@ class FileIndexRepository : Repository {
         
         let fileVersionField = getUpdateFieldSetter(fieldValue: fileIndex.fileVersion, fieldName: FileIndex.fileVersionKey, fieldIsString: false)
         
+        let fileGroupUUIDField = getUpdateFieldSetter(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
+        
         var updateDateValue:String?
         if fileIndex.updateDate != nil {
             updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
@@ -304,7 +325,7 @@ class FileIndexRepository : Repository {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.userIdKey)=\(fileIndex.userId!), \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.userIdKey)=\(fileIndex.userId!), \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -390,6 +411,7 @@ class FileIndexRepository : Repository {
             fileIndex.userId = owningUserId
             fileIndex.appMetaData = upload.appMetaData
             fileIndex.appMetaDataVersion = upload.appMetaDataVersion
+            fileIndex.fileGroupUUID = upload.fileGroupUUID
             
             if let uploadFileVersion = upload.fileVersion {
                 fileIndex.fileVersion = uploadFileVersion
@@ -518,6 +540,7 @@ class FileIndexRepository : Repository {
             fileInfo.creationDate = rowModel.creationDate
             fileInfo.updateDate = rowModel.updateDate
             fileInfo.appMetaDataVersion = rowModel.appMetaDataVersion
+            fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             
             result.append(fileInfo)
         }

@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-TemplateEngine.git",
         "state": {
           "branch": null,
-          "revision": "d432d61cd9dfb66bc9741fec44434bbbcad676cd",
-          "version": "1.7.3"
+          "revision": "d43155da4dadd91c1d34d76e317571dc54655594",
+          "version": "1.7.4"
         }
       },
       {
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/LoggerAPI.git",
         "state": {
           "branch": null,
-          "revision": "ee0084cbb8bace59b3409cec05bedc5d2e97f8b7",
-          "version": "1.7.2"
+          "revision": "5041f2673aa75d6e973d9b6bd3956bc5068387c8",
+          "version": "1.7.3"
         }
       },
       {
@@ -228,11 +228,11 @@
       },
       {
         "package": "SyncServer_Shared",
-        "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
+        "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
-          "branch": null,
-          "revision": "fccb5e3d97a4ffe5743c77d65b108a4601fbaf6c",
-          "version": "6.1.0"
+          "branch": "master",
+          "revision": "b1b40a3a89449e45345bf8ddde74608fbc45df05",
+          "version": null
         }
       }
     ]

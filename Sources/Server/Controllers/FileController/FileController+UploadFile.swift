@@ -139,6 +139,16 @@ extension FileController {
             upload.fileVersion = uploadRequest.fileVersion
             upload.mimeType = uploadRequest.mimeType
             
+            if let fileGroupUUID = uploadRequest.fileGroupUUID {
+                guard uploadRequest.fileVersion == 0 else {
+                    Log.error("fileGroupUUID was given, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0")
+                    params.completion(nil)
+                    return
+                }
+                
+                upload.fileGroupUUID = fileGroupUUID
+            }
+            
             if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile != 0 {
                 Log.info("Undeleting server file.")
                 upload.state = .uploadingUndelete

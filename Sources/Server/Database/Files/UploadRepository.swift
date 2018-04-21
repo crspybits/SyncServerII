@@ -42,6 +42,10 @@ class Upload : NSObject, Model, Filenaming {
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
     
+    static let fileGroupUUIDKey = "fileGroupUUID"
+    // Not all files have to be associated with a file group.
+    var fileGroupUUID:String?
+    
     // The following two dates are required for file uploads.
     static let creationDateKey = "creationDate"
     var creationDate:Date?
@@ -76,6 +80,9 @@ class Upload : NSObject, Model, Filenaming {
 
             case Upload.fileUUIDKey:
                 fileUUID = newValue as! String?
+                
+            case Upload.fileGroupUUIDKey:
+                fileGroupUUID = newValue as! String?
 
             case Upload.userIdKey:
                 userId = newValue as! UserId?
@@ -167,6 +174,9 @@ class UploadRepository : Repository {
             // identifies a specific mobile device (assigned by app)
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
+            // identifies a group of files (assigned by app)
+            "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
+            
             // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates. Plus, upload deletions need not have dates. And when uploading a new version of a file we won't give the creationDate.
             "creationDate DATETIME," +
             "updateDate DATETIME," +
@@ -220,6 +230,12 @@ class UploadRepository : Repository {
             // 3/23/18; Evolution 3: Add the appMetaDataVersion column.
             if db.columnExists(Upload.appMetaDataVersionKey, in: tableName) == false {
                 if !db.addColumn("\(Upload.appMetaDataVersionKey) INT", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
+            if db.columnExists(Upload.fileGroupUUIDKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.fileGroupUUIDKey) VARCHAR(\(Database.uuidLength))", to: tableName) {
                     return .failure(.columnCreation)
                 }
             }
@@ -292,6 +308,8 @@ class UploadRepository : Repository {
 
         let (appMetaDataVersionFieldValue, appMetaDataVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaDataVersion, fieldName: Upload.appMetaDataVersionKey, fieldIsString:false)
         
+        let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileGroupUUID, fieldName: Upload.fileGroupUUIDKey)
+        
         let (fileSizeFieldValue, fileSizeFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileSizeBytes, fieldName: Upload.fileSizeBytesKey, fieldIsString:false)
  
         let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
@@ -313,7 +331,7 @@ class UploadRepository : Repository {
         
         let (fileVersionFieldValue, fileVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileVersion, fieldName: Upload.fileVersionKey, fieldIsString:false)
         
-        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue));"
+        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName) \(fileGroupUUIDFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue) \(fileGroupUUIDFieldValue));"
         
         if db.connection.query(statement: query) {
             return .success(uploadId: db.connection.lastInsertId())
@@ -337,13 +355,15 @@ class UploadRepository : Repository {
         }
     
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-        let appMetaDataField = getUpdateFieldSetter(fieldValue: upload.appMetaData, fieldName: "appMetaData")
-
-        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: upload.fileSizeBytes, fieldName: "fileSizeBytes", fieldIsString: false)
+        let appMetaDataField = getUpdateFieldSetter(fieldValue: upload.appMetaData, fieldName: Upload.appMetaDataKey)
         
-        let mimeTypeField = getUpdateFieldSetter(fieldValue: upload.mimeType, fieldName: "mimeType")
+        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: upload.fileSizeBytes, fieldName: Upload.fileSizeBytesKey, fieldIsString: false)
         
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(fileSizeBytesField) \(appMetaDataField) \(mimeTypeField) WHERE uploadId=\(upload.uploadId!)"
+        let mimeTypeField = getUpdateFieldSetter(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
+        
+        let fileGroupUUIDField = getUpdateFieldSetter(fieldValue: upload.fileGroupUUID, fieldName: Upload.fileGroupUUIDKey)
+        
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(fileSizeBytesField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -448,6 +468,7 @@ class UploadRepository : Repository {
             fileInfo.mimeType = upload.mimeType
             fileInfo.creationDate = upload.creationDate
             fileInfo.updateDate = upload.updateDate
+            fileInfo.fileGroupUUID = upload.fileGroupUUID
             
             result += [fileInfo]
         }

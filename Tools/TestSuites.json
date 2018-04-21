@@ -109,6 +109,12 @@
       ]
     },
     {
+      "name": "FileController_FileGroupUUIDTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
       "name": "FileControllerTests",
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1"
@@ -170,6 +176,12 @@
     },
     {
       "name": "FileController_UploadAppMetaDataTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "FileController_FileGroupUUIDTests",
       "parameters": [
         "PRIMARY_OWNING_DROPBOX1"
       ]
