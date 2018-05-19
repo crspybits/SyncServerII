@@ -1,2 +1,1 @@
-#!/bin/bash
-eb deploy
+../Tools/deploy.sh

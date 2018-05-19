@@ -1,0 +1,20 @@
+5/18/18
+	A method to populate staging with the data from production, to allow for testing in a production-like environment. This is in two parts:
+	a) Suspend the production EB environment-- so no additional changes are made to db-- this must be done before copying cloud storage files b/c someone could upload files during that process.
+		suspend on
+	b) Copying the cloud storage files to staging folders. I think I can just rely on my personal Google Drive folder for this. (Note that this situation is going to get more complex as we go along and other people have their own cloud data)
+	c) Copying the production mySQL data into the staging database.
+		1) Trigger a backup/snapshot to get the the current data backed up.
+			Looks like you can do this by doing "Take snapshot" in the instance details.
+		2) After the backup, unsuspend the production EB environment.
+			suspend off
+		2) Use this method to create a db instance from that (production) snapshot:
+	https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html
+		3) Change the master password to what you want-- i.e., change it to the one I use for staging (assumes the master username is as you need from the snapshot):
+			https://aws.amazon.com/premiumsupport/knowledge-center/reset-master-user-password-rds/
+		(Note that the staging and production SharedImages SyncServer databases have the same name-- this is because changing mySQL database names is a pain).
+		I found out later that this password change didn't work, despite no apparent complaints from AWS/RDS. Instead, I had to sign in at the mySQL command line with the old password, and change it using:
+		SET PASSWORD FOR 'crspybits' = PASSWORD('mynewpassword');
+		
+	The CloudFolderName is specified *initially* by the SharedImages client, and gets stored after that in the User table-- so have to update the user table:
+		UPDATE User SET cloudFolderName = 'Staging.SharedImages.Folder';

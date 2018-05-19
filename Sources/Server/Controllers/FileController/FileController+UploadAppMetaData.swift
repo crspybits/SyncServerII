@@ -48,6 +48,7 @@ extension FileController {
                 return
             }
             
+            // Undeletion is not possible for an appMetaData upload because the file contents have been removed (on a prior upload deletion) and the appMetaData upload can't replace those file contents.
             if existingFileInFileIndex!.deleted {
                 Log.error("Attempt to upload app meta data for an existing file, but it has already been deleted.")
                 params.completion(nil)
