@@ -21,6 +21,9 @@ begin
    END;
    
    START TRANSACTION;
+   
+INSERT INTO FileIndex (fileUUID, userId, deviceUUID, fileGroupUUID, creationDate, updateDate, mimeType, appMetaData, deleted, fileVersion, appMetaDataVersion, fileSizeBytes) VALUES ("7B9E68B3-2827-43C1-AF1A-B0A904431445", 1, "FAF13FCE-EA89-4BCA-84C2-D6F594E3A429", "32FBC7A2-2AE0-49A6-A52E-E5FF896DD051", Now(), Now(), "text/plain", '{"fileType":"discussion"}', FALSE, 0, 0, 66);
+UPDATE FileIndex SET fileGroupUUID = "32FBC7A2-2AE0-49A6-A52E-E5FF896DD051" WHERE fileUUID = "0161A868-C9FB-47D8-9EEF-78300438F7DB";
 
 INSERT INTO FileIndex (fileUUID, userId, deviceUUID, fileGroupUUID, creationDate, updateDate, mimeType, appMetaData, deleted, fileVersion, appMetaDataVersion, fileSizeBytes) VALUES ("400D58A8-70D7-4A9B-A13F-69510BB6B0DB", 1, "03262CCE-59FD-4574-BBE7-CDD99BE2E08E", "935B452C-8941-4875-B6F6-38AFAB0CA861", Now(), Now(), "text/plain", '{"fileType":"discussion"}', FALSE, 0, 0, 66);
 UPDATE FileIndex SET fileGroupUUID = "935B452C-8941-4875-B6F6-38AFAB0CA861" WHERE fileUUID = "03335197-4D5B-46FC-BC38-6038F5E20FC7";
