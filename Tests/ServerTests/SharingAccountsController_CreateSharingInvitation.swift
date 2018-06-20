@@ -9,7 +9,6 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -26,7 +25,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func testSuccessfulReadSharingInvitationCreationByAnOwningUser() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
         self.createSharingInvitation(permission: .read) { expectation, invitationUUID in
             XCTAssert(invitationUUID != nil)
@@ -41,7 +40,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func testSuccessfulWriteSharingInvitationCreationByAnOwningUser() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         addNewUser(deviceUUID:deviceUUID)
         createSharingInvitation(permission: .write) { expectation, invitationUUID in
             XCTAssert(invitationUUID != nil)

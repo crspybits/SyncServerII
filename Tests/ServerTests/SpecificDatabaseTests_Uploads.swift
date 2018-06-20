@@ -12,7 +12,6 @@ import LoggerAPI
 import HeliumLogger
 import Credentials
 import CredentialsGoogle
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -28,7 +27,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string, missingField:Bool = false) -> Upload {
+    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -36,7 +35,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         }
         
         upload.fileSizeBytes = fileSizeBytes
-        upload.fileUUID = PerfectLib.UUID().string
+        upload.fileUUID = Foundation.UUID().uuidString
         upload.fileVersion = 1
         upload.mimeType = mimeType
         upload.state = .uploadingFile
@@ -79,10 +78,10 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         _ = doAddUpload(missingField: true)
     }
     
-    func doAddUploadDeletion(userId:UserId = 1, deviceUUID:String = PerfectLib.UUID().string, missingField:Bool = false) -> Upload {
+    func doAddUploadDeletion(userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         upload.deviceUUID = deviceUUID
-        upload.fileUUID = PerfectLib.UUID().string
+        upload.fileUUID = Foundation.UUID().uuidString
         upload.fileVersion = 1
         upload.state = .toDeleteFromFileIndex
         
@@ -193,7 +192,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == 1, "Bad credentialsId!")
         
-        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, deviceUUID: PerfectLib.UUID().string)
+        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, deviceUUID: Foundation.UUID().uuidString)
         switch uploadedFilesResult {
         case .uploads(let uploads):
             XCTAssert(uploads.count == 0)
@@ -213,7 +212,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let userId = UserRepository(db).add(user: user1)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let upload1 = doAddUpload(userId:userId!, deviceUUID:deviceUUID)
 
         let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, deviceUUID: deviceUUID)

@@ -8,10 +8,8 @@
 
 import LoggerAPI
 import KituraNet
-import SwiftyJSON
 import Foundation
 import SyncServerShared
-import PerfectLib
 
 // TODO: *5* MD5 checksums can be obtained from Google Drive: http://stackoverflow.com/questions/23462168/google-drive-md5-checksum-for-files 
 // At least for Google Drive this ought to enable us to deal with issues of users modifying files and messing us up. i.e., we should drop the byte count support we have and go with a checksum validation.
@@ -41,7 +39,7 @@ extension GoogleCreds : CloudStorage {
         See also see http://stackoverflow.com/questions/35143283/google-drive-api-v3-migration
     */
     // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
-    func listFiles(query:String? = nil, fieldsReturned:String? = nil, completion:@escaping (_ fileListing:JSON?, Swift.Error?)->()) {
+    func listFiles(query:String? = nil, fieldsReturned:String? = nil, completion:@escaping (_ fileListing:[String: Any]?, Swift.Error?)->()) {
         
         var urlParameters = ""
 
@@ -50,7 +48,7 @@ extension GoogleCreds : CloudStorage {
         }
         
         if query != nil {
-            if urlParameters.characters.count != 0 {
+            if urlParameters.count != 0 {
                 urlParameters += "&"
             }
             
@@ -58,7 +56,7 @@ extension GoogleCreds : CloudStorage {
         }
         
         var urlParams:String? = urlParameters
-        if urlParameters.characters.count == 0 {
+        if urlParameters.count == 0 {
             urlParams = nil
         }
         
@@ -74,12 +72,12 @@ extension GoogleCreds : CloudStorage {
                 return
             }
             
-            guard case .json(let jsonResult) = apiResult! else {
+            guard case .dictionary(let dictionary) = apiResult! else {
                 completion(nil, ListFilesError.badJSONResult)
                 return
             }
             
-            completion(jsonResult, error)
+            completion(dictionary, error)
         }
     }
     
@@ -103,7 +101,7 @@ extension GoogleCreds : CloudStorage {
         
         // Google specific result-- a partial files resource for the file.
         // Contains fields: size, and id
-        let json:[String: JSON]
+        let dictionary:[String: Any]
     }
     
     // Considers it an error for there to be more than one item with the given name.
@@ -137,35 +135,36 @@ extension GoogleCreds : CloudStorage {
         // The structure of this wasn't obvious to me-- it's scoped over the entire response object, not just within the files resource. See also http://stackoverflow.com/questions/38853938/google-drive-api-v3-invalid-field-selection
         let fieldsReturned = "files/id,files/size"
         
-        self.listFiles(query:query, fieldsReturned:fieldsReturned) { (json, error) in
+        self.listFiles(query:query, fieldsReturned:fieldsReturned) { (dictionary, error) in
             // For the response structure, see https://developers.google.com/drive/v3/reference/files/list
             
             var result:SearchResult?
             var resultError:Swift.Error? = error
             
-            if error != nil || json == nil || json!.type != .dictionary {
+            if error != nil || dictionary == nil {
                 if error == nil {
                     resultError = SearchError.noJSONDictionaryResult
                 }
             }
             else {
-                switch json!["files"].count {
-                case 0:
-                    // resultError will be nil as will result.
-                    break
+                if let filesArray = dictionary!["files"] as? [Any]  {
+                    switch filesArray.count {
+                    case 0:
+                        // resultError will be nil as will result.
+                        break
+                        
+                    case 1:
+                        if let fileDict = filesArray[0] as? [String: Any],
+                            let id = fileDict["id"] as? String {
+                            result = SearchResult(itemId: id, dictionary: fileDict)
+                        }
+                        else {
+                            resultError = SearchError.noIdInResultingJSON
+                        }
                     
-                case 1:
-                    if let fileArray = json!["files"].array,
-                        let fileDict = fileArray[0].dictionary,
-                        let id = fileDict["id"]?.string {
-                        result = SearchResult(itemId: id, json: fileDict)
+                    default:
+                        resultError = SearchError.moreThanOneItemWithName
                     }
-                    else {
-                        resultError = SearchError.noIdInResultingJSON
-                    }
-                
-                default:
-                    resultError = SearchError.moreThanOneItemWithName
                 }
             }
             
@@ -212,7 +211,7 @@ extension GoogleCreds : CloudStorage {
                 return
             }
             
-            guard case .json(let jsonResult) = apiResult! else {
+            guard case .dictionary(let dictionary) = apiResult! else {
                 completion(nil, CreateFolderError.badJSONResult)
                 return
             }
@@ -220,11 +219,8 @@ extension GoogleCreds : CloudStorage {
             if statusCode != HTTPStatusCode.OK {
                 resultError = CreateFolderError.badStatusCode(statusCode)
             }
-            else if jsonResult.type != .dictionary {
-                resultError = CreateFolderError.noJSONDictionaryResult
-            }
             else {
-                if let id = jsonResult["id"].string {
+                if let id = dictionary["id"] as? String {
                     resultId = id
                 }
                 else {
@@ -363,7 +359,7 @@ extension GoogleCreds : CloudStorage {
     
     private func completeSmallFileUpload(folderId:String, searchType:SearchType, cloudFileName: String, data: Data, mimeType:String, completion:@escaping (Result<Int>)->()) {
         
-        let boundary = PerfectLib.UUID().string
+        let boundary = Foundation.UUID().uuidString
 
         let additionalHeaders = [
             "Content-Type" : "multipart/related; boundary=\(boundary)"
@@ -405,7 +401,7 @@ extension GoogleCreds : CloudStorage {
 
                 self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
                     if error == nil {
-                        if let sizeString = result?.json["size"]?.string,
+                        if let sizeString = result?.dictionary["size"] as? String,
                             let size = Int(sizeString) {
                             completion(.success(size))
                         }

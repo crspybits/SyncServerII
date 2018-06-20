@@ -9,9 +9,7 @@
 import Foundation
 import Credentials
 import CredentialsGoogle
-import PerfectLib
 import KituraNet
-import SwiftyJSON
 import SyncServerShared
 import Kitura
 import LoggerAPI
@@ -194,9 +192,9 @@ class GoogleCreds : AccountAPICall, Account {
                 return
             }
             
-            if case .json(let jsonResult) = apiResult!,
-                let accessToken = jsonResult[GoogleCreds.googleAPIAccessTokenKey].string,
-                let refreshToken = jsonResult[GoogleCreds.googleAPIRefreshTokenKey].string {
+            if case .dictionary(let dictionary) = apiResult!,
+                let accessToken = dictionary[GoogleCreds.googleAPIAccessTokenKey] as? String,
+                let refreshToken = dictionary[GoogleCreds.googleAPIRefreshTokenKey] as? String {
                 
                 self.accessToken = accessToken
                 self.refreshToken = refreshToken
@@ -274,14 +272,13 @@ class GoogleCreds : AccountAPICall, Account {
                 return
             }
             
-            guard case .json(let jsonResult) = apiResult! else {
+            guard case .dictionary(let dictionary) = apiResult! else {
                 Log.error("Bad JSON result: \(String(describing: apiResult))")
                 completion(RefreshError.badJSONResult)
                 return
             }
             
-            if let accessToken =
-                jsonResult[GoogleCreds.googleAPIAccessTokenKey].string {
+            if let accessToken = dictionary[GoogleCreds.googleAPIAccessTokenKey] as? String {
                 self.accessToken = accessToken
                 Log.debug("Refreshed access token: \(accessToken)")
                 

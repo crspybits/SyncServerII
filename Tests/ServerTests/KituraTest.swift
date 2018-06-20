@@ -26,7 +26,6 @@ import Foundation
 @testable import Server
 import CredentialsGoogle
 import SMServerLib
-import PerfectLib
 import SyncServerShared
 
 protocol KituraTest {

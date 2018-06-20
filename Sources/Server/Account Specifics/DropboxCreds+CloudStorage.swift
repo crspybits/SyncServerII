@@ -8,7 +8,6 @@
 import Foundation
 import SyncServerShared
 import LoggerAPI
-import SwiftyJSON
 import KituraNet
 
 extension DropboxCreds {
@@ -59,7 +58,7 @@ extension DropboxCreds {
                 return
             }
             
-            guard case .json(let jsonResult) = apiResult else {
+            guard case .dictionary(let dictionary) = apiResult else {
                 completion(.failure(DropboxError.badJSONResult))
                 return
             }
@@ -67,13 +66,13 @@ extension DropboxCreds {
             // For file not found error, gives:
             // "error": [".tag": "path", "path": [".tag": "not_found"]]
             
-            if let _ = jsonResult.dictionary?["id"] {
+            if let _ = dictionary["id"] {
                 completion(.success(true))
             }
-            else if let error = jsonResult.dictionary?["error"],
-                let path = error.dictionary?["path"],
-                let tag = path.dictionary?[".tag"],
-                tag.string == "not_found" {
+            else if let error = dictionary["error"] as? [String: Any],
+                let path = error["path"] as? [String: Any],
+                let tag = path[".tag"] as? String,
+                tag == "not_found" {
                 completion(.success(false))
             }
             else {
@@ -108,16 +107,15 @@ extension DropboxCreds {
                 return
             }
             
-            guard case .json(let jsonResult) = apiResult else {
+            guard case .dictionary(let dictionary) = apiResult else {
                 completion(.failure(DropboxError.badJSONResult))
                 return
             }
 
-            if let idJson = jsonResult.dictionary?["id"],
-                idJson.string != "",
-                let sizeJson = jsonResult.dictionary?["size"],
-                let size = sizeJson.number {
-                completion(.success(Int(size)))
+            if let idJson = dictionary["id"] as? String,
+                idJson != "",
+                let size = dictionary["size"] as? Int {
+                completion(.success(size))
             }
             else {
                 completion(.failure(DropboxError.couldNotGetFileSize))
@@ -216,14 +214,14 @@ extension DropboxCreds : CloudStorage {
                 return
             }
             
-            guard case .json(let jsonResult) = apiResult else {
+            guard case .dictionary(let dictionary) = apiResult else {
                 completion(DropboxError.badJSONResult)
                 return
             }
 
-            if let metaDataJson = jsonResult.dictionary?["metadata"],
-                let idJson = metaDataJson.dictionary?["id"],
-                idJson.string != "" {
+            if let metaData = dictionary["metadata"] as? [String: Any],
+                let idJson = metaData["id"] as? String,
+                idJson != "" {
                 completion(nil)
             }
             else {

@@ -8,7 +8,6 @@
 
 import XCTest
 @testable import Server
-import PerfectLib
 import Foundation
 import Dispatch
 import SyncServerShared

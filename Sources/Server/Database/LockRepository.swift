@@ -9,7 +9,6 @@
 // Enables short duration locks to be held while info in the UploadRepository is transfered to the FileIndexRepository. This lock works in a somewhat non-obvious manner. Due to the blocking nature of transactions in InnoDB with row-level locking, a lock held by one server request for a specific userId in a transaction will block another server request attempting to obtain the same lock for the same userId.
 
 import Foundation
-import PerfectLib
 import SyncServerShared
 import LoggerAPI
 
@@ -30,13 +29,13 @@ class Lock : NSObject, Model {
         set {
             switch key {
             case Lock.userIdKey:
-                userId = newValue as! UserId!
+                userId = newValue as? UserId
                 
             case Lock.deviceUUIDKey:
-                deviceUUID = newValue as! String!
+                deviceUUID = newValue as? String
                 
             case Lock.expiryKey:
-                expiry = newValue as! Date!
+                expiry = newValue as? Date
                 
             default:
                 assert(false)

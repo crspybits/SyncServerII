@@ -9,7 +9,6 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -42,7 +41,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
 
         redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { expectation in
@@ -56,7 +55,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     }
 
     func testThatRedeemingWithTheSameAccountAsTheOwningAccountFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
         
         var sharingInvitationUUID:String!
@@ -72,7 +71,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func testThatRedeemingWithAnExistingOtherOwningAccountFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
         
         var sharingInvitationUUID:String!
@@ -82,7 +81,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
         addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2)
         
         redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
@@ -91,7 +90,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func redeemingWithAnExistingOtherSharingAccountFails(sharingUser: TestAccount) {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
             
         var sharingInvitationUUID:String!
@@ -140,7 +139,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         let perm:SharingPermission = .write
         createSharingUser(withSharingPermission: perm, sharingUser: sharingUser)
             
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
             
         performServerTest(testAccount: sharingUser) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:sharingUser, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -164,7 +163,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
         
         performServerTest(testAccount: .primaryOwningAccount) { expectation, creds in

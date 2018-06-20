@@ -12,7 +12,6 @@ import Foundation
 import HeliumLogger
 import LoggerAPI
 import SyncServerShared
-import PerfectLib
 
 class GoogleDriveTests: ServerTestCase, LinuxTestable {
     // In my Google Drive, at the top-level:
@@ -260,8 +259,8 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
         
         // Do the upload
-        let deviceUUID = PerfectLib.UUID().string
-        let fileUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
         
         let fileContents = "Hello World"
 

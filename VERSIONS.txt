@@ -1,5 +1,11 @@
 SyncServer
 
+Version 0.15.0
+	* Bringing up to date with current Kitura and PerfectlySoft
+	* Update CredentialsDropbox, SyncServer-Shared, SMServerLib, and (my fork of) Perfect-MySQL
+	* Now using Swift version 4.1.2 (seems required by current Perfect libs)
+	* Updated Docker build and runtime to Swift 4.1.2
+	
 Version 0.14.1 (4/21/18)
 	* Added file group UUID's to file uploads and file index-- to enable client to upload/download files in groups.
 		https://github.com/crspybits/SyncServerII/issues/59

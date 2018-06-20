@@ -9,7 +9,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 import SyncServerShared
 
 class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
@@ -85,7 +84,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     func successDownloadAppMetaData(usingFileDownload: Bool) {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
         
         let (uploadRequest, fileSizeBytes) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1)
@@ -99,7 +98,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let fileInfo1 = fileInfoObjs1[0]
         
         let appMetaData2 = AppMetaData(version: 1, contents: "Test2")
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
         uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadRequest.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2)
@@ -134,7 +133,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     func uploadAppMetaDataOfInitiallyNilAppMetaDataWorks(toAppMetaDataVersion appMetaDataVersion: AppMetaDataVersionInt, expectedError: Bool = false) {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         let (uploadRequest, fileSizeBytes) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:nil)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
@@ -147,7 +146,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let fileInfo1 = fileInfoObjs1[0]
         
         let appMetaData = AppMetaData(version: appMetaDataVersion, contents: "Test2")
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
         uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadRequest.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData, expectedError: expectedError)
@@ -181,7 +180,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     // Try to update from version N meta data to version N (or other, non N+1).
     func testUpdateFromVersion0ToVersion0Fails() {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
         
         let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1)
@@ -195,7 +194,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
 
     // Attempt to upload app meta data for a deleted file.
     func testUploadAppMetaDataForDeletedFileFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         var masterVersion: MasterVersionInt = 0
 
         let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion: masterVersion)
@@ -218,10 +217,10 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     // UploadAppMetaData for a file that doesn't exist.
     func testUploadAppMetaDataForANonExistentFileFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let masterVersion: MasterVersionInt = 0
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
-        let badFileUUID = PerfectLib.UUID().string
+        let badFileUUID = Foundation.UUID().uuidString
         let cloudFolderName = ServerTestCase.cloudFolderName
 
         addNewUser(deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
@@ -231,7 +230,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     // Use download file to try to download an incorrect meta data version.
     func testFileDownloadOfBadMetaDataVersionFails() {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
         
         let (uploadRequest, fileSizeBytes) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1)
@@ -239,7 +238,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         masterVersion += 1
         
         let appMetaData2 = AppMetaData(version: 1, contents: "Test2")
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
         uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadRequest.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2)

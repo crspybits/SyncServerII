@@ -9,7 +9,7 @@
 import LoggerAPI
 import Kitura
 import KituraNet
-import Gloss
+//import Gloss
 import KituraSession
 import Credentials
 import CredentialsGoogle
@@ -67,7 +67,7 @@ class RequestHandler : AccountDelegate {
     }
     
     enum EndWithResponse {
-    case json(JSON)
+    case json([String: Any])
     case data(data:Data?, headers:[String:String])
     case headers([String:String])
     }
@@ -125,7 +125,7 @@ class RequestHandler : AccountDelegate {
     }
     
     enum SuccessResult {
-        case json(JSON)
+        case json([String: Any])
         case dataWithHeaders(Data?, headers:[String:String])
         case headers([String:String])
         case nothing

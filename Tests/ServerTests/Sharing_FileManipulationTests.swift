@@ -9,7 +9,6 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -26,7 +25,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     @discardableResult
     func uploadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         
         addNewUser(deviceUUID:deviceUUID1)
         
@@ -43,7 +42,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
         
         // Attempting to upload a file by our sharing user
         let (request, fileSize) = uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID2, addUser:false, errorExpected: failureExpected)
@@ -54,7 +53,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     func uploadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         
         addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
         
@@ -75,7 +74,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
@@ -88,7 +87,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     func downloadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         
         addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
         
@@ -114,7 +113,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     func downloadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
     
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         
         addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
         
@@ -146,7 +145,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
         // The final step of a download deletion is to check the file index-- and make sure it's marked as deleted for us.
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         self.performServerTest(testAccount: sharingUser) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: sharingUser, accessToken: testCreds.accessToken, deviceUUID:deviceUUID2)

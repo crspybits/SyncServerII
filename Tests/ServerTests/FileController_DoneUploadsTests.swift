@@ -10,7 +10,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 import SyncServerShared
 
 class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
@@ -26,19 +25,19 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
     }
     
     func testDoneUploadsWithNoUploads() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
         self.sendDoneUploads(expectedNumberOfUploads: 0)
     }
     
     func testDoneUploadsWithSingleUpload() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID)
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
     }
     
     func testDoneUploadsWithTwoUploads() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID)
         Log.info("Done uploadTextFile")
         
@@ -53,8 +52,8 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
     }
     
     func testDoneUploadsThatUpdatesFileVersion() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
         
         _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID)
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
@@ -64,7 +63,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
     }
     
     func testDoneUploadsTwiceDoesNothingSecondTime() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID)
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
         
@@ -73,7 +72,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
     
     // If you first upload a file (followed by a DoneUploads), then delete it, and then upload again the last upload fails.
     func testThatUploadAfterUploadDeletionFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
         

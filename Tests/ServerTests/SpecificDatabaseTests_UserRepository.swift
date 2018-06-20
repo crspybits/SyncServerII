@@ -12,7 +12,6 @@ import LoggerAPI
 import HeliumLogger
 import Credentials
 import CredentialsGoogle
-import PerfectLib
 import Foundation
 
 class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {

@@ -9,7 +9,6 @@
 import Foundation
 import HeliumLogger
 import LoggerAPI
-import PerfectLib
 import Kitura
 
 // 7/2/17; SwiftMetrics, perhaps because it was mis-installed, was causing several of my higher-performing test cases to fail. E.g., 10 consecutive uploads and downloads of a 1MB file. Thus, I've commented it out for now.

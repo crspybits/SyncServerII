@@ -9,7 +9,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 import SyncServerShared
 
 class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
@@ -25,8 +24,8 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
     }
 
     func testUploadWithFileGroupUUIDWorks() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileGroupUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileGroupUUID = Foundation.UUID().uuidString
         
         let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID, fileGroupUUID: fileGroupUUID)
         
@@ -45,8 +44,8 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
     
     // Make sure when uploading version 1 of a file, given with nil fileGroupUUID, the fileGroupUUID doesn't reset to nil-- when you gave a fileGroupUUID when uploading v0
     func testUploadVersion1WithNilFileGroupUUIDWorks() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileGroupUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileGroupUUID = Foundation.UUID().uuidString
         
         // Upload v0, with fileGroupUUID
         let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID, fileGroupUUID: fileGroupUUID)
@@ -68,8 +67,8 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
     
     // Give fileGroupUUID with version 1 of file (but not with v0)-- make sure this fails.
     func testFileGroupUUIDOnlyWithVersion1Fails() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileGroupUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileGroupUUID = Foundation.UUID().uuidString
         
         // Upload v0, *without* fileGroupUUID
         let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID)

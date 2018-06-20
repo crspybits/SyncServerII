@@ -11,7 +11,6 @@ import XCTest
 import Foundation
 import LoggerAPI
 import HeliumLogger
-import PerfectLib
 import SyncServerShared
 
 class DropboxTests: ServerTestCase, LinuxTestable {
@@ -72,7 +71,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadFileWorks() {
-        let fileName = PerfectLib.UUID().string
+        let fileName = Foundation.UUID().uuidString
         
         let creds = DropboxCreds()
         creds.accessToken = TestAccount.dropbox1.token()
@@ -99,8 +98,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testFullUploadWorks() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
         
         let creds = DropboxCreds()
         creds.accessToken = TestAccount.dropbox1.token()
@@ -175,8 +174,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadAndDownloadWorks() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
         
         let creds = DropboxCreds()
         creds.accessToken = TestAccount.dropbox1.token()
@@ -228,8 +227,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
     }
 
     func testDeletionOfExistingFileWorks() {
-        let deviceUUID = PerfectLib.UUID().string
-        let fileUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
         
         let creds = DropboxCreds()
         creds.accessToken = TestAccount.dropbox1.token()

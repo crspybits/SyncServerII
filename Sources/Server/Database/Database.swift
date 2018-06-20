@@ -8,7 +8,7 @@
 
 import LoggerAPI
 import Foundation
-import MySQL
+import PerfectMySQL
 
 // See https://github.com/PerfectlySoft/Perfect-MySQL for assumptions about mySQL installation.
 // For mySQL interface docs, see: http://perfect.org/docs/MySQL.html
@@ -62,7 +62,7 @@ class Database {
         if !closed {
             ServerStatsKeeper.session.increment(stat: .dbConnectionsClosed)
             Log.info("CLOSING DB CONNECTION: opened: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsOpened)); closed: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsClosed))")
-            connection.close()
+            connection = nil
             closed = true
         }
     }

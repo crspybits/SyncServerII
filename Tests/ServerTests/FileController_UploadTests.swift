@@ -10,7 +10,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 import SyncServerShared
 
 class FileController_UploadTests: ServerTestCase, LinuxTestable {
@@ -34,7 +33,7 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadTextAndJPEGFile() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID)
         
         guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
@@ -44,7 +43,7 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadingSameFileTwiceWorks() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (request, _) = uploadTextFile(deviceUUID:deviceUUID)
         
         // Second upload.
@@ -61,10 +60,10 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     
     func testUploadWithInvalidMimeTypeFails() {
         let testAccount:TestAccount = .primaryOwningAccount
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         addNewUser(deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName)
         
-        let fileUUIDToSend = PerfectLib.UUID().string
+        let fileUUIDToSend = Foundation.UUID().uuidString
         
         let uploadString = ServerTestCase.uploadTextFileContents
         let data = ServerTestCase.uploadTextFileContents.data(using: .utf8)!

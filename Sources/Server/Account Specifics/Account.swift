@@ -8,7 +8,6 @@
 import Foundation
 import SyncServerShared
 import Credentials
-import SwiftyJSON
 import KituraNet
 import LoggerAPI
 import Kitura
@@ -33,7 +32,7 @@ protocol Account {
     // Accounts that can be both or can be owning return true iff they need a cloud folder name (e.g., Google Drive).
     var owningAccountsNeedCloudFolderName: Bool {get}
     
-    weak var delegate:AccountDelegate? {get set}
+    var delegate:AccountDelegate? {get set}
     
     var accountCreationUser:AccountCreationUser? {get set}
     
@@ -158,7 +157,8 @@ enum APICallBody {
 }
 
 enum APICallResult {
-    case json(JSON)
+    case dictionary([String: Any])
+    case array([Any])
     case data(Data)
 }
 
@@ -248,13 +248,16 @@ class AccountAPICall {
                         result = .data(body)
                     }
                     else {
-                        let jsonBody = JSON(data: body)
+                        let jsonResult:Any = try JSONSerialization.jsonObject(with: body, options: [])
                         
-                        if jsonBody.type == .null {
-                            result = .data(body)
+                        if let dictionary = jsonResult as? [String : Any] {
+                            result = .dictionary(dictionary)
+                        }
+                        else if let array = jsonResult as? [Any] {
+                            result = .array(array)
                         }
                         else {
-                            result = .json(jsonBody)
+                            result = .data(body)
                         }
                     }
                     

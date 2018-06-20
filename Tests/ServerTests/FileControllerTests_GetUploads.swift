@@ -10,7 +10,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 
 class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
 
@@ -25,13 +24,13 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     }
     
     func testForZeroUploads() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:])
     }
     
     func testForOneUpload() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
 
         let expectedSizes = [
@@ -42,7 +41,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     }
     
     func testForOneUploadButDoneTwice() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
 
         // Second upload-- shouldn't result in second entries in Upload table.
@@ -56,7 +55,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     }
     
     func testForOneUploadButFromWrongDeviceUUID() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID)
         
         // This will do the GetUploads, but with a different deviceUUID, which will give empty result.
@@ -64,7 +63,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     }
     
     func testForTwoUploads() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
         
         guard let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
@@ -81,7 +80,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     }
     
     func testForNoUploadsAfterDoneUploads() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID)
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:])

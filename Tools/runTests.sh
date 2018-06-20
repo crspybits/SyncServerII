@@ -29,10 +29,10 @@
 # Assumption: This assumes it's run from the root of the repo.
 
 # Examples
-#   ./runTests.sh filter ServerTests.DatabaseModelTests
-#   ./runTests.sh suites google
-#   ./runTests.sh suites sharing
-#   ./runTests.sh suites owning
+#   ./Tools/runTests.sh filter ServerTests.DatabaseModelTests
+#   ./Tools/runTests.sh suites google
+#   ./Tools/runTests.sh suites sharing
+#   ./Tools/runTests.sh suites owning
 
 TEST_JSON="Tools/TestSuites.json"
 COMMAND=$1
@@ -47,6 +47,9 @@ TEST_OUT_DIR=".testing"
 TOTAL_SUITES_PASSED=0
 TOTAL_SUITES_FAILED=0
 TOTAL_FAILED_TEST_CASES=0
+
+# Create TEST_OUT_DIR if it's not there.
+mkdir -p "$TEST_OUT_DIR"
 
 # See https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux
 RED='\033[0;31m'

@@ -4,7 +4,6 @@ import KituraNet
 @testable import Server
 import LoggerAPI
 import CredentialsGoogle
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -12,7 +11,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     let serverResponseTime:TimeInterval = 10
 
     func testGoodEndpointWithBadCredsFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
@@ -25,7 +24,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
 
     // Good Google creds, not creds that are necessarily on the server.
     func testGoodEndpointWithGoodCredsWorks() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         self.performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
@@ -39,7 +38,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     
     func testBadPathWithGoodCredsFails() {
         let badRoute = ServerEndpoint("foobar", method: .post)
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
 
         performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
@@ -53,7 +52,7 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     func testGoodPathWithBadMethodWithGoodCredsFails() {
         let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post)
         XCTAssert(ServerEndpoints.checkCreds.method != .post)
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
             
         self.performServerTest(testAccount: .google1) { expectation, googleCreds in
             let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)

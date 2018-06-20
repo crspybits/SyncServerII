@@ -9,7 +9,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 import SyncServerShared
 
 class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
@@ -26,19 +25,19 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     func testDownloadAppMetaDataForBadUUIDFails() {
         let masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
         
         uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
     
-        let badFileUUID = PerfectLib.UUID().string
+        let badFileUUID = Foundation.UUID().uuidString
         downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: badFileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, expectedError: true)
     }
     
     func testDownloadAppMetaDataForReallyBadUUIDFails() {
         let masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
 
         uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)
@@ -50,7 +49,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     func testDownloadAppMetaDataVersionNotOnServerFails() {
         let masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
 
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)
@@ -62,7 +61,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
 
     func testDownloadNilAppMetaDataVersionAs0Fails() {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
@@ -73,14 +72,14 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     func testDownloadAppMetaDataForFileThatIsNotOwnedFails() {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
 
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
         masterVersion += 1
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         let nonOwningAccount:TestAccount = .secondaryOwningAccount
         guard let _ = addNewUser(testAccount: nonOwningAccount, deviceUUID:deviceUUID2) else {
@@ -94,7 +93,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     func testDownloadValidAppMetaDataVersion0() {
         let masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
 
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)
@@ -110,7 +109,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
     func testDownloadValidAppMetaDataVersion1() {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         var appMetaData = AppMetaData(version: 0, contents: "Test1")
         
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)
@@ -141,7 +140,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
     // Upload app meta data version 0, then upload app meta version nil, and then make sure when you download you still have app meta version 0. i.e., nil doesn't overwrite a non-nil version.
     func testUploadingNilAppMetaDataDoesNotOverwriteCurrent() {
         var masterVersion: MasterVersionInt = 0
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
         
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData)

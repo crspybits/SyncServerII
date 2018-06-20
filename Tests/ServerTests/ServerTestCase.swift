@@ -12,7 +12,6 @@ import Foundation
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import SyncServerShared
 
 #if os(Linux)
@@ -302,7 +301,7 @@ class ServerTestCase : XCTestCase {
     static let uploadTextFileContents = "Hello World!"
     
     @discardableResult
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
     
         if addUser {
             self.addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
@@ -310,7 +309,7 @@ class ServerTestCase : XCTestCase {
         
         var fileUUIDToSend = ""
         if fileUUID == nil {
-            fileUUIDToSend = PerfectLib.UUID().string
+            fileUUIDToSend = Foundation.UUID().uuidString
         }
         else {
             fileUUIDToSend = fileUUID!
@@ -408,8 +407,8 @@ class ServerTestCase : XCTestCase {
     }
     
     static let jpegMimeType = "image/jpeg"
-    func uploadJPEGFile(deviceUUID:String = PerfectLib.UUID().string,
-        fileUUID:String = PerfectLib.UUID().string, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64)? {
+    func uploadJPEGFile(deviceUUID:String = Foundation.UUID().uuidString,
+        fileUUID:String = Foundation.UUID().uuidString, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64)? {
     
         if addUser {
             self.addNewUser(deviceUUID:deviceUUID)
@@ -445,7 +444,7 @@ class ServerTestCase : XCTestCase {
         return (uploadRequest, sizeOfCatFileInBytes)
     }
     
-    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = PerfectLib.UUID().string, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
+    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -479,7 +478,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = PerfectLib.UUID().string, masterVersionExpected:Int64, expectedFileSizes: [String: Int64], expectedDeletionState:[String: Bool]? = nil) {
+    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64, expectedFileSizes: [String: Int64], expectedDeletionState:[String: Bool]? = nil) {
     
         XCTAssert(expectedFiles.count == expectedFileSizes.count)
         
@@ -528,7 +527,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = PerfectLib.UUID().string) -> [FileInfo]? {
+    func getFileIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString) -> [FileInfo]? {
         var result:[FileInfo]?
         
         self.performServerTest(testAccount: testAccount) { expectation, creds in
@@ -553,7 +552,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = PerfectLib.UUID().string,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil) {
+    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil) {
     
         if expectedFileSizes != nil {
             XCTAssert(expectedFiles.count == expectedFileSizes!.count)
@@ -616,7 +615,7 @@ class ServerTestCase : XCTestCase {
         }
     }
 
-    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: SharingPermission? = nil, deviceUUID:String = PerfectLib.UUID().string, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: SharingPermission? = nil, deviceUUID:String = Foundation.UUID().uuidString, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -654,7 +653,7 @@ class ServerTestCase : XCTestCase {
         // c) And, redeem sharing invitation with that new Google account.
 
         // Create the owning user.
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
         
         var sharingInvitationUUID:String!
@@ -692,7 +691,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = PerfectLib.UUID().string, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ expectation: XCTestExpectation)->()) {
+    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ expectation: XCTestExpectation)->()) {
 
         self.performServerTest(testAccount:sharingUser) { expectation, accountCreds in
             let headers = self.setupHeaders(testUser: sharingUser, accessToken: accountCreds.accessToken, deviceUUID:deviceUUID)
@@ -757,7 +756,7 @@ class ServerTestCase : XCTestCase {
     @discardableResult
     func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:AppMetaData? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, fileSize:Int64? = nil, expectedError: Bool = false) -> DownloadFileResponse? {
     
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let masterVersion:Int64 = 0
         
         var actualUploadFileRequest:UploadFileRequest!

@@ -12,7 +12,6 @@ import LoggerAPI
 import HeliumLogger
 import Credentials
 import CredentialsGoogle
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -97,13 +96,13 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testLock() {
-        let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
+        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
         XCTAssert(!lockIt(lock: lock))
     }
     
     func testThatNewlyAddedLocksAreNotStale() {
-        let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
+        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
         XCTAssert(LockRepository(db).removeStaleLock(forUserId: 1) == 0)
         XCTAssert(!lockIt(lock: lock))
@@ -111,7 +110,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     
     func testThatStaleALockIsRemoved() {
         let duration:TimeInterval = 1
-        let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
+        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
@@ -124,10 +123,10 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testRemoveAllStaleLocks() {
         let duration:TimeInterval = 1
         
-        let lock1 = Lock(userId:1, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
+        let lock1 = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock1))
         
-        let lock2 = Lock(userId:2, deviceUUID:PerfectLib.UUID().string, expiryDuration:duration)
+        let lock2 = Lock(userId:2, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock2))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
@@ -140,7 +139,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testRemoveLock() {
-        let lock = Lock(userId:1, deviceUUID:PerfectLib.UUID().string)
+        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
         XCTAssert(LockRepository(db).unlock(userId:1))
         XCTAssert(lockIt(lock: lock))
@@ -150,8 +149,8 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         let fileIndex = FileIndex()
         fileIndex.fileSizeBytes = 100
         fileIndex.deleted = false
-        fileIndex.fileUUID = PerfectLib.UUID().string
-        fileIndex.deviceUUID = PerfectLib.UUID().string
+        fileIndex.fileUUID = Foundation.UUID().uuidString
+        fileIndex.deviceUUID = Foundation.UUID().uuidString
         fileIndex.fileVersion = 1
         fileIndex.mimeType = "text/plain"
         fileIndex.userId = userId
@@ -267,7 +266,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func doAddDeviceUUID(userId:UserId = 1, repo:DeviceUUIDRepository) -> DeviceUUID? {
-        let du = DeviceUUID(userId: userId, deviceUUID: PerfectLib.UUID().string)
+        let du = DeviceUUID(userId: userId, deviceUUID: Foundation.UUID().uuidString)
         let result = repo.add(deviceUUID: du)
         
         switch result {

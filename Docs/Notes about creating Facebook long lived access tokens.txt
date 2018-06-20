@@ -15,3 +15,19 @@ See also https://stackoverflow.com/questions/10467272/get-long-live-access-token
 I just created one: npjxqwhgom_1513727437@tfbnw.net
 
 I initially had assumed these were long-lived. But, no. After a day I had to generate a new one.
+
+6/19/18-- I just learned something more about the Facebook test accounts-- if you don't use them for more than 90 days, they expire. I started seeing 400 responses from the facebook authorization (Kitura) plugin. Trying the same access token using Postman gave the following:
+
+{
+    "error": {
+        "message": "Error validating access token: Sessions for the user are not allowed because the user is not a confirmed user.",
+        "type": "OAuthException",
+        "code": 190,
+        "error_subcode": 464,
+        "fbtrace_id": "GWheC2eo177"
+    }
+}
+
+This SO post showed me the light:
+https://stackoverflow.com/questions/50124462/facebook-graph-api-rejects-newly-created-access-token
+(My solution was to just delete and recreate my two test users).

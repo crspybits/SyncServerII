@@ -9,7 +9,6 @@
 // Persistent Storage for temporarily storing meta data for file uploads and file deletions before finally storing that info in the FileIndex. This also represents files that need to be purged from cloud storage-- this will be for losers of FileIndex update races and for upload deletions.
 
 import Foundation
-import PerfectLib
 import SyncServerShared
 import LoggerAPI
 

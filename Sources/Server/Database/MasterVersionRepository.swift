@@ -9,7 +9,6 @@
 // This tracks an overall version of the fileIndex per userId.
 
 import Foundation
-import PerfectLib
 import SyncServerShared
 import LoggerAPI
 
@@ -24,10 +23,10 @@ class MasterVersion : NSObject, Model {
         set {
             switch key {
             case MasterVersion.userIdKey:
-                userId = newValue as! UserId!
+                userId = newValue as? UserId
                 
             case MasterVersion.masterVersionKey:
-                masterVersion = newValue as! MasterVersionInt!
+                masterVersion = newValue as? MasterVersionInt
                 
             default:
                 assert(false)

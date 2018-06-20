@@ -11,7 +11,6 @@ import XCTest
 import LoggerAPI
 import Foundation
 import SyncServerShared
-import PerfectLib
 
 class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
 
@@ -30,7 +29,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     // TODO: *1* Also useful would be a service that lets us directly delete a file from cloud storage-- to simulate errors in file deletion.
 
     func testThatUploadDeletionTransfersToUploads() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
@@ -55,7 +54,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     }
     
     func testThatCombinedUploadDeletionAndFileUploadWork() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID)
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
@@ -86,7 +85,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     }
     
     func testThatUploadDeletionTwiceOfSameFileWorks() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
@@ -109,7 +108,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     }
     
     func testThatUploadDeletionFollowedByDoneUploadsActuallyDeletes() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
@@ -149,7 +148,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     // TODO: *0* Test upload deletion with with 2 files
 
     func testThatDeletionOfDifferentVersionFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
         
@@ -165,14 +164,14 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     }
     
     func testThatDeletionOfUnknownFileUUIDFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: PerfectLib.UUID().string,
+            UploadDeletionRequest.fileUUIDKey: Foundation.UUID().uuidString,
             UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
             UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
         ])!
@@ -183,7 +182,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     // TODO: *1* Make sure a deviceUUID from a different user cannot do an UploadDeletion for our file.
     
     func testThatDeletionFailsWhenMasterVersionDoesNotMatch() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
         
@@ -199,7 +198,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     }
     
     func testThatDebugDeletionFromServerWorks() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
         
@@ -239,7 +238,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     
     // Until today, 3/31/17, I had a bug in the server where this didn't work. It would try to delete the file using a name given by the the deviceUUID of the deleting device, not the uploading device.
     func testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID1)
@@ -252,7 +251,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
         ])!
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false)
 
@@ -272,7 +271,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     // MARK: Undeletion tests
     
     func uploadUndelete(twice: Bool = false) {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
         let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)

@@ -79,9 +79,8 @@ class FacebookCreds : AccountAPICall,  Account {
                 urlParameters: urlParameters) { apiCallResult, httpStatus in
             if httpStatus == HTTPStatusCode.OK {
                 switch apiCallResult {
-                case .some(.json(let json)):
-                    guard let jsonAccessToken = json.dictionary?["access_token"],
-                        let accessToken = jsonAccessToken.string else {
+                case .some(.dictionary(let dictionary)):
+                    guard let accessToken = dictionary["access_token"] as? String else {
                         completion(GenerateTokensError.noAccessTokenInResult)
                         return
                     }

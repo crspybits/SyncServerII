@@ -8,7 +8,6 @@
 
 import XCTest
 @testable import Server
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -25,24 +24,24 @@ class MessageTests: ServerTestCase, LinuxTestable {
     }
     
     func testIntConversions() {
-        let uuidString1 = PerfectLib.UUID().string
+        let uuidString1 = Foundation.UUID().uuidString
 
-        let uploadRequest = UploadFileRequest(json: [
+        guard let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42)
-        ])
+        ]) else {
+            XCTFail()
+            return
+        }
         
-        let fileVersion = valueFor(property: UploadFileRequest.fileVersionKey, of: uploadRequest! as Any) as? FileVersionInt
-        XCTAssert(fileVersion == 1, "fileVersion = \(String(describing: fileVersion))")
-        
-        let masterVersion = valueFor(property: UploadFileRequest.masterVersionKey, of: uploadRequest!  as Any) as? MasterVersionInt
-        XCTAssert(masterVersion == 42, "masterVersion = \(String(describing: masterVersion))")
+        XCTAssert(uploadRequest.fileVersion == 1)        
+        XCTAssert(uploadRequest.masterVersion == 42)
   }
 
     func testURLParameters() {
-        let uuidString1 = PerfectLib.UUID().string
+        let uuidString1 = Foundation.UUID().uuidString
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
@@ -57,7 +56,7 @@ class MessageTests: ServerTestCase, LinuxTestable {
     }
     
     func testURLParametersWithIntegersAsStrings() {
-        let uuidString1 = PerfectLib.UUID().string
+        let uuidString1 = Foundation.UUID().uuidString
 
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
@@ -72,7 +71,7 @@ class MessageTests: ServerTestCase, LinuxTestable {
     }
     
     func testURLParametersForUploadDeletion() {
-        let uuidString = PerfectLib.UUID().string
+        let uuidString = Foundation.UUID().uuidString
 
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uuidString,
@@ -103,19 +102,22 @@ class MessageTests: ServerTestCase, LinuxTestable {
     }
     
     func testPropertyHasValue() {
-        let uuidString1 = PerfectLib.UUID().string
+        let uuidString1 = Foundation.UUID().uuidString
 
-        let uploadRequest = UploadFileRequest(json: [
+        guard let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42)
-        ])
+        ]) else {
+            XCTFail()
+            return
+        }
         
-        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileUUIDKey))
-        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.mimeTypeKey))
-        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.fileVersionKey))
-        XCTAssert(uploadRequest!.propertyHasValue(propertyName: UploadFileRequest.masterVersionKey))
+        XCTAssert(uploadRequest.fileUUID == uuidString1)
+        XCTAssert(uploadRequest.mimeType == "text/plain")
+        XCTAssert(uploadRequest.fileVersion == FileVersionInt(1))
+        XCTAssert(uploadRequest.masterVersion == MasterVersionInt(42))
     }
     
     func testNilRequestMessageParams() {

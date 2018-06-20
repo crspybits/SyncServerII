@@ -6,7 +6,6 @@
 //
 
 import XCTest
-import PerfectLib
 import SyncServerShared
 import LoggerAPI
 @testable import Server
@@ -24,7 +23,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     }
 
     func testGoodEndpointWithBadCredsFails() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
             let headers = self.setupHeaders(testUser: .facebook1, accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
@@ -37,7 +36,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     
     // Good Facebook creds, not creds that are necessarily on the server.
     func testGoodEndpointWithGoodCredsWorks() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
             let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
@@ -51,7 +50,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     
     func testBadPathWithGoodCredsFails() {
         let badRoute = ServerEndpoint("foobar", method: .post)
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         performServerTest(testAccount: .facebook1) { expectation, fbCreds in
             let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
@@ -65,7 +64,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     func testGoodPathWithBadMethodWithGoodCredsFails() {
         let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post)
         XCTAssert(ServerEndpoints.checkCreds.method != .post)
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         self.performServerTest(testAccount: .facebook1) { expectation, fbCreds in
             let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
@@ -79,7 +78,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     func testThatFacebookUserHasValidCreds() {
         createSharingUser(withSharingPermission: .read, sharingUser: .facebook1)
         
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         
         self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
             let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)

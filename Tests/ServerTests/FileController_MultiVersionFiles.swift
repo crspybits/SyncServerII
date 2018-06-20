@@ -10,7 +10,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 import SyncServerShared
 
 class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
@@ -35,7 +34,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         }
         
         // The use of a different device UUID here is part of this test-- that the second version can be uploaded with a different device UUID.
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion:fileVersionToUpload, masterVersion: masterVersion, appMetaData: appMetaData)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
         
@@ -81,7 +80,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     func testUploadVersion1AfterVersion0Works() {
         let mimeType = "text/plain"
         let fileVersion:FileVersionInt = 1
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         var appMetaDataVersion: AppMetaDataVersionInt = 0
         
         let (uploadRequest, fileSize) = uploadTextFile(deviceUUID: deviceUUID1, appMetaData: AppMetaData(version: 0, contents: "Some-App-Meta-Data"))
@@ -108,22 +107,22 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     
     // Attempt to upload version 1 when version 0 hasn't yet been committed with DoneUploads-- should fail.
     func testUploadVersion1WhenVersion0HasNotBeenCommitted() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: request.fileUUID, addUser: false, fileVersion:1, masterVersion: 0, errorExpected: true)
     }
 
     // Upload version N of a file; do DoneUploads. Then try again to upload version N. That should fail.
     func testUploadOfSameFileVersionFails() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
 
         _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: request.fileUUID, addUser: false, fileVersion:0, masterVersion: 1, errorExpected: true)
         
@@ -150,7 +149,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     
     @discardableResult
     // Master version after this call is sent back.
-    func uploadVersion(_ version: FileVersionInt, deviceUUID:String = PerfectLib.UUID().string, fileUUID:String, startMasterVersion: MasterVersionInt = 0, addUser:Bool = true) -> (MasterVersionInt, UploadFileRequest) {
+    func uploadVersion(_ version: FileVersionInt, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String, startMasterVersion: MasterVersionInt = 0, addUser:Bool = true) -> (MasterVersionInt, UploadFileRequest) {
         
         var masterVersion:MasterVersionInt = startMasterVersion
 
@@ -174,13 +173,13 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     
     // Upload some number (e.g., 5) of new versions.
     func testSuccessiveUploadsOfNextVersionWorks() {
-        let fileUUID = PerfectLib.UUID().string
+        let fileUUID = Foundation.UUID().uuidString
         uploadVersion(5, fileUUID:fileUUID)
     }
     
     func testUploadDifferentFileContentsForSecondVersionWorks() {
         // Upload small text file first.
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         
         let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID1, appMetaData:AppMetaData(version: 0, contents: appMetaData))
         // Send DoneUploads-- to commit version 0.
@@ -214,18 +213,18 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     
     // Next version uploaded must be +1
     func testUploadOfVersion2OfVersion0FileFails() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: request.fileUUID, addUser: false, fileVersion:2, masterVersion: 1, errorExpected: true)
     }
     
     // Next version uploaded must have the same mimeType
     func testUploadDifferentVersionWithDifferentMimeTypeFails() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
@@ -237,12 +236,12 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     }
     
     func testUploadOfTwoConsecutiveVersionsWithoutADoneUploadsAfterVersion0IsUploadedFails() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: request.fileUUID, addUser: false, fileVersion:1, masterVersion: 1, errorExpected: false)
 
         _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: request.fileUUID, addUser: false, fileVersion:2, masterVersion: 1, errorExpected: true)
@@ -252,7 +251,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
 
     // Upload version 0. Try to delete version 1.
     func testUploadDeletionOfVersionThatDoesNotExistFails() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         let (request, _) = uploadTextFile(deviceUUID: deviceUUID1)
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
@@ -267,7 +266,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     }
     
     func testUploadDeletionOfVersionThatExistsWorks() {
-        let fileUUID = PerfectLib.UUID().string
+        let fileUUID = Foundation.UUID().uuidString
         let (masterVersion, _) = uploadVersion(2, fileUUID:fileUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
@@ -276,7 +275,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             UploadDeletionRequest.masterVersionKey: masterVersion
         ])!
         
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion)
     }
@@ -300,10 +299,10 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     // MARK: File Index
 
     func testFileIndexReportsVariousFileVersions() {
-        let fileUUID1 = PerfectLib.UUID().string
-        let fileUUID2 = PerfectLib.UUID().string
-        let fileUUID3 = PerfectLib.UUID().string
-        let deviceUUID = PerfectLib.UUID().string
+        let fileUUID1 = Foundation.UUID().uuidString
+        let fileUUID2 = Foundation.UUID().uuidString
+        let fileUUID3 = Foundation.UUID().uuidString
+        let deviceUUID = Foundation.UUID().uuidString
 
         var (masterVersion, _) = uploadVersion(2, deviceUUID: deviceUUID, fileUUID:fileUUID1)
         (masterVersion, _) = uploadVersion(3, deviceUUID: deviceUUID, fileUUID:fileUUID2, startMasterVersion: masterVersion, addUser: false)
@@ -317,8 +316,8 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     // MARK: Download
     
     func testDownloadOfFileVersion3Works() {
-        let fileUUID1 = PerfectLib.UUID().string
-        let deviceUUID = PerfectLib.UUID().string
+        let fileUUID1 = Foundation.UUID().uuidString
+        let deviceUUID = Foundation.UUID().uuidString
         let fileVersion:FileVersionInt = 3
         let (masterVersion, uploadRequest) = uploadVersion(fileVersion, deviceUUID: deviceUUID, fileUUID:fileUUID1)
         
@@ -330,8 +329,8 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     }
     
     func testDownloadOfBadVersionFails() {
-        let fileUUID1 = PerfectLib.UUID().string
-        let deviceUUID = PerfectLib.UUID().string
+        let fileUUID1 = Foundation.UUID().uuidString
+        let deviceUUID = Foundation.UUID().uuidString
         let fileVersion:FileVersionInt = 3
         let (masterVersion, uploadRequest) = uploadVersion(fileVersion, deviceUUID: deviceUUID, fileUUID:fileUUID1)
         

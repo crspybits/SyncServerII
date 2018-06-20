@@ -9,7 +9,6 @@
 import XCTest
 @testable import Server
 import LoggerAPI
-import PerfectLib
 import Foundation
 import SyncServerShared
 
@@ -20,7 +19,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testAddUserSucceedsWhenAddingNewUser() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let testAccount:TestAccount = .primaryOwningAccount
         
         guard let addUserResponse = addNewUser(testAccount:testAccount, deviceUUID:deviceUUID) else {
@@ -52,7 +51,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testAddUserFailsWhenAddingExistingUser() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
             
         performServerTest { expectation, creds in
@@ -67,7 +66,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     
     // Purpose is to check if second add user fails because the initial file is there.
     func testAddRemoveAddWorks() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let testAccount:TestAccount = .primaryOwningAccount
         
         addNewUser(testAccount:testAccount, deviceUUID:deviceUUID)
@@ -87,7 +86,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testCheckCredsWhenUserDoesExist() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
             
         performServerTest { expectation, creds in
@@ -110,7 +109,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testCheckCredsWhenUserDoesNotExist() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
 
         performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -124,7 +123,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testCheckCredsWithBadAccessToken() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
 
         performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: "Some junk for access token", deviceUUID:deviceUUID)
@@ -138,7 +137,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testRemoveUserFailsWithNonExistingUser() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
 
         // Don't create the user first.
         performServerTest { expectation, creds in
@@ -153,7 +152,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testRemoveUserSucceedsWithExistingUser() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
 
         performServerTest { expectation, creds in

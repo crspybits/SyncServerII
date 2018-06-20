@@ -12,7 +12,6 @@ import LoggerAPI
 import HeliumLogger
 import Foundation
 import SyncServerShared
-import PerfectLib
 
 class DatabaseModelTests: XCTestCase, LinuxTestable {
     override func setUp() {
@@ -24,8 +23,8 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
     }
 
     func testDeviceUUID() {
-        let deviceUUID = DeviceUUID(userId: 0, deviceUUID: PerfectLib.UUID().string)
-        let newDeviceUUID = PerfectLib.UUID().string
+        let deviceUUID = DeviceUUID(userId: 0, deviceUUID: Foundation.UUID().uuidString)
+        let newDeviceUUID = Foundation.UUID().uuidString
         let newUserId = Int64(10)
         
         deviceUUID[DeviceUUID.deviceUUIDKey] = newDeviceUUID
@@ -42,12 +41,12 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
     }
     
     func testLock() {
-        let lock = Lock(userId: 0, deviceUUID: PerfectLib.UUID().string)
-        lock[Lock.deviceUUIDKey] = PerfectLib.UUID().string
+        let lock = Lock(userId: 0, deviceUUID: Foundation.UUID().uuidString)
+        lock[Lock.deviceUUIDKey] = Foundation.UUID().uuidString
         
         let newDate = Date()
         let newUserId = Int64(5)
-        let newDeviceUUID = PerfectLib.UUID().string
+        let newDeviceUUID = Foundation.UUID().uuidString
         
         lock[Lock.expiryKey] = newDate
         lock[Lock.userIdKey] = newUserId
@@ -88,7 +87,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
     func testSharingInvitation() {
         let sharingInvitation = SharingInvitation()
         
-        let newSharingInvitationUUID = PerfectLib.UUID().string
+        let newSharingInvitationUUID = Foundation.UUID().uuidString
         let newExpiry = Date()
         let newOwningUserId = UserId(342)
         let newSharingPermission:SharingPermission = .read
@@ -174,8 +173,8 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let fileIndex = FileIndex()
 
         let newFileIndexId = FileIndexId(334)
-        let newFileUUID = PerfectLib.UUID().string
-        let newDeviceUUID = PerfectLib.UUID().string
+        let newFileUUID = Foundation.UUID().uuidString
+        let newDeviceUUID = Foundation.UUID().uuidString
         let newUserId = UserId(3226453)
         let newMimeType = "text/plain"
         let newAppMetaData = "whatever"
@@ -238,10 +237,10 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let upload = Upload()
         
         let uploadId = Int64(3300)
-        let fileUUID = PerfectLib.UUID().string
+        let fileUUID = Foundation.UUID().uuidString
         let userId = UserId(43)
         let fileVersion = FileVersionInt(322)
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let state:UploadState = .toDeleteFromFileIndex
         let appMetaData = "arba"
         let fileSizeBytes = Int64(4211)

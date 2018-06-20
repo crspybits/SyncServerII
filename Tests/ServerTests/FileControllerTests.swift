@@ -10,7 +10,6 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
-import PerfectLib
 import SyncServerShared
 
 class FileControllerTests: ServerTestCase, LinuxTestable {
@@ -26,10 +25,10 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
       
     // A test that causes a conflict with the master version on the server. Presumably this needs to take the form of (a) device1 uploading a file to the server, (b) device2 uploading a file, and finishing that upload (`DoneUploads` endpoint), and (c) device1 uploading a second file using its original master version.
     func testMasterVersionConflict1() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID1)
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2)
@@ -38,10 +37,10 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testMasterVersionConflict2() {
-        let deviceUUID1 = PerfectLib.UUID().string
+        let deviceUUID1 = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID1)
         
-        let deviceUUID2 = PerfectLib.UUID().string
+        let deviceUUID2 = Foundation.UUID().uuidString
         _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
@@ -51,14 +50,14 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     }
 
     func testFileIndexWithNoFiles() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
 
         self.addNewUser(deviceUUID:deviceUUID)
         self.getFileIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:])
     }
     
     func testFileIndexWithOneFile() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID)
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
@@ -72,7 +71,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testFileIndexWithTwoFiles() {
-        let deviceUUID = PerfectLib.UUID().string
+        let deviceUUID = Foundation.UUID().uuidString
         let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
         
         guard let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
