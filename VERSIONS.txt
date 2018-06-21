@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.15.1 (6/20/18)
+	* Fixing an issue with Docker-- used wrong base image.
+	
 Version 0.15.0 (6/20/18)
 	* Bringing up to date with current Kitura and PerfectlySoft
 	* Update CredentialsDropbox, SyncServer-Shared, SMServerLib, and (my fork of) Perfect-MySQL
