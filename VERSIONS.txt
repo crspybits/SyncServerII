@@ -1,8 +1,9 @@
 SyncServer
 
-Version 0.15.0
+Version 0.15.0 (6/20/18)
 	* Bringing up to date with current Kitura and PerfectlySoft
 	* Update CredentialsDropbox, SyncServer-Shared, SMServerLib, and (my fork of) Perfect-MySQL
+		Now using actual master branch of Perfect-MySQL-- my PR got merged.
 	* Now using Swift version 4.1.2 (seems required by current Perfect libs)
 	* Updated Docker build and runtime to Swift 4.1.2
 	
