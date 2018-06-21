@@ -19,10 +19,6 @@ class User : NSObject, Model {
     static let usernameKey = "username"
     var username: String!
     
-    // A given user on the system can only have a single UserType role, i.e., either an owning user or a sharing user.
-    static let userTypeKey = "userType"
-    var userType:UserType!
-    
     // Only when the current user is a sharing user, this gives the userId that is the owner of the data.
     static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId?
@@ -53,9 +49,6 @@ class User : NSObject, Model {
 
             case User.usernameKey:
                 username = newValue as! String?
-                
-            case User.userTypeKey:
-                userType = newValue as! UserType?
                 
             case User.owningUserIdKey:
                 owningUserId = newValue as! UserId?
@@ -103,10 +96,6 @@ class User : NSObject, Model {
                 return {(x:Any) -> Any? in
                     return AccountType(rawValue: x as! String)
                 }
-            case User.userTypeKey:
-                return {(x:Any) -> Any? in
-                    return UserType(rawValue: x as! String)
-                }
             case User.sharingPermissionKey:
                 return {(x:Any) -> Any? in
                     return SharingPermission(rawValue: x as! String)
@@ -117,7 +106,7 @@ class User : NSObject, Model {
     }
     
     var effectiveOwningUserId:UserId {
-        if userType == .sharing {
+        if accountType.userType == .sharing {
             return owningUserId!
         }
         else {
@@ -216,7 +205,7 @@ class UserRepository : Repository {
     
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
     func add(user:User) -> Int64? {
-        if user.username == nil || user.accountType == nil || user.credsId == nil || user.userType == nil {
+        if user.username == nil || user.accountType == nil || user.credsId == nil {
             Log.error("One of the model values was nil!")
             return nil
         }
@@ -227,7 +216,7 @@ class UserRepository : Repository {
             return nil
         }
         
-        switch user.userType! {
+        switch user.accountType.userType {
         case .sharing:
             guard user.owningUserId != nil && user.sharingPermission != nil else {
                 Log.error("Sharing user, but there was no owningUserId or sharingPermission")
@@ -245,7 +234,7 @@ class UserRepository : Repository {
         let (sharingPermissionFieldValue, sharingPermissionFieldName) = getInsertFieldValueAndName(fieldValue: user.sharingPermission, fieldName: User.sharingPermissionKey)
         let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: user.cloudFolderName, fieldName: User.cloudFolderNameKey)
         
-        let query = "INSERT INTO \(tableName) (username, accountType, userType, credsId, creds \(owningUserIdFieldName) \(sharingPermissionFieldName) \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.userType.rawValue)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(sharingPermissionFieldValue) \(cloudFolderNameFieldValue));"
+        let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds \(owningUserIdFieldName) \(sharingPermissionFieldName) \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(sharingPermissionFieldValue) \(cloudFolderNameFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -268,7 +257,7 @@ class UserRepository : Repository {
             // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
             let oldCreds = user.credsObject!
             oldCreds.merge(withNewer: newCreds)
-            credsJSONString = oldCreds.toJSON(userType:user.userType)!
+            credsJSONString = oldCreds.toJSON(userType:user.accountType.userType)!
             userId = user.userId
             
         case .userId(let id, let userType):

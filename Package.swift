@@ -10,8 +10,8 @@ let package = Package(
         // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.2.0"),
         
-        // .package(url: "../../repos/SyncServer-Shared", .branch("master")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "7.0.0"),
+        .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
+        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "7.0.0"),
         
         // .package(url: "../../repos/SMServerLib", .branch("master")),
         .package(url: "https://github.com/crspybits/SMServerLib.git", from: "1.0.0"),

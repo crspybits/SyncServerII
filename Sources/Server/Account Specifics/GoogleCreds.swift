@@ -36,7 +36,7 @@ d) The rationale for the two kinds of access tokens (client-side, and server-sid
     ii) The pattern of client-based primary authentication and server-side tokens that access cloud services is the general pattern by which the server needs to be structured. For example, for shared account authorization where Google Drive user X wants to allow a Facebook user Y to make use of their files, primary authentication will take place using Facebook credentials for Y, and server-side use of Google Drive will make use of X's stored refresh token/access token's.
 */
 
-class GoogleCreds : AccountAPICall, Account {
+class GoogleCreds : AccountAPICall, Account {    
     // The following keys are for conversion <-> JSON (e.g., to store this into a database).
     
     static let accessTokenKey = "accessToken"
@@ -61,8 +61,8 @@ class GoogleCreds : AccountAPICall, Account {
         return .Google
     }
     
-    static var signInType:SignInType {
-        return .both
+    var accountType:AccountType {
+        return GoogleCreds.accountType
     }
 
     weak var delegate:AccountDelegate?
@@ -93,7 +93,7 @@ class GoogleCreds : AccountAPICall, Account {
         
         // Only owning users have access token's in creds. Sharing users have empty creds stored in the database.
         switch user {
-        case .user(let user) where user.userType == .owning:
+        case .user(let user) where user.accountType.userType == .owning:
             fallthrough
         case .userId(_, .owning):
             try setProperty(jsonDict:jsonDict, key: accessTokenKey) { value in

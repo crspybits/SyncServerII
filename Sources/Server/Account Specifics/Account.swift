@@ -27,9 +27,10 @@ protocol AccountDelegate : class {
 
 protocol Account {
     static var accountType:AccountType {get}
+    var accountType:AccountType {get}
     
-    // Accounts that can only be sharing always need to return false.
-    // Accounts that can be both or can be owning return true iff they need a cloud folder name (e.g., Google Drive).
+    // Sharing always need to return false.
+    // Owning accounts that return true iff they need a cloud folder name (e.g., Google Drive).
     var owningAccountsNeedCloudFolderName: Bool {get}
     
     var delegate:AccountDelegate? {get set}
@@ -38,9 +39,6 @@ protocol Account {
     
     // Currently assuming all Account's use access tokens.
     var accessToken: String! {get set}
-    
-    // What sign in type(s) does this account type allow?
-    static var signInType:SignInType {get}
     
     func toJSON(userType: UserType) -> String?
     
@@ -63,11 +61,7 @@ enum FromJSONError : Swift.Error {
     case noRequiredKeyValue
 }
 
-extension Account {
-    var signInType: SignInType {
-        return type(of: self).signInType
-    }
-    
+extension Account {    
     // Only use this for owning accounts.
     var cloudFolderName: String? {
         guard let accountCreationUser = accountCreationUser,
@@ -126,6 +120,17 @@ enum AccountType : String {
         }
         
         return AccountType(rawValue: accountTypeString)
+    }
+    
+    var userType: UserType {
+        switch self {
+        case .Google:
+            return .owning
+        case .Facebook:
+            return .sharing
+        case .Dropbox:
+            return .owning
+        }
     }
     
     func toAuthTokenType() -> ServerConstants.AuthTokenType {

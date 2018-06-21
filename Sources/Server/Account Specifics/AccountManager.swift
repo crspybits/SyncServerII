@@ -24,7 +24,7 @@ class AccountManager {
         var number = 0
         
         for accountType in accountTypes {
-            if accountType.signInType.contains(.owningUser) {
+            if accountType.accountType.userType == .owning {
                 number += 1
             }
         }

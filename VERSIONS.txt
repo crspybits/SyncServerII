@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.16.0
+	* Ownership of files by original uploading user
+		https://github.com/crspybits/SyncServerII/issues/76
+
 Version 0.15.1 (6/20/18)
 	* Fixing an issue with Docker-- used wrong base image.
 	

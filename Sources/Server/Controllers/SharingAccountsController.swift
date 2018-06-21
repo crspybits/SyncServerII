@@ -31,9 +31,22 @@ class SharingAccountsController : ControllerProtocol {
             params.completion(nil)
             return
         }
+        
+        guard let currentSignedInUser = params.currentSignedInUser else {
+            Log.error("No currentSignedInUser")
+            params.completion(nil)
+            return
+        }
+        
+        // 6/20/18; Make sure that the calling user is an owning user-- sharing user's can't currently create sharing invitations. See https://github.com/crspybits/SyncServerII/issues/76
+        guard currentSignedInUser.accountType.userType == .owning else {
+            Log.error("A sharing user is trying to create a sharing invitation.")
+            params.completion(nil)
+            return
+        }
 
         let result = SharingInvitationRepository(params.db).add(
-            owningUserId: params.currentSignedInUser!.effectiveOwningUserId,
+            owningUserId: currentSignedInUser.effectiveOwningUserId,
             sharingPermission: createSharingInvitationRequest.sharingPermission)
         
         guard case .success(let sharingInvitationUUID) = result else {
@@ -75,13 +88,6 @@ class SharingAccountsController : ControllerProtocol {
             params.completion(nil)
             return
         }
-        
-        // Don't know if this is ever a case that will occur-- an Account that doesn't allow sharing users, but will check anyways.
-        guard params.profileCreds!.signInType.contains(.sharingUser) else {
-            Log.error("Attempting to redeem a sharing invitation for an Account that only allows owning users!")
-            params.completion(nil)
-            return
-        }
 
         // What I want to do at this point is to simultaneously and atomically, (a) lookup the sharing invitation, and (b) delete it. I believe that since (i) I'm using mySQL transactions, and (ii) InnoDb with a default transaction level of REPEATABLE READ, this should work by first doing the lookup, and then doing the delete.
         
@@ -103,7 +109,6 @@ class SharingAccountsController : ControllerProtocol {
         }
         
         // All seems good. Let's create the new sharing user.
-        let userType:UserType = .sharing
         
         // No database creds because this is a new sharing user-- so use params.profileCreds
         
@@ -111,9 +116,8 @@ class SharingAccountsController : ControllerProtocol {
         user.username = params.userProfile!.displayName
         user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON(userType:userType)
+        user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
         
-        user.userType = userType
         user.sharingPermission = sharingInvitation.sharingPermission
         user.owningUserId = sharingInvitation.owningUserId
         
@@ -128,7 +132,7 @@ class SharingAccountsController : ControllerProtocol {
         
         // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
 
-        params.profileCreds!.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
+        params.profileCreds!.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
             params.completion(response)
         }, failure: {
             params.completion(nil)

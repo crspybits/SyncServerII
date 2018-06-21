@@ -17,6 +17,10 @@ class DropboxCreds : AccountAPICall, Account {
         return .Dropbox
     }
     
+    var accountType:AccountType {
+        return DropboxCreds.accountType
+    }
+    
     var owningAccountsNeedCloudFolderName: Bool {
         return false
     }
@@ -33,12 +37,6 @@ class DropboxCreds : AccountAPICall, Account {
     override init() {
         super.init()
         baseURL = "api.dropboxapi.com"
-    }
-    
-    static var signInType:SignInType {
-        // https://www.dropbox.com/developers/documentation/http/documentation
-        // "Dropbox should not be used as an identity provider."-- I take this to mean we should not allow Dropbox users to be sharing-only.
-        return .owningUser
     }
     
     func toJSON(userType: UserType) -> String? {
@@ -106,7 +104,7 @@ class DropboxCreds : AccountAPICall, Account {
         
         // Owning users have access token's in creds.
         switch user {
-        case .user(let user) where user.userType == .owning:
+        case .user(let user) where user.accountType.userType == .owning:
             fallthrough
         case .userId(_, .owning):
             try setProperty(jsonDict:jsonDict, key: accessTokenKey) { value in

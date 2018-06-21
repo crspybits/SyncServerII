@@ -19,6 +19,10 @@ class FacebookCreds : AccountAPICall,  Account {
         return .Facebook
     }
     
+    var accountType:AccountType {
+        return FacebookCreds.accountType
+    }
+    
     var owningAccountsNeedCloudFolderName: Bool {
         return false
     }
@@ -26,10 +30,6 @@ class FacebookCreds : AccountAPICall,  Account {
     weak var delegate:AccountDelegate?
     
     var accountCreationUser:AccountCreationUser?
-    
-    static var signInType:SignInType {
-        return .sharingUser
-    }
     
     override init() {
         super.init()

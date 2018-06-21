@@ -85,7 +85,6 @@ class UserController : ControllerProtocol {
         user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType: userType)
-        user.userType = userType
         
         if params.profileCreds!.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
@@ -97,7 +96,7 @@ class UserController : ControllerProtocol {
             user.cloudFolderName = addUserRequest.cloudFolderName
         }
         
-        guard params.profileCreds!.signInType.contains(.owningUser) else {
+        guard params.profileCreds?.accountType.userType == .owning else {
             Log.error("Attempting to add a user with an Account that only allows sharing users!")
             params.completion(nil)
             return
@@ -163,7 +162,7 @@ class UserController : ControllerProtocol {
     func checkCreds(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
 
-        let sharingUser = params.currentSignedInUser!.userType == .sharing
+        let sharingUser = params.currentSignedInUser!.accountType.userType == .sharing
         
         let response = CheckCredsResponse()!
         response.userId = params.currentSignedInUser!.userId
@@ -173,7 +172,7 @@ class UserController : ControllerProtocol {
         }
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
-        params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
+        params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.accountType.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
             params.completion(response)
         }, failure: {
             params.completion(nil)
