@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git",
         "state": {
           "branch": null,
-          "revision": "541082b9cd28279ce7a6d8e91bd614f2ce4e52d6",
-          "version": "2.2.1"
+          "revision": "957e98b03c2602e17964fcffe378f0998a98611a",
+          "version": "2.2.2"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git",
         "state": {
           "branch": null,
-          "revision": "90b29fe07d3b86dd70fed2540d266d31d4ddd3a7",
-          "version": "2.2.0"
+          "revision": "2e7da505b2ee0d7ef045db8f7e427b9e247d37f9",
+          "version": "2.2.1"
         }
       },
       {
@@ -213,7 +213,7 @@
         "repositoryURL": "/Users/chris/Desktop/Apps/repos/SyncServer-Shared",
         "state": {
           "branch": "dev",
-          "revision": "9df872a7c9cfd7ddd0db96183ed1b718e051e329",
+          "revision": "32702b26050d784f053d0fbe60e4f0751db00f29",
           "version": null
         }
       },

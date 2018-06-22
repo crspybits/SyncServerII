@@ -24,7 +24,7 @@ class SharingAccountsController : ControllerProtocol {
     
     func createSharingInvitation(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
-        assert(params.ep.minSharingPermission == .admin)
+        assert(params.ep.minPermission == .admin)
 
         guard let createSharingInvitationRequest = params.request as? CreateSharingInvitationRequest else {
             Log.error("Did not receive CreateSharingInvitationRequest")
@@ -38,16 +38,11 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        // 6/20/18; Make sure that the calling user is an owning user-- sharing user's can't currently create sharing invitations. See https://github.com/crspybits/SyncServerII/issues/76
-        guard currentSignedInUser.accountType.userType == .owning else {
-            Log.error("A sharing user is trying to create a sharing invitation.")
-            params.completion(nil)
-            return
-        }
+        // 6/20/18; The current user can be a sharing or owning user, and whether or not these users can invite others depends on the permissions they have. See https://github.com/crspybits/SyncServerII/issues/76
 
         let result = SharingInvitationRepository(params.db).add(
             owningUserId: currentSignedInUser.effectiveOwningUserId,
-            sharingPermission: createSharingInvitationRequest.sharingPermission)
+            permission: createSharingInvitationRequest.permission)
         
         guard case .success(let sharingInvitationUUID) = result else {
             Log.error("Failed to add Sharing Invitation")
@@ -108,18 +103,21 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        // All seems good. Let's create the new sharing user.
+        // All seems good. Let's create the new user.
         
-        // No database creds because this is a new sharing user-- so use params.profileCreds
+        // No database creds because this is a new user-- so use params.profileCreds
         
         let user = User()
         user.username = params.userProfile!.displayName
         user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
+        user.permission = sharingInvitation.permission
         
-        user.sharingPermission = sharingInvitation.sharingPermission
-        user.owningUserId = sharingInvitation.owningUserId
+        // When the user is an owning user, they will rely on their own cloud storage to upload new files-- if they have upload permissions.
+        if user.accountType.userType == .sharing {
+            user.owningUserId = sharingInvitation.owningUserId
+        }
         
         let userId = params.repos.user.add(user: user)
         if userId == nil {

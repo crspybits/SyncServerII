@@ -253,12 +253,10 @@ class RequestHandler : AccountDelegate {
                     return
                 }
                 
-                // This user is on the system. If they are a sharing user, make sure they have the minimum permission to execute this endpoint.
-                if currentSignedInUser!.accountType.userType == .sharing {
-                    guard currentSignedInUser!.sharingPermission!.hasMinimumPermission(endpoint.minSharingPermission) else {
-                        self.failWithError(message: "Signed in user has sharing permissions of \(currentSignedInUser!.sharingPermission!) but these don't meet the minimum requirements of \(endpoint.minSharingPermission)", statusCode: .unauthorized)
-                        return
-                    }
+                // This user is on the system. Whether or not they can perform the endpoint depends on their permissions.
+                guard currentSignedInUser!.permission!.hasMinimumPermission(endpoint.minPermission) else {
+                    self.failWithError(message: "Signed in user has permissions of \(currentSignedInUser!.permission!) but these don't meet the minimum requirements of \(endpoint.minPermission)", statusCode: .unauthorized)
+                    return
                 }
                 
             case .noObjectFound:

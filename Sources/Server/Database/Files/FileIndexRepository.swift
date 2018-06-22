@@ -36,7 +36,7 @@ class FileIndex : NSObject, Model, Filenaming {
     static let updateDateKey = "updateDate"
     var updateDate:Date!
     
-    // The userId of the owning user.
+    // The userId of the (effective) owning user of v0 of the file. The userId doesn't change beyond that point-- the v0 owner is always the owner.
     static let userIdKey = "userId"
     var userId: UserId!
     

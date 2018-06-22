@@ -56,12 +56,6 @@ extension FileController {
                 return
             }
             
-            guard let cloudStorage = params.effectiveOwningUserCreds as? CloudStorage else {
-                Log.error("Could not obtain CloudStorage creds")
-                params.completion(nil)
-                return
-            }
-            
             // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
             var existingFileInFileIndex:FileIndex?
             do {
@@ -127,6 +121,27 @@ extension FileController {
                 // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
                 // https://github.com/crspybits/SyncServerII/issues/4
                 creationDate = todaysDate
+            }
+            
+            var cloudStorage:CloudStorage!
+
+            if newFile {
+                cloudStorage = params.effectiveOwningUserCreds as? CloudStorage
+                guard cloudStorage != nil else {
+                    Log.error("Could not obtain CloudStorage creds for v0 file.")
+                    params.completion(nil)
+                    return
+                }
+            }
+            else {
+                // Need to get creds for the user that uploaded the v0 file.
+                guard let creds = getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db) as? CloudStorage else {
+                    Log.error("Could not obtain CloudStorage creds for original v0 owner of file.")
+                    params.completion(nil)
+                    return
+                }
+                
+                cloudStorage = creds
             }
             
             // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.

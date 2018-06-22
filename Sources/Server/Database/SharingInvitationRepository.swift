@@ -23,8 +23,8 @@ class SharingInvitation : NSObject, Model {
     static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId!
     
-    static let sharingPermissionKey = "sharingPermission"
-    var sharingPermission: SharingPermission!
+    static let permissionKey = "permission"
+    var permission: Permission!
     
     subscript(key:String) -> Any? {
         set {
@@ -38,8 +38,8 @@ class SharingInvitation : NSObject, Model {
             case SharingInvitation.owningUserIdKey:
                 owningUserId = newValue as! UserId?
             
-            case SharingInvitation.sharingPermissionKey:
-                sharingPermission = newValue as! SharingPermission?
+            case SharingInvitation.permissionKey:
+                permission = newValue as! Permission?
                 
             default:
                 assert(false)
@@ -53,9 +53,9 @@ class SharingInvitation : NSObject, Model {
     
     func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
         switch propertyName {
-            case SharingInvitation.sharingPermissionKey:
+            case SharingInvitation.permissionKey:
                 return {(x:Any) -> Any? in
-                    return SharingPermission(rawValue: x as! String)
+                    return Permission(rawValue: x as! String)
                 }
             
             case SharingInvitation.expiryKey:
@@ -83,7 +83,7 @@ class SharingInvitationRepository : Repository {
     let dateFormat = DateExtras.DateFormat.DATETIME
         
     func upcreate() -> Database.TableUpcreateResult {
-        let spMaxLen = SharingPermission.maxStringLength()
+        let spMaxLen = Permission.maxStringLength()
         let createColumns =
             // Id for the sharing invitation-- I'm not using a regular sequential numeric Id here to avoid attacks where someone could enumerate sharing invitation ids.
             "(sharingInvitationUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
@@ -96,7 +96,7 @@ class SharingInvitationRepository : Repository {
             // TODO: *2* Make this a foreign key reference to the User table.
             "owningUserId BIGINT NOT NULL, " +
             
-            "sharingPermission VARCHAR(\(spMaxLen)) NOT NULL, " +
+            "permission VARCHAR(\(spMaxLen)) NOT NULL, " +
         
             "UNIQUE (sharingInvitationUUID))"
         
@@ -132,14 +132,14 @@ class SharingInvitationRepository : Repository {
     case error(String)
     }
     
-    func add(owningUserId:UserId, sharingPermission:SharingPermission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
+    func add(owningUserId:UserId, permission:Permission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
         let calendar = Calendar.current
         let expiryDate = calendar.date(byAdding: .second, value: Int(expiryDuration), to: Date())!
         let expiryDateString = DateExtras.date(expiryDate, toFormat: dateFormat)
         
         let uuid = UUID().uuidString
         
-        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingPermission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(sharingPermission.rawValue)');"
+        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, permission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(permission.rawValue)');"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing invitation!")

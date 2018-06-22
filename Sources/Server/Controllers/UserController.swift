@@ -86,6 +86,9 @@ class UserController : ControllerProtocol {
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType: userType)
         
+        // This is creating the "root" owning user for a sharing group; they have max permissions.
+        user.permission = .admin
+        
         if params.profileCreds!.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
                 Log.error("owningAccountsNeedCloudFolderName but no cloudFolderName")
@@ -161,15 +164,10 @@ class UserController : ControllerProtocol {
     
     func checkCreds(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
-
-        let sharingUser = params.currentSignedInUser!.accountType.userType == .sharing
         
         let response = CheckCredsResponse()!
         response.userId = params.currentSignedInUser!.userId
-        
-        if sharingUser {
-            response.sharingPermission = params.currentSignedInUser!.sharingPermission
-        }
+        response.permission = params.currentSignedInUser!.permission
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
         params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.accountType.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {

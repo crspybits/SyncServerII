@@ -138,8 +138,9 @@ extension FileController {
             return
         }
         
-        guard let cloudStorageCreds = params.effectiveOwningUserCreds as? CloudStorage else {
-            Log.error("Error converting to CloudStorage creds!")
+        // Need to get creds for the user that uploaded the v0 file.
+        guard let cloudStorageCreds = getCreds(forUserId: fileIndexObj.userId, from: params.db) as? CloudStorage else {
+            Log.error("Could not obtain CloudStorage creds for original v0 owner of file.")
             params.completion(nil)
             return
         }

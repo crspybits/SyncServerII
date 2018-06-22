@@ -90,6 +90,23 @@ class FileController : ControllerProtocol {
             completion(GetMasterVersionError.noObjectFound, nil)
         }
     }
+    
+    func getCreds(forUserId userId: UserId, from db: Database) -> Account? {
+        let userKey = UserRepository.LookupKey.userId(userId)
+        let userResults = UserRepository(db).lookup(key: userKey, modelInit: User.init)
+        guard case .found(let model) = userResults,
+            let user = model as? User else {
+            Log.error("Could not get user from database.")
+            return nil
+        }
+    
+        guard let creds = user.credsObject else {
+            Log.error("Could not get user creds.")
+            return nil
+        }
+        
+        return creds
+    }
             
     func fileIndex(params:RequestProcessingParameters) {
         guard let fileIndexRequest = params.request as? FileIndexRequest else {

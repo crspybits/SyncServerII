@@ -27,7 +27,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.userType = .owning
+        user1.permission = .read
         user1.cloudFolderName = "folder1"
         
         let result1 = UserRepository(db).add(user: user1)
@@ -38,7 +38,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user2.accountType = .Google
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue2\"}"
         user2.credsId = "200"
-        user2.userType = .owning
+        user2.permission = .write
         user2.cloudFolderName = "folder2"
         
         let result2 = UserRepository(db).add(user: user2)
@@ -55,7 +55,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.userType = .owning
+        user1.permission = .read
         user1.owningUserId = 100
         
         let result1 = UserRepository(db).add(user: user1)
@@ -68,8 +68,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.userType = .owning
-        user1.sharingPermission = .admin
+        user1.permission = .admin
         
         let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == nil, "Good id!!")
@@ -90,8 +89,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         }
         
         user1.credsId = "100"
-        user1.userType = .sharing
-        user1.sharingPermission = .write
+        user1.permission = .write
         user1.owningUserId = 100
 
         let result1 = UserRepository(db).add(user: user1)
