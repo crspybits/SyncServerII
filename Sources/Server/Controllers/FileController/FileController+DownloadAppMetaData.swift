@@ -9,7 +9,7 @@ import Foundation
 import LoggerAPI
 import SyncServerShared
 
-extension FileController {
+extension FileController {    
     func downloadAppMetaData(params:RequestProcessingParameters) {
         guard let downloadAppMetaDataRequest = params.request as? DownloadAppMetaDataRequest else {
             Log.error("Did not receive DownloadAppMetaDataRequest")
@@ -17,7 +17,13 @@ extension FileController {
             return
         }
         
-        getMasterVersion(params: params) { (error, masterVersion) in
+        guard sharingGroupSecurityCheck(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
+        getMasterVersion(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
                 params.completion(nil)
                 return
@@ -32,10 +38,9 @@ extension FileController {
             }
             
             // Need to get the app meta data from the file index.
-            
-            // First, lookup the file in the FileIndex. This does an important security check too-- makes sure the owning userId corresponds to the fileUUID.
-            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: downloadAppMetaDataRequest.fileUUID)
 
+            // First, lookup the file in the FileIndex. This does an important security check too-- makes sure the fileUUID is in the sharing group.
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, fileUUID: downloadAppMetaDataRequest.fileUUID)
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
             var fileIndexObj:FileIndex!

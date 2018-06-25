@@ -29,6 +29,12 @@ extension FileController {
             return
         }
         
+        guard sharingGroupSecurityCheck(sharingGroupId: uploadRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
         guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
             Log.error("Unknown mime type passed: \(uploadRequest.mimeType) (see SyncServer-Shared)")
             params.completion(nil)
@@ -41,7 +47,7 @@ extension FileController {
             return
         }
         
-        getMasterVersion(params: params) { error, masterVersion in
+        getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
                 Log.error("Error: \(String(describing: error))")
                 params.completion(nil)
@@ -59,7 +65,7 @@ extension FileController {
             // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
             var existingFileInFileIndex:FileIndex?
             do {
-                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, fileUUID:uploadRequest.fileUUID)
+                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupId: uploadRequest.sharingGroupId, fileUUID:uploadRequest.fileUUID)
             } catch (let error) {
                 Log.error("Could not lookup file in FileIndex: \(error)")
                 params.completion(nil)
@@ -123,25 +129,25 @@ extension FileController {
                 creationDate = todaysDate
             }
             
-            var cloudStorage:CloudStorage!
-
+            var ownerCloudStorage:CloudStorage!
+            var ownerAccount:Account!
+            
             if newFile {
-                cloudStorage = params.effectiveOwningUserCreds as? CloudStorage
-                guard cloudStorage != nil else {
-                    Log.error("Could not obtain CloudStorage creds for v0 file.")
-                    params.completion(nil)
-                    return
-                }
+                // OWNER
+                // establish the v0 owner of the file.
+                ownerAccount = params.effectiveOwningUserCreds
             }
             else {
+                // OWNER
                 // Need to get creds for the user that uploaded the v0 file.
-                guard let creds = getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db) as? CloudStorage else {
-                    Log.error("Could not obtain CloudStorage creds for original v0 owner of file.")
-                    params.completion(nil)
-                    return
-                }
-                
-                cloudStorage = creds
+                ownerAccount = getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db)
+            }
+            
+            ownerCloudStorage = ownerAccount as? CloudStorage
+            guard ownerCloudStorage != nil && ownerAccount != nil else {
+                Log.error("Could not obtain creds for v0 file.")
+                params.completion(nil)
+                return
             }
             
             // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
@@ -172,6 +178,7 @@ extension FileController {
                 upload.state = .uploadingFile
             }
             
+            // We are using the current signed in user's id here (and not the effective user id) because we need a way of indexing or organizing the collection of files uploaded by a particular user.
             upload.userId = params.currentSignedInUser!.userId
             
             upload.appMetaData = uploadRequest.appMetaData?.contents
@@ -230,16 +237,9 @@ extension FileController {
             let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!, mimeType: uploadRequest.mimeType)
             Log.info("File being sent to cloud storage: \(cloudFileName)")
             
-            // Because we need this to get the cloudFolderName
-            guard params.effectiveOwningUserCreds != nil else {
-                Log.debug("No effectiveOwningUserCreds")
-                params.completion(nil)
-                return
-            }
+            let options = CloudStorageFileNameOptions(cloudFolderName: ownerAccount.cloudFolderName, mimeType: uploadRequest.mimeType)
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: uploadRequest.mimeType)
-            
-            cloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
+            ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
                 switch result {
                 case .success(let fileSize):
                     upload.fileSizeBytes = Int64(fileSize)

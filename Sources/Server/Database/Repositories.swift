@@ -16,4 +16,6 @@ struct Repositories {
     let upload:UploadRepository!
     let deviceUUID:DeviceUUIDRepository!
     let sharing:SharingInvitationRepository!
+    let sharingGroup: SharingGroupRepository!
+    let sharingGroupUser: SharingGroupUserRepository!
 }

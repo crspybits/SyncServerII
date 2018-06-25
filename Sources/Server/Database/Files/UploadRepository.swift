@@ -31,7 +31,7 @@ class Upload : NSObject, Model, Filenaming {
     var fileUUID: String!
     
     static let userIdKey = "userId"
-    // The userId of the sharing or owning user, i.e., this is not the owning user id.
+    // The userId of the uploading user. i.e., this is not necessarily the owning user id.
     var userId: UserId!
     
     // 3/15/18-- Can now be nil-- when we do an upload app meta data. Keeping it as `!` so it abides by the FileNaming protocol.
@@ -44,6 +44,10 @@ class Upload : NSObject, Model, Filenaming {
     static let fileGroupUUIDKey = "fileGroupUUID"
     // Not all files have to be associated with a file group.
     var fileGroupUUID:String?
+    
+    // Currently allowing files to be in exactly one sharing group.
+    static let sharingGroupIdKey = "sharingGroupId"
+    var sharingGroupId: SharingGroupId!
     
     // The following two dates are required for file uploads.
     static let creationDateKey = "creationDate"
@@ -82,6 +86,9 @@ class Upload : NSObject, Model, Filenaming {
                 
             case Upload.fileGroupUUIDKey:
                 fileGroupUUID = newValue as! String?
+
+            case Upload.sharingGroupIdKey:
+                sharingGroupId = newValue as! SharingGroupId?
 
             case Upload.userIdKey:
                 userId = newValue as! UserId?
@@ -154,6 +161,10 @@ class UploadRepository : Repository {
     }
     
     var tableName:String {
+        return UploadRepository.tableName
+    }
+    
+    static var tableName:String {
         return "Upload"
     }
     
@@ -176,6 +187,8 @@ class UploadRepository : Repository {
             // identifies a group of files (assigned by app)
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
             
+            "sharingGroupId BIGINT NOT NULL, " +
+            
             // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates. Plus, upload deletions need not have dates. And when uploading a new version of a file we won't give the creationDate.
             "creationDate DATETIME," +
             "updateDate DATETIME," +
@@ -196,6 +209,8 @@ class UploadRepository : Repository {
 
             // Can be null if we create the Upload entry before actually uploading the file.
             "fileSizeBytes BIGINT, " +
+            
+            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
 
             // Not including fileVersion in the key because I don't want to allow the possiblity of uploading vN of a file and vM of a file at the same time.
             "UNIQUE (fileUUID, userId, deviceUUID), " +
@@ -248,7 +263,7 @@ class UploadRepository : Repository {
     
     private func haveNilField(upload:Upload, fileInFileIndex: Bool) -> Bool {
         // Basic criteria-- applies across uploads and upload deletion.
-        if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.state == nil {
+        if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.state == nil || upload.sharingGroupId == nil {
             return true
         }
         
@@ -330,7 +345,7 @@ class UploadRepository : Repository {
         
         let (fileVersionFieldValue, fileVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileVersion, fieldName: Upload.fileVersionKey, fieldIsString:false)
         
-        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName) \(fileGroupUUIDFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue) \(fileGroupUUIDFieldValue));"
+        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey), \(Upload.sharingGroupIdKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName) \(fileGroupUUIDFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)', \(upload.sharingGroupId!) \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue) \(fileGroupUUIDFieldValue));"
         
         if db.connection.query(statement: query) {
             return .success(uploadId: db.connection.lastInsertId())
@@ -468,6 +483,7 @@ class UploadRepository : Repository {
             fileInfo.creationDate = upload.creationDate
             fileInfo.updateDate = upload.updateDate
             fileInfo.fileGroupUUID = upload.fileGroupUUID
+            fileInfo.sharingGroupId = upload.sharingGroupId
             
             result += [fileInfo]
         }

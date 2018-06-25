@@ -17,7 +17,13 @@ extension FileController {
             return
         }
         
-        getMasterVersion(params: params) { error, masterVersion in
+        guard sharingGroupSecurityCheck(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
+        getMasterVersion(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
                 Log.error("Error: \(String(describing: error))")
                 params.completion(nil)
@@ -35,7 +41,7 @@ extension FileController {
             // Make sure this file is already present in the FileIndex.
             var existingFileInFileIndex:FileIndex?
             do {
-                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, fileUUID:uploadAppMetaDataRequest.fileUUID)
+                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, fileUUID:uploadAppMetaDataRequest.fileUUID)
             } catch (let error) {
                 Log.error("Could not lookup file in FileIndex: \(error)")
                 params.completion(nil)

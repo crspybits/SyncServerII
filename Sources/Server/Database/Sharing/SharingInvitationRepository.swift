@@ -20,8 +20,12 @@ class SharingInvitation : NSObject, Model {
     // 60 seconds/minute * 60 minutes/hour * 24 hours/day == seconds/day
     static let expiryDuration:TimeInterval = 60*60*24
     
+    // If you are inviting someone to join a sharing group, they may join as a sharing user. i.e., they may not own cloud storage. That user will use your cloud storage.
     static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId!
+    
+    static let sharingGroupIdKey = "SharingGroupId"
+    var sharingGroupId:SharingGroupId!
     
     static let permissionKey = "permission"
     var permission: Permission!
@@ -37,6 +41,9 @@ class SharingInvitation : NSObject, Model {
                 
             case SharingInvitation.owningUserIdKey:
                 owningUserId = newValue as! UserId?
+                
+            case SharingInvitation.sharingGroupIdKey:
+                sharingGroupId = newValue as! SharingGroupId?
             
             case SharingInvitation.permissionKey:
                 permission = newValue as! Permission?
@@ -77,6 +84,11 @@ class SharingInvitationRepository : Repository {
     }
     
     var tableName:String {
+        return SharingInvitationRepository.tableName
+    }
+    
+    static var tableName:String {
+        // Apparently the table name Lock is special-- get an error if we use it.
         return "SharingInvitation"
     }
     
@@ -91,13 +103,17 @@ class SharingInvitationRepository : Repository {
             // gives time/day that the invitation will expire
             "expiry \(dateFormat.rawValue) NOT NULL, " +
 
-            // The invited user is being invited to share data owned by the following (owning) user.
+            // The user that will own new files uploaded by this new user if they join as a sharing user.
             // This is a reference into the User table.
             // TODO: *2* Make this a foreign key reference to the User table.
             "owningUserId BIGINT NOT NULL, " +
             
+            // The sharing group that the person is being invited to.
+            "sharingGroupId BIGINT NOT NULL, " +
+
             "permission VARCHAR(\(spMaxLen)) NOT NULL, " +
         
+            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
             "UNIQUE (sharingInvitationUUID))"
         
         return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -128,18 +144,18 @@ class SharingInvitationRepository : Repository {
     }
     
     enum AddResult {
-    case success(sharingInvitationUUID:String)
-    case error(String)
+        case success(sharingInvitationUUID:String)
+        case error(String)
     }
     
-    func add(owningUserId:UserId, permission:Permission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
+    func add(owningUserId:UserId, sharingGroupId:SharingGroupId, permission:Permission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
         let calendar = Calendar.current
         let expiryDate = calendar.date(byAdding: .second, value: Int(expiryDuration), to: Date())!
         let expiryDateString = DateExtras.date(expiryDate, toFormat: dateFormat)
         
         let uuid = UUID().uuidString
         
-        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, permission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(permission.rawValue)');"
+        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingGroupId, permission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), \(sharingGroupId), '\(permission.rawValue)');"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing invitation!")

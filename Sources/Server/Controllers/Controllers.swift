@@ -16,6 +16,32 @@ protocol ControllerProtocol {
     static func setup(db:Database) -> Bool
 }
 
+extension ControllerProtocol {
+    func sharingGroupSecurityCheck(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> Bool {
+    
+        guard let userId = params.currentSignedInUser?.userId else {
+            Log.error("No userId!")
+            return false
+        }
+        
+        let sharingKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+        let lookupResult = params.repos.sharingGroupUser.lookup(key: sharingKey, modelInit: SharingGroupUser.init)
+        
+        switch lookupResult {
+        case .found:
+            return true
+            
+        case .noObjectFound:
+            Log.error("User: \(userId) is not in sharing group: \(sharingGroupId)")
+            return false
+            
+        case .error(let error):
+            Log.error("Error checking if user is in sharing group: \(error)")
+            return false
+        }
+    }
+}
+
 public struct RequestProcessingParameters {
     let request: RequestMessage!
     let ep: ServerEndpoint!

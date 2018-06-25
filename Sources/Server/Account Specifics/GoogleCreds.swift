@@ -121,11 +121,10 @@ class GoogleCreds : AccountAPICall, Account {
         var jsonDict = [String:String]()
         
         // 8/8/17; Only if a Google user is an owning user should we be storing creds info into the database. https://github.com/crspybits/SyncServerII/issues/13
-        if userType == .owning {
-            jsonDict[GoogleCreds.accessTokenKey] = self.accessToken
-            jsonDict[GoogleCreds.refreshTokenKey] = self.refreshToken
-            jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode
-        }
+        // 6/23/18; Now-- we've changed the concept of owning versus sharing. Google accounts are always owning. See also https://github.com/crspybits/SyncServerII/issues/27
+        jsonDict[GoogleCreds.accessTokenKey] = self.accessToken
+        jsonDict[GoogleCreds.refreshTokenKey] = self.refreshToken
+        jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode
 
         return JSONExtras.toJSONString(dict: jsonDict)
     }

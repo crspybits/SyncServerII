@@ -18,13 +18,19 @@ extension FileController {
             return
         }
         
+        guard sharingGroupSecurityCheck(sharingGroupId: uploadDeletionRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
         guard uploadDeletionRequest.fileVersion != nil else {
             Log.error("File version not given in upload request.")
             params.completion(nil)
             return
         }
         
-        getMasterVersion(params: params) { (error, masterVersion) in
+        getMasterVersion(sharingGroupId: uploadDeletionRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
                 Log.error("Error: \(String(describing: error))")
                 params.completion(nil)
@@ -40,9 +46,8 @@ extension FileController {
             }
             
             // Check whether this fileUUID exists in the FileIndex.
-            // Note that we don't explicitly need to additionally check if our userId matches that in the FileIndex-- the following lookup does that security check for us.
 
-            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadDeletionRequest.fileUUID)
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: uploadDeletionRequest.sharingGroupId, fileUUID: uploadDeletionRequest.fileUUID)
             
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
@@ -138,6 +143,7 @@ extension FileController {
             return
         }
         
+        // OWNER
         // Need to get creds for the user that uploaded the v0 file.
         guard let cloudStorageCreds = getCreds(forUserId: fileIndexObj.userId, from: params.db) as? CloudStorage else {
             Log.error("Could not obtain CloudStorage creds for original v0 owner of file.")

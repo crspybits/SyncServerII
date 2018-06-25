@@ -60,6 +60,10 @@ class DeviceUUIDRepository : Repository {
     }
     
     var tableName:String {
+        return DeviceUUIDRepository.tableName
+    }
+    
+    static var tableName:String {
         return "DeviceUUID"
     }
 

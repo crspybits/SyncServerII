@@ -18,11 +18,17 @@ extension FileController {
             return
         }
         
+        guard sharingGroupSecurityCheck(sharingGroupId: downloadRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
         // TODO: *0* What would happen if someone else deletes the file as we we're downloading it? It seems a shame to hold a lock for the entire duration of the download, however.
         
         // TODO: *0* Related question: With transactions, if we just select from a particular row (i.e., for the master version for this user, as immediately below) does this result in a lock for the duration of the transaction? We could test for this by sleeping in the middle of the download below, and seeing if another request could delete the file at the same time. This should make a good test case for any mechanism that I come up with.
 
-        getMasterVersion(params: params) { (error, masterVersion) in
+        getMasterVersion(sharingGroupId: downloadRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
                 params.completion(nil)
                 return
@@ -35,17 +41,12 @@ extension FileController {
                 params.completion(response)
                 return
             }
-
-            guard let cloudStorageCreds = params.effectiveOwningUserCreds as? CloudStorage else {
-                Log.error("Could not obtain CloudStorage Creds")
-                params.completion(nil)
-                return
-            }
             
             // Need to get the file from the cloud storage service:
             
-            // First, lookup the file in the FileIndex. This does an important security check too-- makes sure the owning userId corresponds to the fileUUID.
-            let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: downloadRequest.fileUUID)
+            // First, lookup the file in the FileIndex. This does an important security check too-- make sure the fileUUID is in the sharing group.
+           
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: downloadRequest.sharingGroupId, fileUUID: downloadRequest.fileUUID)
 
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
@@ -99,15 +100,22 @@ extension FileController {
             }
             
             let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID, mimeType: fileIndexObj!.mimeType)
-            
-            // Because we need this to get the cloudFolderName
-            guard params.effectiveOwningUserCreds != nil else {
-                Log.debug("No effectiveOwningUserCreds")
+
+            // OWNER
+            // The cloud storage for the file is the original owning user's storage.
+            guard let owningUserCreds = getCreds(forUserId: fileIndexObj!.userId, from: params.db) else {
+                Log.error("Could not obtain owning users creds")
                 params.completion(nil)
                 return
             }
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: fileIndexObj!.mimeType)
+            guard let cloudStorageCreds = owningUserCreds as? CloudStorage else {
+                Log.error("Could not obtain cloud storage creds.")
+                params.completion(nil)
+                return
+            }
+            
+            let options = CloudStorageFileNameOptions(cloudFolderName: owningUserCreds.cloudFolderName, mimeType: fileIndexObj!.mimeType)
             
             cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
                 switch result {

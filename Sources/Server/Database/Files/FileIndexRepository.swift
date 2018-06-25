@@ -29,6 +29,10 @@ class FileIndex : NSObject, Model, Filenaming {
     // Not all files have to be associated with a file group.
     var fileGroupUUID:String?
     
+    // Currently allowing files to be in exactly one sharing group.
+    static let sharingGroupIdKey = "sharingGroupId"
+    var sharingGroupId: SharingGroupId!
+    
     static let creationDateKey = "creationDate"
     // We don't give the `creationDate` when updating the fileIndex for versions > 0.
     var creationDate:Date?
@@ -36,7 +40,8 @@ class FileIndex : NSObject, Model, Filenaming {
     static let updateDateKey = "updateDate"
     var updateDate:Date!
     
-    // The userId of the (effective) owning user of v0 of the file. The userId doesn't change beyond that point-- the v0 owner is always the owner.
+    // OWNER
+    /// The userId of the (effective) owning user of v0 of the file. The userId doesn't change beyond that point-- the v0 owner is always the owner.
     static let userIdKey = "userId"
     var userId: UserId!
     
@@ -69,6 +74,9 @@ class FileIndex : NSObject, Model, Filenaming {
 
             case FileIndex.fileGroupUUIDKey:
                 fileGroupUUID = newValue as! String?
+                
+            case FileIndex.sharingGroupIdKey:
+                sharingGroupId = newValue as! SharingGroupId?
                 
             case FileIndex.deviceUUIDKey:
                 deviceUUID = newValue as! String?
@@ -149,6 +157,10 @@ class FileIndexRepository : Repository {
     }
     
     var tableName:String {
+        return FileIndexRepository.tableName
+    }
+    
+    static var tableName:String {
         return "FileIndex"
     }
     
@@ -170,6 +182,8 @@ class FileIndexRepository : Repository {
             // identifies a group of files (assigned by app)
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
             
+            "sharingGroupId BIGINT NOT NULL, " +
+
             // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates.
             "creationDate DATETIME," +
             "updateDate DATETIME," +
@@ -190,7 +204,9 @@ class FileIndexRepository : Repository {
 
             "fileSizeBytes BIGINT NOT NULL, " +
 
-            "UNIQUE (fileUUID, userId), " +
+            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
+
+            "UNIQUE (fileUUID, sharingGroupId), " +
             "UNIQUE (fileIndexId))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -274,7 +290,9 @@ class FileIndexRepository : Repository {
     }
     
     private func haveNilFieldForUpdate(fileIndex:FileIndex, updateType: UpdateType) -> Bool {
-        let result = fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.deleted == nil
+        // OWNER
+        // Allowing a nil userId for update because the v0 owner of a file is always the owner of the file. i.e., for v1, v2 etc. of a file, we don't update the userId.
+        let result = fileIndex.fileUUID == nil || fileIndex.deleted == nil
         
         switch updateType {
         case .uploadDeletion:
@@ -295,6 +313,7 @@ class FileIndexRepository : Repository {
     }
     
     // The FileIndex model *must* have a fileIndexId
+    // OWNER: userId is ignored in the fileIndex-- the v0 owner is the permanent owner.
     func update(fileIndex:FileIndex, updateType: UpdateType = .uploadFile) -> Bool {
         if fileIndex.fileIndexId == nil ||
             haveNilFieldForUpdate(fileIndex: fileIndex, updateType:updateType) {
@@ -325,7 +344,7 @@ class FileIndexRepository : Repository {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.userIdKey)=\(fileIndex.userId!), \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -347,7 +366,7 @@ class FileIndexRepository : Repository {
     enum LookupKey : CustomStringConvertible {
         case fileIndexId(Int64)
         case userId(UserId)
-        case primaryKeys(userId:String, fileUUID:String)
+        case primaryKeys(sharingGroupId: SharingGroupId, fileUUID:String)
         
         var description : String {
             switch self {
@@ -355,8 +374,8 @@ class FileIndexRepository : Repository {
                 return "fileIndexId(\(fileIndexId))"
             case .userId(let userId):
                 return "userId(\(userId))"
-            case .primaryKeys(let userId, let fileUUID):
-                return "userId(\(userId)); fileUUID(\(fileUUID))"
+            case .primaryKeys(let sharingGroupId, let fileUUID):
+                return "sharingGroupId(\(sharingGroupId)); fileUUID(\(fileUUID))"
             }
         }
     }
@@ -367,8 +386,8 @@ class FileIndexRepository : Repository {
             return "fileIndexId = \(fileIndexId)"
         case .userId(let userId):
             return "userId = \(userId)"
-        case .primaryKeys(let userId, let fileUUID):
-            return "userId = \(userId) and fileUUID = '\(fileUUID)'"
+        case .primaryKeys(let sharingGroupId, let fileUUID):
+            return "sharingGroupId = \(sharingGroupId) and fileUUID = '\(fileUUID)'"
         }
     }
     
@@ -408,7 +427,6 @@ class FileIndexRepository : Repository {
             }
             
             fileIndex.mimeType = upload.mimeType
-            fileIndex.userId = owningUserId
             fileIndex.appMetaData = upload.appMetaData
             fileIndex.appMetaDataVersion = upload.appMetaDataVersion
             fileIndex.fileGroupUUID = upload.fileGroupUUID
@@ -418,6 +436,13 @@ class FileIndexRepository : Repository {
 
                 if uploadFileVersion == 0 {
                     fileIndex.creationDate = upload.creationDate
+                    
+                    // OWNER
+                    // version 0 of a file establishes the owning user. The owning user doesn't change if new versions are uploaded.
+                    fileIndex.userId = owningUserId
+                    
+                    // Similarly, the sharing group id doesn't change over time.
+                    fileIndex.sharingGroupId = upload.sharingGroupId
                 }
                 
                 fileIndex.updateDate = upload.updateDate
@@ -428,7 +453,7 @@ class FileIndexRepository : Repository {
                 return
             }
             
-            let key = LookupKey.primaryKeys(userId: "\(owningUserId)", fileUUID: upload.fileUUID)
+            let key = LookupKey.primaryKeys(sharingGroupId: upload.sharingGroupId, fileUUID: upload.fileUUID)
             let result = self.lookup(key: key, modelInit: FileIndex.init)
             
             switch result {
@@ -447,7 +472,7 @@ class FileIndexRepository : Repository {
                     }
                 }
                 else if upload.state != .uploadingAppMetaData {
-                    guard upload.fileVersion == existingFileIndex.fileVersion + FileVersionInt(1) else {
+                    guard upload.fileVersion == (existingFileIndex.fileVersion + 1) else {
                         Log.error("Did not have next version of file!")
                         error = true
                         return
@@ -517,8 +542,8 @@ class FileIndexRepository : Repository {
     case error(String)
     }
      
-    func fileIndex(forUserId userId: UserId) -> FileIndexResult {
-        let query = "select * from \(tableName) where userId = \(userId)"
+    func fileIndex(forSharingGroupId sharingGroupId: SharingGroupId) -> FileIndexResult {
+        let query = "select * from \(tableName) where sharingGroupId = \(sharingGroupId)"
         return fileIndex(forSelectQuery: query)
     }
     
@@ -541,6 +566,8 @@ class FileIndexRepository : Repository {
             fileInfo.updateDate = rowModel.updateDate
             fileInfo.appMetaDataVersion = rowModel.appMetaDataVersion
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
+            fileInfo.owningUserId = rowModel.userId
+            fileInfo.sharingGroupId = rowModel.sharingGroupId
             
             result.append(fileInfo)
         }

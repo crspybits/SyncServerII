@@ -16,11 +16,12 @@ docker tag swift-ubuntu-runtime:latest crspybits/swift-ubuntu-runtime:4.1.2
 docker push crspybits/swift-ubuntu-runtime:latest
 docker push crspybits/swift-ubuntu-runtime:4.1.2
 
+Run this with:
+docker run -p 8080:8080 --rm -i -t -v /Users/chris/Desktop/Apps/:/root/extras crspybits/syncserver-runner:latest
+
 # Run a container
 
 # Assumes AWS Elastic Beanstalk configuration files (.ebextensions) have been used to copy Server.json into the directory: /home/ubuntu on the ec2 instance
-
-docker run -p 8080:8080 --rm -i -t -v /Users/chris/Desktop/Apps/:/root/Apps crspybits/swift-ubuntu-runtime:latest
 
 Get into the running container:
 docker exec -it <mycontainer> bash

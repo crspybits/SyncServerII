@@ -19,7 +19,8 @@ extension FileController {
     
         for uploadFile in uploadFiles {
             // 12/1/17; Up until today, I was using the params.currentSignedInUser!.userId in here and not the effective user id. Thus, when sharing users did an upload deletion, the files got deleted from the file index, but didn't get deleted from cloud storage.
-            primaryFileIndexKeys += [.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: uploadFile.fileUUID)]
+            // 6/24/18; Now things have changed again: With the change to having multiple owning users in a sharing group, a sharingGroupId is the key instead of the userId.
+            primaryFileIndexKeys += [.primaryKeys(sharingGroupId: uploadFile.sharingGroupId, fileUUID: uploadFile.fileUUID)]
         }
     
         var fileIndexObjs = [FileInfo]()
@@ -47,6 +48,12 @@ extension FileController {
             params.completion(nil)
             return nil
         }
+
+        guard sharingGroupSecurityCheck(sharingGroupId: doneUploadsRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return nil
+        }
         
 #if DEBUG
         if doneUploadsRequest.testLockSync != nil {
@@ -58,7 +65,7 @@ extension FileController {
 
         var response:DoneUploadsResponse?
         
-        let updateResult = updateMasterVersion(currentMasterVersion: doneUploadsRequest.masterVersion, params: params)
+        let updateResult = updateMasterVersion(sharingGroupId: doneUploadsRequest.sharingGroupId, currentMasterVersion: doneUploadsRequest.masterVersion, params: params)
         switch updateResult {
         case .success:
             break
@@ -85,6 +92,7 @@ extension FileController {
         var staleVersionsFromUploads:[Upload]
         var uploadDeletions:[Upload]
         
+        // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
         let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
         switch fileUploadsResult {
         case .uploads(let uploads):
@@ -158,12 +166,12 @@ extension FileController {
     case masterVersionUpdate(MasterVersionInt)
     }
     
-    private func updateMasterVersion(currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
+    private func updateMasterVersion(sharingGroupId: SharingGroupId, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
 
         let currentMasterVersionObj = MasterVersion()
         
-        // Note the use of `effectiveOwningUserId`: The master version reflects owning user data, not a sharing user.
-        currentMasterVersionObj.userId = params.currentSignedInUser!.effectiveOwningUserId
+        // The master version reflects a sharing group.
+        currentMasterVersionObj.sharingGroupId = sharingGroupId
         
         currentMasterVersionObj.masterVersion = currentMasterVersion
         let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
@@ -180,7 +188,7 @@ extension FileController {
             result = UpdateMasterVersionResult.error(message)
             
         case .didNotMatchCurrentMasterVersion:
-            getMasterVersion(params: params) { (error, masterVersion) in
+            getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
                 if error == nil {
                     result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
                 }
@@ -194,8 +202,19 @@ extension FileController {
     }
     
     func doneUploads(params:RequestProcessingParameters) {
-        // We are locking the owning user's collection of data, and so use `effectiveOwningUserId`.
-        let lock = Lock(userId:params.currentSignedInUser!.effectiveOwningUserId, deviceUUID:params.deviceUUID!)
+        guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
+            Log.error("Did not receive DoneUploadsRequest")
+            params.completion(nil)
+            return
+        }
+        
+        guard sharingGroupSecurityCheck(sharingGroupId: doneUploadsRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
+        let lock = Lock(sharingGroupId:doneUploadsRequest.sharingGroupId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             break
@@ -213,7 +232,7 @@ extension FileController {
         
         let result = doInitialDoneUploads(params: params)
         
-        if !params.repos.lock.unlock(userId: params.currentSignedInUser!.effectiveOwningUserId) {
+        if !params.repos.lock.unlock(sharingGroupId: doneUploadsRequest.sharingGroupId) {
             Log.debug("Error in unlock!")
             params.completion(nil)
             return
@@ -226,12 +245,6 @@ extension FileController {
         }
         
         // Next: If there are any upload deletions, we need to actually do the file deletions. We are doing this *without* the lock held. I'm assuming it takes far longer to contact the cloud storage service than the other operations we are doing (e.g., mySQL operations).
-        
-        guard let cloudStorageCreds = params.effectiveOwningUserCreds as? CloudStorage else {
-            Log.error("Could not obtain CloudStorage Creds")
-            params.completion(nil)
-            return
-        }
         
         var cloudDeletions = [FileInfo]()
         if let uploadDeletions = uploadDeletions {
@@ -249,20 +262,13 @@ extension FileController {
             return
         }
         
-        // Because we need this to get the cloudFolderName
-        guard params.effectiveOwningUserCreds != nil else {
-            Log.debug("No effectiveOwningUserCreds")
-            params.completion(nil)
-            return
-        }
-        
         let async = AsyncTailRecursion()
         async.start {
-            self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async)
+            self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, numberTransferred: numberTransferred, async:async)
         }
     }
 
-     private func finishDoneUploads(cloudDeletions:[FileInfo], params:RequestProcessingParameters, cloudStorageCreds:CloudStorage, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
+     private func finishDoneUploads(cloudDeletions:[FileInfo], params:RequestProcessingParameters, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
     
         // Base case.
         if cloudDeletions.count == 0 {
@@ -286,7 +292,20 @@ extension FileController {
 
         Log.info("Deleting file: \(cloudFileName)")
         
-        let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: cloudDeletion.mimeType!)
+        // OWNER
+        guard let owningUserCreds = getCreds(forUserId: cloudDeletion.owningUserId, from: params.db) else {
+            Log.error("Could not obtain owning users creds")
+            params.completion(nil)
+            return
+        }
+    
+        guard let cloudStorageCreds = owningUserCreds as? CloudStorage else {
+            Log.error("Could not obtain cloud storage creds.")
+            params.completion(nil)
+            return
+        }
+        
+        let options = CloudStorageFileNameOptions(cloudFolderName: owningUserCreds.cloudFolderName, mimeType: cloudDeletion.mimeType!)
         
         cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
 
@@ -297,12 +316,12 @@ extension FileController {
             if error != nil {
                 // We could get into some odd situations here if we actually report an error by failing. Failing will cause a db transaction rollback. Which could mean we had some files deleted, but *all* of the entries would still be present in the FileIndex/Uploads directory. So, I'm not going to fail, but forge on. I'll report the errors in the DoneUploadsResponse message though.
                 // TODO: *1* A better way to deal with this situation could be to use transactions at a finer grained level. Each deletion we do from Upload and FileIndex for an UploadDeletion could be in a transaction that we don't commit until the deletion succeeds with cloud storage.
-                Log.warning("Error occurred while deleting Google file: \(error!)")
+                Log.warning("Error occurred while deleting file: \(error!)")
                 numberAdditionalErrors = 1
             }
             
             async.next() {
-                self.finishDoneUploads(cloudDeletions: tail, params: params, cloudStorageCreds: cloudStorageCreds, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+                self.finishDoneUploads(cloudDeletions: tail, params: params, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
             }
         }
     }

@@ -19,8 +19,9 @@ class FileController : ControllerProtocol {
     }
     
     // Result is nil if there is no existing file in the FileIndex. Throws an error if there is an error.
-    static func checkForExistingFile(params:RequestProcessingParameters, fileUUID: String) throws -> FileIndex? {
-        let key = FileIndexRepository.LookupKey.primaryKeys(userId: "\(params.currentSignedInUser!.effectiveOwningUserId)", fileUUID: fileUUID)
+    static func checkForExistingFile(params:RequestProcessingParameters, sharingGroupId: SharingGroupId, fileUUID: String) throws -> FileIndex? {
+        
+        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, fileUUID: fileUUID)
 
         let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
 
@@ -68,12 +69,10 @@ class FileController : ControllerProtocol {
     }
     
     // Synchronous callback.
-    func getMasterVersion(params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
-    
-        // We need to get the master version for the effectiveSignedInUser because the master version reflects the version of the data for the owning user, not a sharing user.
-        let effectiveOwningUserId = params.currentSignedInUser!.effectiveOwningUserId
+    // Get the master version for a sharing group because the master version reflects the overall version of the data for a sharing group.
+    func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
         
-        let key = MasterVersionRepository.LookupKey.userId(effectiveOwningUserId)
+        let key = MasterVersionRepository.LookupKey.sharingGroupId(sharingGroupId)
         let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
         
         switch result {
@@ -91,6 +90,7 @@ class FileController : ControllerProtocol {
         }
     }
     
+    // OWNER
     func getCreds(forUserId userId: UserId, from db: Database) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
         let userResults = UserRepository(db).lookup(key: userKey, modelInit: User.init)
@@ -114,6 +114,12 @@ class FileController : ControllerProtocol {
             params.completion(nil)
             return
         }
+        
+        guard sharingGroupSecurityCheck(sharingGroupId: fileIndexRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
 
 #if DEBUG
         if fileIndexRequest.testServerSleep != nil {
@@ -123,14 +129,14 @@ class FileController : ControllerProtocol {
         }
 #endif
         
-        getMasterVersion(params: params) { (error, masterVersion) in
+        getMasterVersion(sharingGroupId: fileIndexRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
                 params.completion(nil)
                 return
             }
             
-            // Note that this uses the `effectiveOwningUserId`-- because we are concerned about the owning user's data.
-            let fileIndexResult = params.repos.fileIndex.fileIndex(forUserId: params.currentSignedInUser!.effectiveOwningUserId)
+            // Get the file index for the sharing group.
+            let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupId: fileIndexRequest.sharingGroupId)
 
             switch fileIndexResult {
             case .fileIndex(let fileIndex):

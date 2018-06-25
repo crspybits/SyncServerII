@@ -145,7 +145,23 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         XCTAssert(lockIt(lock: lock))
     }
     
-    func doAddFileIndex(userId:UserId = 1) -> FileIndex {
+    func doAddFileIndex(userId:UserId = 1, sharingGroupId: SharingGroupId? = nil) -> FileIndex? {
+    
+        var actualSharingGroupId:SharingGroupId!
+        
+        if sharingGroupId == nil {
+            guard case .success(let sharingGroupId) = SharingGroupRepository(db).add(creatingUserId: userId) else {
+                XCTFail()
+                return nil
+            }
+            actualSharingGroupId = sharingGroupId
+            
+            guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId) else {
+                XCTFail()
+                return nil
+            }
+        }
+        
         let fileIndex = FileIndex()
         fileIndex.fileSizeBytes = 100
         fileIndex.deleted = false
@@ -157,43 +173,68 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
         fileIndex.creationDate = Date()
         fileIndex.updateDate = Date()
+        fileIndex.sharingGroupId = actualSharingGroupId
         
-        let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
-        XCTAssert(result1 == 1, "Bad fileIndexId!")
+        guard let result1 = FileIndexRepository(db).add(fileIndex: fileIndex) else {
+            XCTFail()
+            return nil
+        }
+
         fileIndex.fileIndexId = result1
         
         return fileIndex
     }
     
     func testAddFileIndex() {
-        _ = doAddFileIndex()
+        guard let _ = doAddFileIndex() else {
+            XCTFail()
+            return
+        }
     }
     
     func testUpdateFileIndexWithNoChanges() {
-        let fileIndex = doAddFileIndex()
+        guard let fileIndex = doAddFileIndex() else {
+            XCTFail()
+            return
+        }
+        
         XCTAssert(FileIndexRepository(db).update(fileIndex: fileIndex))
     }
     
     func testUpdateFileIndexWithAChange() {
-        let fileIndex = doAddFileIndex()
+        guard let fileIndex = doAddFileIndex() else {
+            XCTFail()
+            return
+        }
+        
         fileIndex.fileVersion = 2
         XCTAssert(FileIndexRepository(db).update(fileIndex: fileIndex))
     }
     
     func testUpdateFileIndexFailsWithoutFileIndexId() {
-        let fileIndex = doAddFileIndex()
+        guard let fileIndex = doAddFileIndex() else {
+            XCTFail()
+            return
+        }
         fileIndex.fileIndexId = nil
         XCTAssert(!FileIndexRepository(db).update(fileIndex: fileIndex))
     }
     
     func testUpdateUploadSucceedsWithNilAppMetaData() {
-        let fileIndex = doAddFileIndex()
+        guard let fileIndex = doAddFileIndex() else {
+            XCTFail()
+            return
+        }
+        
         fileIndex.appMetaData = nil
         XCTAssert(FileIndexRepository(db).update(fileIndex: fileIndex))
     }
     
     func testLookupFromFileIndex() {
-        let fileIndex1 = doAddFileIndex()
+        guard let fileIndex1 = doAddFileIndex() else {
+            XCTFail()
+            return
+        }
         
         let result = FileIndexRepository(db).lookup(key: .fileIndexId(1), modelInit: FileIndex.init)
         switch result {
@@ -225,10 +266,22 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         user1.permission = .write
         
-        let result1 = UserRepository(db).add(user: user1)
-        XCTAssert(result1 == 1, "Bad credentialsId!")
+        guard let userId = UserRepository(db).add(user: user1) else {
+            XCTFail("Bad credentialsId!")
+            return
+        }
         
-        let fileIndexResult = FileIndexRepository(db).fileIndex(forUserId: result1!)
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add(creatingUserId: userId) else {
+            XCTFail()
+            return
+        }
+        
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId) else {
+            XCTFail()
+            return
+        }
+        
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             XCTAssert(fileIndex.count == 0)
@@ -246,12 +299,27 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         user1.permission = .read
         
-        let userId = UserRepository(db).add(user: user1)
-        XCTAssert(userId == 1, "Bad credentialsId!")
+        guard let userId = UserRepository(db).add(user: user1) else {
+            XCTFail()
+            return
+        }
         
-        let fileIndexInserted = doAddFileIndex(userId: userId!)
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add(creatingUserId: userId) else {
+            XCTFail()
+            return
+        }
+        
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndexInserted = doAddFileIndex(userId: userId, sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
 
-        let fileIndexResult = FileIndexRepository(db).fileIndex(forUserId: userId!)
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             XCTAssert(fileIndex.count == 1)

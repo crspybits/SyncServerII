@@ -16,6 +16,14 @@ class SharingAccountsController : ControllerProtocol {
             return false
         }
         
+        if case .failure(_) = SharingGroupRepository(db).upcreate() {
+            return false
+        }
+        
+        if case .failure(_) = SharingGroupUserRepository(db).upcreate() {
+            return false
+        }
+        
         return true
     }
     
@@ -32,16 +40,22 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
+        guard sharingGroupSecurityCheck(sharingGroupId: createSharingInvitationRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
         guard let currentSignedInUser = params.currentSignedInUser else {
             Log.error("No currentSignedInUser")
             params.completion(nil)
             return
         }
         
-        // 6/20/18; The current user can be a sharing or owning user, and whether or not these users can invite others depends on the permissions they have. See https://github.com/crspybits/SyncServerII/issues/76
+        // 6/20/18; The current user can be a sharing or owning user, and whether or not these users can invite others depends on the permissions they have. See https://github.com/crspybits/SyncServerII/issues/76 And permissions have already been checked before this point in request handling.
 
-        let result = SharingInvitationRepository(params.db).add(
-            owningUserId: currentSignedInUser.effectiveOwningUserId,
+        let result = params.repos.sharing.add(
+            owningUserId: currentSignedInUser.effectiveOwningUserId, sharingGroupId: createSharingInvitationRequest.sharingGroupId,
             permission: createSharingInvitationRequest.permission)
         
         guard case .success(let sharingInvitationUUID) = result else {
@@ -119,9 +133,14 @@ class SharingAccountsController : ControllerProtocol {
             user.owningUserId = sharingInvitation.owningUserId
         }
         
-        let userId = params.repos.user.add(user: user)
-        if userId == nil {
+        guard let userId = params.repos.user.add(user: user) else {
             Log.error("Failed on adding sharing user to User!")
+            params.completion(nil)
+            return
+        }
+        
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId) else {
+            Log.error("Failed on adding sharing group user for new sharing user.")
             params.completion(nil)
             return
         }

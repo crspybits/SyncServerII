@@ -123,6 +123,10 @@ class UserRepository : Repository {
     }
     
     var tableName:String {
+        return UserRepository.tableName
+    }
+    
+    static var tableName:String {
         return "User"
     }
     

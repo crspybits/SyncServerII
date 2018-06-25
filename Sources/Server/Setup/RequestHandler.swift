@@ -198,7 +198,7 @@ class RequestHandler : AccountDelegate {
 #endif
 
         let db = Database()
-        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db), sharing: SharingInvitationRepository(db))
+        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db), sharing: SharingInvitationRepository(db), sharingGroup: SharingGroupRepository(db), sharingGroupUser: SharingGroupUserRepository(db))
         
         switch authenticationLevel! {
         case .none:
@@ -270,8 +270,8 @@ class RequestHandler : AccountDelegate {
             }
         }
         
-        let requestObject:RequestMessage? = createRequest(request)
-        if nil == requestObject {
+        
+        guard let requestObject = createRequest(request) else {
             self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
             return
         }
@@ -342,7 +342,7 @@ class RequestHandler : AccountDelegate {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage?, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         
@@ -366,8 +366,17 @@ class RequestHandler : AccountDelegate {
             effectiveOwningUserCreds!.delegate = self
         }
         
+        var requestSharingGroupId: SharingGroupId?
+        
         if self.endpoint.needsLock {
-            let lock = Lock(userId:currentSignedInUser!.effectiveOwningUserId, deviceUUID:deviceUUID!)
+            guard let dict = requestObject.toJSON(), let sharingGroupId = dict[ServerEndpoint.sharingGroupIdKey] as? SharingGroupId else {
+                handleResult(.failure(.message("Could not get sharing group id from request that needs a lock.")))
+                return
+            }
+            
+            requestSharingGroupId = sharingGroupId
+            
+            let lock = Lock(sharingGroupId: sharingGroupId, deviceUUID:deviceUUID!)
             switch repositories.lock.lock(lock: lock) {
             case .success:
                 break
@@ -383,12 +392,11 @@ class RequestHandler : AccountDelegate {
             }
         }
 
-        let params = RequestProcessingParameters(request: requestObject!, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { responseObject in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { responseObject in
         
             // If we locked before, do unlock now.
             if self.endpoint.needsLock {
-                _ = self.repositories.lock.unlock(userId:
-                    self.currentSignedInUser!.effectiveOwningUserId)
+                _ = self.repositories.lock.unlock(sharingGroupId: requestSharingGroupId!)
             }
         
             if nil == responseObject {

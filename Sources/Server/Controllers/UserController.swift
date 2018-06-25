@@ -105,24 +105,35 @@ class UserController : ControllerProtocol {
             return
         }
         
-        let userId = params.repos.user.add(user: user)
-        if userId == nil {
+        guard let userId = params.repos.user.add(user: user) else {
             Log.error("Failed on adding user to User!")
             params.completion(nil)
             return
         }
         
         user.userId = userId
+
+        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(creatingUserId: userId) else {
+            Log.error("Failed on adding sharing group for new root user.")
+            params.completion(nil)
+            return
+        }
+
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId) else {
+            Log.error("Failed on adding sharing group user for new root user.")
+            params.completion(nil)
+            return
+        }
         
-        if !params.repos.masterVersion.initialize(userId:userId!) {
-            Log.error("Failed on creating MasterVersion record for user!")
+        if !params.repos.masterVersion.initialize(sharingGroupId: sharingGroupId) {
+            Log.error("Failed on creating MasterVersion record for sharing group!")
             params.completion(nil)
             return
         }
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
         var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId!, userType)
+        profileCreds.accountCreationUser = .userId(userId, userType)
         
         let response = AddUserResponse()!
         response.userId = userId
@@ -182,7 +193,7 @@ class UserController : ControllerProtocol {
         assert(params.ep.authenticationLevel == .secondary)
         
         var success = 0
-        let expectedSuccess = 5
+        let expectedSuccess = 3
         
         // We'll just do each of the removals, not checking for error after each. Since this is done on the basis of a db transaction, we'll be rolling back if there is an error in any case.
         
@@ -206,16 +217,7 @@ class UserController : ControllerProtocol {
             success += 1
         }
         
-        let masterVersionRepKey = MasterVersionRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        if case .removed(_) = params.repos.masterVersion.remove(key: masterVersionRepKey) {
-            success += 1
-        }
-        
-        let lockRepoKey = LockRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        if case .removed(_) = params.repos.lock.remove(key: lockRepoKey) {
-            success += 1
-        }
-        
+        // Remove all of this user's files from the FileIndex.
         let fileIndexRepoKey = FileIndexRepository.LookupKey.userId(params.currentSignedInUser!.userId)
         if case .removed(_) = params.repos.fileIndex.remove(key: fileIndexRepoKey) {
             success += 1

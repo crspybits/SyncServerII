@@ -15,6 +15,7 @@ protocol Repository {
     var db:Database! {get}
 
     var tableName:String {get}
+    static var tableName:String {get}
 
     // If the table is present, and it's structure needs updating, update it.
     // If it's absent, create it.
