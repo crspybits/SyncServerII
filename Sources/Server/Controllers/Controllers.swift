@@ -13,7 +13,7 @@ import Kitura
 import SyncServerShared
 
 protocol ControllerProtocol {
-    static func setup(db:Database) -> Bool
+    static func setup() -> Bool
 }
 
 extension ControllerProtocol {
@@ -73,9 +73,8 @@ public class Controllers {
         [UserController.self, UtilController.self, FileController.self, SharingAccountsController.self]
     
     static func setup() -> Bool {
-        let db = Database(showStartupInfo: true)
         for controller in list {
-            if !controller.setup(db:db) {
+            if !controller.setup() {
                 Log.error("Could not setup controller: \(controller)")
                 return false
             }

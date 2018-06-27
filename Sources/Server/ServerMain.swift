@@ -63,6 +63,11 @@ public class ServerMain {
             Log.error("Failed during startup: Could not setup controller(s).")
             exit(1)
         }
+        
+        if !Database.setup() {
+            Log.error("Failed during startup: Could not setup database tables(s).")
+            exit(1)
+        }
 
         let serverRoutes = CreateRoutes()
 

@@ -149,10 +149,10 @@ class FileIndex : NSObject, Model, Filenaming {
     }
 }
 
-class FileIndexRepository : Repository {
+class FileIndexRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
     
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     

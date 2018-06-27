@@ -15,7 +15,7 @@ class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
         performServerTest(testAccount: .dropbox1) { expectation, dropboxCreds in
             let headers = self.setupHeaders(testUser: .dropbox1, accessToken: "foobar", deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode.rawValue)")
+                Log.info("Status Code: \(response!.statusCode.rawValue)")
                 XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
                 expectation.fulfill()
             }

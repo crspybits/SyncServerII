@@ -50,12 +50,12 @@ class DeviceUUID : NSObject, Model {
     }
 }
 
-class DeviceUUIDRepository : Repository {
+class DeviceUUIDRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
     
     var maximumNumberOfDeviceUUIDsPerUser:Int? = Constants.session.maxNumberDeviceUUIDPerUser
     
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     

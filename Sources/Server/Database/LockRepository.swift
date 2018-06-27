@@ -60,10 +60,10 @@ class Lock : NSObject, Model {
     }
 }
 
-class LockRepository : Repository {
+class LockRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
     
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     

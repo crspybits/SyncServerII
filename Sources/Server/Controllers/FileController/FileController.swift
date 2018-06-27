@@ -43,20 +43,7 @@ class FileController : ControllerProtocol {
         }
     }
     
-    // Don't do this setup in init so that database initalizations don't have to be done per endpoint call.
-    class func setup(db:Database) -> Bool {
-        if case .failure(_) = UploadRepository(db).upcreate() {
-            return false
-        }
-        
-        if case .failure(_) = FileIndexRepository(db).upcreate() {
-            return false
-        }
-        
-        if case .failure(_) = LockRepository(db).upcreate() {
-            return false
-        }
-        
+    class func setup() -> Bool {
         return true
     }
     

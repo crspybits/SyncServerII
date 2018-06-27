@@ -76,10 +76,10 @@ class SharingInvitation : NSObject, Model {
     }
 }
 
-class SharingInvitationRepository : Repository {
+class SharingInvitationRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
 
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     

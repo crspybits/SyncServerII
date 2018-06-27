@@ -9,20 +9,26 @@
 import Foundation
 import LoggerAPI
 
-protocol Repository {
-    associatedtype LOOKUPKEY
-    
+protocol RepositoryBasics {
     var db:Database! {get}
 
     var tableName:String {get}
     static var tableName:String {get}
+}
 
+protocol RepositoryLookup : RepositoryBasics {
+    associatedtype LOOKUPKEY
+
+    // Returns a constraint for a WHERE clause in mySQL based on the key
+    func lookupConstraint(key:LOOKUPKEY) -> String
+}
+
+protocol Repository {
+    init(_ db: Database)
+    
     // If the table is present, and it's structure needs updating, update it.
     // If it's absent, create it.
     func upcreate() -> Database.TableUpcreateResult
-    
-    // Returns a constraint for a WHERE clause in mySQL based on the key
-    func lookupConstraint(key:LOOKUPKEY) -> String
 }
 
 enum RepositoryRemoveResult {
@@ -36,12 +42,14 @@ enum RepositoryLookupResult {
     case error(String)
 }
 
-extension Repository {
+extension RepositoryBasics {
     // Remove entire table.
     func remove() -> Bool {
         return db.connection.query(statement: "DROP TABLE \(tableName)")
     }
-    
+}
+
+extension RepositoryLookup {
     // Remove row(s) from the table.
     func remove(key:LOOKUPKEY) -> RepositoryRemoveResult {
         let query = "delete from \(tableName) where " + lookupConstraint(key: key)
@@ -97,7 +105,9 @@ extension Repository {
             return .error(error)
         }
     }
-    
+}
+
+extension Repository {
     func getUpdateFieldSetter(fieldValue: Any?, fieldName:String, fieldIsString:Bool = true) -> String {
         
         var fieldSetter = ""

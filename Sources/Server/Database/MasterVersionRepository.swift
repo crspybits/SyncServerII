@@ -6,7 +6,7 @@
 //
 //
 
-// This tracks an overall version of the fileIndex per userId.
+// This tracks an overall version of the fileIndex per sharingGroupId.
 
 import Foundation
 import SyncServerShared
@@ -39,10 +39,10 @@ class MasterVersion : NSObject, Model {
     }
 }
 
-class MasterVersionRepository : Repository {
+class MasterVersionRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
     
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     

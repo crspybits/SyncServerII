@@ -153,10 +153,10 @@ class Upload : NSObject, Model, Filenaming {
     }
 }
 
-class UploadRepository : Repository {
+class UploadRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
 
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     

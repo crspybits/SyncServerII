@@ -14,7 +14,7 @@ import Foundation
 class UtilController : ControllerProtocol {
     static var serverStart:Date!
     
-    class func setup(db:Database) -> Bool {
+    class func setup() -> Bool {
         serverStart = Date()
         return true
     }

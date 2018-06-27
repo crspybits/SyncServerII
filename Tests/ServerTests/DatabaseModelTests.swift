@@ -118,7 +118,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         
         let newUserId = UserId(43287)
         let newUsername = "foobar"
-        let newUserType:UserType = .sharing
         let newOwningUserId = UserId(321)
         let newSharingPermission:Permission = .write
         let newAccountType: AccountType = .Google

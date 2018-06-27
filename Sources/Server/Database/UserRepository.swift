@@ -115,10 +115,10 @@ class User : NSObject, Model {
     }
 }
 
-class UserRepository : Repository {
+class UserRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
 
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     
@@ -138,9 +138,7 @@ class UserRepository : Repository {
         let createColumns =
             "(userId BIGINT NOT NULL AUTO_INCREMENT, " +
             "username VARCHAR(\(usernameMaxLength)) NOT NULL, " +
-            
-            "userType VARCHAR(\(UserType.maxStringLength())) NOT NULL, " +
-    
+                
             // If non-NULL, references a user in the User table.
             // TODO: *2* Make this a foreign key reference to this same table.
             "owningUserId BIGINT, " +

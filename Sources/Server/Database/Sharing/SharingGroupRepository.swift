@@ -36,10 +36,10 @@ class SharingGroup : NSObject, Model {
     }
 }
 
-class SharingGroupRepository : Repository {
+class SharingGroupRepository: Repository, RepositoryLookup {
     private(set) var db:Database!
     
-    init(_ db:Database) {
+    required init(_ db:Database) {
         self.db = db
     }
     
@@ -51,7 +51,6 @@ class SharingGroupRepository : Repository {
         return "SharingGroup"
     }
     
-    // TODO: How do you do deletions of rows with foreign keys?
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(sharingGroupId BIGINT NOT NULL AUTO_INCREMENT, " +
@@ -87,7 +86,8 @@ class SharingGroupRepository : Repository {
     
     // Note that if there are references in the FileIndex to sharingGroupId's, I'm never going to delete the reference in the SharingGroup table. This is because we never really delete files-- we just mark them as deleted.
     func add() -> AddResult {
-        let query = "INSERT INTO \(tableName);"
+        // Deal with table that has only an autoincrement column: https://stackoverflow.com/questions/5962026/mysql-inserting-in-table-with-only-an-auto-incrementing-column
+        let query = "INSERT INTO \(tableName) (sharingGroupId) values (null)"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing group")

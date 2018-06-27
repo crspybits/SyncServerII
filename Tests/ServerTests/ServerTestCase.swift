@@ -51,22 +51,11 @@ class ServerTestCase : XCTestCase {
 #else // Linux
         try! Constants.setup(configFileFullPath: "./ServerTests.json")
 #endif
-        self.db = Database()
         
-        _ = UserRepository(db).remove()
-        _ = UserRepository(db).upcreate()
-        _ = UploadRepository(db).remove()
-        _ = UploadRepository(db).upcreate()
-        _ = MasterVersionRepository(db).remove()
-        _ = MasterVersionRepository(db).upcreate()
-        _ = FileIndexRepository(db).remove()
-        _ = FileIndexRepository(db).upcreate()
-        _ = LockRepository(db).remove()
-        _ = LockRepository(db).upcreate()
-        _ = DeviceUUIDRepository(db).remove()
-        _ = DeviceUUIDRepository(db).upcreate()
-        _ = SharingInvitationRepository(db).remove()
-        _ = SharingInvitationRepository(db).upcreate()
+        Database.remove()
+        _ = Database.setup()
+        
+        self.db = Database()
     }
     
     override func tearDown() {

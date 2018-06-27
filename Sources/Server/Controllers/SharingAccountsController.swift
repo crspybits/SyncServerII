@@ -11,19 +11,7 @@ import SyncServerShared
 import LoggerAPI
 
 class SharingAccountsController : ControllerProtocol {
-    class func setup(db:Database) -> Bool {
-        if case .failure(_) = SharingInvitationRepository(db).upcreate() {
-            return false
-        }
-        
-        if case .failure(_) = SharingGroupRepository(db).upcreate() {
-            return false
-        }
-        
-        if case .failure(_) = SharingGroupUserRepository(db).upcreate() {
-            return false
-        }
-        
+    class func setup() -> Bool {
         return true
     }
     
