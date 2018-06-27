@@ -24,7 +24,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     @discardableResult
-    func uploadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
+    func uploadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64) {
         let deviceUUID1 = Foundation.UUID().uuidString
         
         addNewUser(deviceUUID:deviceUUID1)
@@ -52,7 +52,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         return (request, fileSize)
     }
     
-    func uploadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
+    func uploadDeleteFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
         let deviceUUID1 = Foundation.UUID().uuidString
         
         addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
@@ -86,7 +86,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1), failureExpected:failureExpected)
     }
     
-    func downloadFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
+    func downloadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
         let deviceUUID1 = Foundation.UUID().uuidString
         
         addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID1)
@@ -111,7 +111,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:failureExpected)
     }
     
-    func downloadDeleteFileBySharingUser(withPermission sharingPermission:SharingPermission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
+    func downloadDeleteFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
     
         let deviceUUID1 = Foundation.UUID().uuidString
         

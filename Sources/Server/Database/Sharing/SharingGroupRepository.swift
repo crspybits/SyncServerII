@@ -14,19 +14,12 @@ import SyncServerShared
 class SharingGroup : NSObject, Model {
     static let sharingGroupIdKey = "sharingGroupId"
     var sharingGroupId: SharingGroupId!
-    
-    // The userId of the "root" user for the group-- the one who started the sharing group.
-    static let creatingUserIdKey = "userId"
-    var creatingUserId: UserId!
 
     subscript(key:String) -> Any? {
         set {
             switch key {
             case SharingGroup.sharingGroupIdKey:
                 sharingGroupId = newValue as! SharingGroupId?
-            
-            case SharingGroup.creatingUserIdKey:
-                creatingUserId = newValue as! UserId?
                 
             default:
                 assert(false)
@@ -63,9 +56,6 @@ class SharingGroupRepository : Repository {
         let createColumns =
             "(sharingGroupId BIGINT NOT NULL AUTO_INCREMENT, " +
         
-            "creatingUserId BIGINT NOT NULL, " +
-
-            "FOREIGN KEY (creatingUserId) REFERENCES \(UserRepository.tableName)(\(User.userIdKey)), " +
             "UNIQUE (sharingGroupId))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -95,8 +85,9 @@ class SharingGroupRepository : Repository {
         case error(String)
     }
     
-    func add(creatingUserId:UserId) -> AddResult {
-        let query = "INSERT INTO \(tableName) (creatingUserId) VALUES(\(creatingUserId));"
+    // Note that if there are references in the FileIndex to sharingGroupId's, I'm never going to delete the reference in the SharingGroup table. This is because we never really delete files-- we just mark them as deleted.
+    func add() -> AddResult {
+        let query = "INSERT INTO \(tableName);"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing group")

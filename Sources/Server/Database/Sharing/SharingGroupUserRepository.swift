@@ -85,6 +85,7 @@ class SharingGroupUserRepository : Repository {
     enum LookupKey : CustomStringConvertible {
         case sharingGroupUserId(SharingGroupUserId)
         case primaryKeys(sharingGroupId: SharingGroupId, userId: UserId)
+        case userId(UserId)
         
         var description : String {
             switch self {
@@ -92,6 +93,8 @@ class SharingGroupUserRepository : Repository {
                 return "sharingGroupUserId(\(sharingGroupUserId))"
             case .primaryKeys(sharingGroupId: let sharingGroupId, userId: let userId):
                 return "primaryKeys(\(sharingGroupId), \(userId))"
+            case .userId(let userId):
+                return "userId(\(userId))"
             }
         }
     }
@@ -102,6 +105,8 @@ class SharingGroupUserRepository : Repository {
             return "sharingGroupUserId = \(sharingGroupUserId)"
         case .primaryKeys(sharingGroupId: let sharingGroupId, userId: let userId):
             return "sharingGroupId = \(sharingGroupId) and userId = \(userId)"
+        case .userId(let userId):
+            return "userId = \(userId)"
         }
     }
     

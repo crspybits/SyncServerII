@@ -25,27 +25,27 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
             
-    func checkMasterVersion(userId:UserId, version:Int64) {
-        let result = MasterVersionRepository(db).lookup(key: .userId(userId), modelInit: MasterVersion.init)
+    func checkMasterVersion(sharingGroupId:UserId, version:Int64) {
+        let result = MasterVersionRepository(db).lookup(key: .sharingGroupId(sharingGroupId), modelInit: MasterVersion.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
             
         case .found(let object):
             let masterVersion = object as! MasterVersion
-            XCTAssert(masterVersion.masterVersion == version && masterVersion.userId == userId)
+            XCTAssert(masterVersion.masterVersion == version && masterVersion.sharingGroupId == sharingGroupId)
 
         case .noObjectFound:
             XCTFail("No MasterVersion Found")
         }
     }
     
-    let userId:UserId = 1
+    let sharingGroupId:SharingGroupId = 1
 
     func doUpdateToNextMasterVersion(currentMasterVersion:MasterVersionInt, expectedError: Bool = false) {
         
         let current = MasterVersion()
-        current.userId = userId
+        current.sharingGroupId = sharingGroupId
         current.masterVersion = currentMasterVersion
         
         let result = MasterVersionRepository(db).updateToNext(current: current)
@@ -69,20 +69,20 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testUpdateToNextMasterVersion() {
-        XCTAssert(MasterVersionRepository(db).initialize(userId: userId))
+        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId))
         doUpdateToNextMasterVersion(currentMasterVersion: 0)
-        checkMasterVersion(userId: userId, version: 1)
+        checkMasterVersion(sharingGroupId: sharingGroupId, version: 1)
     }
 
     func testUpdateToNextTwiceMasterVersion() {
-        XCTAssert(MasterVersionRepository(db).initialize(userId: userId))
+        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId))
         doUpdateToNextMasterVersion(currentMasterVersion: 0)
         doUpdateToNextMasterVersion(currentMasterVersion: 1)
-        checkMasterVersion(userId: userId, version: 2)
+        checkMasterVersion(sharingGroupId: sharingGroupId, version: 2)
     }
     
     func testUpdateToNextFailsWithWrongExpectedMasterVersion() {
-        XCTAssert(MasterVersionRepository(db).initialize(userId: userId))
+        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId))
         doUpdateToNextMasterVersion(currentMasterVersion: 1, expectedError: true)
     }
     
@@ -96,37 +96,37 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testLock() {
-        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupId:1, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
         XCTAssert(!lockIt(lock: lock))
     }
     
     func testThatNewlyAddedLocksAreNotStale() {
-        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupId:1, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
-        XCTAssert(LockRepository(db).removeStaleLock(forUserId: 1) == 0)
+        XCTAssert(LockRepository(db).removeStaleLock(forSharingGroupId: 1) == 0)
         XCTAssert(!lockIt(lock: lock))
     }
     
     func testThatStaleALockIsRemoved() {
         let duration:TimeInterval = 1
-        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
+        let lock = Lock(sharingGroupId:1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
-        XCTAssert(LockRepository(db).removeStaleLock(forUserId: 1) == 1)
+        XCTAssert(LockRepository(db).removeStaleLock(forSharingGroupId: 1) == 1)
         XCTAssert(lockIt(lock: lock, removeStale:false))
     }
     
     func testRemoveAllStaleLocks() {
         let duration:TimeInterval = 1
         
-        let lock1 = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
+        let lock1 = Lock(sharingGroupId:1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock1))
         
-        let lock2 = Lock(userId:2, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
+        let lock2 = Lock(sharingGroupId:2, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock2))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
@@ -139,9 +139,9 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testRemoveLock() {
-        let lock = Lock(userId:1, deviceUUID:Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupId:1, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
-        XCTAssert(LockRepository(db).unlock(userId:1))
+        XCTAssert(LockRepository(db).unlock(sharingGroupId:1))
         XCTAssert(lockIt(lock: lock))
     }
     
@@ -150,7 +150,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         var actualSharingGroupId:SharingGroupId!
         
         if sharingGroupId == nil {
-            guard case .success(let sharingGroupId) = SharingGroupRepository(db).add(creatingUserId: userId) else {
+            guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
                 XCTFail()
                 return nil
             }
@@ -271,7 +271,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add(creatingUserId: userId) else {
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
             XCTFail()
             return
         }
@@ -304,7 +304,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add(creatingUserId: userId) else {
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
             XCTFail()
             return
         }

@@ -537,6 +537,25 @@ class FileIndexRepository : Repository {
         }
     }
     
+    func markFilesAsDeleted(forUserId userId: UserId) -> Int64? {
+        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE \(FileIndex.userIdKey)=\(userId)"
+        if db.connection.query(statement: query) {
+            // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
+            if db.connection.numberAffectedRows() <= 1 {
+                return db.connection.numberAffectedRows()
+            }
+            else {
+                Log.error("Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
+                return nil
+            }
+        }
+        else {
+            let error = db.error
+            Log.error("Could not mark files as deleted in \(tableName): \(error)")
+            return nil
+        }
+    }
+    
     enum FileIndexResult {
     case fileIndex([FileInfo])
     case error(String)

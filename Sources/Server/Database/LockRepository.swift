@@ -80,7 +80,6 @@ class LockRepository : Repository {
 
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
-            // reference into User table
             "(sharingGroupId BIGINT NOT NULL, " +
 
             // identifies a specific mobile device (assigned by app)

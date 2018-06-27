@@ -24,6 +24,12 @@ extension FileController {
             return
         }
         
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: uploadDeletionRequest.sharingGroupId, params:params), consistentSharingGroups else {
+            Log.error("Inconsistent sharing groups.")
+            params.completion(nil)
+            return
+        }
+        
         guard uploadDeletionRequest.fileVersion != nil else {
             Log.error("File version not given in upload request.")
             params.completion(nil)

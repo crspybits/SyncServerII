@@ -131,7 +131,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     func testSharingInvitationCreationFailsWithNoAuthorization() {
         self.performServerTest { expectation, creds in
             let request = CreateSharingInvitationRequest(json: [
-                CreateSharingInvitationRequest.sharingPermissionKey : SharingPermission.read
+                CreateSharingInvitationRequest.permissionKey : Permission.read
             ])
             
             self.performRequest(route: ServerEndpoints.createSharingInvitation, urlParameters: "?" + request!.urlParameters()!, body:nil) { response, dict in

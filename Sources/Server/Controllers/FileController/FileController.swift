@@ -107,6 +107,24 @@ class FileController : ControllerProtocol {
         
         return creds
     }
+    
+    func checkSharingGroupConsistency(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> Bool? {
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        switch fileUploadsResult {
+        case .uploads(let uploads):
+            let filteredResult = uploads.filter({$0.sharingGroupId == sharingGroupId})
+            if filteredResult.count == uploads.count {
+                return true
+            }
+            else {
+                return false
+            }
+            
+        case .error(let error):
+            Log.error("Failed to get file uploads: \(error)")
+            return nil
+        }
+    }
             
     func fileIndex(params:RequestProcessingParameters) {
         guard let fileIndexRequest = params.request as? FileIndexRequest else {

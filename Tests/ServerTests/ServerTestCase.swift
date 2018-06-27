@@ -32,9 +32,8 @@ extension LinuxTestable {
         #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
             // Adding 1 to linuxCount because it doesn't have *this* test.
             let linuxCount = testType.allTests.count + 1
-            
-            let darwinCount = Int(testType
-                .defaultTestSuite().testCaseCount)
+        
+            let darwinCount = Int(testType.defaultTestSuite.testCaseCount)
             XCTAssertEqual(linuxCount, darwinCount,
                 "\(darwinCount - linuxCount) test(s) are missing from allTests")
         #endif
@@ -615,7 +614,7 @@ class ServerTestCase : XCTestCase {
         }
     }
 
-    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: SharingPermission? = nil, deviceUUID:String = Foundation.UUID().uuidString, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, deviceUUID:String = Foundation.UUID().uuidString, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -626,7 +625,7 @@ class ServerTestCase : XCTestCase {
             }
             else {
                 request = CreateSharingInvitationRequest(json: [
-                    CreateSharingInvitationRequest.sharingPermissionKey : permission!
+                    CreateSharingInvitationRequest.permissionKey : permission!
                 ])
             }
             
@@ -647,7 +646,7 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:SharingPermission = .read, sharingUser:TestAccount = .google2, failureExpected: Bool = false, completion:((_ newUserId:UserId?)->())? = nil) {
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, failureExpected: Bool = false, completion:((_ newUserId:UserId?)->())? = nil) {
         // a) Create sharing invitation with one Google account.
         // b) Next, need to "sign out" of that account, and sign into another Google account
         // c) And, redeem sharing invitation with that new Google account.

@@ -136,7 +136,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func checkingCredsOnASharingUserGivesSharingPermission(sharingUser: TestAccount) {
-        let perm:SharingPermission = .write
+        let perm:Permission = .write
         createSharingUser(withSharingPermission: perm, sharingUser: sharingUser)
             
         let deviceUUID = Foundation.UUID().uuidString
@@ -151,7 +151,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
                 let response = CheckCredsResponse(json: dict!)
                 
                 // This is what we're looking for: Make sure that the check creds response indicates our expected sharing permission.
-                XCTAssert(response!.sharingPermission == perm)
+                XCTAssert(response!.permission == perm)
                 
                 expectation.fulfill()
             }
@@ -176,7 +176,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
                 let response = CheckCredsResponse(json: dict!)
                 
                 // This is what we're looking for: Make sure that the check creds response gives nil sharing permission-- expected for an owning user.
-                XCTAssert(response!.sharingPermission == nil)
+                XCTAssert(response!.permission == nil)
                 
                 expectation.fulfill()
             }

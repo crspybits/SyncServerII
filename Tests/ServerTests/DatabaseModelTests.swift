@@ -41,46 +41,46 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
     }
     
     func testLock() {
-        let lock = Lock(userId: 0, deviceUUID: Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupId: 0, deviceUUID: Foundation.UUID().uuidString)
         lock[Lock.deviceUUIDKey] = Foundation.UUID().uuidString
         
         let newDate = Date()
-        let newUserId = Int64(5)
+        let newSharingGroupId = Int64(5)
         let newDeviceUUID = Foundation.UUID().uuidString
         
         lock[Lock.expiryKey] = newDate
-        lock[Lock.userIdKey] = newUserId
+        lock[Lock.sharingGroupIdKey] = newSharingGroupId
         lock[Lock.deviceUUIDKey] = newDeviceUUID
         
         XCTAssert(lock.deviceUUID == newDeviceUUID)
-        XCTAssert(lock.userId == newUserId)
+        XCTAssert(lock.sharingGroupId == newSharingGroupId)
         XCTAssert(lock.expiry.compare(newDate) == .orderedSame)
         
         lock[Lock.expiryKey] = nil
-        lock[Lock.userIdKey] = nil
+        lock[Lock.sharingGroupIdKey] = nil
         lock[Lock.deviceUUIDKey] = nil
         
         XCTAssert(lock.deviceUUID == nil)
-        XCTAssert(lock.userId == nil)
+        XCTAssert(lock.sharingGroupId == nil)
         XCTAssert(lock.expiry == nil)
     }
     
     func testMasterVersion() {
         let masterVersion = MasterVersion()
         
-        let newUserId = Int64(805)
+        let newSharingGroupId = Int64(805)
         let newMasterVersion = MasterVersionInt(100)
         
-        masterVersion[MasterVersion.userIdKey] = newUserId
+        masterVersion[MasterVersion.sharingGroupIdKey] = newSharingGroupId
         masterVersion[MasterVersion.masterVersionKey] = newMasterVersion
         
-        XCTAssert(masterVersion.userId == newUserId)
+        XCTAssert(masterVersion.sharingGroupId == newSharingGroupId)
         XCTAssert(masterVersion.masterVersion == newMasterVersion)
 
-        masterVersion[MasterVersion.userIdKey] = nil
+        masterVersion[MasterVersion.sharingGroupIdKey] = nil
         masterVersion[MasterVersion.masterVersionKey] = nil
         
-        XCTAssert(masterVersion.userId == nil)
+        XCTAssert(masterVersion.sharingGroupId == nil)
         XCTAssert(masterVersion.masterVersion == nil)
     }
     
@@ -90,27 +90,27 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let newSharingInvitationUUID = Foundation.UUID().uuidString
         let newExpiry = Date()
         let newOwningUserId = UserId(342)
-        let newSharingPermission:SharingPermission = .read
+        let newSharingPermission:Permission = .read
         
         sharingInvitation[SharingInvitation.sharingInvitationUUIDKey] = newSharingInvitationUUID
         sharingInvitation[SharingInvitation.expiryKey] = newExpiry
         sharingInvitation[SharingInvitation.owningUserIdKey] = newOwningUserId
-        sharingInvitation[SharingInvitation.sharingPermissionKey] = newSharingPermission
+        sharingInvitation[SharingInvitation.permissionKey] = newSharingPermission
         
         XCTAssert(sharingInvitation.sharingInvitationUUID == newSharingInvitationUUID)
         XCTAssert(sharingInvitation.expiry == newExpiry)
         XCTAssert(sharingInvitation.owningUserId == newOwningUserId)
-        XCTAssert(sharingInvitation.sharingPermission == newSharingPermission)
+        XCTAssert(sharingInvitation.permission == newSharingPermission)
 
         sharingInvitation[SharingInvitation.sharingInvitationUUIDKey] = nil
         sharingInvitation[SharingInvitation.expiryKey] = nil
         sharingInvitation[SharingInvitation.owningUserIdKey] = nil
-        sharingInvitation[SharingInvitation.sharingPermissionKey] = nil
+        sharingInvitation[SharingInvitation.permissionKey] = nil
         
         XCTAssert(sharingInvitation.sharingInvitationUUID == nil)
         XCTAssert(sharingInvitation.expiry == nil)
         XCTAssert(sharingInvitation.owningUserId == nil)
-        XCTAssert(sharingInvitation.sharingPermission == nil)
+        XCTAssert(sharingInvitation.permission == nil)
     }
     
     func testUser() {
@@ -120,25 +120,23 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let newUsername = "foobar"
         let newUserType:UserType = .sharing
         let newOwningUserId = UserId(321)
-        let newSharingPermission:SharingPermission = .write
+        let newSharingPermission:Permission = .write
         let newAccountType: AccountType = .Google
         let newCredsId = "d392y2t3"
         let newCreds = "fd9eu23y4"
         
         user[User.userIdKey] = newUserId
         user[User.usernameKey] = newUsername
-        user[User.userTypeKey] = newUserType
         user[User.owningUserIdKey] = newOwningUserId
-        user[User.sharingPermissionKey] = newSharingPermission
+        user[User.permissionKey] = newSharingPermission
         user[User.accountTypeKey] = newAccountType
         user[User.credsIdKey] = newCredsId
         user[User.credsKey] = newCreds
         
         XCTAssert(user.userId == newUserId)
         XCTAssert(user.username == newUsername)
-        XCTAssert(user.userType == newUserType)
         XCTAssert(user.owningUserId == newOwningUserId)
-        XCTAssert(user.sharingPermission == newSharingPermission)
+        XCTAssert(user.permission == newSharingPermission)
         
         // Swift Compiler issues.
         // XCTAssert(user.accountType == newAccountType)
@@ -152,18 +150,16 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         
         user[User.userIdKey] = nil
         user[User.usernameKey] = nil
-        user[User.userTypeKey] = nil
         user[User.owningUserIdKey] = nil
-        user[User.sharingPermissionKey] = nil
+        user[User.permissionKey] = nil
         user[User.accountTypeKey] = nil
         user[User.credsIdKey] = nil
         user[User.credsKey] = nil
         
         XCTAssert(user.userId == nil)
         XCTAssert(user.username == nil)
-        XCTAssert(user.userType == nil)
         XCTAssert(user.owningUserId == nil)
-        XCTAssert(user.sharingPermission == nil)
+        XCTAssert(user.permission == nil)
         XCTAssert(user.accountType == nil)
         XCTAssert(user.credsId == nil)
         XCTAssert(user.creds == nil)
@@ -296,6 +292,10 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(upload.creationDate == nil)
         XCTAssert(upload.updateDate == nil)
     }
+    
+    // SharingGroup
+    
+    // SharingGroupUser
 }
 
 extension DatabaseModelTests {

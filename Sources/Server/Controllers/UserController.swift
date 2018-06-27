@@ -113,14 +113,14 @@ class UserController : ControllerProtocol {
         
         user.userId = userId
 
-        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(creatingUserId: userId) else {
-            Log.error("Failed on adding sharing group for new root user.")
+        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add() else {
+            Log.error("Failed on adding new sharing group.")
             params.completion(nil)
             return
         }
 
         guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId) else {
-            Log.error("Failed on adding sharing group user for new root user.")
+            Log.error("Failed on adding sharing group user.")
             params.completion(nil)
             return
         }
@@ -189,15 +189,11 @@ class UserController : ControllerProtocol {
     }
     
     // A user can only remove themselves, not another user-- this policy is enforced because the currently signed in user (with the UserProfile) is the one removed.
+    // Not currently holding a lock to remove a user-- because currently our locks work on sharing groups-- and in general the scope of removing a user is wider than a single sharing group. In the worst case it seems that some other user(s), invited to join by the user being removed, could be uploading at the same time. Seems like limited consequences.
     func removeUser(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
         
-        var success = 0
-        let expectedSuccess = 3
-        
-        // We'll just do each of the removals, not checking for error after each. Since this is done on the basis of a db transaction, we'll be rolling back if there is an error in any case.
-        
-        // I'm not going to remove the users files in their cloud storage. They own those. I think I don't have any business removing their files in this context.
+        // I'm not going to remove the users files in their cloud storage. They own those. I think SyncServer doesn't have any business removing their files in this context.
         
         guard let accountType = AccountType.for(userProfile: params.userProfile!) else {
             Log.error("Could not get accountType!")
@@ -206,33 +202,52 @@ class UserController : ControllerProtocol {
         }
         
         let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
-        if case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey) {
-            if numberRows == 1 {
-                success += 1
-            }
+        guard case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey), numberRows == 1 else {
+            Log.error("Could not remove user!")
+            params.completion(nil)
+            return
         }
         
         let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
-        if case .removed(_) = params.repos.upload.remove(key: uploadRepoKey) {
-            success += 1
-        }
-        
-        // Remove all of this user's files from the FileIndex.
-        let fileIndexRepoKey = FileIndexRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        if case .removed(_) = params.repos.fileIndex.remove(key: fileIndexRepoKey) {
-            success += 1
-        }
-        
-        // TODO: *2* When removing an owning user, check to see if that owning user has users sharing their data. If so, it would seem best to also remove those sharing users-- because why should a user be allowed to share someone's data when that someone is no longer on the system?
-        
-        // TODO: *2* When removing an owning user: Also remove any sharing invitations that have that owning user in them.
-        
-        if success == expectedSuccess {
-            let response = RemoveUserResponse()!
-            params.completion(response)
-        }
-        else {
+        guard case .removed(_) = params.repos.upload.remove(key: uploadRepoKey) else {
+            Log.error("Could not remove upload files for user!")
             params.completion(nil)
+            return
         }
+        
+        // 6/25/18; Up until today, user removal had included actual removal of all of the user's files from the FileIndex. BUT-- this goes against how deletion occurs on the SyncServer-- we mark files as deleted, but don't actually remove them from the FileIndex.
+        guard let _ = params.repos.fileIndex.markFilesAsDeleted(forUserId: params.currentSignedInUser!.userId) else {
+            Log.error("Could not mark files as deleted for user!")
+            params.completion(nil)
+            return
+        }
+        
+        // The user will no longer be part of any sharing groups
+        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        switch params.repos.sharingGroupUser.remove(key: sharingGroupUserKey) {
+        case .removed:
+            break
+        case .error(let error):
+            Log.error("Could not remove sharing group references for user: \(error)")
+            params.completion(nil)
+            return
+        }
+        
+        // A sharing user that was invited by this user that is deleting themselves will no longer be able to upload files. Because those files have nowhere to go. However, they should still be able to read files in the sharing group uploaded by others. See https://github.com/crspybits/SyncServerII/issues/78
+        
+        // When removing an owning user: Also remove any sharing invitations that have that owning user in them-- this is just in case there are non-expired invitations from that sharing user. They will be invalid now.
+        let sharingInvitationsKey = SharingInvitationRepository.LookupKey
+            .owningUserId(params.currentSignedInUser!.userId)
+        switch params.repos.sharing.remove(key: sharingInvitationsKey) {
+        case .removed:
+            break
+        case .error(let error):
+            Log.error("Could not remove sharing invitations for user: \(error)")
+            params.completion(nil)
+            return
+        }
+        
+        let response = RemoveUserResponse()!
+        params.completion(response)
     }
 }

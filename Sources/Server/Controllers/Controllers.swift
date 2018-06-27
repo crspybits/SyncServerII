@@ -17,6 +17,7 @@ protocol ControllerProtocol {
 }
 
 extension ControllerProtocol {
+    // Make sure the current signed in user is a member of the sharing group.s
     func sharingGroupSecurityCheck(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> Bool {
     
         guard let userId = params.currentSignedInUser?.userId else {

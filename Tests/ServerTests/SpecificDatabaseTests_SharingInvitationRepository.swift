@@ -26,7 +26,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
 
     func testAddingSharingInvitation() {
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingPermission: .read)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupId: 0, permission: .read)
         
         guard case .success(let uuid) = result else {
             XCTFail()
@@ -47,13 +47,14 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         }
         
         XCTAssert(invitation.owningUserId == userId)
-        XCTAssert(invitation.sharingPermission == .read)
+        XCTAssert(invitation.permission == .read)
         XCTAssert(invitation.sharingInvitationUUID == uuid)
     }
     
     func testAttemptToRemoveStaleInvitationsThatAreNotStale() {
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingPermission: .write)
+        let sharingGroupId: SharingGroupId = 45
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupId: sharingGroupId, permission: .write)
         
         guard case .success(let uuid) = result else {
             XCTFail()
@@ -90,7 +91,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
             }
             
             XCTAssert(invitation.owningUserId == userId)
-            XCTAssert(invitation.sharingPermission == .write)
+            XCTAssert(invitation.permission == .write)
             XCTAssert(invitation.sharingInvitationUUID == uuid)
             
             exp.fulfill()
@@ -113,7 +114,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
     
     func testRemoveStaleSharingInvitations() {
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingPermission: .read, expiryDuration: 2)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupId: 35, permission: .read, expiryDuration: 2)
         
         guard case .success(let uuid) = result else {
             XCTFail()

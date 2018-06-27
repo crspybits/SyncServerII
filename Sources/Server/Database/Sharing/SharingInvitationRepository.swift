@@ -122,6 +122,7 @@ class SharingInvitationRepository : Repository {
     enum LookupKey : CustomStringConvertible {
         case sharingInvitationUUID(uuid: String)
         case staleExpiryDates
+        case owningUserId(UserId)
         
         var description : String {
             switch self {
@@ -129,6 +130,8 @@ class SharingInvitationRepository : Repository {
                 return "sharingInvitationUUID(\(uuid))"
             case .staleExpiryDates:
                 return "staleExpiryDates"
+            case .owningUserId(let userId):
+                return "owningUserId(\(userId))"
             }
         }
     }
@@ -140,6 +143,8 @@ class SharingInvitationRepository : Repository {
         case .staleExpiryDates:
             let staleDateString = DateExtras.date(Date(), toFormat: dateFormat)
             return "expiry < '\(staleDateString)'"
+        case .owningUserId(let userId):
+            return "owningUserId = \(userId)"
         }
     }
     
