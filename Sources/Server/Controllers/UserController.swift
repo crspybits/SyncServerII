@@ -125,6 +125,7 @@ class UserController : ControllerProtocol {
         
         let response = AddUserResponse()!
         response.userId = userId
+        response.sharingGroupId = sharingGroupId
         
         // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
         guard let cloudStorageCreds = profileCreds as? CloudStorage else {

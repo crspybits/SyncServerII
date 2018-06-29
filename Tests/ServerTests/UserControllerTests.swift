@@ -26,7 +26,9 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-            
+        
+        XCTAssert(addUserResponse.sharingGroupId != nil)
+        
         // Make sure that the database has a cloud folder name-- but only if that account type needs it.
         if TestAccount.needsCloudFolder(testAccount) {
             let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)

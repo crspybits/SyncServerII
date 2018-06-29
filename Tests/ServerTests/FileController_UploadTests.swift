@@ -34,9 +34,13 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     
     func testUploadTextAndJPEGFile() {
         let deviceUUID = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
+        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupId: sharingGroupId)) else {
             XCTFail()
             return
         }
@@ -44,10 +48,17 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     
     func testUploadingSameFileTwiceWorks() {
         let deviceUUID = Foundation.UUID().uuidString
-        let (request, _) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
         // Second upload.
-        _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: request.fileUUID, addUser: false, fileVersion: request.fileVersion, masterVersion: request.masterVersion, appMetaData: request.appMetaData)
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: uploadResult.request.fileVersion, masterVersion: uploadResult.request.masterVersion, appMetaData: uploadResult.request.appMetaData) else {
+            XCTFail()
+            return
+        }
     }
 
     func testUploadTextFileWithStringWithSpacesAppMetaData() {

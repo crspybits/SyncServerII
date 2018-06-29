@@ -288,11 +288,32 @@ class ServerTestCase : XCTestCase {
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     
-    @discardableResult
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil) -> (request: UploadFileRequest, fileSize:Int64) {
+    struct UploadFileResult {
+        let request: UploadFileRequest
+        let fileSize:Int64
+        let sharingGroupId:SharingGroupId?
+    }
     
-        if addUser {
-            self.addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
+    enum AddUser {
+        case no(sharingGroupId: SharingGroupId)
+        case yes
+    }
+    
+    @discardableResult
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil) -> UploadFileResult? {
+    
+        var sharingGroupId:SharingGroupId!
+        
+        switch addUser {
+        case .yes:
+            guard let addUserResponse = self.addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName) else {
+                XCTFail()
+                return nil
+            }
+            
+            sharingGroupId = addUserResponse.sharingGroupId
+        case .no(sharingGroupId: let id):
+            sharingGroupId = id
         }
         
         var fileUUIDToSend = ""
@@ -319,7 +340,8 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.masterVersionKey: masterVersion,
             UploadFileRequest.undeleteServerFileKey: undelete,
-            UploadFileRequest.fileGroupUUIDKey: fileGroupUUID as Any
+            UploadFileRequest.fileGroupUUIDKey: fileGroupUUID as Any,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadRequest.appMetaData = appMetaData
@@ -327,7 +349,8 @@ class ServerTestCase : XCTestCase {
         Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toJSON()))")
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
-        return (request:uploadRequest, fileSize: Int64(uploadString.count))
+        
+        return UploadFileResult(request: uploadRequest, fileSize: Int64(uploadString.count), sharingGroupId: sharingGroupId)
     }
     
     func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
@@ -396,10 +419,19 @@ class ServerTestCase : XCTestCase {
     
     static let jpegMimeType = "image/jpeg"
     func uploadJPEGFile(deviceUUID:String = Foundation.UUID().uuidString,
-        fileUUID:String = Foundation.UUID().uuidString, addUser:Bool=true, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64)? {
+        fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> UploadFileResult? {
     
-        if addUser {
-            self.addNewUser(deviceUUID:deviceUUID)
+        var sharingGroupId: SharingGroupId!
+        
+        switch addUser {
+        case .yes:
+            guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID) else {
+                XCTFail()
+                return nil
+            }
+            sharingGroupId = addUserResponse.sharingGroupId
+        case .no(sharingGroupId: let id):
+            sharingGroupId = id
         }
         
 #if os(macOS)
@@ -418,7 +450,8 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: ServerTestCase.jpegMimeType,
             UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: expectedMasterVersion
+            UploadFileRequest.masterVersionKey: expectedMasterVersion,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
             ]) else {
             XCTFail()
             return nil
@@ -429,16 +462,17 @@ class ServerTestCase : XCTestCase {
         Log.info("Starting runUploadTest: uploadJPEGFile")
         runUploadTest(data:data, uploadRequest:uploadRequest, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadJPEGFile")
-        return (uploadRequest, sizeOfCatFileInBytes)
+        return UploadFileResult(request: uploadRequest, fileSize: sizeOfCatFileInBytes, sharingGroupId: sharingGroupId)
     }
     
-    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, failureExpected:Bool = false) {
+    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, sharingGroupId: SharingGroupId, failureExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
-                DoneUploadsRequest.masterVersionKey : "\(masterVersion)"
+                DoneUploadsRequest.masterVersionKey : "\(masterVersion)",
+                ServerEndpoint.sharingGroupIdKey: sharingGroupId
             ])
             
             self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
@@ -755,11 +789,16 @@ class ServerTestCase : XCTestCase {
         var fileUUID:String!
         
         if uploadFileRequest == nil {
-            let (uploadRequest, size) = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData)
-            fileUUID = uploadRequest.fileUUID
-            actualUploadFileRequest = uploadRequest
-            actualFileSize = size
-            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+            guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData),
+                let sharingGroupId = uploadResult.sharingGroupId else {
+                XCTFail()
+                return nil
+            }
+            
+            fileUUID = uploadResult.request.fileUUID
+            actualUploadFileRequest = uploadResult.request
+            actualFileSize = uploadResult.fileSize
+            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
             afterUploadTime = Date()
         }
         else {

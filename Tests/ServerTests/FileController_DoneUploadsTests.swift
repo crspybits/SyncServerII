@@ -26,28 +26,39 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
     
     func testDoneUploadsWithNoUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 0)
+        guard let addUserResult = self.addNewUser(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 0, sharingGroupId: addUserResult.sharingGroupId)
     }
     
     func testDoneUploadsWithSingleUpload() {
         let deviceUUID = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
     }
     
     func testDoneUploadsWithTwoUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         Log.info("Done uploadTextFile")
         
-        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
+        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupId: sharingGroupId)) else {
             XCTFail()
             return
         }
         
         Log.info("Done uploadJPEGFile")
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         Log.info("Done sendDoneUploads")
     }
     
@@ -55,42 +66,60 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:false, fileVersion:1, masterVersion: 1)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:.no(sharingGroupId: sharingGroupId), fileVersion:1, masterVersion: 1) else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1, sharingGroupId: sharingGroupId)
     }
     
     func testDoneUploadsTwiceDoesNothingSecondTime() {
         let deviceUUID = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 0, masterVersion: 1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 0, masterVersion: 1, sharingGroupId: sharingGroupId)
     }
     
     // If you first upload a file (followed by a DoneUploads), then delete it, and then upload again the last upload fails.
     func testThatUploadAfterUploadDeletionFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        var masterVersion:MasterVersionInt = uploadRequest.masterVersion + MasterVersionInt(1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        var masterVersion:MasterVersionInt = uploadResult1.request.masterVersion + MasterVersionInt(1)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
 
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
         // Try upload again. This should fail.
-        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: masterVersion, errorExpected: true)
+        uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: 1, masterVersion: masterVersion, errorExpected: true)
     }
 }
 

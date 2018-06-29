@@ -26,27 +26,33 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     // A test that causes a conflict with the master version on the server. Presumably this needs to take the form of (a) device1 uploading a file to the server, (b) device2 uploading a file, and finishing that upload (`DoneUploads` endpoint), and (c) device1 uploading a second file using its original master version.
     func testMasterVersionConflict1() {
         let deviceUUID1 = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID1)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
+        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId))
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId)
         
-        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:false, updatedMasterVersionExpected:1)
+        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId), updatedMasterVersionExpected:1)
     }
     
     func testMasterVersionConflict2() {
         let deviceUUID1 = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID1)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:false)
+        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId))
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
         
         // No uploads should have been successfully finished, i.e., expectedNumberOfUploads = nil, and the updatedMasterVersion should have been updated to 1.
-        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1)
+        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1, sharingGroupId: sharingGroupId)
     }
 
     func testFileIndexWithNoFiles() {
@@ -58,36 +64,42 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testFileIndexWithOneFile() {
         let deviceUUID = Foundation.UUID().uuidString
-        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID)
-        
-        // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
-
-        let expectedSizes = [
-            uploadRequest.fileUUID: fileSize,
-        ]
-        
-        self.getFileIndex(expectedFiles: [uploadRequest], masterVersionExpected: 1, expectedFileSizes: expectedSizes)
-    }
-    
-    func testFileIndexWithTwoFiles() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
-        
-        guard let (uploadRequest2, fileSize2) = uploadJPEGFile(deviceUUID:deviceUUID, addUser:false) else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
             XCTFail()
             return
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
 
         let expectedSizes = [
-            uploadRequest1.fileUUID: fileSize1,
-            uploadRequest2.fileUUID: fileSize2
+            uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
         
-        self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2],masterVersionExpected: 1, expectedFileSizes: expectedSizes)
+        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes)
+    }
+    
+    func testFileIndexWithTwoFiles() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadResult2 = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupId: sharingGroupId)) else {
+            XCTFail()
+            return
+        }
+        
+        // Have to do a DoneUploads to transfer the files into the FileIndex
+        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+
+        let expectedSizes = [
+            uploadResult1.request.fileUUID: uploadResult1.fileSize,
+            uploadResult2.request.fileUUID: uploadResult2.fileSize
+        ]
+        
+        self.getFileIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedFileSizes: expectedSizes)
     }
         
     func testDownloadFileTextSucceeds() {

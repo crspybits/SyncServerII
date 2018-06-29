@@ -30,70 +30,82 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
 
     func testThatUploadDeletionTransfersToUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult1.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
 
         let expectedDeletionState = [
-            uploadRequest.fileUUID: true,
+            uploadResult1.request.fileUUID: true,
         ]
         
-        self.getUploads(expectedFiles: [uploadRequest], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
+        self.getUploads(expectedFiles: [uploadResult1.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1))
-        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupId: sharingGroupId)
+
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false)
     }
     
     func testThatCombinedUploadDeletionAndFileUploadWork() {
         let deviceUUID = Foundation.UUID().uuidString
-        let (uploadRequest, fileSize) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult1.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
         
         let expectedDeletionState = [
-            uploadRequest.fileUUID: true,
+            uploadResult1.request.fileUUID: true,
         ]
         
-        self.getUploads(expectedFiles: [uploadRequest], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
+        self.getUploads(expectedFiles: [uploadResult1.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadRequest.masterVersion + MasterVersionInt(1))
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupId: sharingGroupId)
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false)
         
         let expectedSizes = [
-            uploadRequest.fileUUID: fileSize
+            uploadResult1.request.fileUUID: uploadResult1.fileSize
         ]
         
-        self.getFileIndex(expectedFiles: [uploadRequest], masterVersionExpected: uploadRequest.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+        self.getFileIndex(expectedFiles: [uploadResult1.request], masterVersionExpected: uploadResult1.request.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
     
     func testThatUploadDeletionTwiceOfSameFileWorks() {
         let deviceUUID = Foundation.UUID().uuidString
-        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest.masterVersion + MasterVersionInt(1)
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult1.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -101,48 +113,56 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
 
         let expectedDeletionState = [
-            uploadRequest.fileUUID: true,
+            uploadResult1.request.fileUUID: true,
         ]
         
-        self.getUploads(expectedFiles: [uploadRequest], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
+        self.getUploads(expectedFiles: [uploadResult1.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
     }
     
     func testThatUploadDeletionFollowedByDoneUploadsActuallyDeletes() {
         let deviceUUID = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
-        let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult1.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
         
         // This file will not be deleted.
-        let (uploadRequest2, fileSize2) = uploadTextFile(deviceUUID:deviceUUID, addUser:false, masterVersion: uploadRequest1.masterVersion + MasterVersionInt(1))
+        guard let uploadResult2 = uploadTextFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupId: sharingGroupId), masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1)) else {
+            XCTFail()
+            return
+        }
 
         let expectedDeletionState = [
-            uploadRequest1.fileUUID: true,
-            uploadRequest2.fileUUID: false
+            uploadResult1.request.fileUUID: true,
+            uploadResult2.request.fileUUID: false
         ]
         
-        self.getUploads(expectedFiles: [uploadRequest1, uploadRequest2], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
+        self.getUploads(expectedFiles: [uploadResult1.request, uploadResult2.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
 
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: uploadRequest1.masterVersion + MasterVersionInt(1))
+        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupId: sharingGroupId)
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState)
         
         let expectedSizes = [
-            uploadRequest1.fileUUID: fileSize1,
-            uploadRequest2.fileUUID: fileSize2,
+            uploadResult1.request.fileUUID: uploadResult1.fileSize,
+            uploadResult2.request.fileUUID: uploadResult2.fileSize,
         ]
 
-        self.getFileIndex(expectedFiles: [uploadRequest1, uploadRequest2], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+        self.getFileIndex(expectedFiles: [uploadResult1.request, uploadResult2.request], masterVersionExpected: uploadResult1.request.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
     
     // TODO: *0* Test upload deletion with with 2 files
@@ -150,14 +170,19 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func testThatDeletionOfDifferentVersionFails() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion + FileVersionInt(1),
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion + FileVersionInt(1),
+            UploadDeletionRequest.masterVersionKey: uploadResult1.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
@@ -166,14 +191,19 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func testThatDeletionOfUnknownFileUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: Foundation.UUID().uuidString,
-            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
+            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
@@ -184,14 +214,19 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func testThatDeletionFailsWhenMasterVersionDoesNotMatch() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: MasterVersionInt(100)
+            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: MasterVersionInt(100),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, updatedMasterVersionExpected: 1)
@@ -200,27 +235,32 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func testThatDebugDeletionFromServerWorks() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        let (uploadRequest1, _) = uploadTextFile(deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1),
-            UploadDeletionRequest.actualDeletionKey: Int32(1)
+            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
+            UploadDeletionRequest.actualDeletionKey: Int32(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
         
         // Make sure deletion actually occurred!
         
-        self.getFileIndex(expectedFiles: [], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(1), expectedFileSizes: [:], expectedDeletionState:[:])
+        self.getFileIndex(expectedFiles: [], masterVersionExpected: uploadResult.request.masterVersion + MasterVersionInt(1), expectedFileSizes: [:], expectedDeletionState:[:])
         
         self.performServerTest { expectation, creds in
-            let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID, mimeType: uploadRequest1.mimeType)
+            let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID, mimeType: uploadResult.request.mimeType)
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: uploadRequest1.mimeType)
+            let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: uploadResult.request.mimeType)
             
             let cloudStorageCreds = creds as! CloudStorage
             cloudStorageCreds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
@@ -241,14 +281,19 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let deviceUUID1 = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
-        let (uploadRequest1, fileSize1) = uploadTextFile(deviceUUID:deviceUUID1)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest1.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest1.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadRequest1.masterVersion + MasterVersionInt(1)
+            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         let deviceUUID2 = Foundation.UUID().uuidString
@@ -256,16 +301,16 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false)
 
         let expectedDeletionState = [
-            uploadRequest1.fileUUID: true,
+            uploadResult.request.fileUUID: true,
         ]
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadRequest1.masterVersion + MasterVersionInt(1))
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadResult.request.masterVersion + MasterVersionInt(1), sharingGroupId: sharingGroupId)
         
         let expectedSizes = [
-            uploadRequest1.fileUUID: fileSize1,
+            uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
 
-        self.getFileIndex(expectedFiles: [uploadRequest1], masterVersionExpected: uploadRequest1.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
+        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: uploadResult.request.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, expectedDeletionState:expectedDeletionState)
     }
     
     // MARK: Undeletion tests
@@ -274,32 +319,44 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
-        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
-        var masterVersion:MasterVersionInt = uploadRequest.masterVersion + MasterVersionInt(1)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        var masterVersion:MasterVersionInt = uploadResult.request.masterVersion + MasterVersionInt(1)
         let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadRequest.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadRequest.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion
+            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         
         masterVersion += 1
         
         // Upload undeletion
-        _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: masterVersion, undelete: 1)
-        
-        if twice {
-            let (request, fileSize) = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: false, fileVersion: 1, masterVersion: masterVersion, undelete: 1)
-            
-            // Check uploads-- make sure there is only one.
-            getUploads(expectedFiles: [request], deviceUUID:deviceUUID, expectedFileSizes: [uploadRequest.fileUUID: fileSize])
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: 1, masterVersion: masterVersion, undelete: 1) else {
+            XCTFail()
+            return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion)
+        if twice {
+            guard let uploadResult2 = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: 1, masterVersion: masterVersion, undelete: 1) else {
+                XCTFail()
+                return
+            }
+            
+            // Check uploads-- make sure there is only one.
+            getUploads(expectedFiles: [uploadResult2.request], deviceUUID:deviceUUID, expectedFileSizes: [uploadResult.request.fileUUID: uploadResult.fileSize])
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         
         // Get the file index and make sure the file is not marked as deleted.
         guard let fileIndex = getFileIndex(deviceUUID: deviceUUID) else {
@@ -312,7 +369,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        XCTAssert(fileIndex[0].fileUUID == uploadRequest.fileUUID)
+        XCTAssert(fileIndex[0].fileUUID == uploadResult.request.fileUUID)
         XCTAssert(fileIndex[0].deleted == false)
     }
     

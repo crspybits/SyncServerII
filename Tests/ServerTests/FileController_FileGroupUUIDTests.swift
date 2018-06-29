@@ -27,19 +27,22 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileGroupUUID = Foundation.UUID().uuidString
         
-        let (uploadRequest, _) = uploadTextFile(deviceUUID:deviceUUID, fileGroupUUID: fileGroupUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileGroupUUID: fileGroupUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
         guard let fileIndex = getFileIndex(deviceUUID:deviceUUID), fileIndex.count == 1 else {
             XCTFail()
             return
         }
         
-        XCTAssert(uploadRequest.fileGroupUUID != nil)
+        XCTAssert(uploadResult1.request.fileGroupUUID != nil)
         let fileInfo = fileIndex[0]
-        XCTAssert(uploadRequest.fileGroupUUID == fileInfo.fileGroupUUID)
+        XCTAssert(uploadResult1.request.fileGroupUUID == fileInfo.fileGroupUUID)
     }
     
     // Make sure when uploading version 1 of a file, given with nil fileGroupUUID, the fileGroupUUID doesn't reset to nil-- when you gave a fileGroupUUID when uploading v0
@@ -48,12 +51,19 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
         let fileGroupUUID = Foundation.UUID().uuidString
         
         // Upload v0, with fileGroupUUID
-        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID, fileGroupUUID: fileGroupUUID)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileGroupUUID: fileGroupUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
 
         // Upload v1 with nil fileGroupUUID
-        uploadTextFile(deviceUUID:deviceUUID, fileUUID:uploadRequest.fileUUID, addUser:false, fileVersion:1, masterVersion: 1)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1)
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:uploadResult1.request.fileUUID, addUser:.no(sharingGroupId: sharingGroupId), fileVersion:1, masterVersion: 1) else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1, sharingGroupId: sharingGroupId)
 
         guard let fileIndex = getFileIndex(deviceUUID:deviceUUID), fileIndex.count == 1 else {
             XCTFail()
@@ -71,11 +81,15 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
         let fileGroupUUID = Foundation.UUID().uuidString
         
         // Upload v0, *without* fileGroupUUID
-        let (uploadRequest, _) = uploadTextFile(deviceUUID: deviceUUID)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID)
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
 
         // Upload v1 *with* fileGroupUUID
-        uploadTextFile(deviceUUID:deviceUUID, fileUUID:uploadRequest.fileUUID, addUser:false, fileVersion:1, masterVersion: 1, errorExpected: true, fileGroupUUID: fileGroupUUID)
+        uploadTextFile(deviceUUID:deviceUUID, fileUUID:uploadResult1.request.fileUUID, addUser:.no(sharingGroupId: sharingGroupId), fileVersion:1, masterVersion: 1, errorExpected: true, fileGroupUUID: fileGroupUUID)
     }
 }
 
