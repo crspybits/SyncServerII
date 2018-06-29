@@ -190,13 +190,6 @@ class UserController : ControllerProtocol {
             return
         }
         
-        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
-        guard case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey), numberRows == 1 else {
-            Log.error("Could not remove user!")
-            params.completion(nil)
-            return
-        }
-        
         let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
         guard case .removed(_) = params.repos.upload.remove(key: uploadRepoKey) else {
             Log.error("Could not remove upload files for user!")
@@ -232,6 +225,14 @@ class UserController : ControllerProtocol {
             break
         case .error(let error):
             Log.error("Could not remove sharing invitations for user: \(error)")
+            params.completion(nil)
+            return
+        }
+        
+        // This has to be last-- we have to remove all references to the user first-- due to foreign key constraints.
+        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
+        guard case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey), numberRows == 1 else {
+            Log.error("Could not remove user!")
             params.completion(nil)
             return
         }

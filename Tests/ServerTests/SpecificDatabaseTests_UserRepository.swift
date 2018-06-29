@@ -62,7 +62,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         XCTAssert(result1 == nil, "Good id!!")
     }
     
-    func testAddOwningUserFailsIfYouGivePermissions() {
+    func testAddOwningUserWorksIfYouGivePermissions() {
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = .Google
@@ -70,11 +70,13 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         user1.permission = .admin
         
-        let result1 = UserRepository(db).add(user: user1)
-        XCTAssert(result1 == nil, "Good id!!")
+        guard let _ = UserRepository(db).add(user: user1) else {
+            XCTFail()
+            return
+        }
     }
     
-    func addSharingUser(accountType:AccountType = .Google) {
+    func addUser(accountType:AccountType = .Google, sharing: Bool = true) {
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = accountType
@@ -90,22 +92,27 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         
         user1.credsId = "100"
         user1.permission = .write
-        user1.owningUserId = 100
+        
+        if sharing {
+            user1.owningUserId = 200
+        }
 
-        let result1 = UserRepository(db).add(user: user1)
-        XCTAssert(result1 == 1, "Bad credentialsId!")
+        guard let _ = UserRepository(db).add(user: user1) else {
+            XCTFail()
+            return
+        }
     }
     
     func testAddSharingGoogleUser() {
-        addSharingUser()
+        addUser(sharing: false)
     }
     
     func testAddSharingFacebookUser() {
-        addSharingUser(accountType: .Facebook)
+        addUser(accountType: .Facebook)
     }
     
     func testAddSharingDropboxUser() {
-        addSharingUser(accountType: .Dropbox)
+        addUser(accountType: .Dropbox, sharing: false)
     }
     
     func testUserLookup1() {
@@ -187,7 +194,7 @@ extension SpecificDatabaseTests_UserRepository {
         return [
             ("testAddOwningUser", testAddOwningUser),
             ("testAddOwningUserFailsIfYouGiveAnOwningUserId", testAddOwningUserFailsIfYouGiveAnOwningUserId),
-            ("testAddOwningUserFailsIfYouGivePermissions", testAddOwningUserFailsIfYouGivePermissions),
+            ("testAddOwningUserWorksIfYouGivePermissions", testAddOwningUserWorksIfYouGivePermissions),
             
             ("testAddSharingGoogleUser", testAddSharingGoogleUser),
             ("testAddSharingFacebookUser", testAddSharingFacebookUser),
