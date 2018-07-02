@@ -214,6 +214,12 @@ extension FileController {
             return
         }
         
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: doneUploadsRequest.sharingGroupId, params:params), consistentSharingGroups else {
+            Log.error("Inconsistent sharing groups.")
+            params.completion(nil)
+            return
+        }
+        
         let lock = Lock(sharingGroupId:doneUploadsRequest.sharingGroupId, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:

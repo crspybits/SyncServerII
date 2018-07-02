@@ -56,11 +56,15 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
 
     func testThatRedeemingWithTheSameAccountAsTheOwningAccountFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: .read) { expectation, invitationUUID in
+        createSharingInvitation(permission: .read, sharingGroupId: sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -72,11 +76,16 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     
     func testThatRedeemingWithAnExistingOtherOwningAccountFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: .read) { expectation, invitationUUID in
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -91,11 +100,16 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     
     func redeemingWithAnExistingOtherSharingAccountFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
             
         var sharingInvitationUUID:String!
             
-        createSharingInvitation(permission: .read) { expectation, invitationUUID in
+        createSharingInvitation(permission: .read, sharingGroupId: sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -120,7 +134,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
             
-        createSharingInvitation(permission: .write) { expectation, invitationUUID in
+        createSharingInvitation(permission: .write, sharingGroupId: sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }

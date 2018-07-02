@@ -9,13 +9,23 @@ import Foundation
 import LoggerAPI
 
 extension UserController {
-    func createInitialFileForOwningUser(cloudFileName: String, cloudFolderName: String?, dataForFile:Data, cloudStorage: CloudStorage, completion: @escaping (_ success: Bool)->()) {
+    static func createInitialFileForOwningUser(cloudFolderName: String?, cloudStorage: CloudStorage, completion: @escaping (_ success: Bool)->()) {
+    
+        guard let fileName = Constants.session.owningUserAccountCreation.initialFileName,
+                let fileContents = Constants.session.owningUserAccountCreation.initialFileContents,
+                let data = fileContents.data(using: .utf8) else {
+                
+            // Note: This is not an error-- the server just isn't configured to create these files for owning user accounts.
+            Log.info("No file name and/or contents for initial user file.")
+            completion(true)
+            return
+        }
         
-        Log.info("Initial user file being sent to cloud storage: \(cloudFileName)")
+        Log.info("Initial user file being sent to cloud storage: \(fileName)")
     
         let options = CloudStorageFileNameOptions(cloudFolderName: cloudFolderName, mimeType: "text/plain")
     
-        cloudStorage.uploadFile(cloudFileName:cloudFileName, data: dataForFile, options:options) { result in
+        cloudStorage.uploadFile(cloudFileName:fileName, data: data, options:options) { result in
         
             switch result {
             case .success:
@@ -28,7 +38,7 @@ extension UserController {
                 
             case .failure(let error):
                 // It's possible the file was successfully uploaded, but we got an error anyways. Delete it.
-                cloudStorage.deleteFile(cloudFileName: cloudFileName, options: options) { _ in
+                cloudStorage.deleteFile(cloudFileName: fileName, options: options) { _ in
                     // Ignore any error from deletion. We've alread got an error.
                     
                     Log.error("Could not upload initial file: error: \(error)")

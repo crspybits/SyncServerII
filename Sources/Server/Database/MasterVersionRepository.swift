@@ -108,7 +108,7 @@ class MasterVersionRepository : Repository, RepositoryLookup {
     case success
     }
     
-    // Increments master version for specific userId
+    // Increments master version for specific sharingGroupId
     func updateToNext(current:MasterVersion) -> UpdateToNextResult {
     
         let query = "UPDATE \(tableName) SET masterVersion = masterVersion + 1 " +

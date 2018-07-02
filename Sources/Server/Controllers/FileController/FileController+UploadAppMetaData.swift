@@ -84,6 +84,7 @@ extension FileController {
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadAppMetaDataRequest.appMetaData!.contents
             upload.appMetaDataVersion = uploadAppMetaDataRequest.appMetaData!.version
+            upload.sharingGroupId = uploadAppMetaDataRequest.sharingGroupId
             
             var errorString:String?
             

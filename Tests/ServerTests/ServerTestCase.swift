@@ -13,6 +13,7 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import SyncServerShared
+import HeliumLogger
 
 #if os(Linux)
     import Glibc
@@ -56,6 +57,9 @@ class ServerTestCase : XCTestCase {
         _ = Database.setup()
         
         self.db = Database()
+        
+        Log.logger = HeliumLogger()
+        HeliumLogger.use(.debug)
     }
     
     override func tearDown() {
@@ -66,7 +70,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersionExpectedWithDownload:Int64, expectUpdatedMasterUpdate:Bool = false, appMetaDataVersion: AppMetaDataVersionInt? = nil, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
+    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersionExpectedWithDownload:Int64, expectUpdatedMasterUpdate:Bool = false, appMetaDataVersion: AppMetaDataVersionInt? = nil, sharingGroupId: SharingGroupId, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
 
         var result:DownloadAppMetaDataResponse?
         
@@ -76,7 +80,8 @@ class ServerTestCase : XCTestCase {
             let downloadAppMetaDataRequest = DownloadAppMetaDataRequest(json: [
                 DownloadAppMetaDataRequest.fileUUIDKey: fileUUID,
                 DownloadAppMetaDataRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadAppMetaDataRequest.appMetaDataVersionKey: appMetaDataVersion as Any
+                DownloadAppMetaDataRequest.appMetaDataVersionKey: appMetaDataVersion as Any,
+                ServerEndpoint.sharingGroupIdKey: sharingGroupId
             ])
             
             if downloadAppMetaDataRequest == nil {
@@ -310,7 +315,8 @@ class ServerTestCase : XCTestCase {
                 XCTFail()
                 return nil
             }
-            
+
+            XCTAssert(addUserResponse.sharingGroupId != nil)
             sharingGroupId = addUserResponse.sharingGroupId
         case .no(sharingGroupId: let id):
             sharingGroupId = id
@@ -500,14 +506,24 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64, expectedFileSizes: [String: Int64], expectedDeletionState:[String: Bool]? = nil) {
+    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64, expectedFileSizes: [String: Int64], sharingGroupId: SharingGroupId, expectedDeletionState:[String: Bool]? = nil) {
     
         XCTAssert(expectedFiles.count == expectedFileSizes.count)
+        
+        let fileIndexRequest = FileIndexRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+        ])
+    
+        guard let request = fileIndexRequest,
+            let parameters = request.urlParameters() else {
+            XCTFail()
+            return
+        }
         
         self.performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
-            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, urlParameters: "?" + parameters, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
                 XCTAssert(dict != nil)
@@ -549,13 +565,24 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString) -> [FileInfo]? {
+    func getFileIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId) -> [FileInfo]? {
         var result:[FileInfo]?
         
         self.performServerTest(testAccount: testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
-            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
+            let fileIndexRequest = FileIndexRequest(json: [
+                ServerEndpoint.sharingGroupIdKey: sharingGroupId
+            ])
+            
+            guard let request = fileIndexRequest,
+                let parameters = request.urlParameters() else {
+                expectation.fulfill()
+                XCTFail()
+                return
+            }
+            
+            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, urlParameters: "?" + parameters, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
                 XCTAssert(dict != nil)
@@ -574,16 +601,26 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil) {
+    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil, sharingGroupId: SharingGroupId) {
     
         if expectedFileSizes != nil {
             XCTAssert(expectedFiles.count == expectedFileSizes!.count)
         }
         
+        let getUploadsRequest = GetUploadsRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+        ])
+        
+        guard let request = getUploadsRequest,
+            let params = request.urlParameters() else {
+            XCTFail()
+            return
+        }
+        
         self.performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
-            self.performRequest(route: ServerEndpoints.getUploads, headers: headers, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.getUploads, headers: headers, urlParameters: "?" + params, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on getUploadsRequest request")
                 XCTAssert(dict != nil)
@@ -637,18 +674,21 @@ class ServerTestCase : XCTestCase {
         }
     }
 
-    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, deviceUUID:String = Foundation.UUID().uuidString, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             var request:CreateSharingInvitationRequest!
             if permission == nil {
-                request = CreateSharingInvitationRequest(json: [:])
+                request = CreateSharingInvitationRequest(json: [
+                    ServerEndpoint.sharingGroupIdKey: sharingGroupId
+                ])
             }
             else {
                 request = CreateSharingInvitationRequest(json: [
-                    CreateSharingInvitationRequest.permissionKey : permission!
+                    CreateSharingInvitationRequest.permissionKey : permission!,
+                    ServerEndpoint.sharingGroupIdKey: sharingGroupId
                 ])
             }
             
@@ -669,18 +709,23 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, failureExpected: Bool = false, completion:((_ newUserId:UserId?)->())? = nil) {
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, failureExpected: Bool = false, completion:((_ newUserId:UserId?, _ sharingGroupId: SharingGroupId?)->())? = nil) {
         // a) Create sharing invitation with one Google account.
         // b) Next, need to "sign out" of that account, and sign into another Google account
         // c) And, redeem sharing invitation with that new Google account.
 
         // Create the owning user.
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            completion?(nil, nil)
+            return
+        }
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: permission) { expectation, invitationUUID in
+        createSharingInvitation(permission: permission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -690,7 +735,7 @@ class ServerTestCase : XCTestCase {
         }
 
         if failureExpected {
-            completion?(nil)
+            completion?(nil, nil)
         }
         else {
             // Check to make sure we have a new user:
@@ -698,6 +743,7 @@ class ServerTestCase : XCTestCase {
             let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
             guard case .found(let model) = userResults else {
                 XCTFail()
+                completion?(nil, nil)
                 return
             }
             
@@ -706,14 +752,20 @@ class ServerTestCase : XCTestCase {
             
             guard case .noObjectFound = results else {
                 XCTFail()
+                completion?(nil, nil)
                 return
             }
             
-            completion?((model as! User).userId)
+            completion?((model as! User).userId, sharingGroupId)
         }
     }
     
     func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ expectation: XCTestExpectation)->()) {
+    
+        var actualCloudFolderName: String?
+        if sharingUser.type == .Google {
+            actualCloudFolderName = ServerTestCase.cloudFolderName
+        }
 
         self.performServerTest(testAccount:sharingUser) { expectation, accountCreds in
             let headers = self.setupHeaders(testUser: sharingUser, accessToken: accountCreds.accessToken, deviceUUID:deviceUUID)
@@ -722,7 +774,8 @@ class ServerTestCase : XCTestCase {
             
             if sharingInvitationUUID != nil {
                 let request = RedeemSharingInvitationRequest(json: [
-                    RedeemSharingInvitationRequest.sharingInvitationUUIDKey : sharingInvitationUUID!
+                    RedeemSharingInvitationRequest.sharingInvitationUUIDKey : sharingInvitationUUID!,
+                    AddUserRequest.cloudFolderNameKey: actualCloudFolderName as Any
                 ])
                 urlParameters = "?" + request!.urlParameters()!
             }
@@ -744,8 +797,12 @@ class ServerTestCase : XCTestCase {
     }
     
     func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
+
         if addUser {
-            self.addNewUser(deviceUUID:deviceUUID)
+            guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
+                XCTFail()
+                return
+            }
         }
 
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
@@ -787,6 +844,7 @@ class ServerTestCase : XCTestCase {
         let beforeUploadTime = Date()
         var afterUploadTime:Date!
         var fileUUID:String!
+        var actualSharingGroupId: SharingGroupId!
         
         if uploadFileRequest == nil {
             guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData),
@@ -794,6 +852,8 @@ class ServerTestCase : XCTestCase {
                 XCTFail()
                 return nil
             }
+            
+            actualSharingGroupId = sharingGroupId
             
             fileUUID = uploadResult.request.fileUUID
             actualUploadFileRequest = uploadResult.request
@@ -804,6 +864,7 @@ class ServerTestCase : XCTestCase {
         else {
             actualUploadFileRequest = uploadFileRequest
             actualFileSize = fileSize
+            actualSharingGroupId = uploadFileRequest?.sharingGroupId
         }
         
         var result:DownloadFileResponse?
@@ -815,7 +876,8 @@ class ServerTestCase : XCTestCase {
                 DownloadFileRequest.fileUUIDKey: actualUploadFileRequest!.fileUUID,
                 DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
                 DownloadFileRequest.fileVersionKey : downloadFileVersion,
-                DownloadFileRequest.appMetaDataVersionKey: appMetaData?.version as Any
+                DownloadFileRequest.appMetaDataVersionKey: appMetaData?.version as Any,
+                ServerEndpoint.sharingGroupIdKey: actualSharingGroupId
             ])
             
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
@@ -851,14 +913,14 @@ class ServerTestCase : XCTestCase {
         }
         
         if let afterUploadTime = afterUploadTime, let fileUUID = fileUUID {
-            checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime)
+            checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime, sharingGroupId: actualSharingGroupId)
         }
         
         return result
     }
     
-    func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date) {
-        guard let fileInfo = getFileIndex() else {
+    func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date, sharingGroupId:SharingGroupId) {
+        guard let fileInfo = getFileIndex(sharingGroupId:sharingGroupId) else {
             XCTFail()
             return
         }

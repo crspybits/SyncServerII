@@ -268,7 +268,8 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1
+            UploadFileRequest.masterVersionKey: 1,
+            ServerEndpoint.sharingGroupIdKey: 0
         ])!
         
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")

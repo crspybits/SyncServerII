@@ -18,6 +18,7 @@ class SharingGroupUser : NSObject, Model {
     var sharingGroupUserId: SharingGroupUserId!
     
     // Each record in this table relates a sharing group...
+    static let sharingGroupIdKey = "sharingGroupId"
     var sharingGroupId: SharingGroupId!
     
     // ... to a user.
@@ -33,7 +34,11 @@ class SharingGroupUser : NSObject, Model {
             case SharingGroupUser.userIdKey:
                 userId = newValue as! UserId?
                 
+            case SharingGroupUser.sharingGroupIdKey:
+                sharingGroupId = newValue as! SharingGroupId?
+                
             default:
+                Log.error("Did not find key: \(key)")
                 assert(false)
             }
         }

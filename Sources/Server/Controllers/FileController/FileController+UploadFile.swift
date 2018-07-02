@@ -53,6 +53,8 @@ extension FileController {
             return
         }
         
+        Log.debug("uploadRequest.sharingGroupId: \(uploadRequest.sharingGroupId)")
+        
         getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
                 Log.error("Error: \(String(describing: error))")
@@ -165,6 +167,7 @@ extension FileController {
             upload.fileUUID = uploadRequest.fileUUID
             upload.fileVersion = uploadRequest.fileVersion
             upload.mimeType = uploadRequest.mimeType
+            upload.sharingGroupId = uploadRequest.sharingGroupId
             
             if let fileGroupUUID = uploadRequest.fileGroupUUID {
                 guard uploadRequest.fileVersion == 0 else {

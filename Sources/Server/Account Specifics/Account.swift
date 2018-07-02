@@ -30,7 +30,7 @@ protocol Account {
     var accountType:AccountType {get}
     
     // Sharing always need to return false.
-    // Owning accounts that return true iff they need a cloud folder name (e.g., Google Drive).
+    // Owning accounts return true iff they need a cloud folder name (e.g., Google Drive).
     var owningAccountsNeedCloudFolderName: Bool {get}
     
     var delegate:AccountDelegate? {get set}

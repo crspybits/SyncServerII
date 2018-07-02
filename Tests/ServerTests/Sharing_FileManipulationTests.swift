@@ -24,7 +24,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     @discardableResult
-    func uploadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64)? {
+    func uploadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64, SharingGroupId)? {
         let deviceUUID1 = Foundation.UUID().uuidString
         
         guard let addUserResponse = addNewUser(deviceUUID:deviceUUID1),
@@ -36,7 +36,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         var sharingInvitationUUID:String!
         
         // Have that newly created user create a sharing invitation.
-        createSharingInvitation(permission: sharingPermission) { expectation, invitationUUID in
+        createSharingInvitation(permission: sharingPermission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID!
             expectation.fulfill()
         }
@@ -56,7 +56,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId, failureExpected: failureExpected)
         
-        return (uploadResult.request, uploadResult.fileSize)
+        return (uploadResult.request, uploadResult.fileSize, sharingGroupId)
     }
     
     func uploadDeleteFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
@@ -79,7 +79,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         var sharingInvitationUUID:String!
         
         // Have that newly created user create a sharing invitation.
-        createSharingInvitation(permission: sharingPermission) { expectation, invitationUUID in
+        createSharingInvitation(permission: sharingPermission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID!
             expectation.fulfill()
         }
@@ -122,7 +122,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         var sharingInvitationUUID:String!
         
         // Have that newly created user create a sharing invitation.
-        createSharingInvitation(permission: sharingPermission) { expectation, invitationUUID in
+        createSharingInvitation(permission: sharingPermission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID!
             expectation.fulfill()
         }
@@ -165,7 +165,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         var sharingInvitationUUID:String!
         
         // Have that newly created user create a sharing invitation.
-        createSharingInvitation(permission: sharingPermission) { expectation, invitationUUID in
+        createSharingInvitation(permission: sharingPermission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID!
             expectation.fulfill()
         }
@@ -178,32 +178,21 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         // The final step of a download deletion is to check the file index-- and make sure it's marked as deleted for us.
         
         let deviceUUID2 = Foundation.UUID().uuidString
-
-        self.performServerTest(testAccount: sharingUser) { expectation, testCreds in
-            let headers = self.setupHeaders(testUser: sharingUser, accessToken: testCreds.accessToken, deviceUUID:deviceUUID2)
-            
-            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
-                XCTAssert(dict != nil)
-                
-                if let fileIndexResponse = FileIndexResponse(json: dict!) {
-                    XCTAssert(fileIndexResponse.fileIndex!.count == 1)
-                    let fileInfo = fileIndexResponse.fileIndex![0]
-                    XCTAssert(fileInfo.deleted == true)
-                }
-                else {
-                    XCTFail()
-                }
-                
-                expectation.fulfill()
-            }
+        
+        guard let fileIndex = getFileIndex(testAccount: sharingUser, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId), fileIndex.count == 1 else {
+            XCTFail()
+            return
         }
+        
+        XCTAssert(fileIndex[0].deleted == true)
     }
     
     // MARK: Read sharing user
     func testThatReadSharingUserCannotUploadAFile() {
-        uploadFileBySharingUser(withPermission: .read, failureExpected:true)
+        guard let _ = uploadFileBySharingUser(withPermission: .read, failureExpected:true) else {
+            XCTFail()
+            return
+        }
     }
     
     func testThatReadSharingUserCannotUploadDeleteAFile() {
@@ -220,7 +209,10 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     // MARK: Write sharing user
     func testThatWriteSharingUserCanUploadAFile() {
-        uploadFileBySharingUser(withPermission: .write)
+        guard let _ = uploadFileBySharingUser(withPermission: .write) else {
+            XCTFail()
+            return
+        }
     }
     
     func testThatWriteSharingUserCanUploadDeleteAFile() {
@@ -237,7 +229,10 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     // MARK: Admin sharing user
     func testThatAdminSharingUserCanUploadAFile() {
-        uploadFileBySharingUser(withPermission: .admin)
+        guard let _ = uploadFileBySharingUser(withPermission: .admin) else {
+            XCTFail()
+            return
+        }
     }
     
     func testThatAdminSharingUserCanUploadDeleteAFile() {
@@ -254,7 +249,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     // MARK: Across sharing and owning users.
     func owningUserCanDownloadSharingUserFile(sharingUser: TestAccount = .primarySharingAccount) {
-        guard let (uploadRequest, fileSize) = uploadFileBySharingUser(withPermission: .write, sharingUser: sharingUser) else {
+        guard let (uploadRequest, fileSize, _) = uploadFileBySharingUser(withPermission: .write, sharingUser: sharingUser) else {
             XCTFail()
             return
         }
@@ -268,14 +263,14 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     func sharingUserCanDownloadSharingUserFile(sharingUser: TestAccount = .secondarySharingAccount) {
         // uploaded by primarySharingAccount
-        guard let (uploadRequest, fileSize) = uploadFileBySharingUser(withPermission: .write) else {
+        guard let (uploadRequest, fileSize, sharingGroupId) = uploadFileBySharingUser(withPermission: .write) else {
             XCTFail()
             return
         }
             
         var sharingInvitationUUID:String!
             
-        createSharingInvitation(permission: .read) { expectation, invitationUUID in
+        createSharingInvitation(permission: .read, sharingGroupId: sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID!
             expectation.fulfill()
         }
@@ -297,31 +292,18 @@ extension Sharing_FileManipulationTests {
     static var allTests : [(String, (Sharing_FileManipulationTests) -> () throws -> Void)] {
         return [
             ("testThatReadSharingUserCannotUploadAFile", testThatReadSharingUserCannotUploadAFile),
-
             ("testThatReadSharingUserCannotUploadDeleteAFile", testThatReadSharingUserCannotUploadDeleteAFile),
-
             ("testThatReadSharingUserCanDownloadAFile", testThatReadSharingUserCanDownloadAFile),
-            
             ("testThatReadSharingUserCanDownloadDeleteAFile", testThatReadSharingUserCanDownloadDeleteAFile),
-            
             ("testThatWriteSharingUserCanUploadAFile", testThatWriteSharingUserCanUploadAFile),
-            
             ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
-            
             ("testThatWriteSharingUserCanDownloadAFile", testThatWriteSharingUserCanDownloadAFile),
-            
             ("testThatWriteSharingUserCanDownloadDeleteAFile", testThatWriteSharingUserCanDownloadDeleteAFile),
-            
             ("testThatAdminSharingUserCanUploadAFile", testThatAdminSharingUserCanUploadAFile),
-            
             ("testThatAdminSharingUserCanUploadDeleteAFile", testThatAdminSharingUserCanUploadDeleteAFile),
-            
             ("testThatAdminSharingUserCanDownloadAFile", testThatAdminSharingUserCanDownloadAFile),
-            
             ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
-            
             ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
-            
             ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile),
         ]
     }

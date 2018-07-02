@@ -30,7 +30,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            ServerEndpoint.sharingGroupIdKey: 0
         ]) else {
             XCTFail()
             return
@@ -47,12 +48,13 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            ServerEndpoint.sharingGroupIdKey: 0
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupIdKey)=0", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersWithIntegersAsStrings() {
@@ -62,12 +64,13 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: "1",
-            UploadFileRequest.masterVersionKey: "42"
+            UploadFileRequest.masterVersionKey: "42",
+            ServerEndpoint.sharingGroupIdKey: 0
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupIdKey)=0", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersForUploadDeletion() {
@@ -77,7 +80,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadDeletionRequest.fileUUIDKey: uuidString,
             UploadDeletionRequest.fileVersionKey: FileVersionInt(99),
             UploadDeletionRequest.masterVersionKey: MasterVersionInt(23),
-            UploadDeletionRequest.actualDeletionKey: Int32(1)
+            UploadDeletionRequest.actualDeletionKey: Int32(1),
+            ServerEndpoint.sharingGroupIdKey: 0
         ])
         
         let result = uploadDeletionRequest!.urlParameters()
@@ -86,6 +90,7 @@ class MessageTests: ServerTestCase, LinuxTestable {
             "\(UploadDeletionRequest.fileUUIDKey)=\(uuidString)&" +
             "\(UploadDeletionRequest.fileVersionKey)=99&" +
             "\(UploadDeletionRequest.masterVersionKey)=23&" +
+            "\(ServerEndpoint.sharingGroupIdKey)=0&" +
             "\(UploadDeletionRequest.actualDeletionKey)=1"
         
         XCTAssert(result == expectedURLParams, "Result was: \(String(describing: result))")
@@ -96,7 +101,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            ServerEndpoint.sharingGroupIdKey: 0
         ])
         XCTAssert(uploadRequest == nil)
     }
@@ -108,7 +114,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
-            UploadFileRequest.masterVersionKey: MasterVersionInt(42)
+            UploadFileRequest.masterVersionKey: MasterVersionInt(42),
+            ServerEndpoint.sharingGroupIdKey: 0
         ]) else {
             XCTFail()
             return

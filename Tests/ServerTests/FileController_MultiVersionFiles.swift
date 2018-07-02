@@ -49,7 +49,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         }
         
         // New upload device UUID will go into the FileIndex as that of the new uploading device.
-        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID), fileInfoArray.count == 1 else {
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId), fileInfoArray.count == 1 else {
             XCTFail()
             return
         }
@@ -99,7 +99,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         
         var creationDate:Date!
         
-        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1), fileInfoArray.count == 1 else {
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1, sharingGroupId: sharingGroupId), fileInfoArray.count == 1 else {
             XCTFail()
             return
         }
@@ -143,7 +143,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
 
         uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion:0, masterVersion: 1, errorExpected: true)
         
-        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1), fileInfoArray.count == 1 else {
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1, sharingGroupId: sharingGroupId), fileInfoArray.count == 1 else {
             XCTFail()
             return
         }
@@ -225,7 +225,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 1, sharingGroupId: sharingGroupId)
         
         // Make sure the file contents are right.
-        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1), fileInfoArray.count == 1 else {
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID1, sharingGroupId: sharingGroupId), fileInfoArray.count == 1 else {
             XCTFail()
             return
         }
@@ -346,8 +346,8 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupId: uploadRequest.sharingGroupId)
     }
     
-    func checkFileIndex(deviceUUID:String, fileUUID:String, fileVersion:Int32) {
-        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID) else {
+    func checkFileIndex(deviceUUID:String, fileUUID:String, fileVersion:Int32, sharingGroupId: SharingGroupId) {
+        guard let fileInfoArray = getFileIndex(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId) else {
             XCTFail()
             return
         }
@@ -386,9 +386,9 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             return
         }
 
-        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID1, fileVersion:2)
-        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID2, fileVersion:3)
-        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID3, fileVersion:5)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID1, fileVersion:2, sharingGroupId: sharingGroupId)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID2, fileVersion:3, sharingGroupId: sharingGroupId)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID3, fileVersion:5, sharingGroupId: sharingGroupId)
     }
     
     // MARK: Download

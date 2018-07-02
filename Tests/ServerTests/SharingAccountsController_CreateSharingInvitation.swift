@@ -26,8 +26,13 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     
     func testSuccessfulReadSharingInvitationCreationByAnOwningUser() {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
-        self.createSharingInvitation(permission: .read) { expectation, invitationUUID in
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             XCTAssert(invitationUUID != nil)
             guard let _ = UUID(uuidString: invitationUUID!) else {
                 XCTFail()
@@ -41,8 +46,14 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     
     func testSuccessfulWriteSharingInvitationCreationByAnOwningUser() {
         let deviceUUID = Foundation.UUID().uuidString
-        addNewUser(deviceUUID:deviceUUID)
-        createSharingInvitation(permission: .write) { expectation, invitationUUID in
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        createSharingInvitation(permission: .write, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
             XCTAssert(invitationUUID != nil)
             guard let _ = UUID(uuidString: invitationUUID!) else {
                 XCTFail()
@@ -57,21 +68,33 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     func sharingInvitationCreationByAnAdminSharingUser(sharingUser:TestAccount, failureExpected: Bool = false) {
         // .primaryOwningAccount owning user is created as part of this.
         let testAccount:TestAccount = .primaryOwningAccount
-        createSharingUser(withSharingPermission: .admin, sharingUser: sharingUser)
+        var actualSharingGroupId: SharingGroupId!
+        
+        var adminUserId:UserId!
+        
+        createSharingUser(withSharingPermission: .admin, sharingUser: sharingUser) { userId, sharingGroupId in
+            actualSharingGroupId = sharingGroupId
+            adminUserId = userId
+        }
+        
+        guard actualSharingGroupId != nil else {
+            XCTFail()
+            return
+        }
         
         // Lookup the userId for the freshly created owning user.
         
         let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: testAccount.type, credsId: testAccount.id())
         let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
         guard case .found(let model) = userResults,
-            let owningUserId = (model as? User)?.userId else {
+            let testAccountUserId = (model as? User)?.userId else {
             XCTFail()
             return
         }
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(testAccount: sharingUser, permission: .write, errorExpected: false) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: sharingUser, permission: .write, sharingGroupId: actualSharingGroupId, errorExpected: false) { expectation, invitationUUID in
             XCTAssert(invitationUUID != nil)
             guard let _ = UUID(uuidString: invitationUUID!) else {
                 XCTFail()
@@ -84,7 +107,9 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
             
-        // Now, who is the owning user? Let's make sure the owning user is passed along transitively. It should *not* be the id of the admin sharing user, it should be the owning user of the admin user.
+        // Now, who is the owning user?
+        // If the admin sharing user is an owning user, then the owning user of the invitation will be the admin sharing user.
+        // If the admin sharing user is a sharing user, then the owning user will be the owning user (inviter) of the admin user.
             
         let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
         let results = SharingInvitationRepository(db).lookup(key: key, modelInit: SharingInvitation.init)
@@ -94,8 +119,13 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             XCTFail("ERROR: Did not find sharing invitation!")
             return
         }
-            
-        XCTAssert(invitation.owningUserId == owningUserId, "ERROR: invitation.owningUserId: \(invitation.owningUserId) was not equal to \(owningUserId)")
+        
+        switch sharingUser.type.userType {
+        case .owning:
+            XCTAssert(invitation.owningUserId == adminUserId)
+        case .sharing:
+            XCTAssert(invitation.owningUserId == testAccountUserId, "ERROR: invitation.owningUserId: \(invitation.owningUserId) was not equal to \(testAccountUserId)")
+        }
     }
     
     func testSuccessfulSharingInvitationCreationByAnAdminSharingUser() {
@@ -103,11 +133,19 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func failureOfSharingInvitationCreationByAReadSharingUser(sharingUser: TestAccount) {
-        createSharingUser(withSharingPermission: .read, sharingUser: sharingUser)
+        var actualSharingGroupId: SharingGroupId!
+        createSharingUser(withSharingPermission: .read, sharingUser: sharingUser) { userId, sharingGroupId in
+            actualSharingGroupId = sharingGroupId
+        }
+        
+        guard actualSharingGroupId != nil else {
+            XCTFail()
+            return
+        }
             
         // The sharing user just created is that with account sharingUser. The following will fail because we're attempting to create a sharing invitation with a non-admin user. This non-admin (read) user is referenced by the sharingUser token.
             
-        createSharingInvitation(testAccount: sharingUser, permission: .read, errorExpected: true) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: sharingUser, permission: .read, sharingGroupId: actualSharingGroupId, errorExpected: true) { expectation, invitationUUID in
             expectation.fulfill()
         }
     }
@@ -117,9 +155,17 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     }
     
     func failureOfSharingInvitationCreationByAWriteSharingUser(sharingUser: TestAccount) {
-        createSharingUser(withSharingPermission: .write, sharingUser: sharingUser)
+        var actualSharingGroupId: SharingGroupId!
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingUser) { userId, sharingGroupId in
+            actualSharingGroupId = sharingGroupId
+        }
+        
+        guard actualSharingGroupId != nil else {
+            XCTFail()
+            return
+        }
             
-        createSharingInvitation(testAccount: sharingUser, permission: .read, errorExpected: true) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: sharingUser, permission: .read, sharingGroupId:actualSharingGroupId, errorExpected: true) { expectation, invitationUUID in
             expectation.fulfill()
         }
     }
@@ -131,7 +177,9 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     func testSharingInvitationCreationFailsWithNoAuthorization() {
         self.performServerTest { expectation, creds in
             let request = CreateSharingInvitationRequest(json: [
-                CreateSharingInvitationRequest.permissionKey : Permission.read
+                CreateSharingInvitationRequest.permissionKey : Permission.read,
+                // A fake sharing group id. This shouldn't be the issue that fails the request. It should fail because there is no authorization.
+                ServerEndpoint.sharingGroupIdKey: 0
             ])
             
             self.performRequest(route: ServerEndpoints.createSharingInvitation, urlParameters: "?" + request!.urlParameters()!, body:nil) { response, dict in
@@ -148,13 +196,9 @@ extension SharingAccountsController_CreateSharingInvitation {
         return [
             ("testSuccessfulReadSharingInvitationCreationByAnOwningUser", testSuccessfulReadSharingInvitationCreationByAnOwningUser),
             ("testSuccessfulWriteSharingInvitationCreationByAnOwningUser", testSuccessfulWriteSharingInvitationCreationByAnOwningUser),
-    
             ("testSuccessfulSharingInvitationCreationByAnAdminSharingUser", testSuccessfulSharingInvitationCreationByAnAdminSharingUser),
-            
             ("testFailureOfSharingInvitationCreationByAReadSharingUser", testFailureOfSharingInvitationCreationByAReadSharingUser),
-            
             ("testFailureOfSharingInvitationCreationByAWriteSharingUser", testFailureOfSharingInvitationCreationByAWriteSharingUser),
-            
             ("testSharingInvitationCreationFailsWithNoAuthorization", testSharingInvitationCreationFailsWithNoAuthorization)
         ]
     }

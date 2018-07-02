@@ -32,11 +32,17 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         }
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId))
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId)) else {
+            XCTFail()
+            return
+        }
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId)
         
-        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId), updatedMasterVersionExpected:1)
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId), updatedMasterVersionExpected:1) else {
+            XCTFail()
+            return
+        }
     }
     
     func testMasterVersionConflict2() {
@@ -47,7 +53,10 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         }
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId))
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId)) else {
+            XCTFail()
+            return
+        }
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
         
@@ -58,8 +67,13 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     func testFileIndexWithNoFiles() {
         let deviceUUID = Foundation.UUID().uuidString
 
-        self.addNewUser(deviceUUID:deviceUUID)
-        self.getFileIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:])
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.getFileIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
     }
     
     func testFileIndexWithOneFile() {
@@ -76,7 +90,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
         
-        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes)
+        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
     }
     
     func testFileIndexWithTwoFiles() {
@@ -99,7 +113,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             uploadResult2.request.fileUUID: uploadResult2.fileSize
         ]
         
-        self.getFileIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedFileSizes: expectedSizes)
+        self.getFileIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
     }
         
     func testDownloadFileTextSucceeds() {

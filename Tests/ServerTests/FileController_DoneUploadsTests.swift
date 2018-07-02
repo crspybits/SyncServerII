@@ -66,7 +66,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileUUID: fileUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
             XCTFail()
             return
         }

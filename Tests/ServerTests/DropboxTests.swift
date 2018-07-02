@@ -22,7 +22,6 @@ class DropboxTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
         super.setUp()
-        HeliumLogger.use(.debug)
     }
     
     override func tearDown() {

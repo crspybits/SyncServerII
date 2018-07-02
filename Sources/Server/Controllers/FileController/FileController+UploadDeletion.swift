@@ -103,6 +103,7 @@ extension FileController {
             upload.fileVersion = uploadDeletionRequest.fileVersion
             upload.state = .toDeleteFromFileIndex
             upload.userId = params.currentSignedInUser!.userId
+            upload.sharingGroupId = uploadDeletionRequest.sharingGroupId
             
             let uploadAddResult = params.repos.upload.add(upload: upload)
             

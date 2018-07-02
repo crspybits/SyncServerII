@@ -24,7 +24,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     }
     
     @discardableResult
-    func uploadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersion:Int64, appMetaData: AppMetaData, expectedError: Bool = false) -> UploadAppMetaDataResponse? {
+    func uploadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersion:Int64, appMetaData: AppMetaData, sharingGroupId: SharingGroupId, expectedError: Bool = false) -> UploadAppMetaDataResponse? {
 
         var result:UploadAppMetaDataResponse?
         
@@ -35,6 +35,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             uploadAppMetaDataRequest.fileUUID = fileUUID
             uploadAppMetaDataRequest.masterVersion = masterVersion
             uploadAppMetaDataRequest.appMetaData = appMetaData
+            uploadAppMetaDataRequest.sharingGroupId = sharingGroupId
             
             self.performRequest(route: ServerEndpoints.uploadAppMetaData, headers: headers, urlParameters: "?" + uploadAppMetaDataRequest.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -96,7 +97,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId:sharingGroupId)
         masterVersion += 1
         
-        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID), fileInfoObjs1.count == 1 else {
+        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
             XCTFail()
             return
         }
@@ -106,7 +107,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let deviceUUID2 = Foundation.UUID().uuidString
 
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2)
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, sharingGroupId:sharingGroupId)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
@@ -119,7 +120,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             XCTAssert(downloadResponse.appMetaData == appMetaData2.contents)
         }
         else {
-            guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData2.version, expectedError: false) else {
+            guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData2.version, sharingGroupId: sharingGroupId, expectedError: false) else {
                 XCTFail()
                 return
             }
@@ -127,7 +128,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             XCTAssert(downloadAppMetaDataResponse.appMetaData == appMetaData2.contents)
         }
         
-        guard let fileInfoObjs2 = getFileIndex(deviceUUID: deviceUUID), fileInfoObjs2.count == 1 else {
+        guard let fileInfoObjs2 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs2.count == 1 else {
             XCTFail()
             return
         }
@@ -149,7 +150,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
-        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID), fileInfoObjs1.count == 1 else {
+        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
             XCTFail()
             return
         }
@@ -159,20 +160,20 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let deviceUUID2 = Foundation.UUID().uuidString
 
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData, expectedError: expectedError)
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData, sharingGroupId:sharingGroupId, expectedError: expectedError)
         
         if !expectedError {
             sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
             masterVersion += 1
             
-            guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version, expectedError: false) else {
+            guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version, sharingGroupId: sharingGroupId, expectedError: false) else {
                 XCTFail()
                 return
             }
         
             XCTAssert(downloadAppMetaDataResponse.appMetaData == appMetaData.contents)
             
-            guard let fileInfoObjs2 = getFileIndex(deviceUUID: deviceUUID), fileInfoObjs2.count == 1 else {
+            guard let fileInfoObjs2 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs2.count == 1 else {
                 XCTFail()
                 return
             }
@@ -204,7 +205,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         
         let appMetaData2 = AppMetaData(version: 0, contents: "Test2")
 
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, expectedError: true)
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, sharingGroupId: sharingGroupId, expectedError: true)
     }
 
     // Attempt to upload app meta data for a deleted file.
@@ -233,7 +234,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         masterVersion += 1
         
         let appMetaData = AppMetaData(version: 0, contents: "Test2")
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData, expectedError: true)
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData, sharingGroupId:sharingGroupId, expectedError: true)
     }
     
     // UploadAppMetaData for a file that doesn't exist.
@@ -244,8 +245,13 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let badFileUUID = Foundation.UUID().uuidString
         let cloudFolderName = ServerTestCase.cloudFolderName
 
-        addNewUser(deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: badFileUUID, masterVersion:masterVersion, appMetaData: appMetaData, expectedError: true)
+        guard let addUserResponse = addNewUser(deviceUUID:deviceUUID, cloudFolderName: cloudFolderName),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: badFileUUID, masterVersion:masterVersion, appMetaData: appMetaData, sharingGroupId:sharingGroupId, expectedError: true)
     }
     
     // Use download file to try to download an incorrect meta data version.
@@ -267,10 +273,10 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let deviceUUID2 = Foundation.UUID().uuidString
 
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2)
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, sharingGroupId: sharingGroupId)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
-        
+
         let appMetaData3 = AppMetaData(version: appMetaData2.version + 1, contents: appMetaData2.contents)
         downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion), appMetaData:appMetaData3, uploadFileRequest:uploadResult.request, fileSize:uploadResult.fileSize, expectedError: true)
     }

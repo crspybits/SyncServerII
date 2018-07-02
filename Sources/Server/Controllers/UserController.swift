@@ -119,14 +119,14 @@ class UserController : ControllerProtocol {
             return
         }
         
-        // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
-        var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId, userType)
-        
         let response = AddUserResponse()!
         response.userId = userId
         response.sharingGroupId = sharingGroupId
         
+        // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
+        var profileCreds = params.profileCreds!
+        profileCreds.accountCreationUser = .userId(userId, userType)
+
         // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
         guard let cloudStorageCreds = profileCreds as? CloudStorage else {
             Log.error("Could not obtain CloudStorage Creds")
@@ -137,25 +137,15 @@ class UserController : ControllerProtocol {
         Log.info("About to check if we need to generate tokens...")
         
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
-        profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {[unowned self] in
+        profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
         
-            if let fileName = Constants.session.owningUserAccountCreation.initialFileName,
-                let fileContents = Constants.session.owningUserAccountCreation.initialFileContents,
-                let data = fileContents.data(using: .utf8)  {
-                
-                self.createInitialFileForOwningUser(cloudFileName: fileName, cloudFolderName: addUserRequest.cloudFolderName, dataForFile: data, cloudStorage: cloudStorageCreds) { success in
-                    if success {
-                        params.completion(response)
-                    }
-                    else {
-                        params.completion(nil)
-                    }
+            UserController.createInitialFileForOwningUser(cloudFolderName: addUserRequest.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
+                if success {
+                    params.completion(response)
                 }
-            }
-            else {
-                // Note: This is not an error-- the server just isn't configured to create these files for owning user accounts.
-                Log.info("No file name and/or contents for initial user file.")
-                params.completion(response)
+                else {
+                    params.completion(nil)
+                }
             }
         }, failure: {
             params.completion(nil)

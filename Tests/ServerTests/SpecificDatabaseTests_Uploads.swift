@@ -27,7 +27,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupId: SharingGroupId, fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -44,6 +44,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.appMetaDataVersion = appMetaData?.version
         upload.creationDate = Date()
         upload.updateDate = Date()
+        upload.sharingGroupId = sharingGroupId
         
         let result = UploadRepository(db).add(upload: upload)
         
@@ -71,20 +72,31 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
     }
     
     func testAddUpload() {
-        _ = doAddUpload()
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        _ = doAddUpload(sharingGroupId:sharingGroupId)
     }
     
     func testAddUploadWithMissingField() {
-        _ = doAddUpload(missingField: true)
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        _ = doAddUpload(sharingGroupId:sharingGroupId, missingField: true)
     }
     
-    func doAddUploadDeletion(userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
+    func doAddUploadDeletion(sharingGroupId: SharingGroupId, userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         upload.deviceUUID = deviceUUID
         upload.fileUUID = Foundation.UUID().uuidString
         upload.fileVersion = 1
         upload.state = .toDeleteFromFileIndex
-        
+        upload.sharingGroupId = sharingGroupId
+
         if !missingField {
             upload.userId = userId
         }
@@ -117,48 +129,93 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
     }
     
     func testAddUploadDeletion() {
-        _ = doAddUploadDeletion()
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        _ = doAddUploadDeletion(sharingGroupId:sharingGroupId)
     }
     
     func testAddUploadDeletionWithMissingField() {
-        _ = doAddUploadDeletion(missingField:true)
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        _ = doAddUploadDeletion(sharingGroupId:sharingGroupId, missingField:true)
     }
     
     func testAddUploadSucceedsWithNilAppMetaData() {
-        _ = doAddUpload(appMetaData:nil)
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        _ = doAddUpload(sharingGroupId:sharingGroupId, appMetaData:nil)
     }
     
     func testAddUploadSucceedsWithNilFileSizeBytes() {
-        _ = doAddUpload(fileSizeBytes:nil)
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        _ = doAddUpload(sharingGroupId:sharingGroupId, fileSizeBytes:nil)
     }
     
     func testUpdateUpload() {
-        let upload = doAddUpload()
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        let upload = doAddUpload(sharingGroupId:sharingGroupId)
         XCTAssert(UploadRepository(db).update(upload: upload))
     }
     
     func testUpdateUploadFailsWithoutUploadId() {
-        let upload = doAddUpload()
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        let upload = doAddUpload(sharingGroupId:sharingGroupId)
         upload.uploadId = nil
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
     func testUpdateUploadToUploadedFailsWithoutFileSizeBytes() {
-        let upload = doAddUpload()
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        let upload = doAddUpload(sharingGroupId:sharingGroupId)
         upload.fileSizeBytes = nil
         upload.state = .uploadedFile
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
     func testUpdateUploadSucceedsWithNilAppMetaData() {
-        let upload = doAddUpload()
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        let upload = doAddUpload(sharingGroupId:sharingGroupId)
         upload.appMetaData = nil
         upload.appMetaDataVersion = nil
         XCTAssert(UploadRepository(db).update(upload: upload))
     }
     
     func testLookupFromUpload() {
-        let upload1 = doAddUpload()
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
+        let upload1 = doAddUpload(sharingGroupId:sharingGroupId)
         
         let result = UploadRepository(db).lookup(key: .uploadId(1), modelInit: Upload.init)
         switch result {
@@ -212,8 +269,13 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let userId = UserRepository(db).add(user: user1)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
+        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+            XCTFail()
+            return
+        }
+        
         let deviceUUID = Foundation.UUID().uuidString
-        let upload1 = doAddUpload(userId:userId!, deviceUUID:deviceUUID)
+        let upload1 = doAddUpload(sharingGroupId:sharingGroupId, userId:userId!, deviceUUID:deviceUUID)
 
         let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, deviceUUID: deviceUUID)
         switch uploadedFilesResult {

@@ -116,9 +116,24 @@ class SharingAccountsController : ControllerProtocol {
         user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
         user.permission = sharingInvitation.permission
         
-        // When the user is an owning user, they will rely on their own cloud storage to upload new files-- if they have upload permissions.
-        if user.accountType.userType == .sharing {
+        var createInitialOwningUserFile = false
+        
+        switch user.accountType.userType {
+        case .sharing:
             user.owningUserId = sharingInvitation.owningUserId
+        case .owning:
+            // When the user is an owning user, they will rely on their own cloud storage to upload new files-- if they have upload permissions.
+            // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, where b) that owning account type needs a cloud storage folder (e.g., Google Drive), and c) with permissions of >= write.
+            if params.profileCreds!.owningAccountsNeedCloudFolderName && sharingInvitation.permission.hasMinimumPermission(.write) {
+                guard let cloudFolderName = request.cloudFolderName else {
+                    Log.error("No cloud folder name given when redeeming sharing invitation using owning account that needs one!")
+                    params.completion(nil)
+                    return
+                }
+                
+                createInitialOwningUserFile = true
+                user.cloudFolderName = cloudFolderName
+            }
         }
         
         guard let userId = params.repos.user.add(user: user) else {
@@ -132,13 +147,35 @@ class SharingAccountsController : ControllerProtocol {
             params.completion(nil)
             return
         }
-        
+
         let response = RedeemSharingInvitationResponse()!
         
         // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
 
         params.profileCreds!.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
-            params.completion(response)
+            if createInitialOwningUserFile {
+                var profileCreds = params.profileCreds!
+                profileCreds.accountCreationUser = .userId(userId, user.accountType.userType)
+
+                // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
+                guard let cloudStorageCreds = profileCreds as? CloudStorage else {
+                    Log.error("Could not obtain CloudStorage Creds")
+                    params.completion(nil)
+                    return
+                }
+        
+                UserController.createInitialFileForOwningUser(cloudFolderName: user.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
+                    if success {
+                        params.completion(response)
+                    }
+                    else {
+                        params.completion(nil)
+                    }
+                }
+            }
+            else {
+                params.completion(response)
+            }
         }, failure: {
             params.completion(nil)
         })

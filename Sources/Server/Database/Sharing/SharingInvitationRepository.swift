@@ -24,7 +24,7 @@ class SharingInvitation : NSObject, Model {
     static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId!
     
-    static let sharingGroupIdKey = "SharingGroupId"
+    static let sharingGroupIdKey = "sharingGroupId"
     var sharingGroupId:SharingGroupId!
     
     static let permissionKey = "permission"
@@ -49,6 +49,7 @@ class SharingInvitation : NSObject, Model {
                 permission = newValue as! Permission?
                 
             default:
+                Log.error("key not found: \(key)")
                 assert(false)
             }
         }

@@ -35,7 +35,7 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
         // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         
-        guard let fileIndex = getFileIndex(deviceUUID:deviceUUID), fileIndex.count == 1 else {
+        guard let fileIndex = getFileIndex(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId), fileIndex.count == 1 else {
             XCTFail()
             return
         }
@@ -65,7 +65,7 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
         
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1, sharingGroupId: sharingGroupId)
 
-        guard let fileIndex = getFileIndex(deviceUUID:deviceUUID), fileIndex.count == 1 else {
+        guard let fileIndex = getFileIndex(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId), fileIndex.count == 1 else {
             XCTFail()
             return
         }

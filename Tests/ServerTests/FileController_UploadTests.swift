@@ -25,11 +25,17 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadTextFile() {
-        _ = uploadTextFile()
+        guard let _ = uploadTextFile() else {
+            XCTFail()
+            return
+        }
     }
     
     func testUploadJPEGFile() {
-        _ = uploadJPEGFile()
+        guard let _ = uploadJPEGFile() else {
+            XCTFail()
+            return
+        }
     }
     
     func testUploadTextAndJPEGFile() {
@@ -62,17 +68,27 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     }
 
     func testUploadTextFileWithStringWithSpacesAppMetaData() {
-        _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "A Simple String"))
+        guard let _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "A Simple String")) else {
+            XCTFail()
+            return
+        }
     }
     
     func testUploadTextFileWithJSONAppMetaData() {
-        _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"))
+        guard let _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }")) else {
+            XCTFail()
+            return
+        }
     }
     
     func testUploadWithInvalidMimeTypeFails() {
         let testAccount:TestAccount = .primaryOwningAccount
         let deviceUUID = Foundation.UUID().uuidString
-        addNewUser(deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName)
+        guard let addUserResponse = addNewUser(deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
         
         let fileUUIDToSend = Foundation.UUID().uuidString
         
@@ -83,7 +99,8 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.fileUUIDKey : fileUUIDToSend,
             UploadFileRequest.mimeTypeKey: "foobar",
             UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 0
+            UploadFileRequest.masterVersionKey: 0,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), deviceUUID:deviceUUID, errorExpected: true)

@@ -95,6 +95,7 @@ class FileController : ControllerProtocol {
         return creds
     }
     
+    // Make sure all uploaded files for the current signed in user belong to the given sharing group.
     func checkSharingGroupConsistency(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> Bool? {
         let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
         switch fileUploadsResult {
@@ -160,8 +161,20 @@ class FileController : ControllerProtocol {
     }
     
     func getUploads(params:RequestProcessingParameters) {
-        guard params.request is GetUploadsRequest else {
+        guard let getUploadsRequest = params.request as? GetUploadsRequest else {
             Log.error("Did not receive GetUploadsRequest")
+            params.completion(nil)
+            return
+        }
+        
+        guard sharingGroupSecurityCheck(sharingGroupId: getUploadsRequest.sharingGroupId, params: params) else {
+            Log.error("Failed in sharing group security check.")
+            params.completion(nil)
+            return
+        }
+        
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: getUploadsRequest.sharingGroupId, params:params), consistentSharingGroups else {
+            Log.error("Inconsistent sharing groups.")
             params.completion(nil)
             return
         }

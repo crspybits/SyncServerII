@@ -201,8 +201,6 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         
         Log.info("Starting setUp")
         
-        Log.logger = HeliumLogger()
-        
         c15String = DateExtras.date(c15Value, toFormat: .DATE)
         c16String = DateExtras.date(c16Value, toFormat: .DATETIME)
         c17String = DateExtras.date(c17Value, toFormat: .TIMESTAMP)

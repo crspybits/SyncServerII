@@ -36,7 +36,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
     
         let badFileUUID = Foundation.UUID().uuidString
-        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: badFileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, expectedError: true)
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: badFileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, sharingGroupId: sharingGroupId, expectedError: true)
     }
     
     func testDownloadAppMetaDataForReallyBadUUIDFails() {
@@ -52,7 +52,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
     
         let badFileUUID = "Blig"
-        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: badFileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, expectedError: true)
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: badFileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, sharingGroupId: sharingGroupId, expectedError: true)
     }
     
     func testDownloadAppMetaDataVersionNotOnServerFails() {
@@ -68,7 +68,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
 
         let badAppMetaDataVersion = appMetaData.version + 1
-        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: badAppMetaDataVersion, expectedError: true)
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: badAppMetaDataVersion, sharingGroupId: sharingGroupId, expectedError: true)
     }
 
     func testDownloadNilAppMetaDataVersionAs0Fails() {
@@ -83,7 +83,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
-        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: 0, expectedError: true)
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: 0, sharingGroupId: sharingGroupId, expectedError: true)
     }
     
     func testDownloadAppMetaDataForFileThatIsNotOwnedFails() {
@@ -91,7 +91,8 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
 
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData),
+            let sharingGroupId = uploadResult1.sharingGroupId else {
             XCTFail()
             return
         }
@@ -102,13 +103,14 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let deviceUUID2 = Foundation.UUID().uuidString
 
         let nonOwningAccount:TestAccount = .secondaryOwningAccount
-        guard let _ = addNewUser(testAccount: nonOwningAccount, deviceUUID:deviceUUID2) else {
+        guard let addUserResponse = addNewUser(testAccount: nonOwningAccount, deviceUUID:deviceUUID2),
+            let sharingGroupId2 = addUserResponse.sharingGroupId else {
             XCTFail()
             return
         }
         
         // Using masterVersion 0 here because that's what the nonOwningAccount will have at this point.
-        downloadAppMetaDataVersion(testAccount: nonOwningAccount, deviceUUID:deviceUUID2, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:0, appMetaDataVersion: 0, expectedError: true)
+        downloadAppMetaDataVersion(testAccount: nonOwningAccount, deviceUUID:deviceUUID2, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:0, appMetaDataVersion: 0, sharingGroupId: sharingGroupId2, expectedError: true)
     }
     
     func testDownloadValidAppMetaDataVersion0() {
@@ -123,7 +125,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
 
-        guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0) else {
+        guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, sharingGroupId: sharingGroupId) else {
             XCTFail()
             return
         }
@@ -144,7 +146,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
-        guard let downloadAppMetaDataResponse1 = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version) else {
+        guard let downloadAppMetaDataResponse1 = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version, sharingGroupId: sharingGroupId) else {
             XCTFail()
             return
         }
@@ -157,7 +159,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
-        guard let downloadAppMetaDataResponse2 = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version) else {
+        guard let downloadAppMetaDataResponse2 = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version, sharingGroupId: sharingGroupId) else {
             XCTFail()
             return
         }
@@ -187,7 +189,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
-        guard let downloadAppMetaDataResponse1 = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version) else {
+        guard let downloadAppMetaDataResponse1 = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:masterVersion, appMetaDataVersion: appMetaData.version, sharingGroupId: sharingGroupId) else {
             XCTFail()
             return
         }
