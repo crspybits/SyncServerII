@@ -241,8 +241,7 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "SECONDARY_OWNING_GOOGLE2",
-        "PRIMARY_SHARING_GOOGLE2",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_GOOGLE2"
       ]
     },
     {
@@ -250,8 +249,7 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "SECONDARY_OWNING_GOOGLE2",
-        "PRIMARY_SHARING_FACEBOOK1",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_FACEBOOK1"
       ]
     },
     {
@@ -259,8 +257,7 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "SECONDARY_OWNING_DROPBOX2",
-        "PRIMARY_SHARING_GOOGLE2",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_GOOGLE2"
       ]
     },
     {
@@ -268,8 +265,7 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "SECONDARY_OWNING_DROPBOX2",
-        "PRIMARY_SHARING_FACEBOOK1",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_FACEBOOK1"
       ]
     },
     {
@@ -277,8 +273,7 @@
       "parameters": [
         "PRIMARY_OWNING_DROPBOX1",
         "SECONDARY_OWNING_GOOGLE2",
-        "PRIMARY_SHARING_GOOGLE2",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_GOOGLE2"
       ]
     },
     {
@@ -286,8 +281,7 @@
       "parameters": [
         "PRIMARY_OWNING_DROPBOX1",
         "SECONDARY_OWNING_GOOGLE2",
-        "PRIMARY_SHARING_FACEBOOK1",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_FACEBOOK1"
       ]
     },
     {
@@ -295,8 +289,7 @@
       "parameters": [
         "PRIMARY_OWNING_DROPBOX1",
         "SECONDARY_OWNING_DROPBOX2",
-        "PRIMARY_SHARING_GOOGLE2",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_GOOGLE2"
       ]
     },
     {
@@ -304,8 +297,7 @@
       "parameters": [
         "PRIMARY_OWNING_DROPBOX1",
         "SECONDARY_OWNING_DROPBOX2",
-        "PRIMARY_SHARING_FACEBOOK1",
-        "PRIMARY_NON_SHARING_DROPBOX1"
+        "PRIMARY_SHARING_FACEBOOK1"
       ]
     }
   ],

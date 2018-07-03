@@ -36,10 +36,6 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         createSharingUser(sharingUser: .primarySharingAccount)
     }
     
-    func testThatRedeemingWithANonSharingAccountFails() {
-        createSharingUser(sharingUser: .primaryNonSharingAccount, failureExpected: true)
-    }
-    
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
@@ -176,9 +172,12 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         checkingCredsOnASharingUserGivesSharingPermission(sharingUser: .primarySharingAccount)
     }
     
-    func testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission() {
+    func testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission() {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
+        guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
         
         performServerTest(testAccount: .primaryOwningAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -188,9 +187,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
                 XCTAssert(response!.statusCode == .OK, "checkCreds failed")
                 
                 let response = CheckCredsResponse(json: dict!)
-                
-                // This is what we're looking for: Make sure that the check creds response gives nil sharing permission-- expected for an owning user.
-                XCTAssert(response!.permission == nil)
+
+                XCTAssert(response!.permission == .admin)
                 
                 expectation.fulfill()
             }
@@ -202,7 +200,6 @@ extension SharingAccountsController_RedeemSharingInvitation {
     static var allTests : [(String, (SharingAccountsController_RedeemSharingInvitation) -> () throws -> Void)] {
         return [
             ("testThatRedeemingWithASharingAccountWorks", testThatRedeemingWithASharingAccountWorks),
-            ("testThatRedeemingWithANonSharingAccountFails", testThatRedeemingWithANonSharingAccountFails),
             ("testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails),
             
             ("testThatRedeemingWithTheSameAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameAccountAsTheOwningAccountFails),
@@ -212,7 +209,7 @@ extension SharingAccountsController_RedeemSharingInvitation {
             
             ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
             
-            ("testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission", testThatCheckingCredsOnAnOwningUserGivesNilSharingPermission)
+            ("testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission", testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission)
         ]
     }
     
