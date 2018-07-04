@@ -991,6 +991,21 @@ class ServerTestCase : XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
         return cloudFileName
     }
+    
+    func addSharingGroup() -> SharingGroupId? {
+        let result = SharingGroupRepository(db).add()
+        
+        var sharingGroupId:SharingGroupId?
+        switch result {
+        case .success(sharingGroupId: let id):
+            sharingGroupId = id
+        
+        default:
+            XCTFail()
+        }
+        
+        return sharingGroupId
+    }
 }
 
 extension ServerTestCase : ConstantsDelegate {

@@ -75,6 +75,7 @@ extension RepositoryLookup {
         }
     }
     
+    // The lookup should find: a) exactly one object, or b) no objects.
     func lookup<MODEL: Model>(key: LOOKUPKEY, modelInit:@escaping () -> MODEL) -> RepositoryLookupResult {
         let query = "select * from \(tableName) where " + lookupConstraint(key: key)
         let select = Select(db:db, query: query, modelInit: modelInit, ignoreErrors:false)
