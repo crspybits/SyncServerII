@@ -23,24 +23,16 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-
-    // TODO: *1* With Facebook.
-    /*
-    func testSuccessfulRedeemingSharingInvitation() {
-        // a) Create sharing invitation
-        // b) Next, need to "sign out" of that account, and sign into Facebook account. Can we sign into a Facebook account purely from the server? With Google, I'm doing this using the Google refresh token. Is there something with Facebook equivalent to a refresh token?
-            Not exactly, but close: Look at Long Lived Token's -- last about 60 days.
-    }*/
     
     func testThatRedeemingWithASharingAccountWorks() {
         createSharingUser(sharingUser: .primarySharingAccount)
     }
-    
+        
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
 
-        redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -65,7 +57,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -89,7 +81,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         let deviceUUID2 = Foundation.UUID().uuidString
         addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { expectation in
+        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -110,7 +102,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
             
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
             
@@ -136,7 +128,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
             
         // Since the user account represented by sharingUser has already been used to create a sharing account, this redeem attempt will fail.
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
             expectation.fulfill()
         }
     }

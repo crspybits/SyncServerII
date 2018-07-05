@@ -240,7 +240,7 @@
         "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
           "branch": "dev",
-          "revision": "328300438f6fd331db3d2315759ffd64c2bff050",
+          "revision": "fbc167e42a2ee8a102e2359557eb594f8d762827",
           "version": null
         }
       },

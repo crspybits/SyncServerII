@@ -36,6 +36,12 @@
     },
     {
       "name": "SpecificDatabaseTests_UserRepository"
+    },
+    {
+      "name": "SpecificDatabaseTests_SharingGroups"
+    },
+    {
+      "name": "SpecificDatabaseTests_SharingGroupUsers"
     }
   ],
   "google": [

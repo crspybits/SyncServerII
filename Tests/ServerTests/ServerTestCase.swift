@@ -188,8 +188,11 @@ class ServerTestCase : XCTestCase {
     case errorOrNoAccessToken
     }
     
-    func lookupFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) {
+    @discardableResult
+    func lookupFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) -> Bool? {
     
+        var lookupResult: Bool?
+        
         let expectation = self.expectation(description: "expectation")
     
         switch testAccount.type {
@@ -205,8 +208,8 @@ class ServerTestCase : XCTestCase {
             
                 creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
                     switch result {
-                    case .success:
-                        break
+                    case .success (let found):
+                        lookupResult = found
                     case .failure:
                         XCTFail()
                     }
@@ -222,8 +225,8 @@ class ServerTestCase : XCTestCase {
             
             creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
                 switch result {
-                case .success:
-                    break
+                case .success (let found):
+                    lookupResult = found
                 case .failure:
                     XCTFail()
                 }
@@ -236,6 +239,8 @@ class ServerTestCase : XCTestCase {
         }
         
         waitForExpectations(timeout: 10.0, handler: nil)
+        
+        return lookupResult
     }
     
     @discardableResult
@@ -730,7 +735,8 @@ class ServerTestCase : XCTestCase {
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { expectation in
+        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
+            XCTAssert(result?.userId != nil && result?.sharingGroupId != nil)
             expectation.fulfill()
         }
 
@@ -760,7 +766,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ expectation: XCTestExpectation)->()) {
+    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
     
         var actualCloudFolderName: String?
         if sharingUser.type == .Google {
@@ -783,15 +789,24 @@ class ServerTestCase : XCTestCase {
             self.performRequest(route: ServerEndpoints.redeemSharingInvitation, headers: headers, urlParameters: urlParameters, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
 
+                var result: RedeemSharingInvitationResponse?
+                
                 if errorExpected {
                     XCTAssert(response!.statusCode != .OK, "Worked on request!")
                 }
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on request")
-                    XCTAssert(dict != nil)
+                    
+                    if let dict = dict,
+                        let redeemSharingInvitationResponse = RedeemSharingInvitationResponse(json: dict) {
+                        result = redeemSharingInvitationResponse
+                    }
+                    else {
+                        XCTFail()
+                    }
                 }
                 
-                completion(expectation)
+                completion(result, expectation)
             }
         }
     }

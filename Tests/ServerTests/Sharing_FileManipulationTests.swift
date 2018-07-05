@@ -23,8 +23,17 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
     
+    struct SharingUploadResult {
+        let request: UploadFileRequest
+        let fileSize:Int64
+        let sharingGroupId: SharingGroupId
+        let sharingTestAccount:TestAccount
+        let uploadedDeviceUUID: String
+        let redeemResponse: RedeemSharingInvitationResponse
+    }
+    
     @discardableResult
-    func uploadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> (request: UploadFileRequest, fileSize:Int64, SharingGroupId)? {
+    func uploadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) -> SharingUploadResult? {
         let deviceUUID1 = Foundation.UUID().uuidString
         
         guard let addUserResponse = addNewUser(deviceUUID:deviceUUID1),
@@ -41,9 +50,17 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
+        var redeemResponse: RedeemSharingInvitationResponse!
+        
         // Redeem that sharing invitation with a new user
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { result, expectation in
+            redeemResponse = result
             expectation.fulfill()
+        }
+        
+        guard redeemResponse != nil else {
+            XCTFail()
+            return nil
         }
         
         let deviceUUID2 = Foundation.UUID().uuidString
@@ -56,7 +73,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId, failureExpected: failureExpected)
         
-        return (uploadResult.request, uploadResult.fileSize, sharingGroupId)
+        return SharingUploadResult(request: uploadResult.request, fileSize: uploadResult.fileSize, sharingGroupId: sharingGroupId, sharingTestAccount: sharingUser, uploadedDeviceUUID:deviceUUID2, redeemResponse: redeemResponse)
     }
     
     func uploadDeleteFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
@@ -85,7 +102,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         
         // Redeem that sharing invitation with a new user
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
         
@@ -127,7 +144,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
         
@@ -171,7 +188,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         
         // Redeem that sharing invitation with a new user
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
     
@@ -207,12 +224,36 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         downloadDeleteFileBySharingUser(withPermission: .read)
     }
     
+    // Check to make sure that if the invited user owns cloud storage that the file was uploaded to their cloud storage.
+    func makeSureSharingOwnerOwnsUploadedFile(result: SharingUploadResult) {
+        if result.sharingTestAccount.type.userType == .owning {
+            let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: result.request.mimeType)
+        
+            let fileName = result.request.cloudFileName(deviceUUID:result.uploadedDeviceUUID, mimeType:result.request.mimeType)
+            
+            guard let found = lookupFile(testAccount: result.sharingTestAccount, cloudFileName: fileName, options: options), found else {
+                XCTFail()
+                return
+            }
+            
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: result.sharingGroupId, fileUUID: result.request.fileUUID)
+            guard case .found(let obj) = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init), let fileIndexObj = obj as? FileIndex else {
+                XCTFail()
+                return
+            }
+
+            XCTAssert(fileIndexObj.userId == result.redeemResponse.userId)
+        }
+    }
+    
     // MARK: Write sharing user
     func testThatWriteSharingUserCanUploadAFile() {
-        guard let _ = uploadFileBySharingUser(withPermission: .write) else {
+        guard let result = uploadFileBySharingUser(withPermission: .write) else {
             XCTFail()
             return
         }
+        
+        makeSureSharingOwnerOwnsUploadedFile(result: result)
     }
     
     func testThatWriteSharingUserCanUploadDeleteAFile() {
@@ -229,10 +270,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     // MARK: Admin sharing user
     func testThatAdminSharingUserCanUploadAFile() {
-        guard let _ = uploadFileBySharingUser(withPermission: .admin) else {
+        guard let result = uploadFileBySharingUser(withPermission: .admin) else {
             XCTFail()
             return
         }
+        
+        makeSureSharingOwnerOwnsUploadedFile(result: result)
     }
     
     func testThatAdminSharingUserCanUploadDeleteAFile() {
@@ -249,12 +292,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     // MARK: Across sharing and owning users.
     func owningUserCanDownloadSharingUserFile(sharingUser: TestAccount = .primarySharingAccount) {
-        guard let (uploadRequest, fileSize, _) = uploadFileBySharingUser(withPermission: .write, sharingUser: sharingUser) else {
+        guard let result = uploadFileBySharingUser(withPermission: .write, sharingUser: sharingUser) else {
             XCTFail()
             return
         }
         
-        downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
+        downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize, expectedError:false)
     }
     
     func testThatOwningUserCanDownloadSharingUserFile() {
@@ -263,24 +306,24 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     func sharingUserCanDownloadSharingUserFile(sharingUser: TestAccount = .secondarySharingAccount) {
         // uploaded by primarySharingAccount
-        guard let (uploadRequest, fileSize, sharingGroupId) = uploadFileBySharingUser(withPermission: .write) else {
+        guard let result = uploadFileBySharingUser(withPermission: .write) else {
             XCTFail()
             return
         }
             
         var sharingInvitationUUID:String!
             
-        createSharingInvitation(permission: .read, sharingGroupId: sharingGroupId) { expectation, invitationUUID in
+        createSharingInvitation(permission: .read, sharingGroupId: result.sharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID!
             expectation.fulfill()
         }
             
         // Redeem that sharing invitation with a new user
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
             
-        downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadRequest, fileSize: fileSize, expectedError:false)
+        downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize, expectedError:false)
     }
     
     func testThatSharingUserCanDownloadSharingUserFile() {
