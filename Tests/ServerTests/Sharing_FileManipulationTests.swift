@@ -297,6 +297,40 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         uploadDeleteFileBySharingUser(withPermission: .write)
     }
     
+    // Upload deletions must go to the account of the original (v0) owning user. To test this: a) upload v0 of a file, b) have a different user upload v1 of the file. Now upload delete. Make sure the deletion works.
+    func testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks() {
+        // Upload v0 of file.
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        // Upload v1 of file by another user
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        var masterVersion: MasterVersionInt = 1
+        
+        guard let _ = uploadFileBySharingUser(withPermission: .write, addUser: false, sharingGroupId: sharingGroupId, fileUUID: uploadResult.request.fileUUID, fileVersion: 1, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        masterVersion += 1
+        
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: 1,
+            UploadDeletionRequest.masterVersionKey: masterVersion,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+        ])!
+        
+        // Original v0 uploader deletes file.
+        uploadDeletion(testAccount: .primaryOwningAccount, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
+        sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+    }
+    
     func testThatWriteSharingUserCanDownloadAFile() {
         downloadFileBySharingUser(withPermission: .write)
     }
@@ -366,6 +400,37 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     func testThatSharingUserCanDownloadSharingUserFile() {
         sharingUserCanDownloadSharingUserFile()
     }
+    
+    // After accepting a sharing invitation as a Google or Dropbox user, make sure auth tokens are stored, for that redeeming user, so that we can access cloud storage of that user.
+    func testCanAccessCloudStorageOfRedeemingUser() {
+        var userId: UserId!
+        createSharingUser(sharingUser: .primarySharingAccount) { newUserId, sharingGroupId in
+            userId = newUserId
+        }
+        
+        // Reconstruct the creds of the sharing user and attempt to access their cloud storage.
+        guard userId != nil, let cloudStorageCreds = FileController.getCreds(forUserId: userId, from: db) as? CloudStorage else {
+            XCTFail()
+            return
+        }
+        
+        let exp = expectation(description: "test1")
+        
+        // It doesn't matter if the file here is found or not found; what matters is that the operation doesn't fail.
+        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
+        cloudStorageCreds.lookupFile(cloudFileName: "foobar", options: options) { result in
+            switch result {
+            case .success(let result):
+                Log.debug("cloudStorageCreds.lookupFile: success: found: \(result)")
+                break
+            case .failure(let error):
+                XCTFail("\(error)")
+            }
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
 }
 
 extension Sharing_FileManipulationTests {
@@ -377,6 +442,7 @@ extension Sharing_FileManipulationTests {
             ("testThatReadSharingUserCanDownloadDeleteAFile", testThatReadSharingUserCanDownloadDeleteAFile),
             ("testThatWriteSharingUserCanUploadAFile", testThatWriteSharingUserCanUploadAFile),
             ("testThatV0FileOwnerRemainsFileOwner", testThatV0FileOwnerRemainsFileOwner),
+            ("testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks", testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks),
             ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
             ("testThatWriteSharingUserCanDownloadAFile", testThatWriteSharingUserCanDownloadAFile),
             ("testThatWriteSharingUserCanDownloadDeleteAFile", testThatWriteSharingUserCanDownloadDeleteAFile),
@@ -386,6 +452,7 @@ extension Sharing_FileManipulationTests {
             ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
             ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
             ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile),
+            ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser)
         ]
     }
     

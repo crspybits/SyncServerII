@@ -78,7 +78,7 @@ class FileController : ControllerProtocol {
     }
     
     // OWNER
-    func getCreds(forUserId userId: UserId, from db: Database) -> Account? {
+    static func getCreds(forUserId userId: UserId, from db: Database) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
         let userResults = UserRepository(db).lookup(key: userKey, modelInit: User.init)
         guard case .found(let model) = userResults,

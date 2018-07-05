@@ -299,7 +299,7 @@ extension FileController {
         Log.info("Deleting file: \(cloudFileName)")
         
         // OWNER
-        guard let owningUserCreds = getCreds(forUserId: cloudDeletion.owningUserId, from: params.db) else {
+        guard let owningUserCreds = FileController.getCreds(forUserId: cloudDeletion.owningUserId, from: params.db) else {
             Log.error("Could not obtain owning users creds")
             params.completion(nil)
             return

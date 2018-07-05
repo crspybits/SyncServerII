@@ -405,6 +405,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
         var error = false
         var numberTransferred:Int32 = 0
         
+        // [1] Fetch the uploaded files for the user and this device.
         let uploadSelect = uploadRepo.select(forUserId: uploadUserId, deviceUUID: uploadingDeviceUUID)
         uploadSelect.forEachRow { rowModel in
             if error {
@@ -423,6 +424,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             
             // If this an uploadDeletion or updating app meta data, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
             if !uploadDeletion && upload.state != .uploadingAppMetaData {
+                // Using `uploadingDeviceUUID` here, but equivalently use upload.deviceUUID-- they are the same. See [1] above.
+                assert(uploadingDeviceUUID == upload.deviceUUID)
                 fileIndex.deviceUUID = uploadingDeviceUUID
             }
             

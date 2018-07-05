@@ -103,7 +103,7 @@ extension FileController {
 
             // OWNER
             // The cloud storage for the file is the original owning user's storage.
-            guard let owningUserCreds = getCreds(forUserId: fileIndexObj!.userId, from: params.db) else {
+            guard let owningUserCreds = FileController.getCreds(forUserId: fileIndexObj!.userId, from: params.db) else {
                 Log.error("Could not obtain owning users creds")
                 params.completion(nil)
                 return
