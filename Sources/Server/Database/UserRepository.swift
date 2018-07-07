@@ -277,13 +277,13 @@ class UserRepository : Repository, RepositoryLookup {
         
         if db.connection.query(statement: query) {
             let numberUpdates = db.connection.numberAffectedRows()
-            if numberUpdates == 1 {
-                return true
-            }
-            else {
-                Log.error("Expected 1 update, but had \(numberUpdates)")
+            // 7/6/18; I'm allowing 0 updates because in some cases, e.g., Dropbox, there will be no change in the row.
+            guard numberUpdates <= 1 else {
+                Log.error("Expected <= 1 updated, but had \(numberUpdates)")
                 return false
             }
+
+            return true
         }
         else {
             let error = db.error

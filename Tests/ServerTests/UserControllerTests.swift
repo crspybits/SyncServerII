@@ -88,11 +88,12 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testCheckCredsWhenUserDoesExist() {
+        let testingAccount:TestAccount = .primaryOwningAccount
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
-            
-        performServerTest { expectation, creds in
-            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+        self.addNewUser(testAccount: testingAccount, deviceUUID:deviceUUID)
+
+        performServerTest(testAccount: testingAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testingAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

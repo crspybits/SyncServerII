@@ -53,14 +53,28 @@ class DropboxCreds : AccountAPICall, Account {
     // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
     func needToGenerateTokens(userType:UserType, dbCreds:Account?) -> Bool {
         assert(userType == .owning)
-        return false
+        
+        // 7/6/18; Previously, for Dropbox, I was returning false. But I want to deal with the case where a user a) deauthorizes the client app from using Dropbox, and then b) authorizes it again. This will make the access token we have in the database invalid. This will refresh it.
+        return true
     }
     
     private static let apiAccessTokenKey = "access_token"
     private static let apiTokenTypeKey = "token_type"
     
     func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->()) {
-        completion(nil)
+        // Not generating tokens, just saving.
+        guard let delegate = delegate else {
+            Log.warning("No Dropbox Creds delegate!")
+            completion(nil)
+            return
+        }
+
+        if delegate.saveToDatabase(account: self) {
+            completion(nil)
+            return
+        }
+        
+        completion(GenerateTokensError.errorSavingCredsToDatabase)
     }
     
     func merge(withNewer newerAccount:Account) {

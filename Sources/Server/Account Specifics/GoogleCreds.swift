@@ -145,21 +145,18 @@ class GoogleCreds : AccountAPICall, Account {
     static let googleAPIRefreshTokenKey = "refresh_token"
     
     func needToGenerateTokens(userType:UserType, dbCreds:Account? = nil) -> Bool {
-        var result:Bool
-        if userType == .sharing {
-            result = false
-        }
-        else {
-            result = serverAuthCode != nil
+        // 7/6/18; Google Drive accounts are always owning.
+        assert(userType == .owning)
+
+        var result = serverAuthCode != nil
             
-            // If no dbCreds, then we generate tokens.
-            if let dbCreds = dbCreds {
-                if let dbGoogleCreds = dbCreds as? GoogleCreds {
-                    result = result && serverAuthCode != dbGoogleCreds.serverAuthCode
-                }
-                else {
-                    Log.error("Did not get GoogleCreds as dbCreds!")
-                }
+        // If no dbCreds, then we generate tokens.
+        if let dbCreds = dbCreds {
+            if let dbGoogleCreds = dbCreds as? GoogleCreds {
+                result = result && serverAuthCode != dbGoogleCreds.serverAuthCode
+            }
+            else {
+                Log.error("Did not get GoogleCreds as dbCreds!")
             }
         }
         

@@ -103,7 +103,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         }
     }
     
-    func testAddSharingGoogleUser() {
+    func testAddGoogleUser() {
         addUser(sharing: false)
     }
     
@@ -111,7 +111,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         addUser(accountType: .Facebook)
     }
     
-    func testAddSharingDropboxUser() {
+    func testAddDropboxUser() {
         addUser(accountType: .Dropbox, sharing: false)
     }
     
@@ -196,9 +196,9 @@ extension SpecificDatabaseTests_UserRepository {
             ("testAddOwningUserFailsIfYouGiveAnOwningUserId", testAddOwningUserFailsIfYouGiveAnOwningUserId),
             ("testAddOwningUserWorksIfYouGivePermissions", testAddOwningUserWorksIfYouGivePermissions),
             
-            ("testAddSharingGoogleUser", testAddSharingGoogleUser),
+            ("testAddGoogleUser", testAddGoogleUser),
             ("testAddSharingFacebookUser", testAddSharingFacebookUser),
-            ("testAddSharingDropboxUser", testAddSharingDropboxUser),
+            ("testAddDropboxUser", testAddDropboxUser),
             
             ("testUserLookup1", testUserLookup1),
             ("testUserLookup1b", testUserLookup1b),
