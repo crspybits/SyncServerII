@@ -331,6 +331,36 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
     }
     
+    // Make sure file actually gets deleted in cloud storage for non-root owning users.
+    func testUploadDeletionForNonRootOwningUserWorks() {
+        guard let result = uploadFileBySharingUser(withPermission: .write) else {
+            XCTFail()
+            return
+        }
+        
+        let masterVersion: MasterVersionInt = 1
+        
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: result.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: 0,
+            UploadDeletionRequest.masterVersionKey: masterVersion,
+            ServerEndpoint.sharingGroupIdKey: result.sharingGroupId
+        ])!
+        
+        // Original v0 uploader deletes file.
+        uploadDeletion(testAccount: result.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: result.uploadedDeviceUUID, addUser: false)
+        sendDoneUploads(testAccount: result.sharingTestAccount, expectedNumberOfUploads: 1, deviceUUID:result.uploadedDeviceUUID, masterVersion: masterVersion, sharingGroupId: result.sharingGroupId)
+
+        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: result.request.mimeType)
+
+        let fileName = result.request.cloudFileName(deviceUUID:result.uploadedDeviceUUID, mimeType: result.request.mimeType)
+        Log.debug("Looking for file: \(fileName)")
+        guard let found = lookupFile(testAccount: result.sharingTestAccount, cloudFileName: fileName, options: options), !found else {
+            XCTFail()
+            return
+        }
+    }
+
     func testThatWriteSharingUserCanDownloadAFile() {
         downloadFileBySharingUser(withPermission: .write)
     }
@@ -443,6 +473,7 @@ extension Sharing_FileManipulationTests {
             ("testThatWriteSharingUserCanUploadAFile", testThatWriteSharingUserCanUploadAFile),
             ("testThatV0FileOwnerRemainsFileOwner", testThatV0FileOwnerRemainsFileOwner),
             ("testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks", testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks),
+            ("testUploadDeletionForNonRootOwningUserWorks", testUploadDeletionForNonRootOwningUserWorks),
             ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
             ("testThatWriteSharingUserCanDownloadAFile", testThatWriteSharingUserCanDownloadAFile),
             ("testThatWriteSharingUserCanDownloadDeleteAFile", testThatWriteSharingUserCanDownloadDeleteAFile),
