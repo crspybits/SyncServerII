@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/KituraContracts.git",
         "state": {
           "branch": null,
-          "revision": "fca1d07d9e81cfd3d70822a6b2544bc5c9f366fd",
-          "version": "1.0.1"
+          "revision": "83e5cb37871dce2b1e4ca61821c20b2c654c0c1c",
+          "version": "1.0.2"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/TypeDecoder.git",
         "state": {
           "branch": null,
-          "revision": "3a321fc0ccbd49a9e240b0c0df3b290f393960d2",
-          "version": "1.0.0"
+          "revision": "aaf636e64089baf6a710ff5e7dd5f4c8798ff940",
+          "version": "1.1.0"
         }
       }
     ]

@@ -196,6 +196,42 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         
         XCTAssert(downloadAppMetaDataResponse1.appMetaData == appMetaData.contents)
     }
+    
+    func testDownloadAppMetaDataWithFakeSharingGroupIdFails() {
+        let masterVersion: MasterVersionInt = 0
+        let deviceUUID = Foundation.UUID().uuidString
+        let appMetaData = AppMetaData(version: 0, contents: "Test1")
+
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+
+        let invalidSharingGroupId: SharingGroupId = 100
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, sharingGroupId: invalidSharingGroupId, expectedError: true)
+    }
+    
+    func testDownloadAppMetaDataWithBadSharingGroupIdFails() {
+        let masterVersion: MasterVersionInt = 0
+        let deviceUUID = Foundation.UUID().uuidString
+        let appMetaData = AppMetaData(version: 0, contents: "Test1")
+
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+
+        guard let workingButBadSharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+        
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, sharingGroupId: workingButBadSharingGroupId, expectedError: true)
+    }
 }
 
 extension FileController_DownloadAppMetaDataTests {
@@ -209,6 +245,8 @@ extension FileController_DownloadAppMetaDataTests {
             ("testDownloadValidAppMetaDataVersion0", testDownloadValidAppMetaDataVersion0),
             ("testDownloadValidAppMetaDataVersion1", testDownloadValidAppMetaDataVersion1),
             ("testUploadingNilAppMetaDataDoesNotOverwriteCurrent", testUploadingNilAppMetaDataDoesNotOverwriteCurrent),
+            ("testDownloadAppMetaDataWithBadSharingGroupIdFails", testDownloadAppMetaDataWithBadSharingGroupIdFails),
+            ("testDownloadAppMetaDataWithFakeSharingGroupIdFails", testDownloadAppMetaDataWithFakeSharingGroupIdFails)
         ]
     }
     

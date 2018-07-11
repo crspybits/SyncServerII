@@ -381,6 +381,51 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func textThatUploadUndeleteUploadTwiceWorks() {
         uploadUndelete(twice: true)
     }
+
+    func testThatUploadDeletionWithFakeSharingGroupIdFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        let invalidSharingGroupId: SharingGroupId = 100
+
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult1.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: invalidSharingGroupId
+        ])!
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
+    }
+    
+    func testThatUploadDeletionWithBadSharingGroupIdFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        guard let workingButBadSharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: uploadResult1.request.masterVersion + MasterVersionInt(1),
+            ServerEndpoint.sharingGroupIdKey: workingButBadSharingGroupId
+        ])!
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
+    }
 }
 
 extension FileControllerTests_UploadDeletion {
@@ -396,7 +441,11 @@ extension FileControllerTests_UploadDeletion {
             ("testThatDebugDeletionFromServerWorks", testThatDebugDeletionFromServerWorks),
             ("testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes", testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes),
             ("testUploadUndeleteWorks", testUploadUndeleteWorks),
-            ("textThatUploadUndeleteUploadTwiceWorks", textThatUploadUndeleteUploadTwiceWorks)
+            ("textThatUploadUndeleteUploadTwiceWorks", textThatUploadUndeleteUploadTwiceWorks),
+            ("testThatUploadDeletionWithBadSharingGroupIdFails",
+                testThatUploadDeletionWithBadSharingGroupIdFails),
+            ("testThatUploadDeletionWithFakeSharingGroupIdFails",
+                testThatUploadDeletionWithFakeSharingGroupIdFails)
         ]
     }
     

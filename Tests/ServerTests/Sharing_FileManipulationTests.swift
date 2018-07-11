@@ -297,6 +297,49 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         uploadDeleteFileBySharingUser(withPermission: .write)
     }
     
+    // Upload deletion, including DoneUploads, with files with v0 owners that are different.
+    func testUploadDeletionWithDifferentV0OwnersWorks() {
+        // Upload v0 of file by .primaryOwningAccount user
+        var masterVersion: MasterVersionInt = 0
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let upload1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = upload1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+        
+        masterVersion += 1
+        
+        guard let upload2 = uploadFileBySharingUser(withPermission: .write, addUser: false, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+
+        masterVersion += 1
+        
+        let uploadDeletionRequest1 = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: upload1.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: upload1.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+        ])!
+
+        uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest1, deviceUUID: deviceUUID, addUser: false)
+
+        let uploadDeletionRequest2 = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: upload2.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: upload2.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+        ])!
+
+        uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest2, deviceUUID: deviceUUID, addUser: false)
+
+        sendDoneUploads(testAccount: upload2.sharingTestAccount, expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+    }
+    
     // Upload deletions must go to the account of the original (v0) owning user. To test this: a) upload v0 of a file, b) have a different user upload v1 of the file. Now upload delete. Make sure the deletion works.
     func testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks() {
         // Upload v0 of file.
@@ -472,6 +515,8 @@ extension Sharing_FileManipulationTests {
             ("testThatReadSharingUserCanDownloadDeleteAFile", testThatReadSharingUserCanDownloadDeleteAFile),
             ("testThatWriteSharingUserCanUploadAFile", testThatWriteSharingUserCanUploadAFile),
             ("testThatV0FileOwnerRemainsFileOwner", testThatV0FileOwnerRemainsFileOwner),
+            ("testUploadDeletionWithDifferentV0OwnersWorks",
+                testUploadDeletionWithDifferentV0OwnersWorks),
             ("testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks", testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks),
             ("testUploadDeletionForNonRootOwningUserWorks", testUploadDeletionForNonRootOwningUserWorks),
             ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),

@@ -121,6 +121,32 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         // Try upload again. This should fail.
         uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: 1, masterVersion: masterVersion, errorExpected: true)
     }
+    
+    func testDoneUploadsWithFakeSharingGroupIdFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let invalidSharingGroupId: SharingGroupId = 100
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: invalidSharingGroupId, failureExpected: true)
+    }
+
+    func testDoneUploadsWithBadSharingGroupIdFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        guard let workingButBadSharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: workingButBadSharingGroupId, failureExpected: true)
+    }
 }
 
 extension FileController_DoneUploadsTests {
@@ -131,7 +157,9 @@ extension FileController_DoneUploadsTests {
             ("testDoneUploadsWithTwoUploads", testDoneUploadsWithTwoUploads),
             ("testDoneUploadsThatUpdatesFileVersion", testDoneUploadsThatUpdatesFileVersion),
             ("testDoneUploadsTwiceDoesNothingSecondTime", testDoneUploadsTwiceDoesNothingSecondTime),
-            ("testThatUploadAfterUploadDeletionFails", testThatUploadAfterUploadDeletionFails)
+            ("testThatUploadAfterUploadDeletionFails", testThatUploadAfterUploadDeletionFails),
+            ("testDoneUploadsWithBadSharingGroupIdFails", testDoneUploadsWithBadSharingGroupIdFails),
+            ("testDoneUploadsWithFakeSharingGroupIdFails", testDoneUploadsWithFakeSharingGroupIdFails)
         ]
     }
     

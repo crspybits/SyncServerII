@@ -294,6 +294,63 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
     func testUploadAppMetaDataOfInitiallyNilAppMetaDataToVersion0Works() {
         uploadAppMetaDataOfInitiallyNilAppMetaDataWorks(toAppMetaDataVersion: 0)
     }
+    
+    func testUploadAppMetaDataWithFakeSharingGroupIdFails() {
+        var masterVersion: MasterVersionInt = 0
+        let deviceUUID = Foundation.UUID().uuidString
+        let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
+        
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId:sharingGroupId)
+        masterVersion += 1
+        
+        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        let appMetaData2 = AppMetaData(version: 1, contents: "Test2")
+        let deviceUUID2 = Foundation.UUID().uuidString
+
+        let invalidSharingGroupId: SharingGroupId = 100
+
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, sharingGroupId:invalidSharingGroupId, expectedError: true)
+    }
+    
+    func testUploadAppMetaDataWithInvalidSharingGroupIdFails() {
+        var masterVersion: MasterVersionInt = 0
+        let deviceUUID = Foundation.UUID().uuidString
+        let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
+        
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1),
+            let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId:sharingGroupId)
+        masterVersion += 1
+        
+        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        let appMetaData2 = AppMetaData(version: 1, contents: "Test2")
+        let deviceUUID2 = Foundation.UUID().uuidString
+
+        guard let workingButBadSharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, sharingGroupId:workingButBadSharingGroupId, expectedError: true)
+    }
 }
 
 extension FileController_UploadAppMetaDataTests {
@@ -306,7 +363,9 @@ extension FileController_UploadAppMetaDataTests {
             ("testFileDownloadOfBadMetaDataVersionFails", testFileDownloadOfBadMetaDataVersionFails),
             ("testSuccessUsingFileDownloadToCheck", testSuccessUsingFileDownloadToCheck),
             ("testSuccessUsingDownloadAppMetaDataToCheck", testSuccessUsingDownloadAppMetaDataToCheck),
-            ("testUploadAppMetaDataOfInitiallyNilAppMetaDataToVersion0Works", testUploadAppMetaDataOfInitiallyNilAppMetaDataToVersion0Works)
+            ("testUploadAppMetaDataOfInitiallyNilAppMetaDataToVersion0Works", testUploadAppMetaDataOfInitiallyNilAppMetaDataToVersion0Works),
+            ("testUploadAppMetaDataWithInvalidSharingGroupIdFails", testUploadAppMetaDataWithInvalidSharingGroupIdFails),
+            ("testUploadAppMetaDataWithFakeSharingGroupIdFails", testUploadAppMetaDataWithFakeSharingGroupIdFails)
         ]
     }
     

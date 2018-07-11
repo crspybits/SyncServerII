@@ -10,6 +10,7 @@ import XCTest
 @testable import Server
 import LoggerAPI
 import Foundation
+import SyncServerShared
 
 class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
 
@@ -113,6 +114,35 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
     }
+    
+    func testFakeSharingGroupWithGetUploadsFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        let invalidSharingGroupId: SharingGroupId = 100
+
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupId: invalidSharingGroupId, errorExpected: true)
+    }
+    
+    func testBadSharingGroupWithGetUploadsFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let workingButBadSharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupId: workingButBadSharingGroupId, errorExpected: true)
+    }
 }
 
 extension FileControllerTests_GetUploads {
@@ -123,7 +153,9 @@ extension FileControllerTests_GetUploads {
             ("testForOneUploadButDoneTwice", testForOneUploadButDoneTwice),
             ("testForOneUploadButFromWrongDeviceUUID", testForOneUploadButFromWrongDeviceUUID),
             ("testForTwoUploads", testForTwoUploads),
-            ("testForNoUploadsAfterDoneUploads", testForNoUploadsAfterDoneUploads)
+            ("testForNoUploadsAfterDoneUploads", testForNoUploadsAfterDoneUploads),
+            ("testBadSharingGroupWithGetUploadsFails", testBadSharingGroupWithGetUploadsFails),
+            ("testFakeSharingGroupWithGetUploadsFails", testFakeSharingGroupWithGetUploadsFails)
         ]
     }
     

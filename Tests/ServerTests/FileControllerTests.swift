@@ -133,6 +133,47 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
     }
     
+    func testFileIndexWithFakeSharingGroupIdFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        // Have to do a DoneUploads to transfer the files into the FileIndex
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+
+        let expectedSizes = [
+            uploadResult.request.fileUUID: uploadResult.fileSize,
+        ]
+        
+        let invalidSharingGroupId: SharingGroupId = 100
+        
+        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: invalidSharingGroupId, errorExpected: true)
+    }
+    
+    func testFileIndexWithBadSharingGroupIdFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        // Have to do a DoneUploads to transfer the files into the FileIndex
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+
+        let expectedSizes = [
+            uploadResult.request.fileUUID: uploadResult.fileSize,
+        ]
+        
+        guard let workingButBadSharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+        
+        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: workingButBadSharingGroupId, errorExpected: true)
+    }
+    
     // TODO: *0*: Make sure we're not trying to download a file that has already been deleted.
     
     // TODO: *1* Make sure its an error for a different user to download our file even if they have the fileUUID and fileVersion.
@@ -152,6 +193,8 @@ extension FileControllerTests {
             ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
+            ("testFileIndexWithFakeSharingGroupIdFails", testFileIndexWithFakeSharingGroupIdFails),
+            ("testFileIndexWithBadSharingGroupIdFails", testFileIndexWithBadSharingGroupIdFails)
         ]
     }
     

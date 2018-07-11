@@ -516,7 +516,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64, expectedFileSizes: [String: Int64], sharingGroupId: SharingGroupId, expectedDeletionState:[String: Bool]? = nil) {
+    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64, expectedFileSizes: [String: Int64], sharingGroupId: SharingGroupId, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
     
         XCTAssert(expectedFiles.count == expectedFileSizes.count)
         
@@ -535,39 +535,45 @@ class ServerTestCase : XCTestCase {
             
             self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, urlParameters: "?" + parameters, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
-                XCTAssert(dict != nil)
-                
-                if let fileIndexResponse = FileIndexResponse(json: dict!) {
-                    XCTAssert(fileIndexResponse.masterVersion == masterVersionExpected)
-                    XCTAssert(fileIndexResponse.fileIndex!.count == expectedFiles.count)
-                    
-                    _ = fileIndexResponse.fileIndex!.map { fileInfo in
-                        Log.info("fileInfo: \(fileInfo)")
-                        
-                        let filterResult = expectedFiles.filter { uploadFileRequest in
-                            uploadFileRequest.fileUUID == fileInfo.fileUUID
-                        }
-                        
-                        XCTAssert(filterResult.count == 1)
-                        let expectedFile = filterResult[0]
-                        
-                        XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
-                        XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
-                        XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
-                        
-                        if expectedDeletionState == nil {
-                            XCTAssert(fileInfo.deleted == false)
-                        }
-                        else {
-                            XCTAssert(fileInfo.deleted == expectedDeletionState![fileInfo.fileUUID])
-                        }
-                        
-                        XCTAssert(expectedFileSizes[fileInfo.fileUUID] == fileInfo.fileSizeBytes)
-                    }
+
+                if errorExpected {
+                    XCTAssert(response!.statusCode != .OK)
                 }
                 else {
-                    XCTFail()
+                    XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
+                    XCTAssert(dict != nil)
+
+                    if let fileIndexResponse = FileIndexResponse(json: dict!) {
+                        XCTAssert(fileIndexResponse.masterVersion == masterVersionExpected)
+                        XCTAssert(fileIndexResponse.fileIndex!.count == expectedFiles.count)
+                        
+                        _ = fileIndexResponse.fileIndex!.map { fileInfo in
+                            Log.info("fileInfo: \(fileInfo)")
+                            
+                            let filterResult = expectedFiles.filter { uploadFileRequest in
+                                uploadFileRequest.fileUUID == fileInfo.fileUUID
+                            }
+                            
+                            XCTAssert(filterResult.count == 1)
+                            let expectedFile = filterResult[0]
+                            
+                            XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
+                            XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
+                            XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
+                            
+                            if expectedDeletionState == nil {
+                                XCTAssert(fileInfo.deleted == false)
+                            }
+                            else {
+                                XCTAssert(fileInfo.deleted == expectedDeletionState![fileInfo.fileUUID])
+                            }
+                            
+                            XCTAssert(expectedFileSizes[fileInfo.fileUUID] == fileInfo.fileSizeBytes)
+                        }
+                    }
+                    else {
+                        XCTFail()
+                    }
                 }
                 
                 expectation.fulfill()
@@ -611,7 +617,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil, sharingGroupId: SharingGroupId) {
+    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil, sharingGroupId: SharingGroupId, errorExpected: Bool = false) {
     
         if expectedFileSizes != nil {
             XCTAssert(expectedFiles.count == expectedFileSizes!.count)
@@ -631,9 +637,15 @@ class ServerTestCase : XCTestCase {
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.getUploads, headers: headers, urlParameters: "?" + params, body:nil) { response, dict in
+            
                 Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on getUploadsRequest request")
-                XCTAssert(dict != nil)
+                if errorExpected {
+                    XCTAssert(response!.statusCode != .OK)
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on getUploadsRequest request")
+                    XCTAssert(dict != nil)
+                }
                 
                 if let getUploadsResponse = GetUploadsResponse(json: dict!) {
                     if getUploadsResponse.uploads == nil {

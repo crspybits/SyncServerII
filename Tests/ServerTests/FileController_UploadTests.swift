@@ -25,9 +25,26 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadTextFile() {
-        guard let _ = uploadTextFile() else {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let result = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupId = result.sharingGroupId else {
             XCTFail()
             return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, sharingGroupId: sharingGroupId)
+        
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
+        switch fileIndexResult {
+        case .fileIndex(let fileIndex):
+            guard fileIndex.count == 1 else {
+                XCTFail("fileIndex.count: \(fileIndex.count)")
+                return
+            }
+            
+            XCTAssert(fileIndex[0].fileUUID == result.request.fileUUID)
+        case .error(_):
+            XCTFail()
         }
     }
     
@@ -105,6 +122,30 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), deviceUUID:deviceUUID, errorExpected: true)
     }
+    
+    func testUploadWithInvalidSharingGroupIdFails() {
+        guard let _ = uploadTextFile() else {
+            XCTFail()
+            return
+        }
+        
+        let invalidSharingGroupId: SharingGroupId = 100
+        uploadTextFile(addUser: .no(sharingGroupId: invalidSharingGroupId), errorExpected: true)
+    }
+
+    func testUploadWithBadSharingGroupIdFails() {
+        guard let _ = uploadTextFile() else {
+            XCTFail()
+            return
+        }
+        
+        guard let workingButBadSharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+        
+        uploadTextFile(addUser: .no(sharingGroupId: workingButBadSharingGroupId), errorExpected: true)
+    }
 }
 
 extension FileController_UploadTests {
@@ -116,7 +157,9 @@ extension FileController_UploadTests {
             ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
             ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
             ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
-            ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails)
+            ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails),
+            ("testUploadWithInvalidSharingGroupIdFails", testUploadWithInvalidSharingGroupIdFails),
+            ("testUploadWithBadSharingGroupIdFails", testUploadWithBadSharingGroupIdFails)
         ]
     }
     
