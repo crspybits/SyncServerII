@@ -186,6 +186,23 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             }
         }
     }
+    
+    func testThatDeletingSharingUserWorks() {
+        createSharingUser(sharingUser: .primarySharingAccount)
+        
+        let deviceUUID = Foundation.UUID().uuidString
+
+        // remove
+        performServerTest(testAccount: .primarySharingAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primarySharingAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "removeUser failed")
+                expectation.fulfill()
+            }
+        }
+    }
 }
 
 extension SharingAccountsController_RedeemSharingInvitation {
@@ -201,7 +218,9 @@ extension SharingAccountsController_RedeemSharingInvitation {
             
             ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
             
-            ("testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission", testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission)
+            ("testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission", testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission),
+            
+            ("testThatDeletingSharingUserWorks", testThatDeletingSharingUserWorks)
         ]
     }
     

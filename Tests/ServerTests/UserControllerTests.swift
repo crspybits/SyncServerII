@@ -171,6 +171,48 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         // Confirm that user doesn't exist any more
         testCheckCredsWhenUserDoesNotExist()
     }
+    
+    func testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        // Upload a file.
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupId: sharingGroupId)) else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+
+        performServerTest { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "removeUser failed")
+                expectation.fulfill()
+            }
+        }
+        
+        // Make sure file marked as deleted.
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
+        switch fileIndexResult {
+        case .fileIndex(let fileIndex):
+            guard fileIndex.count == 1 else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(fileIndex[0].deleted == true)
+            XCTAssert(fileIndex[0].fileUUID == uploadResult.request.fileUUID)
+        case .error(_):
+            XCTFail()
+        }
+    }
 }
 
 extension UserControllerTests {
@@ -183,7 +225,8 @@ extension UserControllerTests {
             ("testCheckCredsWhenUserDoesNotExist", testCheckCredsWhenUserDoesNotExist),
             ("testCheckCredsWithBadAccessToken", testCheckCredsWithBadAccessToken),
             ("testRemoveUserFailsWithNonExistingUser", testRemoveUserFailsWithNonExistingUser),
-            ("testRemoveUserSucceedsWithExistingUser", testRemoveUserSucceedsWithExistingUser)
+            ("testRemoveUserSucceedsWithExistingUser", testRemoveUserSucceedsWithExistingUser),
+            ("testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved", testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved)
         ]
     }
     

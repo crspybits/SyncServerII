@@ -504,6 +504,77 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         waitForExpectations(timeout: 10, handler: nil)
     }
+    
+    // Add a regular user. Invite a sharing user. Delete that regular user. See what happens if the sharing user tries to upload a file.
+    func testUploadByOwningSharingUserAfterInvitingUserDeletedWorks() {
+        var actualSharingGroupId:SharingGroupId!
+        
+        // Using an owning account here as sharing user because we always want the upload to work after deleting the inviting user.
+        let sharingAccount: TestAccount = .secondaryOwningAccount
+        
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount) { userId, sharingGroupId in
+            actualSharingGroupId = sharingGroupId
+        }
+        
+        guard actualSharingGroupId != nil else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+
+        // remove the regular/inviting user
+        performServerTest(testAccount: .primaryOwningAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "removeUser failed")
+                expectation.fulfill()
+            }
+        }
+        
+        // Attempting to upload a file by our sharing user-- this should work because the sharing user owns cloud storage.
+        guard let _ = uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId)) else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails() {
+        var actualSharingGroupId:SharingGroupId!
+        
+        let sharingAccount: TestAccount = .nonOwningSharingAccount
+        
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount) { userId, sharingGroupId in
+            actualSharingGroupId = sharingGroupId
+        }
+        
+        guard actualSharingGroupId != nil else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+
+        // remove the regular/inviting user
+        performServerTest(testAccount: .primaryOwningAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "removeUser failed")
+                expectation.fulfill()
+            }
+        }
+        
+        // Attempting to upload a file by our sharing user-- this should fail because the sharing user does not own cloud storage.
+        uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId), errorExpected: true)
+    }
+    
+    // Should change upload endpoint to return a specific HTTP code if the failure is because the effective owning user cannot be found. Change the above test to that end also.
+    
+    // Also need a test case: Similar to that above, but the non-owning, sharing user downloads a file-- that was owned by a third user, that is still on the system, and was in the same sharing group.
 }
 
 extension Sharing_FileManipulationTests {
@@ -528,7 +599,11 @@ extension Sharing_FileManipulationTests {
             ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
             ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
             ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile),
-            ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser)
+            ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser),
+            ("testUploadByOwningSharingUserAfterInvitingUserDeletedWorks",
+                testUploadByOwningSharingUserAfterInvitingUserDeletedWorks),
+            ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails",
+                testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails)
         ]
     }
     

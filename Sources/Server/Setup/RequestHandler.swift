@@ -353,6 +353,8 @@ class RequestHandler : AccountDelegate {
             let userResults = UserRepository(db).lookup(key: effectiveOwningUserKey, modelInit: User.init)
             guard case .found(let model) = userResults,
                 let effectiveOwningUser = model as? User else {
+                
+                // 7/11/18: One reason for this failure is because the effective owning user was removed from the system. This may be too strong of a test for our purposes now-- it may disable downloading of files that can still be downloaded.
                 handleResult(.failure(.message("Could not get effective owning user from database.")))
                 return
             }

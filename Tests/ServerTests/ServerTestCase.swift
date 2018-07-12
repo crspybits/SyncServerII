@@ -385,8 +385,11 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode != .OK, "Worked on uploadFile request!")
                 }
                 else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on uploadFile request: \(response!.statusCode)")
-                    XCTAssert(dict != nil)
+                    guard response!.statusCode == .OK, dict != nil else {
+                        XCTFail("Did not work on uploadFile request: \(response!.statusCode)")
+                        expectation.fulfill()
+                        return
+                    }
                     
                     let sizeInBytes = dict![UploadFileResponse.sizeKey]
                     Log.debug("type of sizeInBytes: \(type(of: sizeInBytes))")

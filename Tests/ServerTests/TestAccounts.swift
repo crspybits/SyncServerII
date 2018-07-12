@@ -58,6 +58,8 @@ struct TestAccount {
     static let secondarySharingAccount:TestAccount = .google3
 #endif
 
+    static let nonOwningSharingAccount:TestAccount = .facebook1
+
     static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google, tokenType: .GoogleToken)
     static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google, tokenType: .GoogleToken)
     static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google, tokenType: .GoogleToken)
