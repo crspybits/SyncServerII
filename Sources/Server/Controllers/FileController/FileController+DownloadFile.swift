@@ -13,14 +13,16 @@ import SyncServerShared
 extension FileController {
     func downloadFile(params:RequestProcessingParameters) {
         guard let downloadRequest = params.request as? DownloadFileRequest else {
-            Log.error("Did not receive DownloadFileRequest")
-            params.completion(nil)
+            let message = "Did not receive DownloadFileRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: downloadRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -30,7 +32,7 @@ extension FileController {
 
         getMasterVersion(sharingGroupId: downloadRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
-                params.completion(nil)
+                params.completion(.failure(.message("\(error!)")))
                 return
             }
 
@@ -38,7 +40,7 @@ extension FileController {
                 let response = DownloadFileResponse()!
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
-                params.completion(response)
+                params.completion(.success(response))
                 return
             }
             
@@ -56,37 +58,43 @@ extension FileController {
             case .found(let modelObj):
                 fileIndexObj = modelObj as? FileIndex
                 if fileIndexObj == nil {
-                    Log.error("Could not convert model object to FileIndex")
-                    params.completion(nil)
+                    let message = "Could not convert model object to FileIndex"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
             case .noObjectFound:
-                Log.error("Could not find file in FileIndex")
-                params.completion(nil)
+                let message = "Could not find file in FileIndex"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
                 
             case .error(let error):
-                Log.error("Error looking up file in FileIndex: \(error)")
-                params.completion(nil)
+                let message = "Error looking up file in FileIndex: \(error)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
-                Log.error("Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)")
-                params.completion(nil)
+                let message = "Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             guard downloadRequest.appMetaDataVersion == fileIndexObj!.appMetaDataVersion else {
-                Log.error("Expected app meta data version \(String(describing: downloadRequest.appMetaDataVersion)) was not the same as the actual version \(String(describing: fileIndexObj!.appMetaDataVersion))")
-                params.completion(nil)
+                let message = "Expected app meta data version \(String(describing: downloadRequest.appMetaDataVersion)) was not the same as the actual version \(String(describing: fileIndexObj!.appMetaDataVersion))"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             if fileIndexObj!.deleted! {
-                Log.error("The file you are trying to download has been deleted!")
-                params.completion(nil)
+                let message = "The file you are trying to download has been deleted!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
@@ -94,8 +102,9 @@ extension FileController {
             
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
             guard let deviceUUID = fileIndexObj!.deviceUUID else {
-                Log.error("No deviceUUID!")
-                params.completion(nil)
+                let message = "No deviceUUID!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
@@ -104,14 +113,16 @@ extension FileController {
             // OWNER
             // The cloud storage for the file is the original owning user's storage.
             guard let owningUserCreds = FileController.getCreds(forUserId: fileIndexObj!.userId, from: params.db) else {
-                Log.error("Could not obtain owning users creds")
-                params.completion(nil)
+                let message = "Could not obtain owning users creds"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             guard let cloudStorageCreds = owningUserCreds as? CloudStorage else {
-                Log.error("Could not obtain cloud storage creds.")
-                params.completion(nil)
+                let message = "Could not obtain cloud storage creds."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
@@ -121,8 +132,9 @@ extension FileController {
                 switch result {
                 case .success(let data):
                     if Int64(data.count) != fileIndexObj!.fileSizeBytes {
-                        Log.error("Actual file size \(data.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)")
-                        params.completion(nil)
+                        let message = "Actual file size \(data.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)"
+                        Log.error(message)
+                        params.completion(.failure(.message(message)))
                         return
                     }
                     
@@ -131,12 +143,13 @@ extension FileController {
                     response.data = data
                     response.fileSizeBytes = Int64(data.count)
                     
-                    params.completion(response)
+                    params.completion(.success(response))
                     return
                 
                 case .failure(let error):
-                    Log.error("Failed downloading file: \(error)")
-                    params.completion(nil)
+                    let message = "Failed downloading file: \(error)"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
             }            

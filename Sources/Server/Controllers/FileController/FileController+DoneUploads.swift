@@ -44,14 +44,16 @@ extension FileController {
     private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)? {
         
         guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
-            Log.error("Did not receive DoneUploadsRequest")
-            params.completion(nil)
+            let message = "Did not receive DoneUploadsRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return nil
         }
 
         guard sharingGroupSecurityCheck(sharingGroupId: doneUploadsRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return nil
         }
         
@@ -75,12 +77,13 @@ extension FileController {
             Log.warning("Master version update: \(updatedMasterVersion)")
             response = DoneUploadsResponse()
             response!.masterVersionUpdate = updatedMasterVersion
-            params.completion(response)
+            params.completion(.success(response!))
             return nil
             
         case .error(let error):
-            Log.error("Failed on updateMasterVersion: \(error)")
-            params.completion(nil)
+            let message = "Failed on updateMasterVersion: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return nil
         }
         
@@ -107,20 +110,21 @@ extension FileController {
             uploadDeletions = uploads.filter({$0.state == .toDeleteFromFileIndex})
 
         case .error(let error):
-            Log.error("Failed to get file uploads: \(error)")
-            params.completion(nil)
+            let message = "Failed to get file uploads: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return nil
         }
 
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
         
         guard let staleVersionsToDelete = getFileIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
-            params.completion(nil)
+            params.completion(.failure(nil))
             return nil
         }
         
         guard let fileIndexDeletions = getFileIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
-            params.completion(nil)
+            params.completion(.failure(nil))
             return nil
         }
         
@@ -131,8 +135,9 @@ extension FileController {
                 uploadRepo: params.repos.upload)
         
         if numberTransferred == nil  {
-            Log.error("Failed on transfer to FileIndex!")
-            params.completion(nil)
+            let message = "Failed on transfer to FileIndex!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return nil
         }
         
@@ -146,14 +151,16 @@ extension FileController {
         switch params.repos.upload.remove(key: filesForUserDevice) {
         case .removed(let numberRows):
             if numberRows != numberTransferred {
-                Log.error("Number rows removed from Upload was \(numberRows) but should have been \(String(describing: numberTransferred))!")
-                params.completion(nil)
+                let message = "Number rows removed from Upload was \(numberRows) but should have been \(String(describing: numberTransferred))!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return nil
             }
             
         case .error(_):
-            Log.error("Failed removing rows from Upload!")
-            params.completion(nil)
+            let message = "Failed removing rows from Upload!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return nil
         }
         
@@ -203,20 +210,23 @@ extension FileController {
     
     func doneUploads(params:RequestProcessingParameters) {
         guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
-            Log.error("Did not receive DoneUploadsRequest")
-            params.completion(nil)
+            let message = "Did not receive DoneUploadsRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: doneUploadsRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: doneUploadsRequest.sharingGroupId, params:params), consistentSharingGroups else {
-            Log.error("Inconsistent sharing groups.")
-            params.completion(nil)
+            let message = "Inconsistent sharing groups."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -226,21 +236,24 @@ extension FileController {
             break
         
         case .lockAlreadyHeld:
-            Log.debug("Error: Lock already held!")
-            params.completion(nil)
+            let message = "Error: Lock already held!"
+            Log.debug(message)
+            params.completion(.failure(.message(message)))
             return
         
         case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-            Log.debug("Error removing locks!")
-            params.completion(nil)
+            let message = "Error removing locks!"
+            Log.debug(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         let result = doInitialDoneUploads(params: params)
         
         if !params.repos.lock.unlock(sharingGroupId: doneUploadsRequest.sharingGroupId) {
-            Log.debug("Error in unlock!")
-            params.completion(nil)
+            let message = "Error in unlock!"
+            Log.debug(message)
+            params.completion(.failure(.message(message)))
             return
         }
 
@@ -264,7 +277,7 @@ extension FileController {
             let response = DoneUploadsResponse()!
             response.numberUploadsTransferred = numberTransferred
             Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
-            params.completion(response)
+            params.completion(.success(response))
             return
         }
         
@@ -287,7 +300,7 @@ extension FileController {
             
             response.numberUploadsTransferred = numberTransferred
             Log.debug("base case: doneUploads.numberUploadsTransferred: \(numberTransferred)")
-            params.completion(response)
+            params.completion(.success(response))
             async.done()
             return
         }
@@ -300,14 +313,16 @@ extension FileController {
         
         // OWNER
         guard let owningUserCreds = FileController.getCreds(forUserId: cloudDeletion.owningUserId, from: params.db) else {
-            Log.error("Could not obtain owning users creds")
-            params.completion(nil)
+            let message = "Could not obtain owning users creds"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
     
         guard let cloudStorageCreds = owningUserCreds as? CloudStorage else {
-            Log.error("Could not obtain cloud storage creds.")
-            params.completion(nil)
+            let message = "Could not obtain cloud storage creds."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         

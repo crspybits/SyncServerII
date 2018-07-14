@@ -9,6 +9,7 @@
 import Foundation
 import LoggerAPI
 import SyncServerShared
+import Kitura
 
 extension FileController {
     private func success(params:RequestProcessingParameters, upload:Upload, creationDate:Date) {
@@ -19,37 +20,42 @@ extension FileController {
         response.creationDate = creationDate
         response.updateDate = upload.updateDate
         
-        params.completion(response)
+        params.completion(.success(response))
     }
     
     func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
-            Log.error("Did not receive UploadFileRequest")
-            params.completion(nil)
+            let message = "Did not receive UploadFileRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: uploadRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: uploadRequest.sharingGroupId, params:params), consistentSharingGroups else {
-            Log.error("Inconsistent sharing groups.")
-            params.completion(nil)
+            let message = "Inconsistent sharing groups."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
-            Log.error("Unknown mime type passed: \(uploadRequest.mimeType) (see SyncServer-Shared)")
-            params.completion(nil)
+            let message = "Unknown mime type passed: \(uploadRequest.mimeType) (see SyncServer-Shared)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard uploadRequest.fileVersion != nil else {
-            Log.error("File version not given in upload request.")
-            params.completion(nil)
+            let message = "File version not given in upload request."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -57,8 +63,9 @@ extension FileController {
         
         getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
-                Log.error("Error: \(String(describing: error))")
-                params.completion(nil)
+                let message = "Error: \(String(describing: error))"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
 
@@ -66,7 +73,7 @@ extension FileController {
                 let response = UploadFileResponse()!
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
-                params.completion(response)
+                params.completion(.success(response))
                 return
             }
             
@@ -75,8 +82,9 @@ extension FileController {
             do {
                 existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupId: uploadRequest.sharingGroupId, fileUUID:uploadRequest.fileUUID)
             } catch (let error) {
-                Log.error("Could not lookup file in FileIndex: \(error)")
-                params.completion(nil)
+                let message = "Could not lookup file in FileIndex: \(error)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
         
@@ -85,8 +93,9 @@ extension FileController {
                 currServerAppMetaData:
                     existingFileInFileIndex?.appMetaData,
                 optionalUpload:uploadRequest.appMetaData) else {
-                Log.error("App meta data or version is not valid for upload.")
-                params.completion(nil)
+                let message = "App meta data or version is not valid for upload."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
@@ -98,21 +107,24 @@ extension FileController {
             var newFile = true
             if let existingFileInFileIndex = existingFileInFileIndex {
                 if existingFileInFileIndex.deleted && (uploadRequest.undeleteServerFile == nil || uploadRequest.undeleteServerFile == 0) {
-                    Log.error("Attempt to upload an existing file, but it has already been deleted.")
-                    params.completion(nil)
+                    let message = "Attempt to upload an existing file, but it has already been deleted."
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
             
                 newFile = false
                 guard existingFileInFileIndex.fileVersion + 1 == uploadRequest.fileVersion else {
-                    Log.error("File version being uploaded (\(uploadRequest.fileVersion)) is not +1 of current version: \(existingFileInFileIndex.fileVersion)")
-                    params.completion(nil)
+                    let message = "File version being uploaded (\(uploadRequest.fileVersion)) is not +1 of current version: \(existingFileInFileIndex.fileVersion)"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
                 guard existingFileInFileIndex.mimeType == uploadRequest.mimeType else {
-                    Log.error("File being uploaded(\(uploadRequest.mimeType)) doesn't have the same mime type as current version: \(existingFileInFileIndex.mimeType)")
-                    params.completion(nil)
+                    let message = "File being uploaded(\(uploadRequest.mimeType)) doesn't have the same mime type as current version: \(existingFileInFileIndex.mimeType)"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
@@ -120,15 +132,17 @@ extension FileController {
             }
             else {
                 if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile != 0  {
-                    Log.error("Attempt to undelete a file but it's a new file!")
-                    params.completion(nil)
+                    let message = "Attempt to undelete a file but it's a new file!"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
                 // File isn't yet in the FileIndex-- must be a new file. Thus, must be version 0.
                 guard uploadRequest.fileVersion == 0 else {
-                    Log.error("File is new, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0")
-                    params.completion(nil)
+                    let message = "File is new, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
             
@@ -153,8 +167,9 @@ extension FileController {
             
             ownerCloudStorage = ownerAccount as? CloudStorage
             guard ownerCloudStorage != nil && ownerAccount != nil else {
-                Log.error("Could not obtain creds for v0 file.")
-                params.completion(nil)
+                let message = "Could not obtain creds for v0 file: Assuming this means owning user is no longer on system."
+                Log.error(message)
+                params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
                 return
             }
             
@@ -171,8 +186,9 @@ extension FileController {
             
             if let fileGroupUUID = uploadRequest.fileGroupUUID {
                 guard uploadRequest.fileVersion == 0 else {
-                    Log.error("fileGroupUUID was given, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0")
-                    params.completion(nil)
+                    let message = "fileGroupUUID was given, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
@@ -239,7 +255,7 @@ extension FileController {
             
             if errorString != nil {
                 Log.error(errorString!)
-                params.completion(nil)
+                params.completion(.failure(.message(errorString!)))
                 return
             }
             
@@ -261,8 +277,9 @@ extension FileController {
                         upload.state = .uploadedUndelete
                         
                     default:
-                        Log.error("Bad upload state: \(upload.state!)")
-                        params.completion(nil)
+                        let message = "Bad upload state: \(upload.state!)"
+                        Log.error(message)
+                        params.completion(.failure(.message(message)))
                     }
                     
                     upload.uploadId = uploadId
@@ -271,13 +288,15 @@ extension FileController {
                     }
                     else {
                         // TODO: *0* Need to remove the file from the cloud server.
-                        Log.error("Could not update UploadRepository: \(String(describing: error))")
-                        params.completion(nil)
+                        let message = "Could not update UploadRepository: \(String(describing: error))"
+                        Log.error(message)
+                        params.completion(.failure(.message(message)))
                     }
                 case .failure(let error):
                     // TODO: *0* It could be useful to remove the file from the cloud server. It might be there.
-                    Log.error("Could not uploadFile: error: \(error)")
-                    params.completion(nil)
+                    let message = "Could not uploadFile: error: \(error)"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                 }
             }
         }

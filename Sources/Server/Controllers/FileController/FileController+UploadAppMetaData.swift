@@ -13,34 +13,35 @@ extension FileController {
     func uploadAppMetaData(params:RequestProcessingParameters) {
         guard let uploadAppMetaDataRequest = params.request as? UploadAppMetaDataRequest else {
             Log.error("Did not receive UploadAppMetaDataRequest")
-            params.completion(nil)
+            params.completion(.failure(nil))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) else {
             Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            params.completion(.failure(nil))
             return
         }
         
         guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params:params), consistentSharingGroups else {
             Log.error("Inconsistent sharing groups.")
-            params.completion(nil)
+            params.completion(.failure(nil))
             return
         }
         
         getMasterVersion(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
-                Log.error("Error: \(String(describing: error))")
-                params.completion(nil)
+                let message = "Error: \(String(describing: error))"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
 
             if masterVersion != uploadAppMetaDataRequest.masterVersion {
-                let response = UploadAppMetaDataResponse()!
+                let response = UploadAppMetaDataResponse()!    
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
-                params.completion(response)
+                params.completion(.success(response))
                 return
             }
             
@@ -49,21 +50,24 @@ extension FileController {
             do {
                 existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, fileUUID:uploadAppMetaDataRequest.fileUUID)
             } catch (let error) {
-                Log.error("Could not lookup file in FileIndex: \(error)")
-                params.completion(nil)
+                let message = "Could not lookup file in FileIndex: \(error)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             guard existingFileInFileIndex != nil else {
-                Log.error("File not found in FileIndex!")
-                params.completion(nil)
+                let message = "File not found in FileIndex!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             // Undeletion is not possible for an appMetaData upload because the file contents have been removed (on a prior upload deletion) and the appMetaData upload can't replace those file contents.
             if existingFileInFileIndex!.deleted {
-                Log.error("Attempt to upload app meta data for an existing file, but it has already been deleted.")
-                params.completion(nil)
+                let message = "Attempt to upload app meta data for an existing file, but it has already been deleted."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
         
@@ -72,8 +76,9 @@ extension FileController {
                 currServerAppMetaData:
                     existingFileInFileIndex!.appMetaData,
                 upload:uploadAppMetaDataRequest.appMetaData) else {
-                Log.error("App meta data or version is not valid for upload.")
-                params.completion(nil)
+                let message = "App meta data or version is not valid for upload."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
@@ -107,12 +112,12 @@ extension FileController {
             
             if errorString != nil {
                 Log.error(errorString!)
-                params.completion(nil)
+                params.completion(.failure(.message(errorString!)))
                 return
             }
 
             let response = UploadAppMetaDataResponse()!
-            params.completion(response)
+            params.completion(.success(response))
         }
     }
 }

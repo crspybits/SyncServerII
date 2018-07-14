@@ -49,8 +49,9 @@ class UserController : ControllerProtocol {
     
     func addUser(params:RequestProcessingParameters) {
         guard let addUserRequest = params.request as? AddUserRequest else {
-            Log.error("Did not receive AddUserRequest")
-            params.completion(nil)
+            let message = "Did not receive AddUserRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -59,8 +60,9 @@ class UserController : ControllerProtocol {
         case .doesNotExist:
             break
         case .error, .exists(_):
-            Log.error("Could not add user: Already exists!")
-            params.completion(nil)
+            let message = "Could not add user: Already exists!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -79,8 +81,9 @@ class UserController : ControllerProtocol {
         
         if params.profileCreds!.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
-                Log.error("owningAccountsNeedCloudFolderName but no cloudFolderName")
-                params.completion(nil)
+                let message = "owningAccountsNeedCloudFolderName but no cloudFolderName"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
@@ -88,34 +91,39 @@ class UserController : ControllerProtocol {
         }
         
         guard params.profileCreds?.accountType.userType == .owning else {
-            Log.error("Attempting to add a user with an Account that only allows sharing users!")
-            params.completion(nil)
+            let message = "Attempting to add a user with an Account that only allows sharing users!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard let userId = params.repos.user.add(user: user) else {
-            Log.error("Failed on adding user to User!")
-            params.completion(nil)
+            let message = "Failed on adding user to User!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         user.userId = userId
 
         guard case .success(let sharingGroupId) = params.repos.sharingGroup.add() else {
-            Log.error("Failed on adding new sharing group.")
-            params.completion(nil)
+            let message = "Failed on adding new sharing group."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
 
         guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId) else {
-            Log.error("Failed on adding sharing group user.")
-            params.completion(nil)
+            let message = "Failed on adding sharing group user."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         if !params.repos.masterVersion.initialize(sharingGroupId: sharingGroupId) {
-            Log.error("Failed on creating MasterVersion record for sharing group!")
-            params.completion(nil)
+            let message = "Failed on creating MasterVersion record for sharing group!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -129,8 +137,9 @@ class UserController : ControllerProtocol {
 
         // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
         guard let cloudStorageCreds = profileCreds as? CloudStorage else {
-            Log.error("Could not obtain CloudStorage Creds")
-            params.completion(nil)
+            let message = "Could not obtain CloudStorage Creds"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -141,14 +150,14 @@ class UserController : ControllerProtocol {
         
             UserController.createInitialFileForOwningUser(cloudFolderName: addUserRequest.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
                 if success {
-                    params.completion(response)
+                    params.completion(.success(response))
                 }
                 else {
-                    params.completion(nil)
+                    params.completion(.failure(nil))
                 }
             }
         }, failure: {
-            params.completion(nil)
+            params.completion(.failure(nil))
         })
     }
     
@@ -161,9 +170,9 @@ class UserController : ControllerProtocol {
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
         params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.accountType.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
-            params.completion(response)
+            params.completion(.success(response))
         }, failure: {
-            params.completion(nil)
+            params.completion(.failure(nil))
         })
     }
     
@@ -175,22 +184,25 @@ class UserController : ControllerProtocol {
         // I'm not going to remove the users files in their cloud storage. They own those. I think SyncServer doesn't have any business removing their files in this context.
         
         guard let accountType = AccountType.for(userProfile: params.userProfile!) else {
-            Log.error("Could not get accountType!")
-            params.completion(nil)
+            let message = "Could not get accountType!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
         guard case .removed(_) = params.repos.upload.remove(key: uploadRepoKey) else {
-            Log.error("Could not remove upload files for user!")
-            params.completion(nil)
+            let message = "Could not remove upload files for user!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         // 6/25/18; Up until today, user removal had included actual removal of all of the user's files from the FileIndex. BUT-- this goes against how deletion occurs on the SyncServer-- we mark files as deleted, but don't actually remove them from the FileIndex.
         guard let _ = params.repos.fileIndex.markFilesAsDeleted(forUserId: params.currentSignedInUser!.userId) else {
-            Log.error("Could not mark files as deleted for user!")
-            params.completion(nil)
+            let message = "Could not mark files as deleted for user!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -200,8 +212,9 @@ class UserController : ControllerProtocol {
         case .removed:
             break
         case .error(let error):
-            Log.error("Could not remove sharing group references for user: \(error)")
-            params.completion(nil)
+            let message = "Could not remove sharing group references for user: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -214,20 +227,22 @@ class UserController : ControllerProtocol {
         case .removed:
             break
         case .error(let error):
-            Log.error("Could not remove sharing invitations for user: \(error)")
-            params.completion(nil)
+            let message = "Could not remove sharing invitations for user: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         // This has to be last-- we have to remove all references to the user first-- due to foreign key constraints.
         let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
         guard case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey), numberRows == 1 else {
-            Log.error("Could not remove user!")
-            params.completion(nil)
+            let message = "Could not remove user!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         let response = RemoveUserResponse()!
-        params.completion(response)
+        params.completion(.success(response))
     }
 }

@@ -12,20 +12,22 @@ import SyncServerShared
 extension FileController {    
     func downloadAppMetaData(params:RequestProcessingParameters) {
         guard let downloadAppMetaDataRequest = params.request as? DownloadAppMetaDataRequest else {
-            Log.error("Did not receive DownloadAppMetaDataRequest")
-            params.completion(nil)
+            let message = "Did not receive DownloadAppMetaDataRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         getMasterVersion(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
-                params.completion(nil)
+                params.completion(.failure(.message("\(error!)")))
                 return
             }
 
@@ -33,7 +35,7 @@ extension FileController {
                 let response = DownloadAppMetaDataResponse()!
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
-                params.completion(response)
+                params.completion(.success(response))
                 return
             }
             
@@ -49,43 +51,49 @@ extension FileController {
             case .found(let modelObj):
                 fileIndexObj = modelObj as? FileIndex
                 if fileIndexObj == nil {
-                    Log.error("Could not convert model object to FileIndex")
-                    params.completion(nil)
+                    let message = "Could not convert model object to FileIndex"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
             case .noObjectFound:
-                Log.error("Could not find file in FileIndex")
-                params.completion(nil)
+                let message = "Could not find file in FileIndex"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
                 
             case .error(let error):
-                Log.error("Error looking up file in FileIndex: \(error)")
-                params.completion(nil)
+                let message = "Error looking up file in FileIndex: \(error)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             if fileIndexObj!.deleted! {
-                Log.error("The file you are trying to download app meta data for has been deleted!")
-                params.completion(nil)
+                let message = "The file you are trying to download app meta data for has been deleted!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             guard let fileIndexAppMetaDataVersion = fileIndexObj.appMetaDataVersion else {
-                Log.error("Nil app meta data version in FileIndex.")
-                params.completion(nil)
+                let message = "Nil app meta data version in FileIndex."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             guard downloadAppMetaDataRequest.appMetaDataVersion == fileIndexAppMetaDataVersion else {
-                Log.error("Expected app meta data version \(downloadAppMetaDataRequest.appMetaDataVersion) was not the same as the actual version \(fileIndexAppMetaDataVersion)")
-                params.completion(nil)
+                let message = "Expected app meta data version \(downloadAppMetaDataRequest.appMetaDataVersion) was not the same as the actual version \(fileIndexAppMetaDataVersion)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             let response = DownloadAppMetaDataResponse()!
             response.appMetaData = fileIndexObj.appMetaData
-            params.completion(response)
+            params.completion(.success(response))
         }
     }
 }

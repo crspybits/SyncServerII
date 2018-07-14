@@ -50,7 +50,7 @@ public struct RequestProcessingParameters {
     // For secondary authenticated endpoints, these are the immediate user's creds (i.e., they are not the effective user id creds) read from the database. It's nil otherwise.
     let creds: Account?
     
-    // These reflect the effectiveOwningUserId of the User.
+    // [1]. These reflect the effectiveOwningUserId of the User, if any. They will be nil if (a) the user was invited, (b) they redeemed their sharing invitation with a non-owning account, and (c) their original inviting user removed their own account.
     let effectiveOwningUserCreds: Account?
 
     // These are used only when we don't yet have database creds-- e.g., for endpoints that are creating users in the database.
@@ -63,8 +63,14 @@ public struct RequestProcessingParameters {
     let routerResponse:RouterResponse!
     let deviceUUID:String?
     
-    // Call the completion with a nil ResponseMessage if there was a fatal error processing the request, i.e., an error that could not be handled in the normal responses made in the ResponseMessage.
-    let completion: (ResponseMessage?)->()
+    enum Response {
+        case success(ResponseMessage)
+        
+        // Fatal error processing the request, i.e., an error that could not be handled in the normal responses made in the ResponseMessage.
+        case failure(RequestHandler.FailureResult?)
+    }
+    
+    let completion: (Response)->()
 }
 
 public class Controllers {

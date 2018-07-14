@@ -36,11 +36,11 @@ class UtilController : ControllerProtocol {
             response.diagnostics = diagnostics
         }
         
-        params.completion(response)
+        params.completion(.success(response))
     }
     
     func checkPrimaryCreds(params:RequestProcessingParameters) {
         let response = CheckPrimaryCredsResponse()
-        params.completion(response)
+        params.completion(.success(response!))
     }
 }

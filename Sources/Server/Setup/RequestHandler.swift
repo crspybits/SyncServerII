@@ -351,21 +351,29 @@ class RequestHandler : AccountDelegate {
             let effectiveOwningUserKey = UserRepository.LookupKey.userId(currentSignedInUser!.effectiveOwningUserId)
             Log.debug("currentSignedInUser!.effectiveOwningUserId: \(currentSignedInUser!.effectiveOwningUserId)")
             let userResults = UserRepository(db).lookup(key: effectiveOwningUserKey, modelInit: User.init)
-            guard case .found(let model) = userResults,
-                let effectiveOwningUser = model as? User else {
+            switch userResults {
+            case .found(let model):
+                guard let effectiveOwningUser = model as? User else {
+                    handleResult(.failure(.message("Could not convert effective owning user model to User.")))
+                    return
+                }
                 
-                // 7/11/18: One reason for this failure is because the effective owning user was removed from the system. This may be too strong of a test for our purposes now-- it may disable downloading of files that can still be downloaded.
-                handleResult(.failure(.message("Could not get effective owning user from database.")))
+                effectiveOwningUserCreds = effectiveOwningUser.credsObject
+                guard effectiveOwningUserCreds != nil else {
+                    handleResult(.failure(.message("Could not get effective owning user creds.")))
+                    return
+                }
+                
+                effectiveOwningUserCreds!.delegate = self
+
+            case .noObjectFound:
+                // Not treating this as an error. Downstream from this, where needed, we check to see if effectiveOwningUserCreds is nil. See also [1] in Controllers.swift.
+                Log.warning("No object found when trying to populate effectiveOwningUserCreds")
+
+            case .error(let error):
+                handleResult(.failure(.message(error)))
                 return
             }
-            
-            effectiveOwningUserCreds = effectiveOwningUser.credsObject
-            guard effectiveOwningUserCreds != nil else {
-                handleResult(.failure(.message("Could not get effective owning user creds.")))
-                return
-            }
-            
-            effectiveOwningUserCreds!.delegate = self
         }
         
         var requestSharingGroupId: SharingGroupId?
@@ -394,19 +402,32 @@ class RequestHandler : AccountDelegate {
             }
         }
 
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { responseObject in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { response in
         
             // If we locked before, do unlock now.
             if self.endpoint.needsLock {
                 _ = self.repositories.lock.unlock(sharingGroupId: requestSharingGroupId!)
             }
         
-            if nil == responseObject {
-                handleResult(.failure(.message("Could not create response object from request object")))
+            var message:ResponseMessage!
+            
+            switch response {
+            case .success(let responseMessage):
+                message = responseMessage
+                
+            case .failure(let failureResult):
+                if let failureResult = failureResult {
+                    handleResult(.failure(failureResult))
+                }
+                else {
+                    handleResult(.failure(.message("Could not create response object from request object")))
+                }
+                
                 return
             }
+
             
-            let jsonDict = responseObject!.toJSON()
+            let jsonDict = message.toJSON()
             if nil == jsonDict {
                 handleResult(.failure(.message("Could not convert response object to json dictionary")))
                 return
@@ -424,7 +445,7 @@ class RequestHandler : AccountDelegate {
                 return result
             }
             
-            switch responseObject!.responseType {
+            switch message.responseType {
             case .json:
                 handleResult(.success(.json(jsonDict!)))
 

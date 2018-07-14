@@ -116,14 +116,16 @@ class FileController : ControllerProtocol {
             
     func fileIndex(params:RequestProcessingParameters) {
         guard let fileIndexRequest = params.request as? FileIndexRequest else {
-            Log.error("Did not receive FileIndexRequest")
-            params.completion(nil)
+            let message = "Did not receive FileIndexRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: fileIndexRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
 
@@ -137,7 +139,7 @@ class FileController : ControllerProtocol {
         
         getMasterVersion(sharingGroupId: fileIndexRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
-                params.completion(nil)
+                params.completion(.failure(.message("\(error!)")))
                 return
             }
             
@@ -150,11 +152,12 @@ class FileController : ControllerProtocol {
                 let response = FileIndexResponse()!
                 response.fileIndex = fileIndex
                 response.masterVersion = masterVersion
-                params.completion(response)
+                params.completion(.success(response))
                 
             case .error(let error):
-                Log.error("Error: \(error)")
-                params.completion(nil)
+                let message = "Error: \(error)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
         }
@@ -162,20 +165,23 @@ class FileController : ControllerProtocol {
     
     func getUploads(params:RequestProcessingParameters) {
         guard let getUploadsRequest = params.request as? GetUploadsRequest else {
-            Log.error("Did not receive GetUploadsRequest")
-            params.completion(nil)
+            let message = "Did not receive GetUploadsRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: getUploadsRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: getUploadsRequest.sharingGroupId, params:params), consistentSharingGroups else {
-            Log.error("Inconsistent sharing groups.")
-            params.completion(nil)
+            let message = "Inconsistent sharing groups."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -186,11 +192,12 @@ class FileController : ControllerProtocol {
             let fileInfo = UploadRepository.uploadsToFileInfo(uploads: uploads)
             let response = GetUploadsResponse()!
             response.uploads = fileInfo
-            params.completion(response)
+            params.completion(.success(response))
             
         case .error(let error):
-            Log.error("Error: \(error)")
-            params.completion(nil)
+            let message = "Error: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
     }

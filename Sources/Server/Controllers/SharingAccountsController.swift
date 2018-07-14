@@ -23,20 +23,23 @@ class SharingAccountsController : ControllerProtocol {
         assert(params.ep.minPermission == .admin)
 
         guard let createSharingInvitationRequest = params.request as? CreateSharingInvitationRequest else {
-            Log.error("Did not receive CreateSharingInvitationRequest")
-            params.completion(nil)
+            let message = "Did not receive CreateSharingInvitationRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: createSharingInvitationRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard let currentSignedInUser = params.currentSignedInUser else {
-            Log.error("No currentSignedInUser")
-            params.completion(nil)
+            let message = "No currentSignedInUser"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -47,22 +50,24 @@ class SharingAccountsController : ControllerProtocol {
             permission: createSharingInvitationRequest.permission)
         
         guard case .success(let sharingInvitationUUID) = result else {
-            Log.error("Failed to add Sharing Invitation")
-            params.completion(nil)
+            let message = "Failed to add Sharing Invitation"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         let response = CreateSharingInvitationResponse()!
         response.sharingInvitationUUID = sharingInvitationUUID
-        params.completion(response)
+        params.completion(.success(response))
     }
     
     func redeemSharingInvitation(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .primary)
 
         guard let request = params.request as? RedeemSharingInvitationRequest else {
-            Log.error("Did not receive RedeemSharingInvitationRequest")
-            params.completion(nil)
+            let message = "Did not receive RedeemSharingInvitationRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -71,8 +76,9 @@ class SharingAccountsController : ControllerProtocol {
         case .doesNotExist:
             break
         case .error, .exists(_):
-            Log.error("Could not add user: Already exists!")
-            params.completion(nil)
+            let message = "Could not add user: Already exists!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -80,9 +86,10 @@ class SharingAccountsController : ControllerProtocol {
         let removalKey = SharingInvitationRepository.LookupKey.staleExpiryDates
         let removalResult = SharingInvitationRepository(params.db).remove(key: removalKey)
         
-        guard case .removed(_) = removalResult else{
-            Log.error("Failed removing stale sharing invitations")
-            params.completion(nil)
+        guard case .removed(_) = removalResult else {
+            let message = "Failed removing stale sharing invitations"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
 
@@ -93,15 +100,17 @@ class SharingAccountsController : ControllerProtocol {
         
         guard case .found(let model) = lookupResult,
             let sharingInvitation = model as? SharingInvitation else {
-            Log.error("Could not find sharing invitation: \(request.sharingInvitationUUID). Was it stale?")
-            params.completion(nil)
+            let message = "Could not find sharing invitation: \(request.sharingInvitationUUID). Was it stale?"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         let removalResult2 = SharingInvitationRepository(params.db).remove(key: sharingInvitationKey)
         guard case .removed(let numberRemoved) = removalResult2, numberRemoved == 1 else {
-            Log.error("Failed removing sharing invitation!")
-            params.completion(nil)
+            let message = "Failed removing sharing invitation!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -126,8 +135,9 @@ class SharingAccountsController : ControllerProtocol {
             // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, where b) that owning account type needs a cloud storage folder (e.g., Google Drive), and c) with permissions of >= write.
             if params.profileCreds!.owningAccountsNeedCloudFolderName && sharingInvitation.permission.hasMinimumPermission(.write) {
                 guard let cloudFolderName = request.cloudFolderName else {
-                    Log.error("No cloud folder name given when redeeming sharing invitation using owning account that needs one!")
-                    params.completion(nil)
+                    let message = "No cloud folder name given when redeeming sharing invitation using owning account that needs one!"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
@@ -137,14 +147,16 @@ class SharingAccountsController : ControllerProtocol {
         }
         
         guard let userId = params.repos.user.add(user: user) else {
-            Log.error("Failed on adding sharing user to User!")
-            params.completion(nil)
+            let message = "Failed on adding sharing user to User!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId) else {
-            Log.error("Failed on adding sharing group user for new sharing user.")
-            params.completion(nil)
+            let message = "Failed on adding sharing group user for new sharing user."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
 
@@ -161,25 +173,26 @@ class SharingAccountsController : ControllerProtocol {
 
                 // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
                 guard let cloudStorageCreds = profileCreds as? CloudStorage else {
-                    Log.error("Could not obtain CloudStorage Creds")
-                    params.completion(nil)
+                    let message = "Could not obtain CloudStorage Creds"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
         
                 UserController.createInitialFileForOwningUser(cloudFolderName: user.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
                     if success {
-                        params.completion(response)
+                        params.completion(.success(response))
                     }
                     else {
-                        params.completion(nil)
+                        params.completion(.failure(nil))
                     }
                 }
             }
             else {
-                params.completion(response)
+                params.completion(.success(response))
             }
         }, failure: {
-            params.completion(nil)
+            params.completion(.failure(nil))
         })
     }
 }

@@ -9,37 +9,43 @@
 import Foundation
 import LoggerAPI
 import SyncServerShared
+import Kitura
 
 extension FileController {
     func uploadDeletion(params:RequestProcessingParameters) {
         guard let uploadDeletionRequest = params.request as? UploadDeletionRequest else {
-            Log.error("Did not receive UploadDeletionRequest")
-            params.completion(nil)
+            let message = "Did not receive UploadDeletionRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard sharingGroupSecurityCheck(sharingGroupId: uploadDeletionRequest.sharingGroupId, params: params) else {
-            Log.error("Failed in sharing group security check.")
-            params.completion(nil)
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: uploadDeletionRequest.sharingGroupId, params:params), consistentSharingGroups else {
-            Log.error("Inconsistent sharing groups.")
-            params.completion(nil)
+            let message = "Inconsistent sharing groups."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         guard uploadDeletionRequest.fileVersion != nil else {
-            Log.error("File version not given in upload request.")
-            params.completion(nil)
+            let message = "File version not given in upload request."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         getMasterVersion(sharingGroupId: uploadDeletionRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
-                Log.error("Error: \(String(describing: error))")
-                params.completion(nil)
+                let message = "Error: \(String(describing: error))"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
 
@@ -47,7 +53,7 @@ extension FileController {
                 let response = UploadDeletionResponse()!
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
-                params.completion(response)
+                params.completion(.success(response))
                 return
             }
             
@@ -63,25 +69,29 @@ extension FileController {
             case .found(let modelObj):
                 fileIndexObj = modelObj as? FileIndex
                 if fileIndexObj == nil {
-                    Log.error("Could not convert model object to FileIndex")
-                    params.completion(nil)
+                    let message = "Could not convert model object to FileIndex"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                     return
                 }
                 
             case .noObjectFound:
-                Log.error("Could not find file to delete in FileIndex")
-                params.completion(nil)
+                let message = "Could not find file to delete in FileIndex"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
                 
             case .error(let error):
-                Log.error("Error looking up file in FileIndex: \(error)")
-                params.completion(nil)
+                let message = "Error looking up file in FileIndex: \(error)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
             if fileIndexObj.fileVersion != uploadDeletionRequest.fileVersion {
-                Log.error("File index version is: \(fileIndexObj.fileVersion), but you asked to delete version: \(uploadDeletionRequest.fileVersion)")
-                params.completion(nil)
+                let message = "File index version is: \(fileIndexObj.fileVersion), but you asked to delete version: \(uploadDeletionRequest.fileVersion)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
@@ -110,13 +120,13 @@ extension FileController {
             switch uploadAddResult {
             case .success(_):
                 let response = UploadDeletionResponse()!
-                params.completion(response)
+                params.completion(.success(response))
                 return
                 
             case .duplicateEntry:
                 Log.info("File was already marked for deletion: Not adding again.")
                 let response = UploadDeletionResponse()!
-                params.completion(response)
+                params.completion(.success(response))
                 return
                 
             case .aModelValueWasNil:
@@ -127,7 +137,7 @@ extension FileController {
             }
 
             Log.error(errorString!)
-            params.completion(nil)
+            params.completion(.failure(.message(errorString!)))
             return
         }
     }
@@ -139,35 +149,40 @@ extension FileController {
         switch result {
         case .removed(numberRows: let numberRows):
             if numberRows != 1 {
-                Log.error("Number of rows deleted \(numberRows) != 1")
-                params.completion(nil)
+                let message = "Number of rows deleted \(numberRows) != 1"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
             
         case .error(let error):
-            Log.error("Error deleting from FileIndex: \(error)")
-            params.completion(nil)
+            let message = "Error deleting from FileIndex: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
         // OWNER
         // Need to get creds for the user that uploaded the v0 file.
         guard let cloudStorageCreds = FileController.getCreds(forUserId: fileIndexObj.userId, from: params.db) as? CloudStorage else {
-            Log.error("Could not obtain CloudStorage creds for original v0 owner of file.")
-            params.completion(nil)
+            let message = "Could not obtain CloudStorage creds for original v0 owner of file."
+            Log.error(message)
+            
+            params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
             return
         }
 
         let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: fileIndexObj.deviceUUID!, mimeType: fileIndexObj.mimeType!)
         
         // Because we need this to get the cloudFolderName
-        guard params.effectiveOwningUserCreds != nil else {
-            Log.debug("No effectiveOwningUserCreds")
-            params.completion(nil)
+        guard let effectiveOwningUserCreds = params.effectiveOwningUserCreds else {
+            let message = "No effectiveOwningUserCreds"
+            Log.debug(message)
+            params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
             return
         }
         
-        let options = CloudStorageFileNameOptions(cloudFolderName: params.effectiveOwningUserCreds!.cloudFolderName, mimeType: fileIndexObj.mimeType!)
+        let options = CloudStorageFileNameOptions(cloudFolderName: effectiveOwningUserCreds.cloudFolderName, mimeType: fileIndexObj.mimeType!)
         
         cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
             if error != nil  {
@@ -176,7 +191,7 @@ extension FileController {
             }
             
             let response = UploadDeletionResponse()!
-            params.completion(response)
+            params.completion(.success(response))
             return
         }
     }
