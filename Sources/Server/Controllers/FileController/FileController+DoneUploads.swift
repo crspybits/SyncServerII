@@ -127,10 +127,15 @@ extension FileController {
             params.completion(.failure(nil))
             return nil
         }
+
+        guard let effectiveOwningUserId = params.currentSignedInUser!.effectiveOwningUserId else {
+            params.completion(.failure(nil))
+            return nil
+        }
         
         // 3) Transfer info to the FileIndex repository from Upload.
         let numberTransferred =
-            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: params.currentSignedInUser!.effectiveOwningUserId,
+            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: effectiveOwningUserId,
                 uploadingDeviceUUID: params.deviceUUID!,
                 uploadRepo: params.repos.upload)
         

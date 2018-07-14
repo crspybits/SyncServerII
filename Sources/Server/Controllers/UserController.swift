@@ -48,6 +48,8 @@ class UserController : ControllerProtocol {
     }
     
     func addUser(params:RequestProcessingParameters) {
+        Log.debug("UserController.addUser.1")
+
         guard let addUserRequest = params.request as? AddUserRequest else {
             let message = "Did not receive AddUserRequest"
             Log.error(message)
@@ -189,6 +191,23 @@ class UserController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
+        
+        let deviceUUIDRepoKey = DeviceUUIDRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        guard case .removed(_) = params.repos.deviceUUID.remove(key: deviceUUIDRepoKey) else {
+            let message = "Could not remove deviceUUID's for user!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard params.repos.user.resetOwningUserIds(forUserId: params.currentSignedInUser!.userId) else {
+            let message = "Could not reset owningUserId's of other users."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
         
         let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
         guard case .removed(_) = params.repos.upload.remove(key: uploadRepoKey) else {

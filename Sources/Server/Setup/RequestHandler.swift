@@ -347,9 +347,10 @@ class RequestHandler : AccountDelegate {
         var effectiveOwningUserCreds:Account?
         
         // For secondary authentication, we'll have a current signed in user.
-        if currentSignedInUser != nil {
-            let effectiveOwningUserKey = UserRepository.LookupKey.userId(currentSignedInUser!.effectiveOwningUserId)
-            Log.debug("currentSignedInUser!.effectiveOwningUserId: \(currentSignedInUser!.effectiveOwningUserId)")
+        // Not treating a nil effectiveOwningUserId for the same reason as the `.noObjectFound` case below.
+        if let effectiveOwningUserId = currentSignedInUser?.effectiveOwningUserId {
+            let effectiveOwningUserKey = UserRepository.LookupKey.userId(effectiveOwningUserId)
+            Log.debug("effectiveOwningUserId: \(effectiveOwningUserId)")
             let userResults = UserRepository(db).lookup(key: effectiveOwningUserKey, modelInit: User.init)
             switch userResults {
             case .found(let model):

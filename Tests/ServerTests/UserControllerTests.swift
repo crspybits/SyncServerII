@@ -29,20 +29,23 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         
         XCTAssert(addUserResponse.sharingGroupId != nil)
         
-        // Make sure that the database has a cloud folder name-- but only if that account type needs it.
-        if TestAccount.needsCloudFolder(testAccount) {
-            let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)
-            switch result {
-            case .error(let error):
-                XCTFail("\(error)")
-                
-            case .found(let object):
-                let user = object as! User
+        let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)
+        switch result {
+        case .error(let error):
+            XCTFail("\(error)")
+            
+        case .found(let object):
+            let user = object as! User
+            
+            // Make sure that the database has a cloud folder name-- but only if that account type needs it.
+            if TestAccount.needsCloudFolder(testAccount) {
                 XCTAssert(user.cloudFolderName == ServerTestCase.cloudFolderName)
-                
-            case .noObjectFound:
-                XCTFail("No User Found")
             }
+            
+            XCTAssert(user.permission == .admin)
+            
+        case .noObjectFound:
+            XCTFail("No User Found")
         }
         
         // Make sure the initial file was created in users cloud storage, if one is configured.

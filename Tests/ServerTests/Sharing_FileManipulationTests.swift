@@ -11,6 +11,7 @@ import XCTest
 import LoggerAPI
 import Foundation
 import SyncServerShared
+import Kitura
 
 class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
 
@@ -541,6 +542,28 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    // User A invites B. B has cloud storage. B uploads. It goes to B's storage. Both A and B can download the file.
+    func testUploadByOwningSharingUserThenDownloadByBothWorks() {
+        let sharingAccount: TestAccount = .secondaryOwningAccount
+        
+        guard let result = uploadFileBySharingUser(withPermission: .write, sharingUser: sharingAccount) else {
+            XCTFail()
+            return
+        }
+        
+        makeSureSharingOwnerOwnsUploadedFile(result: result)
+
+        guard let _ = downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize) else {
+            XCTFail()
+            return
+        }
+    }
+    
     func testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails() {
         var actualSharingGroupId:SharingGroupId!
         
@@ -568,13 +591,52 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             }
         }
         
-        // Attempting to upload a file by our sharing user-- this should fail because the sharing user does not own cloud storage.
-        uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId), errorExpected: true)
+        // Attempting to upload a file by our sharing user-- this should fail with HTTP 410 (Gone) because the sharing user does not own cloud storage.
+        uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId), errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
     }
     
-    // Should change upload endpoint to return a specific HTTP code if the failure is because the effective owning user cannot be found. Change the above test to that end also.
+    // Similar to that above, but the non-owning, sharing user downloads a file-- that was owned by a third user, that is still on the system, and was in the same sharing group.
+    func testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks() {
+        var actualSharingGroupId:SharingGroupId!
+        
+        let sharingAccount1: TestAccount = .nonOwningSharingAccount
+        
+        // This account must be an owning account.
+        let sharingAccount2: TestAccount = .secondaryOwningAccount
+        
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount1) { userId, sharingGroupId in
+            actualSharingGroupId = sharingGroupId
+        }
+        
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount2, addUser: .no(sharingGroupId: actualSharingGroupId))
     
-    // Also need a test case: Similar to that above, but the non-owning, sharing user downloads a file-- that was owned by a third user, that is still on the system, and was in the same sharing group.
+        let deviceUUID = Foundation.UUID().uuidString
+
+        guard let uploadResult = uploadTextFile(testAccount: sharingAccount2, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId)) else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(testAccount: sharingAccount2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: actualSharingGroupId)
+        
+        let deviceUUID2 = Foundation.UUID().uuidString
+
+        // remove the regular/inviting user
+        performServerTest(testAccount: .primaryOwningAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID2)
+            
+            self.performRequest(route: ServerEndpoints.removeUser, headers: headers) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "removeUser failed")
+                expectation.fulfill()
+            }
+        }
+        
+        guard let _ = downloadTextFile(testAccount: sharingAccount1, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadResult.request, fileSize: uploadResult.fileSize) else {
+            XCTFail()
+            return
+        }
+    }
 }
 
 extension Sharing_FileManipulationTests {
@@ -588,6 +650,8 @@ extension Sharing_FileManipulationTests {
             ("testThatV0FileOwnerRemainsFileOwner", testThatV0FileOwnerRemainsFileOwner),
             ("testUploadDeletionWithDifferentV0OwnersWorks",
                 testUploadDeletionWithDifferentV0OwnersWorks),
+            ("testUploadByOwningSharingUserThenDownloadByBothWorks",
+                testUploadByOwningSharingUserThenDownloadByBothWorks),
             ("testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks", testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks),
             ("testUploadDeletionForNonRootOwningUserWorks", testUploadDeletionForNonRootOwningUserWorks),
             ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
@@ -603,7 +667,9 @@ extension Sharing_FileManipulationTests {
             ("testUploadByOwningSharingUserAfterInvitingUserDeletedWorks",
                 testUploadByOwningSharingUserAfterInvitingUserDeletedWorks),
             ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails",
-                testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails)
+                testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails),
+            ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
+                testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks)
         ]
     }
     

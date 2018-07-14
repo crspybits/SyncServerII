@@ -40,11 +40,13 @@ struct TestAccount {
     static let secondaryOwningAccount:TestAccount = .google2
 #endif
 
-    // Main account, for sharing, on which tests are conducted. This account must allow sharing (e.g., not for Dropbox). It should be a different specific account than primaryOwningAccount.
+    // Main account, for sharing, on which tests are conducted. It should be a different specific account than primaryOwningAccount.
 #if PRIMARY_SHARING_GOOGLE2
     static let primarySharingAccount:TestAccount = .google2
 #elseif PRIMARY_SHARING_FACEBOOK1
     static let primarySharingAccount:TestAccount = .facebook1
+#elseif PRIMARY_SHARING_DROPBOX2
+    static let primarySharingAccount:TestAccount = .dropbox2
 #else
     static let primarySharingAccount:TestAccount = .google2
 #endif

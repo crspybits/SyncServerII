@@ -105,9 +105,10 @@ class User : NSObject, Model {
         }
     }
     
-    var effectiveOwningUserId:UserId {
+    // This can be nil in the case where (a) the user is a sharing user, and (b) it original inviting user has been deleted from the system.
+    var effectiveOwningUserId:UserId? {
         if accountType.userType == .sharing {
-            return owningUserId!
+            return owningUserId
         }
         else {
             return userId
@@ -288,6 +289,22 @@ class UserRepository : Repository, RepositoryLookup {
         else {
             let error = db.error
             Log.error("Could not update row for \(tableName): \(error)")
+            return false
+        }
+    }
+    
+    // To deal with deleting the userId account-- any other users that have its user id as their owningUserId must have that owningUserId set to NULL.
+    func resetOwningUserIds(forUserId userId: UserId) -> Bool {
+        let query = "UPDATE \(tableName) SET owningUserId = NULL WHERE owningUserId = \(userId)"
+        
+        if db.connection.query(statement: query) {
+            let numberUpdates = db.connection.numberAffectedRows()
+            Log.info("\(numberUpdates) users had their owningUserId set to NULL.")
+            return true
+        }
+        else {
+            let error = db.error
+            Log.error("Could not update row(s) for \(tableName): \(error)")
             return false
         }
     }

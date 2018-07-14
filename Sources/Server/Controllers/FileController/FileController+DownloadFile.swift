@@ -97,7 +97,7 @@ extension FileController {
                 params.completion(.failure(.message(message)))
                 return
             }
-            
+                        
             // TODO: *5*: Eventually, this should bypass the middle man and stream from the cloud storage service directly to the client.
             
             // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.

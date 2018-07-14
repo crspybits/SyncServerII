@@ -14,6 +14,7 @@ import XCTest
 import LoggerAPI
 import SyncServerShared
 import HeliumLogger
+import Kitura
 
 #if os(Linux)
     import Glibc
@@ -310,8 +311,9 @@ class ServerTestCase : XCTestCase {
         case yes
     }
     
+    // statusCodeExpected is only used if an error is expected.
     @discardableResult
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil) -> UploadFileResult? {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         var sharingGroupId:SharingGroupId!
         var uploadingUserId: UserId?
@@ -361,13 +363,13 @@ class ServerTestCase : XCTestCase {
         uploadRequest.appMetaData = appMetaData
         
         Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toJSON()))")
-        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected)
+        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
         
         return UploadFileResult(request: uploadRequest, fileSize: Int64(uploadString.count), sharingGroupId: sharingGroupId, uploadingUserId: uploadingUserId)
     }
     
-    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false) {
+    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -382,7 +384,12 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
 
                 if errorExpected {
-                    XCTAssert(response!.statusCode != .OK, "Worked on uploadFile request!")
+                    if let statusCodeExpected = statusCodeExpected {
+                        XCTAssert(response!.statusCode == statusCodeExpected)
+                    }
+                    else {
+                        XCTAssert(response!.statusCode != .OK, "Worked on uploadFile request!")
+                    }
                 }
                 else {
                     guard response!.statusCode == .OK, dict != nil else {
@@ -734,23 +741,32 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, failureExpected: Bool = false, completion:((_ newUserId:UserId?, _ sharingGroupId: SharingGroupId?)->())? = nil) {
-        // a) Create sharing invitation with one Google account.
-        // b) Next, need to "sign out" of that account, and sign into another Google account
-        // c) And, redeem sharing invitation with that new Google account.
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, failureExpected: Bool = false, completion:((_ newUserId:UserId?, _ sharingGroupId: SharingGroupId?)->())? = nil) {
+        // a) Create sharing invitation with one account.
+        // b) Next, need to "sign out" of that account, and sign into another account
+        // c) And, redeem sharing invitation with that new account.
 
-        // Create the owning user.
+        // Create the owning user, if needed.
         let deviceUUID = Foundation.UUID().uuidString
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
-            XCTFail()
-            completion?(nil, nil)
-            return
+        var actualSharingGroupId:SharingGroupId!
+        switch addUser {
+        case .no(let sharingGroupId):
+            actualSharingGroupId = sharingGroupId
+
+        case .yes:
+            guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+                let sharingGroupId = addUserResponse.sharingGroupId else {
+                XCTFail()
+                completion?(nil, nil)
+                return
+            }
+            
+            actualSharingGroupId = sharingGroupId
         }
-        
+
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: permission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+        createSharingInvitation(permission: permission, sharingGroupId:actualSharingGroupId) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -782,7 +798,7 @@ class ServerTestCase : XCTestCase {
                 return
             }
             
-            completion?((model as! User).userId, sharingGroupId)
+            completion?((model as! User).userId, actualSharingGroupId)
         }
     }
     
