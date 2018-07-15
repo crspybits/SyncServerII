@@ -1,6 +1,6 @@
 SyncServer
 
-Version 0.16.0
+Version 0.16.0 (7/15/18)
 	* Ownership of files by original uploading user
 		https://github.com/crspybits/SyncServerII/issues/76
 
