@@ -190,7 +190,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func lookupFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) -> Bool? {
+    func lookupFile(forOwningTestAccount testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) -> Bool? {
     
         var lookupResult: Bool?
         
@@ -741,7 +741,7 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, failureExpected: Bool = false, completion:((_ newUserId:UserId?, _ sharingGroupId: SharingGroupId?)->())? = nil) {
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupId: SharingGroupId?)->())? = nil) {
         // a) Create sharing invitation with one account.
         // b) Next, need to "sign out" of that account, and sign into another account
         // c) And, redeem sharing invitation with that new account.

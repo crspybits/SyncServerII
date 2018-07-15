@@ -51,7 +51,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         // Make sure the initial file was created in users cloud storage, if one is configured.
         if let fileName = Constants.session.owningUserAccountCreation.initialFileName {
             let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
-            self.lookupFile(testAccount: testAccount, cloudFileName: fileName, options: options)
+            self.lookupFile(forOwningTestAccount: testAccount, cloudFileName: fileName, options: options)
         }
     }
     

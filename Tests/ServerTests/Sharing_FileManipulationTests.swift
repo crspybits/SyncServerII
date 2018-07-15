@@ -240,7 +240,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
 
         let fileName = request.cloudFileName(deviceUUID:uploadedDeviceUUID, mimeType: request.mimeType)
         Log.debug("Looking for file: \(fileName)")
-        guard let found = lookupFile(testAccount: owningAccount, cloudFileName: fileName, options: options), found else {
+        guard let found = lookupFile(forOwningTestAccount: owningAccount, cloudFileName: fileName, options: options), found else {
             XCTFail()
             return
         }
@@ -396,10 +396,20 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(testAccount: result.sharingTestAccount, expectedNumberOfUploads: 1, deviceUUID:result.uploadedDeviceUUID, masterVersion: masterVersion, sharingGroupId: result.sharingGroupId)
 
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: result.request.mimeType)
+        
+        // The owner of the file will be either (a) the sharing user if that user is an owning user, or (b) the inviting user otherwise.
+        
+        var owningUser: TestAccount!
+        if result.sharingTestAccount.type.userType == .owning {
+            owningUser = result.sharingTestAccount
+        }
+        else {
+            owningUser = .primaryOwningAccount
+        }
 
         let fileName = result.request.cloudFileName(deviceUUID:result.uploadedDeviceUUID, mimeType: result.request.mimeType)
         Log.debug("Looking for file: \(fileName)")
-        guard let found = lookupFile(testAccount: result.sharingTestAccount, cloudFileName: fileName, options: options), !found else {
+        guard let found = lookupFile(forOwningTestAccount: owningUser, cloudFileName: fileName, options: options), !found else {
             XCTFail()
             return
         }
@@ -475,35 +485,44 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         sharingUserCanDownloadSharingUserFile()
     }
     
-    // After accepting a sharing invitation as a Google or Dropbox user, make sure auth tokens are stored, for that redeeming user, so that we can access cloud storage of that user.
+    // After accepting a sharing invitation as an owning user (e.g., Google or Dropbox user), make sure auth tokens are stored, for that redeeming user, so that we can access cloud storage of that user.
     func testCanAccessCloudStorageOfRedeemingUser() {
-        var userId: UserId!
-        createSharingUser(sharingUser: .primarySharingAccount) { newUserId, sharingGroupId in
-            userId = newUserId
-        }
+        var sharingUserId: UserId!
+        let sharingUser:TestAccount = .primarySharingAccount
         
-        // Reconstruct the creds of the sharing user and attempt to access their cloud storage.
-        guard userId != nil, let cloudStorageCreds = FileController.getCreds(forUserId: userId, from: db) as? CloudStorage else {
-            XCTFail()
-            return
-        }
-        
-        let exp = expectation(description: "test1")
-        
-        // It doesn't matter if the file here is found or not found; what matters is that the operation doesn't fail.
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
-        cloudStorageCreds.lookupFile(cloudFileName: "foobar", options: options) { result in
-            switch result {
-            case .success(let result):
-                Log.debug("cloudStorageCreds.lookupFile: success: found: \(result)")
-                break
-            case .failure(let error):
-                XCTFail("\(error)")
+        if sharingUser.type.userType == .owning {
+            createSharingUser(sharingUser: sharingUser) { newUserId, sharingGroupId in
+                sharingUserId = newUserId
             }
-            exp.fulfill()
+            
+            guard sharingUserId != nil else {
+                XCTFail()
+                return
+            }
+            
+            // Reconstruct the creds of the sharing user and attempt to access their cloud storage.
+            guard let cloudStorageCreds = FileController.getCreds(forUserId: sharingUserId, from: db) as? CloudStorage else {
+                XCTFail()
+                return
+            }
+            
+            let exp = expectation(description: "test1")
+            
+            // It doesn't matter if the file here is found or not found; what matters is that the operation doesn't fail.
+            let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
+            cloudStorageCreds.lookupFile(cloudFileName: "foobar", options: options) { result in
+                switch result {
+                case .success(let result):
+                    Log.debug("cloudStorageCreds.lookupFile: success: found: \(result)")
+                    break
+                case .failure(let error):
+                    XCTFail("\(error)")
+                }
+                exp.fulfill()
+            }
+            
+            waitForExpectations(timeout: 10, handler: nil)
         }
-        
-        waitForExpectations(timeout: 10, handler: nil)
     }
     
     // Add a regular user. Invite a sharing user. Delete that regular user. See what happens if the sharing user tries to upload a file.
