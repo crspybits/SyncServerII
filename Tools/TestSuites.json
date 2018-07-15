@@ -4,7 +4,8 @@
     "google",
     "facebook",
     "dropbox",
-    "owning",
+    "owning_google",
+    "owning_dropbox",
     "sharing_create",
     "sharing_redeem",
     "sharing_file"
@@ -65,7 +66,7 @@
       "name": "DropboxTests"
     }
   ],
-  "owning": [
+  "owning_google": [
     {
       "name": "FailureTests",
       "parameters": [
@@ -137,7 +138,9 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1"
       ]
-    },
+    }
+  ],
+  "owning_dropbox": [
     {
       "name": "FailureTests",
       "parameters": [

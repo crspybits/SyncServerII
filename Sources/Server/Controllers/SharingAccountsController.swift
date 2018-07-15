@@ -173,11 +173,11 @@ class SharingAccountsController : ControllerProtocol {
         
         // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
 
-        params.profileCreds!.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
-            if createInitialOwningUserFile {
-                var profileCreds = params.profileCreds!
-                profileCreds.accountCreationUser = .userId(userId, user.accountType.userType)
-
+        var profileCreds = params.profileCreds!
+        profileCreds.accountCreationUser = .userId(userId, user.accountType.userType)
+        
+        profileCreds.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
+            if createInitialOwningUserFile {                
                 // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
                 guard let cloudStorageCreds = profileCreds as? CloudStorage else {
                     let message = "Could not obtain CloudStorage Creds"

@@ -124,7 +124,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         let query = "INSERT INTO \(tableName) (sharingGroupId, userId) VALUES(\(sharingGroupId), \(userId));"
         
         if db.connection.query(statement: query) {
-            Log.info("Sucessfully created sharing group")
+            Log.info("Sucessfully created sharing user group")
             return .success(db.connection.lastInsertId())
         }
         else {
