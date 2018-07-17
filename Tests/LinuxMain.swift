@@ -32,5 +32,6 @@ XCTMain([
     testCase(FileController_UploadAppMetaDataTests.allTests),
     testCase(FileController_FileGroupUUIDTests.allTests),
     testCase(SpecificDatabaseTests_SharingGroups.allTests),
-    testCase(SpecificDatabaseTests_SharingGroupUsers.allTests)
+    testCase(SpecificDatabaseTests_SharingGroupUsers.allTests),
+    testCase(SharingGroupsControllerTests.allTests)
 ])

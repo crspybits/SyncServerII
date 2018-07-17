@@ -73,24 +73,18 @@ class RequestHandler : AccountDelegate {
     }
     
     private func endWith(clientResponse:EndWithResponse) {
-        var jsonString:String?
-        
         self.response.headers.append(ServerConstants.httpResponseCurrentServerVersion, value: Constants.session.deployedGitTag)
         
         switch clientResponse {
         case .json(let jsonDict):
-            
-            do {
-                jsonString = try jsonDict.jsonEncodedString()
-            } catch (let error) {
-                let message = "Failed on json encode: \(error.localizedDescription) for jsonDict: \(jsonDict)"
+            if let jsonString = JSONExtras.toJSONString(dict: jsonDict) {
+                self.response.send(jsonString)
+            }
+            else {
+                let message = "Failed on json encode for jsonDict: \(jsonDict)"
                 Log.error(message)
                 self.response.statusCode = HTTPStatusCode.internalServerError
                 self.response.send(message)
-            }
-            
-            if jsonString != nil {
-                self.response.send(jsonString!)
             }
             
         case .data(data: let data, headers: let headers):

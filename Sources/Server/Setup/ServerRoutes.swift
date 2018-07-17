@@ -36,5 +36,8 @@ public class ServerRoutes {
         let sharingAccountsController = SharingAccountsController()
         proxyRouter.addRoute(ep: ServerEndpoints.createSharingInvitation, createRequest: CreateSharingInvitationRequest.init, processRequest: sharingAccountsController.createSharingInvitation)
         proxyRouter.addRoute(ep: ServerEndpoints.redeemSharingInvitation, createRequest: RedeemSharingInvitationRequest.init, processRequest: sharingAccountsController.redeemSharingInvitation)
+        
+        let sharingGroupsController = SharingGroupsController()
+        proxyRouter.addRoute(ep: ServerEndpoints.getSharingGroups, createRequest: GetSharingGroupsRequest.init, processRequest: sharingGroupsController.getSharingGroups)
     }
 }

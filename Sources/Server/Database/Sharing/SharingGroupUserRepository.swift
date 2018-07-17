@@ -68,7 +68,6 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         return "SharingGroupUser"
     }
     
-    // TODO: How do you do deletions of rows with foreign keys?
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(sharingGroupUserId BIGINT NOT NULL AUTO_INCREMENT, " +
@@ -131,6 +130,29 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             let error = db.error
             Log.error("Could not insert into \(tableName): \(error)")
             return .error(error)
+        }
+    }
+    
+    func sharingGroups(forUserId userId: UserId) -> [SharingGroupUser]? {
+        let query = "select * from \(tableName) where userId = \(userId)"
+        return sharingGroups(forSelectQuery: query)
+    }
+    
+    private func sharingGroups(forSelectQuery selectQuery: String) -> [SharingGroupUser]? {
+        let select = Select(db:db, query: selectQuery, modelInit: SharingGroupUser.init, ignoreErrors:false)
+        
+        var result = [SharingGroupUser]()
+        
+        select.forEachRow { rowModel in
+            let rowModel = rowModel as! SharingGroupUser
+            result.append(rowModel)
+        }
+        
+        if select.forEachRowStatus == nil {
+            return result
+        }
+        else {
+            return nil
         }
     }
 }

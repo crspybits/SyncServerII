@@ -43,6 +43,9 @@
     },
     {
       "name": "SpecificDatabaseTests_SharingGroupUsers"
+    },
+    {
+      "name": "SharingGroupsControllerTests"
     }
   ],
   "google": [

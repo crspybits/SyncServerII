@@ -179,6 +179,13 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         case .error(let error):
             XCTFail("Error: \(error)")
         }
+        
+        guard let groups = SharingGroupUserRepository(db).sharingGroups(forUserId: userId), groups.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(groups[0].sharingGroupId == sharingGroupId)
     }
 }
 

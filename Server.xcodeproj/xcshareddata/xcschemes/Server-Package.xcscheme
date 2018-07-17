@@ -28,65 +28,23 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "KituraContracts::KituraContracts"
+               BuildableName = "KituraContracts.framework"
+               BlueprintName = "KituraContracts"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SyncServer_Shared::SyncServerShared"
                BuildableName = "SyncServerShared.framework"
                BlueprintName = "SyncServerShared"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura-net::CHTTPParser"
-               BuildableName = "CHTTPParser.framework"
-               BlueprintName = "CHTTPParser"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PerfectThread::PerfectThread"
-               BuildableName = "PerfectThread.framework"
-               BlueprintName = "PerfectThread"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura-CredentialsGoogle::CredentialsGoogle"
-               BuildableName = "CredentialsGoogle.framework"
-               BlueprintName = "CredentialsGoogle"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura-CredentialsFacebook::CredentialsFacebook"
-               BuildableName = "CredentialsFacebook.framework"
-               BlueprintName = "CredentialsFacebook"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -112,9 +70,65 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::Main"
-               BuildableName = "Main"
-               BlueprintName = "Main"
+               BlueprintIdentifier = "Kitura-net::KituraNet"
+               BuildableName = "KituraNet.framework"
+               BlueprintName = "KituraNet"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::Server"
+               BuildableName = "Server.framework"
+               BlueprintName = "Server"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Kitura-Credentials::Credentials"
+               BuildableName = "Credentials.framework"
+               BlueprintName = "Credentials"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PerfectLib::PerfectLib"
+               BuildableName = "PerfectLib.framework"
+               BlueprintName = "PerfectLib"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PerfectThread::PerfectThread"
+               BuildableName = "PerfectThread.framework"
+               BlueprintName = "PerfectThread"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -140,9 +154,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSLService::SSLService"
-               BuildableName = "SSLService.framework"
-               BlueprintName = "SSLService"
+               BlueprintIdentifier = "Kitura-CredentialsFacebook::CredentialsFacebook"
+               BuildableName = "CredentialsFacebook.framework"
+               BlueprintName = "CredentialsFacebook"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -154,51 +168,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "KituraContracts::KituraContracts"
-               BuildableName = "KituraContracts.framework"
-               BlueprintName = "KituraContracts"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PerfectMySQL::PerfectMySQL"
-               BuildableName = "PerfectMySQL.framework"
-               BlueprintName = "PerfectMySQL"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Socket::Socket"
-               BuildableName = "Socket.framework"
-               BlueprintName = "Socket"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura-net::KituraNet"
-               BuildableName = "KituraNet.framework"
-               BlueprintName = "KituraNet"
+               BlueprintIdentifier = "Kitura-TemplateEngine::KituraTemplateEngine"
+               BuildableName = "KituraTemplateEngine.framework"
+               BlueprintName = "KituraTemplateEngine"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -213,6 +185,20 @@
                BlueprintIdentifier = "HeliumLogger::HeliumLogger"
                BuildableName = "HeliumLogger.framework"
                BlueprintName = "HeliumLogger"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Kitura-Session::KituraSession"
+               BuildableName = "KituraSession.framework"
+               BlueprintName = "KituraSession"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -252,9 +238,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura-Credentials::Credentials"
-               BuildableName = "Credentials.framework"
-               BlueprintName = "Credentials"
+               BlueprintIdentifier = "Socket::Socket"
+               BuildableName = "Socket.framework"
+               BlueprintName = "Socket"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -266,9 +252,23 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura-TemplateEngine::KituraTemplateEngine"
-               BuildableName = "KituraTemplateEngine.framework"
-               BlueprintName = "KituraTemplateEngine"
+               BlueprintIdentifier = "Kitura-CredentialsGoogle::CredentialsGoogle"
+               BuildableName = "CredentialsGoogle.framework"
+               BlueprintName = "CredentialsGoogle"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::Main"
+               BuildableName = "Main"
+               BlueprintName = "Main"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -294,9 +294,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PerfectLib::PerfectLib"
-               BuildableName = "PerfectLib.framework"
-               BlueprintName = "PerfectLib"
+               BlueprintIdentifier = "Kitura-net::CHTTPParser"
+               BuildableName = "CHTTPParser.framework"
+               BlueprintName = "CHTTPParser"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -308,9 +308,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::Server"
-               BuildableName = "Server.framework"
-               BlueprintName = "Server"
+               BlueprintIdentifier = "Kitura::Kitura"
+               BuildableName = "Kitura.framework"
+               BlueprintName = "Kitura"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -336,9 +336,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura-Session::KituraSession"
-               BuildableName = "KituraSession.framework"
-               BlueprintName = "KituraSession"
+               BlueprintIdentifier = "SSLService::SSLService"
+               BuildableName = "SSLService.framework"
+               BlueprintName = "SSLService"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -350,9 +350,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Kitura::Kitura"
-               BuildableName = "Kitura.framework"
-               BlueprintName = "Kitura"
+               BlueprintIdentifier = "PerfectMySQL::PerfectMySQL"
+               BuildableName = "PerfectMySQL.framework"
+               BlueprintName = "PerfectMySQL"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
