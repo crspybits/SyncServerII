@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.16.1 (7/16/18)
+	* Added endpoint to get sharing group ids.
+
 Version 0.16.0 (7/15/18)
 	* Ownership of files by original uploading user
 		https://github.com/crspybits/SyncServerII/issues/76
