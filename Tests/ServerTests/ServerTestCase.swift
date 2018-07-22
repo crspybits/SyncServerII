@@ -802,10 +802,10 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
+    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
     
         var actualCloudFolderName: String?
-        if sharingUser.type == .Google {
+        if sharingUser.type == .Google && canGiveCloudFolderName {
             actualCloudFolderName = ServerTestCase.cloudFolderName
         }
 

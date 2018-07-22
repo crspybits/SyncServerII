@@ -27,6 +27,30 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     func testThatRedeemingWithASharingAccountWorks() {
         createSharingUser(sharingUser: .primarySharingAccount)
     }
+    
+    func testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails() {
+        let permission:Permission = .write
+        let sharingUser:TestAccount = .google2
+
+        let deviceUUID = Foundation.UUID().uuidString
+
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+
+        var sharingInvitationUUID:String!
+        
+        createSharingInvitation(permission: permission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        redeemSharingInvitation(sharingUser:sharingUser, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
+            expectation.fulfill()
+        }
+    }
         
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
@@ -209,6 +233,10 @@ extension SharingAccountsController_RedeemSharingInvitation {
     static var allTests : [(String, (SharingAccountsController_RedeemSharingInvitation) -> () throws -> Void)] {
         return [
             ("testThatRedeemingWithASharingAccountWorks", testThatRedeemingWithASharingAccountWorks),
+            
+            ("testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails",
+                testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails),
+            
             ("testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails),
             
             ("testThatRedeemingWithTheSameAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameAccountAsTheOwningAccountFails),
