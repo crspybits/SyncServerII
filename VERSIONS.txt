@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.16.3 (7/22/18)
+	* Fixed issue with user deletion.
+	
 Version 0.16.2 (7/22/18)
 	* Added new test case & new version of shared library.
 
