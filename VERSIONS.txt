@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.16.2 (7/22/18)
+	* Added new test case & new version of shared library.
+
 Version 0.16.1 (7/16/18)
 	* Added endpoint to get sharing group ids.
 

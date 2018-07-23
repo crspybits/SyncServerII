@@ -186,8 +186,8 @@
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-CRUD.git",
         "state": {
           "branch": null,
-          "revision": "e79873e28ee9acf96fdf71b6784130a97a4b3f74",
-          "version": "1.0.4"
+          "revision": "49e896a180076d1bf2bf7fe1fa3a110ed35cc73e",
+          "version": "1.0.5"
         }
       },
       {
@@ -240,8 +240,8 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "c6c83c577cdb35a2212f20f4832486817398b37c",
-          "version": "8.1.0"
+          "revision": "68e02c0d221e85dfdb8008bec894c3196a98ee69",
+          "version": "8.2.0"
         }
       },
       {
