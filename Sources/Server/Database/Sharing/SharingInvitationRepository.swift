@@ -104,7 +104,7 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
             // gives time/day that the invitation will expire
             "expiry \(dateFormat.rawValue) NOT NULL, " +
 
-            // The user that will own new files uploaded by this new user if they join as a sharing user.
+            // The user that will own new files uploaded by this new user if they join as a sharing user that doesn't have cloud storage.
             // This is a reference into the User table.
             // TODO: *2* Make this a foreign key reference to the User table.
             "owningUserId BIGINT NOT NULL, " +
