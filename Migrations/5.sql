@@ -22,8 +22,6 @@ begin
    
    START TRANSACTION;
 
-Use SyncServer_SharedImages;
-
 ALTER TABLE User DROP COLUMN userType;
 		
 ALTER TABLE User CHANGE COLUMN sharingPermission permission VARCHAR(5);
@@ -104,23 +102,69 @@ ALTER TABLE FileIndex ADD CONSTRAINT FOREIGN KEY (sharingGroupId) REFERENCES Sha
 -- 	Adding sharingGroupId column to Upload table.
 DELETE FROM Upload;
 
-ALTER TABLE Upload ADD COLUMN sharingGroupId bigint(20) NOT NULL, ADD FOREIGN KEY (sharingGroupId) REFERENCES SharingGroup (sharingGroupId)
+ALTER TABLE Upload ADD COLUMN sharingGroupId bigint(20) NOT NULL, ADD FOREIGN KEY (sharingGroupId) REFERENCES SharingGroup (sharingGroupId);
+
+-- 	Change from UNIQUE (fileUUID, userId) for FileIndex to UNIQUE (fileUUID, sharingGroupId).
+ALTER TABLE FileIndex DROP INDEX FileUUID;
+ALTER TABLE FileIndex ADD UNIQUE (fileUUID, sharingGroupId);
+
+-- 	Master version table: 
+-- 		Replace userId with sharingGroupId
+-- 		* Should just be a few userId's in the production table-- and predominantly, mine.
+-- 
+-- mysql> select * from MasterVersion;
+-- +--------+---------------+
+-- | userId | masterVersion |
+-- +--------+---------------+
+-- |      1 |           484 |
+-- |     12 |             1 |
+-- |     13 |             0 |
+-- +--------+---------------+
+-- 3 rows in set (0.05 sec)
+
+-- SET @AppleReviewUserId := 12;
+-- SET @ChrisUserId := 1;
+-- SET @ChrisDropboxUserId := 13;
+
+-- CREATE TABLE `MasterVersion` (
+--   `userId` bigint(20) NOT NULL,
+--   `masterVersion` bigint(20) NOT NULL,
+--   UNIQUE KEY `userId` (`userId`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+-- SET @firstSharingGroupId := 1;
+-- -- For Apple Review
+-- SET @secondSharingGroupId := 2;
+-- -- For Dropbox
+-- SET @thirdSharingGroupId := 3;
+
+ALTER TABLE MasterVersion DROP INDEX userId;
+ALTER TABLE MasterVersion ADD COLUMN sharingGroupId bigint(20);
+
+UPDATE MasterVersion SET sharingGroupId = @secondSharingGroupId WHERE userId = @AppleReviewUserId;
+UPDATE MasterVersion SET sharingGroupId = @thirdSharingGroupId WHERE userId = @ChrisDropboxUserId;
+UPDATE MasterVersion SET sharingGroupId = @firstSharingGroupId WHERE userId = @ChrisUserId;
+
+ALTER TABLE MasterVersion DROP COLUMN userId;
+ALTER TABLE MasterVersion MODIFY sharingGroupId bigint(20) NOT NULL;
+ALTER TABLE MasterVersion ADD CONSTRAINT FOREIGN KEY (sharingGroupId) REFERENCES SharingGroup (sharingGroupId);
+
+ALTER TABLE MasterVersion ADD UNIQUE (sharingGroupId);
+
+-- 	Changing the Lock table to have a sharingGroupId as index.
+-- 		userId column removed; replaced with sharingGroupId column.
+-- 		No longer have UNIQUE (userId) but have UNIQUE (sharingGroupId)
+
+ALTER TABLE ShortLocks DROP INDEX userId;
+ALTER TABLE ShortLocks DROP COLUMN userId;
+ALTER TABLE ShortLocks ADD COLUMN sharingGroupId bigint(20) NOT NULL, ADD FOREIGN KEY (sharingGroupId) REFERENCES SharingGroup (sharingGroupId);
+ALTER TABLE ShortLocks ADD UNIQUE (sharingGroupId);
 
    COMMIT;
    
 end//
 delimiter ;
 
+Use SyncServer_SharedImages;
 call migration();
 drop procedure migration;
-
-
-
-
--- 	Change from UNIQUE (fileUUID, userId) for FileIndex to UNIQUE (fileUUID, sharingGroupId).
--- 	Master version table: 
--- 		Replace userId with sharingGroupId
--- 		* Should just be a few userId's in the production table-- and predominantly, mine.
--- 	Changing the Lock table to have a sharingGroupId as index.
--- 		userId column removed; replaced with sharingGroupId column.
--- 		No longer have UNIQUE (userId) but have UNIQUE (sharingGroupId)

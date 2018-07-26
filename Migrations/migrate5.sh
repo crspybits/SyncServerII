@@ -1,11 +1,10 @@
 #!/bin/bash
 
 user=
-password=
 host=
-dbname=
+dbname="SyncServer_SharedImages"
 
-result=$(mysql --user="$user" --password="$password" --host="$host" --database="$dbname" < 5.sql 2>&1 )
+result=$(mysql -P 3306 -p --user="$user" --host="$host" --database="$dbname" < 5.sql 2>&1 )
 
 if [ $? = 0 ]; then
     echo "Success running migration"
