@@ -168,3 +168,5 @@ delimiter ;
 Use SyncServer_SharedImages;
 call migration();
 drop procedure migration;
+
+DROP DATABASE syncserver;
