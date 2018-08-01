@@ -17,6 +17,8 @@ class Database {
     // See http://stackoverflow.com/questions/13397038/uuid-max-character-length
     static let uuidLength = 36
     
+    static let maxSharingGroupNameLength = 255
+    
     static let maxMimeTypeLength = 100
 
     // E.g.,[ERR] Could not insert into ShortLocks: Failure: 1062 Duplicate entry '1' for key 'userId'
@@ -316,6 +318,78 @@ class Select {
         
         if !returnCode {
             self.forEachRowStatus = .failedRowIterator
+        }
+    }
+}
+
+extension Database {
+    // This intended for a one-off insert of a row.
+    class Insert {
+        enum ValueType {
+            case null
+            case int(Int)
+            case string(String)
+        }
+        
+        enum Errors : Error {
+            case failedOnPreparingStatement
+            case executionError
+        }
+        
+        private var stmt:MySQLStmt!
+        private var valueTypes = [ValueType]()
+        private var repo: RepositoryBasics!
+        private var fieldNames = [String]()
+        
+        init(repo: RepositoryBasics) {
+            self.repo = repo
+            self.stmt = MySQLStmt(repo.db.connection)
+        }
+        
+        func add(fieldName: String, value: ValueType) {
+            fieldNames += [fieldName]
+            valueTypes += [value]
+        }
+        
+        // Returns the id of the inserted row.
+        @discardableResult
+        func run() throws -> Int64 {
+            var formattedFieldNames = ""
+            var bindParams = ""
+
+            for fieldName in fieldNames {
+                if formattedFieldNames.count > 0 {
+                    formattedFieldNames += ","
+                    bindParams += ","
+                }
+                formattedFieldNames += fieldName
+                bindParams += "?"
+            }
+
+            // The insert query has `?` where values would be. See also https://websitebeaver.com/prepared-statements-in-php-mysqli-to-prevent-sql-injection
+            let query = "INSERT INTO \(repo.tableName) (\(formattedFieldNames)) VALUES (\(bindParams))"
+        
+            guard self.stmt.prepare(statement: query) else {
+                Log.error("Failed on preparing statement: \(query)")
+                throw Errors.failedOnPreparingStatement
+            }
+            
+            for valueType in valueTypes {
+                switch valueType {
+                case .null:
+                    self.stmt.bindParam()
+                case .int(let intValue):
+                    self.stmt.bindParam(intValue)
+                case .string(let stringValue):
+                    self.stmt.bindParam(stringValue)
+                }
+            }
+            
+            guard self.stmt.execute() else {
+                throw Errors.executionError
+            }
+            
+            return repo.db.connection.lastInsertId()
         }
     }
 }

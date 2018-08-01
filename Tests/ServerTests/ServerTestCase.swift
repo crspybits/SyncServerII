@@ -1043,8 +1043,8 @@ class ServerTestCase : XCTestCase {
         return cloudFileName
     }
     
-    func addSharingGroup() -> SharingGroupId? {
-        let result = SharingGroupRepository(db).add()
+    func addSharingGroup(sharingGroupName: String? = nil) -> SharingGroupId? {
+        let result = SharingGroupRepository(db).add(sharingGroupName: sharingGroupName)
         
         var sharingGroupId:SharingGroupId?
         switch result {

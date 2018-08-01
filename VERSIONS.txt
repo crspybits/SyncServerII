@@ -1,5 +1,10 @@
 SyncServer
 
+Version 0.17.0
+	* Multiple sharing groups per user
+		https://github.com/crspybits/SyncServerII/issues/27
+	* Add name to sharing groups.
+
 Version 0.16.3 (7/22/18)
 	* Fixed issue with user deletion.
 	
