@@ -136,6 +136,21 @@ class FileController : ControllerProtocol {
             Log.info("Finished sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
         }
 #endif
+
+        guard let groups = params.repos.sharingGroup.sharingGroups(forUserId: params.currentSignedInUser!.userId) else {
+            let message = "Could not get sharing groups for user."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        let clientSharingGroups:[SyncServerShared.SharingGroup] = groups.map { serverGroup in
+            let clientGroup = SyncServerShared.SharingGroup()!
+            clientGroup.sharingGroupId = serverGroup.sharingGroupId
+            clientGroup.sharingGroupName = serverGroup.sharingGroupName
+            clientGroup.deleted = serverGroup.deleted
+            return clientGroup
+        }
         
         getMasterVersion(sharingGroupId: fileIndexRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
@@ -152,6 +167,7 @@ class FileController : ControllerProtocol {
                 let response = FileIndexResponse()!
                 response.fileIndex = fileIndex
                 response.masterVersion = masterVersion
+                response.sharingGroups = clientSharingGroups
                 params.completion(.success(response))
                 
             case .error(let error):

@@ -15,34 +15,87 @@ class SharingGroupsController : ControllerProtocol {
         return true
     }
     
-    func getSharingGroups(params:RequestProcessingParameters) {
-        guard let _ = params.request as? GetSharingGroupsRequest else {
-            let message = "Did not receive GetSharingGroupsRequest"
+    func createSharingGroup(params:RequestProcessingParameters) {
+        guard let request = params.request as? CreateSharingGroupRequest else {
+            let message = "Did not receive CreateSharingGroupRequest"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        let response = GetSharingGroupsResponse()!
+        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(sharingGroupName: request.sharingGroup.sharingGroupName) else {
+            let message = "Failed on adding new sharing group."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
 
-        guard let groups = params.repos.sharingGroupUser.sharingGroups(forUserId: params.currentSignedInUser!.userId) else {
-            let message = "Could not get sharing groups for user."
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: params.currentSignedInUser!.userId) else {
+            let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        let sharingGroupIds = groups.filter{$0.sharingGroupId != nil}.map {$0.sharingGroupId!}
-        
-        guard sharingGroupIds.count == groups.count else {
-            let message = "At least one of the sharing group id's was nil!"
+        if !params.repos.masterVersion.initialize(sharingGroupId: sharingGroupId) {
+            let message = "Failed on creating MasterVersion record for sharing group!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        response.sharingGroupIds = sharingGroupIds
+        let response = CreateSharingGroupResponse()!
+        response.sharingGroupId = sharingGroupId
         
+        params.completion(.success(response))
+    }
+    
+    func removeSharingGroup(params:RequestProcessingParameters) {
+        guard let request = params.request as? RemoveSharingGroupRequest else {
+            let message = "Did not receive RemoveSharingGroupRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard sharingGroupSecurityCheck(sharingGroupId: request.sharingGroupId, params: params) else {
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard let count = params.repos.fileIndex.markFilesAsDeleted(forCriteria: .sharingGroupId("\(request.sharingGroupId!)")), count == 1 else {
+            let message = "Could not mark files as deleted for sharing group!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // Any users who were members of the sharing group should no longer be members.
+        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.sharingGroupId(request.sharingGroupId)
+        switch params.repos.sharingGroupUser.remove(key: sharingGroupUserKey) {
+        case .removed:
+            break
+        case .error(let error):
+            let message = "Could not remove sharing group user references: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // Mark the sharing group as deleted.
+        guard let _ = params.repos.sharingGroup.markAsDeleted(forCriteria:
+            .sharingGroupId(request.sharingGroupId)) else {
+            let message = "Could not mark sharing group as deleted."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // Not going to remove row from master version. People will still be able to get the file index for this sharing group-- to see that all the files are (marked as) deleted. That requires a master version.
+        
+        let response = RemoveSharingGroupResponse()!
         params.completion(.success(response))
     }
 }

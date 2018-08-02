@@ -180,12 +180,56 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             XCTFail("Error: \(error)")
         }
         
-        guard let groups = SharingGroupUserRepository(db).sharingGroups(forUserId: userId), groups.count == 1 else {
+        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId), groups.count == 1 else {
             XCTFail()
             return
         }
         
         XCTAssert(groups[0].sharingGroupId == sharingGroupId)
+    }
+
+    func testGetUserSharingGroupsForMultipleGroups() {
+        guard let sharingGroupId1 = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+
+        guard let sharingGroupId2 = addSharingGroup(sharingGroupName: "Foobar") else {
+            XCTFail()
+            return
+        }
+
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = .Google
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = "100"
+        user1.permission = .admin
+        
+        guard let userId: UserId = UserRepository(db).add(user: user1) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId1, userId: userId) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId2, userId: userId) else {
+            XCTFail()
+            return
+        }
+        
+        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId), groups.count == 2 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(groups[0].sharingGroupId == sharingGroupId1)
+        XCTAssert(groups[0].sharingGroupName == nil)
+        XCTAssert(groups[1].sharingGroupId == sharingGroupId2)
+        XCTAssert(groups[1].sharingGroupName == "Foobar")
     }
 }
 
@@ -195,7 +239,8 @@ extension SpecificDatabaseTests_SharingGroupUsers {
             ("testAddSharingGroupUser", testAddSharingGroupUser),
             ("testAddMultipleSharingGroupUsers", testAddMultipleSharingGroupUsers),
             ("testAddSharingGroupUserFailsIfYouAddTheSameUserToSameGroupTwice", testAddSharingGroupUserFailsIfYouAddTheSameUserToSameGroupTwice),
-            ("testLookupFromSharingGroupUser", testLookupFromSharingGroupUser)
+            ("testLookupFromSharingGroupUser", testLookupFromSharingGroupUser),
+            ("testGetUserSharingGroupsForMultipleGroups", testGetUserSharingGroupsForMultipleGroups)
         ]
     }
     

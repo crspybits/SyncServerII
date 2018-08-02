@@ -39,7 +39,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on getSharingGroups request: \(response!.statusCode)")
                 if let dict = dict, let getSharingGroupsResponse = GetSharingGroupsResponse(json: dict) {
-                    XCTAssert(getSharingGroupsResponse.sharingGroupIds != nil)
+                    XCTAssert(getSharingGroupsResponse.sharingGroups != nil)
                     result = getSharingGroupsResponse
                 }
                 else {
@@ -63,20 +63,25 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         }
         
         guard let getSharingGroupsResponse = getSharingGroup(deviceUUID:deviceUUID),
-            let sharingGroupIds = getSharingGroupsResponse.sharingGroupIds,
-            sharingGroupIds.count == 1 else {
+            let sharingGroups = getSharingGroupsResponse.sharingGroups,
+            sharingGroups.count == 1 else {
             XCTFail()
             return
         }
         
-        XCTAssert(sharingGroupId == sharingGroupIds[0])
+        XCTAssert(sharingGroups[0].sharingGroupId == sharingGroupId)
+    }
+    
+    func testCreateSharingGroupWorks() {
+    
     }
 }
 
 extension SharingGroupsControllerTests {
     static var allTests : [(String, (SharingGroupsControllerTests) -> () throws -> Void)] {
         return [
-            ("testGetSharingGroups", testGetSharingGroups)
+            ("testGetSharingGroups", testGetSharingGroups),
+            ("testCreateSharingGroupWorks", testCreateSharingGroupWorks)
         ]
     }
     

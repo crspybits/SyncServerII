@@ -90,6 +90,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case sharingGroupUserId(SharingGroupUserId)
         case primaryKeys(sharingGroupId: SharingGroupId, userId: UserId)
         case userId(UserId)
+        case sharingGroupId(SharingGroupId)
         
         var description : String {
             switch self {
@@ -99,6 +100,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
                 return "primaryKeys(\(sharingGroupId), \(userId))"
             case .userId(let userId):
                 return "userId(\(userId))"
+            case .sharingGroupId(let sharingGroupId):
+                return "sharingGroupId(\(sharingGroupId))"
             }
         }
     }
@@ -111,6 +114,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             return "sharingGroupId = \(sharingGroupId) and userId = \(userId)"
         case .userId(let userId):
             return "userId = \(userId)"
+        case .sharingGroupId(let sharingGroupId):
+            return "sharingGroupId = \(sharingGroupId)"
         }
     }
     
@@ -130,29 +135,6 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             let error = db.error
             Log.error("Could not insert into \(tableName): \(error)")
             return .error(error)
-        }
-    }
-    
-    func sharingGroups(forUserId userId: UserId) -> [SharingGroupUser]? {
-        let query = "select * from \(tableName) where userId = \(userId)"
-        return sharingGroups(forSelectQuery: query)
-    }
-    
-    private func sharingGroups(forSelectQuery selectQuery: String) -> [SharingGroupUser]? {
-        let select = Select(db:db, query: selectQuery, modelInit: SharingGroupUser.init, ignoreErrors:false)
-        
-        var result = [SharingGroupUser]()
-        
-        select.forEachRow { rowModel in
-            let rowModel = rowModel as! SharingGroupUser
-            result.append(rowModel)
-        }
-        
-        if select.forEachRowStatus == nil {
-            return result
-        }
-        else {
-            return nil
         }
     }
 }

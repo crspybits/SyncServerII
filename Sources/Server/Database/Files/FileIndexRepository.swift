@@ -540,8 +540,22 @@ class FileIndexRepository : Repository, RepositoryLookup {
         }
     }
     
-    func markFilesAsDeleted(forUserId userId: UserId) -> Int64? {
-        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE \(FileIndex.userIdKey)=\(userId)"
+    enum MarkDeletionCriteria {
+        case userId(String)
+        case sharingGroupId(String)
+        
+        func toString() -> String {
+            switch self {
+            case .userId(let userId):
+                return "\(FileIndex.userIdKey)=\(userId)"
+            case .sharingGroupId(let sharingGroupId):
+                return "\(FileIndex.sharingGroupIdKey)=\(sharingGroupId)"
+            }
+        }
+    }
+    
+    func markFilesAsDeleted(forCriteria criteria: MarkDeletionCriteria) -> Int64? {
+        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + criteria.toString()
         if db.connection.query(statement: query) {
             return db.connection.numberAffectedRows()
         }

@@ -329,6 +329,7 @@ extension Database {
             case null
             case int(Int)
             case string(String)
+            case bool(Bool)
         }
         
         enum Errors : Error {
@@ -382,6 +383,8 @@ extension Database {
                     self.stmt.bindParam(intValue)
                 case .string(let stringValue):
                     self.stmt.bindParam(stringValue)
+                case .bool(let boolValue):
+                    self.stmt.bindParam(boolValue ? 1 : 0)
                 }
             }
             

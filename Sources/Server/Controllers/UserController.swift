@@ -218,7 +218,7 @@ class UserController : ControllerProtocol {
         }
         
         // 6/25/18; Up until today, user removal had included actual removal of all of the user's files from the FileIndex. BUT-- this goes against how deletion occurs on the SyncServer-- we mark files as deleted, but don't actually remove them from the FileIndex.
-        guard let _ = params.repos.fileIndex.markFilesAsDeleted(forUserId: params.currentSignedInUser!.userId) else {
+        guard let _ = params.repos.fileIndex.markFilesAsDeleted(forCriteria: .userId("\(params.currentSignedInUser!.userId!)")) else {
             let message = "Could not mark files as deleted for user!"
             Log.error(message)
             params.completion(.failure(.message(message)))

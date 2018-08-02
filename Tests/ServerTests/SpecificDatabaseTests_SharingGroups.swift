@@ -48,7 +48,7 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
         let result = SharingGroupRepository(db).lookup(key: key, modelInit: SharingGroup.init)
         switch result {
         case .found(let model):
-            guard let obj = model as? SharingGroup else {
+            guard let obj = model as? Server.SharingGroup else {
                 XCTFail()
                 return
             }
