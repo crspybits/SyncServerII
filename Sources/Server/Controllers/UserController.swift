@@ -48,8 +48,6 @@ class UserController : ControllerProtocol {
     }
     
     func addUser(params:RequestProcessingParameters) {
-        Log.debug("UserController.addUser.1")
-
         guard let addUserRequest = params.request as? AddUserRequest else {
             let message = "Did not receive AddUserRequest"
             Log.error(message)
@@ -108,7 +106,7 @@ class UserController : ControllerProtocol {
         
         user.userId = userId
 
-        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add() else {
+        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(sharingGroupName: addUserRequest.sharingGroupName) else {
             let message = "Failed on adding new sharing group."
             Log.error(message)
             params.completion(.failure(.message(message)))

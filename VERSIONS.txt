@@ -6,7 +6,7 @@ Version 0.17.0
 	* Add name to sharing groups.
 	* Repurposed FileIndex endpoint to also return the current users sharing groups.
 		Dropped the get sharing groups endpoint.
-		Renamed it to Index because it's more than just for files.
+		Renamed FileIndex to Index because it's more than just for files.
 		
 Version 0.16.3 (7/22/18)
 	* Fixed issue with user deletion.

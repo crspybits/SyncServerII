@@ -245,7 +245,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName) -> AddUserResponse? {
+    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName, sharingGroupName:String? = nil) -> AddUserResponse? {
         var result:AddUserResponse?
 
         if let fileName = Constants.session.owningUserAccountCreation.initialFileName {
@@ -253,20 +253,21 @@ class ServerTestCase : XCTestCase {
             let options = CloudStorageFileNameOptions(cloudFolderName: cloudFolderName, mimeType: "text/plain")
             
             deleteFile(testAccount: testAccount, cloudFileName: fileName, options: options)
-            result = addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
+            result = addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, sharingGroupName: sharingGroupName)
         }
         else {
-            result = addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName)
+            result = addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, sharingGroupName: sharingGroupName)
         }
         
         return result
     }
     
-    private func addNewUser2(testAccount:TestAccount, deviceUUID:String, cloudFolderName: String?) -> AddUserResponse? {
+    private func addNewUser2(testAccount:TestAccount, deviceUUID:String, cloudFolderName: String?, sharingGroupName:String?) -> AddUserResponse? {
         var result:AddUserResponse?
         
         let addUserRequest = AddUserRequest(json: [
-            AddUserRequest.cloudFolderNameKey : cloudFolderName as Any
+            AddUserRequest.cloudFolderNameKey : cloudFolderName as Any,
+            AddUserRequest.sharingGroupNameKey: sharingGroupName as Any
         ])!
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
@@ -635,9 +636,11 @@ class ServerTestCase : XCTestCase {
                 
                 if sharingGroupId == nil {
                     XCTAssert(indexResponse.fileIndex == nil)
+                    XCTAssert(indexResponse.masterVersion == nil)
                 }
                 else {
                     XCTAssert(indexResponse.fileIndex != nil)
+                    XCTAssert(indexResponse.masterVersion != nil)
                 }
                 
                 result = (indexResponse.fileIndex, groups)

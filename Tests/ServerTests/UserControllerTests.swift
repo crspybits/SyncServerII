@@ -55,6 +55,33 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    func testAddUserWithSharingGroupNameWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let sharingGroupName = "SharingGroup765"
+        
+        guard let addUserResponse = addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, sharingGroupName:sharingGroupName) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(addUserResponse.sharingGroupId != nil)
+        
+        guard let (_, sharingGroups) = getIndex() else {
+            XCTFail()
+            return
+        }
+        
+        guard sharingGroups.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(sharingGroups[0].sharingGroupId == addUserResponse.sharingGroupId)
+        XCTAssert(sharingGroups[0].sharingGroupName == sharingGroupName)
+        XCTAssert(sharingGroups[0].deleted == false)
+    }
+    
     func testAddUserFailsWhenAddingExistingUser() {
         let deviceUUID = Foundation.UUID().uuidString
         self.addNewUser(deviceUUID:deviceUUID)
@@ -229,7 +256,8 @@ extension UserControllerTests {
             ("testCheckCredsWithBadAccessToken", testCheckCredsWithBadAccessToken),
             ("testRemoveUserFailsWithNonExistingUser", testRemoveUserFailsWithNonExistingUser),
             ("testRemoveUserSucceedsWithExistingUser", testRemoveUserSucceedsWithExistingUser),
-            ("testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved", testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved)
+            ("testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved", testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved),
+            ("testAddUserWithSharingGroupNameWorks", testAddUserWithSharingGroupNameWorks)
         ]
     }
     
