@@ -526,15 +526,17 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64, expectedFileSizes: [String: Int64], sharingGroupId: SharingGroupId, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
+    func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, expectedFileSizes: [String: Int64]? = nil, sharingGroupId: SharingGroupId? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
     
-        XCTAssert(expectedFiles.count == expectedFileSizes.count)
+        if let expectedFiles = expectedFiles {
+            XCTAssert(expectedFiles.count == expectedFileSizes!.count)
+        }
         
-        let fileIndexRequest = FileIndexRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+        let indexRequest = IndexRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
         ])
     
-        guard let request = fileIndexRequest,
+        guard let request = indexRequest,
             let parameters = request.urlParameters() else {
             XCTFail()
             return
@@ -543,42 +545,49 @@ class ServerTestCase : XCTestCase {
         self.performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
-            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, urlParameters: "?" + parameters, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.index, headers: headers, urlParameters: "?" + parameters, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
 
                 if errorExpected {
                     XCTAssert(response!.statusCode != .OK)
                 }
                 else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
+                    XCTAssert(response!.statusCode == .OK, "Did not work on IndexRequest request")
                     XCTAssert(dict != nil)
 
-                    if let fileIndexResponse = FileIndexResponse(json: dict!) {
-                        XCTAssert(fileIndexResponse.masterVersion == masterVersionExpected)
-                        XCTAssert(fileIndexResponse.fileIndex!.count == expectedFiles.count)
-                        
-                        _ = fileIndexResponse.fileIndex!.map { fileInfo in
-                            Log.info("fileInfo: \(fileInfo)")
-                            
-                            let filterResult = expectedFiles.filter { uploadFileRequest in
-                                uploadFileRequest.fileUUID == fileInfo.fileUUID
+                    if let indexResponse = IndexResponse(json: dict!) {
+                        XCTAssert(indexResponse.masterVersion == masterVersionExpected)
+                        if let expectedFiles = expectedFiles {
+                            guard let fileIndex = indexResponse.fileIndex else {
+                                XCTFail()
+                                return
                             }
                             
-                            XCTAssert(filterResult.count == 1)
-                            let expectedFile = filterResult[0]
+                            XCTAssert(fileIndex.count == expectedFiles.count)
                             
-                            XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
-                            XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
-                            XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
-                            
-                            if expectedDeletionState == nil {
-                                XCTAssert(fileInfo.deleted == false)
+                            fileIndex.forEach { fileInfo in
+                                Log.info("fileInfo: \(fileInfo)")
+                                
+                                let filterResult = expectedFiles.filter { uploadFileRequest in
+                                    uploadFileRequest.fileUUID == fileInfo.fileUUID
+                                }
+                                
+                                XCTAssert(filterResult.count == 1)
+                                let expectedFile = filterResult[0]
+                                
+                                XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
+                                XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
+                                XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
+                                
+                                if expectedDeletionState == nil {
+                                    XCTAssert(fileInfo.deleted == false)
+                                }
+                                else {
+                                    XCTAssert(fileInfo.deleted == expectedDeletionState![fileInfo.fileUUID])
+                                }
+                                
+                                XCTAssert(expectedFileSizes?[fileInfo.fileUUID] == fileInfo.fileSizeBytes)
                             }
-                            else {
-                                XCTAssert(fileInfo.deleted == expectedDeletionState![fileInfo.fileUUID])
-                            }
-                            
-                            XCTAssert(expectedFileSizes[fileInfo.fileUUID] == fileInfo.fileSizeBytes)
                         }
                     }
                     else {
@@ -591,35 +600,47 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getFileIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId) -> [FileInfo]? {
-        var result:[FileInfo]?
+    func getIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId? = nil) -> ([FileInfo]?, [SyncServerShared.SharingGroup])? {
+        var result:([FileInfo]?, [SyncServerShared.SharingGroup])?
         
         self.performServerTest(testAccount: testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
-            let fileIndexRequest = FileIndexRequest(json: [
-                ServerEndpoint.sharingGroupIdKey: sharingGroupId
+            let indexRequest = IndexRequest(json: [
+                ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
             ])
             
-            guard let request = fileIndexRequest,
-                let parameters = request.urlParameters() else {
+            guard let request = indexRequest else {
                 expectation.fulfill()
                 XCTFail()
                 return
             }
             
-            self.performRequest(route: ServerEndpoints.fileIndex, headers: headers, urlParameters: "?" + parameters, body:nil) { response, dict in
+            var urlParameters = ""
+            if let parameters = request.urlParameters() {
+                urlParameters = "?" + parameters
+            }
+            
+            self.performRequest(route: ServerEndpoints.index, headers: headers, urlParameters: urlParameters, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on fileIndexRequest request")
+                XCTAssert(response!.statusCode == .OK, "Did not work on IndexRequest")
                 XCTAssert(dict != nil)
                 
-                guard let fileIndexResponse = FileIndexResponse(json: dict!) else {
+                guard let indexResponse = IndexResponse(json: dict!),
+                    let groups = indexResponse.sharingGroups else {
                     expectation.fulfill()
                     XCTFail()
                     return
                 }
                 
-                result = fileIndexResponse.fileIndex
+                if sharingGroupId == nil {
+                    XCTAssert(indexResponse.fileIndex == nil)
+                }
+                else {
+                    XCTAssert(indexResponse.fileIndex != nil)
+                }
+                
+                result = (indexResponse.fileIndex, groups)
                 expectation.fulfill()
             }
         }
@@ -971,7 +992,8 @@ class ServerTestCase : XCTestCase {
     }
     
     func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date, sharingGroupId:SharingGroupId) {
-        guard let fileInfo = getFileIndex(sharingGroupId:sharingGroupId) else {
+        guard let (files, _) = getIndex(sharingGroupId:sharingGroupId),
+            let fileInfo = files else {
             XCTFail()
             return
         }

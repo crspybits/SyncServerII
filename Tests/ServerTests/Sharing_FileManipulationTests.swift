@@ -207,7 +207,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let deviceUUID2 = Foundation.UUID().uuidString
         
-        guard let fileIndex = getFileIndex(testAccount: sharingUser, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId), fileIndex.count == 1 else {
+        guard let (files, _) = getIndex(testAccount: sharingUser, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId),
+            let fileIndex = files, fileIndex.count == 1 else {
             XCTFail()
             return
         }

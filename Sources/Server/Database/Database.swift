@@ -384,7 +384,8 @@ extension Database {
                 case .string(let stringValue):
                     self.stmt.bindParam(stringValue)
                 case .bool(let boolValue):
-                    self.stmt.bindParam(boolValue ? 1 : 0)
+                    // Bool is TINYINT(1), which is Int8; https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html
+                    self.stmt.bindParam(Int8(boolValue ? 1 : 0))
                 }
             }
             

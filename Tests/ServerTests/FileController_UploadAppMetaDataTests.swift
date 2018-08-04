@@ -97,7 +97,8 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId:sharingGroupId)
         masterVersion += 1
         
-        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId),
+            let fileInfoObjs1 = files, fileInfoObjs1.count == 1 else {
             XCTFail()
             return
         }
@@ -128,7 +129,8 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             XCTAssert(downloadAppMetaDataResponse.appMetaData == appMetaData2.contents)
         }
         
-        guard let fileInfoObjs2 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs2.count == 1 else {
+        guard let (files2, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId),
+            let fileInfoObjs2 = files2, fileInfoObjs2.count == 1 else {
             XCTFail()
             return
         }
@@ -150,7 +152,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
         masterVersion += 1
         
-        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), let fileInfoObjs1 = files, fileInfoObjs1.count == 1 else {
             XCTFail()
             return
         }
@@ -173,7 +175,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         
             XCTAssert(downloadAppMetaDataResponse.appMetaData == appMetaData.contents)
             
-            guard let fileInfoObjs2 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs2.count == 1 else {
+            guard let (files2, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), let fileInfoObjs2 = files2, fileInfoObjs2.count == 1 else {
                 XCTFail()
                 return
             }
@@ -309,7 +311,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId:sharingGroupId)
         masterVersion += 1
         
-        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), let fileInfoObjs1 = files, fileInfoObjs1.count == 1 else {
             XCTFail()
             return
         }
@@ -336,7 +338,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId:sharingGroupId)
         masterVersion += 1
         
-        guard let fileInfoObjs1 = getFileIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), fileInfoObjs1.count == 1 else {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId:sharingGroupId), let fileInfoObjs1 = files, fileInfoObjs1.count == 1 else {
             XCTFail()
             return
         }

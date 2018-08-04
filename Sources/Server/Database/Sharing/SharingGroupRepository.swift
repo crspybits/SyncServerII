@@ -46,6 +46,18 @@ class SharingGroup : NSObject, Model {
     override init() {
         super.init()
     }
+    
+    func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
+        switch propertyName {
+            case SharingGroup.deletedKey:
+                return {(x:Any) -> Any? in
+                    return (x as! Int8) == 1
+                }
+            
+            default:
+                return nil
+        }
+    }
 }
 
 class SharingGroupRepository: Repository, RepositoryLookup {
@@ -126,7 +138,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
 
     func sharingGroups(forUserId userId: UserId) -> [SharingGroup]? {
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
-        let query = "select \(tableName).sharingGroupId, \(tableName).sharingGroupName from \(tableName),\(sharingGroupUserTableName) where \(sharingGroupUserTableName).userId = \(userId) and \(sharingGroupUserTableName).sharingGroupId = \(tableName).sharingGroupId"
+        let query = "select \(tableName).sharingGroupId, \(tableName).sharingGroupName, \(tableName).deleted from \(tableName),\(sharingGroupUserTableName) where \(sharingGroupUserTableName).userId = \(userId) and \(sharingGroupUserTableName).sharingGroupId = \(tableName).sharingGroupId"
         return sharingGroups(forSelectQuery: query)
     }
     

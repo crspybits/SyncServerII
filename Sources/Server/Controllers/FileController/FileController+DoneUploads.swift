@@ -14,7 +14,7 @@ import SyncServerShared
 
 extension FileController {
     // Returns nil on an error.
-    private func getFileIndexEntries(forUploadFiles uploadFiles:[Upload], params:RequestProcessingParameters) -> [FileInfo]? {
+    private func getIndexEntries(forUploadFiles uploadFiles:[Upload], params:RequestProcessingParameters) -> [FileInfo]? {
         var primaryFileIndexKeys = [FileIndexRepository.LookupKey]()
     
         for uploadFile in uploadFiles {
@@ -118,12 +118,12 @@ extension FileController {
 
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
         
-        guard let staleVersionsToDelete = getFileIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
+        guard let staleVersionsToDelete = getIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
             params.completion(.failure(nil))
             return nil
         }
         
-        guard let fileIndexDeletions = getFileIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
+        guard let fileIndexDeletions = getIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
             params.completion(.failure(nil))
             return nil
         }

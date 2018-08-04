@@ -64,7 +64,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1, sharingGroupId: sharingGroupId)
     }
 
-    func testFileIndexWithNoFiles() {
+    func testIndexWithNoFiles() {
         let deviceUUID = Foundation.UUID().uuidString
 
         guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
@@ -73,10 +73,36 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getFileIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
+        self.getIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
+    }
+
+    func testGetIndexForOnlySharingGroupsWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let addUserResponse = addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let (files, sharingGroups) = getIndex() else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(files == nil)
+        
+        guard sharingGroups.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(sharingGroups[0].sharingGroupId == sharingGroupId)
+        XCTAssert(sharingGroups[0].sharingGroupName == nil)
+        XCTAssert(sharingGroups[0].deleted == false)
     }
     
-    func testFileIndexWithOneFile() {
+    func testIndexWithOneFile() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
             XCTFail()
@@ -90,10 +116,24 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
         
-        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        
+        guard let (files, sharingGroups) = getIndex(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(files != nil)
+        
+        guard sharingGroups.count == 1, sharingGroups[0].sharingGroupId == sharingGroupId,  sharingGroups[0].sharingGroupName == nil,
+            sharingGroups[0].deleted == false
+            else {
+            XCTFail()
+            return
+        }
     }
     
-    func testFileIndexWithTwoFiles() {
+    func testIndexWithTwoFiles() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
             XCTFail()
@@ -113,7 +153,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             uploadResult2.request.fileUUID: uploadResult2.fileSize
         ]
         
-        self.getFileIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
     }
         
     func testDownloadFileTextSucceeds() {
@@ -133,7 +173,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
     }
     
-    func testFileIndexWithFakeSharingGroupIdFails() {
+    func testIndexWithFakeSharingGroupIdFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
             XCTFail()
@@ -149,10 +189,10 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         let invalidSharingGroupId: SharingGroupId = 100
         
-        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: invalidSharingGroupId, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: invalidSharingGroupId, errorExpected: true)
     }
     
-    func testFileIndexWithBadSharingGroupIdFails() {
+    func testIndexWithBadSharingGroupIdFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
             XCTFail()
@@ -171,7 +211,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getFileIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: workingButBadSharingGroupId, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: workingButBadSharingGroupId, errorExpected: true)
     }
     
     // TODO: *0*: Make sure we're not trying to download a file that has already been deleted.
@@ -186,15 +226,16 @@ extension FileControllerTests {
         return [
             ("testMasterVersionConflict1", testMasterVersionConflict1),
             ("testMasterVersionConflict2", testMasterVersionConflict2),
-            ("testFileIndexWithNoFiles", testFileIndexWithNoFiles),
-            ("testFileIndexWithOneFile", testFileIndexWithOneFile),
-            ("testFileIndexWithTwoFiles", testFileIndexWithTwoFiles),
+            ("testIndexWithNoFiles", testIndexWithNoFiles),
+            ("testIndexWithOneFile", testIndexWithOneFile),
+            ("testIndexWithTwoFiles", testIndexWithTwoFiles),
             ("testDownloadFileTextSucceeds", testDownloadFileTextSucceeds),
             ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
-            ("testFileIndexWithFakeSharingGroupIdFails", testFileIndexWithFakeSharingGroupIdFails),
-            ("testFileIndexWithBadSharingGroupIdFails", testFileIndexWithBadSharingGroupIdFails)
+            ("testIndexWithFakeSharingGroupIdFails", testIndexWithFakeSharingGroupIdFails),
+            ("testIndexWithBadSharingGroupIdFails", testIndexWithBadSharingGroupIdFails),
+            ("testGetIndexForOnlySharingGroupsWorks", testGetIndexForOnlySharingGroupsWorks)
         ]
     }
     
