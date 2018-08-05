@@ -323,11 +323,12 @@ class Select {
 }
 
 extension Database {
-    // This intended for a one-off insert of a row.
-    class Insert {
+    // This intended for a one-off insert of a row, or row updates.
+    class PreparedStatement {
         enum ValueType {
             case null
             case int(Int)
+            case int64(Int64)
             case string(String)
             case bool(Bool)
         }
@@ -338,49 +339,101 @@ extension Database {
         }
         
         private var stmt:MySQLStmt!
-        private var valueTypes = [ValueType]()
         private var repo: RepositoryBasics!
+        private var statementType: StatementType!
+        
+        private var valueTypes = [ValueType]()
         private var fieldNames = [String]()
         
-        init(repo: RepositoryBasics) {
-            self.repo = repo
-            self.stmt = MySQLStmt(repo.db.connection)
+        private var whereValueTypes = [ValueType]()
+        private var whereFieldNames = [String]()
+
+        enum StatementType {
+            case insert
+            case update
         }
         
+        init(repo: RepositoryBasics, type: StatementType) {
+            self.repo = repo
+            self.stmt = MySQLStmt(repo.db.connection)
+            self.statementType = type
+        }
+        
+        // For an insert, these are the fields and values for the row you are inserting. For an update, these are the fields and values for the updated row.
         func add(fieldName: String, value: ValueType) {
             fieldNames += [fieldName]
             valueTypes += [value]
         }
         
-        // Returns the id of the inserted row.
+        // For an update only, provide the (conjoined) parts of the where clause.
+        func `where`(fieldName: String, value: ValueType) {
+            assert(statementType == .update)
+            whereFieldNames += [fieldName]
+            whereValueTypes += [value]
+        }
+        
+        // Returns the id of the inserted row for an insert. For an update, returns the number of rows updated.
         @discardableResult
         func run() throws -> Int64 {
-            var formattedFieldNames = ""
-            var bindParams = ""
-
-            for fieldName in fieldNames {
-                if formattedFieldNames.count > 0 {
-                    formattedFieldNames += ","
-                    bindParams += ","
-                }
-                formattedFieldNames += fieldName
-                bindParams += "?"
-            }
-
             // The insert query has `?` where values would be. See also https://websitebeaver.com/prepared-statements-in-php-mysqli-to-prevent-sql-injection
-            let query = "INSERT INTO \(repo.tableName) (\(formattedFieldNames)) VALUES (\(bindParams))"
+            var query:String
+            switch statementType! {
+            case .insert:
+                var formattedFieldNames = ""
+                var bindParams = ""
+
+                fieldNames.forEach { fieldName in
+                    if formattedFieldNames.count > 0 {
+                        formattedFieldNames += ","
+                        bindParams += ","
+                    }
+                    formattedFieldNames += fieldName
+                    bindParams += "?"
+                }
+                
+                query = "INSERT INTO \(repo.tableName) (\(formattedFieldNames)) VALUES (\(bindParams))"
+                
+            case .update:
+                var setValues = ""
+
+                fieldNames.forEach { fieldName in
+                    if setValues.count > 0 {
+                        setValues += ","
+                    }
+                    setValues += "\(fieldName)=?"
+                }
+                
+                var whereClause = ""
+                if whereFieldNames.count > 0 {
+                    whereClause = "WHERE "
+                    var count = 0
+                    whereFieldNames.forEach { whereFieldName in
+                        if count > 0 {
+                            whereClause += " and "
+                        }
+                        count += 1
+                        whereClause += "\(whereFieldName)=?"
+                    }
+                }
+                
+                query = "UPDATE \(repo.tableName) SET \(setValues) \(whereClause)"
+            }
+            
+            Log.debug("Preparing query: \(query)")
         
             guard self.stmt.prepare(statement: query) else {
                 Log.error("Failed on preparing statement: \(query)")
                 throw Errors.failedOnPreparingStatement
             }
             
-            for valueType in valueTypes {
+            for valueType in valueTypes + whereValueTypes {
                 switch valueType {
                 case .null:
                     self.stmt.bindParam()
                 case .int(let intValue):
                     self.stmt.bindParam(intValue)
+                case .int64(let int64Value):
+                    self.stmt.bindParam(int64Value)
                 case .string(let stringValue):
                     self.stmt.bindParam(stringValue)
                 case .bool(let boolValue):
@@ -393,7 +446,12 @@ extension Database {
                 throw Errors.executionError
             }
             
-            return repo.db.connection.lastInsertId()
+            switch statementType! {
+            case .insert:
+                return repo.db.connection.lastInsertId()
+            case .update:
+                return repo.db.connection.numberAffectedRows()
+            }
         }
     }
 }

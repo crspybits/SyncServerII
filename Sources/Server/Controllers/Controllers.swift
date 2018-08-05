@@ -43,7 +43,7 @@ extension ControllerProtocol {
     }
 }
 
-public struct RequestProcessingParameters {
+public class RequestProcessingParameters {
     let request: RequestMessage!
     let ep: ServerEndpoint!
     
@@ -59,7 +59,7 @@ public struct RequestProcessingParameters {
     let userProfile: UserProfile?
     let currentSignedInUser:User?
     let db:Database!
-    let repos:Repositories!
+    var repos:Repositories!
     let routerResponse:RouterResponse!
     let deviceUUID:String?
     
@@ -71,6 +71,21 @@ public struct RequestProcessingParameters {
     }
     
     let completion: (Response)->()
+    
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, completion: @escaping (Response)->()) {
+        self.request = request
+        self.ep = ep
+        self.creds = creds
+        self.effectiveOwningUserCreds = effectiveOwningUserCreds
+        self.profileCreds = profileCreds
+        self.userProfile = userProfile
+        self.currentSignedInUser = currentSignedInUser
+        self.db = db
+        self.repos = repos
+        self.routerResponse = routerResponse
+        self.deviceUUID = deviceUUID
+        self.completion = completion
+    }
 }
 
 public class Controllers {

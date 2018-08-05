@@ -192,7 +192,7 @@ class RequestHandler : AccountDelegate {
 #endif
 
         let db = Database()
-        repositories = Repositories(user: UserRepository(db), lock: LockRepository(db), masterVersion: MasterVersionRepository(db), fileIndex: FileIndexRepository(db), upload: UploadRepository(db), deviceUUID: DeviceUUIDRepository(db), sharing: SharingInvitationRepository(db), sharingGroup: SharingGroupRepository(db), sharingGroupUser: SharingGroupUserRepository(db))
+        repositories = Repositories(db: db)
         
         switch authenticationLevel! {
         case .none:
@@ -264,11 +264,12 @@ class RequestHandler : AccountDelegate {
             }
         }
         
-        
         guard let requestObject = createRequest(request) else {
             self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
             return
         }
+        
+        Log.debug("requestObject: \(String(describing: requestObject.toJSON()))")
         
 #if DEBUG
         // Failure testing.
@@ -375,7 +376,7 @@ class RequestHandler : AccountDelegate {
         
         if self.endpoint.needsLock {
             guard let dict = requestObject.toJSON(), let sharingGroupId = dict[ServerEndpoint.sharingGroupIdKey] as? SharingGroupId else {
-                handleResult(.failure(.message("Could not get sharing group id from request that needs a lock.")))
+                handleResult(.failure(.message("Could not get sharing group id from request that needs a lock: \(String(describing: requestObject.toJSON()))")))
                 return
             }
             

@@ -297,6 +297,41 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
+    @discardableResult
+    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup) -> Bool {
+        var result: Bool = false
+        
+        let updateRequest = UpdateSharingGroupRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroup.sharingGroupId as Any,
+            UpdateSharingGroupRequest.sharingGroupNameKey: sharingGroup.sharingGroupName as Any
+        ])!
+        
+        self.performServerTest(testAccount:testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            var queryParams:String?
+            if let params = updateRequest.urlParameters() {
+                queryParams = "?" + params
+            }
+            
+            self.performRequest(route: ServerEndpoints.updateSharingGroup, headers: headers, urlParameters: queryParams) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on update sharing group request: \(response!.statusCode)")
+                
+                if let dict = dict, let _ = UpdateSharingGroupResponse(json: dict) {
+                    result = true
+                }
+                else {
+                    XCTFail()
+                }
+
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     

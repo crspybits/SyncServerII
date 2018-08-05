@@ -50,6 +50,44 @@ class SharingGroupsController : ControllerProtocol {
         params.completion(.success(response))
     }
     
+    func updateSharingGroup(params:RequestProcessingParameters) {
+        guard let request = params.request as? UpdateSharingGroupRequest else {
+            let message = "Did not receive UpdateSharingGroupRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard let sharingGroupId = request.sharingGroupId,
+            let sharingGroupName = request.sharingGroupName else {
+            Log.info("No name given in sharing group update request-- no change made.")
+            let response = UpdateSharingGroupResponse()!
+            params.completion(.success(response))
+            return
+        }
+        
+        guard sharingGroupSecurityCheck(sharingGroupId: sharingGroupId, params: params) else {
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        let serverSharingGroup = Server.SharingGroup()
+        serverSharingGroup.sharingGroupId = sharingGroupId
+        serverSharingGroup.sharingGroupName = sharingGroupName
+
+        guard params.repos.sharingGroup.update(sharingGroup: serverSharingGroup) else {
+            let message = "Failed in updating sharing group."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        let response = UpdateSharingGroupResponse()!
+        params.completion(.success(response))
+    }
+    
     func removeSharingGroup(params:RequestProcessingParameters) {
         guard let request = params.request as? RemoveSharingGroupRequest else {
             let message = "Did not receive RemoveSharingGroupRequest"

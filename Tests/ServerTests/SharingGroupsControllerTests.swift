@@ -23,14 +23,32 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testCreateSharingGroupWorks() {
+    }
     
+    func testUpdateSharingGroupWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = SyncServerShared.SharingGroup()!
+        sharingGroup.sharingGroupId = sharingGroupId
+        sharingGroup.sharingGroupName = "Louisiana Guys"
+        
+        guard updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
+            XCTFail()
+            return
+        }
     }
 }
 
 extension SharingGroupsControllerTests {
     static var allTests : [(String, (SharingGroupsControllerTests) -> () throws -> Void)] {
         return [
-            ("testCreateSharingGroupWorks", testCreateSharingGroupWorks)
+            ("testCreateSharingGroupWorks", testCreateSharingGroupWorks),
+            ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks)
         ]
     }
     

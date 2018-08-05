@@ -272,7 +272,8 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func createTable3() -> Bool {
         let createColumns =
             "(c1 VARCHAR(100), " +
-            "c2 INT(3))"
+            "c2 INT(3), " +
+            "c3 INT(2))"
 
         if case .success(.created) = db.createTableIfNeeded(tableName: GeneralDatabaseTests.testTableName3, columnCreateQuery: createColumns) {
             return true
@@ -413,7 +414,7 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func testDatabaseInsertStringValueIntoStringColumnWorks() {
         let repo = Table3()
         repo.db = db
-        let insert = Database.Insert(repo: repo)
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
 
         insert.add(fieldName: "c1", value: .string("Example"))
         
@@ -428,8 +429,7 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func testDatabaseInsertIntValueIntoIntColumnWorks() {
         let repo = Table3()
         repo.db = db
-        let insert = Database.Insert(repo: repo)
-
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
         insert.add(fieldName: "c2", value: .int(56))
         
         do {
@@ -443,7 +443,7 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func testDatabaseInsertNullValueIntoIntColumnWorks() {
         let repo = Table3()
         repo.db = db
-        let insert = Database.Insert(repo: repo)
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
 
         insert.add(fieldName: "c2", value: .null)
         
@@ -458,7 +458,7 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func testDatabaseInsertStringValueIntoIntColumnFails() {
         let repo = Table3()
         repo.db = db
-        let insert = Database.Insert(repo: repo)
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
 
         // Note that the opposite doesn't fail-- you can successfully bind an integer value to a string column.
         insert.add(fieldName: "c2", value: .string("Foobar"))
@@ -474,13 +474,70 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func testDatabaseInsertValuesIntoColumnsWorks() {
         let repo = Table3()
         repo.db = db
-        let insert = Database.Insert(repo: repo)
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
 
         insert.add(fieldName: "c1", value: .string("Foobar"))
         insert.add(fieldName: "c2", value: .int(56))
         
         do {
             try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseUpdateWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c1", value: .string("Foobar"))
+        insert.add(fieldName: "c2", value: .int(56))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+        
+        let update = Database.PreparedStatement(repo: repo, type: .update)
+        update.add(fieldName: "c1", value: .string("Snigly"))
+        update.where(fieldName: "c2", value: .int(56))
+        
+        do {
+            try update.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseUpdateWithTwoFieldsInWhereClauseWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c1", value: .string("Foobar"))
+        insert.add(fieldName: "c2", value: .int(56))
+        insert.add(fieldName: "c3", value: .int(100))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+        
+        let update = Database.PreparedStatement(repo: repo, type: .update)
+        update.add(fieldName: "c1", value: .string("Snigly"))
+        update.where(fieldName: "c2", value: .int(56))
+        update.where(fieldName: "c3", value: .int(100))
+        
+        do {
+            let num = try update.run()
+            XCTAssert(num == 1)
         }
         catch (let error) {
             XCTFail("\(error)")
@@ -502,7 +559,9 @@ extension GeneralDatabaseTests {
             ("testDatabaseInsertIntValueIntoIntColumnWorks", testDatabaseInsertIntValueIntoIntColumnWorks),
             ("testDatabaseInsertNullValueIntoIntColumnWorks", testDatabaseInsertNullValueIntoIntColumnWorks),
             ("testDatabaseInsertStringValueIntoIntColumnFails", testDatabaseInsertStringValueIntoIntColumnFails),
-            ("testDatabaseInsertValuesIntoColumnsWorks", testDatabaseInsertValuesIntoColumnsWorks)
+            ("testDatabaseInsertValuesIntoColumnsWorks", testDatabaseInsertValuesIntoColumnsWorks),
+            ("testDatabaseUpdateWorks", testDatabaseUpdateWorks),
+            ("testDatabaseUpdateWithTwoFieldsInWhereClauseWorks", testDatabaseUpdateWithTwoFieldsInWhereClauseWorks)
         ]
     }
     

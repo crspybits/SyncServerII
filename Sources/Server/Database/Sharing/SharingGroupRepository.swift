@@ -115,7 +115,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     }
     
     func add(sharingGroupName: String? = nil) -> AddResult {
-        let insert = Database.Insert(repo: self)
+        let insert = Database.PreparedStatement(repo: self, type: .insert)
         
         // Deal with table that has only an autoincrement column: https://stackoverflow.com/questions/5962026/mysql-inserting-in-table-with-only-an-auto-incrementing-column (This is only really necessary if no sharing group name is given.)
         insert.add(fieldName: SharingGroup.sharingGroupIdKey, value: .null)
@@ -181,6 +181,28 @@ class SharingGroupRepository: Repository, RepositoryLookup {
             Log.error("Could not mark files as deleted in \(tableName): \(error)")
             return nil
         }
+    }
+    
+    func update(sharingGroup: SharingGroup) -> Bool {
+        let update = Database.PreparedStatement(repo: self, type: .update)
+        
+        guard let sharingGroupId = sharingGroup.sharingGroupId,
+            let sharingGroupName = sharingGroup.sharingGroupName else {
+            return false
+        }
+        
+        update.add(fieldName: SharingGroup.sharingGroupNameKey, value: .string(sharingGroupName))
+        update.where(fieldName: SharingGroup.sharingGroupIdKey, value: .int64(sharingGroupId))
+        
+        do {
+            try update.run()
+        }
+        catch (let error) {
+            Log.error("Failed updating sharing group: \(error)")
+            return false
+        }
+        
+        return true
     }
 }
 

@@ -37,7 +37,7 @@ class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
     }
     
     func testBadPathWithGoodCredsFails() {
-        let badRoute = ServerEndpoint("foobar", method: .post)
+        let badRoute = ServerEndpoint("foobar", method: .post, messageType: AddUserRequest.self)
         let deviceUUID = Foundation.UUID().uuidString
         
         performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
@@ -50,7 +50,7 @@ class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
     }
 
     func testGoodPathWithBadMethodWithGoodCredsFails() {
-        let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post)
+        let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post, messageType: CheckCredsRequest.self)
         XCTAssert(ServerEndpoints.checkCreds.method != .post)
         let deviceUUID = Foundation.UUID().uuidString
         
