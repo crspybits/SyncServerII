@@ -17,19 +17,43 @@ protocol ControllerProtocol {
 }
 
 extension ControllerProtocol {
-    // Make sure the current signed in user is a member of the sharing group.s
-    func sharingGroupSecurityCheck(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> Bool {
+    // Make sure the current signed in user is a member of the sharing group.
+    // `checkNotDeleted` set to true ensures the sharing group is not deleted.
+    func sharingGroupSecurityCheck(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, checkNotDeleted: Bool = true) -> Bool {
     
         guard let userId = params.currentSignedInUser?.userId else {
             Log.error("No userId!")
             return false
         }
         
-        let sharingKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
-        let lookupResult = params.repos.sharingGroupUser.lookup(key: sharingKey, modelInit: SharingGroupUser.init)
+        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+        let lookupResult = params.repos.sharingGroupUser.lookup(key: sharingUserKey, modelInit: SharingGroupUser.init)
         
         switch lookupResult {
         case .found:
+            if checkNotDeleted {
+                // The deleted flag is in the SharingGroup (not SharingGroupUser) repo. Need to look that up.
+                let sharingKey = SharingGroupRepository.LookupKey.sharingGroupId(sharingGroupId)
+                let lookupResult = params.repos.sharingGroup.lookup(key: sharingKey, modelInit: SharingGroup.init)
+                switch lookupResult {
+                case .found(let modelObj):
+                    guard let sharingGroup = modelObj as? Server.SharingGroup else {
+                        Log.error("Could not convert model obj to SharingGroup.")
+                        return false
+                    }
+                    
+                    guard !sharingGroup.deleted else {
+                        return false
+                    }
+                    
+                case .noObjectFound:
+                    Log.error("Could not find sharing group.")
+
+                case .error(let error):
+                    Log.error("Error looking up sharing group: \(error)")
+                }
+            }
+            
             return true
             
         case .noObjectFound:
@@ -85,6 +109,11 @@ public class RequestProcessingParameters {
         self.routerResponse = routerResponse
         self.deviceUUID = deviceUUID
         self.completion = completion
+    }
+    
+    func fail(_ message: String) {
+        Log.error(message)
+        completion(.failure(.message(message)))
     }
 }
 

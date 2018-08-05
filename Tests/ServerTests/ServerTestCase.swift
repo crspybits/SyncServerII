@@ -298,7 +298,42 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup) -> Bool {
+    func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup) -> SharingGroupId? {
+        var result: SharingGroupId?
+        
+        let createRequest = CreateSharingGroupRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroup.sharingGroupId as Any,
+            CreateSharingGroupRequest.sharingGroupNameKey: sharingGroup.sharingGroupName as Any
+        ])!
+        
+        self.performServerTest(testAccount:testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            var queryParams:String?
+            if let params = createRequest.urlParameters() {
+                queryParams = "?" + params
+            }
+            
+            self.performRequest(route: ServerEndpoints.createSharingGroup, headers: headers, urlParameters: queryParams) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on create sharing group request: \(response!.statusCode)")
+                
+                if let dict = dict, let createResponse = CreateSharingGroupResponse(json: dict) {
+                    result = createResponse.sharingGroupId
+                }
+                else {
+                    XCTFail()
+                }
+
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
+    @discardableResult
+    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup, expectFailure: Bool = false) -> Bool {
         var result: Bool = false
         
         let updateRequest = UpdateSharingGroupRequest(json: [
@@ -316,9 +351,49 @@ class ServerTestCase : XCTestCase {
             
             self.performRequest(route: ServerEndpoints.updateSharingGroup, headers: headers, urlParameters: queryParams) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on update sharing group request: \(response!.statusCode)")
                 
-                if let dict = dict, let _ = UpdateSharingGroupResponse(json: dict) {
+                if expectFailure {
+                    XCTAssert(response!.statusCode != .OK)
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on update sharing group request: \(response!.statusCode)")
+                    
+                    if let dict = dict, let _ = UpdateSharingGroupResponse(json: dict) {
+                        result = true
+                    }
+                    else {
+                        XCTFail()
+                    }
+                }
+                
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
+    @discardableResult
+    func removeSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId) -> Bool {
+        var result: Bool = false
+        
+        let removeRequest = RemoveSharingGroupRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
+        ])!
+        
+        self.performServerTest(testAccount:testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            var queryParams:String?
+            if let params = removeRequest.urlParameters() {
+                queryParams = "?" + params
+            }
+            
+            self.performRequest(route: ServerEndpoints.removeSharingGroup, headers: headers, urlParameters: queryParams) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on remove sharing group request: \(response!.statusCode)")
+                
+                if let dict = dict, let _ = RemoveSharingGroupResponse(json: dict) {
                     result = true
                 }
                 else {

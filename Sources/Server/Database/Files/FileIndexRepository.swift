@@ -557,7 +557,9 @@ class FileIndexRepository : Repository, RepositoryLookup {
     func markFilesAsDeleted(forCriteria criteria: MarkDeletionCriteria) -> Int64? {
         let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + criteria.toString()
         if db.connection.query(statement: query) {
-            return db.connection.numberAffectedRows()
+            let numberRows = db.connection.numberAffectedRows()
+            Log.debug("Number rows: \(numberRows) for query: \(query)")
+            return numberRows
         }
         else {
             let error = db.error

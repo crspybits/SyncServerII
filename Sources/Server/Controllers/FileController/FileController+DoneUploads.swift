@@ -41,21 +41,7 @@ extension FileController {
     }
     
     // staleVersionsToDelete gives info, if any, on files that we're uploading new versions of.
-    private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)? {
-        
-        guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
-            let message = "Did not receive DoneUploadsRequest"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return nil
-        }
-
-        guard sharingGroupSecurityCheck(sharingGroupId: doneUploadsRequest.sharingGroupId, params: params) else {
-            let message = "Failed in sharing group security check."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return nil
-        }
+    private func doInitialDoneUploads(params:RequestProcessingParameters, doneUploadsRequest: DoneUploadsRequest) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)? {
         
 #if DEBUG
         if doneUploadsRequest.testLockSync != nil {
@@ -253,7 +239,7 @@ extension FileController {
             return
         }
         
-        let result = doInitialDoneUploads(params: params)
+        let result = doInitialDoneUploads(params: params, doneUploadsRequest: doneUploadsRequest)
         
         if !params.repos.lock.unlock(sharingGroupId: doneUploadsRequest.sharingGroupId) {
             let message = "Error in unlock!"

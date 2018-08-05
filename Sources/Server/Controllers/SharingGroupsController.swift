@@ -23,7 +23,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(sharingGroupName: request.sharingGroup.sharingGroupName) else {
+        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(sharingGroupName: request.sharingGroupName) else {
             let message = "Failed on adding new sharing group."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -103,7 +103,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard let count = params.repos.fileIndex.markFilesAsDeleted(forCriteria: .sharingGroupId("\(request.sharingGroupId!)")), count == 1 else {
+        guard let _ = params.repos.fileIndex.markFilesAsDeleted(forCriteria: .sharingGroupId("\(request.sharingGroupId!)")) else {
             let message = "Could not mark files as deleted for sharing group!"
             Log.error(message)
             params.completion(.failure(.message(message)))

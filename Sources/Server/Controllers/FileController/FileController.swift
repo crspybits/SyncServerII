@@ -155,7 +155,8 @@ class FileController : ControllerProtocol {
         
         Log.info("Index: Getting file index for sharing group id: \(sharingGroupId)")
 
-        guard sharingGroupSecurityCheck(sharingGroupId: sharingGroupId, params: params) else {
+        // Not worrying about whether the sharing group is deleted-- where's the harm in getting a file index for a deleted sharing group?
+        guard sharingGroupSecurityCheck(sharingGroupId: sharingGroupId, params: params, checkNotDeleted: false) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))

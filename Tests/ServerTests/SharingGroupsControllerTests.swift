@@ -23,6 +23,63 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testCreateSharingGroupWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = SyncServerShared.SharingGroup()!
+        sharingGroup.sharingGroupName = "Louisiana Guys"
+        
+        guard let sharingGroupId2 = createSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
+            XCTFail()
+            return
+        }
+        
+        guard let (_, sharingGroups) = getIndex() else {
+            XCTFail()
+            return
+        }
+        
+        let filtered = sharingGroups.filter {$0.sharingGroupId == sharingGroupId2}
+        guard filtered.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filtered[0].sharingGroupName == sharingGroup.sharingGroupName)
+    }
+    
+    func testNewlyCreatedSharingGroupHasNoFiles() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = SyncServerShared.SharingGroup()!
+        sharingGroup.sharingGroupName = "Louisiana Guys"
+        
+        guard let sharingGroupId = createSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
+            XCTFail()
+            return
+        }
+        
+        guard let (files, sharingGroups) = getIndex(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard files != nil && files?.count == 0 else {
+            XCTFail()
+            return
+        }
+        
+        guard sharingGroups.count == 2 else {
+            XCTFail()
+            return
+        }
     }
     
     func testUpdateSharingGroupWorks() {
@@ -42,13 +99,51 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
     }
+    
+    func testRemoveSharingGroupWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+    }
+
+    func testUpdateSharingGroupForDeletedSharingGroupFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = SyncServerShared.SharingGroup()!
+        sharingGroup.sharingGroupId = sharingGroupId
+        sharingGroup.sharingGroupName = "Louisiana Guys"
+        
+        let result = updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, expectFailure: true)
+        XCTAssert(result == false)
+    }
 }
 
 extension SharingGroupsControllerTests {
     static var allTests : [(String, (SharingGroupsControllerTests) -> () throws -> Void)] {
         return [
             ("testCreateSharingGroupWorks", testCreateSharingGroupWorks),
-            ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks)
+            ("testNewlyCreatedSharingGroupHasNoFiles", testNewlyCreatedSharingGroupHasNoFiles),
+            ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks),
+            ("testRemoveSharingGroupWorks", testRemoveSharingGroupWorks),
+            ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails)
         ]
     }
     
