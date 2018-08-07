@@ -24,7 +24,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
     
     func testCreateSharingGroupWorks() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID) else {
+        guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
@@ -134,6 +134,43 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         let result = updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, expectFailure: true)
         XCTAssert(result == false)
     }
+    
+    func testGetSharingGroupUsersWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let users = getSharingGroupUsers(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId), users.count == 1 else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func testGetSharingGroupWithMultipleUsersWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = SyncServerShared.SharingGroup()!
+        sharingGroup.sharingGroupName = "Louisiana Guys"
+        
+        guard let _ = createSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
+            XCTFail()
+            return
+        }
+        
+        guard let users = getSharingGroupUsers(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId), users.count == 1 else {
+            XCTFail()
+            return
+        }
+
+    }
 }
 
 extension SharingGroupsControllerTests {
@@ -143,7 +180,9 @@ extension SharingGroupsControllerTests {
             ("testNewlyCreatedSharingGroupHasNoFiles", testNewlyCreatedSharingGroupHasNoFiles),
             ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks),
             ("testRemoveSharingGroupWorks", testRemoveSharingGroupWorks),
-            ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails)
+            ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails),
+            ("testGetSharingGroupUsersWorks", testGetSharingGroupUsersWorks),
+            ("testGetSharingGroupWithMultipleUsersWorks", testGetSharingGroupWithMultipleUsersWorks)
         ]
     }
     

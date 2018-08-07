@@ -137,5 +137,37 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             return .error(error)
         }
     }
+    
+    enum SharingGroupUserResult {
+        case sharingGroupUsers([SyncServerShared.SharingGroupUser])
+        case error(String)
+    }
+    
+    func sharingGroupUsers(forSharingGroupId sharingGroupId: SharingGroupId) -> SharingGroupUserResult {
+        let query = "select \(UserRepository.tableName).\(User.usernameKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupId = \(sharingGroupId)"
+        return sharingGroupUsers(forSelectQuery: query)
+    }
+    
+    private func sharingGroupUsers(forSelectQuery selectQuery: String) -> SharingGroupUserResult {
+        let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false)
+        
+        var result:[SyncServerShared.SharingGroupUser] = []
+        
+        select.forEachRow { rowModel in
+            let rowModel = rowModel as! User
+
+            let sharingGroupUser = SyncServerShared.SharingGroupUser()!
+            sharingGroupUser.name = rowModel.username
+            
+            result.append(sharingGroupUser)
+        }
+        
+        if select.forEachRowStatus == nil {
+            return .sharingGroupUsers(result)
+        }
+        else {
+            return .error("\(select.forEachRowStatus!)")
+        }
+    }
 }
 

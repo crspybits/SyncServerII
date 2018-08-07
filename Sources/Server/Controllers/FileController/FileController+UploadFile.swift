@@ -61,7 +61,7 @@ extension FileController {
         
         Log.debug("uploadRequest.sharingGroupId: \(uploadRequest.sharingGroupId)")
         
-        getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
+        Controllers.getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
                 let message = "Error: \(String(describing: error))"
                 Log.error(message)

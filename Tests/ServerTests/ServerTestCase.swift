@@ -407,6 +407,42 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
+    @discardableResult
+    func getSharingGroupUsers(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId) -> [SyncServerShared.SharingGroupUser]? {
+    
+        var result: [SyncServerShared.SharingGroupUser]?
+        
+        let getRequest = GetSharingGroupUsersRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
+        ])!
+        
+        self.performServerTest(testAccount:testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            var queryParams:String?
+            if let params = getRequest.urlParameters() {
+                queryParams = "?" + params
+            }
+            
+            self.performRequest(route: ServerEndpoints.getSharingGroupUsers, headers: headers, urlParameters: queryParams) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                
+                XCTAssert(response!.statusCode == .OK, "Did not work on update sharing group request: \(response!.statusCode)")
+                
+                if let dict = dict, let response = GetSharingGroupUsersResponse(json: dict) {
+                    result = response.sharingGroupUsers
+                }
+                else {
+                    XCTFail()
+                }
+                
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     
@@ -936,7 +972,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
+    func redeemSharingInvitation(sharingUser:TestAccount, masterVersion: MasterVersionInt, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
     
         var actualCloudFolderName: String?
         if sharingUser.type == .Google && canGiveCloudFolderName {
@@ -951,7 +987,8 @@ class ServerTestCase : XCTestCase {
             if sharingInvitationUUID != nil {
                 let request = RedeemSharingInvitationRequest(json: [
                     RedeemSharingInvitationRequest.sharingInvitationUUIDKey : sharingInvitationUUID!,
-                    AddUserRequest.cloudFolderNameKey: actualCloudFolderName as Any
+                    AddUserRequest.cloudFolderNameKey: actualCloudFolderName as Any,
+                    ServerEndpoint.masterVersionKey: masterVersion
                 ])
                 urlParameters = "?" + request!.urlParameters()!
             }

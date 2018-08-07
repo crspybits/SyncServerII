@@ -50,33 +50,6 @@ class FileController : ControllerProtocol {
     init() {
     }
     
-    enum GetMasterVersionError : Error {
-    case error(String)
-    case noObjectFound
-    }
-    
-    // Synchronous callback.
-    // Get the master version for a sharing group because the master version reflects the overall version of the data for a sharing group.
-    func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
-        
-        let key = MasterVersionRepository.LookupKey.sharingGroupId(sharingGroupId)
-        let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
-        
-        switch result {
-        case .error(let error):
-            completion(GetMasterVersionError.error(error), nil)
-            
-        case .found(let model):
-            let masterVersionObj = model as! MasterVersion
-            completion(nil, masterVersionObj.masterVersion)
-            
-        case .noObjectFound:
-            let errorMessage = "Master version record not found for: \(key)"
-            Log.error(errorMessage)
-            completion(GetMasterVersionError.noObjectFound, nil)
-        }
-    }
-    
     // OWNER
     static func getCreds(forUserId userId: UserId, from db: Database) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
@@ -181,7 +154,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
+        Controllers.getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
                 params.repos.lock.unlock(sharingGroupId: sharingGroupId)
                 params.completion(.failure(.message("\(error!)")))

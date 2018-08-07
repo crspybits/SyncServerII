@@ -50,6 +50,7 @@ class SharingGroupsController : ControllerProtocol {
         params.completion(.success(response))
     }
     
+    // Updates master version: Because this changes the sharing group.
     func updateSharingGroup(params:RequestProcessingParameters) {
         guard let request = params.request as? UpdateSharingGroupRequest else {
             let message = "Did not receive UpdateSharingGroupRequest"
@@ -134,6 +135,31 @@ class SharingGroupsController : ControllerProtocol {
         // Not going to remove row from master version. People will still be able to get the file index for this sharing group-- to see that all the files are (marked as) deleted. That requires a master version.
         
         let response = RemoveSharingGroupResponse()!
+        params.completion(.success(response))
+    }
+    
+    func getSharingGroupUsers(params:RequestProcessingParameters) {
+        guard let request = params.request as? GetSharingGroupUsersRequest else {
+            params.fail("Did not receive GetSharingGroupUsersRequest")
+            return
+        }
+        
+        guard sharingGroupSecurityCheck(sharingGroupId: request.sharingGroupId, params: params) else {
+            params.fail("Failed in sharing group security check.")
+            return
+        }
+        
+        let response = GetSharingGroupUsersResponse()!
+        
+        let usersResult = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupId: request.sharingGroupId)
+        switch usersResult {
+        case .sharingGroupUsers(let users):
+            response.sharingGroupUsers = users
+        case .error(let error):
+            params.fail("Failed getting sharing group users: \(error)")
+            return
+        }
+
         params.completion(.success(response))
     }
 }

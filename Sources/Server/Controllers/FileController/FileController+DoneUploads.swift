@@ -50,26 +50,9 @@ extension FileController {
             Log.info("Finished sleep (testLockSync= \(String(describing: doneUploadsRequest.testLockSync))).")
         }
 #endif
-
-        var response:DoneUploadsResponse?
         
-        let updateResult = updateMasterVersion(sharingGroupId: doneUploadsRequest.sharingGroupId, currentMasterVersion: doneUploadsRequest.masterVersion, params: params)
-        switch updateResult {
-        case .success:
-            break
-
-        case .masterVersionUpdate(let updatedMasterVersion):
-            // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
-            Log.warning("Master version update: \(updatedMasterVersion)")
-            response = DoneUploadsResponse()
-            response!.masterVersionUpdate = updatedMasterVersion
-            params.completion(.success(response!))
-            return nil
-            
-        case .error(let error):
-            let message = "Failed on updateMasterVersion: \(error)"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
+        if let response = Controllers.updateMasterVersion(sharingGroupId: doneUploadsRequest.sharingGroupId, masterVersion: doneUploadsRequest.masterVersion, params: params, responseType: DoneUploadsResponse.self) {
+            params.completion(response)
             return nil
         }
         
@@ -156,47 +139,6 @@ extension FileController {
         }
         
         return (numberTransferred!, fileIndexDeletions, staleVersionsToDelete)
-    }
-    
-    enum UpdateMasterVersionResult : Error {
-    case success
-    case error(String)
-    case masterVersionUpdate(MasterVersionInt)
-    }
-    
-    private func updateMasterVersion(sharingGroupId: SharingGroupId, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
-
-        let currentMasterVersionObj = MasterVersion()
-        
-        // The master version reflects a sharing group.
-        currentMasterVersionObj.sharingGroupId = sharingGroupId
-        
-        currentMasterVersionObj.masterVersion = currentMasterVersion
-        let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
-        
-        var result:UpdateMasterVersionResult!
-        
-        switch updateMasterVersionResult {
-        case .success:
-            result = UpdateMasterVersionResult.success
-            
-        case .error(let error):
-            let message = "Failed lookup in MasterVersionRepository: \(error)"
-            Log.error(message)
-            result = UpdateMasterVersionResult.error(message)
-            
-        case .didNotMatchCurrentMasterVersion:
-            getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
-                if error == nil {
-                    result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
-                }
-                else {
-                    result = UpdateMasterVersionResult.error("\(error!)")
-                }
-            }
-        }
-        
-        return result
     }
     
     func doneUploads(params:RequestProcessingParameters) {

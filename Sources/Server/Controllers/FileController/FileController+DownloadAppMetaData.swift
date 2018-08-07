@@ -25,7 +25,7 @@ extension FileController {
             return
         }
         
-        getMasterVersion(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) { (error, masterVersion) in
+        Controllers.getMasterVersion(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
                 params.completion(.failure(.message("\(error!)")))
                 return

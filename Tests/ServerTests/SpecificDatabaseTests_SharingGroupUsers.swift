@@ -167,7 +167,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         let result = SharingGroupUserRepository(db).lookup(key: key, modelInit: SharingGroupUser.init)
         switch result {
         case .found(let model):
-            guard let obj = model as? SharingGroupUser else {
+            guard let obj = model as? Server.SharingGroupUser else {
                 XCTFail()
                 return
             }

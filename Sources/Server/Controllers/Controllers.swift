@@ -132,4 +132,92 @@ public class Controllers {
         
         return true
     }
+    
+    enum UpdateMasterVersionResult : Error {
+    case success
+    case error(String)
+    case masterVersionUpdate(MasterVersionInt)
+    }
+    
+    private static func updateMasterVersion(sharingGroupId: SharingGroupId, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
+
+        let currentMasterVersionObj = MasterVersion()
+        
+        // The master version reflects a sharing group.
+        currentMasterVersionObj.sharingGroupId = sharingGroupId
+        
+        currentMasterVersionObj.masterVersion = currentMasterVersion
+        let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
+        
+        var result:UpdateMasterVersionResult!
+        
+        switch updateMasterVersionResult {
+        case .success:
+            result = UpdateMasterVersionResult.success
+            
+        case .error(let error):
+            let message = "Failed lookup in MasterVersionRepository: \(error)"
+            Log.error(message)
+            result = UpdateMasterVersionResult.error(message)
+            
+        case .didNotMatchCurrentMasterVersion:
+            getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
+                if error == nil {
+                    result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
+                }
+                else {
+                    result = UpdateMasterVersionResult.error("\(error!)")
+                }
+            }
+        }
+        
+        return result
+    }
+    
+    enum GetMasterVersionError : Error {
+    case error(String)
+    case noObjectFound
+    }
+    
+    // Synchronous callback.
+    // Get the master version for a sharing group because the master version reflects the overall version of the data for a sharing group.
+    static func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
+        
+        let key = MasterVersionRepository.LookupKey.sharingGroupId(sharingGroupId)
+        let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
+        
+        switch result {
+        case .error(let error):
+            completion(GetMasterVersionError.error(error), nil)
+            
+        case .found(let model):
+            let masterVersionObj = model as! MasterVersion
+            completion(nil, masterVersionObj.masterVersion)
+            
+        case .noObjectFound:
+            let errorMessage = "Master version record not found for: \(key)"
+            Log.error(errorMessage)
+            completion(GetMasterVersionError.noObjectFound, nil)
+        }
+    }
+    
+    // Returns nil on success.
+    static func updateMasterVersion(sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type) -> RequestProcessingParameters.Response? {
+        let updateResult = updateMasterVersion(sharingGroupId: sharingGroupId, currentMasterVersion: masterVersion, params: params)
+        switch updateResult {
+        case .success:
+            return nil
+
+        case .masterVersionUpdate(let updatedMasterVersion):
+            Log.warning("Master version update: \(updatedMasterVersion)")
+            var response = responseType.init(json: [:])
+            response!.masterVersionUpdate = updatedMasterVersion
+            return .success(response!)
+            
+        case .error(let error):
+            let message = "Failed on updateMasterVersion: \(error)"
+            Log.error(message)
+            return .failure(.message(message))
+        }
+    }
 }
