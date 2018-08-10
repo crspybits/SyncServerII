@@ -22,10 +22,6 @@ class User : NSObject, Model {
     // Only when the current user is a sharing user, this gives the userId that is the owner of the data.
     static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId?
-
-    // The permissions that the user has in regards to the sharing group of users. The user can read (anyone's data), can upload (to their own or others storage), and invite others to join the group.
-    static let permissionKey = "permission"
-    var permission:Permission?
     
     static let accountTypeKey = "accountType"
     var accountType: AccountType!
@@ -52,9 +48,6 @@ class User : NSObject, Model {
                 
             case User.owningUserIdKey:
                 owningUserId = newValue as! UserId?
-                
-            case User.permissionKey:
-                permission = newValue as! Permission?
                 
             case User.accountTypeKey:
                 accountType = newValue as! AccountType?
@@ -95,10 +88,6 @@ class User : NSObject, Model {
             case User.accountTypeKey:
                 return {(x:Any) -> Any? in
                     return AccountType(rawValue: x as! String)
-                }
-            case User.permissionKey:
-                return {(x:Any) -> Any? in
-                    return Permission(rawValue: x as! String)
                 }
             default:
                 return nil
@@ -143,8 +132,6 @@ class UserRepository : Repository, RepositoryLookup {
             // If non-NULL, references a user in the User table.
             // TODO: *2* Make this a foreign key reference to this same table.
             "owningUserId BIGINT, " +
-            
-            "permission VARCHAR(\(Permission.maxStringLength())), " +
         
             "accountType VARCHAR(\(accountTypeMaxLength)) NOT NULL, " +
             
@@ -219,11 +206,6 @@ class UserRepository : Repository, RepositoryLookup {
             return nil
         }
         
-        guard user.permission != nil else {
-            Log.error("All user must have permissions.")
-            return nil
-        }
-        
         switch user.accountType.userType {
         case .sharing:
             guard user.owningUserId != nil else {
@@ -239,10 +221,9 @@ class UserRepository : Repository, RepositoryLookup {
         }
         
         let (owningUserIdFieldValue, owningUserIdFieldName) = getInsertFieldValueAndName(fieldValue: user.owningUserId, fieldName: "owningUserId", fieldIsString: false)
-        let (permissionFieldValue, permissionFieldName) = getInsertFieldValueAndName(fieldValue: user.permission, fieldName: User.permissionKey)
         let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: user.cloudFolderName, fieldName: User.cloudFolderNameKey)
         
-        let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds \(owningUserIdFieldName) \(permissionFieldName) \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(permissionFieldValue) \(cloudFolderNameFieldValue));"
+        let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds \(owningUserIdFieldName)\(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(cloudFolderNameFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()

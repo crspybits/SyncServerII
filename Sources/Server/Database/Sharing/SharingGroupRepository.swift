@@ -20,6 +20,10 @@ class SharingGroup : NSObject, Model {
     
     static let deletedKey = "deleted"
     var deleted:Bool!
+    
+    // Not a part of this table, but a convenience for doing joins with the MasterVersion table.
+    static let masterVersionKey = "masterVersion"
+    var masterVersion: MasterVersionInt!
 
     subscript(key:String) -> Any? {
         set {
@@ -32,6 +36,9 @@ class SharingGroup : NSObject, Model {
             
             case SharingGroup.deletedKey:
                 deleted = newValue as! Bool?
+
+            case SharingGroup.masterVersionKey:
+                masterVersion = newValue as! MasterVersionInt?
                 
             default:
                 assert(false)
@@ -57,6 +64,15 @@ class SharingGroup : NSObject, Model {
             default:
                 return nil
         }
+    }
+    
+    func toClient() -> SyncServerShared.SharingGroup  {
+        let clientGroup = SyncServerShared.SharingGroup()!
+        clientGroup.sharingGroupId = sharingGroupId
+        clientGroup.sharingGroupName = sharingGroupName
+        clientGroup.deleted = deleted
+        clientGroup.masterVersion = masterVersion
+        return clientGroup
     }
 }
 
@@ -137,8 +153,10 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     }
 
     func sharingGroups(forUserId userId: UserId) -> [SharingGroup]? {
+        let masterVersionTableName = MasterVersionRepository.tableName
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
-        let query = "select \(tableName).sharingGroupId, \(tableName).sharingGroupName, \(tableName).deleted from \(tableName),\(sharingGroupUserTableName) where \(sharingGroupUserTableName).userId = \(userId) and \(sharingGroupUserTableName).sharingGroupId = \(tableName).sharingGroupId"
+        
+        let query = "select \(tableName).sharingGroupId, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupId = \(tableName).sharingGroupId AND \(tableName).sharingGroupId = \(masterVersionTableName).sharingGroupId"
         return sharingGroups(forSelectQuery: query)
     }
     

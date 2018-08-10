@@ -30,7 +30,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
 
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: params.currentSignedInUser!.userId) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: params.currentSignedInUser!.userId, permission: .admin) else {
             let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -74,6 +74,11 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
+        if let errorResponse = Controllers.updateMasterVersion(sharingGroupId: sharingGroupId, masterVersion: request.masterVersion, params: params, responseType: UpdateSharingGroupResponse.self) {
+            params.completion(errorResponse)
+            return
+        }
+
         let serverSharingGroup = Server.SharingGroup()
         serverSharingGroup.sharingGroupId = sharingGroupId
         serverSharingGroup.sharingGroupName = sharingGroupName
@@ -101,6 +106,11 @@ class SharingGroupsController : ControllerProtocol {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
+            return
+        }
+        
+        if let errorResponse = Controllers.updateMasterVersion(sharingGroupId: request.sharingGroupId, masterVersion: request.masterVersion, params: params, responseType: RemoveSharingGroupResponse.self) {
+            params.completion(errorResponse)
             return
         }
         

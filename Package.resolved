@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "Signals",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+        "state": {
+          "branch": null,
+          "revision": "58ec1acfba8fb4bf469ae9f3d633568cb5853305",
+          "version": "1.0.6"
+        }
+      },
+      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
@@ -38,11 +47,11 @@
         }
       },
       {
-        "package": "CommonCrypto",
-        "repositoryURL": "https://github.com/IBM-Swift/CommonCrypto.git",
+        "package": "CEpoll",
+        "repositoryURL": "https://github.com/IBM-Swift/CEpoll.git",
         "state": {
           "branch": null,
-          "revision": "9156d238dbc4c15455b77b45e721b2bb0b995e31",
+          "revision": "4e56acbea4d452110236dcbfcee0045a697c0e9f",
           "version": "1.0.0"
         }
       },
@@ -69,8 +78,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/HeliumLogger.git",
         "state": {
           "branch": null,
-          "revision": "2afeb4c02f5a48a7fbd081fe8607b91eeebd7ecb",
-          "version": "1.7.1"
+          "revision": "0283ca6255bbe73d35abc81438435af40c8fa085",
+          "version": "1.7.2"
         }
       },
       {
@@ -155,6 +164,15 @@
         }
       },
       {
+        "package": "OpenSSL",
+        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
+        "state": {
+          "branch": null,
+          "revision": "ba74a683141fde66d4bf88358b6a678d7e5a27ce",
+          "version": "1.0.1"
+        }
+      },
+      {
         "package": "PerfectLib",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
         "state": {
@@ -173,6 +191,15 @@
         }
       },
       {
+        "package": "LinuxBridge",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+        "state": {
+          "branch": null,
+          "revision": "ba9d1fb5be8eb238521206b39bec90a760bb0192",
+          "version": "3.0.0"
+        }
+      },
+      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -183,10 +210,10 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
         "state": {
           "branch": null,
-          "revision": "51991fc81e40ddef36e8db1868c9b7f1f83d30dc",
+          "revision": "b35cf9671ae9ceb6dec05900b8a69e53ed1985d7",
           "version": "2.0.1"
         }
       },
@@ -210,10 +237,10 @@
       },
       {
         "package": "SyncServer_Shared",
-        "repositoryURL": "/Users/chris/Desktop/Apps/repos/SyncServer-Shared",
+        "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
           "branch": "dev",
-          "revision": "171f132a31264130819a011689194c9d4fe91e6d",
+          "revision": "e36410d4d9b8b8aeb517a5672bbce40e7775e7d4",
           "version": null
         }
       },

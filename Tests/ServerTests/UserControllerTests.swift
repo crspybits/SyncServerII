@@ -42,8 +42,6 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
                 XCTAssert(user.cloudFolderName == ServerTestCase.cloudFolderName)
             }
             
-            XCTAssert(user.permission == .admin)
-            
         case .noObjectFound:
             XCTFail("No User Found")
         }

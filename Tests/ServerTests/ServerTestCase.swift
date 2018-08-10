@@ -333,12 +333,13 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup, expectFailure: Bool = false) -> Bool {
+    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup, masterVersion: MasterVersionInt, expectFailure: Bool = false) -> Bool {
         var result: Bool = false
         
         let updateRequest = UpdateSharingGroupRequest(json: [
             ServerEndpoint.sharingGroupIdKey: sharingGroup.sharingGroupId as Any,
-            UpdateSharingGroupRequest.sharingGroupNameKey: sharingGroup.sharingGroupName as Any
+            UpdateSharingGroupRequest.sharingGroupNameKey: sharingGroup.sharingGroupName as Any,
+            ServerEndpoint.masterVersionKey: masterVersion
         ])!
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
@@ -374,11 +375,12 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func removeSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId) -> Bool {
+    func removeSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt) -> Bool {
         var result: Bool = false
         
         let removeRequest = RemoveSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any,
+            ServerEndpoint.masterVersionKey: masterVersion
         ])!
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
@@ -644,7 +646,7 @@ class ServerTestCase : XCTestCase {
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
-                DoneUploadsRequest.masterVersionKey : "\(masterVersion)",
+                ServerEndpoint.masterVersionKey : "\(masterVersion)",
                 ServerEndpoint.sharingGroupIdKey: sharingGroupId
             ])
             
@@ -797,6 +799,46 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
+    func getMasterVersion(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId) -> MasterVersionInt? {
+        var result:MasterVersionInt?
+        
+        self.performServerTest(testAccount: testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            let indexRequest = IndexRequest(json: [
+                ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
+            ])
+            
+            guard let request = indexRequest else {
+                expectation.fulfill()
+                XCTFail()
+                return
+            }
+            
+            var urlParameters = ""
+            if let parameters = request.urlParameters() {
+                urlParameters = "?" + parameters
+            }
+            
+            self.performRequest(route: ServerEndpoints.index, headers: headers, urlParameters: urlParameters, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on IndexRequest")
+                XCTAssert(dict != nil)
+                
+                guard let indexResponse = IndexResponse(json: dict!) else {
+                    expectation.fulfill()
+                    XCTFail()
+                    return
+                }
+                
+                result = indexResponse.masterVersion
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
     func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil, sharingGroupId: SharingGroupId, errorExpected: Bool = false) {
     
         if expectedFileSizes != nil {
@@ -940,8 +982,13 @@ class ServerTestCase : XCTestCase {
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
+
+        guard let masterVersion = getMasterVersion(sharingGroupId: actualSharingGroupId) else {
+            XCTFail()
+            return
+        }
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
+        redeemSharingInvitation(sharingUser:sharingUser, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
             XCTAssert(result?.userId != nil && result?.sharingGroupId != nil)
             expectation.fulfill()
         }

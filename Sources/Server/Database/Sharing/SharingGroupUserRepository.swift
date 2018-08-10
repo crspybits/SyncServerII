@@ -25,6 +25,10 @@ class SharingGroupUser : NSObject, Model {
     static let userIdKey = "userId"
     var userId: UserId!
 
+    // The permissions that the user has in regards to the sharing group. The user can read (anyone's data), can upload (to their own or others storage), and invite others to join the group.
+    static let permissionKey = "permission"
+    var permission:Permission?
+
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -37,6 +41,9 @@ class SharingGroupUser : NSObject, Model {
             case SharingGroupUser.sharingGroupIdKey:
                 sharingGroupId = newValue as! SharingGroupId?
                 
+            case SharingGroupUser.permissionKey:
+                permission = newValue as! Permission?
+                
             default:
                 Log.error("Did not find key: \(key)")
                 assert(false)
@@ -45,6 +52,17 @@ class SharingGroupUser : NSObject, Model {
         
         get {
             return getValue(forKey: key)
+        }
+    }
+    
+    func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
+        switch propertyName {
+            case SharingGroupUser.permissionKey:
+                return {(x:Any) -> Any? in
+                    return Permission(rawValue: x as! String)
+                }
+            default:
+                return nil
         }
     }
     
@@ -75,6 +93,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             "sharingGroupId BIGINT NOT NULL, " +
             
             "userId BIGINT NOT NULL, " +
+            
+            "permission VARCHAR(\(Permission.maxStringLength())), " +
 
             "FOREIGN KEY (userId) REFERENCES \(UserRepository.tableName)(\(User.userIdKey)), " +
             "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
@@ -124,8 +144,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case error(String)
     }
     
-    func add(sharingGroupId: SharingGroupId, userId: UserId) -> AddResult {
-        let query = "INSERT INTO \(tableName) (sharingGroupId, userId) VALUES(\(sharingGroupId), \(userId));"
+    func add(sharingGroupId: SharingGroupId, userId: UserId, permission: Permission) -> AddResult {
+        let query = "INSERT INTO \(tableName) (sharingGroupId, userId, permission) VALUES(\(sharingGroupId), \(userId), '\(permission.rawValue)');"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing user group")

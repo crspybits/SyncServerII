@@ -26,7 +26,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
     
     @discardableResult
     func addSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, failureExpected: Bool = false) -> SharingGroupUserId? {
-        let result = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId)
+        let result = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read)
         
         var sharingGroupUserId:SharingGroupUserId?
         switch result {
@@ -58,7 +58,6 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
@@ -82,7 +81,6 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId1: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
@@ -99,7 +97,6 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user2.accountType = .Google
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user2.credsId = "101"
-        user2.permission = .admin
         
         guard let userId2: UserId = UserRepository(db).add(user: user2) else {
             XCTFail()
@@ -125,7 +122,6 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId1: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
@@ -151,7 +147,6 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
@@ -204,7 +199,6 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()

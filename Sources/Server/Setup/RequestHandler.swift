@@ -135,6 +135,65 @@ class RequestHandler : AccountDelegate {
         case failure(FailureResult)
     }
     
+    enum PermissionsAndLockingResult {
+        case success(lockedSharingGroup: SharingGroupId?)
+        case failure
+    }
+    
+    func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsAndLockingResult {
+        if let sharing = endpoint.sharing {
+            // Endpoint uses sharing group. Must give sharingGroupId in request.
+            guard let dict = requestObject.toJSON(), let sharingGroupId = dict[ServerEndpoint.sharingGroupIdKey] as? SharingGroupId else {
+            
+                self.failWithError(message: "Could not get sharing group id from request that uses sharing group: \(String(describing: requestObject.toJSON()))")
+                return .failure
+            }
+            
+            // The user is on the system. Whether or not they can perform the endpoint depends on their permissions for the sharing group.
+            let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: currentSignedInUser!.userId)
+            let result = repositories.sharingGroupUser.lookup(key: key, modelInit: SharingGroupUser.init)
+            switch result {
+            case .found(let model):
+                let sharingGroupUser = model as! SharingGroupUser
+                guard let userPermissions = sharingGroupUser.permission else {
+                    self.failWithError(message: "SharingGroupUser did not have permissions!")
+                    return .failure
+                }
+                
+                guard userPermissions.hasMinimumPermission(sharing.minPermission) else {
+                    self.failWithError(message: "User did not meet minimum permissions -- needed: \(sharing.minPermission); had: \(userPermissions)!")
+                    return .failure
+                }
+                
+            case .noObjectFound:
+                self.failWithError(message: "SharingGroupUser object not found!")
+                return .failure
+            case .error(let error):
+                self.failWithError(message: error)
+                return .failure
+            }
+            
+            if sharing.needsLock {
+                let lock = Lock(sharingGroupId: sharingGroupId, deviceUUID:deviceUUID!)
+                switch repositories.lock.lock(lock: lock) {
+                case .success:
+                    return .success(lockedSharingGroup: sharingGroupId)
+                
+                // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
+                case .lockAlreadyHeld:
+                    self.failWithError(message: "Could not obtain lock!!")
+                    return .failure
+                
+                case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+                    self.failWithError(message: "Error obtaining lock!")
+                    return .failure
+                }
+            }
+        }
+        
+        return .success(lockedSharingGroup: nil)
+    }
+    
     // Starts a transaction, and calls the `dbOperations` closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.
     private func dbTransaction(_ db:Database, handleResult:@escaping (ServerResult) ->(), dbOperations:(_ callback: @escaping (ServerResult) ->())->()) {
     
@@ -219,7 +278,14 @@ class RequestHandler : AccountDelegate {
         }
 
         var dbCreds:Account?
+        
+        guard let requestObject = createRequest(request) else {
+            self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
+            return
+        }
     
+        var lockedSharingGroup: SharingGroupId?
+        
         if authenticationLevel! == .secondary {
             // We have .secondary authentication-- i.e., we should have the user recorded in the database already.
             
@@ -230,7 +296,7 @@ class RequestHandler : AccountDelegate {
             
             let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountType, credsId: profile!.id)
             let userLookup = self.repositories.user.lookup(key: key, modelInit: User.init)
-        
+            
             switch userLookup {
             case .found(let model):
                 currentSignedInUser = (model as? User)!
@@ -247,10 +313,12 @@ class RequestHandler : AccountDelegate {
                     return
                 }
                 
-                // This user is on the system. Whether or not they can perform the endpoint depends on their permissions.
-                guard currentSignedInUser!.permission!.hasMinimumPermission(endpoint.minPermission) else {
-                    self.failWithError(message: "Signed in user has permissions of \(currentSignedInUser!.permission!) but these don't meet the minimum requirements of \(endpoint.minPermission)", statusCode: .unauthorized)
+                let result = handlePermissionsAndLocking(requestObject: requestObject)
+                switch result {
+                case .failure:
                     return
+                case .success(lockedSharingGroup: let sharingGroupId):
+                    lockedSharingGroup = sharingGroupId
                 }
                 
             case .noObjectFound:
@@ -259,14 +327,9 @@ class RequestHandler : AccountDelegate {
                 return
                 
             case .error(let error):
-                self.failWithError(message: "Failed looking up user: \(key): \(error)", statusCode: .internalServerError)
+                failWithError(message: "Failed looking up user: \(key): \(error)", statusCode: .internalServerError)
                 return
             }
-        }
-        
-        guard let requestObject = createRequest(request) else {
-            self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
-            return
         }
         
         Log.debug("requestObject: \(String(describing: requestObject.toJSON()))")
@@ -285,7 +348,7 @@ class RequestHandler : AccountDelegate {
             assert(authenticationLevel! == .none)
             
             dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, processRequest: processRequest, handleResult: handleResult)
+                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
@@ -305,7 +368,7 @@ class RequestHandler : AccountDelegate {
             if let profileCreds = AccountManager.session.accountFromProfile(profile: profile!, user: credsUser, delegate: self) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, processRequest: processRequest, handleResult: handleResult)
+                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
@@ -337,7 +400,7 @@ class RequestHandler : AccountDelegate {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, lockedSharingGroup: SharingGroupId?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         
@@ -372,37 +435,11 @@ class RequestHandler : AccountDelegate {
             }
         }
         
-        var requestSharingGroupId: SharingGroupId?
-        
-        if self.endpoint.needsLock {
-            guard let dict = requestObject.toJSON(), let sharingGroupId = dict[ServerEndpoint.sharingGroupIdKey] as? SharingGroupId else {
-                handleResult(.failure(.message("Could not get sharing group id from request that needs a lock: \(String(describing: requestObject.toJSON()))")))
-                return
-            }
-            
-            requestSharingGroupId = sharingGroupId
-            
-            let lock = Lock(sharingGroupId: sharingGroupId, deviceUUID:deviceUUID!)
-            switch repositories.lock.lock(lock: lock) {
-            case .success:
-                break
-            
-            // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
-            case .lockAlreadyHeld:
-                handleResult(.failure(.message("Could not obtain lock!!")))
-                return
-            
-            case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-                handleResult(.failure(.message("Error obtaining lock!")))
-                return
-            }
-        }
-
         let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { response in
         
             // If we locked before, do unlock now.
-            if self.endpoint.needsLock {
-                _ = self.repositories.lock.unlock(sharingGroupId: requestSharingGroupId!)
+            if let sharingGroupId = lockedSharingGroup {
+                _ = self.repositories.lock.unlock(sharingGroupId: sharingGroupId)
             }
         
             var message:ResponseMessage!
@@ -422,7 +459,6 @@ class RequestHandler : AccountDelegate {
                 return
             }
 
-            
             let jsonDict = message.toJSON()
             if nil == jsonDict {
                 handleResult(.failure(.message("Could not convert response object to json dictionary")))

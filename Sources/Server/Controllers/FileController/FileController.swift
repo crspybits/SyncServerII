@@ -111,11 +111,7 @@ class FileController : ControllerProtocol {
         }
         
         let clientSharingGroups:[SyncServerShared.SharingGroup] = groups.map { serverGroup in
-            let clientGroup = SyncServerShared.SharingGroup()!
-            clientGroup.sharingGroupId = serverGroup.sharingGroupId
-            clientGroup.sharingGroupName = serverGroup.sharingGroupName
-            clientGroup.deleted = serverGroup.deleted
-            return clientGroup
+            return serverGroup.toClient()
         }
         
         guard let sharingGroupId = indexRequest.sharingGroupId else {

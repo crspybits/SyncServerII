@@ -76,9 +76,6 @@ class UserController : ControllerProtocol {
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType: userType)
         
-        // This is creating the "root" owning user for a sharing group; they have max permissions.
-        user.permission = .admin
-        
         if params.profileCreds!.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
                 let message = "owningAccountsNeedCloudFolderName but no cloudFolderName"
@@ -113,7 +110,8 @@ class UserController : ControllerProtocol {
             return
         }
 
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId) else {
+        // This is creating the "root" owning user for a sharing group; they have max permissions.
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin) else {
             let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -166,7 +164,6 @@ class UserController : ControllerProtocol {
         
         let response = CheckCredsResponse()!
         response.userId = params.currentSignedInUser!.userId
-        response.permission = params.currentSignedInUser!.permission
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
         params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.accountType.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {

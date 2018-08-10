@@ -20,7 +20,7 @@ class SharingAccountsController : ControllerProtocol {
     
     func createSharingInvitation(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
-        assert(params.ep.minPermission == .admin)
+        assert(params.ep.sharing?.minPermission == .admin)
 
         guard let createSharingInvitationRequest = params.request as? CreateSharingInvitationRequest else {
             let message = "Did not receive CreateSharingInvitationRequest"
@@ -104,7 +104,6 @@ class SharingAccountsController : ControllerProtocol {
         user.accountType = AccountType.for(userProfile: params.userProfile!)
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
-        user.permission = sharingInvitation.permission
         
         var createInitialOwningUserFile = false
         
@@ -134,7 +133,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId, permission: sharingInvitation.permission) else {
             let message = "Failed on adding sharing group user for new sharing user."
             Log.error(message)
             completion(.failure(.message(message)))

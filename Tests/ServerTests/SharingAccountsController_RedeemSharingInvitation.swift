@@ -46,17 +46,32 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
+
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
         
-        redeemSharingInvitation(sharingUser:sharingUser, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
+        redeemSharingInvitation(sharingUser:sharingUser, masterVersion: masterVersion, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
             expectation.fulfill()
         }
     }
         
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
 
-        redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { _, expectation in
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+
+        redeemSharingInvitation(sharingUser: sharingUser, masterVersion: masterVersion, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -81,7 +96,12 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
-        redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        redeemSharingInvitation(sharingUser: .primaryOwningAccount, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -102,10 +122,15 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
         let deviceUUID2 = Foundation.UUID().uuidString
         addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
+        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -125,10 +150,17 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
+        
+        guard var masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
             
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
+        
+        masterVersion += 1
             
         // Check to make sure we have a new user:
         let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
@@ -152,7 +184,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
             
         // Since the user account represented by sharingUser has already been used to create a sharing account, this redeem attempt will fail.
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
             expectation.fulfill()
         }
     }

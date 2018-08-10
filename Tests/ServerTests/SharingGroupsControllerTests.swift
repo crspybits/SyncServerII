@@ -90,11 +90,16 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
         let sharingGroup = SyncServerShared.SharingGroup()!
         sharingGroup.sharingGroupId = sharingGroupId
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
-        guard updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
+        guard updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, masterVersion: masterVersion) else {
             XCTFail()
             return
         }
@@ -108,7 +113,12 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId) else {
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
             XCTFail()
             return
         }
@@ -122,16 +132,23 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId) else {
+        guard var masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
             XCTFail()
             return
         }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        masterVersion += 1
         
         let sharingGroup = SyncServerShared.SharingGroup()!
         sharingGroup.sharingGroupId = sharingGroupId
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
-        let result = updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, expectFailure: true)
+        let result = updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, masterVersion: masterVersion, expectFailure: true)
         XCTAssert(result == false)
     }
     
