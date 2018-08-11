@@ -71,11 +71,6 @@ class SharingAccountsController : ControllerProtocol {
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         
-        if let errorResponse = Controllers.updateMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, masterVersion: request.masterVersion, params: params, responseType: RedeemSharingInvitationResponse.self) {
-            completion(errorResponse)
-            return
-        }
-        
         let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
