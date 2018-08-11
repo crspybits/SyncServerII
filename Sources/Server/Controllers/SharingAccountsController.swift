@@ -71,7 +71,7 @@ class SharingAccountsController : ControllerProtocol {
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         
-        // I'm not requiring a master version from the client-- because they don't have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
+        // I'm not requiring a master version from the client-- because they don't yet have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
         
         guard let masterVersion = Controllers.getMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, params: params) else {
             let message = "Could not get master version for sharing group id: \(sharingInvitation.sharingGroupId)"
@@ -85,17 +85,6 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
-        switch userExists {
-        case .doesNotExist:
-            break
-        case .error, .exists(_):
-            let message = "Could not add user: Already exists!"
-            Log.error(message)
-            completion(.failure(.message(message)))
-            return
-        }
-
         let removalResult2 = SharingInvitationRepository(params.db).remove(key: sharingInvitationKey)
         guard case .removed(let numberRemoved) = removalResult2, numberRemoved == 1 else {
             let message = "Failed removing sharing invitation!"
@@ -104,8 +93,57 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        // All seems good. Let's create the new user.
+        // The user can either: (a) already be on the system -- so this will be a request to add a sharing group to an existing user, or (b) this is a request to both create a user and have them join a sharing group.
         
+        let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
+        switch userExists {
+        case .doesNotExist:
+            redeemSharingInvitationForNewUser(params:params, request: request, sharingInvitation: sharingInvitation, completion: completion)
+        case .exists(let existingUser):
+            redeemSharingInvitationForExistingUser(existingUser, params:params, request: request, sharingInvitation: sharingInvitation, completion: completion)
+        case .error:
+            let message = "Error looking up user!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+        }
+    }
+    
+    private func redeemSharingInvitationForExistingUser(_ existingUser: User, params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation, completion: @escaping ((RequestProcessingParameters.Response)->())) {
+    
+        // Check to see if this user is already in this sharing group. We've got a lock on the sharing group, so no race condition will occur for adding user to sharing group.
+        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId)
+        let result = params.repos.sharingGroupUser.lookup(key: key, modelInit: SharingGroupUser.init)
+        switch result {
+        case .found:
+            let message = "User id: \(existingUser.userId!) was alread in sharing group: \(sharingInvitation.sharingGroupId)"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        case .noObjectFound:
+            // Good: We can add this user to the sharing group.
+            break
+        case .error(let error):
+            Log.error(error)
+            completion(.failure(.message(error)))
+            return
+        }
+
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId, permission: sharingInvitation.permission) else {
+            let message = "Failed on adding sharing group user for user."
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+
+        let response = RedeemSharingInvitationResponse()!
+        response.sharingGroupId = sharingInvitation.sharingGroupId
+        response.userId = existingUser.userId
+        
+        completion(.success(response))
+    }
+    
+    private func redeemSharingInvitationForNewUser(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation, completion: @escaping ((RequestProcessingParameters.Response)->())) {
+    
         // No database creds because this is a new user-- so use params.profileCreds
         
         let user = User()

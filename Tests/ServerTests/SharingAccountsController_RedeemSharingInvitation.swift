@@ -55,7 +55,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
 
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID) else {
+        guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
@@ -185,7 +185,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
         
         
-        XCTAssert(filtered[0].permission == perm, "Actual: \(filtered[0].permission); expected: \(perm)")
+        XCTAssert(filtered[0].permission == perm, "Actual: \(String(describing: filtered[0].permission)); expected: \(perm)")
     }
     
     func testThatCheckingCredsOnASharingUserGivesSharingPermission() {
@@ -231,6 +231,39 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             }
         }
     }
+    
+    func testThatRedeemingWithAnExistingOwningAccountWorks() {
+        // Create an owning user, A -- this also creates sharing group 1
+        // Create another owning user, B (also creates a sharing group)
+        // A creates sharing invitation to sharing group 1.
+        // B redeems sharing invitation.
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        let permission:Permission = .read
+
+        guard let addUserResponse1 = self.addNewUser(testAccount: .primaryOwningAccount, deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse1.sharingGroupId else {
+            XCTFail()
+            return
+        }
+
+        guard let _ = self.addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        var sharingInvitationUUID:String!
+        
+        createSharingInvitation(testAccount: .primaryOwningAccount, permission: permission, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
+            XCTAssert(result?.userId != nil && result?.sharingGroupId != nil)
+            expectation.fulfill()
+        }
+    }
 }
 
 extension SharingAccountsController_RedeemSharingInvitation {
@@ -252,7 +285,9 @@ extension SharingAccountsController_RedeemSharingInvitation {
             
             ("testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission", testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission),
             
-            ("testThatDeletingSharingUserWorks", testThatDeletingSharingUserWorks)
+            ("testThatDeletingSharingUserWorks", testThatDeletingSharingUserWorks),
+            
+            ("testThatRedeemingWithAnExistingOwningAccountWorks", testThatRedeemingWithAnExistingOwningAccountWorks)
         ]
     }
     
