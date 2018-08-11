@@ -71,6 +71,20 @@ class SharingAccountsController : ControllerProtocol {
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         
+        // I'm not requiring a master version from the client-- because they don't have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
+        
+        guard let masterVersion = Controllers.getMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, params: params) else {
+            let message = "Could not get master version for sharing group id: \(sharingInvitation.sharingGroupId)"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        if let response = Controllers.updateMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, masterVersion: masterVersion, params: params, responseType: nil) {
+            completion(response)
+            return
+        }
+        
         let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:

@@ -982,13 +982,8 @@ class ServerTestCase : XCTestCase {
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
-
-        guard let masterVersion = getMasterVersion(sharingGroupId: actualSharingGroupId) else {
-            XCTFail()
-            return
-        }
         
-        redeemSharingInvitation(sharingUser:sharingUser, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
+        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
             XCTAssert(result?.userId != nil && result?.sharingGroupId != nil)
             expectation.fulfill()
         }
@@ -1019,7 +1014,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func redeemSharingInvitation(sharingUser:TestAccount, masterVersion: MasterVersionInt, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
+    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
     
         var actualCloudFolderName: String?
         if sharingUser.type == .Google && canGiveCloudFolderName {
@@ -1034,8 +1029,7 @@ class ServerTestCase : XCTestCase {
             if sharingInvitationUUID != nil {
                 let request = RedeemSharingInvitationRequest(json: [
                     RedeemSharingInvitationRequest.sharingInvitationUUIDKey : sharingInvitationUUID!,
-                    AddUserRequest.cloudFolderNameKey: actualCloudFolderName as Any,
-                    ServerEndpoint.masterVersionKey: masterVersion
+                    AddUserRequest.cloudFolderNameKey: actualCloudFolderName as Any
                 ])
                 urlParameters = "?" + request!.urlParameters()!
             }

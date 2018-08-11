@@ -25,6 +25,10 @@ class SharingGroup : NSObject, Model {
     static let masterVersionKey = "masterVersion"
     var masterVersion: MasterVersionInt!
 
+    // Similarly, not part of this table. For doing joins.
+    public static let permissionKey = "permission"
+    public var permission:Permission?
+
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -39,6 +43,9 @@ class SharingGroup : NSObject, Model {
 
             case SharingGroup.masterVersionKey:
                 masterVersion = newValue as! MasterVersionInt?
+                
+            case SharingGroup.permissionKey:
+                permission = newValue as! Permission?
                 
             default:
                 assert(false)
@@ -60,7 +67,10 @@ class SharingGroup : NSObject, Model {
                 return {(x:Any) -> Any? in
                     return (x as! Int8) == 1
                 }
-            
+            case SharingGroupUser.permissionKey:
+                return {(x:Any) -> Any? in
+                    return Permission(rawValue: x as! String)
+                }
             default:
                 return nil
         }
@@ -72,6 +82,7 @@ class SharingGroup : NSObject, Model {
         clientGroup.sharingGroupName = sharingGroupName
         clientGroup.deleted = deleted
         clientGroup.masterVersion = masterVersion
+        clientGroup.permission = permission
         return clientGroup
     }
 }
@@ -156,7 +167,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         let masterVersionTableName = MasterVersionRepository.tableName
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
         
-        let query = "select \(tableName).sharingGroupId, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupId = \(tableName).sharingGroupId AND \(tableName).sharingGroupId = \(masterVersionTableName).sharingGroupId"
+        let query = "select \(tableName).sharingGroupId, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupId = \(tableName).sharingGroupId AND \(tableName).sharingGroupId = \(masterVersionTableName).sharingGroupId"
         return sharingGroups(forSelectQuery: query)
     }
     

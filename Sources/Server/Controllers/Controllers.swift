@@ -201,8 +201,20 @@ public class Controllers {
         }
     }
     
+    static func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> MasterVersionInt? {
+        var result: MasterVersionInt?
+        
+        getMasterVersion(sharingGroupId: sharingGroupId, params: params) { error, masterVersion in
+            if error == nil {
+                result = masterVersion
+            }
+        }
+        
+        return result
+    }
+    
     // Returns nil on success.
-    static func updateMasterVersion(sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type) -> RequestProcessingParameters.Response? {
+    static func updateMasterVersion(sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type?) -> RequestProcessingParameters.Response? {
         let updateResult = updateMasterVersion(sharingGroupId: sharingGroupId, currentMasterVersion: masterVersion, params: params)
         switch updateResult {
         case .success:
@@ -210,9 +222,16 @@ public class Controllers {
 
         case .masterVersionUpdate(let updatedMasterVersion):
             Log.warning("Master version update: \(updatedMasterVersion)")
-            var response = responseType.init(json: [:])
-            response!.masterVersionUpdate = updatedMasterVersion
-            return .success(response!)
+            if let responseType = responseType {
+                var response = responseType.init(json: [:])
+                response!.masterVersionUpdate = updatedMasterVersion
+                return .success(response!)
+            }
+            else {
+                let message = "Master version update but no response type was given."
+                Log.error(message)
+                return .failure(.message(message))
+            }
             
         case .error(let error):
             let message = "Failed on updateMasterVersion: \(error)"

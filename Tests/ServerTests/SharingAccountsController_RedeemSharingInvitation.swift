@@ -46,13 +46,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
-
-        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
-            XCTFail()
-            return
-        }
         
-        redeemSharingInvitation(sharingUser:sharingUser, masterVersion: masterVersion, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
+        redeemSharingInvitation(sharingUser:sharingUser, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
             expectation.fulfill()
         }
     }
@@ -60,18 +55,12 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
 
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
-            XCTFail()
-            return
-        }
-        
-        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
 
-        redeemSharingInvitation(sharingUser: sharingUser, masterVersion: masterVersion, errorExpected:true) { _, expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -96,12 +85,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
-            XCTFail()
-            return
-        }
-        
-        redeemSharingInvitation(sharingUser: .primaryOwningAccount, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
+        redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -122,15 +106,10 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
-            XCTFail()
-            return
-        }
-        
         let deviceUUID2 = Foundation.UUID().uuidString
         addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
+        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -150,17 +129,10 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
-        
-        guard var masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
-            XCTFail()
-            return
-        }
             
-        redeemSharingInvitation(sharingUser: sharingUser, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
-        
-        masterVersion += 1
             
         // Check to make sure we have a new user:
         let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
@@ -184,7 +156,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
             
         // Since the user account represented by sharingUser has already been used to create a sharing account, this redeem attempt will fail.
-        redeemSharingInvitation(sharingUser: sharingUser, masterVersion: masterVersion, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -195,25 +167,25 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     
     func checkingCredsOnASharingUserGivesSharingPermission(sharingUser: TestAccount) {
         let perm:Permission = .write
-        createSharingUser(withSharingPermission: perm, sharingUser: sharingUser)
-            
-        let deviceUUID = Foundation.UUID().uuidString
-            
-        performServerTest(testAccount: sharingUser) { expectation, testCreds in
-            let headers = self.setupHeaders(testUser:sharingUser, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
-            
-            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "checkCreds failed")
-                
-                let response = CheckCredsResponse(json: dict!)
-                
-                // This is what we're looking for: Make sure that the check creds response indicates our expected sharing permission.
-                XCTAssert(response!.permission == perm)
-                
-                expectation.fulfill()
-            }
+        var actualSharingGroupId: SharingGroupId?
+        createSharingUser(withSharingPermission: perm, sharingUser: sharingUser) { _, sharingGroupId in
+            actualSharingGroupId = sharingGroupId
         }
+        
+        guard let (_, groups) = getIndex(testAccount: sharingUser) else {
+            XCTFail()
+            return
+        }
+        
+        let filtered = groups.filter {$0.sharingGroupId == actualSharingGroupId}
+        
+        guard filtered.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        
+        XCTAssert(filtered[0].permission == perm, "Actual: \(filtered[0].permission); expected: \(perm)")
     }
     
     func testThatCheckingCredsOnASharingUserGivesSharingPermission() {
@@ -222,25 +194,25 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     
     func testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
+        guard let response = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = response.sharingGroupId else {
             XCTFail()
             return
         }
         
-        performServerTest(testAccount: .primaryOwningAccount) { expectation, creds in
-            let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
-            
-            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "checkCreds failed")
-                
-                let response = CheckCredsResponse(json: dict!)
-
-                XCTAssert(response!.permission == .admin)
-                
-                expectation.fulfill()
-            }
+        guard let (_, groups) = getIndex() else {
+            XCTFail()
+            return
         }
+        
+        let filtered = groups.filter {$0.sharingGroupId == sharingGroupId}
+        
+        guard filtered.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filtered[0].permission == .admin)
     }
     
     func testThatDeletingSharingUserWorks() {
