@@ -90,7 +90,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
     }
     
-    func testThatRedeemingWithAnExistingOtherOwningAccountFails() {
+    // 8/12/18; This now works-- i.e., you can redeem with other owning accounts-- because each user can now be in multiple sharing groups. (Prior to this, it was a failure test!).
+    func testThatRedeemingWithAnExistingOtherOwningAccountWorks() {
         let deviceUUID = Foundation.UUID().uuidString
         
         guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
@@ -109,7 +110,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         let deviceUUID2 = Foundation.UUID().uuidString
         addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
+        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
     }
@@ -278,7 +279,7 @@ extension SharingAccountsController_RedeemSharingInvitation {
             
             ("testThatRedeemingWithTheSameAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameAccountAsTheOwningAccountFails),
             
-            ("testThatRedeemingWithAnExistingOtherOwningAccountFails", testThatRedeemingWithAnExistingOtherOwningAccountFails),
+            ("testThatRedeemingWithAnExistingOtherOwningAccountWorks", testThatRedeemingWithAnExistingOtherOwningAccountWorks),
             ("testThatRedeemingWithAnExistingSharingAccountFails", testThatRedeemingWithAnExistingSharingAccountFails),
             
             ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),

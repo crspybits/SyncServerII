@@ -206,5 +206,21 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             return .error("\(select.forEachRowStatus!)")
         }
     }
+    
+    // To deal with deleting a user account-- any other users that have its user id as their owningUserId must have that owningUserId set to NULL. Don't just remove the invited/sharing user from SharingGroupUsers-- why not let them still download from the sharing group?
+    func resetOwningUserIds(forUserId userId: UserId) -> Bool {
+        let query = "UPDATE \(tableName) SET owningUserId = NULL WHERE owningUserId = \(userId)"
+        
+        if db.connection.query(statement: query) {
+            let numberUpdates = db.connection.numberAffectedRows()
+            Log.info("\(numberUpdates) users had their owningUserId set to NULL.")
+            return true
+        }
+        else {
+            let error = db.error
+            Log.error("Could not update row(s) for \(tableName): \(error)")
+            return false
+        }
+    }
 }
 

@@ -166,7 +166,8 @@ class RequestHandler : AccountDelegate {
                 }
                 
             case .noObjectFound:
-                self.failWithError(message: "SharingGroupUser object not found!")
+                // One reason that the sharing group user might not be found is that the SharingGroupUser was removed from the system-- e.g., if an owning user is deleted, SharingGroupUser rows that have it as their owningUserId will be removed.
+                self.failWithError(message: "SharingGroupUser object not found!", statusCode: HTTPStatusCode.gone)
                 return .failure
             case .error(let error):
                 self.failWithError(message: error)

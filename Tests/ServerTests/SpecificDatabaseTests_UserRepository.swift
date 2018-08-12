@@ -47,17 +47,6 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         addOwningUsers()
     }
     
-    func testAddOwningUserFailsIfYouGiveAnOwningUserId() {
-        let user1 = User()
-        user1.username = "Chris"
-        user1.accountType = .Google
-        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
-        user1.credsId = "100"
-        
-        let result1 = UserRepository(db).add(user: user1)
-        XCTAssert(result1 == nil, "Good id!!")
-    }
-    
     func testAddOwningUserWorksIfYouGivePermissions() {
         let user1 = User()
         user1.username = "Chris"
@@ -184,7 +173,6 @@ extension SpecificDatabaseTests_UserRepository {
     static var allTests : [(String, (SpecificDatabaseTests_UserRepository) -> () throws -> Void)] {
         return [
             ("testAddOwningUser", testAddOwningUser),
-            ("testAddOwningUserFailsIfYouGiveAnOwningUserId", testAddOwningUserFailsIfYouGiveAnOwningUserId),
             ("testAddOwningUserWorksIfYouGivePermissions", testAddOwningUserWorksIfYouGivePermissions),
             
             ("testAddGoogleUser", testAddGoogleUser),

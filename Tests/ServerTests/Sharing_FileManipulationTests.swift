@@ -599,7 +599,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
     }
     
-    func testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails() {
+    func testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone() {
         var actualSharingGroupId:SharingGroupId!
         
         let sharingAccount: TestAccount = .nonOwningSharingAccount
@@ -710,8 +710,8 @@ extension Sharing_FileManipulationTests {
             ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser),
             ("testUploadByOwningSharingUserAfterInvitingUserDeletedWorks",
                 testUploadByOwningSharingUserAfterInvitingUserDeletedWorks),
-            ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails",
-                testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails),
+            ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone",
+                testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone),
             ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
                 testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks)
         ]
