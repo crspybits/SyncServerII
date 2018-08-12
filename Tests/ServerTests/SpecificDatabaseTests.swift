@@ -199,7 +199,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             }
             actualSharingGroupId = sharingGroupId
             
-            guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .write) else {
+            guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .write, owningUserId: nil) else {
                 XCTFail()
                 return nil
             }
@@ -388,7 +388,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin) else {
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -419,7 +419,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read) else {
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read, owningUserId: nil) else {
             XCTFail()
             return
         }

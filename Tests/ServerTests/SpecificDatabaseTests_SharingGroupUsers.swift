@@ -25,8 +25,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
     }
     
     @discardableResult
-    func addSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, failureExpected: Bool = false) -> SharingGroupUserId? {
-        let result = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read)
+    func addSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, owningUserId: UserId?, failureExpected: Bool = false) -> SharingGroupUserId? {
+        let result = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read, owningUserId: owningUserId)
         
         var sharingGroupUserId:SharingGroupUserId?
         switch result {
@@ -64,7 +64,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -87,7 +87,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let id1 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1) else {
+        guard let id1 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -103,7 +103,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let id2 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId2) else {
+        guard let id2 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId2, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -128,12 +128,12 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil) else {
             XCTFail()
             return
         }
         
-        addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, failureExpected: true)
+        addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil, failureExpected: true)
     }
     
     func testLookupFromSharingGroupUser() {
@@ -158,7 +158,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -220,12 +220,12 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId1, userId: userId) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId1, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId2, userId: userId) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId2, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }

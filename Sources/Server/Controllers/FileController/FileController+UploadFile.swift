@@ -173,8 +173,6 @@ extension FileController {
                 return
             }
             
-            // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
-            
             // I'm going to create the entry in the Upload repo first because otherwise, there's a (albeit unlikely) race condition-- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload table entry will be the gatekeeper.
             
             let upload = Upload()

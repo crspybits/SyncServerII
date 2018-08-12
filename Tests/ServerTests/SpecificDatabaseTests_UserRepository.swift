@@ -53,7 +53,6 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.owningUserId = 100
         
         let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == nil, "Good id!!")
@@ -88,9 +87,6 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         
         user1.credsId = "100"
         
-        if sharing {
-            user1.owningUserId = 200
-        }
 
         guard let _ = UserRepository(db).add(user: user1) else {
             XCTFail()
