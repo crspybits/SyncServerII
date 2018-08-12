@@ -30,7 +30,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
 
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: params.currentSignedInUser!.userId, permission: .admin) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: params.currentSignedInUser!.userId, permission: .admin, owningUserId: nil) else {
             let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))

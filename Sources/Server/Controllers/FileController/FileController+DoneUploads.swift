@@ -97,7 +97,7 @@ extension FileController {
             return nil
         }
 
-        guard let effectiveOwningUserId = params.currentSignedInUser!.effectiveOwningUserId else {
+        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupId: doneUploadsRequest.sharingGroupId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
             params.completion(.failure(nil))
             return nil
         }

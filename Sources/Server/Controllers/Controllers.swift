@@ -239,4 +239,22 @@ public class Controllers {
             return .failure(.message(message))
         }
     }
+    
+    static func getEffectiveOwningUserId(user: User, sharingGroupId: SharingGroupId, sharingGroupUserRepo: SharingGroupUserRepository) -> UserId? {
+        
+        if user.accountType.userType == .owning {
+            return user.userId
+        }
+        
+        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: user.userId)
+        let lookupResult = sharingGroupUserRepo.lookup(key: sharingUserKey, modelInit: SharingGroupUser.init)
+        
+        switch lookupResult {
+        case .found(let model):
+            let sharingGroupUser = model as! SharingGroupUser
+            return sharingGroupUser.owningUserId
+        case .noObjectFound, .error(_):
+            return nil
+        }
+    }
 }

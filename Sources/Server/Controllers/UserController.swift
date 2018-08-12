@@ -111,7 +111,7 @@ class UserController : ControllerProtocol {
         }
 
         // This is creating the "root" owning user for a sharing group; they have max permissions.
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin, owningUserId: nil) else {
             let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -195,13 +195,6 @@ class UserController : ControllerProtocol {
             return
         }
         
-        guard params.repos.user.resetOwningUserIds(forUserId: params.currentSignedInUser!.userId) else {
-            let message = "Could not reset owningUserId's of other users."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         // When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
         
         let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
@@ -227,6 +220,18 @@ class UserController : ControllerProtocol {
             break
         case .error(let error):
             let message = "Could not remove sharing group references for user: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // And, any sharing users making use of this user as an owningUserId must be removed from the SharingGroupUser table.
+         let sharingGroupUserKey2 = SharingGroupUserRepository.LookupKey.owningUserId(params.currentSignedInUser!.userId)
+        switch params.repos.sharingGroupUser.remove(key: sharingGroupUserKey2) {
+        case .removed:
+            break
+        case .error(let error):
+            let message = "Could not remove sharing group references for owning user: \(error)"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

@@ -45,7 +45,7 @@ class SharingAccountsController : ControllerProtocol {
         
         // 6/20/18; The current user can be a sharing or owning user, and whether or not these users can invite others depends on the permissions they have. See https://github.com/crspybits/SyncServerII/issues/76 And permissions have already been checked before this point in request handling.
 
-        guard let effectiveOwningUserId = currentSignedInUser.effectiveOwningUserId else {
+        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: currentSignedInUser, sharingGroupId: createSharingInvitationRequest.sharingGroupId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
             let message = "Could not get effectiveOwningUserId for inviting user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -127,8 +127,13 @@ class SharingAccountsController : ControllerProtocol {
             completion(.failure(.message(error)))
             return
         }
+        
+        var owningUserId: UserId?
+        if existingUser.accountType.userType == .sharing {
+            owningUserId = sharingInvitation.owningUserId
+        }
 
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId, permission: sharingInvitation.permission) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
             let message = "Failed on adding sharing group user for user."
             Log.error(message)
             completion(.failure(.message(message)))
@@ -153,10 +158,11 @@ class SharingAccountsController : ControllerProtocol {
         user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
         
         var createInitialOwningUserFile = false
-        
+        var owningUserId: UserId?
+
         switch user.accountType.userType {
         case .sharing:
-            user.owningUserId = sharingInvitation.owningUserId
+            owningUserId = sharingInvitation.owningUserId
         case .owning:
             // When the user is an owning user, they will rely on their own cloud storage to upload new files-- if they have upload permissions.
             // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, where b) that owning account type needs a cloud storage folder (e.g., Google Drive), and c) with permissions of >= write.
@@ -180,7 +186,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId, permission: sharingInvitation.permission) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
             let message = "Failed on adding sharing group user for new sharing user."
             Log.error(message)
             completion(.failure(.message(message)))

@@ -24,6 +24,10 @@ class SharingGroupUser : NSObject, Model {
     // ... to a user.
     static let userIdKey = "userId"
     var userId: UserId!
+    
+    // Only when the current user (identified by the userId) is a sharing user, this gives the userId that is the owner of the data for this sharing group.
+    static let owningUserIdKey = "owningUserId"
+    var owningUserId:UserId?
 
     // The permissions that the user has in regards to the sharing group. The user can read (anyone's data), can upload (to their own or others storage), and invite others to join the group.
     static let permissionKey = "permission"
@@ -43,6 +47,9 @@ class SharingGroupUser : NSObject, Model {
                 
             case SharingGroupUser.permissionKey:
                 permission = newValue as! Permission?
+                
+            case SharingGroupUser.owningUserIdKey:
+                owningUserId = newValue as! UserId?
                 
             default:
                 Log.error("Did not find key: \(key)")
@@ -94,8 +101,12 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             
             "userId BIGINT NOT NULL, " +
             
+            // NULL for only owning users; sharing users must have non-NULL value.
+            "owningUserId BIGINT, " +
+            
             "permission VARCHAR(\(Permission.maxStringLength())), " +
 
+            "FOREIGN KEY (owningUserId) REFERENCES \(UserRepository.tableName)(\(User.userIdKey)), " +
             "FOREIGN KEY (userId) REFERENCES \(UserRepository.tableName)(\(User.userIdKey)), " +
             "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
 
@@ -111,6 +122,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case primaryKeys(sharingGroupId: SharingGroupId, userId: UserId)
         case userId(UserId)
         case sharingGroupId(SharingGroupId)
+        case owningUserId(UserId)
         
         var description : String {
             switch self {
@@ -122,6 +134,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
                 return "userId(\(userId))"
             case .sharingGroupId(let sharingGroupId):
                 return "sharingGroupId(\(sharingGroupId))"
+            case .owningUserId(let owningUserId):
+                return "owningUserId(\(owningUserId))"
             }
         }
     }
@@ -136,6 +150,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
             return "userId = \(userId)"
         case .sharingGroupId(let sharingGroupId):
             return "sharingGroupId = \(sharingGroupId)"
+        case .owningUserId(let owningUserId):
+            return "owningUserId = \(owningUserId)"
         }
     }
     
@@ -144,8 +160,9 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case error(String)
     }
     
-    func add(sharingGroupId: SharingGroupId, userId: UserId, permission: Permission) -> AddResult {
-        let query = "INSERT INTO \(tableName) (sharingGroupId, userId, permission) VALUES(\(sharingGroupId), \(userId), '\(permission.rawValue)');"
+    func add(sharingGroupId: SharingGroupId, userId: UserId, permission: Permission, owningUserId: UserId?) -> AddResult {
+        let owningUserIdValue = owningUserId == nil ? "NULL" : "\(owningUserId!)"
+        let query = "INSERT INTO \(tableName) (sharingGroupId, userId, permission, owningUserId) VALUES(\(sharingGroupId), \(userId), '\(permission.rawValue)', \(owningUserIdValue));"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing user group")
