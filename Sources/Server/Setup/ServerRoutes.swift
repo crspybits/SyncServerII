@@ -41,6 +41,5 @@ public class ServerRoutes {
         proxyRouter.addRoute(ep: ServerEndpoints.createSharingGroup, processRequest: sharingGroupsController.createSharingGroup)
         proxyRouter.addRoute(ep: ServerEndpoints.updateSharingGroup, processRequest: sharingGroupsController.updateSharingGroup)
         proxyRouter.addRoute(ep: ServerEndpoints.removeSharingGroup, processRequest: sharingGroupsController.removeSharingGroup)
-        proxyRouter.addRoute(ep: ServerEndpoints.getSharingGroupUsers, processRequest: sharingGroupsController.getSharingGroupUsers)
     }
 }

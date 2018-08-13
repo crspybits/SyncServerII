@@ -64,6 +64,27 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
     }
+
+    func testSuccessfulAdminSharingInvitationCreationByAnOwningUser() {
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        createSharingInvitation(permission: .admin, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            XCTAssert(invitationUUID != nil)
+            guard let _ = UUID(uuidString: invitationUUID!) else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
+
+            expectation.fulfill()
+        }
+    }
     
     func sharingInvitationCreationByAnAdminSharingUser(sharingUser:TestAccount, failureExpected: Bool = false) {
         // .primaryOwningAccount owning user is created as part of this.
@@ -196,6 +217,7 @@ extension SharingAccountsController_CreateSharingInvitation {
         return [
             ("testSuccessfulReadSharingInvitationCreationByAnOwningUser", testSuccessfulReadSharingInvitationCreationByAnOwningUser),
             ("testSuccessfulWriteSharingInvitationCreationByAnOwningUser", testSuccessfulWriteSharingInvitationCreationByAnOwningUser),
+            ("testSuccessfulAdminSharingInvitationCreationByAnOwningUser", testSuccessfulAdminSharingInvitationCreationByAnOwningUser),
             ("testSuccessfulSharingInvitationCreationByAnAdminSharingUser", testSuccessfulSharingInvitationCreationByAnAdminSharingUser),
             ("testFailureOfSharingInvitationCreationByAReadSharingUser", testFailureOfSharingInvitationCreationByAReadSharingUser),
             ("testFailureOfSharingInvitationCreationByAWriteSharingUser", testFailureOfSharingInvitationCreationByAWriteSharingUser),
