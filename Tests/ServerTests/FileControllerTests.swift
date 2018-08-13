@@ -75,7 +75,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         self.getIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
     }
-
+    
     func testGetIndexForOnlySharingGroupsWorks() {
         let deviceUUID = Foundation.UUID().uuidString
         
@@ -100,6 +100,15 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         XCTAssert(sharingGroups[0].sharingGroupId == sharingGroupId)
         XCTAssert(sharingGroups[0].sharingGroupName == nil)
         XCTAssert(sharingGroups[0].deleted == false)
+        guard sharingGroups[0].sharingGroupUsers != nil, sharingGroups[0].sharingGroupUsers.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        sharingGroups[0].sharingGroupUsers.forEach { sgu in
+            XCTAssert(sgu.name != nil)
+            XCTAssert(sgu.userId != nil)
+        }
     }
     
     func testIndexWithOneFile() {

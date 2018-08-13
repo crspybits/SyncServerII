@@ -409,42 +409,6 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    @discardableResult
-    func getSharingGroupUsers(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId) -> [SyncServerShared.SharingGroupUser]? {
-    
-        var result: [SyncServerShared.SharingGroupUser]?
-        
-        let getRequest = GetSharingGroupUsersRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
-        ])!
-        
-        self.performServerTest(testAccount:testAccount) { expectation, creds in
-            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
-            
-            var queryParams:String?
-            if let params = getRequest.urlParameters() {
-                queryParams = "?" + params
-            }
-            
-            self.performRequest(route: ServerEndpoints.getSharingGroupUsers, headers: headers, urlParameters: queryParams) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                
-                XCTAssert(response!.statusCode == .OK, "Did not work on update sharing group request: \(response!.statusCode)")
-                
-                if let dict = dict, let response = GetSharingGroupUsersResponse(json: dict) {
-                    result = response.sharingGroupUsers
-                }
-                else {
-                    XCTFail()
-                }
-                
-                expectation.fulfill()
-            }
-        }
-        
-        return result
-    }
-    
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     
@@ -1008,6 +972,29 @@ class ServerTestCase : XCTestCase {
                 XCTFail()
                 completion?(nil, nil)
                 return
+            }
+            
+            guard let (_, sharingGroups) = getIndex() else {
+                XCTFail()
+                return
+            }
+            
+            guard sharingGroups.count == 1 else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(sharingGroups[0].sharingGroupId == actualSharingGroupId)
+            XCTAssert(sharingGroups[0].sharingGroupName == nil)
+            XCTAssert(sharingGroups[0].deleted == false)
+            guard sharingGroups[0].sharingGroupUsers != nil, sharingGroups[0].sharingGroupUsers.count == 2 else {
+                XCTFail()
+                return
+            }
+            
+            sharingGroups[0].sharingGroupUsers.forEach { sgu in
+                XCTAssert(sgu.name != nil)
+                XCTAssert(sgu.userId != nil)
             }
             
             completion?((model as! User).userId, actualSharingGroupId)

@@ -181,7 +181,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     }
     
     func sharingGroupUsers(forSharingGroupId sharingGroupId: SharingGroupId) -> SharingGroupUserResult {
-        let query = "select \(UserRepository.tableName).\(User.usernameKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupId = \(sharingGroupId)"
+        let query = "select \(UserRepository.tableName).\(User.usernameKey),  \(UserRepository.tableName).\(User.userIdKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupId = \(sharingGroupId)"
         return sharingGroupUsers(forSelectQuery: query)
     }
     
@@ -195,6 +195,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
 
             let sharingGroupUser = SyncServerShared.SharingGroupUser()!
             sharingGroupUser.name = rowModel.username
+            sharingGroupUser.userId = rowModel.userId
             
             result.append(sharingGroupUser)
         }

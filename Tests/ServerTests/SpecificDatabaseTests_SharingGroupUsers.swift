@@ -180,7 +180,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             XCTFail("Error: \(error)")
         }
         
-        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId), groups.count == 1 else {
+        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId, sharingGroupUserRepo: SharingGroupUserRepository(db)), groups.count == 1 else {
             XCTFail()
             return
         }
@@ -230,7 +230,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId), groups.count == 2 else {
+        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId, sharingGroupUserRepo: SharingGroupUserRepository(db)), groups.count == 2 else {
             XCTFail()
             return
         }
