@@ -409,6 +409,41 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
+    @discardableResult
+    func removeUserFromSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt) -> Bool {
+        var result: Bool = false
+        
+        let removeRequest = RemoveUserFromSharingGroupRequest(json: [
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any,
+            ServerEndpoint.masterVersionKey: masterVersion
+        ])!
+        
+        self.performServerTest(testAccount:testAccount) { expectation, creds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
+            
+            var queryParams:String?
+            if let params = removeRequest.urlParameters() {
+                queryParams = "?" + params
+            }
+            
+            self.performRequest(route: ServerEndpoints.removeUserFromSharingGroup, headers: headers, urlParameters: queryParams) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on remove user from sharing group request: \(response!.statusCode)")
+                
+                if let dict = dict, let _ = RemoveUserFromSharingGroupResponse(json: dict) {
+                    result = true
+                }
+                else {
+                    XCTFail()
+                }
+
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
     static let cloudFolderName = "CloudFolder"
     static let uploadTextFileContents = "Hello World!"
     

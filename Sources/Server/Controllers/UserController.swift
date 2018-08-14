@@ -206,7 +206,8 @@ class UserController : ControllerProtocol {
         }
         
         // 6/25/18; Up until today, user removal had included actual removal of all of the user's files from the FileIndex. BUT-- this goes against how deletion occurs on the SyncServer-- we mark files as deleted, but don't actually remove them from the FileIndex.
-        guard let _ = params.repos.fileIndex.markFilesAsDeleted(forCriteria: .userId("\(params.currentSignedInUser!.userId!)")) else {
+        let markKey = FileIndexRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        guard let _ = params.repos.fileIndex.markFilesAsDeleted(key: markKey) else {
             let message = "Could not mark files as deleted for user!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -226,7 +227,8 @@ class UserController : ControllerProtocol {
         }
         
         // And, any sharing users making use of this user as an owningUserId can no longer use its userId.
-        guard params.repos.sharingGroupUser.resetOwningUserIds(forUserId: params.currentSignedInUser!.userId) else {
+        let resetKey = SharingGroupUserRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        guard params.repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
             let message = "Could not remove sharing group references for owning user"
             Log.error(message)
             params.completion(.failure(.message(message)))

@@ -151,6 +151,50 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         let result = updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, masterVersion: masterVersion, expectFailure: true)
         XCTAssert(result == false)
     }
+    
+    // MARK: Remove user from sharing group
+    
+    func testRemoveUserFromSharingGroup_lastUserInSharingGroup() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        let key1 = SharingGroupRepository.LookupKey.sharingGroupId(sharingGroupId)
+        let result1 = SharingGroupRepository(db).lookup(key: key1, modelInit: SharingGroup.init)
+        guard case .noObjectFound = result1 else {
+            XCTFail()
+            return
+        }
+        
+        let key2 = SharingGroupUserRepository.LookupKey.userId(addUserResponse.userId)
+        let result2 = SharingGroupUserRepository(db).lookup(key: key2 , modelInit: SharingGroupUser.init)
+        guard case .noObjectFound = result2 else {
+            XCTFail()
+            return
+        }
+    }
+    
+    /*
+        Test remove user from sharing group
+            When user is last user in sharing group-- should also remove sharing group.
+            When user is not last user in the sharing group-- should not remove sharing group.
+            When user has files in the sharing group-- those should be marked as deleted.
+            When owning user has sharing users in sharing group
+                Those should no longer be able to upload to the sharing group.
+    */
 }
 
 extension SharingGroupsControllerTests {
@@ -160,7 +204,8 @@ extension SharingGroupsControllerTests {
             ("testNewlyCreatedSharingGroupHasNoFiles", testNewlyCreatedSharingGroupHasNoFiles),
             ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks),
             ("testRemoveSharingGroupWorks", testRemoveSharingGroupWorks),
-            ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails)
+            ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails),
+            ("testRemoveUserFromSharingGroup_lastUserInSharingGroup", testRemoveUserFromSharingGroup_lastUserInSharingGroup)
         ]
     }
     

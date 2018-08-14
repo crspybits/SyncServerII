@@ -123,6 +123,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case userId(UserId)
         case sharingGroupId(SharingGroupId)
         case owningUserId(UserId)
+        case owningUserAndSharingGroup(owningUserId: UserId, SharingGroupId)
         
         var description : String {
             switch self {
@@ -136,6 +137,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
                 return "sharingGroupId(\(sharingGroupId))"
             case .owningUserId(let owningUserId):
                 return "owningUserId(\(owningUserId))"
+            case .owningUserAndSharingGroup(owningUserId: let owningUserId, let sharingGroupId):
+                return "owningUserId(\(owningUserId), \(sharingGroupId)"
             }
         }
     }
@@ -145,13 +148,15 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case .sharingGroupUserId(let sharingGroupUserId):
             return "sharingGroupUserId = \(sharingGroupUserId)"
         case .primaryKeys(sharingGroupId: let sharingGroupId, userId: let userId):
-            return "sharingGroupId = \(sharingGroupId) and userId = \(userId)"
+            return "sharingGroupId = \(sharingGroupId) AND userId = \(userId)"
         case .userId(let userId):
             return "userId = \(userId)"
         case .sharingGroupId(let sharingGroupId):
             return "sharingGroupId = \(sharingGroupId)"
         case .owningUserId(let owningUserId):
             return "owningUserId = \(owningUserId)"
+        case .owningUserAndSharingGroup(owningUserId: let owningUserId, let sharingGroupId):
+            return "owningUserId = \(owningUserId) AND sharingGroupId = \(sharingGroupId)"
         }
     }
     
@@ -209,8 +214,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     }
     
     // To deal with deleting a user account-- any other users that have its user id as their owningUserId must have that owningUserId set to NULL. Don't just remove the invited/sharing user from SharingGroupUsers-- why not let them still download from the sharing group?
-    func resetOwningUserIds(forUserId userId: UserId) -> Bool {
-        let query = "UPDATE \(tableName) SET owningUserId = NULL WHERE owningUserId = \(userId)"
+    func resetOwningUserIds(key: LookupKey) -> Bool {
+        let query = "UPDATE \(tableName) SET owningUserId = NULL WHERE " + lookupConstraint(key: key)
         
         if db.connection.query(statement: query) {
             let numberUpdates = db.connection.numberAffectedRows()

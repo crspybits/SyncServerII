@@ -160,9 +160,11 @@ class RequestHandler : AccountDelegate {
                     return .failure
                 }
                 
-                guard userPermissions.hasMinimumPermission(sharing.minPermission) else {
-                    self.failWithError(message: "User did not meet minimum permissions -- needed: \(sharing.minPermission); had: \(userPermissions)!")
-                    return .failure
+                if let minPermission = sharing.minPermission {
+                    guard userPermissions.hasMinimumPermission(minPermission) else {
+                        self.failWithError(message: "User did not meet minimum permissions -- needed: \(minPermission); had: \(userPermissions)!")
+                        return .failure
+                    }
                 }
                 
             case .noObjectFound:

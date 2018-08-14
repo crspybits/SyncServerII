@@ -367,6 +367,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
         case fileIndexId(Int64)
         case userId(UserId)
         case primaryKeys(sharingGroupId: SharingGroupId, fileUUID:String)
+        case sharingGroupId(sharingGroupId: SharingGroupId)
+        case userAndSharingGroup(UserId, SharingGroupId)
         
         var description : String {
             switch self {
@@ -376,6 +378,10 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 return "userId(\(userId))"
             case .primaryKeys(let sharingGroupId, let fileUUID):
                 return "sharingGroupId(\(sharingGroupId)); fileUUID(\(fileUUID))"
+            case .sharingGroupId(let sharingGroupId):
+                return "sharingGroupId(\(sharingGroupId)))"
+            case .userAndSharingGroup(let userId, let sharingGroupId):
+                return "userId(\(userId)); sharingGroupId(\(sharingGroupId)))"
             }
         }
     }
@@ -388,6 +394,10 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return "userId = \(userId)"
         case .primaryKeys(let sharingGroupId, let fileUUID):
             return "sharingGroupId = \(sharingGroupId) and fileUUID = '\(fileUUID)'"
+        case .sharingGroupId(let sharingGroupId):
+            return "sharingGroupId = \(sharingGroupId)"
+        case .userAndSharingGroup(let userId, let sharingGroupId):
+            return "userId = \(userId) AND sharingGroupId = \(sharingGroupId)"
         }
     }
     
@@ -554,8 +564,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
         }
     }
     
-    func markFilesAsDeleted(forCriteria criteria: MarkDeletionCriteria) -> Int64? {
-        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + criteria.toString()
+    func markFilesAsDeleted(key:LookupKey) -> Int64? {
+        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + lookupConstraint(key: key)
         if db.connection.query(statement: query) {
             let numberRows = db.connection.numberAffectedRows()
             Log.debug("Number rows: \(numberRows) for query: \(query)")
