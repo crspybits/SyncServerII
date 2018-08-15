@@ -105,6 +105,8 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    // MARK: Remove sharing groups
+    
     func testRemoveSharingGroupWorks() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
@@ -119,6 +121,93 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         }
         
         guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        let key1 = SharingGroupRepository.LookupKey.sharingGroupId(sharingGroupId)
+        let result1 = SharingGroupRepository(db).lookup(key: key1, modelInit: SharingGroup.init)
+        guard case .found(let model) = result1, let sharingGroup = model as? Server.SharingGroup else {
+            XCTFail()
+            return
+        }
+        
+        guard sharingGroup.deleted else {
+            XCTFail()
+            return
+        }
+        
+        guard let count = SharingGroupUserRepository(db).count(), count == 0 else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func testRemoveSharingGroupWorks_filesMarkedAsDeleted() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        // Can't do a file index because no one is left in the sharing group. So, just look up in the db directly.
+        
+        let key = FileIndexRepository.LookupKey.sharingGroupId(sharingGroupId: sharingGroupId)
+        let result = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
+        switch result {
+        case .noObjectFound:
+            XCTFail()
+        case .error:
+            XCTFail()
+        case .found(let model):
+            let file = model as! FileIndex
+            XCTAssert(file.deleted)
+        }
+    }
+    
+    func testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+
+        var sharingInvitationUUID:String!
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        let sharingUser: TestAccount = .secondaryOwningAccount
+        
+        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
+            expectation.fulfill()
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        guard let count = SharingGroupUserRepository(db).count(), count == 0 else {
             XCTFail()
             return
         }
@@ -354,6 +443,8 @@ extension SharingGroupsControllerTests {
             ("testNewlyCreatedSharingGroupHasNoFiles", testNewlyCreatedSharingGroupHasNoFiles),
             ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks),
             ("testRemoveSharingGroupWorks", testRemoveSharingGroupWorks),
+            ("testRemoveSharingGroupWorks_filesMarkedAsDeleted", testRemoveSharingGroupWorks_filesMarkedAsDeleted),
+            ("testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup", testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup),
             ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails),
             ("testRemoveUserFromSharingGroup_lastUserInSharingGroup", testRemoveUserFromSharingGroup_lastUserInSharingGroup),
             ("testRemoveUserFromSharingGroup_notLastUserInSharingGroup", testRemoveUserFromSharingGroup_notLastUserInSharingGroup),

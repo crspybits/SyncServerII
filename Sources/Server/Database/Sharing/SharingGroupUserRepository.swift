@@ -190,6 +190,20 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         return sharingGroupUsers(forSelectQuery: query)
     }
     
+    // Number of rows in table or nil if there was an error. Only used in testing.
+#if DEBUG
+    func count() -> Int? {
+        let query = "SELECT * FROM \(tableName)"
+        let result = sharingGroupUsers(forSelectQuery: query)
+        switch result {
+        case .sharingGroupUsers(let sgus):
+            return sgus.count
+        case .error:
+            return nil
+        }
+    }
+#endif
+
     private func sharingGroupUsers(forSelectQuery selectQuery: String) -> SharingGroupUserResult {
         let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false)
         

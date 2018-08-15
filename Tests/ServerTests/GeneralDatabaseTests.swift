@@ -273,7 +273,8 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         let createColumns =
             "(c1 VARCHAR(100), " +
             "c2 INT(3), " +
-            "c3 INT(2))"
+            "c3 INT(2), " +
+            "c4 BOOL)"
 
         if case .success(.created) = db.createTableIfNeeded(tableName: GeneralDatabaseTests.testTableName3, columnCreateQuery: createColumns) {
             return true
@@ -411,6 +412,8 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         XCTAssert(db.removeColumn("newTextColumn", from: testTableName))
     }
     
+    // MARK: Database.PreparedStatement
+
     func testDatabaseInsertStringValueIntoStringColumnWorks() {
         let repo = Table3()
         repo.db = db
@@ -431,6 +434,20 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         repo.db = db
         let insert = Database.PreparedStatement(repo: repo, type: .insert)
         insert.add(fieldName: "c2", value: .int(56))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+
+    func testDatabaseInsertBoolValueIntoBoolColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c4", value: .bool(true))
         
         do {
             try insert.run()
@@ -557,6 +574,7 @@ extension GeneralDatabaseTests {
             
             ("testDatabaseInsertStringValueIntoStringColumnWorks", testDatabaseInsertStringValueIntoStringColumnWorks),
             ("testDatabaseInsertIntValueIntoIntColumnWorks", testDatabaseInsertIntValueIntoIntColumnWorks),
+            ("testDatabaseInsertBoolValueIntoBoolColumnWorks", testDatabaseInsertBoolValueIntoBoolColumnWorks),
             ("testDatabaseInsertNullValueIntoIntColumnWorks", testDatabaseInsertNullValueIntoIntColumnWorks),
             ("testDatabaseInsertStringValueIntoIntColumnFails", testDatabaseInsertStringValueIntoIntColumnFails),
             ("testDatabaseInsertValuesIntoColumnsWorks", testDatabaseInsertValuesIntoColumnsWorks),
