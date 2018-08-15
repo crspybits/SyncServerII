@@ -207,7 +207,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        let sharingUser: TestAccount = .dropbox1
+        let sharingUser: TestAccount = .secondaryOwningAccount
         
         redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
             expectation.fulfill()
@@ -262,18 +262,89 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion + 1) else {
+        removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion + 1, expectMasterVersionUpdate: true)
+    }
+    
+    // When user has files in the sharing group-- those should be marked as deleted.
+    func testRemoveUserFromSharingGroup_userHasFiles() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
             XCTFail()
             return
         }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+
+        // Need a second user as a member of the sharing group so we can do a file index on the sharing group after the first user is removed.
+        var sharingInvitationUUID:String!
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        let sharingUser: TestAccount = .secondaryOwningAccount
+        
+        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
+            expectation.fulfill()
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        guard let (files, _) = getIndex(testAccount: sharingUser, sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        let filtered = files!.filter {$0.fileUUID == uploadResult.request.fileUUID}
+        guard filtered.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filtered[0].deleted == true)
     }
     
-    /*
-        Test remove user from sharing group
-            When user has files in the sharing group-- those should be marked as deleted.
-            When owning user has sharing users in sharing group
-                Those should no longer be able to upload to the sharing group.
-    */
+    // When owning user has sharing users in sharing group: Those should no longer be able to upload to the sharing group.
+    func testRemoveUserFromSharingGroup_owningUserHasSharingUsers() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        var sharingInvitationUUID:String!
+        createSharingInvitation(permission: .write, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        let sharingUser: TestAccount = .nonOwningSharingAccount
+        
+        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
+            expectation.fulfill()
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:sharingGroupId), masterVersion: masterVersion + 1, errorExpected: true)
+    }
 }
 
 extension SharingGroupsControllerTests {
@@ -287,7 +358,9 @@ extension SharingGroupsControllerTests {
             ("testRemoveUserFromSharingGroup_lastUserInSharingGroup", testRemoveUserFromSharingGroup_lastUserInSharingGroup),
             ("testRemoveUserFromSharingGroup_notLastUserInSharingGroup", testRemoveUserFromSharingGroup_notLastUserInSharingGroup),
             ("testRemoveUserFromSharingGroup_failsWithBadMasterVersion",
-                testRemoveUserFromSharingGroup_failsWithBadMasterVersion)
+                testRemoveUserFromSharingGroup_failsWithBadMasterVersion),
+            ("testRemoveUserFromSharingGroup_userHasFiles", testRemoveUserFromSharingGroup_userHasFiles),
+            ("testRemoveUserFromSharingGroup_owningUserHasSharingUsers", testRemoveUserFromSharingGroup_owningUserHasSharingUsers)
         ]
     }
     

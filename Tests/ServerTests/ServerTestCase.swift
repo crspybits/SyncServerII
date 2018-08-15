@@ -410,7 +410,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func removeUserFromSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt) -> Bool {
+    func removeUserFromSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false) -> Bool {
         var result: Bool = false
         
         let removeRequest = RemoveUserFromSharingGroupRequest(json: [
@@ -430,7 +430,13 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on remove user from sharing group request: \(response!.statusCode)")
                 
-                if let dict = dict, let _ = RemoveUserFromSharingGroupResponse(json: dict) {
+                if let dict = dict, let response = RemoveUserFromSharingGroupResponse(json: dict) {
+                    if let _ = response.masterVersionUpdate {
+                        XCTAssert(expectMasterVersionUpdate)
+                    }
+                    else {
+                        XCTAssert(!expectMasterVersionUpdate)
+                    }
                     result = true
                 }
                 else {
