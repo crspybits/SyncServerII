@@ -212,6 +212,169 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
     }
+    
+    func testRemoveSharingGroupWorks_cannotThenInviteSomeoneToThatGroup() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId, errorExpected: true) { expectation, _ in
+            expectation.fulfill()
+        }
+    }
+    
+    func testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupId: sharingGroupId), masterVersion:masterVersion+1, errorExpected:true)
+    }
+    
+    func testRemoveSharingGroupWorks_cannotThenDoDoneUploads() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 0, deviceUUID:deviceUUID, masterVersion: masterVersion+1, sharingGroupId: sharingGroupId, failureExpected: true)
+    }
+    
+    func testRemoveSharingGroupWorks_cannotDeleteFile() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+
+        let uploadDeletionRequest = UploadDeletionRequest(json: [
+            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
+            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
+            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+        ])!
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
+    }
+    
+    func testRemoveSharingGroupWorks_uploadAppMetaDataFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+
+        let appMetaData = AppMetaData(version: 0, contents: "Foo")
+
+        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion+1, appMetaData: appMetaData, sharingGroupId:sharingGroupId, expectedError: true)
+    }
+    
+    func testRemoveSharingGroupWorks_downloadAppMetaDataFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        let appMetaData = AppMetaData(version: 0, contents: "Foo")
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, appMetaData: appMetaData), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+
+        downloadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersionExpectedWithDownload:masterVersion + 1, appMetaDataVersion: 0, sharingGroupId: sharingGroupId, expectedError: true)
+    }
+    
+    func testRemoveSharingGroupWorks_downloadFileFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion+1),  downloadFileVersion:0, uploadFileRequest:uploadResult.request, fileSize: 12, expectedError: true)
+    }
 
     func testUpdateSharingGroupForDeletedSharingGroupFails() {
         let deviceUUID = Foundation.UUID().uuidString
@@ -445,6 +608,13 @@ extension SharingGroupsControllerTests {
             ("testRemoveSharingGroupWorks", testRemoveSharingGroupWorks),
             ("testRemoveSharingGroupWorks_filesMarkedAsDeleted", testRemoveSharingGroupWorks_filesMarkedAsDeleted),
             ("testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup", testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup),
+            ("testRemoveSharingGroupWorks_cannotThenInviteSomeoneToThatGroup", testRemoveSharingGroupWorks_cannotThenInviteSomeoneToThatGroup),
+            ("testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup", testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup),
+            ("testRemoveSharingGroupWorks_cannotThenDoDoneUploads", testRemoveSharingGroupWorks_cannotThenDoDoneUploads),
+            ("testRemoveSharingGroupWorks_cannotDeleteFile", testRemoveSharingGroupWorks_cannotDeleteFile),
+            ("testRemoveSharingGroupWorks_uploadAppMetaDataFails", testRemoveSharingGroupWorks_uploadAppMetaDataFails),
+            ("testRemoveSharingGroupWorks_downloadAppMetaDataFails", testRemoveSharingGroupWorks_downloadAppMetaDataFails),
+            ("testRemoveSharingGroupWorks_downloadFileFails", testRemoveSharingGroupWorks_downloadFileFails),
             ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails),
             ("testRemoveUserFromSharingGroup_lastUserInSharingGroup", testRemoveUserFromSharingGroup_lastUserInSharingGroup),
             ("testRemoveUserFromSharingGroup_notLastUserInSharingGroup", testRemoveUserFromSharingGroup_notLastUserInSharingGroup),
