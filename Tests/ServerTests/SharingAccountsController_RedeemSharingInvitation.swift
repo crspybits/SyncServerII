@@ -24,8 +24,41 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         super.tearDown()
     }
     
+    func checkOwingUserIdForSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, sharingUser:TestAccount) {
+        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+        let result = SharingGroupUserRepository(db).lookup(key: key, modelInit: SharingGroupUser.init)
+        var sharingGroupUser: Server.SharingGroupUser!
+        switch result {
+        case .found(let model):
+            sharingGroupUser = model as! Server.SharingGroupUser
+        case .error, .noObjectFound:
+            XCTFail()
+            return
+        }
+        
+        if sharingUser.type.userType == .owning {
+            XCTAssert(sharingGroupUser.owningUserId == nil)
+        }
+        else {
+            XCTAssert(sharingGroupUser.owningUserId != nil)
+        }
+    }
+    
     func testThatRedeemingWithASharingAccountWorks() {
-        createSharingUser(sharingUser: .primarySharingAccount)
+        let sharingUser:TestAccount = .primarySharingAccount
+        var sharingGroupId: SharingGroupId!
+        var newSharingUserId: UserId!
+        createSharingUser(sharingUser: sharingUser) { userId, sid in
+            sharingGroupId = sid
+            newSharingUserId = userId
+        }
+        
+        guard sharingGroupId != nil else {
+            XCTFail()
+            return
+        }
+        
+        checkOwingUserIdForSharingGroupUser(sharingGroupId: sharingGroupId, userId: newSharingUserId, sharingUser: sharingUser)
     }
     
     func testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails() {
@@ -107,15 +140,74 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
         
+        let owningAccount:TestAccount = .secondaryOwningAccount
         let deviceUUID2 = Foundation.UUID().uuidString
-        addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2)
+        addNewUser(testAccount: owningAccount, deviceUUID:deviceUUID2)
         
-        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
+        var result: RedeemSharingInvitationResponse!
+        redeemSharingInvitation(sharingUser: owningAccount, sharingInvitationUUID: sharingInvitationUUID) { response, expectation in
+            result = response
             expectation.fulfill()
         }
+        
+        guard result != nil else {
+            XCTFail()
+            return
+        }
+        
+        checkOwingUserIdForSharingGroupUser(sharingGroupId: sharingGroupId, userId: result.userId, sharingUser: owningAccount)
     }
     
-    func redeemingWithAnExistingOtherSharingAccountFails(sharingUser: TestAccount) {
+    // Redeem sharing invitation for existing user: Works if user isn't already in sharing group
+    func testThatRedeemingWithAnExistingOtherSharingAccountWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        var sharingInvitationUUID:String!
+        
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        let sharingUser: TestAccount = .primarySharingAccount
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
+            expectation.fulfill()
+        }
+        
+        // Primary sharing account user now exists.
+        
+        // Create a second sharing group and invite/redeem the primary sharing account user.
+        guard let sharingGroupId2 = createSharingGroup(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId2) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        var result: RedeemSharingInvitationResponse!
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { response, expectation in
+            result = response
+            expectation.fulfill()
+        }
+        
+        guard result != nil else {
+            XCTFail()
+            return
+        }
+        
+        checkOwingUserIdForSharingGroupUser(sharingGroupId: sharingGroupId2, userId: result.userId, sharingUser: sharingUser)
+    }
+    
+    func redeemingForSameSharingGroupFails(sharingUser: TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
         
         guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
@@ -156,14 +248,14 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
             
-        // Since the user account represented by sharingUser has already been used to create a sharing account, this redeem attempt will fail.
+        // Since the user account represented by sharingUser is already a member of the sharing group referenced by the specific sharingGroupId, this redeem attempt will fail.
         redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
             expectation.fulfill()
         }
     }
     
-    func testThatRedeemingWithAnExistingSharingAccountFails() {
-        redeemingWithAnExistingOtherSharingAccountFails(sharingUser: .primarySharingAccount)
+    func testThatRedeemingForSameSharingGroupFails() {
+        redeemingForSameSharingGroupFails(sharingUser: .primarySharingAccount)
     }
     
     func checkingCredsOnASharingUserGivesSharingPermission(sharingUser: TestAccount) {
@@ -280,7 +372,10 @@ extension SharingAccountsController_RedeemSharingInvitation {
             ("testThatRedeemingWithTheSameAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameAccountAsTheOwningAccountFails),
             
             ("testThatRedeemingWithAnExistingOtherOwningAccountWorks", testThatRedeemingWithAnExistingOtherOwningAccountWorks),
-            ("testThatRedeemingWithAnExistingSharingAccountFails", testThatRedeemingWithAnExistingSharingAccountFails),
+            
+            ("testThatRedeemingWithAnExistingOtherSharingAccountWorks", testThatRedeemingWithAnExistingOtherSharingAccountWorks),
+            
+            ("testThatRedeemingForSameSharingGroupFails", testThatRedeemingForSameSharingGroupFails),
             
             ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
             

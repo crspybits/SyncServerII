@@ -25,7 +25,7 @@ class SharingGroupsController : ControllerProtocol {
         
         // My logic here is that a sharing user should only be able to create files in the same sharing group(s) to which they were originally invited. The only way they'll get access to another sharing group is through invitation, not by creating new sharing groups.
         guard params.currentSignedInUser!.accountType.userType == .owning else {
-            let message = "Did not receive CreateSharingGroupRequest"
+            let message = "Current signed in user is not an owning user."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

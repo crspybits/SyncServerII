@@ -342,12 +342,11 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup) -> SharingGroupId? {
+    func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup? = nil, errorExpected: Bool = false) -> SharingGroupId? {
         var result: SharingGroupId?
         
         let createRequest = CreateSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroup.sharingGroupId as Any,
-            CreateSharingGroupRequest.sharingGroupNameKey: sharingGroup.sharingGroupName as Any
+            CreateSharingGroupRequest.sharingGroupNameKey: sharingGroup?.sharingGroupName as Any
         ])!
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
@@ -360,15 +359,22 @@ class ServerTestCase : XCTestCase {
             
             self.performRequest(route: ServerEndpoints.createSharingGroup, headers: headers, urlParameters: queryParams) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on create sharing group request: \(response!.statusCode)")
-                
-                if let dict = dict, let createResponse = CreateSharingGroupResponse(json: dict) {
-                    result = createResponse.sharingGroupId
+                if errorExpected {
+                    XCTAssert(response!.statusCode != .OK)
                 }
                 else {
-                    XCTFail()
+                    XCTAssert(response!.statusCode == .OK, "Did not work on create sharing group request: \(response!.statusCode)")
                 }
-
+                
+                if !errorExpected {
+                    if let dict = dict, let createResponse = CreateSharingGroupResponse(json: dict) {
+                        result = createResponse.sharingGroupId
+                    }
+                    else {
+                        XCTFail()
+                    }
+                }
+                
                 expectation.fulfill()
             }
         }
@@ -447,7 +453,7 @@ class ServerTestCase : XCTestCase {
                 XCTAssert(response!.statusCode == .OK, "Did not work on remove sharing group request: \(response!.statusCode)")
                 
                 if let dict = dict, let response = RemoveSharingGroupResponse(json: dict) {
-                    if let masterVersionUpdate = response.masterVersionUpdate {
+                    if let _ = response.masterVersionUpdate {
                         result = false
                     }
                     else {

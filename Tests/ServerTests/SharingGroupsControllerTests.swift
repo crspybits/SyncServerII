@@ -51,6 +51,31 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         XCTAssert(filtered[0].sharingGroupName == sharingGroup.sharingGroupName)
     }
     
+    func testThatNonOwningUserCannotCreateASharingGroup() {
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        var sharingInvitationUUID:String!
+        
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        let testAccount:TestAccount = .nonOwningSharingAccount
+        redeemSharingInvitation(sharingUser: testAccount, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
+            expectation.fulfill()
+        }
+        
+        let deviceUUID2 = Foundation.UUID().uuidString
+        createSharingGroup(testAccount: testAccount, deviceUUID:deviceUUID2, errorExpected: true)
+    }
+    
     func testNewlyCreatedSharingGroupHasNoFiles() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
@@ -665,6 +690,7 @@ extension SharingGroupsControllerTests {
     static var allTests : [(String, (SharingGroupsControllerTests) -> () throws -> Void)] {
         return [
             ("testCreateSharingGroupWorks", testCreateSharingGroupWorks),
+            ("testThatNonOwningUserCannotCreateASharingGroup", testThatNonOwningUserCannotCreateASharingGroup),
             ("testNewlyCreatedSharingGroupHasNoFiles", testNewlyCreatedSharingGroupHasNoFiles),
             ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks),
             ("testUpdateSharingGroupWithBadMasterVersionFails", testUpdateSharingGroupWithBadMasterVersionFails),
