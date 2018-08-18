@@ -377,7 +377,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup, masterVersion: MasterVersionInt, expectFailure: Bool = false) -> Bool {
+    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false, expectFailure: Bool = false) -> Bool {
         var result: Bool = false
         
         let updateRequest = UpdateSharingGroupRequest(json: [
@@ -403,7 +403,14 @@ class ServerTestCase : XCTestCase {
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on update sharing group request: \(response!.statusCode)")
                     
-                    if let dict = dict, let _ = UpdateSharingGroupResponse(json: dict) {
+                    if let dict = dict, let response = UpdateSharingGroupResponse(json: dict) {
+                        if let _ = response.masterVersionUpdate {
+                            XCTAssert(expectMasterVersionUpdate)
+                        }
+                        else {
+                            XCTAssert(!expectMasterVersionUpdate)
+                        }
+                        
                         result = true
                     }
                     else {
@@ -439,8 +446,13 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on remove sharing group request: \(response!.statusCode)")
                 
-                if let dict = dict, let _ = RemoveSharingGroupResponse(json: dict) {
-                    result = true
+                if let dict = dict, let response = RemoveSharingGroupResponse(json: dict) {
+                    if let masterVersionUpdate = response.masterVersionUpdate {
+                        result = false
+                    }
+                    else {
+                        result = true
+                    }
                 }
                 else {
                     XCTFail()

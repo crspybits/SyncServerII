@@ -80,6 +80,29 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
+        
+        sharingGroups.forEach { sharingGroup in
+            guard let deleted = sharingGroup.deleted else {
+                XCTFail()
+                return
+            }
+            XCTAssert(!deleted)
+            XCTAssert(sharingGroup.permission == .admin)
+            XCTAssert(sharingGroup.masterVersion == 0)
+        }
+        
+        let filtered = sharingGroups.filter {$0.sharingGroupId == sharingGroupId}
+        guard filtered.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filtered[0].sharingGroupName == sharingGroup.sharingGroupName)
+        
+        guard let users = filtered[0].sharingGroupUsers, users.count == 1, users[0].name != nil, users[0].name.count > 0 else {
+            XCTFail()
+            return
+        }
     }
     
     func testUpdateSharingGroupWorks() {
@@ -103,6 +126,26 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
+    }
+    
+    func testUpdateSharingGroupWithBadMasterVersionFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = SyncServerShared.SharingGroup()!
+        sharingGroup.sharingGroupId = sharingGroupId
+        sharingGroup.sharingGroupName = "Louisiana Guys"
+        
+        updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, masterVersion: masterVersion+1, expectMasterVersionUpdate: true)
     }
     
     // MARK: Remove sharing groups
@@ -375,6 +418,25 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         
         downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion+1),  downloadFileVersion:0, uploadFileRequest:uploadResult.request, fileSize: 12, expectedError: true)
     }
+    
+    func testRemoveSharingGroup_failsWithBadMasterVersion() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard !removeSharingGroup(deviceUUID:deviceUUID, sharingGroupId: sharingGroupId, masterVersion: masterVersion+1) else {
+            XCTFail()
+            return
+        }
+    }
 
     func testUpdateSharingGroupForDeletedSharingGroupFails() {
         let deviceUUID = Foundation.UUID().uuidString
@@ -605,6 +667,7 @@ extension SharingGroupsControllerTests {
             ("testCreateSharingGroupWorks", testCreateSharingGroupWorks),
             ("testNewlyCreatedSharingGroupHasNoFiles", testNewlyCreatedSharingGroupHasNoFiles),
             ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks),
+            ("testUpdateSharingGroupWithBadMasterVersionFails", testUpdateSharingGroupWithBadMasterVersionFails),
             ("testRemoveSharingGroupWorks", testRemoveSharingGroupWorks),
             ("testRemoveSharingGroupWorks_filesMarkedAsDeleted", testRemoveSharingGroupWorks_filesMarkedAsDeleted),
             ("testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup", testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup),
@@ -615,6 +678,7 @@ extension SharingGroupsControllerTests {
             ("testRemoveSharingGroupWorks_uploadAppMetaDataFails", testRemoveSharingGroupWorks_uploadAppMetaDataFails),
             ("testRemoveSharingGroupWorks_downloadAppMetaDataFails", testRemoveSharingGroupWorks_downloadAppMetaDataFails),
             ("testRemoveSharingGroupWorks_downloadFileFails", testRemoveSharingGroupWorks_downloadFileFails),
+            ("testRemoveSharingGroup_failsWithBadMasterVersion", testRemoveSharingGroup_failsWithBadMasterVersion),
             ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails),
             ("testRemoveUserFromSharingGroup_lastUserInSharingGroup", testRemoveUserFromSharingGroup_lastUserInSharingGroup),
             ("testRemoveUserFromSharingGroup_notLastUserInSharingGroup", testRemoveUserFromSharingGroup_notLastUserInSharingGroup),
