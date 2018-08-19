@@ -15,8 +15,8 @@ enum Result<T> {
 
 // Some cloud services (e.g., Google Drive) need additional file naming options; other's don't (e.g., Dropbox). If you give these options and the method doesn't need it, they are ignored.
 struct CloudStorageFileNameOptions {
-    // `String!` because only some cloud storage services need it.
-    let cloudFolderName:String!
+    // `String?` because only some cloud storage services need it.
+    let cloudFolderName:String?
     
     let mimeType:String
 }

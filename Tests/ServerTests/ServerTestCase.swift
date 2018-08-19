@@ -71,6 +71,85 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
+    func checkOwingUserIdForSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, sharingUser:TestAccount) -> Bool {
+        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+        let result = SharingGroupUserRepository(db).lookup(key: key, modelInit: SharingGroupUser.init)
+        var sharingGroupUser: Server.SharingGroupUser!
+        switch result {
+        case .found(let model):
+            sharingGroupUser = model as! Server.SharingGroupUser
+        case .error, .noObjectFound:
+            XCTFail()
+            return false
+        }
+        
+        if sharingUser.type.userType == .owning {
+            XCTAssert(sharingGroupUser.owningUserId == nil)
+            return sharingGroupUser.owningUserId == nil
+        }
+        else {
+            XCTAssert(sharingGroupUser.owningUserId != nil)
+            return sharingGroupUser.owningUserId != nil
+        }
+    }
+    
+    // The second sharing account joined is returned as the sharingGroupId
+    @discardableResult
+    func redeemWithAnExistingOtherSharingAccount() -> (TestAccount, SharingGroupId)? {
+        var returnResult: (TestAccount, SharingGroupId)?
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return nil
+        }
+        
+        var sharingInvitationUUID:String!
+        
+        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        let sharingUser: TestAccount = .primarySharingAccount
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
+            expectation.fulfill()
+        }
+        
+        // Primary sharing account user now exists.
+        
+        // Create a second sharing group and invite/redeem the primary sharing account user.
+        guard let sharingGroupId2 = createSharingGroup(deviceUUID:deviceUUID) else {
+            XCTFail()
+            return nil
+        }
+        
+        createSharingInvitation(permission: .write, sharingGroupId:sharingGroupId2) { expectation, invitationUUID in
+            sharingInvitationUUID = invitationUUID
+            expectation.fulfill()
+        }
+        
+        var result: RedeemSharingInvitationResponse!
+        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { response, expectation in
+            result = response
+            expectation.fulfill()
+        }
+        
+        guard result != nil else {
+            XCTFail()
+            return nil
+        }
+        
+        if checkOwingUserIdForSharingGroupUser(sharingGroupId: sharingGroupId2, userId: result.userId, sharingUser: sharingUser) {
+            returnResult = (sharingUser, sharingGroupId2)
+        }
+        
+        return returnResult
+    }
+    
+    @discardableResult
     func uploadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersion:Int64, appMetaData: AppMetaData, sharingGroupId: SharingGroupId, expectedError: Bool = false) -> UploadAppMetaDataResponse? {
 
         var result:UploadAppMetaDataResponse?

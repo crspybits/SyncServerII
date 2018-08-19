@@ -165,6 +165,13 @@ extension FileController {
                 ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db)
             }
             
+            guard ownerAccount != nil else {
+                let message = "No owning account!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
+            
             ownerCloudStorage = ownerAccount as? CloudStorage
             guard ownerCloudStorage != nil && ownerAccount != nil else {
                 let message = "Could not obtain creds for v0 file: Assuming this means owning user is no longer on system."
@@ -258,13 +265,22 @@ extension FileController {
             }
             
             let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!, mimeType: uploadRequest.mimeType)
-            Log.info("File being sent to cloud storage: \(cloudFileName)")
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: ownerAccount.cloudFolderName, mimeType: uploadRequest.mimeType)
+            guard let mimeType = uploadRequest.mimeType else {
+                let message = "No mimeType given!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
+            
+            Log.info("File being sent to cloud storage: \(cloudFileName)")
+
+            let options = CloudStorageFileNameOptions(cloudFolderName: ownerAccount.cloudFolderName, mimeType: mimeType)
             
             ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
                 switch result {
                 case .success(let fileSize):
+                    Log.debug("File with size \(fileSize) successfully uploaded!")
                     upload.fileSizeBytes = Int64(fileSize)
                     
                     switch upload.state! {

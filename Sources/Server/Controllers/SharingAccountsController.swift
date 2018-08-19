@@ -164,9 +164,9 @@ class SharingAccountsController : ControllerProtocol {
         case .sharing:
             owningUserId = sharingInvitation.owningUserId
         case .owning:
-            // When the user is an owning user, they will rely on their own cloud storage to upload new files-- if they have upload permissions.
-            // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, where b) that owning account type needs a cloud storage folder (e.g., Google Drive), and c) with permissions of >= write.
-            if params.profileCreds!.owningAccountsNeedCloudFolderName && sharingInvitation.permission.hasMinimumPermission(.write) {
+            // When the user is an owning user, they will rely on their own cloud storage to upload new files-- for sharing groups where they have upload permissions.
+            // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, and where b) that owning account type needs a cloud storage folder (e.g., Google Drive). I'm not going to concern myself with the sharing permissions of the immediate sharing invitation because they may join other sharing groups-- and have write permissions there.
+            if params.profileCreds!.owningAccountsNeedCloudFolderName {
                 guard let cloudFolderName = request.cloudFolderName else {
                     let message = "No cloud folder name given when redeeming sharing invitation using owning account that needs one!"
                     Log.error(message)

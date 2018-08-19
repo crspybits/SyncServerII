@@ -681,6 +681,24 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
     }
+    
+    // File operations work for a second sharing group you are a member of: Upload
+    func testThatUploadForSecondSharingGroupWorks() {
+        guard let (testAccount, sharingGroupId) = redeemWithAnExistingOtherSharingAccount() else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadTextFile(testAccount: testAccount, addUser: .no(sharingGroupId:sharingGroupId), masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+    }
 }
 
 extension Sharing_FileManipulationTests {
@@ -713,7 +731,8 @@ extension Sharing_FileManipulationTests {
             ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone",
                 testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone),
             ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
-                testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks)
+                testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks),
+            ("testThatUploadForSecondSharingGroupWorks", testThatUploadForSecondSharingGroupWorks)
         ]
     }
     
