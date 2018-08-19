@@ -2,13 +2,14 @@
   "all": [
     "basic",
     "google",
-    "facebook",
     "dropbox",
     "owning_google",
     "owning_dropbox",
     "sharing_create",
     "sharing_redeem",
-    "sharing_file"
+    "sharing_file",
+    "sharing_groups",
+    "facebook"
   ],
   "basic": [
     {
@@ -43,9 +44,6 @@
     },
     {
       "name": "SpecificDatabaseTests_SharingGroupUsers"
-    },
-    {
-      "name": "SharingGroupsControllerTests"
     }
   ],
   "google": [
@@ -424,5 +422,36 @@
         "SECONDARY_SHARING_FACEBOOK2"
       ]
     }
+  ],
+  "sharing_groups": [
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2"
+      ]
+    }
   ]
 }
+
