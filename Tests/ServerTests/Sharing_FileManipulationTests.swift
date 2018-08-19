@@ -699,6 +699,48 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
     }
+    
+    func testThatDoneUploadsForSecondSharingGroupWorks() {
+        guard let (testAccount, sharingGroupId) = redeemWithAnExistingOtherSharingAccount() else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let _ = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID, addUser: .no(sharingGroupId:sharingGroupId), masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+    }
+    
+    func testThatDownloadForSecondSharingGroupWorks() {
+        guard let (testAccount, sharingGroupId) = redeemWithAnExistingOtherSharingAccount() else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let result = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID, addUser: .no(sharingGroupId:sharingGroupId), masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+        
+        downloadTextFile(testAccount: testAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request, fileSize: result.fileSize)
+    }
 }
 
 extension Sharing_FileManipulationTests {
@@ -732,7 +774,9 @@ extension Sharing_FileManipulationTests {
                 testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone),
             ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
                 testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks),
-            ("testThatUploadForSecondSharingGroupWorks", testThatUploadForSecondSharingGroupWorks)
+            ("testThatUploadForSecondSharingGroupWorks", testThatUploadForSecondSharingGroupWorks),
+            ("testThatDoneUploadsForSecondSharingGroupWorks", testThatDoneUploadsForSecondSharingGroupWorks),
+            ("testThatDownloadForSecondSharingGroupWorks", testThatDownloadForSecondSharingGroupWorks)
         ]
     }
     

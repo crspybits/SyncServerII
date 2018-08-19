@@ -72,7 +72,6 @@ extension Account {
             return nil
         }
         
-        Log.error("Account has cloud folder name but has one.")
         assert(owningAccountsNeedCloudFolderName)
         return cloudFolderName
     }
