@@ -24,8 +24,15 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func testAddSharingGroup() {
+    func testAddSharingGroupWithoutName() {
         guard let _ = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func testAddSharingGroupWithName() {
+        guard let _ = addSharingGroup(sharingGroupName: "Foobar") else {
             XCTFail()
             return
         }
@@ -41,7 +48,7 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
         let result = SharingGroupRepository(db).lookup(key: key, modelInit: SharingGroup.init)
         switch result {
         case .found(let model):
-            guard let obj = model as? SharingGroup else {
+            guard let obj = model as? Server.SharingGroup else {
                 XCTFail()
                 return
             }
@@ -70,7 +77,8 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
 extension SpecificDatabaseTests_SharingGroups {
     static var allTests : [(String, (SpecificDatabaseTests_SharingGroups) -> () throws -> Void)] {
         return [
-            ("testAddSharingGroup", testAddSharingGroup),
+            ("testAddSharingGroupWithoutName", testAddSharingGroupWithoutName),
+            ("testAddSharingGroupWithName", testAddSharingGroupWithName),
             ("testLookupFromSharingGroupExisting", testLookupFromSharingGroupExisting),
             ("testLookupFromSharingGroupNonExisting", testLookupFromSharingGroupNonExisting)
         ]

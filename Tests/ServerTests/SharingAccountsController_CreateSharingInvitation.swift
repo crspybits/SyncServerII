@@ -64,6 +64,27 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
     }
+
+    func testSuccessfulAdminSharingInvitationCreationByAnOwningUser() {
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        createSharingInvitation(permission: .admin, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+            XCTAssert(invitationUUID != nil)
+            guard let _ = UUID(uuidString: invitationUUID!) else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
+
+            expectation.fulfill()
+        }
+    }
     
     func sharingInvitationCreationByAnAdminSharingUser(sharingUser:TestAccount, failureExpected: Bool = false) {
         // .primaryOwningAccount owning user is created as part of this.
@@ -189,6 +210,25 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             }
         }
     }
+    
+    func testSharingInvitationCreationFailsWithoutMembershipInSharingGroup() {
+        let deviceUUID1 = Foundation.UUID().uuidString
+        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID1),
+            let sharingGroupId = addUserResponse.sharingGroupId else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID2 = Foundation.UUID().uuidString
+        guard let _ = self.addNewUser(testAccount: .secondaryOwningAccount, deviceUUID:deviceUUID2) else {
+            XCTFail()
+            return
+        }
+        
+        createSharingInvitation(testAccount: .secondaryOwningAccount, permission: .write, sharingGroupId:sharingGroupId, errorExpected: true) { expectation, invitationUUID in
+            expectation.fulfill()
+        }
+    }
 }
 
 extension SharingAccountsController_CreateSharingInvitation {
@@ -196,10 +236,12 @@ extension SharingAccountsController_CreateSharingInvitation {
         return [
             ("testSuccessfulReadSharingInvitationCreationByAnOwningUser", testSuccessfulReadSharingInvitationCreationByAnOwningUser),
             ("testSuccessfulWriteSharingInvitationCreationByAnOwningUser", testSuccessfulWriteSharingInvitationCreationByAnOwningUser),
+            ("testSuccessfulAdminSharingInvitationCreationByAnOwningUser", testSuccessfulAdminSharingInvitationCreationByAnOwningUser),
             ("testSuccessfulSharingInvitationCreationByAnAdminSharingUser", testSuccessfulSharingInvitationCreationByAnAdminSharingUser),
             ("testFailureOfSharingInvitationCreationByAReadSharingUser", testFailureOfSharingInvitationCreationByAReadSharingUser),
             ("testFailureOfSharingInvitationCreationByAWriteSharingUser", testFailureOfSharingInvitationCreationByAWriteSharingUser),
-            ("testSharingInvitationCreationFailsWithNoAuthorization", testSharingInvitationCreationFailsWithNoAuthorization)
+            ("testSharingInvitationCreationFailsWithNoAuthorization", testSharingInvitationCreationFailsWithNoAuthorization),
+            ("testSharingInvitationCreationFailsWithoutMembershipInSharingGroup", testSharingInvitationCreationFailsWithoutMembershipInSharingGroup)
         ]
     }
     

@@ -9,13 +9,19 @@
 import Foundation
 
 struct Repositories {
-    let user:UserRepository!
-    let lock:LockRepository!
-    let masterVersion:MasterVersionRepository!
-    let fileIndex:FileIndexRepository!
-    let upload:UploadRepository!
-    let deviceUUID:DeviceUUIDRepository!
-    let sharing:SharingInvitationRepository!
-    let sharingGroup: SharingGroupRepository!
-    let sharingGroupUser: SharingGroupUserRepository!
+    let db: Database
+    
+    lazy var user = UserRepository(db)
+    lazy var lock = LockRepository(db)
+    lazy var masterVersion = MasterVersionRepository(db)
+    lazy var fileIndex = FileIndexRepository(db)
+    lazy var upload = UploadRepository(db)
+    lazy var deviceUUID = DeviceUUIDRepository(db)
+    lazy var sharing = SharingInvitationRepository(db)
+    lazy var sharingGroup = SharingGroupRepository(db)
+    lazy var sharingGroupUser = SharingGroupUserRepository(db)
+    
+    init(db: Database) {
+        self.db = db
+    }
 }

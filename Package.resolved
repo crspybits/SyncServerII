@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
           "branch": null,
-          "revision": "7865ad2f864633eb945dc77c43213fb34688bb3e",
-          "version": "1.0.5"
+          "revision": "30b6cf38322838d1e973e0626c6abf9602b03cf5",
+          "version": "1.0.9"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
         "state": {
           "branch": null,
-          "revision": "c5a3445f0be9a4fabd66765f54559f039a9f2cfb",
-          "version": "1.0.4"
+          "revision": "58ec1acfba8fb4bf469ae9f3d633568cb5853305",
+          "version": "1.0.6"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "e2f6aee81b9e316f61e173e8350cb69d7714ead8",
-          "version": "1.0.10"
+          "revision": "15ff39f95e0b56058cf050c910c1e26002d01f71",
+          "version": "1.0.15"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
         "state": {
           "branch": null,
-          "revision": "f4c012b783f8809d4e6597b304357c5324ff459b",
-          "version": "1.0.10"
+          "revision": "e29d5112fb5958327f537a6420d292922f3587dc",
+          "version": "1.0.15"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/HeliumLogger.git",
         "state": {
           "branch": null,
-          "revision": "2afeb4c02f5a48a7fbd081fe8607b91eeebd7ecb",
-          "version": "1.7.1"
+          "revision": "0283ca6255bbe73d35abc81438435af40c8fa085",
+          "version": "1.7.2"
         }
       },
       {
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
         "state": {
           "branch": null,
-          "revision": "95c405c18a071a1c13616e984ba1b3c6091ca6ca",
-          "version": "1.0.0"
+          "revision": "ba74a683141fde66d4bf88358b6a678d7e5a27ce",
+          "version": "1.0.1"
         }
       },
       {
@@ -186,8 +186,8 @@
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-CRUD.git",
         "state": {
           "branch": null,
-          "revision": "49e896a180076d1bf2bf7fe1fa3a110ed35cc73e",
-          "version": "1.0.5"
+          "revision": "50d458bf8af90651dcfbb155cd66ade32c2af59a",
+          "version": "1.1.0"
         }
       },
       {
@@ -237,11 +237,11 @@
       },
       {
         "package": "SyncServer_Shared",
-        "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
+        "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
-          "branch": null,
-          "revision": "68e02c0d221e85dfdb8008bec894c3196a98ee69",
-          "version": "8.2.0"
+          "branch": "dev",
+          "revision": "bb457e18ba5f1a08acae37652dab893470bbfc3d",
+          "version": null
         }
       },
       {

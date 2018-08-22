@@ -13,31 +13,34 @@ import SyncServerShared
 public class ServerRoutes {
     class func add(proxyRouter:CreateRoutes) {
         let utilController = UtilController()
-        proxyRouter.addRoute(ep: ServerEndpoints.healthCheck, createRequest: HealthCheckRequest.init, processRequest: utilController.healthCheck)
+        proxyRouter.addRoute(ep: ServerEndpoints.healthCheck, processRequest: utilController.healthCheck)
 #if DEBUG
-        proxyRouter.addRoute(ep: ServerEndpoints.checkPrimaryCreds, createRequest: CheckPrimaryCredsRequest.init, processRequest: utilController.checkPrimaryCreds)
+        proxyRouter.addRoute(ep: ServerEndpoints.checkPrimaryCreds, processRequest: utilController.checkPrimaryCreds)
 #endif
 
         let userController = UserController()
-        proxyRouter.addRoute(ep: ServerEndpoints.addUser, createRequest: AddUserRequest.init, processRequest: userController.addUser)
-        proxyRouter.addRoute(ep: ServerEndpoints.checkCreds, createRequest: CheckCredsRequest.init, processRequest: userController.checkCreds)
-        proxyRouter.addRoute(ep: ServerEndpoints.removeUser, createRequest: RemoveUserRequest.init, processRequest: userController.removeUser)
+        proxyRouter.addRoute(ep: ServerEndpoints.addUser, processRequest: userController.addUser)
+        proxyRouter.addRoute(ep: ServerEndpoints.checkCreds, processRequest: userController.checkCreds)
+        proxyRouter.addRoute(ep: ServerEndpoints.removeUser, processRequest: userController.removeUser)
         
         let fileController = FileController()
-        proxyRouter.addRoute(ep: ServerEndpoints.fileIndex, createRequest: FileIndexRequest.init, processRequest: fileController.fileIndex)
-        proxyRouter.addRoute(ep: ServerEndpoints.uploadFile, createRequest: UploadFileRequest.init, processRequest: fileController.uploadFile)
-        proxyRouter.addRoute(ep: ServerEndpoints.uploadAppMetaData, createRequest: UploadAppMetaDataRequest.init, processRequest: fileController.uploadAppMetaData)
-        proxyRouter.addRoute(ep: ServerEndpoints.doneUploads, createRequest: DoneUploadsRequest.init, processRequest: fileController.doneUploads)
-        proxyRouter.addRoute(ep: ServerEndpoints.downloadFile, createRequest: DownloadFileRequest.init, processRequest: fileController.downloadFile)
-        proxyRouter.addRoute(ep: ServerEndpoints.downloadAppMetaData, createRequest: DownloadAppMetaDataRequest.init, processRequest: fileController.downloadAppMetaData)
-        proxyRouter.addRoute(ep: ServerEndpoints.getUploads, createRequest: GetUploadsRequest.init, processRequest: fileController.getUploads)
-        proxyRouter.addRoute(ep: ServerEndpoints.uploadDeletion, createRequest: UploadDeletionRequest.init, processRequest: fileController.uploadDeletion)
+        proxyRouter.addRoute(ep: ServerEndpoints.index, processRequest: fileController.index)
+        proxyRouter.addRoute(ep: ServerEndpoints.uploadFile, processRequest: fileController.uploadFile)
+        proxyRouter.addRoute(ep: ServerEndpoints.uploadAppMetaData, processRequest: fileController.uploadAppMetaData)
+        proxyRouter.addRoute(ep: ServerEndpoints.doneUploads, processRequest: fileController.doneUploads)
+        proxyRouter.addRoute(ep: ServerEndpoints.downloadFile, processRequest: fileController.downloadFile)
+        proxyRouter.addRoute(ep: ServerEndpoints.downloadAppMetaData, processRequest: fileController.downloadAppMetaData)
+        proxyRouter.addRoute(ep: ServerEndpoints.getUploads, processRequest: fileController.getUploads)
+        proxyRouter.addRoute(ep: ServerEndpoints.uploadDeletion, processRequest: fileController.uploadDeletion)
         
         let sharingAccountsController = SharingAccountsController()
-        proxyRouter.addRoute(ep: ServerEndpoints.createSharingInvitation, createRequest: CreateSharingInvitationRequest.init, processRequest: sharingAccountsController.createSharingInvitation)
-        proxyRouter.addRoute(ep: ServerEndpoints.redeemSharingInvitation, createRequest: RedeemSharingInvitationRequest.init, processRequest: sharingAccountsController.redeemSharingInvitation)
+        proxyRouter.addRoute(ep: ServerEndpoints.createSharingInvitation, processRequest: sharingAccountsController.createSharingInvitation)
+        proxyRouter.addRoute(ep: ServerEndpoints.redeemSharingInvitation, processRequest: sharingAccountsController.redeemSharingInvitation)
         
         let sharingGroupsController = SharingGroupsController()
-        proxyRouter.addRoute(ep: ServerEndpoints.getSharingGroups, createRequest: GetSharingGroupsRequest.init, processRequest: sharingGroupsController.getSharingGroups)
+        proxyRouter.addRoute(ep: ServerEndpoints.createSharingGroup, processRequest: sharingGroupsController.createSharingGroup)
+        proxyRouter.addRoute(ep: ServerEndpoints.updateSharingGroup, processRequest: sharingGroupsController.updateSharingGroup)
+        proxyRouter.addRoute(ep: ServerEndpoints.removeSharingGroup, processRequest: sharingGroupsController.removeSharingGroup)
+        proxyRouter.addRoute(ep: ServerEndpoints.removeUserFromSharingGroup, processRequest: sharingGroupsController.removeUserFromSharingGroup)
     }
 }

@@ -30,7 +30,7 @@ extension FileController {
         
         // TODO: *0* Related question: With transactions, if we just select from a particular row (i.e., for the master version for this user, as immediately below) does this result in a lock for the duration of the transaction? We could test for this by sleeping in the middle of the download below, and seeing if another request could delete the file at the same time. This should make a good test case for any mechanism that I come up with.
 
-        getMasterVersion(sharingGroupId: downloadRequest.sharingGroupId, params: params) { (error, masterVersion) in
+        Controllers.getMasterVersion(sharingGroupId: downloadRequest.sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
                 params.completion(.failure(.message("\(error!)")))
                 return

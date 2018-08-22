@@ -1,5 +1,15 @@
 SyncServer
 
+Version 0.17.0
+	* Multiple sharing groups per user
+		https://github.com/crspybits/SyncServerII/issues/27
+	* Add name to sharing groups.
+	* Repurposed FileIndex endpoint to also return the current users sharing groups.
+		Dropped the get sharing groups endpoint.
+		Renamed FileIndex to Index because it's more than just for files.
+	* Added other endpoints to support multiple sharing groups:
+		Create sharing group, remove sharing group, remove user from sharing group, update sharing group.
+		
 Version 0.16.3 (7/22/18)
 	* Fixed issue with user deletion.
 	

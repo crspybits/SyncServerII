@@ -25,8 +25,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
     }
     
     @discardableResult
-    func addSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, failureExpected: Bool = false) -> SharingGroupUserId? {
-        let result = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId)
+    func addSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, owningUserId: UserId?, failureExpected: Bool = false) -> SharingGroupUserId? {
+        let result = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read, owningUserId: owningUserId)
         
         var sharingGroupUserId:SharingGroupUserId?
         switch result {
@@ -58,14 +58,13 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -82,14 +81,13 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId1: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
             return
         }
         
-        guard let id1 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1) else {
+        guard let id1 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -99,14 +97,13 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user2.accountType = .Google
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user2.credsId = "101"
-        user2.permission = .admin
         
         guard let userId2: UserId = UserRepository(db).add(user: user2) else {
             XCTFail()
             return
         }
         
-        guard let id2 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId2) else {
+        guard let id2 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId2, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -125,23 +122,27 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId1: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil) else {
             XCTFail()
             return
         }
         
-        addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, failureExpected: true)
+        addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil, failureExpected: true)
     }
     
     func testLookupFromSharingGroupUser() {
         guard let sharingGroupId = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+
+        guard MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId) else {
             XCTFail()
             return
         }
@@ -151,14 +152,13 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let userId: UserId = UserRepository(db).add(user: user1) else {
             XCTFail()
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId) else {
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -167,7 +167,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         let result = SharingGroupUserRepository(db).lookup(key: key, modelInit: SharingGroupUser.init)
         switch result {
         case .found(let model):
-            guard let obj = model as? SharingGroupUser else {
+            guard let obj = model as? Server.SharingGroupUser else {
                 XCTFail()
                 return
             }
@@ -180,12 +180,65 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             XCTFail("Error: \(error)")
         }
         
-        guard let groups = SharingGroupUserRepository(db).sharingGroups(forUserId: userId), groups.count == 1 else {
+        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId, sharingGroupUserRepo: SharingGroupUserRepository(db)), groups.count == 1 else {
             XCTFail()
             return
         }
         
         XCTAssert(groups[0].sharingGroupId == sharingGroupId)
+    }
+
+    func testGetUserSharingGroupsForMultipleGroups() {
+        guard let sharingGroupId1 = addSharingGroup() else {
+            XCTFail()
+            return
+        }
+        
+        guard MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId1) else {
+            XCTFail()
+            return
+        }
+
+        guard let sharingGroupId2 = addSharingGroup(sharingGroupName: "Foobar") else {
+            XCTFail()
+            return
+        }
+        
+        guard MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId2) else {
+            XCTFail()
+            return
+        }
+
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = .Google
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = "100"
+        
+        guard let userId: UserId = UserRepository(db).add(user: user1) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId1, userId: userId, owningUserId: nil) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId2, userId: userId, owningUserId: nil) else {
+            XCTFail()
+            return
+        }
+        
+        guard let groups = SharingGroupRepository(db).sharingGroups(forUserId: userId, sharingGroupUserRepo: SharingGroupUserRepository(db)), groups.count == 2 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(groups[0].sharingGroupId == sharingGroupId1)
+        XCTAssert(groups[0].sharingGroupName == nil)
+        XCTAssert(groups[1].sharingGroupId == sharingGroupId2)
+        XCTAssert(groups[1].sharingGroupName == "Foobar")
     }
 }
 
@@ -195,7 +248,8 @@ extension SpecificDatabaseTests_SharingGroupUsers {
             ("testAddSharingGroupUser", testAddSharingGroupUser),
             ("testAddMultipleSharingGroupUsers", testAddMultipleSharingGroupUsers),
             ("testAddSharingGroupUserFailsIfYouAddTheSameUserToSameGroupTwice", testAddSharingGroupUserFailsIfYouAddTheSameUserToSameGroupTwice),
-            ("testLookupFromSharingGroupUser", testLookupFromSharingGroupUser)
+            ("testLookupFromSharingGroupUser", testLookupFromSharingGroupUser),
+            ("testGetUserSharingGroupsForMultipleGroups", testGetUserSharingGroupsForMultipleGroups)
         ]
     }
     

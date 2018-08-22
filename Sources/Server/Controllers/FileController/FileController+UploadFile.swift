@@ -61,7 +61,7 @@ extension FileController {
         
         Log.debug("uploadRequest.sharingGroupId: \(uploadRequest.sharingGroupId)")
         
-        getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
+        Controllers.getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
                 let message = "Error: \(String(describing: error))"
                 Log.error(message)
@@ -173,8 +173,6 @@ extension FileController {
                 return
             }
             
-            // TODO: *6* Need to have streaming data from client, and send streaming data up to Google Drive.
-            
             // I'm going to create the entry in the Upload repo first because otherwise, there's a (albeit unlikely) race condition-- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. This way, the process of creating the Upload table entry will be the gatekeeper.
             
             let upload = Upload()
@@ -260,13 +258,22 @@ extension FileController {
             }
             
             let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!, mimeType: uploadRequest.mimeType)
-            Log.info("File being sent to cloud storage: \(cloudFileName)")
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: ownerAccount.cloudFolderName, mimeType: uploadRequest.mimeType)
+            guard let mimeType = uploadRequest.mimeType else {
+                let message = "No mimeType given!"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
+            
+            Log.info("File being sent to cloud storage: \(cloudFileName)")
+
+            let options = CloudStorageFileNameOptions(cloudFolderName: ownerAccount.cloudFolderName, mimeType: mimeType)
             
             ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
                 switch result {
                 case .success(let fileSize):
+                    Log.debug("File with size \(fileSize) successfully uploaded!")
                     upload.fileSizeBytes = Int64(fileSize)
                     
                     switch upload.state! {

@@ -20,7 +20,7 @@ class SharingAccountsController : ControllerProtocol {
     
     func createSharingInvitation(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
-        assert(params.ep.minPermission == .admin)
+        assert(params.ep.sharing?.minPermission == .admin)
 
         guard let createSharingInvitationRequest = params.request as? CreateSharingInvitationRequest else {
             let message = "Did not receive CreateSharingInvitationRequest"
@@ -45,7 +45,7 @@ class SharingAccountsController : ControllerProtocol {
         
         // 6/20/18; The current user can be a sharing or owning user, and whether or not these users can invite others depends on the permissions they have. See https://github.com/crspybits/SyncServerII/issues/76 And permissions have already been checked before this point in request handling.
 
-        guard let effectiveOwningUserId = currentSignedInUser.effectiveOwningUserId else {
+        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: currentSignedInUser, sharingGroupId: createSharingInvitationRequest.sharingGroupId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
             let message = "Could not get effectiveOwningUserId for inviting user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -68,22 +68,172 @@ class SharingAccountsController : ControllerProtocol {
         params.completion(.success(response))
     }
     
+    private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
+                        sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
+        
+        // I'm not requiring a master version from the client-- because they don't yet have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
+        
+        guard let masterVersion = Controllers.getMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, params: params) else {
+            let message = "Could not get master version for sharing group id: \(sharingInvitation.sharingGroupId)"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        if let response = Controllers.updateMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, masterVersion: masterVersion, params: params, responseType: nil) {
+            completion(response)
+            return
+        }
+        
+        let removalResult2 = SharingInvitationRepository(params.db).remove(key: sharingInvitationKey)
+        guard case .removed(let numberRemoved) = removalResult2, numberRemoved == 1 else {
+            let message = "Failed removing sharing invitation!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        // The user can either: (a) already be on the system -- so this will be a request to add a sharing group to an existing user, or (b) this is a request to both create a user and have them join a sharing group.
+        
+        let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
+        switch userExists {
+        case .doesNotExist:
+            redeemSharingInvitationForNewUser(params:params, request: request, sharingInvitation: sharingInvitation, completion: completion)
+        case .exists(let existingUser):
+            redeemSharingInvitationForExistingUser(existingUser, params:params, request: request, sharingInvitation: sharingInvitation, completion: completion)
+        case .error:
+            let message = "Error looking up user!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+        }
+    }
+    
+    private func redeemSharingInvitationForExistingUser(_ existingUser: User, params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation, completion: @escaping ((RequestProcessingParameters.Response)->())) {
+    
+        // Check to see if this user is already in this sharing group. We've got a lock on the sharing group, so no race condition will occur for adding user to sharing group.
+        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId)
+        let result = params.repos.sharingGroupUser.lookup(key: key, modelInit: SharingGroupUser.init)
+        switch result {
+        case .found:
+            let message = "User id: \(existingUser.userId!) was alread in sharing group: \(sharingInvitation.sharingGroupId)"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        case .noObjectFound:
+            // Good: We can add this user to the sharing group.
+            break
+        case .error(let error):
+            Log.error(error)
+            completion(.failure(.message(error)))
+            return
+        }
+        
+        var owningUserId: UserId?
+        if existingUser.accountType.userType == .sharing {
+            owningUserId = sharingInvitation.owningUserId
+        }
+
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
+            let message = "Failed on adding sharing group user for user."
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+
+        let response = RedeemSharingInvitationResponse()!
+        response.sharingGroupId = sharingInvitation.sharingGroupId
+        response.userId = existingUser.userId
+        
+        completion(.success(response))
+    }
+    
+    private func redeemSharingInvitationForNewUser(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation, completion: @escaping ((RequestProcessingParameters.Response)->())) {
+    
+        // No database creds because this is a new user-- so use params.profileCreds
+        
+        let user = User()
+        user.username = params.userProfile!.displayName
+        user.accountType = AccountType.for(userProfile: params.userProfile!)
+        user.credsId = params.userProfile!.id
+        user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
+        
+        var createInitialOwningUserFile = false
+        var owningUserId: UserId?
+
+        switch user.accountType.userType {
+        case .sharing:
+            owningUserId = sharingInvitation.owningUserId
+        case .owning:
+            // When the user is an owning user, they will rely on their own cloud storage to upload new files-- for sharing groups where they have upload permissions.
+            // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, and where b) that owning account type needs a cloud storage folder (e.g., Google Drive). I'm not going to concern myself with the sharing permissions of the immediate sharing invitation because they may join other sharing groups-- and have write permissions there.
+            if params.profileCreds!.owningAccountsNeedCloudFolderName {
+                guard let cloudFolderName = request.cloudFolderName else {
+                    let message = "No cloud folder name given when redeeming sharing invitation using owning account that needs one!"
+                    Log.error(message)
+                    completion(.failure(.message(message)))
+                    return
+                }
+                
+                createInitialOwningUserFile = true
+                user.cloudFolderName = cloudFolderName
+            }
+        }
+        
+        guard let userId = params.repos.user.add(user: user) else {
+            let message = "Failed on adding sharing user to User!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
+            let message = "Failed on adding sharing group user for new sharing user."
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+
+        let response = RedeemSharingInvitationResponse()!
+        response.sharingGroupId = sharingInvitation.sharingGroupId
+        response.userId = userId
+        
+        // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
+
+        var profileCreds = params.profileCreds!
+        profileCreds.accountCreationUser = .userId(userId, user.accountType.userType)
+        
+        profileCreds.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
+            if createInitialOwningUserFile {
+                // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
+                guard let cloudStorageCreds = profileCreds as? CloudStorage else {
+                    let message = "Could not obtain CloudStorage Creds"
+                    Log.error(message)
+                    completion(.failure(.message(message)))
+                    return
+                }
+        
+                UserController.createInitialFileForOwningUser(cloudFolderName: user.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
+                    if success {
+                        completion(.success(response))
+                    }
+                    else {
+                        completion(.failure(nil))
+                    }
+                }
+            }
+            else {
+                completion(.success(response))
+            }
+        }, failure: {
+            completion(.failure(nil))
+        })
+    }
+    
     func redeemSharingInvitation(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .primary)
 
         guard let request = params.request as? RedeemSharingInvitationRequest else {
             let message = "Did not receive RedeemSharingInvitationRequest"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
-        switch userExists {
-        case .doesNotExist:
-            break
-        case .error, .exists(_):
-            let message = "Could not add user: Already exists!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
@@ -113,93 +263,42 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        let removalResult2 = SharingInvitationRepository(params.db).remove(key: sharingInvitationKey)
-        guard case .removed(let numberRemoved) = removalResult2, numberRemoved == 1 else {
-            let message = "Failed removing sharing invitation!"
-            Log.error(message)
+        let lock = Lock(sharingGroupId:sharingInvitation.sharingGroupId, deviceUUID:params.deviceUUID!)
+        switch params.repos.lock.lock(lock: lock) {
+        case .success:
+            break
+        
+        case .lockAlreadyHeld:
+            let message = "Error: Lock already held!"
+            Log.debug(message)
+            params.completion(.failure(.message(message)))
+            return
+        
+        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+            let message = "Error removing locks!"
+            Log.debug(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        // All seems good. Let's create the new user.
+        redeem(params: params, request: request, sharingInvitation: sharingInvitation, sharingInvitationKey: sharingInvitationKey) { response in
         
-        // No database creds because this is a new user-- so use params.profileCreds
-        
-        let user = User()
-        user.username = params.userProfile!.displayName
-        user.accountType = AccountType.for(userProfile: params.userProfile!)
-        user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
-        user.permission = sharingInvitation.permission
-        
-        var createInitialOwningUserFile = false
-        
-        switch user.accountType.userType {
-        case .sharing:
-            user.owningUserId = sharingInvitation.owningUserId
-        case .owning:
-            // When the user is an owning user, they will rely on their own cloud storage to upload new files-- if they have upload permissions.
-            // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, where b) that owning account type needs a cloud storage folder (e.g., Google Drive), and c) with permissions of >= write.
-            if params.profileCreds!.owningAccountsNeedCloudFolderName && sharingInvitation.permission.hasMinimumPermission(.write) {
-                guard let cloudFolderName = request.cloudFolderName else {
-                    let message = "No cloud folder name given when redeeming sharing invitation using owning account that needs one!"
-                    Log.error(message)
+            let unlockResult = params.repos.lock.unlock(sharingGroupId: sharingInvitation.sharingGroupId)
+            
+            switch response {
+            case .success:
+                if unlockResult {
+                    params.completion(response)
+                }
+                else {
+                    let message = "Error in unlock!"
+                    Log.debug(message)
                     params.completion(.failure(.message(message)))
-                    return
                 }
                 
-                createInitialOwningUserFile = true
-                user.cloudFolderName = cloudFolderName
+            case .failure:
+                params.completion(response)
             }
         }
-        
-        guard let userId = params.repos.user.add(user: user) else {
-            let message = "Failed on adding sharing user to User!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId) else {
-            let message = "Failed on adding sharing group user for new sharing user."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-
-        let response = RedeemSharingInvitationResponse()!
-        response.sharingGroupId = sharingInvitation.sharingGroupId
-        response.userId = userId
-        
-        // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
-
-        var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId, user.accountType.userType)
-        
-        profileCreds.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
-            if createInitialOwningUserFile {                
-                // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
-                guard let cloudStorageCreds = profileCreds as? CloudStorage else {
-                    let message = "Could not obtain CloudStorage Creds"
-                    Log.error(message)
-                    params.completion(.failure(.message(message)))
-                    return
-                }
-        
-                UserController.createInitialFileForOwningUser(cloudFolderName: user.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
-                    if success {
-                        params.completion(.success(response))
-                    }
-                    else {
-                        params.completion(.failure(nil))
-                    }
-                }
-            }
-            else {
-                params.completion(.success(response))
-            }
-        }, failure: {
-            params.completion(.failure(nil))
-        })
     }
 }

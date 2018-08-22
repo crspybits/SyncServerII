@@ -118,24 +118,18 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         
         let newUserId = UserId(43287)
         let newUsername = "foobar"
-        let newOwningUserId = UserId(321)
-        let newSharingPermission:Permission = .write
         let newAccountType: AccountType = .Google
         let newCredsId = "d392y2t3"
         let newCreds = "fd9eu23y4"
         
         user[User.userIdKey] = newUserId
         user[User.usernameKey] = newUsername
-        user[User.owningUserIdKey] = newOwningUserId
-        user[User.permissionKey] = newSharingPermission
         user[User.accountTypeKey] = newAccountType
         user[User.credsIdKey] = newCredsId
         user[User.credsKey] = newCreds
         
         XCTAssert(user.userId == newUserId)
         XCTAssert(user.username == newUsername)
-        XCTAssert(user.owningUserId == newOwningUserId)
-        XCTAssert(user.permission == newSharingPermission)
         
         // Swift Compiler issues.
         // XCTAssert(user.accountType == newAccountType)
@@ -149,16 +143,12 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         
         user[User.userIdKey] = nil
         user[User.usernameKey] = nil
-        user[User.owningUserIdKey] = nil
-        user[User.permissionKey] = nil
         user[User.accountTypeKey] = nil
         user[User.credsIdKey] = nil
         user[User.credsKey] = nil
         
         XCTAssert(user.userId == nil)
         XCTAssert(user.username == nil)
-        XCTAssert(user.owningUserId == nil)
-        XCTAssert(user.permission == nil)
         XCTAssert(user.accountType == nil)
         XCTAssert(user.credsId == nil)
         XCTAssert(user.creds == nil)

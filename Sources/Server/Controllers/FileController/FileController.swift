@@ -50,33 +50,6 @@ class FileController : ControllerProtocol {
     init() {
     }
     
-    enum GetMasterVersionError : Error {
-    case error(String)
-    case noObjectFound
-    }
-    
-    // Synchronous callback.
-    // Get the master version for a sharing group because the master version reflects the overall version of the data for a sharing group.
-    func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
-        
-        let key = MasterVersionRepository.LookupKey.sharingGroupId(sharingGroupId)
-        let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
-        
-        switch result {
-        case .error(let error):
-            completion(GetMasterVersionError.error(error), nil)
-            
-        case .found(let model):
-            let masterVersionObj = model as! MasterVersion
-            completion(nil, masterVersionObj.masterVersion)
-            
-        case .noObjectFound:
-            let errorMessage = "Master version record not found for: \(key)"
-            Log.error(errorMessage)
-            completion(GetMasterVersionError.noObjectFound, nil)
-        }
-    }
-    
     // OWNER
     static func getCreds(forUserId userId: UserId, from db: Database) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
@@ -114,44 +87,92 @@ class FileController : ControllerProtocol {
         }
     }
             
-    func fileIndex(params:RequestProcessingParameters) {
-        guard let fileIndexRequest = params.request as? FileIndexRequest else {
-            let message = "Did not receive FileIndexRequest"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        guard sharingGroupSecurityCheck(sharingGroupId: fileIndexRequest.sharingGroupId, params: params) else {
-            let message = "Failed in sharing group security check."
+    func index(params:RequestProcessingParameters) {
+        guard let indexRequest = params.request as? IndexRequest else {
+            let message = "Did not receive IndexRequest"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
 
 #if DEBUG
-        if fileIndexRequest.testServerSleep != nil {
-            Log.info("Starting sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
-            Thread.sleep(forTimeInterval: TimeInterval(fileIndexRequest.testServerSleep!))
-            Log.info("Finished sleep (testServerSleep= \(fileIndexRequest.testServerSleep!)).")
+        if indexRequest.testServerSleep != nil {
+            Log.info("Starting sleep (testServerSleep= \(indexRequest.testServerSleep!)).")
+            Thread.sleep(forTimeInterval: TimeInterval(indexRequest.testServerSleep!))
+            Log.info("Finished sleep (testServerSleep= \(indexRequest.testServerSleep!)).")
         }
 #endif
+
+        guard let groups = params.repos.sharingGroup.sharingGroups(forUserId: params.currentSignedInUser!.userId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
+            let message = "Could not get sharing groups for user."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
         
-        getMasterVersion(sharingGroupId: fileIndexRequest.sharingGroupId, params: params) { (error, masterVersion) in
+        let clientSharingGroups:[SyncServerShared.SharingGroup] = groups.map { serverGroup in
+            return serverGroup.toClient()
+        }
+        
+        guard let sharingGroupId = indexRequest.sharingGroupId else {
+            // Not an error-- caller just didn't give a sharing group id-- only returning sharing group info.
+            let response = IndexResponse()!
+            response.sharingGroups = clientSharingGroups
+            params.completion(.success(response))
+            return
+        }
+        
+        Log.info("Index: Getting file index for sharing group id: \(sharingGroupId)")
+
+        // Not worrying about whether the sharing group is deleted-- where's the harm in getting a file index for a deleted sharing group?
+        guard sharingGroupSecurityCheck(sharingGroupId: sharingGroupId, params: params, checkNotDeleted: false) else {
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        let lock = Lock(sharingGroupId:sharingGroupId, deviceUUID:params.deviceUUID!)
+        switch params.repos.lock.lock(lock: lock) {
+        case .success:
+            break
+        
+        case .lockAlreadyHeld:
+            let message = "Error: Lock already held!"
+            Log.debug(message)
+            params.completion(.failure(.message(message)))
+            return
+        
+        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+            let message = "Error removing locks!"
+            Log.debug(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        Controllers.getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
             if error != nil {
+                params.repos.lock.unlock(sharingGroupId: sharingGroupId)
                 params.completion(.failure(.message("\(error!)")))
                 return
             }
             
-            // Get the file index for the sharing group.
-            let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupId: fileIndexRequest.sharingGroupId)
+            let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupId: sharingGroupId)
+            
+            if !params.repos.lock.unlock(sharingGroupId: sharingGroupId) {
+                let message = "Error in unlock!"
+                Log.debug(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
 
             switch fileIndexResult {
             case .fileIndex(let fileIndex):
                 Log.info("Number of entries in FileIndex: \(fileIndex.count)")
-                let response = FileIndexResponse()!
+                let response = IndexResponse()!
                 response.fileIndex = fileIndex
                 response.masterVersion = masterVersion
+                response.sharingGroups = clientSharingGroups
                 params.completion(.success(response))
                 
             case .error(let error):

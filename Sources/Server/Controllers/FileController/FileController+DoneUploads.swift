@@ -14,7 +14,7 @@ import SyncServerShared
 
 extension FileController {
     // Returns nil on an error.
-    private func getFileIndexEntries(forUploadFiles uploadFiles:[Upload], params:RequestProcessingParameters) -> [FileInfo]? {
+    private func getIndexEntries(forUploadFiles uploadFiles:[Upload], params:RequestProcessingParameters) -> [FileInfo]? {
         var primaryFileIndexKeys = [FileIndexRepository.LookupKey]()
     
         for uploadFile in uploadFiles {
@@ -41,21 +41,7 @@ extension FileController {
     }
     
     // staleVersionsToDelete gives info, if any, on files that we're uploading new versions of.
-    private func doInitialDoneUploads(params:RequestProcessingParameters) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)? {
-        
-        guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
-            let message = "Did not receive DoneUploadsRequest"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return nil
-        }
-
-        guard sharingGroupSecurityCheck(sharingGroupId: doneUploadsRequest.sharingGroupId, params: params) else {
-            let message = "Failed in sharing group security check."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return nil
-        }
+    private func doInitialDoneUploads(params:RequestProcessingParameters, doneUploadsRequest: DoneUploadsRequest) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)? {
         
 #if DEBUG
         if doneUploadsRequest.testLockSync != nil {
@@ -64,26 +50,9 @@ extension FileController {
             Log.info("Finished sleep (testLockSync= \(String(describing: doneUploadsRequest.testLockSync))).")
         }
 #endif
-
-        var response:DoneUploadsResponse?
         
-        let updateResult = updateMasterVersion(sharingGroupId: doneUploadsRequest.sharingGroupId, currentMasterVersion: doneUploadsRequest.masterVersion, params: params)
-        switch updateResult {
-        case .success:
-            break
-
-        case .masterVersionUpdate(let updatedMasterVersion):
-            // [1]. 2/11/17. My initial thinking was that we would mark any uploads from this device as having a `toPurge` state, after having obtained an updated master version. However, that seems in opposition to my more recent idea of having a "GetUploads" endpoint which would indicate to a client which files were in an uploaded state. Perhaps what would be suitable is to provide clients with an endpoint to delete or flush files that are in an uploaded state, should they decide to do that.
-            Log.warning("Master version update: \(updatedMasterVersion)")
-            response = DoneUploadsResponse()
-            response!.masterVersionUpdate = updatedMasterVersion
-            params.completion(.success(response!))
-            return nil
-            
-        case .error(let error):
-            let message = "Failed on updateMasterVersion: \(error)"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
+        if let response = Controllers.updateMasterVersion(sharingGroupId: doneUploadsRequest.sharingGroupId, masterVersion: doneUploadsRequest.masterVersion, params: params, responseType: DoneUploadsResponse.self) {
+            params.completion(response)
             return nil
         }
         
@@ -118,17 +87,17 @@ extension FileController {
 
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
         
-        guard let staleVersionsToDelete = getFileIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
+        guard let staleVersionsToDelete = getIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
             params.completion(.failure(nil))
             return nil
         }
         
-        guard let fileIndexDeletions = getFileIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
+        guard let fileIndexDeletions = getIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
             params.completion(.failure(nil))
             return nil
         }
 
-        guard let effectiveOwningUserId = params.currentSignedInUser!.effectiveOwningUserId else {
+        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupId: doneUploadsRequest.sharingGroupId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
             params.completion(.failure(nil))
             return nil
         }
@@ -172,47 +141,6 @@ extension FileController {
         return (numberTransferred!, fileIndexDeletions, staleVersionsToDelete)
     }
     
-    enum UpdateMasterVersionResult : Error {
-    case success
-    case error(String)
-    case masterVersionUpdate(MasterVersionInt)
-    }
-    
-    private func updateMasterVersion(sharingGroupId: SharingGroupId, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
-
-        let currentMasterVersionObj = MasterVersion()
-        
-        // The master version reflects a sharing group.
-        currentMasterVersionObj.sharingGroupId = sharingGroupId
-        
-        currentMasterVersionObj.masterVersion = currentMasterVersion
-        let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
-        
-        var result:UpdateMasterVersionResult!
-        
-        switch updateMasterVersionResult {
-        case .success:
-            result = UpdateMasterVersionResult.success
-            
-        case .error(let error):
-            let message = "Failed lookup in MasterVersionRepository: \(error)"
-            Log.error(message)
-            result = UpdateMasterVersionResult.error(message)
-            
-        case .didNotMatchCurrentMasterVersion:
-            getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
-                if error == nil {
-                    result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
-                }
-                else {
-                    result = UpdateMasterVersionResult.error("\(error!)")
-                }
-            }
-        }
-        
-        return result
-    }
-    
     func doneUploads(params:RequestProcessingParameters) {
         guard let doneUploadsRequest = params.request as? DoneUploadsRequest else {
             let message = "Did not receive DoneUploadsRequest"
@@ -253,7 +181,7 @@ extension FileController {
             return
         }
         
-        let result = doInitialDoneUploads(params: params)
+        let result = doInitialDoneUploads(params: params, doneUploadsRequest: doneUploadsRequest)
         
         if !params.repos.lock.unlock(sharingGroupId: doneUploadsRequest.sharingGroupId) {
             let message = "Error in unlock!"

@@ -48,8 +48,6 @@ class UserController : ControllerProtocol {
     }
     
     func addUser(params:RequestProcessingParameters) {
-        Log.debug("UserController.addUser.1")
-
         guard let addUserRequest = params.request as? AddUserRequest else {
             let message = "Did not receive AddUserRequest"
             Log.error(message)
@@ -78,9 +76,6 @@ class UserController : ControllerProtocol {
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType: userType)
         
-        // This is creating the "root" owning user for a sharing group; they have max permissions.
-        user.permission = .admin
-        
         if params.profileCreds!.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
                 let message = "owningAccountsNeedCloudFolderName but no cloudFolderName"
@@ -108,14 +103,15 @@ class UserController : ControllerProtocol {
         
         user.userId = userId
 
-        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add() else {
+        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(sharingGroupName: addUserRequest.sharingGroupName) else {
             let message = "Failed on adding new sharing group."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
 
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId) else {
+        // This is creating the "root" owning user for a sharing group; they have max permissions.
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin, owningUserId: nil) else {
             let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -168,7 +164,6 @@ class UserController : ControllerProtocol {
         
         let response = CheckCredsResponse()!
         response.userId = params.currentSignedInUser!.userId
-        response.permission = params.currentSignedInUser!.permission
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
         params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.accountType.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
@@ -200,13 +195,6 @@ class UserController : ControllerProtocol {
             return
         }
         
-        guard params.repos.user.resetOwningUserIds(forUserId: params.currentSignedInUser!.userId) else {
-            let message = "Could not reset owningUserId's of other users."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         // When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
         
         let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
@@ -218,7 +206,8 @@ class UserController : ControllerProtocol {
         }
         
         // 6/25/18; Up until today, user removal had included actual removal of all of the user's files from the FileIndex. BUT-- this goes against how deletion occurs on the SyncServer-- we mark files as deleted, but don't actually remove them from the FileIndex.
-        guard let _ = params.repos.fileIndex.markFilesAsDeleted(forUserId: params.currentSignedInUser!.userId) else {
+        let markKey = FileIndexRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        guard let _ = params.repos.fileIndex.markFilesAsDeleted(key: markKey) else {
             let message = "Could not mark files as deleted for user!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -232,6 +221,15 @@ class UserController : ControllerProtocol {
             break
         case .error(let error):
             let message = "Could not remove sharing group references for user: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // And, any sharing users making use of this user as an owningUserId can no longer use its userId.
+        let resetKey = SharingGroupUserRepository.LookupKey.owningUserId(params.currentSignedInUser!.userId)
+        guard params.repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
+            let message = "Could not remove sharing group references for owning user"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

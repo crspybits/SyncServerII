@@ -193,7 +193,8 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     
     let testTableName = "TestTable12345"
     let testTableName2 = "TestTable6789"
-    
+    static let testTableName3 = "TestTableABC"
+
     let c2Table2Value = Date()
 
     override func setUp() {
@@ -209,9 +210,11 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         // Ignore any failure in dropping: E.g., a failure resulting from the table not existing the first time around.
         let _ = db.connection.query(statement: "DROP TABLE \(testTableName)")
         let _ = db.connection.query(statement: "DROP TABLE \(testTableName2)")
-
+        let _ = db.connection.query(statement: "DROP TABLE \(GeneralDatabaseTests.testTableName3)")
+        
         XCTAssert(createTable())
         XCTAssert(createTable2())
+        XCTAssert(createTable3())
         insertRows()
         insertRows2()
         
@@ -253,6 +256,27 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             "c2 DATE)"
 
         if case .success(.created) = db.createTableIfNeeded(tableName: testTableName2, columnCreateQuery: createColumns) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+    
+    class Table3 : RepositoryBasics {
+        var db: Database!
+        let tableName = GeneralDatabaseTests.testTableName3
+        static var tableName = GeneralDatabaseTests.testTableName3
+    }
+    
+    func createTable3() -> Bool {
+        let createColumns =
+            "(c1 VARCHAR(100), " +
+            "c2 INT(3), " +
+            "c3 INT(2), " +
+            "c4 BOOL)"
+
+        if case .success(.created) = db.createTableIfNeeded(tableName: GeneralDatabaseTests.testTableName3, columnCreateQuery: createColumns) {
             return true
         }
         else {
@@ -387,6 +411,155 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         XCTAssert(db.addColumn("newTextColumn TEXT", to: testTableName))
         XCTAssert(db.removeColumn("newTextColumn", from: testTableName))
     }
+    
+    // MARK: Database.PreparedStatement
+
+    func testDatabaseInsertStringValueIntoStringColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c1", value: .string("Example"))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+
+    func testDatabaseInsertIntValueIntoIntColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c2", value: .int(56))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+
+    func testDatabaseInsertBoolValueIntoBoolColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c4", value: .bool(true))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNullValueIntoIntColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c2", value: .null)
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertStringValueIntoIntColumnFails() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        // Note that the opposite doesn't fail-- you can successfully bind an integer value to a string column.
+        insert.add(fieldName: "c2", value: .string("Foobar"))
+        
+        do {
+            try insert.run()
+            XCTFail()
+        }
+        catch {
+        }
+    }
+    
+    func testDatabaseInsertValuesIntoColumnsWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c1", value: .string("Foobar"))
+        insert.add(fieldName: "c2", value: .int(56))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseUpdateWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c1", value: .string("Foobar"))
+        insert.add(fieldName: "c2", value: .int(56))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+        
+        let update = Database.PreparedStatement(repo: repo, type: .update)
+        update.add(fieldName: "c1", value: .string("Snigly"))
+        update.where(fieldName: "c2", value: .int(56))
+        
+        do {
+            try update.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseUpdateWithTwoFieldsInWhereClauseWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c1", value: .string("Foobar"))
+        insert.add(fieldName: "c2", value: .int(56))
+        insert.add(fieldName: "c3", value: .int(100))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+        
+        let update = Database.PreparedStatement(repo: repo, type: .update)
+        update.add(fieldName: "c1", value: .string("Snigly"))
+        update.where(fieldName: "c2", value: .int(56))
+        update.where(fieldName: "c3", value: .int(100))
+        
+        do {
+            let num = try update.run()
+            XCTAssert(num == 1)
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
 }
 
 extension GeneralDatabaseTests {
@@ -397,9 +570,20 @@ extension GeneralDatabaseTests {
             ("testTypeConverters", testTypeConverters),
             ("testColumnExists", testColumnExists),
             ("testAddColumn", testAddColumn),
-            ("testRemoveColumn", testRemoveColumn)
+            ("testRemoveColumn", testRemoveColumn),
+            
+            ("testDatabaseInsertStringValueIntoStringColumnWorks", testDatabaseInsertStringValueIntoStringColumnWorks),
+            ("testDatabaseInsertIntValueIntoIntColumnWorks", testDatabaseInsertIntValueIntoIntColumnWorks),
+            ("testDatabaseInsertBoolValueIntoBoolColumnWorks", testDatabaseInsertBoolValueIntoBoolColumnWorks),
+            ("testDatabaseInsertNullValueIntoIntColumnWorks", testDatabaseInsertNullValueIntoIntColumnWorks),
+            ("testDatabaseInsertStringValueIntoIntColumnFails", testDatabaseInsertStringValueIntoIntColumnFails),
+            ("testDatabaseInsertValuesIntoColumnsWorks", testDatabaseInsertValuesIntoColumnsWorks),
+            ("testDatabaseUpdateWorks", testDatabaseUpdateWorks),
+            ("testDatabaseUpdateWithTwoFieldsInWhereClauseWorks", testDatabaseUpdateWithTwoFieldsInWhereClauseWorks)
         ]
     }
+    
+    
     
     func testLinuxTestSuiteIncludesAllTests() {
         linuxTestSuiteIncludesAllTests(testType:GeneralDatabaseTests.self)

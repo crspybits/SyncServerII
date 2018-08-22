@@ -27,7 +27,6 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .read
         user1.cloudFolderName = "folder1"
         
         let result1 = UserRepository(db).add(user: user1)
@@ -38,7 +37,6 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user2.accountType = .Google
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue2\"}"
         user2.credsId = "200"
-        user2.permission = .write
         user2.cloudFolderName = "folder2"
         
         let result2 = UserRepository(db).add(user: user2)
@@ -49,26 +47,12 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         addOwningUsers()
     }
     
-    func testAddOwningUserFailsIfYouGiveAnOwningUserId() {
-        let user1 = User()
-        user1.username = "Chris"
-        user1.accountType = .Google
-        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
-        user1.credsId = "100"
-        user1.permission = .read
-        user1.owningUserId = 100
-        
-        let result1 = UserRepository(db).add(user: user1)
-        XCTAssert(result1 == nil, "Good id!!")
-    }
-    
     func testAddOwningUserWorksIfYouGivePermissions() {
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .admin
         
         guard let _ = UserRepository(db).add(user: user1) else {
             XCTFail()
@@ -91,11 +75,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         }
         
         user1.credsId = "100"
-        user1.permission = .write
         
-        if sharing {
-            user1.owningUserId = 200
-        }
 
         guard let _ = UserRepository(db).add(user: user1) else {
             XCTFail()
@@ -193,7 +173,6 @@ extension SpecificDatabaseTests_UserRepository {
     static var allTests : [(String, (SpecificDatabaseTests_UserRepository) -> () throws -> Void)] {
         return [
             ("testAddOwningUser", testAddOwningUser),
-            ("testAddOwningUserFailsIfYouGiveAnOwningUserId", testAddOwningUserFailsIfYouGiveAnOwningUserId),
             ("testAddOwningUserWorksIfYouGivePermissions", testAddOwningUserWorksIfYouGivePermissions),
             
             ("testAddGoogleUser", testAddGoogleUser),

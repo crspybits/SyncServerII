@@ -17,7 +17,7 @@ class GeneralAuthTests: ServerTestCase, LinuxTestable {
 
     func testBadEndpointFails() {
         performServerTest { expectation, creds in
-            let badRoute = ServerEndpoint("foobar", method: .post)
+            let badRoute = ServerEndpoint("foobar", method: .post, messageType: AddUserRequest.self)
             self.performRequest(route:badRoute) { response, dict in
                 XCTAssert(response!.statusCode != .OK, "Did not fail on request")
                 Log.info("response.statusCode: \(String(describing: response?.statusCode))")

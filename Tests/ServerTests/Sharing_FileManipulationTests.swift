@@ -77,12 +77,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let deviceUUID2 = Foundation.UUID().uuidString
         
         // Attempting to upload a file by our sharing user
-        guard let uploadResult = uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupId:actualSharingGroupId), fileVersion: fileVersion, masterVersion: masterVersion, errorExpected: failureExpected) else {
+        guard let uploadResult = uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupId:actualSharingGroupId), fileVersion: fileVersion, masterVersion: masterVersion + 1, errorExpected: failureExpected) else {
             XCTFail()
             return nil
         }
         
-        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion, sharingGroupId: actualSharingGroupId, failureExpected: failureExpected)
+        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion + 1, sharingGroupId: actualSharingGroupId, failureExpected: failureExpected)
         
         return SharingUploadResult(request: uploadResult.request, fileSize: uploadResult.fileSize, sharingGroupId: actualSharingGroupId, sharingTestAccount: sharingUser, uploadedDeviceUUID:deviceUUID2, redeemResponse: redeemResponse)
     }
@@ -112,6 +112,11 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+
         // Redeem that sharing invitation with a new user
         redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
@@ -122,12 +127,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
+            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
             ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
         
         uploadDeletion(testAccount: sharingUser, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false, expectError: failureExpected)
-        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadResult.request.masterVersion + MasterVersionInt(1), sharingGroupId: sharingGroupId, failureExpected:failureExpected)
+        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion + 1, sharingGroupId: sharingGroupId, failureExpected:failureExpected)
     }
     
     func downloadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
@@ -160,7 +165,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         
         // Now see if we can download the file with the sharing user creds.
-        downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadResult.request, fileSize: uploadResult.fileSize, expectedError:failureExpected)
+        downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 2, uploadFileRequest: uploadResult.request, fileSize: uploadResult.fileSize, expectedError:failureExpected)
     }
     
     func downloadDeleteFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
@@ -207,7 +212,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let deviceUUID2 = Foundation.UUID().uuidString
         
-        guard let fileIndex = getFileIndex(testAccount: sharingUser, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId), fileIndex.count == 1 else {
+        guard let (files, _) = getIndex(testAccount: sharingUser, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId),
+            let fileIndex = files, fileIndex.count == 1 else {
             XCTFail()
             return
         }
@@ -323,7 +329,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest1 = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: upload1.request.fileUUID,
             UploadDeletionRequest.fileVersionKey: upload1.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
             ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
 
@@ -332,13 +338,13 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let uploadDeletionRequest2 = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: upload2.request.fileUUID,
             UploadDeletionRequest.fileVersionKey: upload2.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion,
+            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
             ServerEndpoint.sharingGroupIdKey: sharingGroupId
         ])!
 
         uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest2, deviceUUID: deviceUUID, addUser: false)
 
-        sendDoneUploads(testAccount: upload2.sharingTestAccount, expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+        sendDoneUploads(testAccount: upload2.sharingTestAccount, expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: masterVersion + 1, sharingGroupId: sharingGroupId)
     }
     
     // Upload deletions must go to the account of the original (v0) owning user. To test this: a) upload v0 of a file, b) have a different user upload v1 of the file. Now upload delete. Make sure the deletion works.
@@ -361,7 +367,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        masterVersion += 1
+        masterVersion += 2
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
@@ -382,7 +388,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let masterVersion: MasterVersionInt = 1
+        let masterVersion: MasterVersionInt = 2
         
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: result.request.fileUUID,
@@ -452,7 +458,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize, expectedError:false)
+        downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: 2, uploadFileRequest: result.request, fileSize: result.fileSize, expectedError:false)
     }
     
     func testThatOwningUserCanDownloadSharingUserFile() {
@@ -472,13 +478,18 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             sharingInvitationUUID = invitationUUID!
             expectation.fulfill()
         }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: result.sharingGroupId) else {
+            XCTFail()
+            return
+        }
             
         // Redeem that sharing invitation with a new user
         redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID:sharingInvitationUUID) { _, expectation in
             expectation.fulfill()
         }
             
-        downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize, expectedError:false)
+        downloadTextFile(testAccount: sharingUser, masterVersionExpectedWithDownload: Int(masterVersion + 1), uploadFileRequest: result.request, fileSize: result.fileSize, expectedError:false)
     }
     
     func testThatSharingUserCanDownloadSharingUserFile() {
@@ -555,7 +566,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         
         // Attempting to upload a file by our sharing user-- this should work because the sharing user owns cloud storage.
-        guard let _ = uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId)) else {
+        guard let _ = uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId), masterVersion: 1) else {
             XCTFail()
             return
         }
@@ -571,19 +582,24 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         
         makeSureSharingOwnerOwnsUploadedFile(result: result)
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: result.sharingGroupId) else {
+            XCTFail()
+            return
+        }
 
-        guard let _ = downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize) else {
+        guard let _ = downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion), uploadFileRequest: result.request, fileSize: result.fileSize) else {
             XCTFail()
             return
         }
         
-        guard let _ = downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: result.request, fileSize: result.fileSize) else {
+        guard let _ = downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: Int(masterVersion), uploadFileRequest: result.request, fileSize: result.fileSize) else {
             XCTFail()
             return
         }
     }
     
-    func testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails() {
+    func testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone() {
         var actualSharingGroupId:SharingGroupId!
         
         let sharingAccount: TestAccount = .nonOwningSharingAccount
@@ -611,7 +627,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         
         // Attempting to upload a file by our sharing user-- this should fail with HTTP 410 (Gone) because the sharing user does not own cloud storage.
-        uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId), errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
+        uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId), masterVersion: 1, errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
     }
     
     // Similar to that above, but the non-owning, sharing user downloads a file-- that was owned by a third user, that is still on the system, and was in the same sharing group.
@@ -627,16 +643,25 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             actualSharingGroupId = sharingGroupId
         }
         
-        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount2, addUser: .no(sharingGroupId: actualSharingGroupId))
-    
-        let deviceUUID = Foundation.UUID().uuidString
-
-        guard let uploadResult = uploadTextFile(testAccount: sharingAccount2, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId)) else {
+        guard var masterVersion = getMasterVersion(sharingGroupId: actualSharingGroupId) else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(testAccount: sharingAccount2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: actualSharingGroupId)
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount2, addUser: .no(sharingGroupId: actualSharingGroupId))
+        
+        masterVersion += 1
+    
+        let deviceUUID = Foundation.UUID().uuidString
+
+        guard let uploadResult = uploadTextFile(testAccount: sharingAccount2, deviceUUID:deviceUUID, addUser: .no(sharingGroupId:actualSharingGroupId), masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(testAccount: sharingAccount2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: actualSharingGroupId)
+        
+        masterVersion += 1
         
         let deviceUUID2 = Foundation.UUID().uuidString
 
@@ -651,10 +676,70 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             }
         }
         
-        guard let _ = downloadTextFile(testAccount: sharingAccount1, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadResult.request, fileSize: uploadResult.fileSize) else {
+        guard let _ = downloadTextFile(testAccount: sharingAccount1, masterVersionExpectedWithDownload: Int(masterVersion), uploadFileRequest: uploadResult.request, fileSize: uploadResult.fileSize) else {
             XCTFail()
             return
         }
+    }
+    
+    // File operations work for a second sharing group you are a member of: Upload
+    func testThatUploadForSecondSharingGroupWorks() {
+        guard let (testAccount, sharingGroupId) = redeemWithAnExistingOtherSharingAccount() else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadTextFile(testAccount: testAccount, addUser: .no(sharingGroupId:sharingGroupId), masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func testThatDoneUploadsForSecondSharingGroupWorks() {
+        guard let (testAccount, sharingGroupId) = redeemWithAnExistingOtherSharingAccount() else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let _ = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID, addUser: .no(sharingGroupId:sharingGroupId), masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+    }
+    
+    func testThatDownloadForSecondSharingGroupWorks() {
+        guard let (testAccount, sharingGroupId) = redeemWithAnExistingOtherSharingAccount() else {
+            XCTFail()
+            return
+        }
+        
+        guard let masterVersion = getMasterVersion(sharingGroupId: sharingGroupId) else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let result = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID, addUser: .no(sharingGroupId:sharingGroupId), masterVersion: masterVersion) else {
+            XCTFail()
+            return
+        }
+        
+        sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+        
+        downloadTextFile(testAccount: testAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request, fileSize: result.fileSize)
     }
 }
 
@@ -685,10 +770,13 @@ extension Sharing_FileManipulationTests {
             ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser),
             ("testUploadByOwningSharingUserAfterInvitingUserDeletedWorks",
                 testUploadByOwningSharingUserAfterInvitingUserDeletedWorks),
-            ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails",
-                testUploadByNonOwningSharingUserAfterInvitingUserDeletedFails),
+            ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone",
+                testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone),
             ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
-                testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks)
+                testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks),
+            ("testThatUploadForSecondSharingGroupWorks", testThatUploadForSecondSharingGroupWorks),
+            ("testThatDoneUploadsForSecondSharingGroupWorks", testThatDoneUploadsForSecondSharingGroupWorks),
+            ("testThatDownloadForSecondSharingGroupWorks", testThatDownloadForSecondSharingGroupWorks)
         ]
     }
     

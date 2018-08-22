@@ -29,7 +29,7 @@ extension FileController {
             return
         }
         
-        getMasterVersion(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) { error, masterVersion in
+        Controllers.getMasterVersion(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) { error, masterVersion in
             if error != nil {
                 let message = "Error: \(String(describing: error))"
                 Log.error(message)

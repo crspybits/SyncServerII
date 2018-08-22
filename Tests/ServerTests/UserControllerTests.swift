@@ -42,8 +42,6 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
                 XCTAssert(user.cloudFolderName == ServerTestCase.cloudFolderName)
             }
             
-            XCTAssert(user.permission == .admin)
-            
         case .noObjectFound:
             XCTFail("No User Found")
         }
@@ -53,6 +51,33 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
             self.lookupFile(forOwningTestAccount: testAccount, cloudFileName: fileName, options: options)
         }
+    }
+    
+    func testAddUserWithSharingGroupNameWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let sharingGroupName = "SharingGroup765"
+        
+        guard let addUserResponse = addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, sharingGroupName:sharingGroupName) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(addUserResponse.sharingGroupId != nil)
+        
+        guard let (_, sharingGroups) = getIndex() else {
+            XCTFail()
+            return
+        }
+        
+        guard sharingGroups.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(sharingGroups[0].sharingGroupId == addUserResponse.sharingGroupId)
+        XCTAssert(sharingGroups[0].sharingGroupName == sharingGroupName)
+        XCTAssert(sharingGroups[0].deleted == false)
     }
     
     func testAddUserFailsWhenAddingExistingUser() {
@@ -229,7 +254,8 @@ extension UserControllerTests {
             ("testCheckCredsWithBadAccessToken", testCheckCredsWithBadAccessToken),
             ("testRemoveUserFailsWithNonExistingUser", testRemoveUserFailsWithNonExistingUser),
             ("testRemoveUserSucceedsWithExistingUser", testRemoveUserSucceedsWithExistingUser),
-            ("testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved", testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved)
+            ("testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved", testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved),
+            ("testAddUserWithSharingGroupNameWorks", testAddUserWithSharingGroupNameWorks)
         ]
     }
     

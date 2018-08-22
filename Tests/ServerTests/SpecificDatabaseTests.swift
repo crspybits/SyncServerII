@@ -199,7 +199,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             }
             actualSharingGroupId = sharingGroupId
             
-            guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId) else {
+            guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .write, owningUserId: nil) else {
                 XCTFail()
                 return nil
             }
@@ -237,7 +237,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .write
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
@@ -256,7 +255,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .write
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
@@ -277,7 +275,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .write
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
@@ -299,7 +296,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .write
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
@@ -320,7 +316,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .write
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
@@ -342,7 +337,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .write
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
@@ -383,7 +377,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .write
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
@@ -395,7 +388,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId) else {
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -415,7 +408,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        user1.permission = .read
         
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail()
@@ -427,7 +419,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId) else {
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read, owningUserId: nil) else {
             XCTFail()
             return
         }

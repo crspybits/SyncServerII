@@ -182,6 +182,7 @@ class LockRepository : Repository, RepositoryLookup {
         }
     }
     
+    @discardableResult
     func unlock(sharingGroupId:SharingGroupId) -> Bool {
         let query = "DELETE FROM \(tableName) WHERE sharingGroupId = \(sharingGroupId)"
         

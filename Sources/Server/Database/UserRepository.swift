@@ -19,14 +19,6 @@ class User : NSObject, Model {
     static let usernameKey = "username"
     var username: String!
     
-    // Only when the current user is a sharing user, this gives the userId that is the owner of the data.
-    static let owningUserIdKey = "owningUserId"
-    var owningUserId:UserId?
-
-    // The permissions that the user has in regards to the sharing group of users. The user can read (anyone's data), can upload (to their own or others storage), and invite others to join the group.
-    static let permissionKey = "permission"
-    var permission:Permission?
-    
     static let accountTypeKey = "accountType"
     var accountType: AccountType!
 
@@ -49,12 +41,6 @@ class User : NSObject, Model {
 
             case User.usernameKey:
                 username = newValue as! String?
-                
-            case User.owningUserIdKey:
-                owningUserId = newValue as! UserId?
-                
-            case User.permissionKey:
-                permission = newValue as! Permission?
                 
             case User.accountTypeKey:
                 accountType = newValue as! AccountType?
@@ -96,22 +82,8 @@ class User : NSObject, Model {
                 return {(x:Any) -> Any? in
                     return AccountType(rawValue: x as! String)
                 }
-            case User.permissionKey:
-                return {(x:Any) -> Any? in
-                    return Permission(rawValue: x as! String)
-                }
             default:
                 return nil
-        }
-    }
-    
-    // This can be nil in the case where (a) the user is a sharing user, and (b) it original inviting user has been deleted from the system.
-    var effectiveOwningUserId:UserId? {
-        if accountType.userType == .sharing {
-            return owningUserId
-        }
-        else {
-            return userId
         }
     }
 }
@@ -139,12 +111,6 @@ class UserRepository : Repository, RepositoryLookup {
         let createColumns =
             "(userId BIGINT NOT NULL AUTO_INCREMENT, " +
             "username VARCHAR(\(usernameMaxLength)) NOT NULL, " +
-                
-            // If non-NULL, references a user in the User table.
-            // TODO: *2* Make this a foreign key reference to this same table.
-            "owningUserId BIGINT, " +
-            
-            "permission VARCHAR(\(Permission.maxStringLength())), " +
         
             "accountType VARCHAR(\(accountTypeMaxLength)) NOT NULL, " +
             
@@ -218,31 +184,10 @@ class UserRepository : Repository, RepositoryLookup {
             Log.error("Invalid creds JSON: \(user.creds) for accountType: \(user.accountType)")
             return nil
         }
-        
-        guard user.permission != nil else {
-            Log.error("All user must have permissions.")
-            return nil
-        }
-        
-        switch user.accountType.userType {
-        case .sharing:
-            guard user.owningUserId != nil else {
-                Log.error("Sharing user, but there was no owningUserId")
-                return nil
-            }
-            
-        case .owning:
-            guard user.owningUserId == nil else {
-                Log.error("Owning user, and there was an owningUserId")
-                return nil
-            }
-        }
-        
-        let (owningUserIdFieldValue, owningUserIdFieldName) = getInsertFieldValueAndName(fieldValue: user.owningUserId, fieldName: "owningUserId", fieldIsString: false)
-        let (permissionFieldValue, permissionFieldName) = getInsertFieldValueAndName(fieldValue: user.permission, fieldName: User.permissionKey)
+
         let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: user.cloudFolderName, fieldName: User.cloudFolderNameKey)
         
-        let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds \(owningUserIdFieldName) \(permissionFieldName) \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.credsId!)', '\(user.creds!)' \(owningUserIdFieldValue) \(permissionFieldValue) \(cloudFolderNameFieldValue));"
+        let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.credsId!)', '\(user.creds!)' \(cloudFolderNameFieldValue));"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -289,22 +234,6 @@ class UserRepository : Repository, RepositoryLookup {
         else {
             let error = db.error
             Log.error("Could not update row for \(tableName): \(error)")
-            return false
-        }
-    }
-    
-    // To deal with deleting the userId account-- any other users that have its user id as their owningUserId must have that owningUserId set to NULL.
-    func resetOwningUserIds(forUserId userId: UserId) -> Bool {
-        let query = "UPDATE \(tableName) SET owningUserId = NULL WHERE owningUserId = \(userId)"
-        
-        if db.connection.query(statement: query) {
-            let numberUpdates = db.connection.numberAffectedRows()
-            Log.info("\(numberUpdates) users had their owningUserId set to NULL.")
-            return true
-        }
-        else {
-            let error = db.error
-            Log.error("Could not update row(s) for \(tableName): \(error)")
             return false
         }
     }

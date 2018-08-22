@@ -17,14 +17,14 @@ class CreateRoutes {
     init() {
     }
     
-    func addRoute(ep:ServerEndpoint,
-        createRequest: @escaping (RouterRequest) -> (RequestMessage?),
-        processRequest: @escaping ProcessRequest) {
+    func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest) {
 
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info("parsedURL: \(routerRequest.parsedURL)")
             let handler = RequestHandler(request: routerRequest, response: routerResponse, endpoint:ep)
-            handler.doRequest(createRequest: createRequest, processRequest: processRequest)
+            
+            let create:(RouterRequest) -> (RequestMessage?) = ep.requestMessageType.init
+            handler.doRequest(createRequest: create, processRequest: processRequest)
         }
         
         switch (ep.method) {
@@ -35,6 +35,11 @@ class CreateRoutes {
             
         case .post:
             self.router.post(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+                handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
+            }
+        
+        case .patch:
+            self.router.patch(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         

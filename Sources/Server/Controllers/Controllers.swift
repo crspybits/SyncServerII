@@ -17,19 +17,43 @@ protocol ControllerProtocol {
 }
 
 extension ControllerProtocol {
-    // Make sure the current signed in user is a member of the sharing group.s
-    func sharingGroupSecurityCheck(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> Bool {
+    // Make sure the current signed in user is a member of the sharing group.
+    // `checkNotDeleted` set to true ensures the sharing group is not deleted.
+    func sharingGroupSecurityCheck(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, checkNotDeleted: Bool = true) -> Bool {
     
         guard let userId = params.currentSignedInUser?.userId else {
             Log.error("No userId!")
             return false
         }
         
-        let sharingKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
-        let lookupResult = params.repos.sharingGroupUser.lookup(key: sharingKey, modelInit: SharingGroupUser.init)
+        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+        let lookupResult = params.repos.sharingGroupUser.lookup(key: sharingUserKey, modelInit: SharingGroupUser.init)
         
         switch lookupResult {
         case .found:
+            if checkNotDeleted {
+                // The deleted flag is in the SharingGroup (not SharingGroupUser) repo. Need to look that up.
+                let sharingKey = SharingGroupRepository.LookupKey.sharingGroupId(sharingGroupId)
+                let lookupResult = params.repos.sharingGroup.lookup(key: sharingKey, modelInit: SharingGroup.init)
+                switch lookupResult {
+                case .found(let modelObj):
+                    guard let sharingGroup = modelObj as? Server.SharingGroup else {
+                        Log.error("Could not convert model obj to SharingGroup.")
+                        return false
+                    }
+                    
+                    guard !sharingGroup.deleted else {
+                        return false
+                    }
+                    
+                case .noObjectFound:
+                    Log.error("Could not find sharing group.")
+
+                case .error(let error):
+                    Log.error("Error looking up sharing group: \(error)")
+                }
+            }
+            
             return true
             
         case .noObjectFound:
@@ -43,7 +67,7 @@ extension ControllerProtocol {
     }
 }
 
-public struct RequestProcessingParameters {
+public class RequestProcessingParameters {
     let request: RequestMessage!
     let ep: ServerEndpoint!
     
@@ -59,7 +83,7 @@ public struct RequestProcessingParameters {
     let userProfile: UserProfile?
     let currentSignedInUser:User?
     let db:Database!
-    let repos:Repositories!
+    var repos:Repositories!
     let routerResponse:RouterResponse!
     let deviceUUID:String?
     
@@ -71,6 +95,26 @@ public struct RequestProcessingParameters {
     }
     
     let completion: (Response)->()
+    
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, completion: @escaping (Response)->()) {
+        self.request = request
+        self.ep = ep
+        self.creds = creds
+        self.effectiveOwningUserCreds = effectiveOwningUserCreds
+        self.profileCreds = profileCreds
+        self.userProfile = userProfile
+        self.currentSignedInUser = currentSignedInUser
+        self.db = db
+        self.repos = repos
+        self.routerResponse = routerResponse
+        self.deviceUUID = deviceUUID
+        self.completion = completion
+    }
+    
+    func fail(_ message: String) {
+        Log.error(message)
+        completion(.failure(.message(message)))
+    }
 }
 
 public class Controllers {
@@ -87,5 +131,130 @@ public class Controllers {
         }
         
         return true
+    }
+    
+    enum UpdateMasterVersionResult : Error {
+    case success
+    case error(String)
+    case masterVersionUpdate(MasterVersionInt)
+    }
+    
+    private static func updateMasterVersion(sharingGroupId: SharingGroupId, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
+
+        let currentMasterVersionObj = MasterVersion()
+        
+        // The master version reflects a sharing group.
+        currentMasterVersionObj.sharingGroupId = sharingGroupId
+        
+        currentMasterVersionObj.masterVersion = currentMasterVersion
+        let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
+        
+        var result:UpdateMasterVersionResult!
+        
+        switch updateMasterVersionResult {
+        case .success:
+            result = UpdateMasterVersionResult.success
+            
+        case .error(let error):
+            let message = "Failed lookup in MasterVersionRepository: \(error)"
+            Log.error(message)
+            result = UpdateMasterVersionResult.error(message)
+            
+        case .didNotMatchCurrentMasterVersion:
+            getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
+                if error == nil {
+                    result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
+                }
+                else {
+                    result = UpdateMasterVersionResult.error("\(error!)")
+                }
+            }
+        }
+        
+        return result
+    }
+    
+    enum GetMasterVersionError : Error {
+    case error(String)
+    case noObjectFound
+    }
+    
+    // Synchronous callback.
+    // Get the master version for a sharing group because the master version reflects the overall version of the data for a sharing group.
+    static func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
+        
+        let key = MasterVersionRepository.LookupKey.sharingGroupId(sharingGroupId)
+        let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
+        
+        switch result {
+        case .error(let error):
+            completion(GetMasterVersionError.error(error), nil)
+            
+        case .found(let model):
+            let masterVersionObj = model as! MasterVersion
+            completion(nil, masterVersionObj.masterVersion)
+            
+        case .noObjectFound:
+            let errorMessage = "Master version record not found for: \(key)"
+            Log.error(errorMessage)
+            completion(GetMasterVersionError.noObjectFound, nil)
+        }
+    }
+    
+    static func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> MasterVersionInt? {
+        var result: MasterVersionInt?
+        
+        getMasterVersion(sharingGroupId: sharingGroupId, params: params) { error, masterVersion in
+            if error == nil {
+                result = masterVersion
+            }
+        }
+        
+        return result
+    }
+    
+    // Returns nil on success.
+    static func updateMasterVersion(sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type?) -> RequestProcessingParameters.Response? {
+        let updateResult = updateMasterVersion(sharingGroupId: sharingGroupId, currentMasterVersion: masterVersion, params: params)
+        switch updateResult {
+        case .success:
+            return nil
+
+        case .masterVersionUpdate(let updatedMasterVersion):
+            Log.warning("Master version update: \(updatedMasterVersion)")
+            if let responseType = responseType {
+                var response = responseType.init(json: [:])
+                response!.masterVersionUpdate = updatedMasterVersion
+                return .success(response!)
+            }
+            else {
+                let message = "Master version update but no response type was given."
+                Log.error(message)
+                return .failure(.message(message))
+            }
+            
+        case .error(let error):
+            let message = "Failed on updateMasterVersion: \(error)"
+            Log.error(message)
+            return .failure(.message(message))
+        }
+    }
+    
+    static func getEffectiveOwningUserId(user: User, sharingGroupId: SharingGroupId, sharingGroupUserRepo: SharingGroupUserRepository) -> UserId? {
+        
+        if user.accountType.userType == .owning {
+            return user.userId
+        }
+        
+        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: user.userId)
+        let lookupResult = sharingGroupUserRepo.lookup(key: sharingUserKey, modelInit: SharingGroupUser.init)
+        
+        switch lookupResult {
+        case .found(let model):
+            let sharingGroupUser = model as! SharingGroupUser
+            return sharingGroupUser.owningUserId
+        case .noObjectFound, .error(_):
+            return nil
+        }
     }
 }
