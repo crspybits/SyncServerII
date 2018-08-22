@@ -227,7 +227,7 @@ class UserController : ControllerProtocol {
         }
         
         // And, any sharing users making use of this user as an owningUserId can no longer use its userId.
-        let resetKey = SharingGroupUserRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        let resetKey = SharingGroupUserRepository.LookupKey.owningUserId(params.currentSignedInUser!.userId)
         guard params.repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
             let message = "Could not remove sharing group references for owning user"
             Log.error(message)

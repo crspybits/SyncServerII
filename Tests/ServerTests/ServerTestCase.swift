@@ -1142,6 +1142,7 @@ class ServerTestCase : XCTestCase {
             let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
             let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
             guard case .found(let model) = userResults else {
+                Log.debug("sharingUser.type: \(sharingUser.type); sharingUser.id(): \(sharingUser.id())")
                 XCTFail()
                 completion?(nil, nil)
                 return
@@ -1169,7 +1170,12 @@ class ServerTestCase : XCTestCase {
             XCTAssert(sharingGroups[0].sharingGroupId == actualSharingGroupId)
             XCTAssert(sharingGroups[0].sharingGroupName == nil)
             XCTAssert(sharingGroups[0].deleted == false)
-            guard sharingGroups[0].sharingGroupUsers != nil, sharingGroups[0].sharingGroupUsers.count == 2 else {
+            guard sharingGroups[0].sharingGroupUsers != nil else {
+                XCTFail()
+                return
+            }
+            
+            guard sharingGroups[0].sharingGroupUsers.count >= 2 else {
                 XCTFail()
                 return
             }
