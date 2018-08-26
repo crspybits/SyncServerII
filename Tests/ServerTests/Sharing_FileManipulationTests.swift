@@ -32,7 +32,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let redeemResponse: RedeemSharingInvitationResponse
     }
     
-    // If not adding a user, you must pass a sharingGroupId.
+    // If not adding a user, you must pass a sharingGroupUUID.
     @discardableResult
     func uploadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, addUser: Bool = true, sharingGroupUUID: String, failureExpected:Bool = false, fileUUID:String? = nil, fileVersion:FileVersionInt = 0, masterVersion: MasterVersionInt = 0) -> SharingUploadResult? {
         let deviceUUID1 = Foundation.UUID().uuidString
@@ -500,7 +500,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let sharingUser:TestAccount = .primarySharingAccount
         
         if sharingUser.type.userType == .owning {
-            createSharingUser(sharingUser: sharingUser) { newUserId, sharingGroupId in
+            createSharingUser(sharingUser: sharingUser) { newUserId, _ in
                 sharingUserId = newUserId
             }
             

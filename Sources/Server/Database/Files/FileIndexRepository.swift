@@ -182,7 +182,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             // identifies a group of files (assigned by app)
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
             
-            "sharingGroupId BIGINT NOT NULL, " +
+            "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
             // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates.
             "creationDate DATETIME," +
@@ -552,13 +552,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
     
     enum MarkDeletionCriteria {
         case userId(String)
-        case sharingGroupId(String)
+        case sharingGroupUUID(String)
         
         func toString() -> String {
             switch self {
             case .userId(let userId):
                 return "\(FileIndex.userIdKey)=\(userId)"
-            case .sharingGroupId(let sharingGroupUUID):
+            case .sharingGroupUUID(let sharingGroupUUID):
                 return "\(FileIndex.sharingGroupUUIDKey)='\(sharingGroupUUID)'"
             }
         }

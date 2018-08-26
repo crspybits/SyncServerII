@@ -203,7 +203,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         XCTAssert(downloadAppMetaDataResponse1.appMetaData == appMetaData.contents)
     }
     
-    func testDownloadAppMetaDataWithFakeSharingGroupIdFails() {
+    func testDownloadAppMetaDataWithFakeSharingGroupUUIDFails() {
         let masterVersion: MasterVersionInt = 0
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
@@ -220,7 +220,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, sharingGroupUUID: invalidSharingGroupUUID, expectedError: true)
     }
     
-    func testDownloadAppMetaDataWithBadSharingGroupIdFails() {
+    func testDownloadAppMetaDataWithBadSharingGroupUUIDFails() {
         let masterVersion: MasterVersionInt = 0
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
@@ -254,8 +254,8 @@ extension FileController_DownloadAppMetaDataTests {
             ("testDownloadValidAppMetaDataVersion0", testDownloadValidAppMetaDataVersion0),
             ("testDownloadValidAppMetaDataVersion1", testDownloadValidAppMetaDataVersion1),
             ("testUploadingNilAppMetaDataDoesNotOverwriteCurrent", testUploadingNilAppMetaDataDoesNotOverwriteCurrent),
-            ("testDownloadAppMetaDataWithBadSharingGroupIdFails", testDownloadAppMetaDataWithBadSharingGroupIdFails),
-            ("testDownloadAppMetaDataWithFakeSharingGroupIdFails", testDownloadAppMetaDataWithFakeSharingGroupIdFails)
+            ("testDownloadAppMetaDataWithBadSharingGroupUUIDFails", testDownloadAppMetaDataWithBadSharingGroupUUIDFails),
+            ("testDownloadAppMetaDataWithFakeSharingGroupUUIDFails", testDownloadAppMetaDataWithFakeSharingGroupUUIDFails)
         ]
     }
     

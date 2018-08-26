@@ -124,7 +124,7 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), deviceUUID:deviceUUID, errorExpected: true)
     }
     
-    func testUploadWithInvalidSharingGroupIdFails() {
+    func testUploadWithInvalidSharingGroupUUIDFails() {
         guard let _ = uploadTextFile() else {
             XCTFail()
             return
@@ -134,7 +134,7 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         uploadTextFile(addUser: .no(sharingGroupUUID: invalidSharingGroupUUID), errorExpected: true)
     }
 
-    func testUploadWithBadSharingGroupIdFails() {
+    func testUploadWithBadSharingGroupUUIDFails() {
         guard let _ = uploadTextFile() else {
             XCTFail()
             return
@@ -160,8 +160,8 @@ extension FileController_UploadTests {
             ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
             ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
             ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails),
-            ("testUploadWithInvalidSharingGroupIdFails", testUploadWithInvalidSharingGroupIdFails),
-            ("testUploadWithBadSharingGroupIdFails", testUploadWithBadSharingGroupIdFails)
+            ("testUploadWithInvalidSharingGroupUUIDFails", testUploadWithInvalidSharingGroupUUIDFails),
+            ("testUploadWithBadSharingGroupUUIDFails", testUploadWithBadSharingGroupUUIDFails)
         ]
     }
     

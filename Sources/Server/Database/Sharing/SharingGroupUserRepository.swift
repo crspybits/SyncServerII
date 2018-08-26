@@ -97,7 +97,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         let createColumns =
             "(sharingGroupUserId BIGINT NOT NULL AUTO_INCREMENT, " +
         
-            "sharingGroupUUID BIGINT NOT NULL, " +
+            "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
             "userId BIGINT NOT NULL, " +
             
@@ -167,7 +167,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     
     func add(sharingGroupUUID: String, userId: UserId, permission: Permission, owningUserId: UserId?) -> AddResult {
         let owningUserIdValue = owningUserId == nil ? "NULL" : "\(owningUserId!)"
-        let query = "INSERT INTO \(tableName) (sharingGroupId, userId, permission, owningUserId) VALUES('\(sharingGroupUUID)', \(userId), '\(permission.rawValue)', \(owningUserIdValue));"
+        let query = "INSERT INTO \(tableName) (sharingGroupUUID, userId, permission, owningUserId) VALUES('\(sharingGroupUUID)', \(userId), '\(permission.rawValue)', \(owningUserIdValue));"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing user group")

@@ -142,7 +142,7 @@ class RequestHandler : AccountDelegate {
     
     func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsAndLockingResult {
         if let sharing = endpoint.sharing {
-            // Endpoint uses sharing group. Must give sharingGroupId in request.
+            // Endpoint uses sharing group. Must give sharingGroupUUID in request.
             guard let dict = requestObject.toJSON(), let sharingGroupUUID = dict[ServerEndpoint.sharingGroupUUIDKey] as? String else {
             
                 self.failWithError(message: "Could not get sharing group uuid from request that uses sharing group: \(String(describing: requestObject.toJSON()))")

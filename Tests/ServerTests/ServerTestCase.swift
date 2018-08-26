@@ -93,7 +93,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    // The second sharing account joined is returned as the sharingGroupId
+    // The second sharing account joined is returned as the sharingGroupUUID
     @discardableResult
     func redeemWithAnExistingOtherSharingAccount() -> (TestAccount, sharingGroupUUID: String)? {
         var returnResult: (TestAccount, String)?

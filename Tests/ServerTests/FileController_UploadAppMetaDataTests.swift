@@ -254,7 +254,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         uploadAppMetaDataOfInitiallyNilAppMetaDataWorks(toAppMetaDataVersion: 0)
     }
     
-    func testUploadAppMetaDataWithFakeSharingGroupIdFails() {
+    func testUploadAppMetaDataWithFakeSharingGroupUUIDFails() {
         var masterVersion: MasterVersionInt = 0
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
@@ -281,7 +281,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, sharingGroupUUID:invalidSharingGroupUUID, expectedError: true)
     }
     
-    func testUploadAppMetaDataWithInvalidSharingGroupIdFails() {
+    func testUploadAppMetaDataWithInvalidSharingGroupUUIDFails() {
         var masterVersion: MasterVersionInt = 0
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
@@ -324,8 +324,8 @@ extension FileController_UploadAppMetaDataTests {
             ("testSuccessUsingFileDownloadToCheck", testSuccessUsingFileDownloadToCheck),
             ("testSuccessUsingDownloadAppMetaDataToCheck", testSuccessUsingDownloadAppMetaDataToCheck),
             ("testUploadAppMetaDataOfInitiallyNilAppMetaDataToVersion0Works", testUploadAppMetaDataOfInitiallyNilAppMetaDataToVersion0Works),
-            ("testUploadAppMetaDataWithInvalidSharingGroupIdFails", testUploadAppMetaDataWithInvalidSharingGroupIdFails),
-            ("testUploadAppMetaDataWithFakeSharingGroupIdFails", testUploadAppMetaDataWithFakeSharingGroupIdFails)
+            ("testUploadAppMetaDataWithInvalidSharingGroupUUIDFails", testUploadAppMetaDataWithInvalidSharingGroupUUIDFails),
+            ("testUploadAppMetaDataWithFakeSharingGroupUUIDFails", testUploadAppMetaDataWithFakeSharingGroupUUIDFails)
         ]
     }
     

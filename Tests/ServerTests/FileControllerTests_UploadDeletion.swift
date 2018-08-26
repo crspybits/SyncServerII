@@ -386,7 +386,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         uploadUndelete(twice: true)
     }
 
-    func testThatUploadDeletionWithFakeSharingGroupIdFails() {
+    func testThatUploadDeletionWithFakeSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
@@ -408,7 +408,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
     }
     
-    func testThatUploadDeletionWithBadSharingGroupIdFails() {
+    func testThatUploadDeletionWithBadSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
@@ -449,10 +449,10 @@ extension FileControllerTests_UploadDeletion {
             ("testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes", testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes),
             ("testUploadUndeleteWorks", testUploadUndeleteWorks),
             ("textThatUploadUndeleteUploadTwiceWorks", textThatUploadUndeleteUploadTwiceWorks),
-            ("testThatUploadDeletionWithBadSharingGroupIdFails",
-                testThatUploadDeletionWithBadSharingGroupIdFails),
-            ("testThatUploadDeletionWithFakeSharingGroupIdFails",
-                testThatUploadDeletionWithFakeSharingGroupIdFails)
+            ("testThatUploadDeletionWithBadSharingGroupUUIDFails",
+                testThatUploadDeletionWithBadSharingGroupUUIDFails),
+            ("testThatUploadDeletionWithFakeSharingGroupUUIDFails",
+                testThatUploadDeletionWithFakeSharingGroupUUIDFails)
         ]
     }
     

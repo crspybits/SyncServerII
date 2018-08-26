@@ -126,7 +126,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: 1, masterVersion: masterVersion, errorExpected: true)
     }
     
-    func testDoneUploadsWithFakeSharingGroupIdFails() {
+    func testDoneUploadsWithFakeSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let _ = uploadTextFile(deviceUUID:deviceUUID) else {
             XCTFail()
@@ -137,7 +137,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: invalidSharingGroupUUID, failureExpected: true)
     }
 
-    func testDoneUploadsWithBadSharingGroupIdFails() {
+    func testDoneUploadsWithBadSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let _ = uploadTextFile(deviceUUID:deviceUUID) else {
             XCTFail()
@@ -163,8 +163,8 @@ extension FileController_DoneUploadsTests {
             ("testDoneUploadsThatUpdatesFileVersion", testDoneUploadsThatUpdatesFileVersion),
             ("testDoneUploadsTwiceDoesNothingSecondTime", testDoneUploadsTwiceDoesNothingSecondTime),
             ("testThatUploadAfterUploadDeletionFails", testThatUploadAfterUploadDeletionFails),
-            ("testDoneUploadsWithBadSharingGroupIdFails", testDoneUploadsWithBadSharingGroupIdFails),
-            ("testDoneUploadsWithFakeSharingGroupIdFails", testDoneUploadsWithFakeSharingGroupIdFails)
+            ("testDoneUploadsWithBadSharingGroupUUIDFails", testDoneUploadsWithBadSharingGroupUUIDFails),
+            ("testDoneUploadsWithFakeSharingGroupUUIDFails", testDoneUploadsWithFakeSharingGroupUUIDFails)
         ]
     }
     

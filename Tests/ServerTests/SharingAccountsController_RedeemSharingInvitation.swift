@@ -185,7 +185,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
             
-        // Since the user account represented by sharingUser is already a member of the sharing group referenced by the specific sharingGroupId, this redeem attempt will fail.
+        // Since the user account represented by sharingUser is already a member of the sharing group referenced by the specific sharingGroupUUID, this redeem attempt will fail.
         redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
             expectation.fulfill()
         }

@@ -6,7 +6,7 @@
 //
 //
 
-// This tracks an overall version of the fileIndex per sharingGroupId.
+// This tracks an overall version of the fileIndex per sharingGroupUUID.
 
 import Foundation
 import SyncServerShared
@@ -108,7 +108,7 @@ class MasterVersionRepository : Repository, RepositoryLookup {
     case success
     }
     
-    // Increments master version for specific sharingGroupId
+    // Increments master version for specific sharingGroupUUID
     func updateToNext(current:MasterVersion) -> UpdateToNextResult {
     
         let query = "UPDATE \(tableName) SET masterVersion = masterVersion + 1 " +

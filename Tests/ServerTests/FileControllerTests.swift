@@ -184,7 +184,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
     }
     
-    func testIndexWithFakeSharingGroupIdFails() {
+    func testIndexWithFakeSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
@@ -203,7 +203,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
     }
     
-    func testIndexWithBadSharingGroupIdFails() {
+    func testIndexWithBadSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
@@ -246,8 +246,8 @@ extension FileControllerTests {
             ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
-            ("testIndexWithFakeSharingGroupIdFails", testIndexWithFakeSharingGroupIdFails),
-            ("testIndexWithBadSharingGroupIdFails", testIndexWithBadSharingGroupIdFails),
+            ("testIndexWithFakeSharingGroupUUIDFails", testIndexWithFakeSharingGroupUUIDFails),
+            ("testIndexWithBadSharingGroupUUIDFails", testIndexWithBadSharingGroupUUIDFails),
             ("testGetIndexForOnlySharingGroupsWorks", testGetIndexForOnlySharingGroupsWorks)
         ]
     }

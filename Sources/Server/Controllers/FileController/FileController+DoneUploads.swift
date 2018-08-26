@@ -19,7 +19,7 @@ extension FileController {
     
         for uploadFile in uploadFiles {
             // 12/1/17; Up until today, I was using the params.currentSignedInUser!.userId in here and not the effective user id. Thus, when sharing users did an upload deletion, the files got deleted from the file index, but didn't get deleted from cloud storage.
-            // 6/24/18; Now things have changed again: With the change to having multiple owning users in a sharing group, a sharingGroupId is the key instead of the userId.
+            // 6/24/18; Now things have changed again: With the change to having multiple owning users in a sharing group, a sharingGroup id is the key instead of the userId.
             primaryFileIndexKeys += [.primaryKeys(sharingGroupUUID: uploadFile.sharingGroupUUID, fileUUID: uploadFile.fileUUID)]
         }
     
