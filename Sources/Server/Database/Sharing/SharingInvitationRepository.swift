@@ -24,8 +24,8 @@ class SharingInvitation : NSObject, Model {
     static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId!
     
-    static let sharingGroupIdKey = "sharingGroupId"
-    var sharingGroupId:SharingGroupId!
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID:String!
     
     static let permissionKey = "permission"
     var permission: Permission!
@@ -42,8 +42,8 @@ class SharingInvitation : NSObject, Model {
             case SharingInvitation.owningUserIdKey:
                 owningUserId = newValue as! UserId?
                 
-            case SharingInvitation.sharingGroupIdKey:
-                sharingGroupId = newValue as! SharingGroupId?
+            case SharingInvitation.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as! String?
             
             case SharingInvitation.permissionKey:
                 permission = newValue as! Permission?
@@ -110,11 +110,11 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
             "owningUserId BIGINT NOT NULL, " +
             
             // The sharing group that the person is being invited to.
-            "sharingGroupId BIGINT NOT NULL, " +
+            "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
             "permission VARCHAR(\(spMaxLen)) NOT NULL, " +
         
-            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
+            "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
             "UNIQUE (sharingInvitationUUID))"
         
         return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -154,14 +154,14 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
         case error(String)
     }
     
-    func add(owningUserId:UserId, sharingGroupId:SharingGroupId, permission:Permission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
+    func add(owningUserId:UserId, sharingGroupUUID:String, permission:Permission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
         let calendar = Calendar.current
         let expiryDate = calendar.date(byAdding: .second, value: Int(expiryDuration), to: Date())!
         let expiryDateString = DateExtras.date(expiryDate, toFormat: dateFormat)
         
         let uuid = UUID().uuidString
         
-        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingGroupId, permission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), \(sharingGroupId), '\(permission.rawValue)');"
+        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingGroupUUID, permission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(sharingGroupUUID)', '\(permission.rawValue)');"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing invitation!")

@@ -12,8 +12,8 @@ import LoggerAPI
 import SyncServerShared
 
 class SharingGroup : NSObject, Model {
-    static let sharingGroupIdKey = "sharingGroupId"
-    var sharingGroupId: SharingGroupId!
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID: String!
     
     static let sharingGroupNameKey = "sharingGroupName"
     var sharingGroupName: String!
@@ -35,8 +35,8 @@ class SharingGroup : NSObject, Model {
     subscript(key:String) -> Any? {
         set {
             switch key {
-            case SharingGroup.sharingGroupIdKey:
-                sharingGroupId = newValue as! SharingGroupId?
+            case SharingGroup.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as! String?
 
             case SharingGroup.sharingGroupNameKey:
                 sharingGroupName = newValue as! String?
@@ -81,7 +81,7 @@ class SharingGroup : NSObject, Model {
     
     func toClient() -> SyncServerShared.SharingGroup  {
         let clientGroup = SyncServerShared.SharingGroup()!
-        clientGroup.sharingGroupId = sharingGroupId
+        clientGroup.sharingGroupUUID = sharingGroupUUID
         clientGroup.sharingGroupName = sharingGroupName
         clientGroup.deleted = deleted
         clientGroup.masterVersion = masterVersion
@@ -108,7 +108,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
-            "(sharingGroupId BIGINT NOT NULL AUTO_INCREMENT, " +
+            "(sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
             // A name for the sharing group-- assigned by the client app.
             "sharingGroupName VARCHAR(\(Database.maxSharingGroupNameLength)), " +
@@ -116,40 +116,39 @@ class SharingGroupRepository: Repository, RepositoryLookup {
             // true iff sharing group has been deleted. Like file references in the FileIndex, I'm never going to actually delete sharing groups.
             "deleted BOOL NOT NULL, " +
             
-            "UNIQUE (sharingGroupId))"
+            "UNIQUE (sharingGroupUUID))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
         return result
     }
     
     enum LookupKey : CustomStringConvertible {
-        case sharingGroupId(SharingGroupId)
+        case sharingGroupUUID(String)
         
         var description : String {
             switch self {
-            case .sharingGroupId(let sharingGroupId):
-                return "sharingGroupId(\(sharingGroupId))"
+            case .sharingGroupUUID(let sharingGroupUUID):
+                return "sharingGroupUUID(\(sharingGroupUUID))"
             }
         }
     }
     
     func lookupConstraint(key:LookupKey) -> String {
         switch key {
-        case .sharingGroupId(let sharingGroupId):
-            return "sharingGroupId = \(sharingGroupId)"
+        case .sharingGroupUUID(let sharingGroupUUID):
+            return "sharingGroupUUID = '\(sharingGroupUUID)'"
         }
     }
     
     enum AddResult {
-        case success(SharingGroupId)
+        case success
         case error(String)
     }
     
-    func add(sharingGroupName: String? = nil) -> AddResult {
+    func add(sharingGroupUUID:String, sharingGroupName: String? = nil) -> AddResult {
         let insert = Database.PreparedStatement(repo: self, type: .insert)
         
-        // Deal with table that has only an autoincrement column: https://stackoverflow.com/questions/5962026/mysql-inserting-in-table-with-only-an-auto-incrementing-column (This is only really necessary if no sharing group name is given.)
-        insert.add(fieldName: SharingGroup.sharingGroupIdKey, value: .null)
+        insert.add(fieldName: SharingGroup.sharingGroupUUIDKey, value: .string(sharingGroupUUID))
         insert.add(fieldName: SharingGroup.deletedKey, value: .bool(false))
 
         if let sharingGroupName = sharingGroupName {
@@ -157,9 +156,9 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         }
         
         do {
-            let id = try insert.run()
+            try insert.run()
             Log.info("Sucessfully created sharing group")
-            return .success(id)
+            return .success
         }
         catch (let error) {
             Log.error("Could not insert into \(tableName): \(error)")
@@ -171,7 +170,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         let masterVersionTableName = MasterVersionRepository.tableName
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
         
-        let query = "select \(tableName).sharingGroupId, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupId = \(tableName).sharingGroupId AND \(tableName).sharingGroupId = \(masterVersionTableName).sharingGroupId"
+        let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID AND \(tableName).sharingGroupUUID = \(masterVersionTableName).sharingGroupUUID"
         return sharingGroups(forSelectQuery: query, sharingGroupUserRepo: sharingGroupUserRepo)
     }
     
@@ -184,7 +183,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         select.forEachRow { rowModel in
             let sharingGroup = rowModel as! SharingGroup
             
-            let sguResult = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupId: sharingGroup.sharingGroupId)
+            let sguResult = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupUUID: sharingGroup.sharingGroupUUID)
             switch sguResult {
             case .sharingGroupUsers(let sgus):
                 sharingGroup.sharingGroupUsers = sgus
@@ -206,12 +205,12 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     }
     
     enum MarkDeletionCriteria {
-        case sharingGroupId(SharingGroupId)
+        case sharingGroupUUID(String)
         
         func toString() -> String {
             switch self {
-            case .sharingGroupId(let sharingGroupId):
-                return "\(SharingGroup.sharingGroupIdKey)=\(sharingGroupId)"
+            case .sharingGroupUUID(let sharingGroupUUID):
+                return "\(SharingGroup.sharingGroupUUIDKey)='\(sharingGroupUUID)'"
             }
         }
     }
@@ -231,13 +230,13 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     func update(sharingGroup: SharingGroup) -> Bool {
         let update = Database.PreparedStatement(repo: self, type: .update)
         
-        guard let sharingGroupId = sharingGroup.sharingGroupId,
+        guard let sharingGroupUUID = sharingGroup.sharingGroupUUID,
             let sharingGroupName = sharingGroup.sharingGroupName else {
             return false
         }
         
         update.add(fieldName: SharingGroup.sharingGroupNameKey, value: .string(sharingGroupName))
-        update.where(fieldName: SharingGroup.sharingGroupIdKey, value: .int64(sharingGroupId))
+        update.where(fieldName: SharingGroup.sharingGroupUUIDKey, value: .string(sharingGroupUUID))
         
         do {
             try update.run()

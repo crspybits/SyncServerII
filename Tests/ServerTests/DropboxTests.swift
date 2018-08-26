@@ -111,7 +111,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
         ])!
         
         uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)
@@ -188,7 +188,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
         ])!
         
         uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)
@@ -242,7 +242,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
         ])!
         
         let fileName = uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)

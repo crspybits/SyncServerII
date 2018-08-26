@@ -18,8 +18,8 @@ class SharingGroupUser : NSObject, Model {
     var sharingGroupUserId: SharingGroupUserId!
     
     // Each record in this table relates a sharing group...
-    static let sharingGroupIdKey = "sharingGroupId"
-    var sharingGroupId: SharingGroupId!
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID: String!
     
     // ... to a user.
     static let userIdKey = "userId"
@@ -42,8 +42,8 @@ class SharingGroupUser : NSObject, Model {
             case SharingGroupUser.userIdKey:
                 userId = newValue as! UserId?
                 
-            case SharingGroupUser.sharingGroupIdKey:
-                sharingGroupId = newValue as! SharingGroupId?
+            case SharingGroupUser.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as! String?
                 
             case SharingGroupUser.permissionKey:
                 permission = newValue as! Permission?
@@ -97,7 +97,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         let createColumns =
             "(sharingGroupUserId BIGINT NOT NULL AUTO_INCREMENT, " +
         
-            "sharingGroupId BIGINT NOT NULL, " +
+            "sharingGroupUUID BIGINT NOT NULL, " +
             
             "userId BIGINT NOT NULL, " +
             
@@ -108,9 +108,9 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
 
             "FOREIGN KEY (owningUserId) REFERENCES \(UserRepository.tableName)(\(User.userIdKey)), " +
             "FOREIGN KEY (userId) REFERENCES \(UserRepository.tableName)(\(User.userIdKey)), " +
-            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
+            "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 
-            "UNIQUE (sharingGroupId, userId), " +
+            "UNIQUE (sharingGroupUUID, userId), " +
             "UNIQUE (sharingGroupUserId))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -119,26 +119,26 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     
     enum LookupKey : CustomStringConvertible {
         case sharingGroupUserId(SharingGroupUserId)
-        case primaryKeys(sharingGroupId: SharingGroupId, userId: UserId)
+        case primaryKeys(sharingGroupUUID: String, userId: UserId)
         case userId(UserId)
-        case sharingGroupId(SharingGroupId)
+        case sharingGroupUUID(String)
         case owningUserId(UserId)
-        case owningUserAndSharingGroup(owningUserId: UserId, SharingGroupId)
+        case owningUserAndSharingGroup(owningUserId: UserId, uuid: String)
         
         var description : String {
             switch self {
             case .sharingGroupUserId(let sharingGroupUserId):
                 return "sharingGroupUserId(\(sharingGroupUserId))"
-            case .primaryKeys(sharingGroupId: let sharingGroupId, userId: let userId):
-                return "primaryKeys(\(sharingGroupId), \(userId))"
+            case .primaryKeys(sharingGroupUUID: let sharingGroupUUID, userId: let userId):
+                return "primaryKeys(\(sharingGroupUUID), \(userId))"
             case .userId(let userId):
                 return "userId(\(userId))"
-            case .sharingGroupId(let sharingGroupId):
-                return "sharingGroupId(\(sharingGroupId))"
+            case .sharingGroupUUID(let sharingGroupUUID):
+                return "sharingGroupUUID(\(sharingGroupUUID))"
             case .owningUserId(let owningUserId):
                 return "owningUserId(\(owningUserId))"
-            case .owningUserAndSharingGroup(owningUserId: let owningUserId, let sharingGroupId):
-                return "owningUserId(\(owningUserId), \(sharingGroupId)"
+            case .owningUserAndSharingGroup(owningUserId: let owningUserId, let sharingGroupUUID):
+                return "owningUserId(\(owningUserId), \(sharingGroupUUID)"
             }
         }
     }
@@ -147,16 +147,16 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         switch key {
         case .sharingGroupUserId(let sharingGroupUserId):
             return "sharingGroupUserId = \(sharingGroupUserId)"
-        case .primaryKeys(sharingGroupId: let sharingGroupId, userId: let userId):
-            return "sharingGroupId = \(sharingGroupId) AND userId = \(userId)"
+        case .primaryKeys(sharingGroupUUID: let sharingGroupUUID, userId: let userId):
+            return "sharingGroupUUID = '\(sharingGroupUUID)' AND userId = \(userId)"
         case .userId(let userId):
             return "userId = \(userId)"
-        case .sharingGroupId(let sharingGroupId):
-            return "sharingGroupId = \(sharingGroupId)"
+        case .sharingGroupUUID(let sharingGroupUUID):
+            return "sharingGroupUUID = '\(sharingGroupUUID)'"
         case .owningUserId(let owningUserId):
             return "owningUserId = \(owningUserId)"
-        case .owningUserAndSharingGroup(owningUserId: let owningUserId, let sharingGroupId):
-            return "owningUserId = \(owningUserId) AND sharingGroupId = \(sharingGroupId)"
+        case .owningUserAndSharingGroup(owningUserId: let owningUserId, let sharingGroupUUID):
+            return "owningUserId = \(owningUserId) AND sharingGroupUUID = '\(sharingGroupUUID)'"
         }
     }
     
@@ -165,9 +165,9 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case error(String)
     }
     
-    func add(sharingGroupId: SharingGroupId, userId: UserId, permission: Permission, owningUserId: UserId?) -> AddResult {
+    func add(sharingGroupUUID: String, userId: UserId, permission: Permission, owningUserId: UserId?) -> AddResult {
         let owningUserIdValue = owningUserId == nil ? "NULL" : "\(owningUserId!)"
-        let query = "INSERT INTO \(tableName) (sharingGroupId, userId, permission, owningUserId) VALUES(\(sharingGroupId), \(userId), '\(permission.rawValue)', \(owningUserIdValue));"
+        let query = "INSERT INTO \(tableName) (sharingGroupId, userId, permission, owningUserId) VALUES('\(sharingGroupUUID)', \(userId), '\(permission.rawValue)', \(owningUserIdValue));"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing user group")
@@ -185,8 +185,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         case error(String)
     }
     
-    func sharingGroupUsers(forSharingGroupId sharingGroupId: SharingGroupId) -> SharingGroupUserResult {
-        let query = "select \(UserRepository.tableName).\(User.usernameKey),  \(UserRepository.tableName).\(User.userIdKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupId = \(sharingGroupId)"
+    func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> SharingGroupUserResult {
+        let query = "select \(UserRepository.tableName).\(User.usernameKey),  \(UserRepository.tableName).\(User.userIdKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupUUID = '\(sharingGroupUUID)'"
         return sharingGroupUsers(forSelectQuery: query)
     }
     

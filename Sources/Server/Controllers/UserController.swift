@@ -103,7 +103,7 @@ class UserController : ControllerProtocol {
         
         user.userId = userId
 
-        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(sharingGroupName: addUserRequest.sharingGroupName) else {
+        guard case .success = params.repos.sharingGroup.add(sharingGroupUUID: addUserRequest.sharingGroupUUID, sharingGroupName: addUserRequest.sharingGroupName) else {
             let message = "Failed on adding new sharing group."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -111,14 +111,14 @@ class UserController : ControllerProtocol {
         }
 
         // This is creating the "root" owning user for a sharing group; they have max permissions.
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin, owningUserId: nil) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupUUID: addUserRequest.sharingGroupUUID, userId: userId, permission: .admin, owningUserId: nil) else {
             let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        if !params.repos.masterVersion.initialize(sharingGroupId: sharingGroupId) {
+        if !params.repos.masterVersion.initialize(sharingGroupUUID: addUserRequest.sharingGroupUUID) {
             let message = "Failed on creating MasterVersion record for sharing group!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -127,7 +127,6 @@ class UserController : ControllerProtocol {
         
         let response = AddUserResponse()!
         response.userId = userId
-        response.sharingGroupId = sharingGroupId
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
         var profileCreds = params.profileCreds!

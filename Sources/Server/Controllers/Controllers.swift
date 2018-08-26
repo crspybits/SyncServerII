@@ -19,21 +19,21 @@ protocol ControllerProtocol {
 extension ControllerProtocol {
     // Make sure the current signed in user is a member of the sharing group.
     // `checkNotDeleted` set to true ensures the sharing group is not deleted.
-    func sharingGroupSecurityCheck(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, checkNotDeleted: Bool = true) -> Bool {
+    func sharingGroupSecurityCheck(sharingGroupUUID: String, params:RequestProcessingParameters, checkNotDeleted: Bool = true) -> Bool {
     
         guard let userId = params.currentSignedInUser?.userId else {
             Log.error("No userId!")
             return false
         }
         
-        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: userId)
         let lookupResult = params.repos.sharingGroupUser.lookup(key: sharingUserKey, modelInit: SharingGroupUser.init)
         
         switch lookupResult {
         case .found:
             if checkNotDeleted {
                 // The deleted flag is in the SharingGroup (not SharingGroupUser) repo. Need to look that up.
-                let sharingKey = SharingGroupRepository.LookupKey.sharingGroupId(sharingGroupId)
+                let sharingKey = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
                 let lookupResult = params.repos.sharingGroup.lookup(key: sharingKey, modelInit: SharingGroup.init)
                 switch lookupResult {
                 case .found(let modelObj):
@@ -57,7 +57,7 @@ extension ControllerProtocol {
             return true
             
         case .noObjectFound:
-            Log.error("User: \(userId) is not in sharing group: \(sharingGroupId)")
+            Log.error("User: \(userId) is not in sharing group: \(sharingGroupUUID)")
             return false
             
         case .error(let error):
@@ -139,12 +139,12 @@ public class Controllers {
     case masterVersionUpdate(MasterVersionInt)
     }
     
-    private static func updateMasterVersion(sharingGroupId: SharingGroupId, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
+    private static func updateMasterVersion(sharingGroupUUID:String, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
 
         let currentMasterVersionObj = MasterVersion()
         
         // The master version reflects a sharing group.
-        currentMasterVersionObj.sharingGroupId = sharingGroupId
+        currentMasterVersionObj.sharingGroupUUID = sharingGroupUUID
         
         currentMasterVersionObj.masterVersion = currentMasterVersion
         let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
@@ -161,7 +161,7 @@ public class Controllers {
             result = UpdateMasterVersionResult.error(message)
             
         case .didNotMatchCurrentMasterVersion:
-            getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
+            getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
                 if error == nil {
                     result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
                 }
@@ -181,9 +181,9 @@ public class Controllers {
     
     // Synchronous callback.
     // Get the master version for a sharing group because the master version reflects the overall version of the data for a sharing group.
-    static func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
+    static func getMasterVersion(sharingGroupUUID: String, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
         
-        let key = MasterVersionRepository.LookupKey.sharingGroupId(sharingGroupId)
+        let key = MasterVersionRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
         let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
         
         switch result {
@@ -201,10 +201,10 @@ public class Controllers {
         }
     }
     
-    static func getMasterVersion(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> MasterVersionInt? {
+    static func getMasterVersion(sharingGroupUUID: String, params:RequestProcessingParameters) -> MasterVersionInt? {
         var result: MasterVersionInt?
         
-        getMasterVersion(sharingGroupId: sharingGroupId, params: params) { error, masterVersion in
+        getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { error, masterVersion in
             if error == nil {
                 result = masterVersion
             }
@@ -214,8 +214,8 @@ public class Controllers {
     }
     
     // Returns nil on success.
-    static func updateMasterVersion(sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type?) -> RequestProcessingParameters.Response? {
-        let updateResult = updateMasterVersion(sharingGroupId: sharingGroupId, currentMasterVersion: masterVersion, params: params)
+    static func updateMasterVersion(sharingGroupUUID: String, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type?) -> RequestProcessingParameters.Response? {
+        let updateResult = updateMasterVersion(sharingGroupUUID: sharingGroupUUID, currentMasterVersion: masterVersion, params: params)
         switch updateResult {
         case .success:
             return nil
@@ -240,13 +240,13 @@ public class Controllers {
         }
     }
     
-    static func getEffectiveOwningUserId(user: User, sharingGroupId: SharingGroupId, sharingGroupUserRepo: SharingGroupUserRepository) -> UserId? {
+    static func getEffectiveOwningUserId(user: User, sharingGroupUUID: String, sharingGroupUserRepo: SharingGroupUserRepository) -> UserId? {
         
         if user.accountType.userType == .owning {
             return user.userId
         }
         
-        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: user.userId)
+        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: user.userId)
         let lookupResult = sharingGroupUserRepo.lookup(key: sharingUserKey, modelInit: SharingGroupUser.init)
         
         switch lookupResult {

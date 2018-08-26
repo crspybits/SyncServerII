@@ -20,7 +20,7 @@ extension FileController {
         for uploadFile in uploadFiles {
             // 12/1/17; Up until today, I was using the params.currentSignedInUser!.userId in here and not the effective user id. Thus, when sharing users did an upload deletion, the files got deleted from the file index, but didn't get deleted from cloud storage.
             // 6/24/18; Now things have changed again: With the change to having multiple owning users in a sharing group, a sharingGroupId is the key instead of the userId.
-            primaryFileIndexKeys += [.primaryKeys(sharingGroupId: uploadFile.sharingGroupId, fileUUID: uploadFile.fileUUID)]
+            primaryFileIndexKeys += [.primaryKeys(sharingGroupUUID: uploadFile.sharingGroupUUID, fileUUID: uploadFile.fileUUID)]
         }
     
         var fileIndexObjs = [FileInfo]()
@@ -51,7 +51,7 @@ extension FileController {
         }
 #endif
         
-        if let response = Controllers.updateMasterVersion(sharingGroupId: doneUploadsRequest.sharingGroupId, masterVersion: doneUploadsRequest.masterVersion, params: params, responseType: DoneUploadsResponse.self) {
+        if let response = Controllers.updateMasterVersion(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, masterVersion: doneUploadsRequest.masterVersion, params: params, responseType: DoneUploadsResponse.self) {
             params.completion(response)
             return nil
         }
@@ -97,7 +97,7 @@ extension FileController {
             return nil
         }
 
-        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupId: doneUploadsRequest.sharingGroupId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
+        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
             params.completion(.failure(nil))
             return nil
         }
@@ -149,21 +149,21 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: doneUploadsRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: doneUploadsRequest.sharingGroupId, params:params), consistentSharingGroups else {
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
             let message = "Inconsistent sharing groups."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        let lock = Lock(sharingGroupId:doneUploadsRequest.sharingGroupId, deviceUUID:params.deviceUUID!)
+        let lock = Lock(sharingGroupUUID:doneUploadsRequest.sharingGroupUUID, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             break
@@ -183,7 +183,7 @@ extension FileController {
         
         let result = doInitialDoneUploads(params: params, doneUploadsRequest: doneUploadsRequest)
         
-        if !params.repos.lock.unlock(sharingGroupId: doneUploadsRequest.sharingGroupId) {
+        if !params.repos.lock.unlock(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID) {
             let message = "Error in unlock!"
             Log.debug(message)
             params.completion(.failure(.message(message)))

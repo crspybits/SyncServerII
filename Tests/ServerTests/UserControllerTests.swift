@@ -20,14 +20,13 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     
     func testAddUserSucceedsWhenAddingNewUser() {
         let deviceUUID = Foundation.UUID().uuidString
+        let sharingGroupUUID = UUID().uuidString
         let testAccount:TestAccount = .primaryOwningAccount
         
-        guard let addUserResponse = addNewUser(testAccount:testAccount, deviceUUID:deviceUUID) else {
+        guard let addUserResponse = addNewUser(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
-        
-        XCTAssert(addUserResponse.sharingGroupId != nil)
         
         let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)
         switch result {
@@ -54,16 +53,15 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     }
     
     func testAddUserWithSharingGroupNameWorks() {
+        let sharingGroupUUID = UUID().uuidString
         let deviceUUID = Foundation.UUID().uuidString
         let testAccount:TestAccount = .primaryOwningAccount
         let sharingGroupName = "SharingGroup765"
         
-        guard let addUserResponse = addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, sharingGroupName:sharingGroupName) else {
+        guard let _ = addNewUser(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, sharingGroupName:sharingGroupName) else {
             XCTFail()
             return
         }
-        
-        XCTAssert(addUserResponse.sharingGroupId != nil)
         
         guard let (_, sharingGroups) = getIndex() else {
             XCTFail()
@@ -75,15 +73,16 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        XCTAssert(sharingGroups[0].sharingGroupId == addUserResponse.sharingGroupId)
+        XCTAssert(sharingGroups[0].sharingGroupUUID == sharingGroupUUID)
         XCTAssert(sharingGroups[0].sharingGroupName == sharingGroupName)
         XCTAssert(sharingGroups[0].deleted == false)
     }
     
     func testAddUserFailsWhenAddingExistingUser() {
+        let sharingGroupUUID = UUID().uuidString
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
-            
+        self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID)
+        
         performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.addUser, headers: headers) { response, dict in
@@ -98,8 +97,9 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     func testAddRemoveAddWorks() {
         let deviceUUID = Foundation.UUID().uuidString
         let testAccount:TestAccount = .primaryOwningAccount
+        let sharingGroupUUID1 = UUID().uuidString
         
-        addNewUser(testAccount:testAccount, deviceUUID:deviceUUID)
+        addNewUser(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID1, deviceUUID:deviceUUID)
         
         // remove
         performServerTest { expectation, creds in
@@ -112,13 +112,16 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             }
         }
         
-        addNewUser(testAccount:testAccount, deviceUUID:deviceUUID)
+        let sharingGroupUUID2 = UUID().uuidString
+        addNewUser(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID)
     }
     
     func testCheckCredsWhenUserDoesExist() {
         let testingAccount:TestAccount = .primaryOwningAccount
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(testAccount: testingAccount, deviceUUID:deviceUUID)
+        let sharingGroupUUID = UUID().uuidString
+
+        self.addNewUser(testAccount: testingAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID)
 
         performServerTest(testAccount: testingAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testingAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -184,7 +187,9 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     
     func testRemoveUserSucceedsWithExistingUser() {
         let deviceUUID = Foundation.UUID().uuidString
-        self.addNewUser(deviceUUID:deviceUUID)
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID)
 
         performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -202,19 +207,20 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
     
     func testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
         
         // Upload a file.
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupId: sharingGroupId)) else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -227,7 +233,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         }
         
         // Make sure file marked as deleted.
-        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             guard fileIndex.count == 1 else {

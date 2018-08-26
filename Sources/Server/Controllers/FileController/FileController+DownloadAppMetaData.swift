@@ -18,14 +18,14 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: downloadAppMetaDataRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        Controllers.getMasterVersion(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, params: params) { (error, masterVersion) in
+        Controllers.getMasterVersion(sharingGroupUUID: downloadAppMetaDataRequest.sharingGroupUUID, params: params) { (error, masterVersion) in
             if error != nil {
                 params.completion(.failure(.message("\(error!)")))
                 return
@@ -42,7 +42,7 @@ extension FileController {
             // Need to get the app meta data from the file index.
 
             // First, lookup the file in the FileIndex. This does an important security check too-- makes sure the fileUUID is in the sharing group.
-            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: downloadAppMetaDataRequest.sharingGroupId, fileUUID: downloadAppMetaDataRequest.fileUUID)
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: downloadAppMetaDataRequest.sharingGroupUUID, fileUUID: downloadAppMetaDataRequest.fileUUID)
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
             var fileIndexObj:FileIndex!

@@ -31,7 +31,7 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
         ]) else {
             XCTFail()
             return
@@ -43,45 +43,50 @@ class MessageTests: ServerTestCase, LinuxTestable {
 
     func testURLParameters() {
         let uuidString1 = Foundation.UUID().uuidString
+        let sharingGroupUUID = UUID().uuidString
         
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupIdKey)=0", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupUUIDKey)=\(sharingGroupUUID)", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersWithIntegersAsStrings() {
         let uuidString1 = Foundation.UUID().uuidString
 
+        let sharingGroupUUID = UUID().uuidString
+        
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: "1",
             UploadFileRequest.masterVersionKey: "42",
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupIdKey)=0", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupUUIDKey)=\(sharingGroupUUID)", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersForUploadDeletion() {
         let uuidString = Foundation.UUID().uuidString
 
+        let sharingGroupUUID = UUID().uuidString
+        
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uuidString,
             UploadDeletionRequest.fileVersionKey: FileVersionInt(99),
             UploadDeletionRequest.masterVersionKey: MasterVersionInt(23),
             UploadDeletionRequest.actualDeletionKey: Int32(1),
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])
         
         let result = uploadDeletionRequest!.urlParameters()
@@ -90,32 +95,35 @@ class MessageTests: ServerTestCase, LinuxTestable {
             "\(UploadDeletionRequest.fileUUIDKey)=\(uuidString)&" +
             "\(UploadDeletionRequest.fileVersionKey)=99&" +
             "\(UploadDeletionRequest.masterVersionKey)=23&" +
-            "\(ServerEndpoint.sharingGroupIdKey)=0&" +
+            "\(ServerEndpoint.sharingGroupUUIDKey)=\(sharingGroupUUID)&" +
             "\(UploadDeletionRequest.actualDeletionKey)=1"
         
         XCTAssert(result == expectedURLParams, "Result was: \(String(describing: result))")
     }
     
     func testBadUUIDForFileName() {
+        let sharingGroupUUID = UUID().uuidString
+
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : "foobar",
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])
         XCTAssert(uploadRequest == nil)
     }
     
     func testPropertyHasValue() {
         let uuidString1 = Foundation.UUID().uuidString
+        let sharingGroupUUID = UUID().uuidString
 
         guard let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupIdKey: 0
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ]) else {
             XCTFail()
             return
@@ -125,6 +133,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
         XCTAssert(uploadRequest.mimeType == "text/plain")
         XCTAssert(uploadRequest.fileVersion == FileVersionInt(1))
         XCTAssert(uploadRequest.masterVersion == MasterVersionInt(42))
+        XCTAssert(uploadRequest.sharingGroupUUID == sharingGroupUUID)
+
     }
     
     func testNilRequestMessageParams() {

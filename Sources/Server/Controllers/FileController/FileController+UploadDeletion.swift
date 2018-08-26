@@ -20,14 +20,14 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: uploadDeletionRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: uploadDeletionRequest.sharingGroupId, params:params), consistentSharingGroups else {
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
             let message = "Inconsistent sharing groups."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -41,7 +41,7 @@ extension FileController {
             return
         }
         
-        Controllers.getMasterVersion(sharingGroupId: uploadDeletionRequest.sharingGroupId, params: params) { (error, masterVersion) in
+        Controllers.getMasterVersion(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, params: params) { (error, masterVersion) in
             if error != nil {
                 let message = "Error: \(String(describing: error))"
                 Log.error(message)
@@ -59,7 +59,7 @@ extension FileController {
             
             // Check whether this fileUUID exists in the FileIndex.
 
-            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: uploadDeletionRequest.sharingGroupId, fileUUID: uploadDeletionRequest.fileUUID)
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, fileUUID: uploadDeletionRequest.fileUUID)
             
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
@@ -113,7 +113,7 @@ extension FileController {
             upload.fileVersion = uploadDeletionRequest.fileVersion
             upload.state = .toDeleteFromFileIndex
             upload.userId = params.currentSignedInUser!.userId
-            upload.sharingGroupId = uploadDeletionRequest.sharingGroupId
+            upload.sharingGroupUUID = uploadDeletionRequest.sharingGroupUUID
             
             let uploadAddResult = params.repos.upload.add(upload: upload)
             

@@ -65,8 +65,9 @@ class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
     
     func testThatDropboxUserHasValidCreds() {
         let deviceUUID = Foundation.UUID().uuidString
-        
-        addNewUser(testAccount: .dropbox1, deviceUUID:deviceUUID, cloudFolderName: nil)
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        addNewUser(testAccount: .dropbox1, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: nil)
         
         self.performServerTest(testAccount: .dropbox1) { expectation, dbCreds in
             let headers = self.setupHeaders(testUser: .dropbox1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)

@@ -30,8 +30,8 @@ class FileIndex : NSObject, Model, Filenaming {
     var fileGroupUUID:String?
     
     // Currently allowing files to be in exactly one sharing group.
-    static let sharingGroupIdKey = "sharingGroupId"
-    var sharingGroupId: SharingGroupId!
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID: String!
     
     static let creationDateKey = "creationDate"
     // We don't give the `creationDate` when updating the fileIndex for versions > 0.
@@ -75,8 +75,8 @@ class FileIndex : NSObject, Model, Filenaming {
             case FileIndex.fileGroupUUIDKey:
                 fileGroupUUID = newValue as! String?
                 
-            case FileIndex.sharingGroupIdKey:
-                sharingGroupId = newValue as! SharingGroupId?
+            case FileIndex.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as! String?
                 
             case FileIndex.deviceUUIDKey:
                 deviceUUID = newValue as! String?
@@ -204,9 +204,9 @@ class FileIndexRepository : Repository, RepositoryLookup {
 
             "fileSizeBytes BIGINT NOT NULL, " +
 
-            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
+            "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 
-            "UNIQUE (fileUUID, sharingGroupId), " +
+            "UNIQUE (fileUUID, sharingGroupUUID), " +
             "UNIQUE (fileIndexId))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -277,7 +277,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
         
         let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
         
-        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.fileSizeBytesKey), \(FileIndex.sharingGroupIdKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), \(fileIndex.sharingGroupId!) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
+        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.fileSizeBytesKey), \(FileIndex.sharingGroupUUIDKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), '\(fileIndex.sharingGroupUUID!)' \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -366,9 +366,9 @@ class FileIndexRepository : Repository, RepositoryLookup {
     enum LookupKey : CustomStringConvertible {
         case fileIndexId(Int64)
         case userId(UserId)
-        case primaryKeys(sharingGroupId: SharingGroupId, fileUUID:String)
-        case sharingGroupId(sharingGroupId: SharingGroupId)
-        case userAndSharingGroup(UserId, SharingGroupId)
+        case primaryKeys(sharingGroupUUID: String, fileUUID:String)
+        case sharingGroupUUID(sharingGroupUUID: String)
+        case userAndSharingGroup(UserId, sharingGroupUUID: String)
         
         var description : String {
             switch self {
@@ -376,12 +376,12 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 return "fileIndexId(\(fileIndexId))"
             case .userId(let userId):
                 return "userId(\(userId))"
-            case .primaryKeys(let sharingGroupId, let fileUUID):
-                return "sharingGroupId(\(sharingGroupId)); fileUUID(\(fileUUID))"
-            case .sharingGroupId(let sharingGroupId):
-                return "sharingGroupId(\(sharingGroupId)))"
-            case .userAndSharingGroup(let userId, let sharingGroupId):
-                return "userId(\(userId)); sharingGroupId(\(sharingGroupId)))"
+            case .primaryKeys(let sharingGroupUUID, let fileUUID):
+                return "sharingGroupUUID(\(sharingGroupUUID)); fileUUID(\(fileUUID))"
+            case .sharingGroupUUID(let sharingGroupUUID):
+                return "sharingGroupUUID(\(sharingGroupUUID)))"
+            case .userAndSharingGroup(let userId, let sharingGroupUUID):
+                return "userId(\(userId)); sharingGroupUUID(\(sharingGroupUUID)))"
             }
         }
     }
@@ -392,12 +392,12 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return "fileIndexId = \(fileIndexId)"
         case .userId(let userId):
             return "userId = \(userId)"
-        case .primaryKeys(let sharingGroupId, let fileUUID):
-            return "sharingGroupId = \(sharingGroupId) and fileUUID = '\(fileUUID)'"
-        case .sharingGroupId(let sharingGroupId):
-            return "sharingGroupId = \(sharingGroupId)"
-        case .userAndSharingGroup(let userId, let sharingGroupId):
-            return "userId = \(userId) AND sharingGroupId = \(sharingGroupId)"
+        case .primaryKeys(let sharingGroupUUID, let fileUUID):
+            return "sharingGroupUUID = '\(sharingGroupUUID)' and fileUUID = '\(fileUUID)'"
+        case .sharingGroupUUID(let sharingGroupUUID):
+            return "sharingGroupUUID = '\(sharingGroupUUID)'"
+        case .userAndSharingGroup(let userId, let sharingGroupUUID):
+            return "userId = \(userId) AND sharingGroupUUID = '\(sharingGroupUUID)'"
         }
     }
     
@@ -455,7 +455,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
                     fileIndex.userId = owningUserId
                     
                     // Similarly, the sharing group id doesn't change over time.
-                    fileIndex.sharingGroupId = upload.sharingGroupId
+                    fileIndex.sharingGroupUUID = upload.sharingGroupUUID
                 }
                 
                 fileIndex.updateDate = upload.updateDate
@@ -466,7 +466,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 return
             }
             
-            let key = LookupKey.primaryKeys(sharingGroupId: upload.sharingGroupId, fileUUID: upload.fileUUID)
+            let key = LookupKey.primaryKeys(sharingGroupUUID: upload.sharingGroupUUID, fileUUID: upload.fileUUID)
             let result = self.lookup(key: key, modelInit: FileIndex.init)
             
             switch result {
@@ -558,8 +558,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             switch self {
             case .userId(let userId):
                 return "\(FileIndex.userIdKey)=\(userId)"
-            case .sharingGroupId(let sharingGroupId):
-                return "\(FileIndex.sharingGroupIdKey)=\(sharingGroupId)"
+            case .sharingGroupId(let sharingGroupUUID):
+                return "\(FileIndex.sharingGroupUUIDKey)='\(sharingGroupUUID)'"
             }
         }
     }
@@ -583,8 +583,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
     case error(String)
     }
      
-    func fileIndex(forSharingGroupId sharingGroupId: SharingGroupId) -> FileIndexResult {
-        let query = "select * from \(tableName) where sharingGroupId = \(sharingGroupId)"
+    func fileIndex(forSharingGroupUUID sharingGroupUUID: String) -> FileIndexResult {
+        let query = "select * from \(tableName) where sharingGroupUUID = '\(sharingGroupUUID)'"
         return fileIndex(forSelectQuery: query)
     }
     
@@ -608,7 +608,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.appMetaDataVersion = rowModel.appMetaDataVersion
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
-            fileInfo.sharingGroupId = rowModel.sharingGroupId
+            fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
             
             result.append(fileInfo)
         }

@@ -26,19 +26,20 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     
     func testForZeroUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
         
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: sharingGroupUUID)
     }
     
     func testForOneUpload() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
@@ -47,19 +48,19 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             uploadResult.request.fileUUID: uploadResult.fileSize
         ]
         
-        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
     }
-    
+
     func testForOneUploadButDoneTwice() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
 
         // Second upload-- shouldn't result in second entries in Upload table.
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: uploadResult.request.fileVersion, masterVersion: uploadResult.request.masterVersion, appMetaData: uploadResult.request.appMetaData) else {
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: uploadResult.request.fileVersion, masterVersion: uploadResult.request.masterVersion, appMetaData: uploadResult.request.appMetaData) else {
             XCTFail()
             return
         }
@@ -68,30 +69,31 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
         
-        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testForOneUploadButFromWrongDeviceUUID() {
         let deviceUUID = Foundation.UUID().uuidString
         
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // This will do the GetUploads, but with a different deviceUUID, which will give empty result.
-        self.getUploads(expectedFiles: [], expectedFileSizes: [:], sharingGroupId:sharingGroupId)
+        self.getUploads(expectedFiles: [], expectedFileSizes: [:], sharingGroupUUID:sharingGroupUUID)
     }
     
     func testForTwoUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let uploadResult2 = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupId: sharingGroupId)) else {
+        guard let uploadResult2 = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
@@ -101,47 +103,51 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             uploadResult2.request.fileUUID: uploadResult2.fileSize
         ]
         
-        self.getUploads(expectedFiles: [uploadResult1.request, uploadResult2.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        self.getUploads(expectedFiles: [uploadResult1.request, uploadResult2.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testForNoUploadsAfterDoneUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: sharingGroupUUID)
     }
     
     func testFakeSharingGroupWithGetUploadsFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        let invalidSharingGroupId: SharingGroupId = 100
+        let invalidSharingGroupUUID = UUID().uuidString
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupId: invalidSharingGroupId, errorExpected: true)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
     }
     
     func testBadSharingGroupWithGetUploadsFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let workingButBadSharingGroupId = addSharingGroup() else {
+        let workingButBadSharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupId: workingButBadSharingGroupId, errorExpected: true)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
     }
 }
 

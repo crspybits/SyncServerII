@@ -31,21 +31,21 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard case .success(let sharingGroupId) = params.repos.sharingGroup.add(sharingGroupName: request.sharingGroupName) else {
+        guard case .success = params.repos.sharingGroup.add(sharingGroupUUID: request.sharingGroupUUID, sharingGroupName: request.sharingGroupName) else {
             let message = "Failed on adding new sharing group."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
 
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingGroupId, userId: params.currentSignedInUser!.userId, permission: .admin, owningUserId: nil) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupUUID: request.sharingGroupUUID, userId: params.currentSignedInUser!.userId, permission: .admin, owningUserId: nil) else {
             let message = "Failed on adding sharing group user."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        if !params.repos.masterVersion.initialize(sharingGroupId: sharingGroupId) {
+        if !params.repos.masterVersion.initialize(sharingGroupUUID: request.sharingGroupUUID) {
             let message = "Failed on creating MasterVersion record for sharing group!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -53,8 +53,6 @@ class SharingGroupsController : ControllerProtocol {
         }
         
         let response = CreateSharingGroupResponse()!
-        response.sharingGroupId = sharingGroupId
-        
         params.completion(.success(response))
     }
     
@@ -67,7 +65,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard let sharingGroupId = request.sharingGroupId,
+        guard let sharingGroupUUID = request.sharingGroupUUID,
             let sharingGroupName = request.sharingGroupName else {
             Log.info("No name given in sharing group update request-- no change made.")
             let response = UpdateSharingGroupResponse()!
@@ -75,20 +73,20 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        if let errorResponse = Controllers.updateMasterVersion(sharingGroupId: sharingGroupId, masterVersion: request.masterVersion, params: params, responseType: UpdateSharingGroupResponse.self) {
+        if let errorResponse = Controllers.updateMasterVersion(sharingGroupUUID: sharingGroupUUID, masterVersion: request.masterVersion, params: params, responseType: UpdateSharingGroupResponse.self) {
             params.completion(errorResponse)
             return
         }
 
         let serverSharingGroup = Server.SharingGroup()
-        serverSharingGroup.sharingGroupId = sharingGroupId
+        serverSharingGroup.sharingGroupUUID = sharingGroupUUID
         serverSharingGroup.sharingGroupName = sharingGroupName
 
         guard params.repos.sharingGroup.update(sharingGroup: serverSharingGroup) else {
@@ -110,19 +108,19 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: request.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: request.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        if let errorResponse = Controllers.updateMasterVersion(sharingGroupId: request.sharingGroupId, masterVersion: request.masterVersion, params: params, responseType: RemoveSharingGroupResponse.self) {
+        if let errorResponse = Controllers.updateMasterVersion(sharingGroupUUID: request.sharingGroupUUID, masterVersion: request.masterVersion, params: params, responseType: RemoveSharingGroupResponse.self) {
             params.completion(errorResponse)
             return
         }
         
-        guard remove(params:params, sharingGroupId: request.sharingGroupId) else {
+        guard remove(params:params, sharingGroupUUID: request.sharingGroupUUID) else {
             return
         }
         
@@ -130,8 +128,8 @@ class SharingGroupsController : ControllerProtocol {
         params.completion(.success(response))
     }
     
-    private func remove(params:RequestProcessingParameters, sharingGroupId: SharingGroupId) -> Bool {
-        let markKey = FileIndexRepository.LookupKey.sharingGroupId(sharingGroupId: sharingGroupId)
+    private func remove(params:RequestProcessingParameters, sharingGroupUUID: String) -> Bool {
+        let markKey = FileIndexRepository.LookupKey.sharingGroupUUID(sharingGroupUUID: sharingGroupUUID)
         guard let _ = params.repos.fileIndex.markFilesAsDeleted(key: markKey) else {
             let message = "Could not mark files as deleted for sharing group!"
             Log.error(message)
@@ -140,7 +138,7 @@ class SharingGroupsController : ControllerProtocol {
         }
         
         // Any users who were members of the sharing group should no longer be members.
-        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.sharingGroupId(sharingGroupId)
+        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
         switch params.repos.sharingGroupUser.remove(key: sharingGroupUserKey) {
         case .removed:
             break
@@ -153,7 +151,7 @@ class SharingGroupsController : ControllerProtocol {
         
         // Mark the sharing group as deleted.
         guard let _ = params.repos.sharingGroup.markAsDeleted(forCriteria:
-            .sharingGroupId(sharingGroupId)) else {
+            .sharingGroupUUID(sharingGroupUUID)) else {
             let message = "Could not mark sharing group as deleted."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -173,21 +171,21 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: request.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: request.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        if let errorResponse = Controllers.updateMasterVersion(sharingGroupId: request.sharingGroupId, masterVersion: request.masterVersion, params: params, responseType: RemoveSharingGroupResponse.self) {
+        if let errorResponse = Controllers.updateMasterVersion(sharingGroupUUID: request.sharingGroupUUID, masterVersion: request.masterVersion, params: params, responseType: RemoveSharingGroupResponse.self) {
             params.completion(errorResponse)
             return
         }
         
         // Need to count number of users in sharing group-- if this will be the last user need to "remove" the sharing group because no other people will be able to enter it. ("remove" ==  mark the sharing group as deleted).
         var numberSharingUsers:Int!
-        let result = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupId: request.sharingGroupId)
+        let result = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: request.sharingGroupUUID)
         switch result {
         case .sharingGroupUsers(let sgus):
             numberSharingUsers = sgus.count
@@ -197,7 +195,7 @@ class SharingGroupsController : ControllerProtocol {
         }
         
         // If we're going to remove the user from the sharing group, and this user is an owning user, we should mark any of their sharing users in that sharing group as removed.
-        let resetKey = SharingGroupUserRepository.LookupKey.owningUserAndSharingGroup(owningUserId: params.currentSignedInUser!.userId, request.sharingGroupId)
+        let resetKey = SharingGroupUserRepository.LookupKey.owningUserAndSharingGroup(owningUserId: params.currentSignedInUser!.userId, uuid: request.sharingGroupUUID)
         if params.currentSignedInUser!.accountType.userType == .owning {
             guard params.repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
                 let message = "Could not reset owning users ids."
@@ -207,7 +205,7 @@ class SharingGroupsController : ControllerProtocol {
             }
         }
         
-        let removalKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: request.sharingGroupId, userId: params.currentSignedInUser!.userId)
+        let removalKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: request.sharingGroupUUID, userId: params.currentSignedInUser!.userId)
         guard case .removed(let numberRows) = params.repos.sharingGroupUser.remove(key: removalKey), numberRows == 1 else {
             let message = "Could not remove user from SharingGroup."
             Log.error(message)
@@ -216,7 +214,7 @@ class SharingGroupsController : ControllerProtocol {
         }
         
         // Any files that this user has in the FileIndex for this sharing group should be marked as deleted.
-        let markKey = FileIndexRepository.LookupKey.userAndSharingGroup(params.currentSignedInUser!.userId, request.sharingGroupId)
+        let markKey = FileIndexRepository.LookupKey.userAndSharingGroup(params.currentSignedInUser!.userId, sharingGroupUUID: request.sharingGroupUUID)
         guard let _ = params.repos.fileIndex.markFilesAsDeleted(key: markKey) else {
             let message = "Could not mark files as deleted for user and sharing group!"
             Log.error(message)
@@ -225,7 +223,7 @@ class SharingGroupsController : ControllerProtocol {
         }
 
         if numberSharingUsers == 1 {
-            guard remove(params:params, sharingGroupId: request.sharingGroupId) else {
+            guard remove(params:params, sharingGroupUUID: request.sharingGroupUUID) else {
                 return
             }
         }

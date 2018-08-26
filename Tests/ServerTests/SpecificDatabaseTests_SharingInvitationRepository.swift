@@ -25,13 +25,15 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
     }
 
     func testAddingSharingInvitation() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupId: sharingGroupId, permission: .read)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read)
 
         guard case .success(let uuid) = result else {
             XCTFail()
@@ -57,13 +59,15 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
     }
     
     func testAttemptToRemoveStaleInvitationsThatAreNotStale() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupId: sharingGroupId, permission: .write)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .write)
         
         guard case .success(let uuid) = result else {
             XCTFail()
@@ -102,7 +106,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
             XCTAssert(invitation.owningUserId == userId)
             XCTAssert(invitation.permission == .write)
             XCTAssert(invitation.sharingInvitationUUID == uuid)
-            XCTAssert(invitation.sharingGroupId == sharingGroupId)
+            XCTAssert(invitation.sharingGroupUUID == sharingGroupUUID)
             
             exp.fulfill()
         }
@@ -123,13 +127,14 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
     }
     
     func testRemoveStaleSharingInvitations() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupId: sharingGroupId, permission: .read, expiryDuration: 2)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read, expiryDuration: 2)
         
         guard case .success(let uuid) = result else {
             XCTFail()

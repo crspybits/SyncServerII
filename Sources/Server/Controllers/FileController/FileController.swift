@@ -19,9 +19,9 @@ class FileController : ControllerProtocol {
     }
     
     // Result is nil if there is no existing file in the FileIndex. Throws an error if there is an error.
-    static func checkForExistingFile(params:RequestProcessingParameters, sharingGroupId: SharingGroupId, fileUUID: String) throws -> FileIndex? {
+    static func checkForExistingFile(params:RequestProcessingParameters, sharingGroupUUID: String, fileUUID: String) throws -> FileIndex? {
         
-        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, fileUUID: fileUUID)
+        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
 
         let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
 
@@ -69,11 +69,11 @@ class FileController : ControllerProtocol {
     }
     
     // Make sure all uploaded files for the current signed in user belong to the given sharing group.
-    func checkSharingGroupConsistency(sharingGroupId: SharingGroupId, params:RequestProcessingParameters) -> Bool? {
+    func checkSharingGroupConsistency(sharingGroupUUID: String, params:RequestProcessingParameters) -> Bool? {
         let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
         switch fileUploadsResult {
         case .uploads(let uploads):
-            let filteredResult = uploads.filter({$0.sharingGroupId == sharingGroupId})
+            let filteredResult = uploads.filter({$0.sharingGroupUUID == sharingGroupUUID})
             if filteredResult.count == uploads.count {
                 return true
             }
@@ -114,25 +114,25 @@ class FileController : ControllerProtocol {
             return serverGroup.toClient()
         }
         
-        guard let sharingGroupId = indexRequest.sharingGroupId else {
-            // Not an error-- caller just didn't give a sharing group id-- only returning sharing group info.
+        guard let sharingGroupUUID = indexRequest.sharingGroupUUID else {
+            // Not an error-- caller just didn't give a sharing group uuid-- only returning sharing group info.
             let response = IndexResponse()!
             response.sharingGroups = clientSharingGroups
             params.completion(.success(response))
             return
         }
         
-        Log.info("Index: Getting file index for sharing group id: \(sharingGroupId)")
+        Log.info("Index: Getting file index for sharing group uuid: \(sharingGroupUUID)")
 
         // Not worrying about whether the sharing group is deleted-- where's the harm in getting a file index for a deleted sharing group?
-        guard sharingGroupSecurityCheck(sharingGroupId: sharingGroupId, params: params, checkNotDeleted: false) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: sharingGroupUUID, params: params, checkNotDeleted: false) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        let lock = Lock(sharingGroupId:sharingGroupId, deviceUUID:params.deviceUUID!)
+        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             break
@@ -150,16 +150,16 @@ class FileController : ControllerProtocol {
             return
         }
         
-        Controllers.getMasterVersion(sharingGroupId: sharingGroupId, params: params) { (error, masterVersion) in
+        Controllers.getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
             if error != nil {
-                params.repos.lock.unlock(sharingGroupId: sharingGroupId)
+                params.repos.lock.unlock(sharingGroupUUID: sharingGroupUUID)
                 params.completion(.failure(.message("\(error!)")))
                 return
             }
             
-            let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupId: sharingGroupId)
+            let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)
             
-            if !params.repos.lock.unlock(sharingGroupId: sharingGroupId) {
+            if !params.repos.lock.unlock(sharingGroupUUID: sharingGroupUUID) {
                 let message = "Error in unlock!"
                 Log.debug(message)
                 params.completion(.failure(.message(message)))
@@ -192,14 +192,14 @@ class FileController : ControllerProtocol {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: getUploadsRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: getUploadsRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: getUploadsRequest.sharingGroupId, params:params), consistentSharingGroups else {
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: getUploadsRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
             let message = "Inconsistent sharing groups."
             Log.error(message)
             params.completion(.failure(.message(message)))

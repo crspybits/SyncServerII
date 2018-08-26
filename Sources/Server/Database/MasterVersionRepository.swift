@@ -13,8 +13,8 @@ import SyncServerShared
 import LoggerAPI
 
 class MasterVersion : NSObject, Model {
-    static let sharingGroupIdKey = "sharingGroupId"
-    var sharingGroupId: SharingGroupId!
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID: String!
     
     static let masterVersionKey = "masterVersion"
     var masterVersion: MasterVersionInt!
@@ -22,8 +22,8 @@ class MasterVersion : NSObject, Model {
     subscript(key:String) -> Any? {
         set {
             switch key {
-            case MasterVersion.sharingGroupIdKey:
-                sharingGroupId = newValue as? SharingGroupId
+            case MasterVersion.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as? String
                 
             case MasterVersion.masterVersionKey:
                 masterVersion = newValue as? MasterVersionInt
@@ -58,24 +58,24 @@ class MasterVersionRepository : Repository, RepositoryLookup {
 
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
-            "(sharingGroupId BIGINT NOT NULL, " +
+            "(sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
             "masterVersion BIGINT NOT NULL, " +
 
-            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
+            "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 
-            "UNIQUE (sharingGroupId))"
+            "UNIQUE (sharingGroupUUID))"
         
         return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
     enum LookupKey : CustomStringConvertible {
-        case sharingGroupId(SharingGroupId)
+        case sharingGroupUUID(String)
         
         var description : String {
             switch self {
-            case .sharingGroupId(let sharingGroupId):
-                return "sharingGroupId(\(sharingGroupId))"
+            case .sharingGroupUUID(let sharingGroupUUID):
+                return "sharingGroupUUID(\(sharingGroupUUID))"
             }
         }
     }
@@ -83,14 +83,14 @@ class MasterVersionRepository : Repository, RepositoryLookup {
     // The masterVersion is with respect to the userId
     func lookupConstraint(key:LookupKey) -> String {
         switch key {
-        case .sharingGroupId(let sharingGroupId):
-            return "sharingGroupId = \(sharingGroupId)"
+        case .sharingGroupUUID(let sharingGroupUUID):
+            return "sharingGroupUUID = '\(sharingGroupUUID)'"
         }
     }
 
-    func initialize(sharingGroupId:SharingGroupId) -> Bool {
-        let query = "INSERT INTO \(tableName) (sharingGroupId, masterVersion) " +
-            "VALUES(\(sharingGroupId), \(initialMasterVersion)) "
+    func initialize(sharingGroupUUID:String) -> Bool {
+        let query = "INSERT INTO \(tableName) (sharingGroupUUID, masterVersion) " +
+            "VALUES('\(sharingGroupUUID)', \(initialMasterVersion)) "
         
         if db.connection.query(statement: query) {
             return true
@@ -112,7 +112,7 @@ class MasterVersionRepository : Repository, RepositoryLookup {
     func updateToNext(current:MasterVersion) -> UpdateToNextResult {
     
         let query = "UPDATE \(tableName) SET masterVersion = masterVersion + 1 " +
-            "WHERE sharingGroupId = \(current.sharingGroupId!) and " +
+            "WHERE sharingGroupUUID = '\(current.sharingGroupUUID!)' and " +
             "masterVersion = \(current.masterVersion!)"
         
         if db.connection.query(statement: query) {

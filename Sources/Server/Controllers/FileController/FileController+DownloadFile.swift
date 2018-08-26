@@ -19,7 +19,7 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: downloadRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: downloadRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -30,7 +30,7 @@ extension FileController {
         
         // TODO: *0* Related question: With transactions, if we just select from a particular row (i.e., for the master version for this user, as immediately below) does this result in a lock for the duration of the transaction? We could test for this by sleeping in the middle of the download below, and seeing if another request could delete the file at the same time. This should make a good test case for any mechanism that I come up with.
 
-        Controllers.getMasterVersion(sharingGroupId: downloadRequest.sharingGroupId, params: params) { (error, masterVersion) in
+        Controllers.getMasterVersion(sharingGroupUUID: downloadRequest.sharingGroupUUID, params: params) { (error, masterVersion) in
             if error != nil {
                 params.completion(.failure(.message("\(error!)")))
                 return
@@ -48,7 +48,7 @@ extension FileController {
             
             // First, lookup the file in the FileIndex. This does an important security check too-- make sure the fileUUID is in the sharing group.
            
-            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupId: downloadRequest.sharingGroupId, fileUUID: downloadRequest.fileUUID)
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: downloadRequest.sharingGroupUUID, fileUUID: downloadRequest.fileUUID)
 
             let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
             
