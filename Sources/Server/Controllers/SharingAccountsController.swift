@@ -29,7 +29,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: createSharingInvitationRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -45,7 +45,7 @@ class SharingAccountsController : ControllerProtocol {
         
         // 6/20/18; The current user can be a sharing or owning user, and whether or not these users can invite others depends on the permissions they have. See https://github.com/crspybits/SyncServerII/issues/76 And permissions have already been checked before this point in request handling.
 
-        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: currentSignedInUser, sharingGroupId: createSharingInvitationRequest.sharingGroupId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
+        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: currentSignedInUser, sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
             let message = "Could not get effectiveOwningUserId for inviting user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -53,7 +53,7 @@ class SharingAccountsController : ControllerProtocol {
         }
         
         let result = params.repos.sharing.add(
-            owningUserId: effectiveOwningUserId, sharingGroupId: createSharingInvitationRequest.sharingGroupId,
+            owningUserId: effectiveOwningUserId, sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID,
             permission: createSharingInvitationRequest.permission)
         
         guard case .success(let sharingInvitationUUID) = result else {
@@ -73,14 +73,14 @@ class SharingAccountsController : ControllerProtocol {
         
         // I'm not requiring a master version from the client-- because they don't yet have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
         
-        guard let masterVersion = Controllers.getMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, params: params) else {
-            let message = "Could not get master version for sharing group id: \(sharingInvitation.sharingGroupId)"
+        guard let masterVersion = Controllers.getMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, params: params) else {
+            let message = "Could not get master version for sharing group uuid: \(sharingInvitation.sharingGroupUUID)"
             Log.error(message)
             completion(.failure(.message(message)))
             return
         }
         
-        if let response = Controllers.updateMasterVersion(sharingGroupId: sharingInvitation.sharingGroupId, masterVersion: masterVersion, params: params, responseType: nil) {
+        if let response = Controllers.updateMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, masterVersion: masterVersion, params: params, responseType: nil) {
             completion(response)
             return
         }
@@ -111,11 +111,11 @@ class SharingAccountsController : ControllerProtocol {
     private func redeemSharingInvitationForExistingUser(_ existingUser: User, params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation, completion: @escaping ((RequestProcessingParameters.Response)->())) {
     
         // Check to see if this user is already in this sharing group. We've got a lock on the sharing group, so no race condition will occur for adding user to sharing group.
-        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId)
+        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingInvitation.sharingGroupUUID, userId: existingUser.userId)
         let result = params.repos.sharingGroupUser.lookup(key: key, modelInit: SharingGroupUser.init)
         switch result {
         case .found:
-            let message = "User id: \(existingUser.userId!) was alread in sharing group: \(sharingInvitation.sharingGroupId)"
+            let message = "User id: \(existingUser.userId!) was alread in sharing group: \(sharingInvitation.sharingGroupUUID)"
             Log.error(message)
             completion(.failure(.message(message)))
             return
@@ -133,7 +133,7 @@ class SharingAccountsController : ControllerProtocol {
             owningUserId = sharingInvitation.owningUserId
         }
 
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: existingUser.userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupUUID: sharingInvitation.sharingGroupUUID, userId: existingUser.userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
             let message = "Failed on adding sharing group user for user."
             Log.error(message)
             completion(.failure(.message(message)))
@@ -141,7 +141,7 @@ class SharingAccountsController : ControllerProtocol {
         }
 
         let response = RedeemSharingInvitationResponse()!
-        response.sharingGroupId = sharingInvitation.sharingGroupId
+        response.sharingGroupUUID = sharingInvitation.sharingGroupUUID
         response.userId = existingUser.userId
         
         completion(.success(response))
@@ -186,7 +186,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        guard case .success = params.repos.sharingGroupUser.add(sharingGroupId: sharingInvitation.sharingGroupId, userId: userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
+        guard case .success = params.repos.sharingGroupUser.add(sharingGroupUUID: sharingInvitation.sharingGroupUUID, userId: userId, permission: sharingInvitation.permission, owningUserId: owningUserId) else {
             let message = "Failed on adding sharing group user for new sharing user."
             Log.error(message)
             completion(.failure(.message(message)))
@@ -194,7 +194,7 @@ class SharingAccountsController : ControllerProtocol {
         }
 
         let response = RedeemSharingInvitationResponse()!
-        response.sharingGroupId = sharingInvitation.sharingGroupId
+        response.sharingGroupUUID = sharingInvitation.sharingGroupUUID
         response.userId = userId
         
         // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
@@ -263,7 +263,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        let lock = Lock(sharingGroupId:sharingInvitation.sharingGroupId, deviceUUID:params.deviceUUID!)
+        let lock = Lock(sharingGroupUUID:sharingInvitation.sharingGroupUUID, deviceUUID:params.deviceUUID!)
         switch params.repos.lock.lock(lock: lock) {
         case .success:
             break
@@ -283,7 +283,7 @@ class SharingAccountsController : ControllerProtocol {
         
         redeem(params: params, request: request, sharingInvitation: sharingInvitation, sharingInvitationKey: sharingInvitationKey) { response in
         
-            let unlockResult = params.repos.lock.unlock(sharingGroupId: sharingInvitation.sharingGroupId)
+            let unlockResult = params.repos.lock.unlock(sharingGroupUUID: sharingInvitation.sharingGroupUUID)
             
             switch response {
             case .success:

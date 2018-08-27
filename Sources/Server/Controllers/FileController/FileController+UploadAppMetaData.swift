@@ -17,19 +17,19 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: uploadAppMetaDataRequest.sharingGroupUUID, params: params) else {
             Log.error("Failed in sharing group security check.")
             params.completion(.failure(nil))
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params:params), consistentSharingGroups else {
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: uploadAppMetaDataRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
             Log.error("Inconsistent sharing groups.")
             params.completion(.failure(nil))
             return
         }
         
-        Controllers.getMasterVersion(sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, params: params) { error, masterVersion in
+        Controllers.getMasterVersion(sharingGroupUUID: uploadAppMetaDataRequest.sharingGroupUUID, params: params) { error, masterVersion in
             if error != nil {
                 let message = "Error: \(String(describing: error))"
                 Log.error(message)
@@ -48,7 +48,7 @@ extension FileController {
             // Make sure this file is already present in the FileIndex.
             var existingFileInFileIndex:FileIndex?
             do {
-                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupId: uploadAppMetaDataRequest.sharingGroupId, fileUUID:uploadAppMetaDataRequest.fileUUID)
+                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadAppMetaDataRequest.sharingGroupUUID, fileUUID:uploadAppMetaDataRequest.fileUUID)
             } catch (let error) {
                 let message = "Could not lookup file in FileIndex: \(error)"
                 Log.error(message)
@@ -89,7 +89,7 @@ extension FileController {
             upload.userId = params.currentSignedInUser!.userId
             upload.appMetaData = uploadAppMetaDataRequest.appMetaData!.contents
             upload.appMetaDataVersion = uploadAppMetaDataRequest.appMetaData!.version
-            upload.sharingGroupId = uploadAppMetaDataRequest.sharingGroupId
+            upload.sharingGroupUUID = uploadAppMetaDataRequest.sharingGroupUUID
             
             var errorString:String?
             

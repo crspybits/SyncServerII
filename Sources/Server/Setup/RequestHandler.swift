@@ -136,21 +136,21 @@ class RequestHandler : AccountDelegate {
     }
     
     enum PermissionsAndLockingResult {
-        case success(sharingGroup: SharingGroupId?, lockedSharingGroup: Bool)
+        case success(sharingGroupUUID: String?, lockedSharingGroup: Bool)
         case failure
     }
     
     func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsAndLockingResult {
         if let sharing = endpoint.sharing {
-            // Endpoint uses sharing group. Must give sharingGroupId in request.
-            guard let dict = requestObject.toJSON(), let sharingGroupId = dict[ServerEndpoint.sharingGroupIdKey] as? SharingGroupId else {
+            // Endpoint uses sharing group. Must give sharingGroupUUID in request.
+            guard let dict = requestObject.toJSON(), let sharingGroupUUID = dict[ServerEndpoint.sharingGroupUUIDKey] as? String else {
             
-                self.failWithError(message: "Could not get sharing group id from request that uses sharing group: \(String(describing: requestObject.toJSON()))")
+                self.failWithError(message: "Could not get sharing group uuid from request that uses sharing group: \(String(describing: requestObject.toJSON()))")
                 return .failure
             }
             
             // The user is on the system. Whether or not they can perform the endpoint depends on their permissions for the sharing group.
-            let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: currentSignedInUser!.userId)
+            let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: currentSignedInUser!.userId)
             let result = repositories.sharingGroupUser.lookup(key: key, modelInit: SharingGroupUser.init)
             switch result {
             case .found(let model):
@@ -177,10 +177,10 @@ class RequestHandler : AccountDelegate {
             }
             
             if sharing.needsLock {
-                let lock = Lock(sharingGroupId: sharingGroupId, deviceUUID:deviceUUID!)
+                let lock = Lock(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID!)
                 switch repositories.lock.lock(lock: lock) {
                 case .success:
-                    return .success(sharingGroup: sharingGroupId, lockedSharingGroup: true)
+                    return .success(sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: true)
                 
                 // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
                 case .lockAlreadyHeld:
@@ -193,11 +193,11 @@ class RequestHandler : AccountDelegate {
                 }
             }
             else {
-                return .success(sharingGroup: sharingGroupId, lockedSharingGroup: false)
+                return .success(sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: false)
             }
         }
         
-        return .success(sharingGroup: nil, lockedSharingGroup: false)
+        return .success(sharingGroupUUID: nil, lockedSharingGroup: false)
     }
     
     // Starts a transaction, and calls the `dbOperations` closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.
@@ -290,7 +290,7 @@ class RequestHandler : AccountDelegate {
             return
         }
     
-        var sharingGroupId: SharingGroupId?
+        var sharingGroupUUID: String?
         var lockedSharingGroup: Bool = false
 
         if authenticationLevel! == .secondary {
@@ -324,9 +324,10 @@ class RequestHandler : AccountDelegate {
                 switch result {
                 case .failure:
                     return
-                case .success(sharingGroup: let sharingGroup, lockedSharingGroup: let locked):
+                    
+                case .success(sharingGroupUUID: let sgid, lockedSharingGroup: let locked):
                     lockedSharingGroup = locked
-                    sharingGroupId = sharingGroup
+                    sharingGroupUUID = sgid
                 }
                 
             case .noObjectFound:
@@ -356,7 +357,7 @@ class RequestHandler : AccountDelegate {
             assert(authenticationLevel! == .none)
             
             dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, sharingGroupId: sharingGroupId, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
+                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
@@ -376,7 +377,7 @@ class RequestHandler : AccountDelegate {
             if let profileCreds = AccountManager.session.accountFromProfile(profile: profile!, user: credsUser, delegate: self) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, sharingGroupId: sharingGroupId, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
+                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
@@ -408,14 +409,14 @@ class RequestHandler : AccountDelegate {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, sharingGroupId: SharingGroupId?, lockedSharingGroup: Bool, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, sharingGroupUUID: String?, lockedSharingGroup: Bool, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         
         // For secondary authentication, we'll have a current signed in user.
         // Not treating a nil effectiveOwningUserId for the same reason as the `.noObjectFound` case below.
         
-        if let user = currentSignedInUser, let sharingGroupId = sharingGroupId, let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: user, sharingGroupId: sharingGroupId, sharingGroupUserRepo: repositories.sharingGroupUser) {
+        if let user = currentSignedInUser, let sharingGroupUUID = sharingGroupUUID, let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: user, sharingGroupUUID: sharingGroupUUID, sharingGroupUserRepo: repositories.sharingGroupUser) {
 
             let effectiveOwningUserKey = UserRepository.LookupKey.userId(effectiveOwningUserId)
             Log.debug("effectiveOwningUserId: \(effectiveOwningUserId)")
@@ -449,8 +450,8 @@ class RequestHandler : AccountDelegate {
         let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { response in
         
             // If we locked before, do unlock now.
-            if lockedSharingGroup, let sharingGroupId = sharingGroupId {
-                _ = self.repositories.lock.unlock(sharingGroupId: sharingGroupId)
+            if lockedSharingGroup, let sharingGroupUUID = sharingGroupUUID {
+                _ = self.repositories.lock.unlock(sharingGroupUUID: sharingGroupUUID)
             }
         
             var message:ResponseMessage!

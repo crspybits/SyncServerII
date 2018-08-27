@@ -71,8 +71,8 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func checkOwingUserIdForSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, sharingUser:TestAccount) -> Bool {
-        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+    func checkOwingUserIdForSharingGroupUser(sharingGroupUUID: String, userId: UserId, sharingUser:TestAccount) -> Bool {
+        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: userId)
         let result = SharingGroupUserRepository(db).lookup(key: key, modelInit: SharingGroupUser.init)
         var sharingGroupUser: Server.SharingGroupUser!
         switch result {
@@ -93,22 +93,22 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    // The second sharing account joined is returned as the sharingGroupId
+    // The second sharing account joined is returned as the sharingGroupUUID
     @discardableResult
-    func redeemWithAnExistingOtherSharingAccount() -> (TestAccount, SharingGroupId)? {
-        var returnResult: (TestAccount, SharingGroupId)?
+    func redeemWithAnExistingOtherSharingAccount() -> (TestAccount, sharingGroupUUID: String)? {
+        var returnResult: (TestAccount, String)?
         
         let deviceUUID = Foundation.UUID().uuidString
-        
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return nil
         }
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: .read, sharingGroupId:sharingGroupId) { expectation, invitationUUID in
+        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -119,14 +119,16 @@ class ServerTestCase : XCTestCase {
         }
         
         // Primary sharing account user now exists.
-        
+
+        let sharingGroupUUID2 = Foundation.UUID().uuidString
+
         // Create a second sharing group and invite/redeem the primary sharing account user.
-        guard let sharingGroupId2 = createSharingGroup(deviceUUID:deviceUUID) else {
+        guard createSharingGroup(sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID) else {
             XCTFail()
             return nil
         }
         
-        createSharingInvitation(permission: .write, sharingGroupId:sharingGroupId2) { expectation, invitationUUID in
+        createSharingInvitation(permission: .write, sharingGroupUUID:sharingGroupUUID2) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -142,15 +144,15 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        if checkOwingUserIdForSharingGroupUser(sharingGroupId: sharingGroupId2, userId: result.userId, sharingUser: sharingUser) {
-            returnResult = (sharingUser, sharingGroupId2)
+        if checkOwingUserIdForSharingGroupUser(sharingGroupUUID: sharingGroupUUID2, userId: result.userId, sharingUser: sharingUser) {
+            returnResult = (sharingUser, sharingGroupUUID2)
         }
         
         return returnResult
     }
     
     @discardableResult
-    func uploadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersion:Int64, appMetaData: AppMetaData, sharingGroupId: SharingGroupId, expectedError: Bool = false) -> UploadAppMetaDataResponse? {
+    func uploadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersion:Int64, appMetaData: AppMetaData, sharingGroupUUID: String, expectedError: Bool = false) -> UploadAppMetaDataResponse? {
 
         var result:UploadAppMetaDataResponse?
         
@@ -161,7 +163,7 @@ class ServerTestCase : XCTestCase {
             uploadAppMetaDataRequest.fileUUID = fileUUID
             uploadAppMetaDataRequest.masterVersion = masterVersion
             uploadAppMetaDataRequest.appMetaData = appMetaData
-            uploadAppMetaDataRequest.sharingGroupId = sharingGroupId
+            uploadAppMetaDataRequest.sharingGroupUUID = sharingGroupUUID
             
             self.performRequest(route: ServerEndpoints.uploadAppMetaData, headers: headers, urlParameters: "?" + uploadAppMetaDataRequest.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
@@ -194,7 +196,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersionExpectedWithDownload:Int64, expectUpdatedMasterUpdate:Bool = false, appMetaDataVersion: AppMetaDataVersionInt? = nil, sharingGroupId: SharingGroupId, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
+    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersionExpectedWithDownload:Int64, expectUpdatedMasterUpdate:Bool = false, appMetaDataVersion: AppMetaDataVersionInt? = nil, sharingGroupUUID: String, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
 
         var result:DownloadAppMetaDataResponse?
         
@@ -205,7 +207,7 @@ class ServerTestCase : XCTestCase {
                 DownloadAppMetaDataRequest.fileUUIDKey: fileUUID,
                 DownloadAppMetaDataRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
                 DownloadAppMetaDataRequest.appMetaDataVersionKey: appMetaDataVersion as Any,
-                ServerEndpoint.sharingGroupIdKey: sharingGroupId
+                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
             ])
             
             if downloadAppMetaDataRequest == nil {
@@ -368,7 +370,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName, sharingGroupName:String? = nil) -> AddUserResponse? {
+    func addNewUser(testAccount:TestAccount = .primaryOwningAccount, sharingGroupUUID: String, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName, sharingGroupName:String? = nil) -> AddUserResponse? {
         var result:AddUserResponse?
 
         if let fileName = Constants.session.owningUserAccountCreation.initialFileName {
@@ -376,21 +378,22 @@ class ServerTestCase : XCTestCase {
             let options = CloudStorageFileNameOptions(cloudFolderName: cloudFolderName, mimeType: "text/plain")
             
             deleteFile(testAccount: testAccount, cloudFileName: fileName, options: options)
-            result = addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, sharingGroupName: sharingGroupName)
+            result = addNewUser2(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, sharingGroupName: sharingGroupName)
         }
         else {
-            result = addNewUser2(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, sharingGroupName: sharingGroupName)
+            result = addNewUser2(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, sharingGroupName: sharingGroupName)
         }
         
         return result
     }
     
-    private func addNewUser2(testAccount:TestAccount, deviceUUID:String, cloudFolderName: String?, sharingGroupName:String?) -> AddUserResponse? {
+    private func addNewUser2(testAccount:TestAccount, sharingGroupUUID: String, deviceUUID:String, cloudFolderName: String?, sharingGroupName:String?) -> AddUserResponse? {
         var result:AddUserResponse?
         
         let addUserRequest = AddUserRequest(json: [
             AddUserRequest.cloudFolderNameKey : cloudFolderName as Any,
-            AddUserRequest.sharingGroupNameKey: sharingGroupName as Any
+            AddUserRequest.sharingGroupNameKey: sharingGroupName as Any,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])!
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
@@ -421,11 +424,13 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup? = nil, errorExpected: Bool = false) -> SharingGroupId? {
-        var result: SharingGroupId?
+    // Returns sharing group UUID
+    func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, sharingGroupUUID:String, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup? = nil, errorExpected: Bool = false) -> Bool {
+        var result: Bool = false
         
         let createRequest = CreateSharingGroupRequest(json: [
-            CreateSharingGroupRequest.sharingGroupNameKey: sharingGroup?.sharingGroupName as Any
+            CreateSharingGroupRequest.sharingGroupNameKey: sharingGroup?.sharingGroupName as Any,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])!
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
@@ -446,8 +451,8 @@ class ServerTestCase : XCTestCase {
                 }
                 
                 if !errorExpected {
-                    if let dict = dict, let createResponse = CreateSharingGroupResponse(json: dict) {
-                        result = createResponse.sharingGroupId
+                    if let dict = dict, let _ = CreateSharingGroupResponse(json: dict) {
+                        result = true
                     }
                     else {
                         XCTFail()
@@ -466,7 +471,7 @@ class ServerTestCase : XCTestCase {
         var result: Bool = false
         
         let updateRequest = UpdateSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroup.sharingGroupId as Any,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroup.sharingGroupUUID as Any,
             UpdateSharingGroupRequest.sharingGroupNameKey: sharingGroup.sharingGroupName as Any,
             ServerEndpoint.masterVersionKey: masterVersion
         ])!
@@ -511,11 +516,11 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func removeSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt) -> Bool {
+    func removeSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupUUID: String, masterVersion: MasterVersionInt) -> Bool {
         var result: Bool = false
         
         let removeRequest = RemoveSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
             ServerEndpoint.masterVersionKey: masterVersion
         ])!
         
@@ -551,11 +556,11 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func removeUserFromSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupId: SharingGroupId, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false) -> Bool {
+    func removeUserFromSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupUUID: String, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false) -> Bool {
         var result: Bool = false
         
         let removeRequest = RemoveUserFromSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
             ServerEndpoint.masterVersionKey: masterVersion
         ])!
         
@@ -597,12 +602,12 @@ class ServerTestCase : XCTestCase {
     struct UploadFileResult {
         let request: UploadFileRequest
         let fileSize:Int64
-        let sharingGroupId:SharingGroupId?
+        let sharingGroupUUID:String?
         let uploadingUserId: UserId?
     }
     
     enum AddUser {
-        case no(sharingGroupId: SharingGroupId)
+        case no(sharingGroupUUID: String)
         case yes
     }
     
@@ -610,21 +615,19 @@ class ServerTestCase : XCTestCase {
     @discardableResult
     func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, contents: String? = nil, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
-        var sharingGroupId:SharingGroupId!
+        var sharingGroupUUID = UUID().uuidString
         var uploadingUserId: UserId?
         
         switch addUser {
         case .yes:
-            guard let addUserResponse = self.addNewUser(testAccount:testAccount, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName) else {
+            guard let addUserResponse = self.addNewUser(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName) else {
                 XCTFail()
                 return nil
             }
 
-            XCTAssert(addUserResponse.sharingGroupId != nil)
-            sharingGroupId = addUserResponse.sharingGroupId
             uploadingUserId = addUserResponse.userId
-        case .no(sharingGroupId: let id):
-            sharingGroupId = id
+        case .no(sharingGroupUUID: let id):
+            sharingGroupUUID = id
         }
         
         var fileUUIDToSend = ""
@@ -652,7 +655,7 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.masterVersionKey: masterVersion,
             UploadFileRequest.undeleteServerFileKey: undelete,
             UploadFileRequest.fileGroupUUIDKey: fileGroupUUID as Any,
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])!
         
         uploadRequest.appMetaData = appMetaData
@@ -661,7 +664,7 @@ class ServerTestCase : XCTestCase {
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
         
-        return UploadFileResult(request: uploadRequest, fileSize: Int64(uploadString.count), sharingGroupId: sharingGroupId, uploadingUserId: uploadingUserId)
+        return UploadFileResult(request: uploadRequest, fileSize: Int64(uploadString.count), sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId)
     }
     
     func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, expectedUploadSize:Int64, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) {
@@ -740,19 +743,19 @@ class ServerTestCase : XCTestCase {
     func uploadJPEGFile(deviceUUID:String = Foundation.UUID().uuidString,
         fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> UploadFileResult? {
     
-        var sharingGroupId: SharingGroupId!
+        var sharingGroupUUID: String!
         var uploadingUserId: UserId?
         
         switch addUser {
         case .yes:
-            guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID) else {
+            sharingGroupUUID = UUID().uuidString
+            guard let addUserResponse = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
                 XCTFail()
                 return nil
             }
-            sharingGroupId = addUserResponse.sharingGroupId
             uploadingUserId = addUserResponse.userId
-        case .no(sharingGroupId: let id):
-            sharingGroupId = id
+        case .no(sharingGroupUUID: let id):
+            sharingGroupUUID = id
         }
         
 #if os(macOS)
@@ -772,7 +775,7 @@ class ServerTestCase : XCTestCase {
             UploadFileRequest.mimeTypeKey: ServerTestCase.jpegMimeType,
             UploadFileRequest.fileVersionKey: fileVersion,
             UploadFileRequest.masterVersionKey: expectedMasterVersion,
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
             ]) else {
             XCTFail()
             return nil
@@ -783,17 +786,17 @@ class ServerTestCase : XCTestCase {
         Log.info("Starting runUploadTest: uploadJPEGFile")
         runUploadTest(data:data, uploadRequest:uploadRequest, expectedUploadSize:sizeOfCatFileInBytes, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadJPEGFile")
-        return UploadFileResult(request: uploadRequest, fileSize: sizeOfCatFileInBytes, sharingGroupId: sharingGroupId, uploadingUserId:uploadingUserId)
+        return UploadFileResult(request: uploadRequest, fileSize: sizeOfCatFileInBytes, sharingGroupUUID: sharingGroupUUID, uploadingUserId:uploadingUserId)
     }
     
-    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, sharingGroupId: SharingGroupId, failureExpected:Bool = false) {
+    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, sharingGroupUUID: String, failureExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest(json: [
                 ServerEndpoint.masterVersionKey : "\(masterVersion)",
-                ServerEndpoint.sharingGroupIdKey: sharingGroupId
+                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
             ])
             
             self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
@@ -821,14 +824,14 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, expectedFileSizes: [String: Int64]? = nil, sharingGroupId: SharingGroupId? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
+    func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, expectedFileSizes: [String: Int64]? = nil, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
     
         if let expectedFiles = expectedFiles {
             XCTAssert(expectedFiles.count == expectedFileSizes!.count)
         }
         
         let indexRequest = IndexRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID as Any
         ])
     
         guard let request = indexRequest,
@@ -895,14 +898,14 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId? = nil) -> ([FileInfo]?, [SyncServerShared.SharingGroup])? {
+    func getIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil) -> ([FileInfo]?, [SyncServerShared.SharingGroup])? {
         var result:([FileInfo]?, [SyncServerShared.SharingGroup])?
         
         self.performServerTest(testAccount: testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             let indexRequest = IndexRequest(json: [
-                ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
+                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID as Any
             ])
             
             guard let request = indexRequest else {
@@ -928,7 +931,7 @@ class ServerTestCase : XCTestCase {
                     return
                 }
                 
-                if sharingGroupId == nil {
+                if sharingGroupUUID == nil {
                     XCTAssert(indexResponse.fileIndex == nil)
                     XCTAssert(indexResponse.masterVersion == nil)
                 }
@@ -945,14 +948,14 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func getMasterVersion(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId) -> MasterVersionInt? {
+    func getMasterVersion(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String) -> MasterVersionInt? {
         var result:MasterVersionInt?
         
         self.performServerTest(testAccount: testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             let indexRequest = IndexRequest(json: [
-                ServerEndpoint.sharingGroupIdKey: sharingGroupId as Any
+                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID as Any
             ])
             
             guard let request = indexRequest else {
@@ -985,14 +988,14 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString,expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil, sharingGroupId: SharingGroupId, errorExpected: Bool = false) {
+    func getUploads(expectedFiles:[UploadFileRequest], deviceUUID:String = Foundation.UUID().uuidString, expectedFileSizes: [String: Int64]? = nil, matchOptionals:Bool = true, expectedDeletionState:[String: Bool]? = nil, sharingGroupUUID: String, errorExpected: Bool = false) {
     
         if expectedFileSizes != nil {
             XCTAssert(expectedFiles.count == expectedFileSizes!.count)
         }
         
         let getUploadsRequest = GetUploadsRequest(json: [
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])
         
         guard let request = getUploadsRequest,
@@ -1064,7 +1067,7 @@ class ServerTestCase : XCTestCase {
         }
     }
 
-    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupId: SharingGroupId, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -1072,13 +1075,13 @@ class ServerTestCase : XCTestCase {
             var request:CreateSharingInvitationRequest!
             if permission == nil {
                 request = CreateSharingInvitationRequest(json: [
-                    ServerEndpoint.sharingGroupIdKey: sharingGroupId
+                    ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
                 ])
             }
             else {
                 request = CreateSharingInvitationRequest(json: [
                     CreateSharingInvitationRequest.permissionKey : permission!,
-                    ServerEndpoint.sharingGroupIdKey: sharingGroupId
+                    ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
                 ])
             }
             
@@ -1099,38 +1102,36 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupId: SharingGroupId?)->())? = nil) {
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupUUID: String?)->())? = nil) {
         // a) Create sharing invitation with one account.
         // b) Next, need to "sign out" of that account, and sign into another account
         // c) And, redeem sharing invitation with that new account.
 
         // Create the owning user, if needed.
         let deviceUUID = Foundation.UUID().uuidString
-        var actualSharingGroupId:SharingGroupId!
+        var actualSharingGroupUUID:String!
         switch addUser {
-        case .no(let sharingGroupId):
-            actualSharingGroupId = sharingGroupId
+        case .no(let sharingGroupUUID):
+            actualSharingGroupUUID = sharingGroupUUID
 
         case .yes:
-            guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
-                let sharingGroupId = addUserResponse.sharingGroupId else {
+            actualSharingGroupUUID = Foundation.UUID().uuidString
+            guard let _ = self.addNewUser(sharingGroupUUID: actualSharingGroupUUID, deviceUUID:deviceUUID) else {
                 XCTFail()
                 completion?(nil, nil)
                 return
             }
-            
-            actualSharingGroupId = sharingGroupId
         }
 
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: permission, sharingGroupId:actualSharingGroupId) { expectation, invitationUUID in
+        createSharingInvitation(permission: permission, sharingGroupUUID:actualSharingGroupUUID) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
         
         redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
-            XCTAssert(result?.userId != nil && result?.sharingGroupId != nil)
+            XCTAssert(result?.userId != nil && result?.sharingGroupUUID != nil)
             expectation.fulfill()
         }
 
@@ -1167,7 +1168,7 @@ class ServerTestCase : XCTestCase {
                 return
             }
             
-            XCTAssert(sharingGroups[0].sharingGroupId == actualSharingGroupId)
+            XCTAssert(sharingGroups[0].sharingGroupUUID == actualSharingGroupUUID)
             XCTAssert(sharingGroups[0].sharingGroupName == nil)
             XCTAssert(sharingGroups[0].deleted == false)
             guard sharingGroups[0].sharingGroupUsers != nil else {
@@ -1185,7 +1186,7 @@ class ServerTestCase : XCTestCase {
                 XCTAssert(sgu.userId != nil)
             }
             
-            completion?((model as! User).userId, actualSharingGroupId)
+            completion?((model as! User).userId, actualSharingGroupUUID)
         }
     }
     
@@ -1237,7 +1238,8 @@ class ServerTestCase : XCTestCase {
     func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
 
         if addUser {
-            guard let _ = self.addNewUser(deviceUUID:deviceUUID) else {
+            let sharingGroupUUID = UUID().uuidString
+            guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
                 XCTFail()
                 return
             }
@@ -1282,27 +1284,27 @@ class ServerTestCase : XCTestCase {
         let beforeUploadTime = Date()
         var afterUploadTime:Date!
         var fileUUID:String!
-        var actualSharingGroupId: SharingGroupId!
+        var actualSharingGroupUUID: String!
         
         if uploadFileRequest == nil {
             guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData),
-                let sharingGroupId = uploadResult.sharingGroupId else {
+                let sharingGroupUUID = uploadResult.sharingGroupUUID else {
                 XCTFail()
                 return nil
             }
             
-            actualSharingGroupId = sharingGroupId
+            actualSharingGroupUUID = sharingGroupUUID
             
             fileUUID = uploadResult.request.fileUUID
             actualUploadFileRequest = uploadResult.request
             actualFileSize = uploadResult.fileSize
-            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
             afterUploadTime = Date()
         }
         else {
             actualUploadFileRequest = uploadFileRequest
             actualFileSize = fileSize
-            actualSharingGroupId = uploadFileRequest?.sharingGroupId
+            actualSharingGroupUUID = uploadFileRequest?.sharingGroupUUID
         }
         
         var result:DownloadFileResponse?
@@ -1315,7 +1317,7 @@ class ServerTestCase : XCTestCase {
                 DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
                 DownloadFileRequest.fileVersionKey : downloadFileVersion,
                 DownloadFileRequest.appMetaDataVersionKey: appMetaData?.version as Any,
-                ServerEndpoint.sharingGroupIdKey: actualSharingGroupId
+                ServerEndpoint.sharingGroupUUIDKey: actualSharingGroupUUID
             ])
             
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
@@ -1351,14 +1353,14 @@ class ServerTestCase : XCTestCase {
         }
         
         if let afterUploadTime = afterUploadTime, let fileUUID = fileUUID {
-            checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime, sharingGroupId: actualSharingGroupId)
+            checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime, sharingGroupUUID: actualSharingGroupUUID)
         }
         
         return result
     }
     
-    func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date, sharingGroupId:SharingGroupId) {
-        guard let (files, _) = getIndex(sharingGroupId:sharingGroupId),
+    func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date, sharingGroupUUID:String) {
+        guard let (files, _) = getIndex(sharingGroupUUID:sharingGroupUUID),
             let fileInfo = files else {
             XCTFail()
             return
@@ -1431,19 +1433,18 @@ class ServerTestCase : XCTestCase {
         return cloudFileName
     }
     
-    func addSharingGroup(sharingGroupName: String? = nil) -> SharingGroupId? {
-        let result = SharingGroupRepository(db).add(sharingGroupName: sharingGroupName)
+    func addSharingGroup(sharingGroupUUID: String, sharingGroupName: String? = nil) -> Bool {
+        let result = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID, sharingGroupName: sharingGroupName)
         
-        var sharingGroupId:SharingGroupId?
         switch result {
-        case .success(sharingGroupId: let id):
-            sharingGroupId = id
+        case .success:
+            return true
         
         default:
             XCTFail()
         }
         
-        return sharingGroupId
+        return false
     }
 }
 

@@ -6,15 +6,15 @@
 //
 //
 
-// Enables short duration locks to be held while info in the UploadRepository is transfered to the FileIndexRepository. This lock works in a somewhat non-obvious manner. Due to the blocking nature of transactions in InnoDB with row-level locking, a lock held by one server request for a specific sharingGroupId in a transaction will block another server request attempting to obtain the same lock for the same sharingGroupId.
+// Enables short duration locks to be held while info in the UploadRepository is transfered to the FileIndexRepository. This lock works in a somewhat non-obvious manner. Due to the blocking nature of transactions in InnoDB with row-level locking, a lock held by one server request for a specific sharingGroupUUID in a transaction will block another server request attempting to obtain the same lock for the same sharingGroupUUID.
 
 import Foundation
 import SyncServerShared
 import LoggerAPI
 
 class Lock : NSObject, Model {
-    static let sharingGroupIdKey = "sharingGroupId"
-    var sharingGroupId: SharingGroupId!
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID: String!
     
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
@@ -28,8 +28,8 @@ class Lock : NSObject, Model {
     subscript(key:String) -> Any? {
         set {
             switch key {
-            case Lock.sharingGroupIdKey:
-                sharingGroupId = newValue as? SharingGroupId
+            case Lock.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as? String
                 
             case Lock.deviceUUIDKey:
                 deviceUUID = newValue as? String
@@ -51,9 +51,9 @@ class Lock : NSObject, Model {
         super.init()
     }
     
-    init(sharingGroupId: SharingGroupId, deviceUUID: String,
+    init(sharingGroupUUID: String, deviceUUID: String,
         expiryDuration:TimeInterval = Lock.expiryDuration) {
-        self.sharingGroupId = sharingGroupId
+        self.sharingGroupUUID = sharingGroupUUID
         self.deviceUUID = deviceUUID
         let calendar = Calendar.current
         expiry = calendar.date(byAdding: .second, value: Int(expiryDuration), to: Date())!
@@ -80,35 +80,35 @@ class LockRepository : Repository, RepositoryLookup {
 
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
-            "(sharingGroupId BIGINT NOT NULL, " +
+            "(sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
             // identifies a specific mobile device (assigned by app)
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
             "expiry \(dateFormat.rawValue), " +
 
-            "FOREIGN KEY (sharingGroupId) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupIdKey)), " +
+            "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 
-            "UNIQUE (sharingGroupId))"
+            "UNIQUE (sharingGroupUUID))"
         
         return db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
     }
     
     enum LookupKey : CustomStringConvertible {
-        case sharingGroupId(SharingGroupId)
+        case sharingGroupUUID(String)
         
         var description : String {
             switch self {
-            case .sharingGroupId(let sharingGroupId):
-                return "sharingGroupId(\(sharingGroupId))"
+            case .sharingGroupUUID(let sharingGroupUUID):
+                return "sharingGroupUUID(\(sharingGroupUUID))"
             }
         }
     }
     
     func lookupConstraint(key:LookupKey) -> String {
         switch key {
-        case .sharingGroupId(let sharingGroupId):
-            return "sharingGroupId = \(sharingGroupId)"
+        case .sharingGroupUUID(let sharingGroupUUID):
+            return "sharingGroupUUID = '\(sharingGroupUUID)'"
         }
     }
     
@@ -125,13 +125,13 @@ class LockRepository : Repository, RepositoryLookup {
     
     // removeStale indicates whether to remove any lock, held by the user, past its expiry prior to attempting to obtain lock.
     func lock(lock:Lock, removeStale:Bool = true) -> LockAttemptResult {
-        if lock.sharingGroupId == nil || lock.deviceUUID == nil || lock.expiry == nil {
+        if lock.sharingGroupUUID == nil || lock.deviceUUID == nil || lock.expiry == nil {
             Log.error("One of the model values was nil!")
             return .modelValueWasNil
         }
         
         if removeStale {
-            if removeStaleLock(forSharingGroupId: lock.sharingGroupId!) == nil {
+            if removeStaleLock(forSharingGroupUUID: lock.sharingGroupUUID!) == nil {
                 Log.error("Error removing stale locks!")
                 return .errorRemovingStaleLocks
             }
@@ -142,7 +142,7 @@ class LockRepository : Repository, RepositoryLookup {
         // TODO: *2* It would be good to specify the expiry time dynamically if possible-- this insert can block. e.g., NOW() + INTERVAL 15 DAY
         // It is conceptually possible for the block to wake up and the lock already to be expired.
         
-        let query = "INSERT INTO \(tableName) (sharingGroupId, deviceUUID, expiry) VALUES(\(lock.sharingGroupId!), '\(lock.deviceUUID!)', '\(expiry)');"
+        let query = "INSERT INTO \(tableName) (sharingGroupUUID, deviceUUID, expiry) VALUES('\(lock.sharingGroupUUID!)', '\(lock.deviceUUID!)', '\(expiry)');"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully obtained lock!!")
@@ -160,15 +160,15 @@ class LockRepository : Repository, RepositoryLookup {
     
     // Omit the userId parameter to remove all stale locks.
     // Returns the number of stale locks that were actually removed, or nil if there was an error.
-    func removeStaleLock(forSharingGroupId sharingGroupId:SharingGroupId? = nil) -> Int? {
+    func removeStaleLock(forSharingGroupUUID sharingGroupUUID:String? = nil) -> Int? {
         let staleDate = DateExtras.date(Date(), toFormat: dateFormat)
         
-        var sharingGroupIdConstraint = ""
-        if sharingGroupId != nil {
-            sharingGroupIdConstraint = "sharingGroupId = \(sharingGroupId!) and "
+        var sharingGroupUUIDConstraint = ""
+        if sharingGroupUUID != nil {
+            sharingGroupUUIDConstraint = "sharingGroupUUID = '\(sharingGroupUUID!)' and "
         }
         
-        let query = "DELETE FROM \(tableName) WHERE \(sharingGroupIdConstraint) expiry < '\(staleDate)'"
+        let query = "DELETE FROM \(tableName) WHERE \(sharingGroupUUIDConstraint) expiry < '\(staleDate)'"
         
         if db.connection.query(statement: query) {
             let numberLocksRemoved = Int(db.connection.numberAffectedRows())
@@ -183,8 +183,8 @@ class LockRepository : Repository, RepositoryLookup {
     }
     
     @discardableResult
-    func unlock(sharingGroupId:SharingGroupId) -> Bool {
-        let query = "DELETE FROM \(tableName) WHERE sharingGroupId = \(sharingGroupId)"
+    func unlock(sharingGroupUUID:String) -> Bool {
+        let query = "DELETE FROM \(tableName) WHERE sharingGroupUUID = '\(sharingGroupUUID)'"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully released lock!!")

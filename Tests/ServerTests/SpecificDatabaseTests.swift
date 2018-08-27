@@ -25,25 +25,25 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
             
-    func checkMasterVersion(sharingGroupId:UserId, version:Int64) {
-        let result = MasterVersionRepository(db).lookup(key: .sharingGroupId(sharingGroupId), modelInit: MasterVersion.init)
+    func checkMasterVersion(sharingGroupUUID:String, version:Int64) {
+        let result = MasterVersionRepository(db).lookup(key: .sharingGroupUUID(sharingGroupUUID), modelInit: MasterVersion.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
             
         case .found(let object):
             let masterVersion = object as! MasterVersion
-            XCTAssert(masterVersion.masterVersion == version && masterVersion.sharingGroupId == sharingGroupId)
+            XCTAssert(masterVersion.masterVersion == version && masterVersion.sharingGroupUUID == sharingGroupUUID)
 
         case .noObjectFound:
             XCTFail("No MasterVersion Found")
         }
     }
 
-    func doUpdateToNextMasterVersion(currentMasterVersion:MasterVersionInt, sharingGroupId: SharingGroupId, expectedError: Bool = false) {
+    func doUpdateToNextMasterVersion(currentMasterVersion:MasterVersionInt, sharingGroupUUID: String, expectedError: Bool = false) {
         
         let current = MasterVersion()
-        current.sharingGroupId = sharingGroupId
+        current.sharingGroupUUID = sharingGroupUUID
         current.masterVersion = currentMasterVersion
         
         let result = MasterVersionRepository(db).updateToNext(current: current)
@@ -67,36 +67,40 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testUpdateToNextMasterVersion() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId))
-        doUpdateToNextMasterVersion(currentMasterVersion: 0, sharingGroupId: sharingGroupId)
-        checkMasterVersion(sharingGroupId: sharingGroupId, version: 1)
+        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID))
+        doUpdateToNextMasterVersion(currentMasterVersion: 0, sharingGroupUUID: sharingGroupUUID)
+        checkMasterVersion(sharingGroupUUID: sharingGroupUUID, version: 1)
     }
 
     func testUpdateToNextTwiceMasterVersion() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId))
-        doUpdateToNextMasterVersion(currentMasterVersion: 0, sharingGroupId: sharingGroupId)
-        doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupId: sharingGroupId)
-        checkMasterVersion(sharingGroupId: sharingGroupId, version: 2)
+        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID))
+        doUpdateToNextMasterVersion(currentMasterVersion: 0, sharingGroupUUID: sharingGroupUUID)
+        doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupUUID: sharingGroupUUID)
+        checkMasterVersion(sharingGroupUUID: sharingGroupUUID, version: 2)
     }
     
     func testUpdateToNextFailsWithWrongExpectedMasterVersion() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId))
-        doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupId: sharingGroupId, expectedError: true)
+        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID))
+        doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupUUID: sharingGroupUUID, expectedError: true)
     }
     
     func lockIt(lock:Lock, removeStale:Bool = true) -> Bool {
@@ -109,62 +113,67 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testLock() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        let lock = Lock(sharingGroupId:sharingGroupId, deviceUUID:Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
         XCTAssert(!lockIt(lock: lock))
     }
     
     func testThatNewlyAddedLocksAreNotStale() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        let lock = Lock(sharingGroupId:sharingGroupId, deviceUUID:Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
-        XCTAssert(LockRepository(db).removeStaleLock(forSharingGroupId: 1) == 0)
+        XCTAssert(LockRepository(db).removeStaleLock() == 0)
         XCTAssert(!lockIt(lock: lock))
     }
     
     func testThatStaleALockIsRemoved() {
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
         let duration:TimeInterval = 1
-        let lock = Lock(sharingGroupId:sharingGroupId, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
+        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
         sleep(sleepDuration)
         
-        XCTAssert(LockRepository(db).removeStaleLock(forSharingGroupId: sharingGroupId) == 1)
+        XCTAssert(LockRepository(db).removeStaleLock(forSharingGroupUUID: sharingGroupUUID) == 1)
         XCTAssert(lockIt(lock: lock, removeStale:false))
     }
     
     func testRemoveAllStaleLocks() {
-        guard case .success(let sharingGroupId1) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID1 = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID1) else {
             XCTFail()
             return
         }
-        
-        guard case .success(let sharingGroupId2) = SharingGroupRepository(db).add() else {
+
+        let sharingGroupUUID2 = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID2) else {
             XCTFail()
             return
         }
         
         let duration:TimeInterval = 1
         
-        let lock1 = Lock(sharingGroupId:sharingGroupId1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
+        let lock1 = Lock(sharingGroupUUID:sharingGroupUUID1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock1))
         
-        let lock2 = Lock(sharingGroupId:sharingGroupId2, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
+        let lock2 = Lock(sharingGroupUUID:sharingGroupUUID2, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
         XCTAssert(lockIt(lock: lock2))
         
         let sleepDuration = UInt32(duration) + UInt32(1)
@@ -177,35 +186,31 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     }
     
     func testRemoveLock() {
-        guard case .success(let sharingGroupId1) = SharingGroupRepository(db).add() else {
+        let sharingGroupUUID = UUID().uuidString
+        
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        let lock = Lock(sharingGroupId:sharingGroupId1, deviceUUID:Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString)
         XCTAssert(lockIt(lock: lock))
-        XCTAssert(LockRepository(db).unlock(sharingGroupId:sharingGroupId1))
+        XCTAssert(LockRepository(db).unlock(sharingGroupUUID:sharingGroupUUID))
         XCTAssert(lockIt(lock: lock))
     }
     
-    func doAddFileIndex(userId:UserId = 1, sharingGroupId: SharingGroupId? = nil) -> FileIndex? {
-    
-        var actualSharingGroupId:SharingGroupId!
-        
-        if sharingGroupId == nil {
-            guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+    func doAddFileIndex(userId:UserId = 1, sharingGroupUUID:String, createSharingGroup: Bool) -> FileIndex? {
+
+        if createSharingGroup {
+            guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
                 XCTFail()
                 return nil
             }
-            actualSharingGroupId = sharingGroupId
             
-            guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .write, owningUserId: nil) else {
+            guard case .success = SharingGroupUserRepository(db).add(sharingGroupUUID: sharingGroupUUID, userId: userId, permission: .write, owningUserId: nil) else {
                 XCTFail()
                 return nil
             }
-        }
-        else {
-            actualSharingGroupId = sharingGroupId
         }
         
         let fileIndex = FileIndex()
@@ -219,7 +224,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
         fileIndex.creationDate = Date()
         fileIndex.updateDate = Date()
-        fileIndex.sharingGroupId = actualSharingGroupId
+        fileIndex.sharingGroupUUID = sharingGroupUUID
         
         guard let result1 = FileIndexRepository(db).add(fileIndex: fileIndex) else {
             XCTFail()
@@ -243,7 +248,8 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = doAddFileIndex(userId:userId) else {
+        let sharingGroupUUID = UUID().uuidString
+        guard let _ = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
             XCTFail()
             return
         }
@@ -261,7 +267,8 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let fileIndex = doAddFileIndex(userId:userId) else {
+        let sharingGroupUUID = UUID().uuidString
+        guard let fileIndex = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
             XCTFail()
             return
         }
@@ -275,13 +282,14 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        
+        let sharingGroupUUID = UUID().uuidString
+
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
             return
         }
         
-        guard let fileIndex = doAddFileIndex(userId:userId) else {
+        guard let fileIndex = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
             XCTFail()
             return
         }
@@ -296,13 +304,14 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        
+        let sharingGroupUUID = UUID().uuidString
+
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
             return
         }
         
-        guard let fileIndex = doAddFileIndex(userId:userId) else {
+        guard let fileIndex = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
             XCTFail()
             return
         }
@@ -316,13 +325,14 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        
+        let sharingGroupUUID = UUID().uuidString
+
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
             return
         }
         
-        guard let fileIndex = doAddFileIndex(userId:userId) else {
+        guard let fileIndex = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
             XCTFail()
             return
         }
@@ -337,13 +347,14 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        
+        let sharingGroupUUID = UUID().uuidString
+
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
             return
         }
         
-        guard let fileIndex1 = doAddFileIndex(userId:userId) else {
+        guard let fileIndex1 = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
             XCTFail()
             return
         }
@@ -364,7 +375,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             XCTAssert(fileIndex1.mimeType != nil && fileIndex1.mimeType == fileIndex2.mimeType)
             XCTAssert(fileIndex1.userId != nil && fileIndex1.userId == fileIndex2.userId)
             XCTAssert(fileIndex1.appMetaData != nil && fileIndex1.appMetaData == fileIndex2.appMetaData)
-            XCTAssert(fileIndex1.sharingGroupId != nil && fileIndex1.sharingGroupId == fileIndex2.sharingGroupId)
+            XCTAssert(fileIndex1.sharingGroupUUID != nil && fileIndex1.sharingGroupUUID == fileIndex2.sharingGroupUUID)
 
         case .noObjectFound:
             XCTFail("No Upload Found")
@@ -377,23 +388,24 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        
+        let sharingGroupUUID = UUID().uuidString
+
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail("Bad credentialsId!")
             return
         }
         
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .admin, owningUserId: nil) else {
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupUUID: sharingGroupUUID, userId: userId, permission: .admin, owningUserId: nil) else {
             XCTFail()
             return
         }
         
-        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             XCTAssert(fileIndex.count == 0)
@@ -408,28 +420,29 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.accountType = .Google
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
-        
+        let sharingGroupUUID = UUID().uuidString
+
         guard let userId = UserRepository(db).add(user: user1) else {
             XCTFail()
             return
         }
         
-        guard case .success(let sharingGroupId) = SharingGroupRepository(db).add() else {
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        guard case .success = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read, owningUserId: nil) else {
+        guard case .success = SharingGroupUserRepository(db).add(sharingGroupUUID: sharingGroupUUID, userId: userId, permission: .read, owningUserId: nil) else {
             XCTFail()
             return
         }
 
-        guard let fileIndexInserted = doAddFileIndex(userId: userId, sharingGroupId: sharingGroupId) else {
+        guard let fileIndexInserted = doAddFileIndex(userId: userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: false) else {
             XCTFail()
             return
         }
 
-        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             XCTAssert(fileIndex.count == 1)

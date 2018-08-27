@@ -25,26 +25,29 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
     }
 
     func testAddSharingGroupWithoutName() {
-        guard let _ = addSharingGroup() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
     }
     
     func testAddSharingGroupWithName() {
-        guard let _ = addSharingGroup(sharingGroupName: "Foobar") else {
+        let sharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID, sharingGroupName: "Foobar") else {
             XCTFail()
             return
         }
     }
     
     func testLookupFromSharingGroupExisting() {
-        guard let sharingGroupId = addSharingGroup() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        let key = SharingGroupRepository.LookupKey.sharingGroupId(sharingGroupId)
+        let key = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
         let result = SharingGroupRepository(db).lookup(key: key, modelInit: SharingGroup.init)
         switch result {
         case .found(let model):
@@ -52,7 +55,7 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
                 XCTFail()
                 return
             }
-            XCTAssert(obj.sharingGroupId != nil)
+            XCTAssert(obj.sharingGroupUUID != nil)
         case .noObjectFound:
             XCTFail("No object found")
         case .error(let error):
@@ -61,7 +64,7 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
     }
 
     func testLookupFromSharingGroupNonExisting() {
-        let key = SharingGroupRepository.LookupKey.sharingGroupId(100)
+        let key = SharingGroupRepository.LookupKey.sharingGroupUUID(UUID().uuidString)
         let result = SharingGroupRepository(db).lookup(key: key, modelInit: SharingGroup.init)
         switch result {
         case .found:

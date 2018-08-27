@@ -27,14 +27,14 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     func testUploadTextFile() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let result = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupId = result.sharingGroupId else {
+            let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupId: sharingGroupId)
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
             guard fileIndex.count == 1 else {
@@ -58,12 +58,12 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     func testUploadTextAndJPEGFile() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupId: sharingGroupId)) else {
+        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
@@ -72,13 +72,13 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     func testUploadingSameFileTwiceWorks() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Second upload.
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: uploadResult.request.fileVersion, masterVersion: uploadResult.request.masterVersion, appMetaData: uploadResult.request.appMetaData) else {
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: uploadResult.request.fileVersion, masterVersion: uploadResult.request.masterVersion, appMetaData: uploadResult.request.appMetaData) else {
             XCTFail()
             return
         }
@@ -101,8 +101,9 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     func testUploadWithInvalidMimeTypeFails() {
         let testAccount:TestAccount = .primaryOwningAccount
         let deviceUUID = Foundation.UUID().uuidString
-        guard let addUserResponse = addNewUser(deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
             XCTFail()
             return
         }
@@ -117,34 +118,35 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "foobar",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 0,
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])!
         
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), deviceUUID:deviceUUID, errorExpected: true)
     }
     
-    func testUploadWithInvalidSharingGroupIdFails() {
+    func testUploadWithInvalidSharingGroupUUIDFails() {
         guard let _ = uploadTextFile() else {
             XCTFail()
             return
         }
         
-        let invalidSharingGroupId: SharingGroupId = 100
-        uploadTextFile(addUser: .no(sharingGroupId: invalidSharingGroupId), errorExpected: true)
+        let invalidSharingGroupUUID = UUID().uuidString
+        uploadTextFile(addUser: .no(sharingGroupUUID: invalidSharingGroupUUID), errorExpected: true)
     }
 
-    func testUploadWithBadSharingGroupIdFails() {
+    func testUploadWithBadSharingGroupUUIDFails() {
         guard let _ = uploadTextFile() else {
             XCTFail()
             return
         }
         
-        guard let workingButBadSharingGroupId = addSharingGroup() else {
+        let workingButBadSharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        uploadTextFile(addUser: .no(sharingGroupId: workingButBadSharingGroupId), errorExpected: true)
+        uploadTextFile(addUser: .no(sharingGroupUUID: workingButBadSharingGroupUUID), errorExpected: true)
     }
 }
 
@@ -158,8 +160,8 @@ extension FileController_UploadTests {
             ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
             ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
             ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails),
-            ("testUploadWithInvalidSharingGroupIdFails", testUploadWithInvalidSharingGroupIdFails),
-            ("testUploadWithBadSharingGroupIdFails", testUploadWithBadSharingGroupIdFails)
+            ("testUploadWithInvalidSharingGroupUUIDFails", testUploadWithInvalidSharingGroupUUIDFails),
+            ("testUploadWithBadSharingGroupUUIDFails", testUploadWithBadSharingGroupUUIDFails)
         ]
     }
     

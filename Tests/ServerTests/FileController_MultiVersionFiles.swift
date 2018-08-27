@@ -36,12 +36,12 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         // The use of a different device UUID here is part of this test-- that the second version can be uploaded with a different device UUID.
         let deviceUUID = Foundation.UUID().uuidString
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: .no(sharingGroupId: uploadRequest.sharingGroupId), fileVersion:fileVersionToUpload, masterVersion: masterVersion, appMetaData: appMetaData), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, addUser: .no(sharingGroupUUID: uploadRequest.sharingGroupUUID), fileVersion:fileVersionToUpload, masterVersion: masterVersion, appMetaData: appMetaData), let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         
         guard let healthCheck2 = healthCheck() else {
             XCTFail()
@@ -49,7 +49,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         }
         
         // New upload device UUID will go into the FileIndex as that of the new uploading device.
-        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId),
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID),
             let fileInfoArray = files,
             fileInfoArray.count == 1 else {
             XCTFail()
@@ -90,18 +90,19 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         let deviceUUID1 = Foundation.UUID().uuidString
         var appMetaDataVersion: AppMetaDataVersionInt = 0
         
-        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1, appMetaData: AppMetaData(version: 0, contents: "Some-App-Meta-Data")), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1, appMetaData: AppMetaData(version: 0, contents: "Some-App-Meta-Data")),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         appMetaDataVersion += 1
         
         var creationDate:Date!
         
-        guard let (files, _) = getIndex(deviceUUID: deviceUUID1, sharingGroupId: sharingGroupId), let fileInfoArray = files, fileInfoArray.count == 1 else {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID1, sharingGroupUUID: sharingGroupUUID), let fileInfoArray = files, fileInfoArray.count == 1 else {
             XCTFail()
             return
         }
@@ -119,33 +120,34 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     // Attempt to upload version 1 when version 0 hasn't yet been committed with DoneUploads-- should fail.
     func testUploadVersion1WhenVersion0HasNotBeenCommitted() {
         let deviceUUID1 = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         let deviceUUID2 = Foundation.UUID().uuidString
 
-        uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion:1, masterVersion: 0, errorExpected: true)
+        uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:1, masterVersion: 0, errorExpected: true)
     }
 
     // Upload version N of a file; do DoneUploads. Then try again to upload version N. That should fail.
     func testUploadOfSameFileVersionFails() {
         let deviceUUID1 = Foundation.UUID().uuidString
         
-        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         let deviceUUID2 = Foundation.UUID().uuidString
 
-        uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion:0, masterVersion: 1, errorExpected: true)
+        uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:0, masterVersion: 1, errorExpected: true)
         
-        guard let (files, _) = getIndex(deviceUUID: deviceUUID1, sharingGroupId: sharingGroupId), let fileInfoArray = files, fileInfoArray.count == 1 else {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID1, sharingGroupUUID: sharingGroupUUID), let fileInfoArray = files, fileInfoArray.count == 1 else {
             XCTFail()
             return
         }
@@ -172,23 +174,24 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         
         var masterVersion:MasterVersionInt = startMasterVersion
 
-        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID, fileUUID:fileUUID, addUser:addUser, masterVersion:masterVersion, appMetaData:AppMetaData(version: 0, contents: appMetaData)), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID, fileUUID:fileUUID, addUser:addUser, masterVersion:masterVersion, appMetaData:AppMetaData(version: 0, contents: appMetaData)),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return nil
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion:masterVersion, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion:masterVersion, sharingGroupUUID: sharingGroupUUID)
         
         masterVersion += 1
         var fileVersion:FileVersionInt = 1
 
         for _ in 1...version {
-            guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion:fileVersion, masterVersion: masterVersion) else {
+            guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:fileVersion, masterVersion: masterVersion) else {
                 XCTFail()
                 return nil
             }
-            sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupId: sharingGroupId)
+            sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
             
             fileVersion += 1
             masterVersion += 1
@@ -207,27 +210,28 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         // Upload small text file first.
         let deviceUUID1 = Foundation.UUID().uuidString
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID: deviceUUID1, appMetaData:AppMetaData(version: 0, contents: appMetaData)), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID: deviceUUID1, appMetaData:AppMetaData(version: 0, contents: appMetaData)),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 0, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 0, sharingGroupUUID: sharingGroupUUID)
         
         let fileContentsV2 = "This is some longer text that I'm typing here and hopefullly I don't get too bored"
         
         // Then upload some other text contents -- as version 1 of the same file.
         let appMetaData2 = AppMetaData(version: 1, contents: appMetaData)
-        guard let uploadResult2 = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:uploadResult1.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion: 1, masterVersion: 1, appMetaData:appMetaData2, contents: fileContentsV2) else {
+        guard let uploadResult2 = uploadTextFile(deviceUUID: deviceUUID1, fileUUID:uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: 1, masterVersion: 1, appMetaData:appMetaData2, contents: fileContentsV2) else {
             XCTFail()
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 1, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: 1, sharingGroupUUID: sharingGroupUUID)
         
         // Make sure the file contents are right.
-        guard let (files, _) = getIndex(deviceUUID: deviceUUID1, sharingGroupId: sharingGroupId), let fileInfoArray = files, fileInfoArray.count == 1 else {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID1, sharingGroupUUID: sharingGroupUUID), let fileInfoArray = files, fileInfoArray.count == 1 else {
             XCTFail()
             return
         }
@@ -248,16 +252,16 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     func testUploadOfVersion2OfVersion0FileFails() {
         let deviceUUID1 = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion:2, masterVersion: 1, errorExpected: true) else {
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:2, masterVersion: 1, errorExpected: true) else {
             XCTFail()
             return
         }
@@ -267,15 +271,15 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     func testUploadDifferentVersionWithDifferentMimeTypeFails() {
         let deviceUUID1 = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
-        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID1, fileUUID: uploadResult.request.fileUUID, addUser:.no(sharingGroupId: sharingGroupId), fileVersion:1, expectedMasterVersion:1, errorExpected: true) else {
+        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID1, fileUUID: uploadResult.request.fileUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID), fileVersion:1, expectedMasterVersion:1, errorExpected: true) else {
             XCTFail()
             return
         }
@@ -285,21 +289,21 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         let deviceUUID1 = Foundation.UUID().uuidString
         
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion:1, masterVersion: 1, errorExpected: false) else {
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:1, masterVersion: 1, errorExpected: false) else {
             XCTFail()
             return
         }
 
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupId: sharingGroupId), fileVersion:2, masterVersion: 1, errorExpected: true) else {
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:2, masterVersion: 1, errorExpected: true) else {
             XCTFail()
             return
         }
@@ -311,19 +315,19 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
     func testUploadDeletionOfVersionThatDoesNotExistFails() {
         let deviceUUID1 = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID: deviceUUID1),
-            let sharingGroupId = uploadResult.sharingGroupId else {
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Send DoneUploads-- to commit version 0.
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
 
         let uploadDeletionRequest = UploadDeletionRequest(json: [
             UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
             UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion + 1,
             UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
-            ServerEndpoint.sharingGroupIdKey: sharingGroupId
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])!
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID1, addUser: false, expectError: true)
@@ -340,16 +344,16 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             UploadDeletionRequest.fileUUIDKey: fileUUID,
             UploadDeletionRequest.fileVersionKey: 2,
             UploadDeletionRequest.masterVersionKey: masterVersion,
-            ServerEndpoint.sharingGroupIdKey: uploadRequest.sharingGroupId
+            ServerEndpoint.sharingGroupUUIDKey: uploadRequest.sharingGroupUUID
         ])!
         
         let deviceUUID = Foundation.UUID().uuidString
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupId: uploadRequest.sharingGroupId)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupUUID: uploadRequest.sharingGroupUUID)
     }
     
-    func checkFileIndex(deviceUUID:String, fileUUID:String, fileVersion:Int32, sharingGroupId: SharingGroupId) {
-        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupId: sharingGroupId), let fileInfoArray = files else {
+    func checkFileIndex(deviceUUID:String, fileUUID:String, fileVersion:Int32, sharingGroupUUID: String) {
+        guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID), let fileInfoArray = files else {
             XCTFail()
             return
         }
@@ -373,24 +377,24 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
 
         guard let (masterVersion, uploadRequest) = uploadVersion(2, deviceUUID: deviceUUID, fileUUID:fileUUID1),
-            let sharingGroupId = uploadRequest.sharingGroupId else {
+            let sharingGroupUUID = uploadRequest.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let (masterVersion2, _) = uploadVersion(3, deviceUUID: deviceUUID, fileUUID:fileUUID2, startMasterVersion: masterVersion, addUser: .no(sharingGroupId: sharingGroupId)) else {
+        guard let (masterVersion2, _) = uploadVersion(3, deviceUUID: deviceUUID, fileUUID:fileUUID2, startMasterVersion: masterVersion, addUser: .no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadVersion(5, deviceUUID: deviceUUID, fileUUID:fileUUID3, startMasterVersion: masterVersion2, addUser: .no(sharingGroupId: sharingGroupId)) else {
+        guard let _ = uploadVersion(5, deviceUUID: deviceUUID, fileUUID:fileUUID3, startMasterVersion: masterVersion2, addUser: .no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
 
-        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID1, fileVersion:2, sharingGroupId: sharingGroupId)
-        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID2, fileVersion:3, sharingGroupId: sharingGroupId)
-        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID3, fileVersion:5, sharingGroupId: sharingGroupId)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID1, fileVersion:2, sharingGroupUUID: sharingGroupUUID)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID2, fileVersion:3, sharingGroupUUID: sharingGroupUUID)
+        checkFileIndex(deviceUUID:deviceUUID, fileUUID:fileUUID3, fileVersion:5, sharingGroupUUID: sharingGroupUUID)
     }
     
     // MARK: Download

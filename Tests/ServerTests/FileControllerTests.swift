@@ -26,20 +26,20 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     // A test that causes a conflict with the master version on the server. Presumably this needs to take the form of (a) device1 uploading a file to the server, (b) device2 uploading a file, and finishing that upload (`DoneUploads` endpoint), and (c) device1 uploading a second file using its original master version.
     func testMasterVersionConflict1() {
         let deviceUUID1 = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId)) else {
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
         
-        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId), updatedMasterVersionExpected:1) else {
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupUUID: sharingGroupUUID), updatedMasterVersionExpected:1) else {
             XCTFail()
             return
         }
@@ -47,40 +47,40 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testMasterVersionConflict2() {
         let deviceUUID1 = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupId: sharingGroupId)) else {
+        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         // No uploads should have been successfully finished, i.e., expectedNumberOfUploads = nil, and the updatedMasterVersion should have been updated to 1.
-        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1, sharingGroupUUID: sharingGroupUUID)
     }
 
     func testIndexWithNoFiles() {
         let deviceUUID = Foundation.UUID().uuidString
+        let sharingGroupUUID = Foundation.UUID().uuidString
 
-        guard let addUserResponse = self.addNewUser(deviceUUID:deviceUUID),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
+        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
         
-        self.getIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:], sharingGroupId: sharingGroupId)
+        self.getIndex(expectedFiles: [], masterVersionExpected: 0, expectedFileSizes: [:], sharingGroupUUID: sharingGroupUUID)
     }
     
     func testGetIndexForOnlySharingGroupsWorks() {
         let deviceUUID = Foundation.UUID().uuidString
-        
-        guard let addUserResponse = addNewUser(deviceUUID:deviceUUID),
-            let sharingGroupId = addUserResponse.sharingGroupId else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
@@ -97,7 +97,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        XCTAssert(sharingGroups[0].sharingGroupId == sharingGroupId)
+        XCTAssert(sharingGroups[0].sharingGroupUUID == sharingGroupUUID)
         XCTAssert(sharingGroups[0].sharingGroupName == nil)
         XCTAssert(sharingGroups[0].deleted == false)
         guard sharingGroups[0].sharingGroupUsers != nil, sharingGroups[0].sharingGroupUsers.count == 1 else {
@@ -113,28 +113,29 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testIndexWithOneFile() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         let expectedSizes = [
             uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
         
-        guard let (files, sharingGroups) = getIndex(sharingGroupId: sharingGroupId) else {
+        guard let (files, sharingGroups) = getIndex(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
         XCTAssert(files != nil)
         
-        guard sharingGroups.count == 1, sharingGroups[0].sharingGroupId == sharingGroupId,  sharingGroups[0].sharingGroupName == nil,
+        guard sharingGroups.count == 1, sharingGroups[0].sharingGroupUUID == sharingGroupUUID,  sharingGroups[0].sharingGroupName == nil,
             sharingGroups[0].deleted == false
             else {
             XCTFail()
@@ -144,25 +145,26 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testIndexWithTwoFiles() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult1.sharingGroupId else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let uploadResult2 = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupId: sharingGroupId)) else {
+        guard let uploadResult2 = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
             XCTFail()
             return
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         let expectedSizes = [
             uploadResult1.request.fileUUID: uploadResult1.fileSize,
             uploadResult2.request.fileUUID: uploadResult2.fileSize
         ]
         
-        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: sharingGroupId)
+        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
     }
         
     func testDownloadFileTextSucceeds() {
@@ -182,45 +184,47 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
     }
     
-    func testIndexWithFakeSharingGroupIdFails() {
+    func testIndexWithFakeSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         let expectedSizes = [
             uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
         
-        let invalidSharingGroupId: SharingGroupId = 100
+        let invalidSharingGroupUUID = UUID().uuidString
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: invalidSharingGroupId, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
     }
     
-    func testIndexWithBadSharingGroupIdFails() {
+    func testIndexWithBadSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupId = uploadResult.sharingGroupId else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupId: sharingGroupId)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         let expectedSizes = [
             uploadResult.request.fileUUID: uploadResult.fileSize,
         ]
         
-        guard let workingButBadSharingGroupId = addSharingGroup() else {
+        let workingButBadSharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupId: workingButBadSharingGroupId, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
     }
     
     // TODO: *0*: Make sure we're not trying to download a file that has already been deleted.
@@ -242,8 +246,8 @@ extension FileControllerTests {
             ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
-            ("testIndexWithFakeSharingGroupIdFails", testIndexWithFakeSharingGroupIdFails),
-            ("testIndexWithBadSharingGroupIdFails", testIndexWithBadSharingGroupIdFails),
+            ("testIndexWithFakeSharingGroupUUIDFails", testIndexWithFakeSharingGroupUUIDFails),
+            ("testIndexWithBadSharingGroupUUIDFails", testIndexWithBadSharingGroupUUIDFails),
             ("testGetIndexForOnlySharingGroupsWorks", testGetIndexForOnlySharingGroupsWorks)
         ]
     }

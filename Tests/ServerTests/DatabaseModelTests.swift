@@ -41,46 +41,46 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
     }
     
     func testLock() {
-        let lock = Lock(sharingGroupId: 0, deviceUUID: Foundation.UUID().uuidString)
+        let lock = Lock(sharingGroupUUID: UUID().uuidString, deviceUUID: Foundation.UUID().uuidString)
         lock[Lock.deviceUUIDKey] = Foundation.UUID().uuidString
         
         let newDate = Date()
-        let newSharingGroupId = Int64(5)
+        let newSharingGroupUUID = UUID().uuidString
         let newDeviceUUID = Foundation.UUID().uuidString
         
         lock[Lock.expiryKey] = newDate
-        lock[Lock.sharingGroupIdKey] = newSharingGroupId
+        lock[Lock.sharingGroupUUIDKey] = newSharingGroupUUID
         lock[Lock.deviceUUIDKey] = newDeviceUUID
         
         XCTAssert(lock.deviceUUID == newDeviceUUID)
-        XCTAssert(lock.sharingGroupId == newSharingGroupId)
+        XCTAssert(lock.sharingGroupUUID == newSharingGroupUUID)
         XCTAssert(lock.expiry.compare(newDate) == .orderedSame)
         
         lock[Lock.expiryKey] = nil
-        lock[Lock.sharingGroupIdKey] = nil
+        lock[Lock.sharingGroupUUIDKey] = nil
         lock[Lock.deviceUUIDKey] = nil
         
         XCTAssert(lock.deviceUUID == nil)
-        XCTAssert(lock.sharingGroupId == nil)
+        XCTAssert(lock.sharingGroupUUID == nil)
         XCTAssert(lock.expiry == nil)
     }
     
     func testMasterVersion() {
         let masterVersion = MasterVersion()
         
-        let newSharingGroupId = Int64(805)
+        let newSharingGroupUUID = UUID().uuidString
         let newMasterVersion = MasterVersionInt(100)
         
-        masterVersion[MasterVersion.sharingGroupIdKey] = newSharingGroupId
+        masterVersion[MasterVersion.sharingGroupUUIDKey] = newSharingGroupUUID
         masterVersion[MasterVersion.masterVersionKey] = newMasterVersion
         
-        XCTAssert(masterVersion.sharingGroupId == newSharingGroupId)
+        XCTAssert(masterVersion.sharingGroupUUID == newSharingGroupUUID)
         XCTAssert(masterVersion.masterVersion == newMasterVersion)
 
-        masterVersion[MasterVersion.sharingGroupIdKey] = nil
+        masterVersion[MasterVersion.sharingGroupUUIDKey] = nil
         masterVersion[MasterVersion.masterVersionKey] = nil
         
-        XCTAssert(masterVersion.sharingGroupId == nil)
+        XCTAssert(masterVersion.sharingGroupUUID == nil)
         XCTAssert(masterVersion.masterVersion == nil)
     }
     

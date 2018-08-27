@@ -31,14 +31,14 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupId: uploadRequest.sharingGroupId, params: params) else {
+        guard sharingGroupSecurityCheck(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupId: uploadRequest.sharingGroupId, params:params), consistentSharingGroups else {
+        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: uploadRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
             let message = "Inconsistent sharing groups."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -59,9 +59,9 @@ extension FileController {
             return
         }
         
-        Log.debug("uploadRequest.sharingGroupId: \(uploadRequest.sharingGroupId)")
+        Log.debug("uploadRequest.sharingGroupUUID: \(uploadRequest.sharingGroupUUID)")
         
-        Controllers.getMasterVersion(sharingGroupId: uploadRequest.sharingGroupId, params: params) { error, masterVersion in
+        Controllers.getMasterVersion(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params) { error, masterVersion in
             if error != nil {
                 let message = "Error: \(String(describing: error))"
                 Log.error(message)
@@ -80,7 +80,7 @@ extension FileController {
             // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
             var existingFileInFileIndex:FileIndex?
             do {
-                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupId: uploadRequest.sharingGroupId, fileUUID:uploadRequest.fileUUID)
+                existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadRequest.sharingGroupUUID, fileUUID:uploadRequest.fileUUID)
             } catch (let error) {
                 let message = "Could not lookup file in FileIndex: \(error)"
                 Log.error(message)
@@ -180,7 +180,7 @@ extension FileController {
             upload.fileUUID = uploadRequest.fileUUID
             upload.fileVersion = uploadRequest.fileVersion
             upload.mimeType = uploadRequest.mimeType
-            upload.sharingGroupId = uploadRequest.sharingGroupId
+            upload.sharingGroupUUID = uploadRequest.sharingGroupUUID
             
             if let fileGroupUUID = uploadRequest.fileGroupUUID {
                 guard uploadRequest.fileVersion == 0 else {

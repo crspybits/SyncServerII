@@ -25,8 +25,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
     }
     
     @discardableResult
-    func addSharingGroupUser(sharingGroupId: SharingGroupId, userId: UserId, owningUserId: UserId?, failureExpected: Bool = false) -> SharingGroupUserId? {
-        let result = SharingGroupUserRepository(db).add(sharingGroupId: sharingGroupId, userId: userId, permission: .read, owningUserId: owningUserId)
+    func addSharingGroupUser(sharingGroupUUID: String, userId: UserId, owningUserId: UserId?, failureExpected: Bool = false) -> SharingGroupUserId? {
+        let result = SharingGroupUserRepository(db).add(sharingGroupUUID: sharingGroupUUID, userId: userId, permission: .read, owningUserId: owningUserId)
         
         var sharingGroupUserId:SharingGroupUserId?
         switch result {
@@ -48,7 +48,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
     }
 
     func testAddSharingGroupUser() {
-        guard let sharingGroupId = addSharingGroup() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -64,14 +65,15 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId, owningUserId: nil) else {
+        guard let _ = addSharingGroupUser(sharingGroupUUID:sharingGroupUUID, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
     }
     
     func testAddMultipleSharingGroupUsers() {
-        guard let sharingGroupId = addSharingGroup() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -87,7 +89,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let id1 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil) else {
+        guard let id1 = addSharingGroupUser(sharingGroupUUID:sharingGroupUUID, userId: userId1, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -103,7 +105,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let id2 = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId2, owningUserId: nil) else {
+        guard let id2 = addSharingGroupUser(sharingGroupUUID:sharingGroupUUID, userId: userId2, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -112,7 +114,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
     }
     
     func testAddSharingGroupUserFailsIfYouAddTheSameUserToSameGroupTwice() {
-        guard let sharingGroupId = addSharingGroup() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -128,21 +131,22 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil) else {
+        guard let _ = addSharingGroupUser(sharingGroupUUID:sharingGroupUUID, userId: userId1, owningUserId: nil) else {
             XCTFail()
             return
         }
         
-        addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId1, owningUserId: nil, failureExpected: true)
+        addSharingGroupUser(sharingGroupUUID:sharingGroupUUID, userId: userId1, owningUserId: nil, failureExpected: true)
     }
     
     func testLookupFromSharingGroupUser() {
-        guard let sharingGroupId = addSharingGroup() else {
+        let sharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
 
-        guard MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId) else {
+        guard MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -158,12 +162,12 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId, userId: userId, owningUserId: nil) else {
+        guard let _ = addSharingGroupUser(sharingGroupUUID:sharingGroupUUID, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
         
-        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupId: sharingGroupId, userId: userId)
+        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: userId)
         let result = SharingGroupUserRepository(db).lookup(key: key, modelInit: SharingGroupUser.init)
         switch result {
         case .found(let model):
@@ -171,7 +175,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
                 XCTFail()
                 return
             }
-            XCTAssert(obj.sharingGroupId == sharingGroupId)
+            XCTAssert(obj.sharingGroupUUID == sharingGroupUUID)
             XCTAssert(obj.userId == userId)
             XCTAssert(obj.sharingGroupUserId != nil)
         case .noObjectFound:
@@ -185,26 +189,30 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        XCTAssert(groups[0].sharingGroupId == sharingGroupId)
+        XCTAssert(groups[0].sharingGroupUUID == sharingGroupUUID)
     }
 
     func testGetUserSharingGroupsForMultipleGroups() {
-        guard let sharingGroupId1 = addSharingGroup() else {
+        let sharingGroupUUID1 = UUID().uuidString
+
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID1) else {
             XCTFail()
             return
         }
         
-        guard MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId1) else {
+        guard MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID1) else {
             XCTFail()
             return
         }
 
-        guard let sharingGroupId2 = addSharingGroup(sharingGroupName: "Foobar") else {
+        let sharingGroupUUID2 = UUID().uuidString
+
+        guard addSharingGroup(sharingGroupUUID: sharingGroupUUID2, sharingGroupName: "Foobar") else {
             XCTFail()
             return
         }
         
-        guard MasterVersionRepository(db).initialize(sharingGroupId: sharingGroupId2) else {
+        guard MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID2) else {
             XCTFail()
             return
         }
@@ -220,12 +228,12 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId1, userId: userId, owningUserId: nil) else {
+        guard let _ = addSharingGroupUser(sharingGroupUUID:sharingGroupUUID1, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
         
-        guard let _ = addSharingGroupUser(sharingGroupId:sharingGroupId2, userId: userId, owningUserId: nil) else {
+        guard let _ = addSharingGroupUser(sharingGroupUUID:sharingGroupUUID2, userId: userId, owningUserId: nil) else {
             XCTFail()
             return
         }
@@ -235,10 +243,20 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        XCTAssert(groups[0].sharingGroupId == sharingGroupId1)
-        XCTAssert(groups[0].sharingGroupName == nil)
-        XCTAssert(groups[1].sharingGroupId == sharingGroupId2)
-        XCTAssert(groups[1].sharingGroupName == "Foobar")
+        let filter1 = groups.filter {$0.sharingGroupUUID == sharingGroupUUID1}
+        guard filter1.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filter1[0].sharingGroupName == nil)
+        
+        let filter2 = groups.filter {$0.sharingGroupUUID == sharingGroupUUID2}
+        guard filter2.count == 1 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(filter2[0].sharingGroupName == "Foobar")
     }
 }
 
