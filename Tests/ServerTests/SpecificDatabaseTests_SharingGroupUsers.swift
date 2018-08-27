@@ -243,10 +243,20 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         
-        XCTAssert(groups[0].sharingGroupUUID == sharingGroupUUID1)
-        XCTAssert(groups[0].sharingGroupName == nil)
-        XCTAssert(groups[1].sharingGroupUUID == sharingGroupUUID2)
-        XCTAssert(groups[1].sharingGroupName == "Foobar")
+        let filter1 = groups.filter {$0.sharingGroupUUID == sharingGroupUUID1}
+        guard filter1.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filter1[0].sharingGroupName == nil)
+        
+        let filter2 = groups.filter {$0.sharingGroupUUID == sharingGroupUUID2}
+        guard filter2.count == 1 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(filter2[0].sharingGroupName == "Foobar")
     }
 }
 
