@@ -107,23 +107,24 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     // 8/12/18; This now works-- i.e., you can redeem with other owning accounts-- because each user can now be in multiple sharing groups. (Prior to this, it was a failure test!).
     func testThatRedeemingWithAnExistingOtherOwningAccountWorks() {
         let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
+        let sharingGroupUUID1 = Foundation.UUID().uuidString
 
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
+        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID1, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
+        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID1) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
         
         let owningAccount:TestAccount = .secondaryOwningAccount
         let deviceUUID2 = Foundation.UUID().uuidString
-        addNewUser(testAccount: owningAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID2)
+        let sharingGroupUUID2 = Foundation.UUID().uuidString
+        addNewUser(testAccount: owningAccount, sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID2)
         
         var result: RedeemSharingInvitationResponse!
         redeemSharingInvitation(sharingUser: owningAccount, sharingInvitationUUID: sharingInvitationUUID) { response, expectation in
@@ -136,7 +137,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        checkOwingUserIdForSharingGroupUser(sharingGroupUUID: sharingGroupUUID, userId: result.userId, sharingUser: owningAccount)
+        checkOwingUserIdForSharingGroupUser(sharingGroupUUID: sharingGroupUUID2, userId: result.userId, sharingUser: owningAccount)
     }
     
     // Redeem sharing invitation for existing user: Works if user isn't already in sharing group
