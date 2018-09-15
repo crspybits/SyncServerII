@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.17.2 (9/15/18)
+	* Added ability to do sharing group update (name change) along with the DoneUploads endpoint. This was needed by the iOS client.
+	
 Version 0.17.1 (8/26/18)
 	* Now have sharing group ids created by client to make client interface consistent.
 

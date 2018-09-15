@@ -789,7 +789,8 @@ class ServerTestCase : XCTestCase {
         return UploadFileResult(request: uploadRequest, fileSize: sizeOfCatFileInBytes, sharingGroupUUID: sharingGroupUUID, uploadingUserId:uploadingUserId)
     }
     
-    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, sharingGroupUUID: String, failureExpected:Bool = false) {
+    // sharingGroupName enables you to change the sharing group name during the DoneUploads.
+    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, sharingGroupUUID: String, sharingGroupName: String? = nil, failureExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -798,6 +799,10 @@ class ServerTestCase : XCTestCase {
                 ServerEndpoint.masterVersionKey : "\(masterVersion)",
                 ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
             ])
+            
+            if let sharingGroupName = sharingGroupName {
+                doneUploadsRequest?.sharingGroupName = sharingGroupName
+            }
             
             self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")

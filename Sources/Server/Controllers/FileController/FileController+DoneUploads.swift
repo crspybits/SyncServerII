@@ -40,8 +40,13 @@ extension FileController {
         return fileIndexObjs
     }
     
+    enum DoInitialDoneUploadResponse {
+        case success(numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)
+        case doCompletion(RequestProcessingParameters.Response)
+    }
+    
     // staleVersionsToDelete gives info, if any, on files that we're uploading new versions of.
-    private func doInitialDoneUploads(params:RequestProcessingParameters, doneUploadsRequest: DoneUploadsRequest) -> (numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)? {
+    private func doInitialDoneUploads(params:RequestProcessingParameters, doneUploadsRequest: DoneUploadsRequest) -> DoInitialDoneUploadResponse {
         
 #if DEBUG
         if doneUploadsRequest.testLockSync != nil {
@@ -52,8 +57,7 @@ extension FileController {
 #endif
         
         if let response = Controllers.updateMasterVersion(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, masterVersion: doneUploadsRequest.masterVersion, params: params, responseType: DoneUploadsResponse.self) {
-            params.completion(response)
-            return nil
+            return .doCompletion(response)
         }
         
         // Now, start the heavy lifting. This has to accomodate both file uploads, and upload deletions-- because these both need to alter the masterVersion (i.e., they change the file index).
@@ -81,25 +85,21 @@ extension FileController {
         case .error(let error):
             let message = "Failed to get file uploads: \(error)"
             Log.error(message)
-            params.completion(.failure(.message(message)))
-            return nil
+            return .doCompletion(.failure(.message(message)))
         }
 
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
         
         guard let staleVersionsToDelete = getIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
-            params.completion(.failure(nil))
-            return nil
+            return .doCompletion(.failure(nil))
         }
         
         guard let fileIndexDeletions = getIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
-            params.completion(.failure(nil))
-            return nil
+            return .doCompletion(.failure(nil))
         }
 
         guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
-            params.completion(.failure(nil))
-            return nil
+            return .doCompletion(.failure(nil))
         }
         
         // 3) Transfer info to the FileIndex repository from Upload.
@@ -111,8 +111,7 @@ extension FileController {
         if numberTransferred == nil  {
             let message = "Failed on transfer to FileIndex!"
             Log.error(message)
-            params.completion(.failure(.message(message)))
-            return nil
+            return .doCompletion(.failure(.message(message)))
         }
         
         // 4) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
@@ -127,18 +126,29 @@ extension FileController {
             if numberRows != numberTransferred {
                 let message = "Number rows removed from Upload was \(numberRows) but should have been \(String(describing: numberTransferred))!"
                 Log.error(message)
-                params.completion(.failure(.message(message)))
-                return nil
+                return .doCompletion(.failure(.message(message)))
             }
             
         case .error(_):
             let message = "Failed removing rows from Upload!"
             Log.error(message)
-            params.completion(.failure(.message(message)))
-            return nil
+            return .doCompletion(.failure(.message(message)))
         }
         
-        return (numberTransferred!, fileIndexDeletions, staleVersionsToDelete)
+        // See if we have to sharing group update operation.
+        if let sharingGroupName = doneUploadsRequest.sharingGroupName {
+            let serverSharingGroup = Server.SharingGroup()
+            serverSharingGroup.sharingGroupUUID = doneUploadsRequest.sharingGroupUUID
+            serverSharingGroup.sharingGroupName = sharingGroupName
+
+            if !params.repos.sharingGroup.update(sharingGroup: serverSharingGroup) {
+                let message = "Failed in updating sharing group."
+                Log.error(message)
+                return .doCompletion(.failure(.message(message)))
+            }
+        }
+        
+        return .success(numberTransferred:numberTransferred!, uploadDeletions:fileIndexDeletions, staleVersionsToDelete:staleVersionsToDelete)
     }
     
     func doneUploads(params:RequestProcessingParameters) {
@@ -186,13 +196,25 @@ extension FileController {
         if !params.repos.lock.unlock(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID) {
             let message = "Error in unlock!"
             Log.debug(message)
-            params.completion(.failure(.message(message)))
+            
+            // So in the case of multiple errors, don't get a completion in the unlock AND a completion in doInitialDoneUploads.
+            switch result {
+            case .doCompletion(let response):
+                params.completion(response)
+            case .success:
+                params.completion(.failure(.message(message)))
+            }
             return
         }
 
-        guard let (numberTransferred, uploadDeletions, staleVersionsToDelete) = result else {
+        guard case .success(let numberTransferred, let uploadDeletions, let staleVersionsToDelete) = result else {
             Log.error("Error in doInitialDoneUploads!")
-            // Don't do `params.completion(nil)` because we may not be passing back nil, i.e., for a master version update. The params.completion call was made in doInitialDoneUploads if needed.
+            switch result {
+            case .doCompletion(let response):
+                params.completion(response)
+            case .success:
+                assert(false)
+            }
             return
         }
         

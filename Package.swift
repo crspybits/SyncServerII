@@ -11,7 +11,7 @@ let package = Package(
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.2.0"),
         
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.1.1"),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.2.1"),
         
         // .package(url: "../../repos/SMServerLib", .branch("master")),
         .package(url: "https://github.com/crspybits/SMServerLib.git", from: "1.0.0"),
@@ -35,7 +35,7 @@ let package = Package(
         .target(name: "Main",
             dependencies: ["Server"]),
         .target(name: "Server",
-            dependencies: ["SyncServer_Shared", "Credentials", "CredentialsGoogle", "SMServerLib", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib"]),
+            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "SMServerLib", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib"]),
         .testTarget(name: "ServerTests",
             dependencies: ["Server", "Main", "CredentialsDropbox"])
     ]

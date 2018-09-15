@@ -152,6 +152,41 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: workingButBadSharingGroupUUID, failureExpected: true)
     }
+    
+    func testDoneUploadsWithChangeOfSharingGroupNameWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        guard let (_, sharingGroups1) = getIndex() else {
+            XCTFail()
+            return
+        }
+        
+        let filter1 = sharingGroups1.filter {$0.sharingGroupUUID == sharingGroupUUID}
+        guard filter1.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroupName = UUID().uuidString
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, sharingGroupName: sharingGroupName)
+        
+        guard let (_, sharingGroups2) = getIndex() else {
+            XCTFail()
+            return
+        }
+        
+        let filter2 = sharingGroups2.filter {$0.sharingGroupUUID == sharingGroupUUID}
+        guard filter2.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filter2[0].sharingGroupName == sharingGroupName)
+    }
 }
 
 extension FileController_DoneUploadsTests {
@@ -164,7 +199,8 @@ extension FileController_DoneUploadsTests {
             ("testDoneUploadsTwiceDoesNothingSecondTime", testDoneUploadsTwiceDoesNothingSecondTime),
             ("testThatUploadAfterUploadDeletionFails", testThatUploadAfterUploadDeletionFails),
             ("testDoneUploadsWithBadSharingGroupUUIDFails", testDoneUploadsWithBadSharingGroupUUIDFails),
-            ("testDoneUploadsWithFakeSharingGroupUUIDFails", testDoneUploadsWithFakeSharingGroupUUIDFails)
+            ("testDoneUploadsWithFakeSharingGroupUUIDFails", testDoneUploadsWithFakeSharingGroupUUIDFails),
+            ("testDoneUploadsWithChangeOfSharingGroupNameWorks", testDoneUploadsWithChangeOfSharingGroupNameWorks)
         ]
     }
     
