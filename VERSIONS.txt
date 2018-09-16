@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.17.3  (9/16/18)
+	* Fixed git tagging issue.
+	
 Version 0.17.2 (9/15/18)
 	* Added ability to do sharing group update (name change) along with the DoneUploads endpoint. This was needed by the iOS client.
 	
