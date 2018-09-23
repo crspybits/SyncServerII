@@ -700,6 +700,44 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         
         uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
     }
+    
+    func testInterleavedUploadsToDifferentSharingGroupsWorks() {
+        let deviceUUID = Foundation.UUID().uuidString
+        let sharingGroupUUID1 = Foundation.UUID().uuidString
+
+        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID1, deviceUUID:deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = SyncServerShared.SharingGroup()!
+        let sharingGroupUUID2 = UUID().uuidString
+        
+        guard createSharingGroup(sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
+            XCTFail()
+            return
+        }
+        
+        // Upload (only; no DoneUploads) to sharing group 1
+        guard let masterVersion1 = getMasterVersion(sharingGroupUUID: sharingGroupUUID1) else {
+            XCTFail()
+            return
+        }
+
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID1), masterVersion: masterVersion1)
+        
+        // Upload (only; no DoneUploads) to sharing group 2
+        guard let masterVersion2 = getMasterVersion(sharingGroupUUID: sharingGroupUUID2) else {
+            XCTFail()
+            return
+        }
+
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID2), masterVersion: masterVersion2)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID1)
+        
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID2)
+    }
 }
 
 extension SharingGroupsControllerTests {
@@ -727,7 +765,8 @@ extension SharingGroupsControllerTests {
             ("testRemoveUserFromSharingGroup_failsWithBadMasterVersion",
                 testRemoveUserFromSharingGroup_failsWithBadMasterVersion),
             ("testRemoveUserFromSharingGroup_userHasFiles", testRemoveUserFromSharingGroup_userHasFiles),
-            ("testRemoveUserFromSharingGroup_owningUserHasSharingUsers", testRemoveUserFromSharingGroup_owningUserHasSharingUsers)
+            ("testRemoveUserFromSharingGroup_owningUserHasSharingUsers", testRemoveUserFromSharingGroup_owningUserHasSharingUsers),
+            ("testInterleavedUploadsToDifferentSharingGroupsWorks", testInterleavedUploadsToDifferentSharingGroupsWorks)
         ]
     }
     

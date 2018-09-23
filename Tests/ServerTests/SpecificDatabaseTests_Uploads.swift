@@ -302,6 +302,50 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             XCTFail()
         }
     }
+    
+    func testUploadedIndexWithInterleavedSharingGroupFiles() {
+        let sharingGroupUUID1 = UUID().uuidString
+        let sharingGroupUUID2 = UUID().uuidString
+
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = .Google
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = "100"
+        
+        let userId = UserRepository(db).add(user: user1)
+        XCTAssert(userId == 1, "Bad credentialsId!")
+        
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID1) else {
+            XCTFail()
+            return
+        }
+        
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID2) else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID1, userId:userId!, deviceUUID:deviceUUID)
+
+        // This is illustrating an "interleaved" upload-- where a client could have uploaded a file to a different sharing group UUID before doing a DoneUploads.
+        let _ = doAddUpload(sharingGroupUUID:sharingGroupUUID2, userId:userId!, deviceUUID:deviceUUID)
+        
+        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, sharingGroupUUID: sharingGroupUUID1, deviceUUID: deviceUUID)
+        switch uploadedFilesResult {
+        case .uploads(let uploads):
+            XCTAssert(uploads.count == 1)
+            XCTAssert(upload1.appMetaData == uploads[0].appMetaData)
+            XCTAssert(upload1.fileUUID == uploads[0].fileUUID)
+            XCTAssert(upload1.fileVersion == uploads[0].fileVersion)
+            XCTAssert(upload1.mimeType == uploads[0].mimeType)
+            XCTAssert(upload1.fileSizeBytes == uploads[0].fileSizeBytes)
+            XCTAssert(upload1.sharingGroupUUID == uploads[0].sharingGroupUUID)
+        case .error(_):
+            XCTFail()
+        }
+    }
 }
 
 extension SpecificDatabaseTests_Uploads {
@@ -319,7 +363,8 @@ extension SpecificDatabaseTests_Uploads {
             ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
             ("testLookupFromUpload", testLookupFromUpload),
             ("testGetUploadsWithNoFiles", testGetUploadsWithNoFiles),
-            ("testUploadedIndexWithOneFile", testUploadedIndexWithOneFile)
+            ("testUploadedIndexWithOneFile", testUploadedIndexWithOneFile),
+            ("testUploadedIndexWithInterleavedSharingGroupFiles", testUploadedIndexWithInterleavedSharingGroupFiles)
         ]
     }
     

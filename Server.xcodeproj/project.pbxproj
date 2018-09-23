@@ -41,8 +41,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		2555E38558339912EDC4886C /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = A4A2D6F38522DABBA34064D5 /* Server.json */; };
-		4657D01E03D27AF0CEC4CB22 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 079ECC10633C304C563A7CDD /* ServerTests.json */; };
+		1D4FCD7D5D115FAF18E9EE34 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0DFD23565185DE2AC6A61DC8 /* ServerTests.json */; };
+		249EAC6276A8CD532739131D /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6EFEFC19C7B8C95B5D974D2 /* Server.json */; };
 		OBJ_1000 /* ComparisonInts.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_159 /* ComparisonInts.swift */; };
 		OBJ_1001 /* Equality.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_160 /* Equality.swift */; };
 		OBJ_1002 /* EqualityInts.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_161 /* EqualityInts.swift */; };
@@ -543,1106 +543,1106 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		83F25CFF2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523CD2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D002157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523CE2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D012157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523CF2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D022157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D02157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D032157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D12157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D042157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D22157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D052157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D32157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D062157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D42157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D072157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D52157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D082157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D62157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D092157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D72157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D0A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D82157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D0B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523D92157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D0C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523DA2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D0D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523DB2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Gloss::Gloss";
 			remoteInfo = Gloss;
 		};
-		83F25D0E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523DC2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D0F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523DD2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D102157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523DE2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D112157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523DF2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D122157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E02157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D132157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E12157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D142157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E22157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D152157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E32157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D162157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E42157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D172157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E52157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectLib::PerfectLib";
 			remoteInfo = PerfectLib;
 		};
-		83F25D182157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E62157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectLib::PerfectLib";
 			remoteInfo = PerfectLib;
 		};
-		83F25D192157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E72157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D1A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E82157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D1B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523E92157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D1C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523EA2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D1D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523EB2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D1E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523EC2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D1F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523ED2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D202157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523EE2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D212157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523EF2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D222157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F02157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D232157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F12157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Session::KituraSession";
 			remoteInfo = KituraSession;
 		};
-		83F25D242157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F22157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D252157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F32157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D262157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F42157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D272157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F52157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D282157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F62157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D292157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F72157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D2A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F82157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D2B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523F92157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D2C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523FA2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D2D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523FB2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D2E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523FC2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Credentials::Credentials";
 			remoteInfo = Credentials;
 		};
-		83F25D2F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523FD2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Session::KituraSession";
 			remoteInfo = KituraSession;
 		};
-		83F25D302157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523FE2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D312157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B523FF2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D322157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524002157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D332157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524012157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D342157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524022157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D352157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524032157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D362157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524042157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D372157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524052157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D382157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524062157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D392157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524072157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D3A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524082157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Credentials::Credentials";
 			remoteInfo = Credentials;
 		};
-		83F25D3B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524092157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Session::KituraSession";
 			remoteInfo = KituraSession;
 		};
-		83F25D3C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5240A2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D3D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5240B2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D3E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5240C2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D3F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5240D2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D402157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5240E2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D412157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5240F2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D422157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524102157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D432157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524112157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D442157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524122157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D452157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524132157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D462157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524142157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D472157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524152157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "CredentialsDropbox::CredentialsDropbox";
 			remoteInfo = CredentialsDropbox;
 		};
-		83F25D482157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524162157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Credentials::Credentials";
 			remoteInfo = Credentials;
 		};
-		83F25D492157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524172157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Session::KituraSession";
 			remoteInfo = KituraSession;
 		};
-		83F25D4A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524182157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D4B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524192157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D4C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5241A2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D4D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5241B2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D4E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5241C2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D4F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5241D2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D502157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5241E2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D512157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5241F2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D522157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524202157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D532157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524212157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D542157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524222157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-CredentialsFacebook::CredentialsFacebook";
 			remoteInfo = CredentialsFacebook;
 		};
-		83F25D552157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524232157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "HeliumLogger::HeliumLogger";
 			remoteInfo = HeliumLogger;
 		};
-		83F25D562157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524242157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectMySQL::PerfectMySQL";
 			remoteInfo = PerfectMySQL;
 		};
-		83F25D572157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524252157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectCRUD::PerfectCRUD";
 			remoteInfo = PerfectCRUD;
 		};
-		83F25D582157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524262157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectCRUD::PerfectCRUD";
 			remoteInfo = PerfectCRUD;
 		};
-		83F25D592157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524272157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectThread::PerfectThread";
 			remoteInfo = PerfectThread;
 		};
-		83F25D5A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524282157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SMServerLib::SMServerLib";
 			remoteInfo = SMServerLib;
 		};
-		83F25D5B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524292157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-CredentialsGoogle::CredentialsGoogle";
 			remoteInfo = CredentialsGoogle;
 		};
-		83F25D5C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5242A2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Credentials::Credentials";
 			remoteInfo = Credentials;
 		};
-		83F25D5D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5242B2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Session::KituraSession";
 			remoteInfo = KituraSession;
 		};
-		83F25D5E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5242C2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D5F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5242D2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SyncServerShared::SyncServerShared";
 			remoteInfo = SyncServerShared;
 		};
-		83F25D602157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5242E2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Gloss::Gloss";
 			remoteInfo = Gloss;
 		};
-		83F25D612157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5242F2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D622157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524302157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D632157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524312157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D642157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524322157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D652157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524332157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D662157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524342157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D672157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524352157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D682157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524362157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D692157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524372157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D6A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524382157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectLib::PerfectLib";
 			remoteInfo = PerfectLib;
 		};
-		83F25D6B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524392157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Server::Server";
 			remoteInfo = Server;
 		};
-		83F25D6C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5243A2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "CredentialsDropbox::CredentialsDropbox";
 			remoteInfo = CredentialsDropbox;
 		};
-		83F25D6D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5243B2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-CredentialsFacebook::CredentialsFacebook";
 			remoteInfo = CredentialsFacebook;
 		};
-		83F25D6E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5243C2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "HeliumLogger::HeliumLogger";
 			remoteInfo = HeliumLogger;
 		};
-		83F25D6F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5243D2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectMySQL::PerfectMySQL";
 			remoteInfo = PerfectMySQL;
 		};
-		83F25D702157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5243E2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectCRUD::PerfectCRUD";
 			remoteInfo = PerfectCRUD;
 		};
-		83F25D712157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5243F2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectThread::PerfectThread";
 			remoteInfo = PerfectThread;
 		};
-		83F25D722157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524402157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SMServerLib::SMServerLib";
 			remoteInfo = SMServerLib;
 		};
-		83F25D732157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524412157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-CredentialsGoogle::CredentialsGoogle";
 			remoteInfo = CredentialsGoogle;
 		};
-		83F25D742157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524422157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Credentials::Credentials";
 			remoteInfo = Credentials;
 		};
-		83F25D752157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524432157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Session::KituraSession";
 			remoteInfo = KituraSession;
 		};
-		83F25D762157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524442157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D772157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524452157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SyncServerShared::SyncServerShared";
 			remoteInfo = SyncServerShared;
 		};
-		83F25D782157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524462157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Gloss::Gloss";
 			remoteInfo = Gloss;
 		};
-		83F25D792157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524472157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D7A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524482157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D7B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524492157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D7C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5244A2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D7D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5244B2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D7E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5244C2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D7F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5244D2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D802157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5244E2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D812157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5244F2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D822157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524502157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectLib::PerfectLib";
 			remoteInfo = PerfectLib;
 		};
-		83F25D832157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524512157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Server::Main";
 			remoteInfo = Main;
 		};
-		83F25D842157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524522157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Server::Server";
 			remoteInfo = Server;
 		};
-		83F25D852157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524532157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "CredentialsDropbox::CredentialsDropbox";
 			remoteInfo = CredentialsDropbox;
 		};
-		83F25D862157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524542157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-CredentialsFacebook::CredentialsFacebook";
 			remoteInfo = CredentialsFacebook;
 		};
-		83F25D872157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524552157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "HeliumLogger::HeliumLogger";
 			remoteInfo = HeliumLogger;
 		};
-		83F25D882157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524562157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectMySQL::PerfectMySQL";
 			remoteInfo = PerfectMySQL;
 		};
-		83F25D892157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524572157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectCRUD::PerfectCRUD";
 			remoteInfo = PerfectCRUD;
 		};
-		83F25D8A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524582157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectThread::PerfectThread";
 			remoteInfo = PerfectThread;
 		};
-		83F25D8B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524592157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SMServerLib::SMServerLib";
 			remoteInfo = SMServerLib;
 		};
-		83F25D8C2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5245A2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-CredentialsGoogle::CredentialsGoogle";
 			remoteInfo = CredentialsGoogle;
 		};
-		83F25D8D2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5245B2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Credentials::Credentials";
 			remoteInfo = Credentials;
 		};
-		83F25D8E2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5245C2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-Session::KituraSession";
 			remoteInfo = KituraSession;
 		};
-		83F25D8F2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5245D2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Cryptor::Cryptor";
 			remoteInfo = Cryptor;
 		};
-		83F25D902157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5245E2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SyncServerShared::SyncServerShared";
 			remoteInfo = SyncServerShared;
 		};
-		83F25D912157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B5245F2157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Gloss::Gloss";
 			remoteInfo = Gloss;
 		};
-		83F25D922157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524602157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura::Kitura";
 			remoteInfo = Kitura;
 		};
-		83F25D932157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524612157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "TypeDecoder::TypeDecoder";
 			remoteInfo = TypeDecoder;
 		};
-		83F25D942157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524622157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KituraContracts::KituraContracts";
 			remoteInfo = KituraContracts;
 		};
-		83F25D952157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524632157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-TemplateEngine::KituraTemplateEngine";
 			remoteInfo = KituraTemplateEngine;
 		};
-		83F25D962157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524642157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::KituraNet";
 			remoteInfo = KituraNet;
 		};
-		83F25D972157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524652157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SSLService::SSLService";
 			remoteInfo = SSLService;
 		};
-		83F25D982157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524662157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Socket::Socket";
 			remoteInfo = Socket;
 		};
-		83F25D992157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524672157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "LoggerAPI::LoggerAPI";
 			remoteInfo = LoggerAPI;
 		};
-		83F25D9A2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524682157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "Kitura-net::CHTTPParser";
 			remoteInfo = CHTTPParser;
 		};
-		83F25D9B2157E5F700C8C25F /* PBXContainerItemProxy */ = {
+		83B524692157FB1900CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "PerfectLib::PerfectLib";
 			remoteInfo = PerfectLib;
 		};
-		83F25D9C2157E5FD00C8C25F /* PBXContainerItemProxy */ = {
+		83B5246A2157FB1D00CDBC99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
@@ -1652,22 +1652,22 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		2F495724D6DA514E2B52450B /* CopyFiles */ = {
+		41F81FD868AF2340EF1FB8F1 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				2555E38558339912EDC4886C /* Server.json in CopyFiles */,
-				4657D01E03D27AF0CEC4CB22 /* ServerTests.json in CopyFiles */,
+				249EAC6276A8CD532739131D /* Server.json in CopyFiles */,
+				1D4FCD7D5D115FAF18E9EE34 /* ServerTests.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		079ECC10633C304C563A7CDD /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
-		A4A2D6F38522DABBA34064D5 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
+		0DFD23565185DE2AC6A61DC8 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		C6EFEFC19C7B8C95B5D974D2 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		"CredentialsDropbox::CredentialsDropbox::Product" /* CredentialsDropbox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Cryptor::Cryptor::Product" /* Cryptor.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Cryptor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Gloss::Gloss::Product" /* Gloss.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Gloss.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2388,11 +2388,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		83F25CFE2157E5F400C8C25F /* Recovered References */ = {
+		83B523CC2157FB1700CDBC99 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
-				A4A2D6F38522DABBA34064D5 /* Server.json */,
-				079ECC10633C304C563A7CDD /* ServerTests.json */,
+				C6EFEFC19C7B8C95B5D974D2 /* Server.json */,
+				0DFD23565185DE2AC6A61DC8 /* ServerTests.json */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -3218,31 +3218,31 @@
 		OBJ_425 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				"PerfectThread::PerfectThread::Product" /* PerfectThread.framework */,
-				"KituraContracts::KituraContracts::Product" /* KituraContracts.framework */,
+				"Server::Server::Product" /* Server.framework */,
+				"LoggerAPI::LoggerAPI::Product" /* LoggerAPI.framework */,
+				"Cryptor::Cryptor::Product" /* Cryptor.framework */,
+				"HeliumLogger::HeliumLogger::Product" /* HeliumLogger.framework */,
 				"Kitura-Credentials::Credentials::Product" /* Credentials.framework */,
 				"Kitura-CredentialsGoogle::CredentialsGoogle::Product" /* CredentialsGoogle.framework */,
-				"PerfectCRUD::PerfectCRUD::Product" /* PerfectCRUD.framework */,
-				"Server::ServerTests::Product" /* ServerTests.xctest */,
+				"Kitura-net::KituraNet::Product" /* KituraNet.framework */,
+				"Kitura::Kitura::Product" /* Kitura.framework */,
+				"PerfectLib::PerfectLib::Product" /* PerfectLib.framework */,
+				"Server::Main::Product" /* Main */,
+				"Kitura-TemplateEngine::KituraTemplateEngine::Product" /* KituraTemplateEngine.framework */,
+				"SSLService::SSLService::Product" /* SSLService.framework */,
+				"Kitura-net::CHTTPParser::Product" /* CHTTPParser.framework */,
+				"SMServerLib::SMServerLib::Product" /* SMServerLib.framework */,
 				"PerfectMySQL::PerfectMySQL::Product" /* PerfectMySQL.framework */,
 				"Kitura-CredentialsFacebook::CredentialsFacebook::Product" /* CredentialsFacebook.framework */,
-				"SMServerLib::SMServerLib::Product" /* SMServerLib.framework */,
-				"Kitura-Session::KituraSession::Product" /* KituraSession.framework */,
-				"Kitura-TemplateEngine::KituraTemplateEngine::Product" /* KituraTemplateEngine.framework */,
 				"CredentialsDropbox::CredentialsDropbox::Product" /* CredentialsDropbox.framework */,
-				"Kitura::Kitura::Product" /* Kitura.framework */,
-				"SyncServerShared::SyncServerShared::Product" /* SyncServerShared.framework */,
-				"Kitura-net::CHTTPParser::Product" /* CHTTPParser.framework */,
-				"Kitura-net::KituraNet::Product" /* KituraNet.framework */,
-				"LoggerAPI::LoggerAPI::Product" /* LoggerAPI.framework */,
-				"HeliumLogger::HeliumLogger::Product" /* HeliumLogger.framework */,
-				"PerfectLib::PerfectLib::Product" /* PerfectLib.framework */,
-				"Socket::Socket::Product" /* Socket.framework */,
-				"Cryptor::Cryptor::Product" /* Cryptor.framework */,
-				"Server::Server::Product" /* Server.framework */,
-				"Server::Main::Product" /* Main */,
+				"Server::ServerTests::Product" /* ServerTests.xctest */,
+				"Kitura-Session::KituraSession::Product" /* KituraSession.framework */,
 				"TypeDecoder::TypeDecoder::Product" /* TypeDecoder.framework */,
-				"SSLService::SSLService::Product" /* SSLService.framework */,
+				"Socket::Socket::Product" /* Socket.framework */,
+				"PerfectCRUD::PerfectCRUD::Product" /* PerfectCRUD.framework */,
+				"KituraContracts::KituraContracts::Product" /* KituraContracts.framework */,
+				"SyncServerShared::SyncServerShared::Product" /* SyncServerShared.framework */,
+				"PerfectThread::PerfectThread::Product" /* PerfectThread.framework */,
 				"Gloss::Gloss::Product" /* Gloss.framework */,
 			);
 			name = Products;
@@ -3271,7 +3271,7 @@
 				OBJ_105 /* Docs */,
 				OBJ_106 /* Dependencies */,
 				OBJ_425 /* Products */,
-				83F25CFE2157E5F400C8C25F /* Recovered References */,
+				83B523CC2157FB1700CDBC99 /* Recovered References */,
 			);
 			name = "";
 			sourceTree = "<group>";
@@ -4076,7 +4076,7 @@
 			buildPhases = (
 				OBJ_1105 /* Sources */,
 				OBJ_1150 /* Frameworks */,
-				2F495724D6DA514E2B52450B /* CopyFiles */,
+				41F81FD868AF2340EF1FB8F1 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -4116,7 +4116,7 @@
 			buildPhases = (
 				OBJ_1212 /* Sources */,
 				OBJ_1249 /* Frameworks */,
-				0BD304A9BC3CC9BA12A221E3 /* ShellScript */,
+				108F63499BAA518179B46E61 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -4344,7 +4344,7 @@
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		0BD304A9BC3CC9BA12A221E3 /* ShellScript */ = {
+		108F63499BAA518179B46E61 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -5050,792 +5050,792 @@
 		OBJ_1053 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectCRUD::PerfectCRUD" /* PerfectCRUD */;
-			targetProxy = 83F25D572157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524252157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1081 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectLib::PerfectLib" /* PerfectLib */;
-			targetProxy = 83F25D182157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E62157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1095 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25CFF2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523CD2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1174 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "CredentialsDropbox::CredentialsDropbox" /* CredentialsDropbox */;
-			targetProxy = 83F25D472157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524152157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1175 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-CredentialsFacebook::CredentialsFacebook" /* CredentialsFacebook */;
-			targetProxy = 83F25D542157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524222157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1176 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "HeliumLogger::HeliumLogger" /* HeliumLogger */;
-			targetProxy = 83F25D552157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524232157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1177 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectMySQL::PerfectMySQL" /* PerfectMySQL */;
-			targetProxy = 83F25D562157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524242157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1178 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectCRUD::PerfectCRUD" /* PerfectCRUD */;
-			targetProxy = 83F25D582157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524262157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1179 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectThread::PerfectThread" /* PerfectThread */;
-			targetProxy = 83F25D592157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524272157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1180 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SMServerLib::SMServerLib" /* SMServerLib */;
-			targetProxy = 83F25D5A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524282157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1181 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-CredentialsGoogle::CredentialsGoogle" /* CredentialsGoogle */;
-			targetProxy = 83F25D5B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524292157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1182 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Credentials::Credentials" /* Credentials */;
-			targetProxy = 83F25D5C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5242A2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1183 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Session::KituraSession" /* KituraSession */;
-			targetProxy = 83F25D5D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5242B2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1184 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D5E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5242C2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1185 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SyncServerShared::SyncServerShared" /* SyncServerShared */;
-			targetProxy = 83F25D5F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5242D2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1186 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Gloss::Gloss" /* Gloss */;
-			targetProxy = 83F25D602157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5242E2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1187 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D612157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5242F2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1188 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D622157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524302157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1189 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D632157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524312157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1190 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D642157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524322157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1191 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D652157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524332157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1192 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D662157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524342157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1193 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D672157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524352157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1194 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D682157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524362157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1195 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D692157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524372157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1196 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectLib::PerfectLib" /* PerfectLib */;
-			targetProxy = 83F25D6A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524382157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1207 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Server::ServerTests" /* ServerTests */;
-			targetProxy = 83F25D9C2157E5FD00C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5246A2157FB1D00CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1274 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Server::Main" /* Main */;
-			targetProxy = 83F25D832157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524512157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1275 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Server::Server" /* Server */;
-			targetProxy = 83F25D842157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524522157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1276 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "CredentialsDropbox::CredentialsDropbox" /* CredentialsDropbox */;
-			targetProxy = 83F25D852157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524532157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1277 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-CredentialsFacebook::CredentialsFacebook" /* CredentialsFacebook */;
-			targetProxy = 83F25D862157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524542157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1278 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "HeliumLogger::HeliumLogger" /* HeliumLogger */;
-			targetProxy = 83F25D872157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524552157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1279 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectMySQL::PerfectMySQL" /* PerfectMySQL */;
-			targetProxy = 83F25D882157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524562157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1280 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectCRUD::PerfectCRUD" /* PerfectCRUD */;
-			targetProxy = 83F25D892157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524572157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1281 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectThread::PerfectThread" /* PerfectThread */;
-			targetProxy = 83F25D8A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524582157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1282 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SMServerLib::SMServerLib" /* SMServerLib */;
-			targetProxy = 83F25D8B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524592157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1283 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-CredentialsGoogle::CredentialsGoogle" /* CredentialsGoogle */;
-			targetProxy = 83F25D8C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5245A2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1284 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Credentials::Credentials" /* Credentials */;
-			targetProxy = 83F25D8D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5245B2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1285 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Session::KituraSession" /* KituraSession */;
-			targetProxy = 83F25D8E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5245C2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1286 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D8F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5245D2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1287 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SyncServerShared::SyncServerShared" /* SyncServerShared */;
-			targetProxy = 83F25D902157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5245E2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1288 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Gloss::Gloss" /* Gloss */;
-			targetProxy = 83F25D912157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5245F2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1289 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D922157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524602157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1290 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D932157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524612157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1291 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D942157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524622157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1292 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D952157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524632157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1293 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D962157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524642157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1294 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D972157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524652157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1295 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D982157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524662157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1296 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D992157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524672157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1297 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D9A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524682157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1298 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectLib::PerfectLib" /* PerfectLib */;
-			targetProxy = 83F25D9B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524692157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1360 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Gloss::Gloss" /* Gloss */;
-			targetProxy = 83F25D0D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523DB2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1361 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D0E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523DC2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1362 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D0F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523DD2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1363 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D102157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523DE2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1364 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D112157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523DF2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1365 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D122157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E02157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1366 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D132157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E12157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1367 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D142157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E22157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1368 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D152157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E32157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1369 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D162157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E42157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_1370 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectLib::PerfectLib" /* PerfectLib */;
-			targetProxy = 83F25D172157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E52157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_493 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Session::KituraSession" /* KituraSession */;
-			targetProxy = 83F25D232157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F12157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_495 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D242157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F22157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_497 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D252157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F32157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_499 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D262157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F42157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_501 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D272157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F52157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_503 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D282157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F62157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_505 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D292157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F72157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_507 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D2A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F82157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_509 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D2B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F92157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_511 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D2C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523FA2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_513 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D2D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523FB2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_535 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Credentials::Credentials" /* Credentials */;
-			targetProxy = 83F25D482157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524162157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_536 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Session::KituraSession" /* KituraSession */;
-			targetProxy = 83F25D492157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524172157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_537 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D4A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524182157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_538 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D4B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524192157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_539 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D4C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5241A2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_540 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D4D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5241B2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_541 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D4E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5241C2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_542 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D4F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5241D2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_543 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D502157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5241E2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_544 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D512157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5241F2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_545 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D522157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524202157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_546 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D532157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524212157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_579 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Credentials::Credentials" /* Credentials */;
-			targetProxy = 83F25D2E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523FC2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_580 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Session::KituraSession" /* KituraSession */;
-			targetProxy = 83F25D2F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523FD2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_581 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D302157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523FE2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_582 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D312157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523FF2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_583 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D322157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524002157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_584 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D332157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524012157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_585 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D342157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524022157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_586 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D352157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524032157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_587 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D362157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524042157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_588 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D372157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524052157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_589 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D382157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524062157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_590 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D392157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524072157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_616 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Credentials::Credentials" /* Credentials */;
-			targetProxy = 83F25D3A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524082157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_617 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Session::KituraSession" /* KituraSession */;
-			targetProxy = 83F25D3B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524092157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_618 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D3C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5240A2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_619 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D3D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5240B2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_620 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D3E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5240C2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_621 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D3F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5240D2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_622 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D402157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5240E2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_623 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D412157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5240F2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_624 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D422157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524102157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_625 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D432157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524112157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_626 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D442157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524122157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_627 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D452157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524132157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_677 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D462157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524142157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_749 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D042157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D22157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_750 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D052157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D32157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_751 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D072157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D52157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_752 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D082157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D62157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_753 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D092157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D72157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_754 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D0A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D82157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_755 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D0B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D92157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_756 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D0C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523DA2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_808 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D062157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D42157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_860 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D002157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523CE2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_861 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D012157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523CF2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_862 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D022157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D02157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_863 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D032157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523D12157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_896 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D192157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E72157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_897 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D1A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E82157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_898 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D1B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523E92157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_899 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D1C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523EA2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_900 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D1D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523EB2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_901 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D1E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523EC2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_902 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D1F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523ED2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_903 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D202157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523EE2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_904 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D212157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523EF2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_905 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D222157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B523F02157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_955 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Server::Server" /* Server */;
-			targetProxy = 83F25D6B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524392157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_957 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "CredentialsDropbox::CredentialsDropbox" /* CredentialsDropbox */;
-			targetProxy = 83F25D6C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5243A2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_958 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-CredentialsFacebook::CredentialsFacebook" /* CredentialsFacebook */;
-			targetProxy = 83F25D6D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5243B2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_959 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "HeliumLogger::HeliumLogger" /* HeliumLogger */;
-			targetProxy = 83F25D6E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5243C2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_960 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectMySQL::PerfectMySQL" /* PerfectMySQL */;
-			targetProxy = 83F25D6F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5243D2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_962 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectCRUD::PerfectCRUD" /* PerfectCRUD */;
-			targetProxy = 83F25D702157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5243E2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_964 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectThread::PerfectThread" /* PerfectThread */;
-			targetProxy = 83F25D712157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5243F2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_966 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SMServerLib::SMServerLib" /* SMServerLib */;
-			targetProxy = 83F25D722157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524402157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_968 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-CredentialsGoogle::CredentialsGoogle" /* CredentialsGoogle */;
-			targetProxy = 83F25D732157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524412157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_969 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Credentials::Credentials" /* Credentials */;
-			targetProxy = 83F25D742157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524422157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_970 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-Session::KituraSession" /* KituraSession */;
-			targetProxy = 83F25D752157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524432157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_971 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Cryptor::Cryptor" /* Cryptor */;
-			targetProxy = 83F25D762157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524442157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_972 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SyncServerShared::SyncServerShared" /* SyncServerShared */;
-			targetProxy = 83F25D772157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524452157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_974 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Gloss::Gloss" /* Gloss */;
-			targetProxy = 83F25D782157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524462157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_975 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura::Kitura" /* Kitura */;
-			targetProxy = 83F25D792157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524472157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_976 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "TypeDecoder::TypeDecoder" /* TypeDecoder */;
-			targetProxy = 83F25D7A2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524482157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_977 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KituraContracts::KituraContracts" /* KituraContracts */;
-			targetProxy = 83F25D7B2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524492157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_978 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-TemplateEngine::KituraTemplateEngine" /* KituraTemplateEngine */;
-			targetProxy = 83F25D7C2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5244A2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_979 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::KituraNet" /* KituraNet */;
-			targetProxy = 83F25D7D2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5244B2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_980 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SSLService::SSLService" /* SSLService */;
-			targetProxy = 83F25D7E2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5244C2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_981 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Socket::Socket" /* Socket */;
-			targetProxy = 83F25D7F2157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5244D2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_982 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "LoggerAPI::LoggerAPI" /* LoggerAPI */;
-			targetProxy = 83F25D802157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5244E2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_983 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "Kitura-net::CHTTPParser" /* CHTTPParser */;
-			targetProxy = 83F25D812157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B5244F2157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 		OBJ_984 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "PerfectLib::PerfectLib" /* PerfectLib */;
-			targetProxy = 83F25D822157E5F700C8C25F /* PBXContainerItemProxy */;
+			targetProxy = 83B524502157FB1900CDBC99 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
