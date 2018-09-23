@@ -62,10 +62,6 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             }
         }
         
-        if !missingField {
-            XCTAssert(uploadId == 1, "Bad uploadId!")
-        }
-        
         upload.uploadId = uploadId
         
         return upload

@@ -115,11 +115,12 @@ extension FileController {
         }
         
         // 4) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
-        let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID)
         
         // 5/28/17; I just got an error on this: 
         // [ERR] Number rows removed from Upload was 10 but should have been Optional(9)!
         // How could this happen?
+        // 9/23/18; It could have been a race condition across test cases with the same device UUID and user. I'm now adding in a sharing group UUID qualifier, so I wonder if this will solve that problem too?
         
         switch params.repos.upload.remove(key: filesForUserDevice) {
         case .removed(let numberRows):
@@ -135,7 +136,7 @@ extension FileController {
             return .doCompletion(.failure(.message(message)))
         }
         
-        // See if we have to sharing group update operation.
+        // See if we have to do a sharing group update operation.
         if let sharingGroupName = doneUploadsRequest.sharingGroupName {
             let serverSharingGroup = Server.SharingGroup()
             serverSharingGroup.sharingGroupUUID = doneUploadsRequest.sharingGroupUUID

@@ -401,7 +401,7 @@ class UploadRepository : Repository, RepositoryLookup {
         case uploadId(Int64)
         case fileUUID(String)
         case userId(UserId)
-        case filesForUserDevice(userId:UserId, deviceUUID:String)
+        case filesForUserDevice(userId:UserId, deviceUUID:String, sharingGroupUUID: String)
         case primaryKey(fileUUID:String, userId:UserId, deviceUUID:String)
         
         var description : String {
@@ -412,8 +412,8 @@ class UploadRepository : Repository, RepositoryLookup {
                 return "fileUUID(\(fileUUID))"
             case .userId(let userId):
                 return "userId(\(userId))"
-            case .filesForUserDevice(let userId, let deviceUUID):
-                return "userId(\(userId)); deviceUUID(\(deviceUUID))"
+            case .filesForUserDevice(let userId, let deviceUUID, let sharingGroupUUID):
+                return "userId(\(userId)); deviceUUID(\(deviceUUID); sharingGroupUUID(\(sharingGroupUUID))"
             case .primaryKey(let fileUUID, let userId, let deviceUUID):
                 return "fileUUID(\(fileUUID)); userId(\(userId)); deviceUUID(\(deviceUUID))"
             }
@@ -428,8 +428,8 @@ class UploadRepository : Repository, RepositoryLookup {
             return "fileUUID = '\(fileUUID)'"
         case .userId(let userId):
             return "userId = '\(userId)'"
-        case .filesForUserDevice(let userId, let deviceUUID):
-            return "userId = \(userId) and deviceUUID = '\(deviceUUID)'"
+        case .filesForUserDevice(let userId, let deviceUUID, let sharingGroupUUID):
+            return "userId = \(userId) and deviceUUID = '\(deviceUUID)' and sharingGroupUUID = '\(sharingGroupUUID)'"
         case .primaryKey(let fileUUID, let userId, let deviceUUID):
             return "fileUUID = '\(fileUUID)' and userId = \(userId) and deviceUUID = '\(deviceUUID)'"
         }
