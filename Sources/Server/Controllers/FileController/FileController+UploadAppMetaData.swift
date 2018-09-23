@@ -23,12 +23,6 @@ extension FileController {
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: uploadAppMetaDataRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
-            Log.error("Inconsistent sharing groups.")
-            params.completion(.failure(nil))
-            return
-        }
-        
         Controllers.getMasterVersion(sharingGroupUUID: uploadAppMetaDataRequest.sharingGroupUUID, params: params) { error, masterVersion in
             if error != nil {
                 let message = "Error: \(String(describing: error))"

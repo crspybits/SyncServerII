@@ -69,7 +69,7 @@ extension FileController {
         var uploadDeletions:[Upload]
         
         // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
-        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, deviceUUID: params.deviceUUID!)
         switch fileUploadsResult {
         case .uploads(let uploads):
             Log.debug("Number of file uploads and upload deletions: \(uploads.count)")
@@ -104,7 +104,7 @@ extension FileController {
         
         // 3) Transfer info to the FileIndex repository from Upload.
         let numberTransferred =
-            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: effectiveOwningUserId,
+            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: effectiveOwningUserId, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID,
                 uploadingDeviceUUID: params.deviceUUID!,
                 uploadRepo: params.repos.upload)
         
@@ -161,13 +161,6 @@ extension FileController {
         
         guard sharingGroupSecurityCheck(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
-            let message = "Inconsistent sharing groups."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

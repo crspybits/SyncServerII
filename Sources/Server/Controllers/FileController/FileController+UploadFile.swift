@@ -38,13 +38,6 @@ extension FileController {
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: uploadRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
-            let message = "Inconsistent sharing groups."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
             let message = "Unknown mime type passed: \(uploadRequest.mimeType) (see SyncServer-Shared)"
             Log.error(message)

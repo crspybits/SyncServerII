@@ -213,6 +213,7 @@ class UploadRepository : Repository, RepositoryLookup {
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 
             // Not including fileVersion in the key because I don't want to allow the possiblity of uploading vN of a file and vM of a file at the same time.
+            // This allows for the possibility of a client interleaving uploads to different sharing group UUID's (without interveneing DoneUploads) -- because the same fileUUID cannot appear in different sharing groups.
             "UNIQUE (fileUUID, userId, deviceUUID), " +
             
             "UNIQUE (uploadId))"
@@ -434,9 +435,9 @@ class UploadRepository : Repository, RepositoryLookup {
         }
     }
     
-    func select(forUserId userId: UserId, deviceUUID:String, andState state:UploadState? = nil) -> Select {
+    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, andState state:UploadState? = nil) -> Select {
     
-        var query = "select * from \(tableName) where userId=\(userId) and deviceUUID='\(deviceUUID)'"
+        var query = "select * from \(tableName) where userId=\(userId) and sharingGroupUUID = '\(sharingGroupUUID)' and deviceUUID='\(deviceUUID)'"
         
         if state != nil {
             query += " and state='\(state!.rawValue)'"
@@ -451,8 +452,8 @@ class UploadRepository : Repository, RepositoryLookup {
     }
     
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
-    func uploadedFiles(forUserId userId: UserId, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
-        let selectUploadedFiles = select(forUserId: userId, deviceUUID: deviceUUID, andState: state)
+    func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
+        let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, andState: state)
 
         var result:[Upload] = []
         

@@ -261,7 +261,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let result1 = UserRepository(db).add(user: user1)
         XCTAssert(result1 == 1, "Bad credentialsId!")
         
-        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, deviceUUID: Foundation.UUID().uuidString)
+        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, sharingGroupUUID: UUID().uuidString, deviceUUID: Foundation.UUID().uuidString)
         switch uploadedFilesResult {
         case .uploads(let uploads):
             XCTAssert(uploads.count == 0)
@@ -289,7 +289,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, userId:userId!, deviceUUID:deviceUUID)
 
-        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, deviceUUID: deviceUUID)
+        let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID)
         switch uploadedFilesResult {
         case .uploads(let uploads):
             XCTAssert(uploads.count == 1)

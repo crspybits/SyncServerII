@@ -67,25 +67,6 @@ class FileController : ControllerProtocol {
         
         return creds
     }
-    
-    // Make sure all uploaded files for the current signed in user belong to the given sharing group.
-    func checkSharingGroupConsistency(sharingGroupUUID: String, params:RequestProcessingParameters) -> Bool? {
-        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
-        switch fileUploadsResult {
-        case .uploads(let uploads):
-            let filteredResult = uploads.filter({$0.sharingGroupUUID == sharingGroupUUID})
-            if filteredResult.count == uploads.count {
-                return true
-            }
-            else {
-                return false
-            }
-            
-        case .error(let error):
-            Log.error("Failed to get file uploads: \(error)")
-            return nil
-        }
-    }
             
     func index(params:RequestProcessingParameters) {
         guard let indexRequest = params.request as? IndexRequest else {
@@ -199,14 +180,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: getUploadsRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
-            let message = "Inconsistent sharing groups."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        let uploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        let uploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, sharingGroupUUID: getUploadsRequest.sharingGroupUUID, deviceUUID: params.deviceUUID!)
 
         switch uploadsResult {
         case .uploads(let uploads):
