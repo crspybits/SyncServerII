@@ -213,6 +213,7 @@ class UploadRepository : Repository, RepositoryLookup {
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 
             // Not including fileVersion in the key because I don't want to allow the possiblity of uploading vN of a file and vM of a file at the same time.
+            // This allows for the possibility of a client interleaving uploads to different sharing group UUID's (without interveneing DoneUploads) -- because the same fileUUID cannot appear in different sharing groups.
             "UNIQUE (fileUUID, userId, deviceUUID), " +
             
             "UNIQUE (uploadId))"
@@ -400,7 +401,7 @@ class UploadRepository : Repository, RepositoryLookup {
         case uploadId(Int64)
         case fileUUID(String)
         case userId(UserId)
-        case filesForUserDevice(userId:UserId, deviceUUID:String)
+        case filesForUserDevice(userId:UserId, deviceUUID:String, sharingGroupUUID: String)
         case primaryKey(fileUUID:String, userId:UserId, deviceUUID:String)
         
         var description : String {
@@ -411,8 +412,8 @@ class UploadRepository : Repository, RepositoryLookup {
                 return "fileUUID(\(fileUUID))"
             case .userId(let userId):
                 return "userId(\(userId))"
-            case .filesForUserDevice(let userId, let deviceUUID):
-                return "userId(\(userId)); deviceUUID(\(deviceUUID))"
+            case .filesForUserDevice(let userId, let deviceUUID, let sharingGroupUUID):
+                return "userId(\(userId)); deviceUUID(\(deviceUUID); sharingGroupUUID(\(sharingGroupUUID))"
             case .primaryKey(let fileUUID, let userId, let deviceUUID):
                 return "fileUUID(\(fileUUID)); userId(\(userId)); deviceUUID(\(deviceUUID))"
             }
@@ -427,16 +428,16 @@ class UploadRepository : Repository, RepositoryLookup {
             return "fileUUID = '\(fileUUID)'"
         case .userId(let userId):
             return "userId = '\(userId)'"
-        case .filesForUserDevice(let userId, let deviceUUID):
-            return "userId = \(userId) and deviceUUID = '\(deviceUUID)'"
+        case .filesForUserDevice(let userId, let deviceUUID, let sharingGroupUUID):
+            return "userId = \(userId) and deviceUUID = '\(deviceUUID)' and sharingGroupUUID = '\(sharingGroupUUID)'"
         case .primaryKey(let fileUUID, let userId, let deviceUUID):
             return "fileUUID = '\(fileUUID)' and userId = \(userId) and deviceUUID = '\(deviceUUID)'"
         }
     }
     
-    func select(forUserId userId: UserId, deviceUUID:String, andState state:UploadState? = nil) -> Select {
+    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, andState state:UploadState? = nil) -> Select {
     
-        var query = "select * from \(tableName) where userId=\(userId) and deviceUUID='\(deviceUUID)'"
+        var query = "select * from \(tableName) where userId=\(userId) and sharingGroupUUID = '\(sharingGroupUUID)' and deviceUUID='\(deviceUUID)'"
         
         if state != nil {
             query += " and state='\(state!.rawValue)'"
@@ -451,8 +452,8 @@ class UploadRepository : Repository, RepositoryLookup {
     }
     
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
-    func uploadedFiles(forUserId userId: UserId, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
-        let selectUploadedFiles = select(forUserId: userId, deviceUUID: deviceUUID, andState: state)
+    func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
+        let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, andState: state)
 
         var result:[Upload] = []
         

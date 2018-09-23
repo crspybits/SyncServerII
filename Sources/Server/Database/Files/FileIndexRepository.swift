@@ -410,13 +410,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 <Uploading-deviceUUID> is the device UUID of the uploading device.
     */
     // Returns nil on failure, and on success returns the number of uploads transferred.
-    func transferUploads(uploadUserId: UserId, owningUserId: UserId, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
+    func transferUploads(uploadUserId: UserId, owningUserId: UserId, sharingGroupUUID: String, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
         
         var error = false
         var numberTransferred:Int32 = 0
         
-        // [1] Fetch the uploaded files for the user and this device.
-        let uploadSelect = uploadRepo.select(forUserId: uploadUserId, deviceUUID: uploadingDeviceUUID)
+        // [1] Fetch the uploaded files for the user, device, and sharing group.
+        let uploadSelect = uploadRepo.select(forUserId: uploadUserId, sharingGroupUUID: sharingGroupUUID, deviceUUID: uploadingDeviceUUID)
         uploadSelect.forEachRow { rowModel in
             if error {
                 return

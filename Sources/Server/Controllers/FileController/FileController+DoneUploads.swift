@@ -69,7 +69,7 @@ extension FileController {
         var uploadDeletions:[Upload]
         
         // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
-        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, deviceUUID: params.deviceUUID!)
         switch fileUploadsResult {
         case .uploads(let uploads):
             Log.debug("Number of file uploads and upload deletions: \(uploads.count)")
@@ -104,7 +104,7 @@ extension FileController {
         
         // 3) Transfer info to the FileIndex repository from Upload.
         let numberTransferred =
-            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: effectiveOwningUserId,
+            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: effectiveOwningUserId, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID,
                 uploadingDeviceUUID: params.deviceUUID!,
                 uploadRepo: params.repos.upload)
         
@@ -115,11 +115,12 @@ extension FileController {
         }
         
         // 4) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
-        let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID)
         
         // 5/28/17; I just got an error on this: 
         // [ERR] Number rows removed from Upload was 10 but should have been Optional(9)!
         // How could this happen?
+        // 9/23/18; It could have been a race condition across test cases with the same device UUID and user. I'm now adding in a sharing group UUID qualifier, so I wonder if this will solve that problem too?
         
         switch params.repos.upload.remove(key: filesForUserDevice) {
         case .removed(let numberRows):
@@ -135,7 +136,7 @@ extension FileController {
             return .doCompletion(.failure(.message(message)))
         }
         
-        // See if we have to sharing group update operation.
+        // See if we have to do a sharing group update operation.
         if let sharingGroupName = doneUploadsRequest.sharingGroupName {
             let serverSharingGroup = Server.SharingGroup()
             serverSharingGroup.sharingGroupUUID = doneUploadsRequest.sharingGroupUUID
@@ -161,13 +162,6 @@ extension FileController {
         
         guard sharingGroupSecurityCheck(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        guard let consistentSharingGroups = checkSharingGroupConsistency(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, params:params), consistentSharingGroups else {
-            let message = "Inconsistent sharing groups."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

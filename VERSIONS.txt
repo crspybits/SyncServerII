@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.17.4
+	* Removed a consistency check across upload operations. Now allowing for the possibility of a client interleaving uploads from different sharing group UUID's (without an intervening DoneUploads) to give the client more flexibility. E.g., this could help in some client error recovery use cases.
+
 Version 0.17.3  (9/16/18)
 	* Fixed git tagging issue.
 	
