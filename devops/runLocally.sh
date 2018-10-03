@@ -6,6 +6,7 @@
 # 	http://localhost:8080/HealthCheck/
 
 # E.g., runLocally.sh ~/Desktop/Apps/SyncServerII/Private/Server/SharedImages-local.json
+# E.g., runLocally.sh ~/Desktop/Apps/SyncServerII/Private/Server/ClientTesting-local.json
 SERVER_JSON=$1
 RUN_DIR=/Users/chris/Desktop/Apps/SyncServer.Run
 IMAGE=syncserver-runner
