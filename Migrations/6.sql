@@ -6,6 +6,8 @@
 -- importing to local db
 -- mysql -u crspybits -p < ~/Desktop/dump.sql
 
+-- drop table DeviceUUID; drop table ShortLocks; drop table FileIndex; drop table MasterVersion; drop table SharingGroupUser; drop table Upload; drop table User; drop table SharingInvitation; drop table SharingGroup;
+
 delimiter //
 create procedure migration()
 begin 
@@ -13,7 +15,7 @@ begin
       BEGIN
       
       GET DIAGNOSTICS CONDITION 1 @p1 = RETURNED_SQLSTATE, @p2 = MESSAGE_TEXT;
-	  SELECT @p1, @p2;
+	  SELECT @p1, @p2, "ERROR999";
      
       ROLLBACK;
    END;
@@ -21,7 +23,7 @@ begin
    DECLARE exit handler for sqlwarning
      BEGIN
       GET DIAGNOSTICS CONDITION 1 @p1 = RETURNED_SQLSTATE, @p2 = MESSAGE_TEXT;
-	  SELECT @p1, @p2;
+	  SELECT @p1, @p2, "ERROR999";
 	  
      ROLLBACK;
    END;
@@ -81,7 +83,7 @@ begin
 	
 	-- Without the FK name, I get:
 	-- ERROR 1050 (42S01): Table './syncserver_sharedimages/sharinggroupuser' already exists
-	ALTER TABLE SharingGroupUser ADD COLUMN owningUserId BIGINT, ADD CONSTRAINT `SharingGroupUser_ibfk_3` FOREIGN KEY (owningUserId) REFERENCES User(userId);
+	ALTER TABLE SharingGroupUser ADD COLUMN owningUserId BIGINT, ADD CONSTRAINT `SharingGroupUser_ibfk_5` FOREIGN KEY (owningUserId) REFERENCES User(userId);
 	
 	UPDATE SharingGroupUser INNER JOIN User ON SharingGroupUser.userId = User.userId SET SharingGroupUser.owningUserId = User.owningUserId;
 
@@ -140,6 +142,7 @@ begin
 	ALTER TABLE SharingGroupUser ADD CONSTRAINT UNIQUE (sharingGroupUUID, userId);
 	
 	ALTER TABLE SharingGroupUser DROP FOREIGN KEY `SharingGroupUser_ibfk_2`;
+	ALTER TABLE SharingGroupUser DROP INDEX sharingGroupId;
 	ALTER TABLE SharingGroupUser DROP COLUMN sharingGroupId;
 
 	-- 4) FileIndex
@@ -175,7 +178,8 @@ begin
 	
 	ALTER TABLE ShortLocks DROP FOREIGN KEY `ShortLocks_ibfk_1`;
 	ALTER TABLE ShortLocks DROP COLUMN sharingGroupId;
-	
+	ALTER TABLE ShortLocks ADD CONSTRAINT UNIQUE (sharingGroupUUID);
+
 	
 	-- 7) Upload
 	DELETE FROM Upload;
