@@ -115,7 +115,7 @@ class SharingAccountsController : ControllerProtocol {
         let result = params.repos.sharingGroupUser.lookup(key: key, modelInit: SharingGroupUser.init)
         switch result {
         case .found:
-            let message = "User id: \(existingUser.userId!) was alread in sharing group: \(sharingInvitation.sharingGroupUUID)"
+            let message = "User id: \(existingUser.userId!) was already in sharing group: \(sharingInvitation.sharingGroupUUID)"
             Log.error(message)
             completion(.failure(.message(message)))
             return
