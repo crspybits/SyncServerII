@@ -4,9 +4,11 @@
 -- mysqldump -h url.for.db -P 3306 -u username --databases dbname > dump.sql
 
 -- importing to local db
--- mysql -u crspybits -p < ~/Desktop/dump.sql
+-- mysql -u root -p < ~/Desktop/dump.sql
 
 -- drop table DeviceUUID; drop table ShortLocks; drop table FileIndex; drop table MasterVersion; drop table SharingGroupUser; drop table Upload; drop table User; drop table SharingInvitation; drop table SharingGroup;
+
+-- delete from DeviceUUID; delete from ShortLocks; delete from FileIndex; delete from MasterVersion; delete from SharingGroupUser; delete from Upload; delete from User; delete from SharingInvitation; delete from SharingGroup;
 
 delimiter //
 create procedure migration()
@@ -120,25 +122,27 @@ begin
 
 	
 	-- 2) MasterVersion
-	ALTER TABLE MasterVersion ADD COLUMN sharingGroupUUID VARCHAR(36), ADD CONSTRAINT `MasterVersion_ibfk_2` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
+	ALTER TABLE MasterVersion ADD COLUMN sharingGroupUUID VARCHAR(36);
 	
 	UPDATE MasterVersion INNER JOIN SharingGroup ON MasterVersion.sharingGroupId = SharingGroup.sharingGroupId SET MasterVersion.sharingGroupUUID = SharingGroup.sharingGroupUUID;
 	
 	ALTER TABLE MasterVersion MODIFY sharingGroupUUID VARCHAR(36) NOT NULL;
 	
-	ALTER TABLE MasterVersion ADD CONSTRAINT UNIQUE (sharingGroupUUID);
+	ALTER TABLE MasterVersion ADD CONSTRAINT UNIQUE (sharingGroupUUID), ADD CONSTRAINT `MasterVersion_ibfk_2` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
 	
 	ALTER TABLE MasterVersion DROP FOREIGN KEY `MasterVersion_ibfk_1`;
 	ALTER TABLE MasterVersion DROP COLUMN sharingGroupId;
 
 
 	-- 3) SharingGroupUser
-	ALTER TABLE SharingGroupUser ADD COLUMN sharingGroupUUID VARCHAR(36), ADD CONSTRAINT `SharingGroupUser_ibfk_4` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
+	ALTER TABLE SharingGroupUser ADD COLUMN sharingGroupUUID VARCHAR(36);
 	
 	UPDATE SharingGroupUser INNER JOIN SharingGroup ON SharingGroupUser.sharingGroupId = SharingGroup.sharingGroupId SET SharingGroupUser.sharingGroupUUID = SharingGroup.sharingGroupUUID;
 	
 	ALTER TABLE SharingGroupUser MODIFY sharingGroupUUID VARCHAR(36) NOT NULL;
 
+	ALTER TABLE SharingGroupUser ADD CONSTRAINT `SharingGroupUser_ibfk_4` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
+	
 	ALTER TABLE SharingGroupUser ADD CONSTRAINT UNIQUE (sharingGroupUUID, userId);
 	
 	ALTER TABLE SharingGroupUser DROP FOREIGN KEY `SharingGroupUser_ibfk_2`;
@@ -146,12 +150,14 @@ begin
 	ALTER TABLE SharingGroupUser DROP COLUMN sharingGroupId;
 
 	-- 4) FileIndex
-	ALTER TABLE FileIndex ADD COLUMN sharingGroupUUID VARCHAR(36), ADD CONSTRAINT `FileIndex_ibfk_2` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
+	ALTER TABLE FileIndex ADD COLUMN sharingGroupUUID VARCHAR(36);
 	
 	UPDATE FileIndex INNER JOIN SharingGroup ON FileIndex.sharingGroupId = SharingGroup.sharingGroupId SET FileIndex.sharingGroupUUID = SharingGroup.sharingGroupUUID;
 	
 	ALTER TABLE FileIndex MODIFY sharingGroupUUID VARCHAR(36) NOT NULL;
-
+	
+	ALTER TABLE FileIndex ADD CONSTRAINT `FileIndex_ibfk_2` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
+	
 	ALTER TABLE FileIndex ADD CONSTRAINT UNIQUE (fileUUID, sharingGroupUUID);
 	
 	ALTER TABLE FileIndex DROP FOREIGN KEY `FileIndex_ibfk_1`;
@@ -174,11 +180,10 @@ begin
 	-- 6) ShortLocks
 	DELETE FROM ShortLocks;
 	
-	ALTER TABLE ShortLocks ADD COLUMN sharingGroupUUID VARCHAR(36) NOT NULL, ADD CONSTRAINT `ShortLocks_ibfk_2` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
+	ALTER TABLE ShortLocks ADD COLUMN sharingGroupUUID VARCHAR(36) NOT NULL, ADD CONSTRAINT UNIQUE (sharingGroupUUID), ADD CONSTRAINT `ShortLocks_ibfk_2` FOREIGN KEY (sharingGroupUUID) REFERENCES SharingGroup(sharingGroupUUID);
 	
 	ALTER TABLE ShortLocks DROP FOREIGN KEY `ShortLocks_ibfk_1`;
 	ALTER TABLE ShortLocks DROP COLUMN sharingGroupId;
-	ALTER TABLE ShortLocks ADD CONSTRAINT UNIQUE (sharingGroupUUID);
 
 	
 	-- 7) Upload

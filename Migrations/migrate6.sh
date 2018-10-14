@@ -2,8 +2,14 @@
 
 user=""
 host=""
+
+# user="root"
+# host="localhost"
+
 dbname="SyncServer_SharedImages"
 sqlScript="6.sql"
+
+echo "Migrating $dbname on $host"
 
 result=$(mysql -P 3306 -p --user="$user" --host="$host" --database="$dbname" < "$sqlScript" 2>&1 )
 
