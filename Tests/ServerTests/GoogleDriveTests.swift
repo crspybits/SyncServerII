@@ -17,6 +17,8 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     // In my Google Drive, at the top-level:
     let knownPresentFolder = "Programming"
     let knownPresentFile = "DO-NOT-REMOVE.txt"
+    
+    let knownPresentImageFile = "DO-NOT-REMOVE.png"
 
     // This is special in that (a) it contains only two characters, and (b) it was causing me problems for downloading on 2/4/18.
     let knownPresentFile2 = "DO-NOT-REMOVE2.txt"
@@ -126,6 +128,10 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     
     func testSearchForPresentFile() {
         searchForFile(name: knownPresentFile, withMimeType: "text/plain", inFolder: nil, presentExpected: true)
+    }
+    
+    func testSearchForPresentImageFile() {
+        searchForFile(name: knownPresentImageFile, withMimeType: "image/png", inFolder: nil, presentExpected: true)
     }
     
     func testSearchForAbsentFile() {
@@ -406,6 +412,7 @@ extension GoogleDriveTests {
             ("testSearchForPresentFolder", testSearchForPresentFolder),
             ("testSearchForAbsentFolder", testSearchForAbsentFolder),
             ("testSearchForPresentFile", testSearchForPresentFile),
+            ("testSearchForPresentImageFile", testSearchForPresentImageFile),
             ("testSearchForAbsentFile", testSearchForAbsentFile),
             ("testSearchForPresentFileInFolder", testSearchForPresentFileInFolder),
             ("testSearchForAbsentFileInFolder", testSearchForAbsentFileInFolder),

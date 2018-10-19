@@ -119,8 +119,9 @@ extension FileController {
                 return
             }
             
-            guard let cloudStorageCreds = owningUserCreds as? CloudStorage else {
-                let message = "Could not obtain cloud storage creds."
+            guard let cloudStorageCreds = owningUserCreds as? CloudStorage,
+                let cloudStorageType = owningUserCreds.accountType.cloudStorageType else {
+                let message = "Could not obtain cloud storage creds or cloud storage type."
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
@@ -130,18 +131,22 @@ extension FileController {
             
             cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
                 switch result {
-                case .success(let data):
-                    if Int64(data.count) != fileIndexObj!.fileSizeBytes {
-                        let message = "Actual file size \(data.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)"
+                case .success(let downloadResult):
+                    if Int64(downloadResult.data.count) != fileIndexObj!.fileSizeBytes {
+                        let message = "Actual file size \(downloadResult.data.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)"
                         Log.error(message)
                         params.completion(.failure(.message(message)))
                         return
                     }
                     
+                    Log.debug("CheckSum: \(downloadResult.checkSum)")
+                    
                     let response = DownloadFileResponse()!
                     response.appMetaData = fileIndexObj!.appMetaData
-                    response.data = data
-                    response.fileSizeBytes = Int64(data.count)
+                    response.data = downloadResult.data
+                    response.fileSizeBytes = Int64(downloadResult.data.count)
+                    response.checkSum = downloadResult.checkSum
+                    response.cloudStorageType = cloudStorageType.rawValue
                     
                     params.completion(.success(response))
                     return

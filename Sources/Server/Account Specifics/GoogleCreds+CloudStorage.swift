@@ -60,7 +60,7 @@ extension GoogleCreds : CloudStorage {
             urlParams = nil
         }
         
-        self.apiCall(method: "GET", path: "/drive/v3/files", urlParameters:urlParams) { (apiResult, statusCode) in
+        self.apiCall(method: "GET", path: "/drive/v3/files", urlParameters:urlParams) { (apiResult, statusCode, responseHeaders) in
             
             var error:ListFilesError?
             if statusCode != HTTPStatusCode.OK {
@@ -102,6 +102,9 @@ extension GoogleCreds : CloudStorage {
         // Google specific result-- a partial files resource for the file.
         // Contains fields: size, and id
         let dictionary:[String: Any]
+        
+        // Non-nil for files.
+        let checkSum: String?
     }
     
     // Considers it an error for there to be more than one item with the given name.
@@ -133,7 +136,8 @@ extension GoogleCreds : CloudStorage {
         query += "name='\(itemName)' and trashed=false"
         
         // The structure of this wasn't obvious to me-- it's scoped over the entire response object, not just within the files resource. See also http://stackoverflow.com/questions/38853938/google-drive-api-v3-invalid-field-selection
-        let fieldsReturned = "files/id,files/size"
+        // And see https://developers.google.com/drive/api/v3/performance#partial
+        let fieldsReturned = "files/id,files/size,files/md5Checksum"
         
         self.listFiles(query:query, fieldsReturned:fieldsReturned) { (dictionary, error) in
             // For the response structure, see https://developers.google.com/drive/v3/reference/files/list
@@ -156,7 +160,11 @@ extension GoogleCreds : CloudStorage {
                     case 1:
                         if let fileDict = filesArray[0] as? [String: Any],
                             let id = fileDict["id"] as? String {
-                            result = SearchResult(itemId: id, dictionary: fileDict)
+                            
+                            // See https://developers.google.com/drive/api/v3/reference/files
+                            let checkSum = fileDict["md5Checksum"] as? String
+
+                            result = SearchResult(itemId: id, dictionary: fileDict, checkSum: checkSum)
                         }
                         else {
                             resultError = SearchError.noIdInResultingJSON
@@ -202,7 +210,7 @@ extension GoogleCreds : CloudStorage {
             return
         }
     
-        self.apiCall(method: "POST", path: "/drive/v3/files", additionalHeaders:additionalHeaders, body: .string(jsonString)) { (apiResult, statusCode) in
+        self.apiCall(method: "POST", path: "/drive/v3/files", additionalHeaders:additionalHeaders, body: .string(jsonString)) { (apiResult, statusCode, responseHeaders) in
             var resultId:String?
             var resultError:Swift.Error?
             
@@ -301,7 +309,7 @@ extension GoogleCreds : CloudStorage {
             "Content-Type": "application/json; charset=UTF-8",
         ]
         
-        self.apiCall(method: "DELETE", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders) { (json, statusCode) in
+        self.apiCall(method: "DELETE", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders) { (json, statusCode, responseHeaders) in
             // The "noContent" correct result was not apparent from the docs-- figured this out by experimentation.
             if statusCode == HTTPStatusCode.noContent {
                 completion(nil)
@@ -395,7 +403,7 @@ extension GoogleCreds : CloudStorage {
         let endBoundary = "\r\n--\(boundary)--".data(using: .utf8)!
         multiPartData.append(endBoundary)
 
-        self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode) in
+        self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode, responseHeaders) in
 
             if statusCode != HTTPStatusCode.OK {
                 // Error case
@@ -448,7 +456,7 @@ extension GoogleCreds : CloudStorage {
             return
         }
         
-        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, error) in
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, checkSum, error) in
 
             switch error {
             case .none:
@@ -463,12 +471,12 @@ extension GoogleCreds : CloudStorage {
         }
     }
     
-    func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, Swift.Error?) -> ()) {
+    func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, _ checkSum: String?, Swift.Error?) -> ()) {
         
         self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in
             if result == nil {
                 // Folder doesn't exist. Yikes!
-                completion(nil, SearchForFileError.cloudFolderDoesNotExist)
+                completion(nil, nil, SearchForFileError.cloudFolderDoesNotExist)
             }
             else {
                 // Folder exists. Next need to find the id of our file within this folder.
@@ -476,10 +484,10 @@ extension GoogleCreds : CloudStorage {
                 let searchType = SearchType.file(mimeType: mimeType, parentFolderId: result!.itemId)
                 self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
                     if result == nil {
-                        completion(nil, SearchForFileError.cloudFileDoesNotExist(cloudFileName: cloudFileName))
+                        completion(nil, nil, SearchForFileError.cloudFileDoesNotExist(cloudFileName: cloudFileName))
                     }
                     else {
-                        completion(result!.itemId, nil)
+                        completion(result!.itemId, result!.checkSum, nil)
                     }
                 }
             }
@@ -494,7 +502,7 @@ extension GoogleCreds : CloudStorage {
         case noCloudFolderName
     }
 
-    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<Data>)->()) {
+    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<DownloadResult>)->()) {
         
         guard let options = options else {
             completion(.failure(DownloadSmallFileError.noOptions))
@@ -506,12 +514,13 @@ extension GoogleCreds : CloudStorage {
             return
         }
         
-        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, error) in
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, checkSum, error) in
             if error == nil {
                 // File was found! Need to download it now.
                 self.completeSmallFileDownload(fileId: cloudFileId!) { (data, error) in
                     if error == nil {
-                        completion(.success(data!))
+                        let downloadResult = DownloadResult(data: data!, checkSum: checkSum!)
+                        completion(.success(downloadResult))
                     }
                     else {
                         completion(.failure(error!))
@@ -523,7 +532,7 @@ extension GoogleCreds : CloudStorage {
             }
         }
     }
-    
+
     private func completeSmallFileDownload(fileId:String, completion:@escaping (_ data:Data?, Swift.Error?)->()) {
         // See https://developers.google.com/drive/v3/web/manage-downloads
         /*
@@ -533,7 +542,7 @@ extension GoogleCreds : CloudStorage {
         
         let path = "/drive/v3/files/\(fileId)?alt=media"
         
-        self.apiCall(method: "GET", path: path, expectingData: true) { (apiResult, statusCode) in
+        self.apiCall(method: "GET", path: path, expectingData: true) { (apiResult, statusCode, responseHeaders) in
         
             if statusCode != HTTPStatusCode.OK {
                 completion(nil, DownloadSmallFileError.badStatusCode(statusCode))
@@ -572,7 +581,7 @@ extension GoogleCreds : CloudStorage {
             return
         }
         
-        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, error) in
+        searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, checkSum, error) in
             if error == nil {
                 // File was found! Need to delete it now.
                 self.deleteFile(fileId: cloudFileId!) { error in

@@ -63,6 +63,10 @@ class FileIndex : NSObject, Model, Filenaming {
     static let fileSizeBytesKey = "fileSizeBytes"
     var fileSizeBytes: Int64!
     
+    // For queries; not in this table.
+    static let accountTypeKey = "accountType"
+    var accountType: String!
+    
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -108,7 +112,11 @@ class FileIndex : NSObject, Model, Filenaming {
             case FileIndex.fileSizeBytesKey:
                 fileSizeBytes = newValue as! Int64?
                 
+            case User.accountTypeKey:
+                accountType = newValue as! String?
+                
             default:
+                Log.debug("key: \(key)")
                 assert(false)
             }
         }
@@ -584,7 +592,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
     }
      
     func fileIndex(forSharingGroupUUID sharingGroupUUID: String) -> FileIndexResult {
-        let query = "select * from \(tableName) where sharingGroupUUID = '\(sharingGroupUUID)'"
+        let query = "select \(tableName).*, \(UserRepository.tableName).accountType from \(tableName), \(UserRepository.tableName) where sharingGroupUUID = '\(sharingGroupUUID)' and \(tableName).userId = \(UserRepository.tableName).userId"
         return fileIndex(forSelectQuery: query)
     }
     
@@ -609,6 +617,11 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
+            
+            if let accountType = AccountType(rawValue: rowModel.accountType),
+                let cloudStorageType = accountType.cloudStorageType {
+                fileInfo.cloudStorageType = cloudStorageType.rawValue
+            }
             
             result.append(fileInfo)
         }

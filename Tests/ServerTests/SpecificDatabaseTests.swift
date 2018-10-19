@@ -445,12 +445,18 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
-            XCTAssert(fileIndex.count == 1)
+            guard fileIndex.count == 1 else {
+                XCTFail()
+                return
+            }
+            
             XCTAssert(fileIndexInserted.fileUUID == fileIndex[0].fileUUID)
             XCTAssert(fileIndexInserted.fileVersion == fileIndex[0].fileVersion)
             XCTAssert(fileIndexInserted.mimeType == fileIndex[0].mimeType)
             XCTAssert(fileIndexInserted.deleted == fileIndex[0].deleted)
             XCTAssert(fileIndexInserted.fileSizeBytes == fileIndex[0].fileSizeBytes)
+            XCTAssert(fileIndex[0].cloudStorageType == CloudStorageType.Google.rawValue)
+            
         case .error(_):
             XCTFail()
         }

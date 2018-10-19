@@ -134,6 +134,17 @@ enum AccountType : String {
         }
     }
     
+    var cloudStorageType: CloudStorageType? {
+        switch self {
+        case .Google:
+            return .Google
+        case .Dropbox:
+            return .Dropbox
+        case .Facebook:
+            return nil
+        }
+    }
+    
     func toAuthTokenType() -> ServerConstants.AuthTokenType {
         switch self {
             case .Google:
@@ -187,7 +198,7 @@ class AccountAPICall {
                  body:APICallBody? = nil,
                  returnResultWhenNon200Code:Bool = false,
                  expectingData:Bool? = nil,
-        completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
+        completion:@escaping (_ result: APICallResult?, HTTPStatusCode?, _ responseHeaders: HeadersContainer?)->()) {
         
         var hostname = baseURL
         if hostname == nil {
@@ -240,7 +251,7 @@ class AccountAPICall {
                     // The actual `TODO` item here is to respond to the client in such a way so the client can prompt the user to re-sign in to generate an updated refresh token.
                     
                     if !returnResultWhenNon200Code {
-                        completion(nil, statusCode)
+                        completion(nil, statusCode, nil)
                         return
                     }
                 }
@@ -267,14 +278,14 @@ class AccountAPICall {
                         }
                     }
                     
-                    completion(result, statusCode)
+                    completion(result, statusCode, response.headers)
                     return
                 } catch (let error) {
                     Log.error("Failed to read response: \(error)")
                 }
             }
             
-            completion(nil, nil)
+            completion(nil, nil, nil)
         }
         
         switch body {

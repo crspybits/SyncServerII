@@ -76,7 +76,7 @@ class FacebookCreds : AccountAPICall,  Account {
         */
         
         apiCall(method: "GET", path: "/oauth/access_token",
-                urlParameters: urlParameters) { apiCallResult, httpStatus in
+                urlParameters: urlParameters) { apiCallResult, httpStatus, responseHeaders in
             if httpStatus == HTTPStatusCode.OK {
                 switch apiCallResult {
                 case .some(.dictionary(let dictionary)):

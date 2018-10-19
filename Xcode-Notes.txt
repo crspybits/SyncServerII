@@ -1,0 +1,22 @@
+My general work-flow is to use Xcode for all my editing needs for the server code. And for more than a couple of lines of change, I first do:
+	./Tools/clean.sh
+	./generateXcodeproj.sh
+	
+This is so that I can get a clean build (but not run) the server. This helps me getting rid of syntax errors. I am running the server only under Docker and Linux.
+
+10/17/18
+
+I've been having problems regenerating the Xcode project using the generateXcodeproj.sh script. These are coming in two types:
+
+1) I haven't gotten a successful build with Xcode 10 yet. This may be because of Swift 4.2, I'm not sure.
+
+2) With Xcode 9.4.1, I'm having problems with building PerfectMySQL. The first problem was that I'd messed my MySQL installation and it wasn't finding headers. I had to arm wrestle with that for a while to fix it. Memory serving, my current fix is to (a) install with homebrew (cannot use latest mySQL -- has to be mySQL 5.7 at most-- see https://github.com/PerfectlySoft/Perfect-MySQL), and (b) soft link (ln -s) the includes into the right place. The second problem, I'm still struggling with. It's failing to find the link library for mySQL: 
+	"ld: warning: Auto-Linking library not found for -lmysqlclient"
+	
+OK-- So, here's what finally seemed to have worked:
+
+	brew install mysql@5.7 && brew link mysql@5.7 --force
+	./Tools/clean.sh 
+	./generateXcodeproj.sh 
+
+I've got a clean build again.

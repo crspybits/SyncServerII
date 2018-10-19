@@ -177,7 +177,7 @@ class GoogleCreds : AccountAPICall, Account {
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
 
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode, responseHeaders in
             guard statusCode == HTTPStatusCode.OK else {
                 completion(GenerateTokensError.badStatusCode(statusCode))
                 return
@@ -255,7 +255,7 @@ class GoogleCreds : AccountAPICall, Account {
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
         
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode in
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode, responseHeaders in
             guard statusCode == HTTPStatusCode.OK else {
                 Log.error("Bad status code: \(String(describing: statusCode))")
                 completion(RefreshError.badStatusCode(statusCode))
@@ -301,7 +301,7 @@ class GoogleCreds : AccountAPICall, Account {
     override func apiCall(method:String, baseURL:String? = nil, path:String,
         additionalHeaders: [String:String]? = nil, urlParameters:String? = nil, body:APICallBody? = nil, returnResultWhenNon200Code:Bool = false,
             expectingData:Bool? = nil,
-        completion:@escaping (_ result: APICallResult?, HTTPStatusCode?)->()) {
+        completion:@escaping (_ result: APICallResult?, HTTPStatusCode?, _ responseHeaders: HeadersContainer?)->()) {
         
         var headers:[String:String] = additionalHeaders ?? [:]
         
@@ -310,7 +310,7 @@ class GoogleCreds : AccountAPICall, Account {
             headers["Authorization"] = "Bearer \(self.accessToken!)"
         }
 
-        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectingData: expectingData) { (apiCallResult, statusCode) in
+        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectingData: expectingData) { (apiCallResult, statusCode, responseHeaders) in
         
             if statusCode == self.expiredAccessTokenHTTPCode && !self.alreadyRefreshed {
                 self.alreadyRefreshed = true
@@ -327,12 +327,12 @@ class GoogleCreds : AccountAPICall, Account {
                     }
                     else {
                         Log.error("Failed to refresh access token: \(String(describing: error))")
-                        completion(nil, .internalServerError)
+                        completion(nil, .internalServerError, nil)
                     }
                 }
             }
             else {
-                completion(apiCallResult, statusCode)
+                completion(apiCallResult, statusCode, responseHeaders)
             }
         }
     }

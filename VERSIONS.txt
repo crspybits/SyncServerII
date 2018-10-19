@@ -1,5 +1,11 @@
 SyncServer
 
+Version 0.18.0
+	* Removing fileSizeInBytes from server/database; replacing with lastUploadedChecksum.
+	* Enabled download endpoint to return the checksum for the file currently in cloud storage so a client can (a) check it against the last uploaded file checksum, and (b) check for network transmission errors.
+	* CheckCreds endpoint returning cloud storage type.
+	* Index endpoint returning cloud storage type per file.
+
 Version 0.17.4 (9/23/18)
 	* Removed a consistency check across upload operations. Now allowing for the possibility of a client interleaving uploads from different sharing group UUID's (without an intervening DoneUploads) to give the client more flexibility. E.g., this could help in some client error recovery use cases.
 

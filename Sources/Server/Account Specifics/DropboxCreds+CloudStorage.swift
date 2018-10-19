@@ -24,6 +24,7 @@ extension DropboxCreds {
     enum DropboxError : Swift.Error {
         case badStatusCode(HTTPStatusCode?)
         case nilAPIResult
+        case nilCheckSum
         case badJSONResult
         case couldNotGetFileSize
         case unknownError
@@ -44,7 +45,7 @@ extension DropboxCreds {
         // It's hard to see in here, but I've put an explicit "/" before the file name. Dropbox needs this to precede file names.
         let body = "{\"path\": \"/\(fileName)\",\"include_media_info\": false,\"include_deleted\": false,\"include_has_explicit_shared_members\": false}"
         
-        self.apiCall(method: "POST", path: "/2/files/get_metadata", additionalHeaders: basicHeaders(), body: .string(body), returnResultWhenNon200Code: true) { (apiResult, statusCode) in
+        self.apiCall(method: "POST", path: "/2/files/get_metadata", additionalHeaders: basicHeaders(), body: .string(body), returnResultWhenNon200Code: true) { (apiResult, statusCode, responseHeaders) in
             
             // Log.debug("apiResult: \(String(describing: apiResult))")
 
@@ -95,7 +96,7 @@ extension DropboxCreds {
         headers["Dropbox-API-Arg"] = "{\"path\": \"/\(fileName)\",\"mode\": \"add\",\"autorename\": false,\"mute\": false}"
         headers["Content-Type"] = "application/octet-stream"
             
-        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/upload", additionalHeaders: headers, body: .data(data)) { (apiResult, statusCode) in
+        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/upload", additionalHeaders: headers, body: .data(data)) { (apiResult, statusCode, responseHeaders) in
             
             guard statusCode == HTTPStatusCode.OK else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))
@@ -152,7 +153,7 @@ extension DropboxCreds : CloudStorage {
         }
     }
     
-    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions? = nil, completion:@escaping (Result<Data>)->()) {
+    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions? = nil, completion:@escaping (Result<DownloadResult>)->()) {
         
         // https://www.dropbox.com/developers/documentation/http/documentation#files-download
         /*
@@ -165,8 +166,11 @@ extension DropboxCreds : CloudStorage {
         // See https://stackoverflow.com/questions/42755495/dropbox-download-file-api-stopped-working-with-400-error
         var headers = basicHeaders(withContentTypeHeader: "")
         headers["Dropbox-API-Arg"] = "{\"path\": \"/\(cloudFileName)\"}"
+        
+        // "The response body contains file content, so the result will appear as JSON in the Dropbox-API-Result response header"
+        // See https://www.dropbox.com/developers/documentation/http/documentation#formats
 
-        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/download", additionalHeaders: headers, expectingData: true) { (apiResult, statusCode) in
+        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/download", additionalHeaders: headers, expectingData: true) { (apiResult, statusCode, responseHeaders) in
             
             guard statusCode == HTTPStatusCode.OK else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))
@@ -178,12 +182,31 @@ extension DropboxCreds : CloudStorage {
                 return
             }
             
+            guard let headerAPIResult = responseHeaders?["Dropbox-API-Result"], headerAPIResult.count > 0 else {
+                Log.error("Could not get headerAPIResult")
+                completion(.failure(DropboxError.nilCheckSum))
+                return
+            }
+            
+            guard let headerAPIResultDict = headerAPIResult[0].toJSONDictionary() else {
+                Log.error("Could not convert string to JSON dict: headerAPIResultDict")
+                completion(.failure(DropboxError.nilCheckSum))
+                return
+            }
+
+            guard let checkSum = headerAPIResultDict["content_hash"] as? String else {
+                Log.error("Could not get check sum from headerAPIResultDict")
+                completion(.failure(DropboxError.nilCheckSum))
+                return
+            }
+                        
             guard case .data(let data) = apiResult else {
                 completion(.failure(DropboxError.noDataInAPIResult))
                 return
             }
 
-            completion(.success(data))
+            let downloadResult = DownloadResult(data: data, checkSum: checkSum)
+            completion(.success(downloadResult))
         }
     }
     
@@ -202,7 +225,7 @@ extension DropboxCreds : CloudStorage {
         
         let body = "{\"path\": \"/\(cloudFileName)\"}"
         
-        self.apiCall(method: "POST", path: "/2/files/delete_v2", additionalHeaders: headers, body: .string(body)) { (apiResult, statusCode) in
+        self.apiCall(method: "POST", path: "/2/files/delete_v2", additionalHeaders: headers, body: .string(body)) { (apiResult, statusCode, responseHeaders) in
             
             guard statusCode == HTTPStatusCode.OK else {
                 completion(DropboxError.badStatusCode(statusCode))

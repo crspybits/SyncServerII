@@ -125,9 +125,9 @@ class DropboxTests: ServerTestCase, LinuxTestable {
 
         creds.downloadFile(cloudFileName: cloudFileName) { result in
             switch result {
-            case .success(let data):
+            case .success(let downloadResult):
                 if let expectedContents = expectedContents {
-                    guard let str = String(data: data, encoding: String.Encoding.ascii) else {
+                    guard let str = String(data: downloadResult.data, encoding: String.Encoding.ascii) else {
                         XCTFail()
                         Log.error("Failed on string decoding")
                         return

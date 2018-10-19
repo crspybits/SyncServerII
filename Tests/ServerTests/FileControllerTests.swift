@@ -113,7 +113,9 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testIndexWithOneFile() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        let testAccount:TestAccount = .primaryOwningAccount
+        
+        guard let uploadResult = uploadTextFile(testAccount: testAccount, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -128,7 +130,8 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
         
-        guard let (files, sharingGroups) = getIndex(sharingGroupUUID: sharingGroupUUID) else {
+        guard let (files, sharingGroups) = getIndex(sharingGroupUUID: sharingGroupUUID),
+            let theFiles = files else {
             XCTFail()
             return
         }
@@ -140,6 +143,22 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             else {
             XCTFail()
             return
+        }
+        
+        for file in theFiles {
+            guard let cloudStorageType = file.cloudStorageType else {
+                XCTFail()
+                return
+            }
+            
+            guard let type = CloudStorageType(rawValue: cloudStorageType) else {
+                XCTFail()
+                return
+            }
+            
+            if file.fileUUID == uploadResult.request.fileUUID {
+                XCTAssert(testAccount.type.cloudStorageType == type)
+            }
         }
     }
     

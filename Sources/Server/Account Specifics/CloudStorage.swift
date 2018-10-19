@@ -25,13 +25,20 @@ public enum CloudStorageError : Int, Swift.Error {
     case alreadyUploaded
 }
 
+public struct DownloadResult {
+    let data: Data
+    
+    // A checksum value defined by the cloud storage system. This is the checksum value *before* the download.
+    let checkSum: String
+}
+
 protocol CloudStorage {
     // On success, Int in result gives file size in bytes on server.
     // Returns .failure(CloudStorageError.alreadyUploaded) in completion if the named file already exists.
     func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions?,
         completion:@escaping (Result<Int>)->())
     
-    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<Data>)->())
+    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<DownloadResult>)->())
     
     func deleteFile(cloudFileName:String, options:CloudStorageFileNameOptions?,
         completion:@escaping (Swift.Error?)->())
