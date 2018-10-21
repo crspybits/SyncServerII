@@ -313,7 +313,12 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     
     func runSelectTestForEachRow(ignoreErrors:Bool) {
         let query = "select * from \(testTableName)"
-        let select = Select(db:db, query: query, modelInit: model.init, ignoreErrors:ignoreErrors)
+        
+        guard let select = Select(db:db, query: query, modelInit: model.init, ignoreErrors:ignoreErrors) else {
+            XCTFail()
+            return
+        }
+        
         var row = 1
         
         select.forEachRow { rowModel in
@@ -376,7 +381,12 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
 
     func testTypeConverters() {
         let query = "select * from \(testTableName2)"
-        let select = Select(db:db, query: query, modelInit: model2.init, ignoreErrors:false)
+        
+        guard let select = Select(db:db, query: query, modelInit: model2.init, ignoreErrors:false) else {
+            XCTFail()
+            return
+        }
+        
         var rows = 0
         
         select.forEachRow { rowModel in

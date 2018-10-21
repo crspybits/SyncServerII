@@ -26,9 +26,12 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     
     func testThatRedeemingWithASharingAccountWorks() {
         let sharingUser:TestAccount = .primarySharingAccount
+        let owningUser:TestAccount = .primaryOwningAccount
+
         var sharingGroupUUID: String!
         var newSharingUserId: UserId!
-        createSharingUser(sharingUser: sharingUser) { userId, sid in
+        
+        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sid in
             sharingGroupUUID = sid
             newSharingUserId = userId
         }
@@ -37,8 +40,51 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             XCTFail()
             return
         }
-        
+
         checkOwingUserIdForSharingGroupUser(sharingGroupUUID: sharingGroupUUID, userId: newSharingUserId, sharingUser: sharingUser)
+    }
+    
+    // Requires that Facebook creds be up to date.
+    func testThatRedeemingWithANonOwningSharingAccountWorks() {
+        let sharingUser:TestAccount = .nonOwningSharingAccount
+        let owningUser:TestAccount = .primaryOwningAccount
+
+        var sharingGroupUUID: String!
+        var newSharingUserId: UserId!
+        
+        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sid in
+            sharingGroupUUID = sid
+            newSharingUserId = userId
+        }
+        
+        guard sharingGroupUUID != nil else {
+            XCTFail()
+            return
+        }
+
+        checkOwingUserIdForSharingGroupUser(sharingGroupUUID: sharingGroupUUID, userId: newSharingUserId, sharingUser: sharingUser)
+
+        guard let (_, sharingGroups) = getIndex(testAccount: sharingUser), sharingGroups.count > 0 else {
+            XCTFail()
+            return
+        }
+        
+        var found = false
+        
+        for sharingGroup in sharingGroups {
+            if sharingGroup.sharingGroupUUID == sharingGroupUUID {
+                guard let type = sharingGroup.cloudStorageType,
+                    let cloudStorageType = CloudStorageType(rawValue: type) else {
+                    XCTFail()
+                    return
+                }
+         
+                XCTAssert(owningUser.type.cloudStorageType == cloudStorageType)
+                found = true
+            }
+        }
+        
+        XCTAssert(found)
     }
     
     func testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails() {
@@ -215,7 +261,6 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        
         XCTAssert(filtered[0].permission == perm, "Actual: \(String(describing: filtered[0].permission)); expected: \(perm)")
     }
     
@@ -304,6 +349,8 @@ extension SharingAccountsController_RedeemSharingInvitation {
     static var allTests : [(String, (SharingAccountsController_RedeemSharingInvitation) -> () throws -> Void)] {
         return [
             ("testThatRedeemingWithASharingAccountWorks", testThatRedeemingWithASharingAccountWorks),
+            
+            ("testThatRedeemingWithANonOwningSharingAccountWorks", testThatRedeemingWithANonOwningSharingAccountWorks),
             
             ("testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails",
                 testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails),

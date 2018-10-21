@@ -424,7 +424,10 @@ class FileIndexRepository : Repository, RepositoryLookup {
         var numberTransferred:Int32 = 0
         
         // [1] Fetch the uploaded files for the user, device, and sharing group.
-        let uploadSelect = uploadRepo.select(forUserId: uploadUserId, sharingGroupUUID: sharingGroupUUID, deviceUUID: uploadingDeviceUUID)
+        guard let uploadSelect = uploadRepo.select(forUserId: uploadUserId, sharingGroupUUID: sharingGroupUUID, deviceUUID: uploadingDeviceUUID) else {
+            return nil
+        }
+        
         uploadSelect.forEachRow { rowModel in
             if error {
                 return
@@ -597,7 +600,9 @@ class FileIndexRepository : Repository, RepositoryLookup {
     }
     
     private func fileIndex(forSelectQuery selectQuery: String) -> FileIndexResult {
-        let select = Select(db:db, query: selectQuery, modelInit: FileIndex.init, ignoreErrors:false)
+        guard let select = Select(db:db, query: selectQuery, modelInit: FileIndex.init, ignoreErrors:false) else {
+            return .error("Failed on Select!")
+        }
         
         var result:[FileInfo] = []
         

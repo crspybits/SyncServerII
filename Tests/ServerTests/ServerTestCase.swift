@@ -1107,7 +1107,7 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupUUID: String?)->())? = nil) {
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, owningUserWhenCreating:TestAccount = .primaryOwningAccount, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupUUID: String?)->())? = nil) {
         // a) Create sharing invitation with one account.
         // b) Next, need to "sign out" of that account, and sign into another account
         // c) And, redeem sharing invitation with that new account.
@@ -1121,7 +1121,7 @@ class ServerTestCase : XCTestCase {
 
         case .yes:
             actualSharingGroupUUID = Foundation.UUID().uuidString
-            guard let _ = self.addNewUser(sharingGroupUUID: actualSharingGroupUUID, deviceUUID:deviceUUID) else {
+            guard let _ = self.addNewUser(testAccount: owningUserWhenCreating, sharingGroupUUID: actualSharingGroupUUID, deviceUUID:deviceUUID) else {
                 XCTFail()
                 completion?(nil, nil)
                 return
@@ -1130,7 +1130,7 @@ class ServerTestCase : XCTestCase {
 
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: permission, sharingGroupUUID:actualSharingGroupUUID) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: owningUserWhenCreating, permission: permission, sharingGroupUUID:actualSharingGroupUUID) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -1346,6 +1346,12 @@ class ServerTestCase : XCTestCase {
                             XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
                             XCTAssert(downloadFileResponse.fileSizeBytes == actualFileSize, "downloadFileResponse.fileSizeBytes: \(String(describing: downloadFileResponse.fileSizeBytes)); actualFileSize: \(actualFileSize)")
                             XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
+                            guard let type = downloadFileResponse.cloudStorageType,
+                                let _ = CloudStorageType(rawValue: type) else {
+                                XCTFail()
+                                return
+                            }
+                            XCTAssert(downloadFileResponse.checkSum != nil)
                         }
                     }
                     else {

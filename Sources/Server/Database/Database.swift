@@ -211,19 +211,19 @@ class Select {
     
     // Pass a mySQL select statement; the modelInit will be used to create the object type that will be returned in forEachRow
     // ignoreErrors, if true, will ignore type conversion errors and missing fields in your model.
-    init(db:Database, query:String, modelInit:@escaping () -> Model, ignoreErrors:Bool=true) {
+    init?(db:Database, query:String, modelInit:@escaping () -> Model, ignoreErrors:Bool=true) {
         self.modelInit = modelInit
         self.stmt = MySQLStmt(db.connection)
         self.ignoreErrors = ignoreErrors
         
         if !self.stmt.prepare(statement: query) {
             Log.error("Failed on preparing statement: \(query)")
-            return
+            return nil
         }
         
         if !self.stmt.execute() {
             Log.error("Failed on executing statement: \(query)")
-            return
+            return nil
         }
         
         self.fieldTypes = [Int: String]()

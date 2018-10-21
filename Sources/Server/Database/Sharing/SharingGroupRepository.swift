@@ -32,6 +32,12 @@ class SharingGroup : NSObject, Model {
     // Also not part of this table. For doing fetches of sharing group users for the sharing group.
     public var sharingGroupUsers:[SyncServerShared.SharingGroupUser]!
 
+    static let accountTypeKey = "accountType"
+    var accountType: String!
+
+    static let owningUserIdKey = "owningUserId"
+    var owningUserId:UserId?
+
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -50,6 +56,12 @@ class SharingGroup : NSObject, Model {
             case SharingGroup.permissionKey:
                 permission = newValue as! Permission?
                 
+            case SharingGroup.accountTypeKey:
+                accountType = newValue as! String?
+
+            case SharingGroup.owningUserIdKey:
+                owningUserId = newValue as! UserId?
+
             default:
                 assert(false)
             }
@@ -87,6 +99,13 @@ class SharingGroup : NSObject, Model {
         clientGroup.masterVersion = masterVersion
         clientGroup.permission = permission
         clientGroup.sharingGroupUsers = sharingGroupUsers
+        
+        Log.debug("accountType: \(String(describing: accountType))")
+        
+        if let accountType = accountType {
+            clientGroup.cloudStorageType = AccountType(rawValue: accountType)?.cloudStorageType?.rawValue
+        }
+
         return clientGroup
     }
 }
@@ -166,16 +185,37 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         }
     }
 
-    func sharingGroups(forUserId userId: UserId, sharingGroupUserRepo: SharingGroupUserRepository) -> [SharingGroup]? {
+    func sharingGroups(forUserId userId: UserId, sharingGroupUserRepo: SharingGroupUserRepository, userRepo: UserRepository) -> [SharingGroup]? {
         let masterVersionTableName = MasterVersionRepository.tableName
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
         
-        let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID AND \(tableName).sharingGroupUUID = \(masterVersionTableName).sharingGroupUUID"
-        return sharingGroups(forSelectQuery: query, sharingGroupUserRepo: sharingGroupUserRepo)
+        let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission, \(sharingGroupUserTableName).owningUserId FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID AND \(tableName).sharingGroupUUID = \(masterVersionTableName).sharingGroupUUID"
+        
+        guard let owningUsers = userRepo.getOwningSharingGroupUsers(forSharingUserId: userId) else {
+            Log.error("Failed calling getOwningSharingGroupUsers")
+            return nil
+        }
+        
+        guard let sharingGroups = self.sharingGroups(forSelectQuery: query, sharingGroupUserRepo: sharingGroupUserRepo) else {
+            Log.error("Failed calling sharingGroups")
+            return nil
+        }
+        
+        for sharingGroup in sharingGroups {
+            let owningUser = owningUsers.filter {sharingGroup.owningUserId != nil && $0.userId == sharingGroup.owningUserId}
+            if owningUser.count == 1 {
+                sharingGroup.accountType = owningUser[0].accountType.rawValue
+            }
+        }
+        
+        return sharingGroups
     }
     
     private func sharingGroups(forSelectQuery selectQuery: String, sharingGroupUserRepo: SharingGroupUserRepository) -> [SharingGroup]? {
-        let select = Select(db:db, query: selectQuery, modelInit: SharingGroup.init, ignoreErrors:false)
+        
+        guard let select = Select(db:db, query: selectQuery, modelInit: SharingGroup.init, ignoreErrors:false) else {
+            return nil
+        }
         
         var result = [SharingGroup]()
         var errorGettingSgus = false

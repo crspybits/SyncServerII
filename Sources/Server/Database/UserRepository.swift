@@ -237,4 +237,29 @@ class UserRepository : Repository, RepositoryLookup {
             return false
         }
     }
+    
+    // For a sharing user, will have one element per sharing group the user is a member of. Returns an empty list if the user isn't a sharing user.
+    func getOwningSharingGroupUsers(forSharingUserId userId: UserId) -> [User]? {
+        let sharingGroupUserTableName = SharingGroupUserRepository.tableName
+        
+        let selectQuery = "select \(tableName).* FROM \(sharingGroupUserTableName), \(tableName) WHERE \(sharingGroupUserTableName).userId = \(userId) and \(sharingGroupUserTableName).owningUserId = \(tableName).userId"
+
+        guard let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false) else {
+            return nil
+        }
+        
+        var result:[User] = []
+        
+        select.forEachRow { rowModel in
+            let rowModel = rowModel as! User
+            result.append(rowModel)
+        }
+        
+        if select.forEachRowStatus == nil {
+            return result
+        }
+        else {
+            return nil
+        }
+    }
 }

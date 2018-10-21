@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
         "state": {
           "branch": null,
-          "revision": "f1a8a701c49fd214da3fc3458c1211f17c8e13f4",
-          "version": "1.0.10"
+          "revision": "f67d9ca98341525193cf692440c827e2306026a6",
+          "version": "1.0.12"
         }
       },
       {
@@ -240,7 +240,7 @@
         "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
           "branch": "dev",
-          "revision": "8d0bd6729ae7cb906e3db0642201abb05e6ad2ed",
+          "revision": "706cc9de9d28566f994261c62f34b14437297daa",
           "version": null
         }
       },

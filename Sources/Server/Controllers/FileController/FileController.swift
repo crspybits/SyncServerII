@@ -84,7 +84,7 @@ class FileController : ControllerProtocol {
         }
 #endif
 
-        guard let groups = params.repos.sharingGroup.sharingGroups(forUserId: params.currentSignedInUser!.userId, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
+        guard let groups = params.repos.sharingGroup.sharingGroups(forUserId: params.currentSignedInUser!.userId, sharingGroupUserRepo: params.repos.sharingGroupUser, userRepo: params.repos.user) else {
             let message = "Could not get sharing groups for user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -190,7 +190,7 @@ class FileController : ControllerProtocol {
             params.completion(.success(response))
             
         case .error(let error):
-            let message = "Error: \(error)"
+            let message = "Error: \(String(describing: error))"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

@@ -83,7 +83,7 @@ extension FileController {
             uploadDeletions = uploads.filter({$0.state == .toDeleteFromFileIndex})
 
         case .error(let error):
-            let message = "Failed to get file uploads: \(error)"
+            let message = "Failed to get file uploads: \(String(describing: error))"
             Log.error(message)
             return .doCompletion(.failure(.message(message)))
         }

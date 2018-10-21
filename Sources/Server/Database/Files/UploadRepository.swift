@@ -435,7 +435,7 @@ class UploadRepository : Repository, RepositoryLookup {
         }
     }
     
-    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, andState state:UploadState? = nil) -> Select {
+    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, andState state:UploadState? = nil) -> Select? {
     
         var query = "select * from \(tableName) where userId=\(userId) and sharingGroupUUID = '\(sharingGroupUUID)' and deviceUUID='\(deviceUUID)'"
         
@@ -448,12 +448,15 @@ class UploadRepository : Repository, RepositoryLookup {
     
     enum UploadedFilesResult {
     case uploads([Upload])
-    case error(Swift.Error)
+    case error(Swift.Error?)
     }
     
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
     func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
-        let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, andState: state)
+        
+        guard let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, andState: state) else {
+            return .error(nil)
+        }
 
         var result:[Upload] = []
         

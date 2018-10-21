@@ -205,7 +205,10 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
 #endif
 
     private func sharingGroupUsers(forSelectQuery selectQuery: String) -> SharingGroupUserResult {
-        let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false)
+        
+        guard let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false) else {
+            return .error("Failed on Select!")
+        }
         
         var result:[SyncServerShared.SharingGroupUser] = []
         
