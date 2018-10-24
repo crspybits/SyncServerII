@@ -165,7 +165,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let newAppMetaData = "whatever"
         let newDeleted = false
         let newFileVersion = FileVersionInt(100)
-        let newFileSizeBytes = Int64(322)
+        let newCheckSum = "abcdef"
         let creationDate = Date()
         let updateDate = Date()
         
@@ -177,7 +177,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         fileIndex[FileIndex.appMetaDataKey] = newAppMetaData
         fileIndex[FileIndex.deletedKey] = newDeleted
         fileIndex[FileIndex.fileVersionKey] = newFileVersion
-        fileIndex[FileIndex.fileSizeBytesKey] = newFileSizeBytes
+        fileIndex[FileIndex.lastUploadedCheckSumKey] = newCheckSum
         fileIndex[FileIndex.creationDateKey] = creationDate
         fileIndex[FileIndex.updateDateKey] = updateDate
         
@@ -189,7 +189,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(fileIndex.appMetaData == newAppMetaData)
         XCTAssert(fileIndex.deleted == newDeleted)
         XCTAssert(fileIndex.fileVersion == newFileVersion)
-        XCTAssert(fileIndex.fileSizeBytes == newFileSizeBytes)
+        XCTAssert(fileIndex.lastUploadedCheckSum == newCheckSum)
         XCTAssert(fileIndex.creationDate == creationDate)
         XCTAssert(fileIndex.updateDate == updateDate)
 
@@ -201,7 +201,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         fileIndex[FileIndex.appMetaDataKey] = nil
         fileIndex[FileIndex.deletedKey] = nil
         fileIndex[FileIndex.fileVersionKey] = nil
-        fileIndex[FileIndex.fileSizeBytesKey] = nil
+        fileIndex[FileIndex.lastUploadedCheckSumKey] = nil
         fileIndex[FileIndex.creationDateKey] = nil
         fileIndex[FileIndex.updateDateKey] = nil
 
@@ -213,7 +213,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(fileIndex.appMetaData == nil)
         XCTAssert(fileIndex.deleted == nil)
         XCTAssert(fileIndex.fileVersion == nil)
-        XCTAssert(fileIndex.fileSizeBytes == nil)
+        XCTAssert(fileIndex.lastUploadedCheckSum == nil)
         XCTAssert(fileIndex.creationDate == nil)
         XCTAssert(fileIndex.updateDate == nil)
     }
@@ -228,7 +228,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let state:UploadState = .toDeleteFromFileIndex
         let appMetaData = "arba"
-        let fileSizeBytes = Int64(4211)
+        let fileCheckSum = TestFile.test1.dropboxCheckSum
         let mimeType = "text/plain"
         let creationDate = Date()
         let updateDate = Date()
@@ -240,7 +240,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         upload[Upload.deviceUUIDKey] = deviceUUID
         upload[Upload.stateKey] = state
         upload[Upload.appMetaDataKey] = appMetaData
-        upload[Upload.fileSizeBytesKey] = fileSizeBytes
+        upload[Upload.lastUploadedCheckSumKey] = fileCheckSum
         upload[Upload.mimeTypeKey] = mimeType
         upload[Upload.creationDateKey] = creationDate
         upload[Upload.updateDateKey] = updateDate
@@ -252,7 +252,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(upload.deviceUUID == deviceUUID)
         XCTAssert(upload.state == state)
         XCTAssert(upload.appMetaData == appMetaData)
-        XCTAssert(upload.fileSizeBytes == fileSizeBytes)
+        XCTAssert(upload.lastUploadedCheckSum == fileCheckSum)
         XCTAssert(upload.mimeType == mimeType)
         XCTAssert(upload.creationDate == creationDate)
         XCTAssert(upload.updateDate == updateDate)
@@ -264,7 +264,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         upload[Upload.deviceUUIDKey] = nil
         upload[Upload.stateKey] = nil
         upload[Upload.appMetaDataKey] = nil
-        upload[Upload.fileSizeBytesKey] = nil
+        upload[Upload.lastUploadedCheckSumKey] = nil
         upload[Upload.mimeTypeKey] = nil
         upload[Upload.creationDateKey] = nil
         upload[Upload.updateDateKey] = nil
@@ -276,7 +276,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(upload.deviceUUID == nil)
         XCTAssert(upload.state == nil)
         XCTAssert(upload.appMetaData == nil)
-        XCTAssert(upload.fileSizeBytes == nil)
+        XCTAssert(upload.lastUploadedCheckSum == nil)
         XCTAssert(upload.mimeType == nil)
         XCTAssert(upload.creationDate == nil)
         XCTAssert(upload.updateDate == nil)

@@ -27,6 +27,8 @@ extension GoogleCreds : CloudStorage {
     case badJSONResult
     }
     
+    private static let md5ChecksumKey = "md5Checksum"
+    
     /* If this isn't working for you, try:
         curl -H "Authorization: Bearer YourAccessToken" https://www.googleapis.com/drive/v3/files
     at the command line.
@@ -137,7 +139,7 @@ extension GoogleCreds : CloudStorage {
         
         // The structure of this wasn't obvious to me-- it's scoped over the entire response object, not just within the files resource. See also http://stackoverflow.com/questions/38853938/google-drive-api-v3-invalid-field-selection
         // And see https://developers.google.com/drive/api/v3/performance#partial
-        let fieldsReturned = "files/id,files/size,files/md5Checksum"
+        let fieldsReturned = "files/id,files/\(GoogleCreds.md5ChecksumKey)"
         
         self.listFiles(query:query, fieldsReturned:fieldsReturned) { (dictionary, error) in
             // For the response structure, see https://developers.google.com/drive/v3/reference/files/list
@@ -162,7 +164,7 @@ extension GoogleCreds : CloudStorage {
                             let id = fileDict["id"] as? String {
                             
                             // See https://developers.google.com/drive/api/v3/reference/files
-                            let checkSum = fileDict["md5Checksum"] as? String
+                            let checkSum = fileDict[GoogleCreds.md5ChecksumKey] as? String
 
                             result = SearchResult(itemId: id, dictionary: fileDict, checkSum: checkSum)
                         }
@@ -322,7 +324,7 @@ extension GoogleCreds : CloudStorage {
 
     enum UploadError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
-    case couldNotObtainFileSize
+    case couldNotObtainCheckSum
     case noCloudFolderName
     case noOptions
     case missingCloudFolderNameOrMimeType
@@ -331,7 +333,7 @@ extension GoogleCreds : CloudStorage {
     // TODO: *1* It would be good to put some retry logic in here. With a timed fallback as well. e.g., if an upload fails the first time around, retry after a period of time. OR, do this when I generalize this scheme to use other cloud storage services-- thus the retry logic could work across each scheme.
     // For relatively small files-- e.g., <= 5MB, where the entire upload can be retried if it fails.
     func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions?,
-        completion:@escaping (Result<Int>)->()) {
+        completion:@escaping (Result<String>)->()) {
         
         // See https://developers.google.com/drive/v3/web/manage-uploads
 
@@ -372,7 +374,8 @@ extension GoogleCreds : CloudStorage {
         }
     }
     
-    private func completeSmallFileUpload(folderId:String, searchType:SearchType, cloudFileName: String, data: Data, mimeType:String, completion:@escaping (Result<Int>)->()) {
+    // See https://developers.google.com/drive/api/v3/multipart-upload
+    private func completeSmallFileUpload(folderId:String, searchType:SearchType, cloudFileName: String, data: Data, mimeType:String, completion:@escaping (Result<String>)->()) {
         
         let boundary = Foundation.UUID().uuidString
 
@@ -380,7 +383,8 @@ extension GoogleCreds : CloudStorage {
             "Content-Type" : "multipart/related; boundary=\(boundary)"
         ]
         
-        let urlParameters = "uploadType=multipart"
+        var urlParameters = "uploadType=multipart"
+        urlParameters += "&fields=" + GoogleCreds.md5ChecksumKey
         
         let firstPart =
             "--\(boundary)\r\n" +
@@ -411,9 +415,19 @@ extension GoogleCreds : CloudStorage {
                 completion(.failure(UploadError.badStatusCode(statusCode)))
             }
             else {
+                guard let json = json,
+                    case .dictionary(let dict) = json,
+                    let checkSum = dict[GoogleCreds.md5ChecksumKey] as? String else {
+                    completion(.failure(UploadError.couldNotObtainCheckSum))
+                    return
+                }
+                
+                completion(.success(checkSum))
+
                 // Success case
                 // TODO: *4* This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
 
+                /*
                 self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
                     if error == nil {
                         if let sizeString = result?.dictionary["size"] as? String,
@@ -429,6 +443,7 @@ extension GoogleCreds : CloudStorage {
                         completion(.failure(error!))
                     }
                 }
+                */
             }
         }
     }

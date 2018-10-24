@@ -66,14 +66,13 @@ class Upload : NSObject, Model, Filenaming {
     static let appMetaDataVersionKey = "appMetaDataVersion"
     var appMetaDataVersion: AppMetaDataVersionInt?
     
-    static let fileSizeBytesKey = "fileSizeBytes"
-    
-    // Required only when the state is .uploaded
-    var fileSizeBytes: Int64?
-    
     // This is not present in upload deletions.
     static let mimeTypeKey = "mimeType"
     var mimeType: String?
+    
+    // Required only when the state is .uploaded
+    static let lastUploadedCheckSumKey = "lastUploadedCheckSum"
+    var lastUploadedCheckSum: String!
     
     subscript(key:String) -> Any? {
         set {
@@ -113,9 +112,6 @@ class Upload : NSObject, Model, Filenaming {
                 
             case Upload.appMetaDataVersionKey:
                 appMetaDataVersion = newValue as! AppMetaDataVersionInt?
-            
-            case Upload.fileSizeBytesKey:
-                fileSizeBytes = newValue as! Int64?
                 
             case Upload.mimeTypeKey:
                 mimeType = newValue as! String?
@@ -208,7 +204,7 @@ class UploadRepository : Repository, RepositoryLookup {
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
             // Can be null if we create the Upload entry before actually uploading the file.
-            "fileSizeBytes BIGINT, " +
+            "lastUploadedCheckSum TEXT, " +
             
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 
@@ -301,7 +297,7 @@ class UploadRepository : Repository, RepositoryLookup {
         }
         
         // Have to have fileSizeBytes when we're in the uploaded state.
-        return upload.fileSizeBytes == nil
+        return upload.lastUploadedCheckSum == nil
     }
     
     enum AddResult {
@@ -325,7 +321,7 @@ class UploadRepository : Repository, RepositoryLookup {
         
         let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileGroupUUID, fieldName: Upload.fileGroupUUIDKey)
         
-        let (fileSizeFieldValue, fileSizeFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileSizeBytes, fieldName: Upload.fileSizeBytesKey, fieldIsString:false)
+        let (lastUploadedCheckSumFieldValue, lastUploadedCheckSumFieldName) = getInsertFieldValueAndName(fieldValue: upload.lastUploadedCheckSum, fieldName: Upload.lastUploadedCheckSumKey)
  
         let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
         
@@ -346,7 +342,7 @@ class UploadRepository : Repository, RepositoryLookup {
         
         let (fileVersionFieldValue, fileVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileVersion, fieldName: Upload.fileVersionKey, fieldIsString:false)
         
-        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey), \(Upload.sharingGroupUUIDKey) \(creationDateFieldName) \(updateDateFieldName) \(fileSizeFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName) \(fileGroupUUIDFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)', '\(upload.sharingGroupUUID!)' \(creationDateFieldValue) \(updateDateFieldValue) \(fileSizeFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue) \(fileGroupUUIDFieldValue));"
+        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey), \(Upload.sharingGroupUUIDKey) \(creationDateFieldName) \(updateDateFieldName) \(lastUploadedCheckSumFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName) \(fileGroupUUIDFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)', '\(upload.sharingGroupUUID!)' \(creationDateFieldValue) \(updateDateFieldValue) \(lastUploadedCheckSumFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue) \(fileGroupUUIDFieldValue));"
         
         if db.connection.query(statement: query) {
             return .success(uploadId: db.connection.lastInsertId())
@@ -372,13 +368,13 @@ class UploadRepository : Repository, RepositoryLookup {
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
         let appMetaDataField = getUpdateFieldSetter(fieldValue: upload.appMetaData, fieldName: Upload.appMetaDataKey)
         
-        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: upload.fileSizeBytes, fieldName: Upload.fileSizeBytesKey, fieldIsString: false)
+        let lastUploadedCheckSumField = getUpdateFieldSetter(fieldValue: upload.lastUploadedCheckSum, fieldName: Upload.lastUploadedCheckSumKey)
         
         let mimeTypeField = getUpdateFieldSetter(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
         
         let fileGroupUUIDField = getUpdateFieldSetter(fieldValue: upload.fileGroupUUID, fieldName: Upload.fileGroupUUIDKey)
         
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(fileSizeBytesField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) WHERE uploadId=\(upload.uploadId!)"
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -482,7 +478,6 @@ class UploadRepository : Repository, RepositoryLookup {
             fileInfo.fileUUID = upload.fileUUID
             fileInfo.fileVersion = upload.fileVersion
             fileInfo.deleted = upload.state == .toDeleteFromFileIndex
-            fileInfo.fileSizeBytes = upload.fileSizeBytes
             fileInfo.mimeType = upload.mimeType
             fileInfo.creationDate = upload.creationDate
             fileInfo.updateDate = upload.updateDate

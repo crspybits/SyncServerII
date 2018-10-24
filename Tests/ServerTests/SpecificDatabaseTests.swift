@@ -214,7 +214,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         }
         
         let fileIndex = FileIndex()
-        fileIndex.fileSizeBytes = 100
+        fileIndex.lastUploadedCheckSum = "abcde"
         fileIndex.deleted = false
         fileIndex.fileUUID = Foundation.UUID().uuidString
         fileIndex.deviceUUID = Foundation.UUID().uuidString
@@ -366,7 +366,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             
         case .found(let object):
             let fileIndex2 = object as! FileIndex
-            XCTAssert(fileIndex1.fileSizeBytes != nil && fileIndex1.fileSizeBytes == fileIndex2.fileSizeBytes)
+            XCTAssert(fileIndex1.lastUploadedCheckSum != nil && fileIndex1.lastUploadedCheckSum == fileIndex2.lastUploadedCheckSum)
             XCTAssert(fileIndex1.deleted != nil && fileIndex1.deleted == fileIndex2.deleted)
             XCTAssert(fileIndex1.fileUUID != nil && fileIndex1.fileUUID == fileIndex2.fileUUID)
             XCTAssert(fileIndex1.deviceUUID != nil && fileIndex1.deviceUUID == fileIndex2.deviceUUID)
@@ -454,7 +454,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             XCTAssert(fileIndexInserted.fileVersion == fileIndex[0].fileVersion)
             XCTAssert(fileIndexInserted.mimeType == fileIndex[0].mimeType)
             XCTAssert(fileIndexInserted.deleted == fileIndex[0].deleted)
-            XCTAssert(fileIndexInserted.fileSizeBytes == fileIndex[0].fileSizeBytes)
+            XCTAssert(fileIndexInserted.lastUploadedCheckSum == fileIndex[0].lastUploadedCheckSum)
             XCTAssert(fileIndex[0].cloudStorageType == CloudStorageType.Google.rawValue)
             
         case .error(_):

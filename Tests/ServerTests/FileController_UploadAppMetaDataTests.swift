@@ -23,7 +23,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
     
-    func checkFileIndex(before: FileInfo, after: FileInfo, uploadRequest: UploadFileRequest, deviceUUID: String, fileVersion: FileVersionInt, fileSizeBytes: Int64, appMetaDataVersion: AppMetaDataVersionInt) {
+    func checkFileIndex(before: FileInfo, after: FileInfo, uploadRequest: UploadFileRequest, deviceUUID: String, fileVersion: FileVersionInt, appMetaDataVersion: AppMetaDataVersionInt) {
         XCTAssert(after.fileUUID == uploadRequest.fileUUID)
         XCTAssert(after.deviceUUID == deviceUUID)
         
@@ -36,15 +36,16 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         
         XCTAssert(after.appMetaDataVersion == appMetaDataVersion)
         XCTAssert(after.fileVersion == fileVersion)
-        XCTAssert(after.fileSizeBytes == fileSizeBytes)
+        XCTAssert(after.lastUploadedCheckSum == uploadRequest.checkSum)
     }
     
     func successDownloadAppMetaData(usingFileDownload: Bool) {
         var masterVersion: MasterVersionInt = 0
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData1 = AppMetaData(version: 0, contents: "Test1")
+        let testAccount:TestAccount = .primaryOwningAccount
         
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1),
+        guard let uploadResult = uploadTextFile(testAccount: testAccount, deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData1),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -69,7 +70,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         masterVersion += 1
         
         if usingFileDownload {
-            guard let downloadResponse = downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion), appMetaData:appMetaData2, uploadFileRequest:uploadResult.request, fileSize:uploadResult.fileSize) else {
+            guard let downloadResponse = downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion), appMetaData:appMetaData2, uploadFileRequest:uploadResult.request) else {
                 XCTFail()
                 return
             }
@@ -92,7 +93,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         }
         let fileInfo2 = fileInfoObjs2[0]
         
-        checkFileIndex(before: fileInfo1, after: fileInfo2, uploadRequest: uploadResult.request, deviceUUID: deviceUUID, fileVersion: 0, fileSizeBytes: uploadResult.fileSize, appMetaDataVersion: appMetaData2.version)
+        checkFileIndex(before: fileInfo1, after: fileInfo2, uploadRequest: uploadResult.request, deviceUUID: deviceUUID, fileVersion: 0, appMetaDataVersion: appMetaData2.version)
     }
     
     func uploadAppMetaDataOfInitiallyNilAppMetaDataWorks(toAppMetaDataVersion appMetaDataVersion: AppMetaDataVersionInt, expectedError: Bool = false) {
@@ -137,7 +138,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             }
             let fileInfo2 = fileInfoObjs2[0]
             
-            checkFileIndex(before: fileInfo1, after: fileInfo2, uploadRequest: uploadResult.request, deviceUUID: deviceUUID, fileVersion: 0, fileSizeBytes: uploadResult.fileSize, appMetaDataVersion: appMetaData.version)
+            checkFileIndex(before: fileInfo1, after: fileInfo2, uploadRequest: uploadResult.request, deviceUUID: deviceUUID, fileVersion: 0, appMetaDataVersion: appMetaData.version)
         }
     }
     
@@ -237,7 +238,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         masterVersion += 1
 
         let appMetaData3 = AppMetaData(version: appMetaData2.version + 1, contents: appMetaData2.contents)
-        downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion), appMetaData:appMetaData3, uploadFileRequest:uploadResult.request, fileSize:uploadResult.fileSize, expectedError: true)
+        downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion), appMetaData:appMetaData3, uploadFileRequest:uploadResult.request, expectedError: true)
     }
     
     // UploadAppMetaData, then use regular download to retrieve.

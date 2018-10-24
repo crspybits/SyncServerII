@@ -26,7 +26,7 @@ extension DropboxCreds {
         case nilAPIResult
         case nilCheckSum
         case badJSONResult
-        case couldNotGetFileSize
+        case couldNotGetCheckSum
         case unknownError
         case noDataInAPIResult
         case couldNotGetId
@@ -82,7 +82,8 @@ extension DropboxCreds {
         }
     }
     
-    func uploadFile(withName fileName: String, data:Data, completion:@escaping (Result<Int>)->()) {
+    // String in successful result is checksum.
+    func uploadFile(withName fileName: String, data:Data, completion:@escaping (Result<String>)->()) {
         // https://www.dropbox.com/developers/documentation/http/documentation#files-upload
         /*
          curl -X POST https://content.dropboxapi.com/2/files/upload \
@@ -115,11 +116,11 @@ extension DropboxCreds {
 
             if let idJson = dictionary["id"] as? String,
                 idJson != "",
-                let size = dictionary["size"] as? Int {
-                completion(.success(size))
+                let checkSum = dictionary["content_hash"] as? String {
+                completion(.success(checkSum))
             }
             else {
-                completion(.failure(DropboxError.couldNotGetFileSize))
+                completion(.failure(DropboxError.couldNotGetCheckSum))
             }
         }
     }
@@ -131,7 +132,7 @@ extension DropboxCreds : CloudStorage {
         case alreadyUploaded
     }
     
-    func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions? = nil, completion:@escaping (Result<Int>)->()) {
+    func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions? = nil, completion:@escaping (Result<String>)->()) {
         
         // First, look to see if the file exists on Dropbox. Don't want to upload it more than once.
 

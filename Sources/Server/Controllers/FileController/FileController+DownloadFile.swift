@@ -132,19 +132,13 @@ extension FileController {
             cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
                 switch result {
                 case .success(let downloadResult):
-                    if Int64(downloadResult.data.count) != fileIndexObj!.fileSizeBytes {
-                        let message = "Actual file size \(downloadResult.data.count) was not the same as that expected \(fileIndexObj!.fileSizeBytes)"
-                        Log.error(message)
-                        params.completion(.failure(.message(message)))
-                        return
-                    }
+                    // I used to check the file size as downloaded against the file size in the file index (last uploaded). And call it an error if they didn't match. But we're being fancier now. Going to let the client see if this is an error. https://github.com/crspybits/SyncServerII/issues/93
                     
                     Log.debug("CheckSum: \(downloadResult.checkSum)")
                     
                     let response = DownloadFileResponse()!
                     response.appMetaData = fileIndexObj!.appMetaData
                     response.data = downloadResult.data
-                    response.fileSizeBytes = Int64(downloadResult.data.count)
                     response.checkSum = downloadResult.checkSum
                     response.cloudStorageType = cloudStorageType.rawValue
                     

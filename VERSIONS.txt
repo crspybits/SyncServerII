@@ -1,7 +1,7 @@
 SyncServer
 
 Version 0.18.0
-	* Removing fileSizeInBytes from server/database; replacing with lastUploadedChecksum.
+	* Removing byte sizes from server/database; replacing with checksums.
 	* Enabled download endpoint to return the checksum for the file currently in cloud storage so a client can (a) check it against the last uploaded file checksum, and (b) check for network transmission errors.
 	* Index endpoint returning cloud storage type per file, and per sharing group (for purely sharing users).
 	* Fixed a longstanding issue, where some failures were not detected, in the Select function.

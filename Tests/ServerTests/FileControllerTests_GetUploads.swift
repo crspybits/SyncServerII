@@ -33,7 +33,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedCheckSums: [:], sharingGroupUUID: sharingGroupUUID)
     }
     
     func testForOneUpload() {
@@ -44,11 +44,11 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             return
         }
 
-        let expectedSizes = [
-            uploadResult.request.fileUUID: uploadResult.fileSize
+        let expectedCheckSums = [
+            uploadResult.request.fileUUID: uploadResult.checkSum
         ]
         
-        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)
     }
 
     func testForOneUploadButDoneTwice() {
@@ -65,11 +65,11 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             return
         }
         
-        let expectedSizes = [
-            uploadResult.request.fileUUID: uploadResult.fileSize,
+        let expectedCheckSums = [
+            uploadResult.request.fileUUID: uploadResult.checkSum,
         ]
         
-        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testForOneUploadButFromWrongDeviceUUID() {
@@ -82,7 +82,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         }
         
         // This will do the GetUploads, but with a different deviceUUID, which will give empty result.
-        self.getUploads(expectedFiles: [], expectedFileSizes: [:], sharingGroupUUID:sharingGroupUUID)
+        self.getUploads(expectedFiles: [], expectedCheckSums: [:], sharingGroupUUID:sharingGroupUUID)
     }
     
     func testForTwoUploads() {
@@ -98,12 +98,12 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             return
         }
 
-        let expectedSizes = [
-            uploadResult1.request.fileUUID: uploadResult1.fileSize,
-            uploadResult2.request.fileUUID: uploadResult2.fileSize
+        let expectedCheckSums = [
+            uploadResult1.request.fileUUID: uploadResult1.checkSum,
+            uploadResult2.request.fileUUID: uploadResult2.checkSum
         ]
         
-        self.getUploads(expectedFiles: [uploadResult1.request, uploadResult2.request], deviceUUID:deviceUUID, expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [uploadResult1.request, uploadResult2.request], deviceUUID:deviceUUID, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testForNoUploadsAfterDoneUploads() {
@@ -115,7 +115,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         }
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: sharingGroupUUID)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedCheckSums: [:], sharingGroupUUID: sharingGroupUUID)
     }
     
     func testFakeSharingGroupWithGetUploadsFails() {
@@ -129,7 +129,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         let invalidSharingGroupUUID = UUID().uuidString
 
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedCheckSums: [:], sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
     }
     
     func testBadSharingGroupWithGetUploadsFails() {
@@ -147,7 +147,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         }
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedFileSizes: [:], sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
+        self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedCheckSums: [:], sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
     }
 }
 

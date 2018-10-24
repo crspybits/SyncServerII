@@ -27,14 +27,14 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, fileSizeBytes:Int64?=100, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
             upload.deviceUUID = deviceUUID
         }
         
-        upload.fileSizeBytes = fileSizeBytes
+        upload.lastUploadedCheckSum = checkSum
         upload.fileUUID = Foundation.UUID().uuidString
         upload.fileVersion = 1
         upload.mimeType = mimeType
@@ -165,7 +165,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             return
         }
         
-        _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, fileSizeBytes:nil)
+        _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, checkSum:nil)
     }
     
     func testUpdateUpload() {
@@ -199,7 +199,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         }
         
         let upload = doAddUpload(sharingGroupUUID:sharingGroupUUID)
-        upload.fileSizeBytes = nil
+        upload.lastUploadedCheckSum = nil
         upload.state = .uploadedFile
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
@@ -234,7 +234,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         case .found(let object):
             let upload2 = object as! Upload
             XCTAssert(upload1.deviceUUID != nil && upload1.deviceUUID == upload2.deviceUUID)
-            XCTAssert(upload1.fileSizeBytes != nil && upload1.fileSizeBytes == upload2.fileSizeBytes)
+            XCTAssert(upload1.lastUploadedCheckSum != nil && upload1.lastUploadedCheckSum == upload2.lastUploadedCheckSum)
             XCTAssert(upload1.fileUUID != nil && upload1.fileUUID == upload2.fileUUID)
             XCTAssert(upload1.fileVersion != nil && upload1.fileVersion == upload2.fileVersion)
             XCTAssert(upload1.mimeType != nil && upload1.mimeType == upload2.mimeType)
@@ -293,7 +293,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             XCTAssert(upload1.fileUUID == uploads[0].fileUUID)
             XCTAssert(upload1.fileVersion == uploads[0].fileVersion)
             XCTAssert(upload1.mimeType == uploads[0].mimeType)
-            XCTAssert(upload1.fileSizeBytes == uploads[0].fileSizeBytes)
+            XCTAssert(upload1.lastUploadedCheckSum == uploads[0].lastUploadedCheckSum)
         case .error(_):
             XCTFail()
         }
@@ -336,7 +336,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             XCTAssert(upload1.fileUUID == uploads[0].fileUUID)
             XCTAssert(upload1.fileVersion == uploads[0].fileVersion)
             XCTAssert(upload1.mimeType == uploads[0].mimeType)
-            XCTAssert(upload1.fileSizeBytes == uploads[0].fileSizeBytes)
+            XCTAssert(upload1.lastUploadedCheckSum == uploads[0].lastUploadedCheckSum)
             XCTAssert(upload1.sharingGroupUUID == uploads[0].sharingGroupUUID)
         case .error(_):
             XCTFail()

@@ -60,8 +60,8 @@ class FileIndex : NSObject, Model, Filenaming {
     static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
     
-    static let fileSizeBytesKey = "fileSizeBytes"
-    var fileSizeBytes: Int64!
+    static let lastUploadedCheckSumKey = "lastUploadedCheckSum"
+    var lastUploadedCheckSum: String!
     
     // For queries; not in this table.
     static let accountTypeKey = "accountType"
@@ -109,8 +109,8 @@ class FileIndex : NSObject, Model, Filenaming {
             case FileIndex.fileVersionKey:
                 fileVersion = newValue as! FileVersionInt?
                 
-            case FileIndex.fileSizeBytesKey:
-                fileSizeBytes = newValue as! Int64?
+            case FileIndex.lastUploadedCheckSumKey:
+                lastUploadedCheckSum = newValue as! String?
                 
             case User.accountTypeKey:
                 accountType = newValue as! String?
@@ -153,7 +153,7 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(deleted); fileVersion: \(fileVersion); fileSizeBytes: \(fileSizeBytes)"
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(deleted); fileVersion: \(fileVersion); lastUploadedCheckSum: \(lastUploadedCheckSum)"
     }
 }
 
@@ -263,7 +263,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
     }
     
     private func haveNilFieldForAdd(fileIndex:FileIndex) -> Bool {
-        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.fileSizeBytes == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.lastUploadedCheckSum == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
@@ -285,7 +285,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
         
         let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
         
-        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.fileSizeBytesKey), \(FileIndex.sharingGroupUUIDKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), \(fileIndex.fileSizeBytes!), '\(fileIndex.sharingGroupUUID!)' \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
+        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.lastUploadedCheckSumKey), \(FileIndex.sharingGroupUUIDKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), '\(fileIndex.lastUploadedCheckSum!)', '\(fileIndex.sharingGroupUUID!)' \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
         
         if db.connection.query(statement: query) {
             return db.connection.lastInsertId()
@@ -334,7 +334,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
 
         let appMetaDataVersionField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaDataVersion, fieldName: FileIndex.appMetaDataVersionKey, fieldIsString: false)
         
-        let fileSizeBytesField = getUpdateFieldSetter(fieldValue: fileIndex.fileSizeBytes, fieldName: FileIndex.fileSizeBytesKey, fieldIsString: false)
+        let lastUploadedCheckSumField = getUpdateFieldSetter(fieldValue: fileIndex.lastUploadedCheckSum, fieldName: FileIndex.lastUploadedCheckSumKey)
         
         let mimeTypeField = getUpdateFieldSetter(fieldValue: fileIndex.mimeType, fieldName: FileIndex.mimeTypeKey)
 
@@ -352,7 +352,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
 
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(fileSizeBytesField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.connection.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -439,7 +439,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             let uploadDeletion = upload.state == .toDeleteFromFileIndex
 
             let fileIndex = FileIndex()
-            fileIndex.fileSizeBytes = upload.fileSizeBytes
+            fileIndex.lastUploadedCheckSum = upload.lastUploadedCheckSum
             fileIndex.deleted = uploadDeletion
             fileIndex.fileUUID = upload.fileUUID
             
@@ -614,7 +614,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.deviceUUID = rowModel.deviceUUID
             fileInfo.fileVersion = rowModel.fileVersion
             fileInfo.deleted = rowModel.deleted
-            fileInfo.fileSizeBytes = rowModel.fileSizeBytes
+            fileInfo.lastUploadedCheckSum = rowModel.lastUploadedCheckSum
             fileInfo.mimeType = rowModel.mimeType
             fileInfo.creationDate = rowModel.creationDate
             fileInfo.updateDate = rowModel.updateDate

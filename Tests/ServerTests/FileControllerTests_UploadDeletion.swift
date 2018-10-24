@@ -87,11 +87,11 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, sharingGroupUUID:sharingGroupUUID)
         
-        let expectedSizes = [
-            uploadResult1.request.fileUUID: uploadResult1.fileSize
+        let expectedCheckSums = [
+            uploadResult1.request.fileUUID: uploadResult1.checkSum
         ]
         
-        self.getIndex(expectedFiles: [uploadResult1.request], masterVersionExpected: uploadResult1.request.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
+        self.getIndex(expectedFiles: [uploadResult1.request], masterVersionExpected: uploadResult1.request.masterVersion + MasterVersionInt(2), expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
     }
     
     func testThatUploadDeletionTwiceOfSameFileWorks() {
@@ -160,12 +160,12 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState, sharingGroupUUID:sharingGroupUUID)
         
-        let expectedSizes = [
-            uploadResult1.request.fileUUID: uploadResult1.fileSize,
-            uploadResult2.request.fileUUID: uploadResult2.fileSize,
+        let expectedCheckSums = [
+            uploadResult1.request.fileUUID: uploadResult1.checkSum,
+            uploadResult2.request.fileUUID: uploadResult2.checkSum,
         ]
 
-        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request], masterVersionExpected: uploadResult1.request.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
+        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request], masterVersionExpected: uploadResult1.request.masterVersion + MasterVersionInt(2), expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
     }
     
     // TODO: *0* Test upload deletion with with 2 files
@@ -258,7 +258,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         // Make sure deletion actually occurred!
         
-        self.getIndex(expectedFiles: [], masterVersionExpected: uploadResult.request.masterVersion + MasterVersionInt(1), expectedFileSizes: [:], sharingGroupUUID: sharingGroupUUID, expectedDeletionState:[:])
+        self.getIndex(expectedFiles: [], masterVersionExpected: uploadResult.request.masterVersion + MasterVersionInt(1), expectedCheckSums: [:], sharingGroupUUID: sharingGroupUUID, expectedDeletionState:[:])
         
         self.performServerTest { expectation, creds in
             let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: deviceUUID, mimeType: uploadResult.request.mimeType)
@@ -309,11 +309,11 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
 
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadResult.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
         
-        let expectedSizes = [
-            uploadResult.request.fileUUID: uploadResult.fileSize,
+        let expectedCheckSums = [
+            uploadResult.request.fileUUID: uploadResult.checkSum,
         ]
 
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: uploadResult.request.masterVersion + MasterVersionInt(2), expectedFileSizes: expectedSizes, sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: uploadResult.request.masterVersion + MasterVersionInt(2), expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
     }
     
     // MARK: Undeletion tests
@@ -356,7 +356,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             }
             
             // Check uploads-- make sure there is only one.
-            getUploads(expectedFiles: [uploadResult2.request], deviceUUID:deviceUUID, expectedFileSizes: [uploadResult.request.fileUUID: uploadResult.fileSize], sharingGroupUUID:sharingGroupUUID)
+            getUploads(expectedFiles: [uploadResult2.request], deviceUUID:deviceUUID, expectedCheckSums: [uploadResult.request.fileUUID: uploadResult.checkSum], sharingGroupUUID:sharingGroupUUID)
         }
         
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)

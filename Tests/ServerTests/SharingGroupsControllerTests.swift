@@ -457,7 +457,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion+1),  downloadFileVersion:0, uploadFileRequest:uploadResult.request, fileSize: 12, expectedError: true)
+        downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion+1),  downloadFileVersion:0, uploadFileRequest:uploadResult.request, expectedError: true)
     }
     
     func testRemoveSharingGroup_failsWithBadMasterVersion() {

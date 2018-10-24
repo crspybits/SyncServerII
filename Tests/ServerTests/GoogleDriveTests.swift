@@ -268,22 +268,23 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let fileContents = "Hello World"
-
+        let file = TestFile.test1
+        
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: file.md5CheckSum
         ])!
-        
+
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
         
-        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest, options: options)
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options)
         
         // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
-        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest, options: options, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
     func downloadFile(cloudFileName:String, expectError:Bool = false) {

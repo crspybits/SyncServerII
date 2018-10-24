@@ -33,10 +33,10 @@ public struct DownloadResult {
 }
 
 protocol CloudStorage {
-    // On success, Int in result gives file size in bytes on server.
+    // On success, String in result gives checksum of file on server.
     // Returns .failure(CloudStorageError.alreadyUploaded) in completion if the named file already exists.
     func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions?,
-        completion:@escaping (Result<Int>)->())
+        completion:@escaping (Result<String>)->())
     
     func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<DownloadResult>)->())
     

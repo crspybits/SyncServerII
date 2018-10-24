@@ -14,7 +14,6 @@ import Kitura
 extension FileController {
     private func success(params:RequestProcessingParameters, upload:Upload, creationDate:Date) {
         let response = UploadFileResponse()!
-        response.size = Int64(upload.fileSizeBytes!)
 
         // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
         response.creationDate = creationDate
@@ -265,9 +264,9 @@ extension FileController {
             
             ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
                 switch result {
-                case .success(let fileSize):
-                    Log.debug("File with size \(fileSize) successfully uploaded!")
-                    upload.fileSizeBytes = Int64(fileSize)
+                case .success(let checkSum):
+                    Log.debug("File with checkSum \(checkSum) successfully uploaded!")
+                    upload.lastUploadedCheckSum = checkSum
                     
                     switch upload.state! {
                     case .uploadingFile:

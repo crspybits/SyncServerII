@@ -110,7 +110,6 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         
         let fileUUIDToSend = Foundation.UUID().uuidString
         
-        let uploadString = ServerTestCase.uploadTextFileContents
         let data = ServerTestCase.uploadTextFileContents.data(using: .utf8)!
         
         let uploadRequest = UploadFileRequest(json: [
@@ -121,7 +120,7 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
             ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
         ])!
         
-        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, expectedUploadSize:Int64(uploadString.count), deviceUUID:deviceUUID, errorExpected: true)
+        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)
     }
     
     func testUploadWithInvalidSharingGroupUUIDFails() {

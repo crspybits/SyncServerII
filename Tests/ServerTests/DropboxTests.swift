@@ -78,13 +78,15 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         let exp = expectation(description: "\(#function)\(#line)")
         
         let fileContents = "Hello World"
+        let fileContentsHash = ""
+        assert(false)
+        
         let fileContentsData = fileContents.data(using: .ascii)!
         
         creds.uploadFile(withName: fileName, data: fileContentsData) { result in
             switch result {
-            case .success(let size):
-                XCTAssert(size == fileContents.count)
-                Log.debug("size: \(size)")
+            case .success(let hash):
+                XCTAssert(hash == fileContentsHash)
             case .failure(let error):
                 Log.error("uploadFile: \(error)")
                 XCTFail()
@@ -104,20 +106,21 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         
-        let fileContents = "Hello World"
-
+        let file = TestFile.test1
+        
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: file.dropboxCheckSum
         ])!
         
-        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)
+        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: TestFile.test1, uploadRequest:uploadRequest)
         
         // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
-        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
     func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedContents:String? = nil, expectedFailure: Bool = false) {
@@ -180,18 +183,23 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         let creds = DropboxCreds()
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
-        
-        let fileContents = "Hello World"
 
+        let file = TestFile.test1
+        guard case .string(let fileContents) = file.contents else {
+            XCTFail()
+            return
+        }
+        
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: file.dropboxCheckSum
         ])!
-        
-        uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)
+
+        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest)
         
         let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         Log.debug("cloudFileName: \(cloudFileName)")
@@ -235,17 +243,21 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         
-        let fileContents = "Hello World"
+        let file = TestFile.test1
 
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUID,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: file.dropboxCheckSum
         ])!
         
-        let fileName = uploadFile(creds: creds, deviceUUID:deviceUUID, fileContents:fileContents, uploadRequest:uploadRequest)
+        guard let fileName = uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile:file, uploadRequest:uploadRequest) else {
+            XCTFail()
+            return
+        }
         
         deleteFile(creds: creds, cloudFileName: fileName)
     }
