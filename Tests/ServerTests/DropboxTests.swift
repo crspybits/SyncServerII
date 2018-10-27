@@ -77,16 +77,19 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         creds.accountId = TestAccount.dropbox1.id()
         let exp = expectation(description: "\(#function)\(#line)")
         
-        let fileContents = "Hello World"
-        let fileContentsHash = ""
-        assert(false)
+        let stringFile = TestFile.test1
         
-        let fileContentsData = fileContents.data(using: .ascii)!
+        guard case .string(let stringContents) = stringFile.contents else {
+            XCTFail()
+            return
+        }
+        
+        let fileContentsData = stringContents.data(using: .ascii)!
         
         creds.uploadFile(withName: fileName, data: fileContentsData) { result in
             switch result {
             case .success(let hash):
-                XCTAssert(hash == fileContentsHash)
+                XCTAssert(hash == stringFile.dropboxCheckSum)
             case .failure(let error):
                 Log.error("uploadFile: \(error)")
                 XCTFail()
@@ -123,20 +126,28 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
-    func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedContents:String? = nil, expectedFailure: Bool = false) {
+    func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedStringFile:TestFile? = nil, expectedFailure: Bool = false) {
         let exp = expectation(description: "\(#function)\(#line)")
 
         creds.downloadFile(cloudFileName: cloudFileName) { result in
             switch result {
             case .success(let downloadResult):
-                if let expectedContents = expectedContents {
+                if let expectedStringFile = expectedStringFile {
+                    guard case .string(let expectedContents) = expectedStringFile.contents else {
+                        XCTFail()
+                        return
+                    }
+                    
                     guard let str = String(data: downloadResult.data, encoding: String.Encoding.ascii) else {
                         XCTFail()
                         Log.error("Failed on string decoding")
                         return
                     }
+                    
+                    XCTAssert(downloadResult.checkSum == expectedStringFile.dropboxCheckSum)
                     XCTAssert(str == expectedContents)
                 }
+                
                 if expectedFailure {
                     XCTFail()
                 }
@@ -185,7 +196,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         creds.accountId = TestAccount.dropbox1.id()
 
         let file = TestFile.test1
-        guard case .string(let fileContents) = file.contents else {
+        guard case .string = file.contents else {
             XCTFail()
             return
         }
@@ -203,7 +214,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         
         let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         Log.debug("cloudFileName: \(cloudFileName)")
-        downloadFile(creds: creds, cloudFileName: cloudFileName, expectedContents: fileContents)
+        downloadFile(creds: creds, cloudFileName: cloudFileName, expectedStringFile: file)
     }
     
     func deleteFile(creds: DropboxCreds, cloudFileName: String, expectedFailure: Bool = false) {

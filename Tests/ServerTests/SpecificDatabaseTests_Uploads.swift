@@ -158,7 +158,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, appMetaData:nil)
     }
     
-    func testAddUploadSucceedsWithNilFileSizeBytes() {
+    func testAddUploadSucceedsWithNilCheckSum() {
         let sharingGroupUUID = UUID().uuidString
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -191,7 +191,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
-    func testUpdateUploadToUploadedFailsWithoutFileSizeBytes() {
+    func testUpdateUploadToUploadedFailsWithoutCheckSum() {
         let sharingGroupUUID = UUID().uuidString
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -352,10 +352,10 @@ extension SpecificDatabaseTests_Uploads {
             ("testAddUploadDeletion", testAddUploadDeletion),
             ("testAddUploadDeletionWithMissingField", testAddUploadDeletionWithMissingField),
             ("testAddUploadSucceedsWithNilAppMetaData", testAddUploadSucceedsWithNilAppMetaData),
-            ("testAddUploadSucceedsWithNilFileSizeBytes", testAddUploadSucceedsWithNilFileSizeBytes),
+            ("testAddUploadSucceedsWithNilCheckSum", testAddUploadSucceedsWithNilCheckSum),
             ("testUpdateUpload", testUpdateUpload),
             ("testUpdateUploadFailsWithoutUploadId", testUpdateUploadFailsWithoutUploadId),
-            ("testUpdateUploadToUploadedFailsWithoutFileSizeBytes", testUpdateUploadToUploadedFailsWithoutFileSizeBytes),
+            ("testUpdateUploadToUploadedFailsWithoutCheckSum", testUpdateUploadToUploadedFailsWithoutCheckSum),
             ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
             ("testLookupFromUpload", testLookupFromUpload),
             ("testGetUploadsWithNoFiles", testGetUploadsWithNoFiles),

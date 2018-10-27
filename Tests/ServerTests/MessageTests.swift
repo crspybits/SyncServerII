@@ -25,13 +25,14 @@ class MessageTests: ServerTestCase, LinuxTestable {
     
     func testIntConversions() {
         let uuidString1 = Foundation.UUID().uuidString
-
+        
         guard let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : uuidString1,
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: TestFile.test1.dropboxCheckSum
         ]) else {
             XCTFail()
             return
@@ -50,12 +51,13 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: TestFile.test1.dropboxCheckSum
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupUUIDKey)=\(sharingGroupUUID)", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupUUIDKey)=\(sharingGroupUUID)&\(UploadFileRequest.checkSumKey)=\(TestFile.test1.dropboxCheckSum)", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersWithIntegersAsStrings() {
@@ -68,12 +70,13 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: "1",
             UploadFileRequest.masterVersionKey: "42",
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: TestFile.test1.dropboxCheckSum
         ])
         
         let result = uploadRequest!.urlParameters()
         
-        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupUUIDKey)=\(sharingGroupUUID)", "Result was: \(String(describing: result))")
+        XCTAssert(result == "\(UploadFileRequest.fileUUIDKey)=\(uuidString1)&mimeType=text%2Fplain&\(UploadFileRequest.fileVersionKey)=1&\(UploadFileRequest.masterVersionKey)=42&\(ServerEndpoint.sharingGroupUUIDKey)=\(sharingGroupUUID)&\(UploadFileRequest.checkSumKey)=\(TestFile.test1.dropboxCheckSum)", "Result was: \(String(describing: result))")
     }
     
     func testURLParametersForUploadDeletion() {
@@ -109,7 +112,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: TestFile.test1.dropboxCheckSum
         ])
         XCTAssert(uploadRequest == nil)
     }
@@ -123,7 +127,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
             UploadFileRequest.mimeTypeKey: "text/plain",
             UploadFileRequest.fileVersionKey: FileVersionInt(1),
             UploadFileRequest.masterVersionKey: MasterVersionInt(42),
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: TestFile.test1.dropboxCheckSum
         ]) else {
             XCTFail()
             return
@@ -134,7 +139,7 @@ class MessageTests: ServerTestCase, LinuxTestable {
         XCTAssert(uploadRequest.fileVersion == FileVersionInt(1))
         XCTAssert(uploadRequest.masterVersion == MasterVersionInt(42))
         XCTAssert(uploadRequest.sharingGroupUUID == sharingGroupUUID)
-
+        XCTAssert(uploadRequest.checkSum == TestFile.test1.dropboxCheckSum)
     }
     
     func testNilRequestMessageParams() {

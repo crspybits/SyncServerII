@@ -210,7 +210,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             // Making this optional because appMetaData is optional. If there is app meta data, this must not be null.
             "appMetaDataVersion INT, " +
 
-            "fileSizeBytes BIGINT NOT NULL, " +
+            // I've left this as NULL-able for now to deal with migration-- systems in production prior to 10/27/18. In general, this should not be null.
+            "lastUploadedCheckSum TEXT, " +
 
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
 

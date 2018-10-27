@@ -110,14 +110,73 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         
         let fileUUIDToSend = Foundation.UUID().uuidString
         
-        let data = ServerTestCase.uploadTextFileContents.data(using: .utf8)!
-        
+        let file = TestFile.test1
+        guard case .string(let fileContents) = file.contents,
+            let data = fileContents.data(using: .utf8) else {
+            XCTFail()
+            return
+        }
+
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUIDToSend,
             UploadFileRequest.mimeTypeKey: "foobar",
             UploadFileRequest.fileVersionKey: 0,
             UploadFileRequest.masterVersionKey: 0,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: file.checkSum(type: testAccount.type)
+        ])!
+        
+        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)
+    }
+    
+    func testUploadWithNoCheckSumFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
+            XCTFail()
+            return
+        }
+        
+        let fileUUIDToSend = Foundation.UUID().uuidString
+        
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 0,
             ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
+        ])
+
+        XCTAssert(uploadRequest == nil)
+    }
+
+    func testUploadWithBadCheckSumFails() {
+        let testAccount:TestAccount = .primaryOwningAccount
+        let deviceUUID = Foundation.UUID().uuidString
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
+            XCTFail()
+            return
+        }
+        
+        let fileUUIDToSend = Foundation.UUID().uuidString
+        
+        let file = TestFile.test1
+        guard case .string(let fileContents) = file.contents,
+            let data = fileContents.data(using: .utf8) else {
+            XCTFail()
+            return
+        }
+
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 0,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: "foobar"
         ])!
         
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)

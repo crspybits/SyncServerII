@@ -29,13 +29,14 @@ struct TestFile {
         }
     }
     
-    static let test1 = TestFile(dropboxCheckSum: "", md5CheckSum: "", contents: .string("Hello World"))
-    static let test2 = TestFile(dropboxCheckSum: "", md5CheckSum: "", contents: .string("This is some longer text that I'm typing here and hopefullly I don't get too bored"))
+    static let test1 = TestFile(dropboxCheckSum: "42a873ac3abd02122d27e80486c6fa1ef78694e8505fcec9cbcc8a7728ba8949", md5CheckSum: "b10a8db164e0754105b7a99be72e3fe5", contents: .string("Hello World"))
+    static let test2 = TestFile(dropboxCheckSum: "3e1c5665be7f2f5552efb9fd93df8fe9d58c54619fefe1a5b474e38464391011", md5CheckSum: "a9d2b23e3001e558213c4ee056f31ba1", contents: .string("This is some longer text that I'm typing here and hopefullly I don't get too bored"))
 
 #if os(macOS)
         private static let catFileURL = URL(fileURLWithPath: "/tmp/Cat.jpg")
 #else
         private static let catFileURL = URL(fileURLWithPath: "./Resources/Cat.jpg")
 #endif
-    static let catJpg = TestFile(dropboxCheckSum: "", md5CheckSum: "", contents: .url(catFileURL))
+
+    static let catJpg = TestFile(dropboxCheckSum: "d342f6ab222c322e5fccf148435ef32bd676d7ce0baa72ea88593ef93bef8ac2", md5CheckSum: "5edb34be3781c079935b9314b4d3340d", contents: .url(catFileURL))
 }

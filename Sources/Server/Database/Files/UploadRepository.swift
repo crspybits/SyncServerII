@@ -296,7 +296,7 @@ class UploadRepository : Repository, RepositoryLookup {
             return false
         }
         
-        // Have to have fileSizeBytes when we're in the uploaded state.
+        // Have to have lastUploadedCheckSum when we're in the uploaded state.
         return upload.lastUploadedCheckSum == nil
     }
     

@@ -597,7 +597,6 @@ class ServerTestCase : XCTestCase {
     }
     
     static let cloudFolderName = "CloudFolder"
-    static let uploadTextFileContents = "Hello World!"
     
     struct UploadFileResult {
         let request: UploadFileRequest
@@ -673,6 +672,20 @@ class ServerTestCase : XCTestCase {
         Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toJSON()))")
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
+        
+        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID:fileUUIDToSend)
+        
+        let fileIndexResult = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
+        guard case .found(let obj) = fileIndexResult,
+            let fileIndexObj = obj as? FileIndex else {
+            XCTFail()
+            return nil
+        }
+        
+        guard fileIndexObj.lastUploadedCheckSum != nil else {
+            XCTFail()
+            return nil
+        }
         
         return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId, data: data, checkSum: stringFile.checkSum(type: checkSumType))
     }
@@ -843,7 +856,12 @@ class ServerTestCase : XCTestCase {
     func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, expectedCheckSums: [String: String]? = nil, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
     
         if let expectedFiles = expectedFiles {
-            XCTAssert(expectedFiles.count == expectedCheckSums!.count)
+            guard let expectedCheckSums = expectedCheckSums else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(expectedFiles.count == expectedCheckSums.count)
         }
         
         let indexRequest = IndexRequest(json: [
@@ -901,6 +919,8 @@ class ServerTestCase : XCTestCase {
                                 }
                                 
                                 XCTAssert(expectedCheckSums?[fileInfo.fileUUID] == fileInfo.lastUploadedCheckSum)
+                                
+                                XCTAssert(fileInfo.cloudStorageType != nil)
                             }
                         }
                     }

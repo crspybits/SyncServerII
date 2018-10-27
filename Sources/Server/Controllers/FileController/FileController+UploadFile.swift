@@ -22,6 +22,13 @@ extension FileController {
         params.completion(.success(response))
     }
     
+    private struct ErrorDeletion {
+        let cloudFileName: String
+        let options: CloudStorageFileNameOptions
+        let ownerCloudStorage: CloudStorage
+        let params:RequestProcessingParameters
+    }
+    
     func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
             let message = "Did not receive UploadFileRequest"
@@ -262,10 +269,19 @@ extension FileController {
 
             let options = CloudStorageFileNameOptions(cloudFolderName: ownerAccount.cloudFolderName, mimeType: mimeType)
             
+            let errorDeletion = ErrorDeletion(cloudFileName: cloudFileName, options: options, ownerCloudStorage: ownerCloudStorage, params: params)
+            
             ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
                 switch result {
                 case .success(let checkSum):
                     Log.debug("File with checkSum \(checkSum) successfully uploaded!")
+                    
+                    // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
+                    guard checkSum == uploadRequest.checkSum else {
+                        self.errorCleanup("Checksum after upload to cloud storage (\(checkSum) is not the same as before upload \(uploadRequest.checkSum).", errorDeletion: errorDeletion)
+                        return
+                    }
+                    
                     upload.lastUploadedCheckSum = checkSum
                     
                     switch upload.state! {
@@ -276,9 +292,8 @@ extension FileController {
                         upload.state = .uploadedUndelete
                         
                     default:
-                        let message = "Bad upload state: \(upload.state!)"
-                        Log.error(message)
-                        params.completion(.failure(.message(message)))
+                        self.errorCleanup("Bad upload state: \(upload.state!)", errorDeletion: errorDeletion)
+                        return
                     }
                     
                     upload.uploadId = uploadId
@@ -286,18 +301,19 @@ extension FileController {
                         self.success(params: params, upload: upload, creationDate: creationDate)
                     }
                     else {
-                        // TODO: *0* Need to remove the file from the cloud server.
-                        let message = "Could not update UploadRepository: \(String(describing: error))"
-                        Log.error(message)
-                        params.completion(.failure(.message(message)))
+                        self.errorCleanup("Could not update UploadRepository: \(String(describing: error))", errorDeletion: errorDeletion)
                     }
                 case .failure(let error):
-                    // TODO: *0* It could be useful to remove the file from the cloud server. It might be there.
-                    let message = "Could not uploadFile: error: \(error)"
-                    Log.error(message)
-                    params.completion(.failure(.message(message)))
+                    self.errorCleanup("Could not uploadFile: error: \(error)", errorDeletion: errorDeletion)
                 }
             }
         }
+    }
+    
+    private func errorCleanup(_ errorMessage: String, errorDeletion:ErrorDeletion) {
+        errorDeletion.ownerCloudStorage.deleteFile(cloudFileName: errorDeletion.cloudFileName, options: errorDeletion.options, completion: {_ in
+            Log.error(errorMessage)
+            errorDeletion.params.completion(.failure(.message(errorMessage)))
+        })
     }
 }
