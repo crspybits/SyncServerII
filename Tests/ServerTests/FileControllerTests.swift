@@ -123,6 +123,20 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        
+        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: uploadResult.request.fileUUID)
+        
+        let fileIndexResult = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
+        guard case .found(let obj) = fileIndexResult,
+            let fileIndexObj = obj as? FileIndex else {
+            XCTFail()
+            return
+        }
+        
+        guard fileIndexObj.lastUploadedCheckSum != nil else {
+            XCTFail()
+            return
+        }
 
         let expectedCheckSums = [
             uploadResult.request.fileUUID: uploadResult.checkSum,

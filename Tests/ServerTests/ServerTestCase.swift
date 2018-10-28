@@ -673,20 +673,6 @@ class ServerTestCase : XCTestCase {
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected)
         Log.info("Completed runUploadTest: uploadTextFile")
         
-        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID:fileUUIDToSend)
-        
-        let fileIndexResult = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
-        guard case .found(let obj) = fileIndexResult,
-            let fileIndexObj = obj as? FileIndex else {
-            XCTFail()
-            return nil
-        }
-        
-        guard fileIndexObj.lastUploadedCheckSum != nil else {
-            XCTFail()
-            return nil
-        }
-        
         return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId, data: data, checkSum: stringFile.checkSum(type: checkSumType))
     }
     
@@ -1081,7 +1067,7 @@ class ServerTestCase : XCTestCase {
                                 XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
                                 
                                 if expectedCheckSums != nil {
-                                    XCTAssert(expectedCheckSums![fileInfo.fileUUID] == fileInfo.lastUploadedCheckSum)
+                                    XCTAssert(expectedCheckSums![fileInfo.fileUUID] == fileInfo.lastUploadedCheckSum, "expectedCheckSums![fileInfo.fileUUID]: \(expectedCheckSums![fileInfo.fileUUID]); fileInfo.lastUploadedCheckSum: \(fileInfo.lastUploadedCheckSum)")
                                 }
                             }
                             

@@ -72,7 +72,7 @@ class Upload : NSObject, Model, Filenaming {
     
     // Required only when the state is .uploaded
     static let lastUploadedCheckSumKey = "lastUploadedCheckSum"
-    var lastUploadedCheckSum: String!
+    var lastUploadedCheckSum: String?
     
     subscript(key:String) -> Any? {
         set {
@@ -115,8 +115,12 @@ class Upload : NSObject, Model, Filenaming {
                 
             case Upload.mimeTypeKey:
                 mimeType = newValue as! String?
+                
+            case Upload.lastUploadedCheckSumKey:
+                lastUploadedCheckSum = newValue as! String?
 
             default:
+                Log.error("key: \(key)")
                 assert(false)
             }
         }
@@ -483,7 +487,8 @@ class UploadRepository : Repository, RepositoryLookup {
             fileInfo.updateDate = upload.updateDate
             fileInfo.fileGroupUUID = upload.fileGroupUUID
             fileInfo.sharingGroupUUID = upload.sharingGroupUUID
-            
+            fileInfo.lastUploadedCheckSum = upload.lastUploadedCheckSum
+                        
             result += [fileInfo]
         }
         

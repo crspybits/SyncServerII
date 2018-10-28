@@ -222,6 +222,7 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
+        // Remove the user
         performServerTest { expectation, creds in
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
@@ -232,19 +233,36 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             }
         }
         
-        // Make sure file marked as deleted.
+        // Make sure file was deleted.
+        
         let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
         switch fileIndexResult {
         case .fileIndex(let fileIndex):
-            guard fileIndex.count == 1 else {
+            // We don't get any file index rows for this user with the sharing group when the user was deleted.
+            guard fileIndex.count == 0 else {
+                XCTFail("fileIndex.count: \(fileIndex.count)")
+                return
+            }
+            
+
+        case .error(_):
+            XCTFail()
+        }
+        
+        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: uploadResult.request.fileUUID)
+        let result = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
+        switch result {
+        case .found(let obj):
+            guard let fileIndexObj = obj as? FileIndex else {
                 XCTFail()
                 return
             }
             
-            XCTAssert(fileIndex[0].deleted == true)
-            XCTAssert(fileIndex[0].fileUUID == uploadResult.request.fileUUID)
-        case .error(_):
+            XCTAssert(fileIndexObj.deleted == true)
+        
+        default:
             XCTFail()
+            return
         }
     }
 }

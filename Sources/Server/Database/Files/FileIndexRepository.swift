@@ -61,7 +61,7 @@ class FileIndex : NSObject, Model, Filenaming {
     var fileVersion: FileVersionInt!
     
     static let lastUploadedCheckSumKey = "lastUploadedCheckSum"
-    var lastUploadedCheckSum: String!
+    var lastUploadedCheckSum: String?
     
     // For queries; not in this table.
     static let accountTypeKey = "accountType"
@@ -153,7 +153,7 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(deleted); fileVersion: \(fileVersion); lastUploadedCheckSum: \(lastUploadedCheckSum)"
+        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(deleted); fileVersion: \(fileVersion); lastUploadedCheckSum: \(String(describing: lastUploadedCheckSum))"
     }
 }
 
@@ -594,7 +594,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
     case fileIndex([FileInfo])
     case error(String)
     }
-     
+    
+    // Does not return FileIndex rows where the user has been deleted and those rows have been marked as deleted.
     func fileIndex(forSharingGroupUUID sharingGroupUUID: String) -> FileIndexResult {
         let query = "select \(tableName).*, \(UserRepository.tableName).accountType from \(tableName), \(UserRepository.tableName) where sharingGroupUUID = '\(sharingGroupUUID)' and \(tableName).userId = \(UserRepository.tableName).userId"
         return fileIndex(forSelectQuery: query)
@@ -615,7 +616,6 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.deviceUUID = rowModel.deviceUUID
             fileInfo.fileVersion = rowModel.fileVersion
             fileInfo.deleted = rowModel.deleted
-            fileInfo.lastUploadedCheckSum = rowModel.lastUploadedCheckSum
             fileInfo.mimeType = rowModel.mimeType
             fileInfo.creationDate = rowModel.creationDate
             fileInfo.updateDate = rowModel.updateDate
@@ -623,8 +623,10 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
-            
-            if let accountType = AccountType(rawValue: rowModel.accountType),
+            fileInfo.lastUploadedCheckSum = rowModel.lastUploadedCheckSum
+
+            if let rawAccountType = rowModel.accountType,
+                let accountType = AccountType(rawValue: rawAccountType),
                 let cloudStorageType = accountType.cloudStorageType {
                 fileInfo.cloudStorageType = cloudStorageType.rawValue
             }
@@ -645,7 +647,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return .error("Can't give 0 keys!")
         }
         
-        var query = "select * from \(tableName) where "
+        var query = "select \(tableName).*, \(UserRepository.tableName).accountType from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and ( "
+        
         var numberValues = 0
         for key in keys {
             if numberValues > 0 {
@@ -656,6 +659,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             
             numberValues += 1
         }
+        
+        query += " )"
         
         return fileIndex(forSelectQuery: query)
     }
