@@ -106,10 +106,14 @@ generateOutput () {
 runSpecificSuite () {
     # Parameters:
     local suiteName=$1
+    local runOrPrint=$2 # "run" or "print"
+
     local suiteTestCount=`jq .$suiteName' | length' < ${TEST_JSON}`
 
-    echo Running $suiteName containing $suiteTestCount test suites
-
+    if [ $runOrPrint == "run" ]; then
+        echo Running $suiteName containing $suiteTestCount test suites
+    fi
+    
     # To ensure the output filename (in /tmp) is unique
     local fileNameCounter=0
 
@@ -130,11 +134,13 @@ runSpecificSuite () {
                 commandParams="$commandParams ${SWIFT_DEFINE}$parameter"
             done
 
-            printf "\trunning $testCaseName with command:\n"
-            outputPrefix="\t\t"
-
-            # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
-            swift package clean
+            if [ $runOrPrint == "run" ]; then
+                printf "\trunning $testCaseName with command:\n"
+                outputPrefix="\t\t"
+            
+                # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
+                swift package clean
+            fi
         else
             outputPrefix="\t"
         fi
@@ -143,24 +149,36 @@ runSpecificSuite () {
         local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName"
 
         printf "$outputPrefix$command\n"
-        $command > $outputFileName
+
+        if [ $runOrPrint == "run" ]; then
+            $command > $outputFileName
+        fi
 
         # For testing to see if the compiler failed.
         local compilerResult=$?
 
-        generateOutput $outputFileName $outputPrefix $compilerResult
+        if [ $runOrPrint == "run" ]; then
+            generateOutput $outputFileName $outputPrefix $compilerResult
+        fi
 
         fileNameCounter=`expr $fileNameCounter + 1`
     done
 }
 
-if [ "${COMMAND}" != "suites" ] && [ "${COMMAND}" != "filter" ] && [ "${COMMAND}" != "run" ]; then
-    echo "Command was not 'suites', 'filter', or 'run' -- see Usage at the top of this script file."
+if [ "${COMMAND}" != "suites" ] && [ "${COMMAND}" != "print-suites" ] && [ "${COMMAND}" != "filter" ] && [ "${COMMAND}" != "run" ]; then
+    echo "Command was not 'suites', 'print-suites', 'filter', or 'run' -- see Usage at the top of this script file."
     exit 1
 fi
 
-if  [ "${COMMAND}" == "suites" ] ; then
+if  [ "${COMMAND}" == "suites" ] || [ "${COMMAND}" == "print-suites" ] ; then
     # option must be 'all' or from the all list.
+
+    if  [ "${COMMAND}" == "suites" ] ; then
+        runOrPrint="run"
+    else
+        runOrPrint="print"
+    fi
+
     if  [ "${OPTION}" != "all" ] ; then
         FOUND=0
         for i in $(seq 0 `expr $ALL_COUNT - 1`); do 
@@ -180,10 +198,10 @@ if  [ "${COMMAND}" == "suites" ] ; then
         # iterate over all suites
         for i in $(seq 0 `expr $ALL_COUNT - 1`); do 
             SUITE=`jq -r .all[$i] < ${TEST_JSON}`
-            runSpecificSuite $SUITE
+            runSpecificSuite $SUITE $runOrPrint
         done
     else 
-        runSpecificSuite ${OPTION}
+        runSpecificSuite ${OPTION} $runOrPrint
     fi
 elif [ "${COMMAND}" == "filter" ] ; then
     OUTPUT_FILE_NAME="$TEST_OUT_DIR"/filter.txt

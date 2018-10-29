@@ -701,7 +701,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     
     // File operations work for a second sharing group you are a member of: Upload
     func testThatUploadForSecondSharingGroupWorks() {
-        guard let (testAccount, sharingGroupUUID) = redeemWithAnExistingOtherSharingAccount() else {
+        let owningAccount: TestAccount = .primaryOwningAccount
+        guard let (sharingAccount, sharingGroupUUID) = redeemWithAnExistingOtherSharingAccount() else {
             XCTFail()
             return
         }
@@ -711,14 +712,23 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let _ = uploadTextFile(testAccount: testAccount, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion) else {
+        var owningAccountType: AccountType?
+        if sharingAccount.type.userType == .owning {
+            owningAccountType = sharingAccount.type
+        }
+        else {
+            owningAccountType = owningAccount.type
+        }
+        
+        guard let _ = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningAccountType, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion) else {
             XCTFail()
             return
         }
     }
     
     func testThatDoneUploadsForSecondSharingGroupWorks() {
-        guard let (testAccount, sharingGroupUUID) = redeemWithAnExistingOtherSharingAccount() else {
+        let owningAccount: TestAccount = .primaryOwningAccount
+        guard let (sharingAccount, sharingGroupUUID) = redeemWithAnExistingOtherSharingAccount() else {
             XCTFail()
             return
         }
@@ -728,17 +738,26 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
+        var owningAccountType: AccountType?
+        if sharingAccount.type.userType == .owning {
+            owningAccountType = sharingAccount.type
+        }
+        else {
+            owningAccountType = owningAccount.type
+        }
+        
         let deviceUUID = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion) else {
+        guard let _ = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningAccountType, deviceUUID: deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion) else {
             XCTFail()
             return
         }
         
-        sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(testAccount: sharingAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testThatDownloadForSecondSharingGroupWorks() {
-        guard let (testAccount, sharingGroupUUID) = redeemWithAnExistingOtherSharingAccount() else {
+        let owningAccount: TestAccount = .primaryOwningAccount
+        guard let (sharingAccount, sharingGroupUUID) = redeemWithAnExistingOtherSharingAccount() else {
             XCTFail()
             return
         }
@@ -748,15 +767,23 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
+        var owningAccountType: AccountType?
+        if sharingAccount.type.userType == .owning {
+            owningAccountType = sharingAccount.type
+        }
+        else {
+            owningAccountType = owningAccount.type
+        }
+        
         let deviceUUID = Foundation.UUID().uuidString
-        guard let result = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion) else {
+        guard let result = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningAccountType, deviceUUID: deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion) else {
             XCTFail()
             return
         }
         
-        sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(testAccount: sharingAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         
-        downloadTextFile(testAccount: testAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request)
+        downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request)
     }
 }
 
