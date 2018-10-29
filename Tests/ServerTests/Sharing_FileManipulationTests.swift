@@ -67,9 +67,25 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let deviceUUID2 = Foundation.UUID().uuidString
         
+        var owningAccountType: AccountType
+        
+        if fileVersion == 0 {
+            switch sharingUser.type.userType {
+            case .owning:
+                owningAccountType = sharingUser.type
+            case .sharing:
+                owningAccountType = owningAccount.type
+            }
+        }
+        else {
+            owningAccountType = owningAccount.type
+        }
+        
         // Attempting to upload a file by our sharing user
-        guard let uploadResult = uploadTextFile(testAccount: sharingUser, owningAccountType: owningAccount.type, deviceUUID:deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), fileVersion: fileVersion, masterVersion: masterVersion + 1, errorExpected: failureExpected) else {
-            XCTFail()
+        guard let uploadResult = uploadTextFile(testAccount: sharingUser, owningAccountType: owningAccountType, deviceUUID:deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), fileVersion: fileVersion, masterVersion: masterVersion + 1, errorExpected: failureExpected) else {
+            if !failureExpected {
+                XCTFail()
+            }
             return nil
         }
         
@@ -215,10 +231,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     // MARK: Read sharing user
     func testThatReadSharingUserCannotUploadAFile() {
         let sharingGroupUUID = UUID().uuidString
-        guard let _ = uploadFileBySharingUser(withPermission: .read, owningAccount: .primaryOwningAccount, sharingGroupUUID: sharingGroupUUID, failureExpected:true) else {
-            XCTFail()
-            return
-        }
+        let result = uploadFileBySharingUser(withPermission: .read, owningAccount: .primaryOwningAccount, sharingGroupUUID: sharingGroupUUID, failureExpected:true)
+        XCTAssert(result == nil)
     }
     
     func testThatReadSharingUserCannotUploadDeleteAFile() {
@@ -260,6 +274,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     }
     
     // MARK: Write sharing user
+    
+    
     func testThatWriteSharingUserCanUploadAFile() {
         let sharingGroupUUID = UUID().uuidString
         
@@ -274,8 +290,9 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     // When an owning user uploads a modified file (v1) which was initially uploaded (v0) by another owning user, that original owning user must remain the owner of the modified file.
     func testThatV0FileOwnerRemainsFileOwner() {
         // Upload v0 of file.
+        let owningAccount:TestAccount = .primaryOwningAccount
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(testAccount: owningAccount, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID,
             let v0UserId = uploadResult.uploadingUserId else {
             XCTFail()
@@ -285,13 +302,13 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         // Upload v1 of file by another user
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        guard let uploadResult2 = uploadFileBySharingUser(withPermission: .write, owningAccount: .primaryOwningAccount, addUser: false, sharingGroupUUID: sharingGroupUUID, fileUUID: uploadResult.request.fileUUID, fileVersion: 1, masterVersion: 1) else {
+        guard let uploadResult2 = uploadFileBySharingUser(withPermission: .write, owningAccount: owningAccount, addUser: false, sharingGroupUUID: sharingGroupUUID, fileUUID: uploadResult.request.fileUUID, fileVersion: 1, masterVersion: 1) else {
             XCTFail()
             return
         }
         
         // Check that the v0 owner still owns the file.
-        checkFileOwner(uploadedDeviceUUID: uploadResult2.uploadedDeviceUUID, owningAccount: .primaryOwningAccount, ownerUserId: v0UserId, request: uploadResult2.request)
+        checkFileOwner(uploadedDeviceUUID: uploadResult2.uploadedDeviceUUID, owningAccount: owningAccount, ownerUserId: v0UserId, request: uploadResult2.request)
     }
     
     func testThatWriteSharingUserCanUploadDeleteAFile() {
@@ -601,8 +618,9 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         var actualSharingGroupUUID:String!
         
         let sharingAccount: TestAccount = .nonOwningSharingAccount
+        let owningUserWhenCreating:TestAccount = .primaryOwningAccount
         
-        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount, owningUserWhenCreating: owningUserWhenCreating) { userId, sharingGroupUUID in
             actualSharingGroupUUID = sharingGroupUUID
         }
         
@@ -625,7 +643,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         
         // Attempting to upload a file by our sharing user-- this should fail with HTTP 410 (Gone) because the sharing user does not own cloud storage.
-        uploadTextFile(testAccount: sharingAccount, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:actualSharingGroupUUID), masterVersion: 1, errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
+        let result = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningUserWhenCreating.type, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:actualSharingGroupUUID), masterVersion: 1, errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
+        XCTAssert(result == nil)
     }
     
     // Similar to that above, but the non-owning, sharing user downloads a file-- that was owned by a third user, that is still on the system, and was in the same sharing group.

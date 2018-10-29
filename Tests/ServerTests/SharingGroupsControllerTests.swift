@@ -698,7 +698,8 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
+        let result = uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
+        XCTAssert(result == nil)
     }
     
     func testInterleavedUploadsToDifferentSharingGroupsWorks() {

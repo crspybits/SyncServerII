@@ -67,8 +67,12 @@ extension Account {
         guard let accountCreationUser = accountCreationUser,
             case .user(let user) = accountCreationUser,
             let cloudFolderName = user.cloudFolderName else {
-            Log.error("Account needs cloud folder name, but has none.")
-            assert(!owningAccountsNeedCloudFolderName)
+            
+            if owningAccountsNeedCloudFolderName {
+                Log.error("Account needs cloud folder name, but has none.")
+                assert(false)
+            }
+
             return nil
         }
         

@@ -655,7 +655,7 @@ class ServerTestCase : XCTestCase {
         else {
             checkSumType = testAccount.type
         }
-        
+
         let uploadRequest = UploadFileRequest(json: [
             UploadFileRequest.fileUUIDKey : fileUUIDToSend,
             UploadFileRequest.mimeTypeKey: "text/plain",
@@ -670,13 +670,28 @@ class ServerTestCase : XCTestCase {
         uploadRequest.appMetaData = appMetaData
         
         Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toJSON()))")
-        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected)
+        guard runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
+            if !errorExpected {
+                XCTFail()
+            }
+            return nil
+        }
+        
         Log.info("Completed runUploadTest: uploadTextFile")
         
-        return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId, data: data, checkSum: stringFile.checkSum(type: checkSumType))
+        guard let checkSum = stringFile.checkSum(type: checkSumType) else {
+            XCTFail()
+            return nil
+        }
+        
+        return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId, data: data, checkSum: checkSum)
     }
     
-    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) {
+    // Returns true iff the file could be uploaded.
+    @discardableResult
+    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> Bool {
+        
+        var result: Bool = true
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -691,57 +706,45 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
 
                 if errorExpected {
+                    result = false
                     if let statusCodeExpected = statusCodeExpected {
                         XCTAssert(response!.statusCode == statusCodeExpected)
                     }
                     else {
-                        XCTAssert(response!.statusCode != .OK, "Worked on uploadFile request!")
+                        XCTAssert(response!.statusCode != .OK)
                     }
                 }
                 else {
                     guard response!.statusCode == .OK, dict != nil else {
                         XCTFail("Did not work on uploadFile request: \(response!.statusCode)")
+                        result = false
                         expectation.fulfill()
                         return
                     }
                     
                     if let uploadResponse = UploadFileResponse(json: dict!) {
                         if updatedMasterVersionExpected == nil {
-                            XCTAssert(uploadResponse.creationDate != nil)
-                            XCTAssert(uploadResponse.updateDate != nil)
+                            guard uploadResponse.creationDate != nil, uploadResponse.updateDate != nil else {
+                                result = false
+                                expectation.fulfill()
+                                return
+                            }
                         }
                         else {
                             XCTAssert(uploadResponse.masterVersionUpdate == updatedMasterVersionExpected)
                         }
                     }
                     else {
+                        result = false
                         XCTFail()
                     }
                 }
-                
-                // [1]. 2/11/16. Once I put transaction support into mySQL access, I run into some apparent race conditions with using `UploadRepository(self.db).lookup` here. That is, I fail the following check -- but I don't fail if I put a breakpoint here. This has lead me want to implement a new endpoint-- "GetUploads"-- which will enable (a) testing of the scenario below (i.e., after an upload, making sure that the Upload table has the relevant contents), and (b) recovery in an app when the masterVersion comes back different-- so that some uploaded files might not need to be uploaded again (note that for most purposes this later issue is an optimization).
-                /*
-                // Check the upload repo to make sure the entry is present.
-                Log.debug("uploadRequest.fileUUID: \(uploadRequest.fileUUID)")
-                let result = UploadRepository(self.db).lookup(key: .fileUUID(uploadRequest.fileUUID), modelInit: Upload.init)
-                switch result {
-                case .error(let error):
-                    XCTFail("\(error)")
-                    
-                case .found(_):
-                    if updatedMasterVersionExpected != nil {
-                        XCTFail("No Upload Found")
-                    }
-
-                case .noObjectFound:
-                    if updatedMasterVersionExpected == nil {
-                        XCTFail("No Upload Found")
-                    }
-                }*/
 
                 expectation.fulfill()
             }
         }
+        
+        return result
     }
     
     static let jpegMimeType = "image/jpeg"
@@ -1067,7 +1070,7 @@ class ServerTestCase : XCTestCase {
                                 XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
                                 
                                 if expectedCheckSums != nil {
-                                    XCTAssert(expectedCheckSums![fileInfo.fileUUID] == fileInfo.lastUploadedCheckSum, "expectedCheckSums![fileInfo.fileUUID]: \(expectedCheckSums![fileInfo.fileUUID]); fileInfo.lastUploadedCheckSum: \(fileInfo.lastUploadedCheckSum)")
+                                    XCTAssert(expectedCheckSums![fileInfo.fileUUID] == fileInfo.lastUploadedCheckSum, "expectedCheckSums![fileInfo.fileUUID]: \(String(describing: expectedCheckSums![fileInfo.fileUUID])); fileInfo.lastUploadedCheckSum: \(String(describing: fileInfo.lastUploadedCheckSum))")
                                 }
                             }
                             
