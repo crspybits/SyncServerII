@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
           "branch": null,
-          "revision": "99d5dd3fb0aae3709aa9c06adf15c020b84524ff",
-          "version": "1.0.15"
+          "revision": "2bf9fd19e21cae84c8050623437562da083c501a",
+          "version": "1.0.16"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
         "state": {
           "branch": null,
-          "revision": "f67d9ca98341525193cf692440c827e2306026a6",
-          "version": "1.0.12"
+          "revision": "f16840f89b6516b1332f6a4cd45e1556ef8ae380",
+          "version": "1.0.14"
         }
       },
       {
@@ -240,7 +240,7 @@
         "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
           "branch": "dev",
-          "revision": "4fb96e92643fd9539ba18fd96af261a7b3f41af0",
+          "revision": "d557092d52bc295d0fb847009d0b06f32333e165",
           "version": null
         }
       },

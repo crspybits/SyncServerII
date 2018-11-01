@@ -135,12 +135,18 @@ extension FileController {
                     // I used to check the file size as downloaded against the file size in the file index (last uploaded). And call it an error if they didn't match. But we're being fancier now. Going to let the client see if this is an error. https://github.com/crspybits/SyncServerII/issues/93
                     
                     Log.debug("CheckSum: \(downloadResult.checkSum)")
+
+                    var contentsChanged = false
+                    if let lastUploadedCheckSum = fileIndexObj!.lastUploadedCheckSum {
+                        contentsChanged = downloadResult.checkSum != lastUploadedCheckSum
+                    }
                     
                     let response = DownloadFileResponse()!
                     response.appMetaData = fileIndexObj!.appMetaData
                     response.data = downloadResult.data
                     response.checkSum = downloadResult.checkSum
                     response.cloudStorageType = cloudStorageType.rawValue
+                    response.contentsChanged = contentsChanged
                     
                     params.completion(.success(response))
                     return

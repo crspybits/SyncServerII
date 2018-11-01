@@ -204,6 +204,73 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         downloadTextFile(masterVersionExpectedWithDownload: 1)
     }
     
+    func testDownloadFileTextWithASimulatedUserChangeSucceeds() {
+        let testAccount:TestAccount = .primaryOwningAccount
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let uploadResult = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        
+        var checkSum:String!
+        var cloudStorageCreds: CloudStorage!
+        
+        switch testAccount.type {
+        case .Dropbox:
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
+            cloudStorageCreds = creds
+
+        case .Google:
+            let creds = GoogleCreds()
+            creds.refreshToken = testAccount.token()
+            let exp = expectation(description: "\(#function)\(#line)")
+            
+            creds.refresh { error in
+                XCTAssert(error == nil)
+                XCTAssert(creds.accessToken != nil)
+                exp.fulfill()
+            }
+
+            waitForExpectations(timeout: 10, handler: nil)
+            cloudStorageCreds = creds
+
+        case .Facebook:
+            XCTFail()
+            return
+        }
+        
+        let file = TestFile.test2
+        
+        checkSum = file.checkSum(type: testAccount.type)
+
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : uploadResult.request.fileUUID,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 1,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: checkSum
+        ])!
+    
+        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
+
+        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
+
+        uploadFile(accountType: testAccount.type, creds: cloudStorageCreds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options)
+        
+        // Don't want the download to fail just due to a checksum mismatch.
+        uploadResult.request.checkSum = checkSum
+
+        downloadTextFile(testAccount: testAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadResult.request, contentsChangedExpected: true)
+    }
+    
     func testDownloadFileTextWhereMasterVersionDiffersFails() {
         downloadTextFile(masterVersionExpectedWithDownload: 0, expectUpdatedMasterUpdate:true)
     }
@@ -276,6 +343,7 @@ extension FileControllerTests {
             ("testIndexWithOneFile", testIndexWithOneFile),
             ("testIndexWithTwoFiles", testIndexWithTwoFiles),
             ("testDownloadFileTextSucceeds", testDownloadFileTextSucceeds),
+            ("testDownloadFileTextWithASimulatedUserChangeSucceeds", testDownloadFileTextWithASimulatedUserChangeSucceeds),
             ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),

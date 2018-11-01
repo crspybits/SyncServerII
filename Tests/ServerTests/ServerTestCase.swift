@@ -274,7 +274,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    private func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) {
+    func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) {
         
         let expectation = self.expectation(description: "expectation")
 
@@ -291,6 +291,7 @@ class ServerTestCase : XCTestCase {
                 }
                 
                 creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
+                    XCTAssert(error == nil)
                     expectation.fulfill()
                 }
             }
@@ -300,6 +301,7 @@ class ServerTestCase : XCTestCase {
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
+                XCTAssert(error == nil)
                 expectation.fulfill()
             }
             
@@ -1298,7 +1300,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:AppMetaData? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false) -> DownloadFileResponse? {
+    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:AppMetaData? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadFileResponse? {
     
         let deviceUUID = Foundation.UUID().uuidString
         let masterVersion:Int64 = 0
@@ -1363,6 +1365,7 @@ class ServerTestCase : XCTestCase {
                             XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
                         }
                         else {
+                            XCTAssert(downloadFileResponse.contentsChanged == contentsChangedExpected)
                             XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
                             XCTAssert(downloadFileResponse.checkSum == actualCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(actualCheckSum)")
                             XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
