@@ -36,7 +36,6 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         
         XCTAssert(after.appMetaDataVersion == appMetaDataVersion)
         XCTAssert(after.fileVersion == fileVersion)
-        XCTAssert(after.lastUploadedCheckSum == uploadRequest.checkSum)
     }
     
     func successDownloadAppMetaData(usingFileDownload: Bool) {

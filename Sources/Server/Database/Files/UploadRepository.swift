@@ -487,7 +487,6 @@ class UploadRepository : Repository, RepositoryLookup {
             fileInfo.updateDate = upload.updateDate
             fileInfo.fileGroupUUID = upload.fileGroupUUID
             fileInfo.sharingGroupUUID = upload.sharingGroupUUID
-            fileInfo.lastUploadedCheckSum = upload.lastUploadedCheckSum
                         
             result += [fileInfo]
         }

@@ -73,7 +73,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getIndex(expectedFiles: [], masterVersionExpected: 0, expectedCheckSums: [:], sharingGroupUUID: sharingGroupUUID)
+        self.getIndex(expectedFiles: [], masterVersionExpected: 0, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testGetIndexForOnlySharingGroupsWorks() {
@@ -137,12 +137,8 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-
-        let expectedCheckSums = [
-            uploadResult.request.fileUUID: uploadResult.checkSum,
-        ]
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, sharingGroupUUID: sharingGroupUUID)
         
         guard let (files, sharingGroups) = getIndex(sharingGroupUUID: sharingGroupUUID),
             let theFiles = files else {
@@ -191,13 +187,8 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-
-        let expectedCheckSums = [
-            uploadResult1.request.fileUUID: uploadResult1.checkSum,
-            uploadResult2.request.fileUUID: uploadResult2.checkSum
-        ]
         
-        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)
+        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, sharingGroupUUID: sharingGroupUUID)
     }
         
     func testDownloadFileTextSucceeds() {
@@ -293,14 +284,10 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-
-        let expectedCheckSums = [
-            uploadResult.request.fileUUID: uploadResult.checkSum,
-        ]
         
         let invalidSharingGroupUUID = UUID().uuidString
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedCheckSums: expectedCheckSums, sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
     }
     
     func testIndexWithBadSharingGroupUUIDFails() {
@@ -313,10 +300,6 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-
-        let expectedCheckSums = [
-            uploadResult.request.fileUUID: uploadResult.checkSum,
-        ]
         
         let workingButBadSharingGroupUUID = UUID().uuidString
         guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {
@@ -324,7 +307,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, expectedCheckSums: expectedCheckSums, sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
     }
     
     // TODO: *0*: Make sure we're not trying to download a file that has already been deleted.

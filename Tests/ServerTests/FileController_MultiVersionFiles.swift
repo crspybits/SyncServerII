@@ -73,9 +73,7 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         
         XCTAssert(result[0].mimeType == mimeType)
         XCTAssert(result[0].deleted == false)
-        XCTAssert(result[0].fileVersion == fileVersionToUpload)
-        XCTAssert(result[0].lastUploadedCheckSum == checkSum)
-        
+        XCTAssert(result[0].fileVersion == fileVersionToUpload)        
         
         guard let _ = self.downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion + 1), appMetaData: appMetaData, downloadFileVersion: fileVersionToUpload, uploadFileRequest: uploadRequest) else {
             XCTFail()

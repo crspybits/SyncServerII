@@ -623,8 +623,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
-            fileInfo.lastUploadedCheckSum = rowModel.lastUploadedCheckSum
 
+            // TODO: FIX: It's an error if we can't get the cloud storage type for a file.
             if let rawAccountType = rowModel.accountType,
                 let accountType = AccountType(rawValue: rawAccountType),
                 let cloudStorageType = accountType.cloudStorageType {

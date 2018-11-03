@@ -454,7 +454,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             XCTAssert(fileIndexInserted.fileVersion == fileIndex[0].fileVersion)
             XCTAssert(fileIndexInserted.mimeType == fileIndex[0].mimeType)
             XCTAssert(fileIndexInserted.deleted == fileIndex[0].deleted)
-            XCTAssert(fileIndexInserted.lastUploadedCheckSum == fileIndex[0].lastUploadedCheckSum)
             XCTAssert(fileIndex[0].cloudStorageType == CloudStorageType.Google.rawValue)
             
         case .error(_):

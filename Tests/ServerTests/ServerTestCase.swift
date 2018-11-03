@@ -844,16 +844,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, expectedCheckSums: [String: String]? = nil, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
-    
-        if let expectedFiles = expectedFiles {
-            guard let expectedCheckSums = expectedCheckSums else {
-                XCTFail()
-                return
-            }
-            
-            XCTAssert(expectedFiles.count == expectedCheckSums.count)
-        }
+    func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
         
         let indexRequest = IndexRequest(json: [
             ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID as Any
@@ -908,8 +899,6 @@ class ServerTestCase : XCTestCase {
                                 else {
                                     XCTAssert(fileInfo.deleted == expectedDeletionState![fileInfo.fileUUID])
                                 }
-                                
-                                XCTAssert(expectedCheckSums?[fileInfo.fileUUID] == fileInfo.lastUploadedCheckSum)
                                 
                                 XCTAssert(fileInfo.cloudStorageType != nil)
                             }
@@ -1070,10 +1059,6 @@ class ServerTestCase : XCTestCase {
                             
                             if matchOptionals {
                                 XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
-                                
-                                if expectedCheckSums != nil {
-                                    XCTAssert(expectedCheckSums![fileInfo.fileUUID] == fileInfo.lastUploadedCheckSum, "expectedCheckSums![fileInfo.fileUUID]: \(String(describing: expectedCheckSums![fileInfo.fileUUID])); fileInfo.lastUploadedCheckSum: \(String(describing: fileInfo.lastUploadedCheckSum))")
-                                }
                             }
                             
                             if expectedDeletionState == nil {
