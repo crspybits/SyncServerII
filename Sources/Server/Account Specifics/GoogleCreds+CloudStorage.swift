@@ -543,6 +543,7 @@ extension GoogleCreds : CloudStorage {
                 }
             }
             else {
+                // Error may be: SearchForFileError.cloudFileDoesNotExist
                 completion(.failure(error!))
             }
         }

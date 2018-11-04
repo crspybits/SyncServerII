@@ -173,6 +173,8 @@ extension DropboxCreds : CloudStorage {
 
         self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/download", additionalHeaders: headers, expectingData: true) { (apiResult, statusCode, responseHeaders) in
             
+            // QUESTION: What does dropbox respond with if the file is not present? Is this a non-OK status code?
+            
             guard statusCode == HTTPStatusCode.OK else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))
                 return
