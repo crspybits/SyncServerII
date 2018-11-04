@@ -71,26 +71,91 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func checkOwingUserIdForSharingGroupUser(sharingGroupUUID: String, userId: UserId, sharingUser:TestAccount) -> Bool {
-        let key = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: userId)
-        let result = SharingGroupUserRepository(db).lookup(key: key, modelInit: SharingGroupUser.init)
-        var sharingGroupUser: Server.SharingGroupUser!
-        switch result {
+    func checkOwingUserForSharingGroupUser(sharingGroupUUID: String, sharingUserId: UserId, sharingUser:TestAccount, owningUser: TestAccount) -> Bool {
+        
+        let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: sharingUserId)
+        let sharingResult = SharingGroupUserRepository(db).lookup(key: sharingUserKey, modelInit: SharingGroupUser.init)
+        var sharingGroupUser1: Server.SharingGroupUser!
+        switch sharingResult {
         case .found(let model):
-            sharingGroupUser = model as! Server.SharingGroupUser
+            sharingGroupUser1 = model as! Server.SharingGroupUser
         case .error, .noObjectFound:
             XCTFail()
             return false
         }
         
+        guard let (_, sharingGroups) = getIndex(testAccount: sharingUser) else {
+            XCTFail()
+            return false
+        }
+        
+        let filtered = sharingGroups.filter {$0.sharingGroupUUID == sharingGroupUUID}
+        guard filtered.count == 1 else {
+            XCTFail()
+            return false
+        }
+        
+        let sharingGroup = filtered[0]
+        
         if sharingUser.type.userType == .owning {
-            XCTAssert(sharingGroupUser.owningUserId == nil)
-            return sharingGroupUser.owningUserId == nil
+            XCTAssert(sharingGroup.cloudStorageType == nil)
+            XCTAssert(sharingGroupUser1.owningUserId == nil)
+            return sharingGroupUser1.owningUserId == nil
         }
-        else {
-            XCTAssert(sharingGroupUser.owningUserId != nil)
-            return sharingGroupUser.owningUserId != nil
+        
+        guard let owningUserId = sharingGroupUser1.owningUserId else {
+            XCTFail()
+            return false
         }
+        
+        let owningUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: owningUserId)
+        let owningResult = SharingGroupUserRepository(db).lookup(key: owningUserKey, modelInit: SharingGroupUser.init)
+        var sharingGroupUser2: Server.SharingGroupUser!
+        switch owningResult {
+        case .found(let model):
+            sharingGroupUser2 = model as! Server.SharingGroupUser
+        case .error, .noObjectFound:
+            XCTFail()
+            return false
+        }
+        
+        guard owningUser.type.userType == .owning,
+            sharingGroupUser2.owningUserId == nil else {
+            XCTFail()
+            return false
+        }
+        
+        let userKey = UserRepository.LookupKey.userId(owningUserId)
+        let userResult = UserRepository(db).lookup(key: userKey, modelInit: User.init)
+        
+        var resultOwningUser: User!
+        
+        switch userResult {
+        case .found(let model):
+            guard let userObj = model as? User,
+                userObj.accountType == owningUser.type else {
+                XCTFail()
+                return false
+            }
+            resultOwningUser = userObj
+
+        case .error, .noObjectFound:
+            XCTFail()
+            return false
+        }
+        
+        // Make sure that sharing groups returned from the server with the Index reflect, for sharing users, their "parent" owning user for the sharing group.
+        guard let ownersCloudStorageType = sharingGroup.cloudStorageType else {
+            XCTFail()
+            return false
+        }
+        
+        guard resultOwningUser.accountType.cloudStorageType?.rawValue == ownersCloudStorageType else {
+            XCTFail()
+            return false
+        }
+        
+        return true
     }
     
     // The second sharing account joined is returned as the sharingGroupUUID
@@ -100,15 +165,16 @@ class ServerTestCase : XCTestCase {
         
         let deviceUUID = Foundation.UUID().uuidString
         let sharingGroupUUID = Foundation.UUID().uuidString
+        let owningUser:TestAccount = .primaryOwningAccount
 
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
+        guard let _ = self.addNewUser(testAccount: owningUser, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return nil
         }
         
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: owningUser, permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -123,12 +189,12 @@ class ServerTestCase : XCTestCase {
         let sharingGroupUUID2 = Foundation.UUID().uuidString
 
         // Create a second sharing group and invite/redeem the primary sharing account user.
-        guard createSharingGroup(sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID) else {
+        guard createSharingGroup(testAccount: owningUser, sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID) else {
             XCTFail()
             return nil
         }
         
-        createSharingInvitation(permission: .write, sharingGroupUUID:sharingGroupUUID2) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: owningUser, permission: .write, sharingGroupUUID:sharingGroupUUID2) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -143,8 +209,8 @@ class ServerTestCase : XCTestCase {
             XCTFail()
             return nil
         }
-        
-        if checkOwingUserIdForSharingGroupUser(sharingGroupUUID: sharingGroupUUID2, userId: result.userId, sharingUser: sharingUser) {
+
+        if checkOwingUserForSharingGroupUser(sharingGroupUUID: sharingGroupUUID2, sharingUserId: result.userId, sharingUser: sharingUser, owningUser: owningUser) {
             returnResult = (sharingUser, sharingGroupUUID2)
         }
         

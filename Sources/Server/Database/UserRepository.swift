@@ -238,11 +238,11 @@ class UserRepository : Repository, RepositoryLookup {
         }
     }
     
-    // For a sharing user, will have one element per sharing group the user is a member of. Returns an empty list if the user isn't a sharing user.
+    // For a sharing user, will have one element per sharing group the user is a member of. These are the "owners" or "parents" of the sharing groups the sharing user is in. Returns an empty list if the user isn't a sharing user.
     func getOwningSharingGroupUsers(forSharingUserId userId: UserId) -> [User]? {
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
         
-        let selectQuery = "select \(tableName).* FROM \(sharingGroupUserTableName), \(tableName) WHERE \(sharingGroupUserTableName).userId = \(userId) and \(sharingGroupUserTableName).owningUserId = \(tableName).userId"
+        let selectQuery = "select DISTINCT \(tableName).* FROM \(sharingGroupUserTableName), \(tableName) WHERE \(sharingGroupUserTableName).userId = \(userId) and \(sharingGroupUserTableName).owningUserId = \(tableName).userId"
 
         guard let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false) else {
             return nil

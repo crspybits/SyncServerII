@@ -607,8 +607,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
         }
         
         var result:[FileInfo] = []
+        var error:FileIndexResult!
         
         select.forEachRow { rowModel in
+            if let _ = error {
+                return
+            }
+            
             let rowModel = rowModel as! FileIndex
 
             let fileInfo = FileInfo()!
@@ -624,14 +629,20 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
 
-            // TODO: FIX: It's an error if we can't get the cloud storage type for a file.
-            if let rawAccountType = rowModel.accountType,
+            guard let rawAccountType = rowModel.accountType,
                 let accountType = AccountType(rawValue: rawAccountType),
-                let cloudStorageType = accountType.cloudStorageType {
-                fileInfo.cloudStorageType = cloudStorageType.rawValue
+                let cloudStorageType = accountType.cloudStorageType else {
+                error = .error("Failed getting cloud storage type for fileUUID: \(rowModel.fileUUID)")
+                return
             }
             
+            fileInfo.cloudStorageType = cloudStorageType.rawValue
+
             result.append(fileInfo)
+        }
+        
+        if let error = error {
+            return error
         }
         
         if select.forEachRowStatus == nil {

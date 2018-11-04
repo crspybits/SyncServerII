@@ -191,6 +191,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         
         let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission, \(sharingGroupUserTableName).owningUserId FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID AND \(tableName).sharingGroupUUID = \(masterVersionTableName).sharingGroupUUID"
         
+        // The "owners" or "parents" of the sharing groups the sharing user is in
         guard let owningUsers = userRepo.getOwningSharingGroupUsers(forSharingUserId: userId) else {
             Log.error("Failed calling getOwningSharingGroupUsers")
             return nil
@@ -201,6 +202,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
             return nil
         }
         
+        // Now, get the accountTypes of the "owning" or "parent" users for each sharing group, for sharing users. This will be used downstream to determine the cloud sharing type of each sharing group for the sharing user.
         for sharingGroup in sharingGroups {
             let owningUser = owningUsers.filter {sharingGroup.owningUserId != nil && $0.userId == sharingGroup.owningUserId}
             if owningUser.count == 1 {

@@ -257,10 +257,9 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         let deviceUUID2 = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:2, masterVersion: 1, errorExpected: true) else {
-            XCTFail()
-            return
-        }
+        
+        // This will return nil because of the expected error.
+        uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:2, masterVersion: 1, errorExpected: true)
     }
     
     // Next version uploaded must have the same mimeType
@@ -299,10 +298,8 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             return
         }
 
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:2, masterVersion: 1, errorExpected: true) else {
-            XCTFail()
-            return
-        }
+        // Returns nil because of expected error.
+        uploadTextFile(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion:2, masterVersion: 1, errorExpected: true)
     }
     
     // MARK: Upload deletion.
