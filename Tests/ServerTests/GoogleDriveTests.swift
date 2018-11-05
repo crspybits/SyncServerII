@@ -305,6 +305,8 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
                         XCTFail()
                     }
                 case .failure:
+                    XCTFail()
+                case .fileNotFound:
                     if !expectError {
                         XCTFail()
                     }
@@ -335,6 +337,35 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         downloadFile(cloudFileName: self.knownAbsentFile, expectError: true)
     }
     
+    func testFileDirectDownloadOfNonExistentFileFails() {
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.google1.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            
+            creds.completeSmallFileDownload(fileId: "foobar") { data, error in
+                if let error = error {
+                    switch error {
+                    case GoogleCreds.DownloadSmallFileError.fileNotFound:
+                        break
+                    default:
+                        XCTFail()
+                    }
+                }
+                else {
+                    XCTFail()
+                }
+                
+                exp.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testThatAccessTokenRefreshOccursWithBadToken() {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
@@ -350,6 +381,8 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             case .success:
                 break
             case .failure:
+                XCTFail()
+            case .fileNotFound:
                 XCTFail()
             }
             
@@ -425,6 +458,7 @@ extension GoogleDriveTests {
             ("testSearchForPresentFile2", testSearchForPresentFile2),
             ("testBasicFileDownloadWorks2", testBasicFileDownloadWorks2),
             ("testFileDownloadOfNonExistentFileFails", testFileDownloadOfNonExistentFileFails),
+            ("testFileDirectDownloadOfNonExistentFileFails", testFileDirectDownloadOfNonExistentFileFails),
             ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken),
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
             ("testLookupFileThatExists", testLookupFileThatExists)

@@ -262,8 +262,18 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-
+        
         XCTAssert(fileIndexObj.userId == ownerUserId)
+        
+        // Need to make sure that the cloud storage type of the file, in the file index, corresponds to the cloud storage type of the owningAccount.
+        guard let rawAccountType = fileIndexObj.accountType,
+            let accountType = AccountType(rawValue: rawAccountType),
+            let cloudStorageType = accountType.cloudStorageType else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(owningAccount.type.cloudStorageType == cloudStorageType)
     }
 
     // Check to make sure that if the invited user owns cloud storage that the file was uploaded to their cloud storage.
@@ -299,9 +309,9 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        // Upload v1 of file by another user
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
+        // Upload v1 of file by another user
         guard let uploadResult2 = uploadFileBySharingUser(withPermission: .write, owningAccount: owningAccount, addUser: false, sharingGroupUUID: sharingGroupUUID, fileUUID: uploadResult.request.fileUUID, fileVersion: 1, masterVersion: 1) else {
             XCTFail()
             return

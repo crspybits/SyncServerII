@@ -45,7 +45,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         }
 
         let expectedCheckSums = [
-            uploadResult.request.fileUUID: uploadResult.checkSum
+            uploadResult.request.fileUUID!: uploadResult.checkSum
         ]
         
         self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)
@@ -66,7 +66,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         }
         
         let expectedCheckSums = [
-            uploadResult.request.fileUUID: uploadResult.checkSum,
+            uploadResult.request.fileUUID!: uploadResult.checkSum,
         ]
         
         self.getUploads(expectedFiles: [uploadResult.request], deviceUUID:deviceUUID, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)
@@ -99,8 +99,8 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         }
 
         let expectedCheckSums = [
-            uploadResult1.request.fileUUID: uploadResult1.checkSum,
-            uploadResult2.request.fileUUID: uploadResult2.checkSum
+            uploadResult1.request.fileUUID!: uploadResult1.checkSum,
+            uploadResult2.request.fileUUID!: uploadResult2.checkSum
         ]
         
         self.getUploads(expectedFiles: [uploadResult1.request, uploadResult2.request], deviceUUID:deviceUUID, expectedCheckSums: expectedCheckSums, sharingGroupUUID: sharingGroupUUID)

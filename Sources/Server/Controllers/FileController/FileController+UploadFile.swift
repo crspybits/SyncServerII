@@ -183,7 +183,7 @@ extension FileController {
             
             if let fileGroupUUID = uploadRequest.fileGroupUUID {
                 guard uploadRequest.fileVersion == 0 else {
-                    let message = "fileGroupUUID was given, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0"
+                    let message = "fileGroupUUID was given, but file version being uploaded (\(String(describing: uploadRequest.fileVersion))) is not 0"
                     Log.error(message)
                     params.completion(.failure(.message(message)))
                     return

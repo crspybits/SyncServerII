@@ -9,6 +9,7 @@
 import Foundation
 import LoggerAPI
 import SyncServerShared
+import Kitura
 
 extension FileController {
     func downloadFile(params:RequestProcessingParameters) {
@@ -78,7 +79,7 @@ extension FileController {
             }
             
             guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
-                let message = "Expected file version \(downloadRequest.fileVersion) was not the same as the actual version \(fileIndexObj!.fileVersion)"
+                let message = "Expected file version \(String(describing: downloadRequest.fileVersion)) was not the same as the actual version \(String(describing: fileIndexObj!.fileVersion))"
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
@@ -137,6 +138,7 @@ extension FileController {
                     Log.debug("CheckSum: \(downloadResult.checkSum)")
 
                     var contentsChanged = false
+                    // 11/4/18; This is conditional because for migration purposes, the FileIndex may not contain a lastUploadedCheckSum. i.e., it comes from a FileIndex record before we added the lastUploadedCheckSum field.
                     if let lastUploadedCheckSum = fileIndexObj!.lastUploadedCheckSum {
                         contentsChanged = downloadResult.checkSum != lastUploadedCheckSum
                     }
@@ -147,15 +149,17 @@ extension FileController {
                     response.checkSum = downloadResult.checkSum
                     response.cloudStorageType = cloudStorageType.rawValue
                     response.contentsChanged = contentsChanged
-                    
                     params.completion(.success(response))
-                    return
+                    
+                case .fileNotFound:
+                    let message = "File not found."
+                    Log.error(message)
+                    params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
                 
                 case .failure(let error):
                     let message = "Failed downloading file: \(error)"
                     Log.error(message)
                     params.completion(.failure(.message(message)))
-                    return
                 }
             }            
         }

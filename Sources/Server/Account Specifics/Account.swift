@@ -195,13 +195,49 @@ class AccountAPICall {
     // Used by `apiCall` function to make a REST call to an Account service.
     var baseURL:String?
     
+    private func parseResponse(_ response: ClientResponse, expectedBody: ExpectedResponse?) -> APICallResult? {
+        var result:APICallResult?
+
+        do {
+            var body = Data()
+            try response.readAllData(into: &body)
+
+            if let expectedBody = expectedBody, expectedBody == .data {
+                result = .data(body)
+            }
+            else {
+                let jsonResult:Any = try JSONSerialization.jsonObject(with: body, options: [])
+                
+                if let dictionary = jsonResult as? [String : Any] {
+                    result = .dictionary(dictionary)
+                }
+                else if let array = jsonResult as? [Any] {
+                    result = .array(array)
+                }
+                else {
+                    result = .data(body)
+                }
+            }
+        } catch (let error) {
+            Log.error("Failed to read response: \(error)")
+        }
+        
+        return result
+    }
+    
+    enum ExpectedResponse {
+        case data
+        case json
+    }
+    
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
     // expectingData == true means return Data. false or nil just look for Data or JSON result.
     func apiCall(method:String, baseURL:String? = nil, path:String,
                  additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
                  body:APICallBody? = nil,
                  returnResultWhenNon200Code:Bool = false,
-                 expectingData:Bool? = nil,
+                 expectedSuccessBody:ExpectedResponse? = nil,
+                 expectedFailureBody:ExpectedResponse? = nil,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?, _ responseHeaders: HeadersContainer?)->()) {
         
         var hostname = baseURL
@@ -239,10 +275,17 @@ class AccountAPICall {
         
         requestOptions.append(.headers(headers))
         
-        let req = HTTP.request(requestOptions) { response in
+        let req = HTTP.request(requestOptions) {[unowned self] response in
             if let response:KituraNet.ClientResponse = response {
                 let statusCode = response.statusCode
-                if statusCode != HTTPStatusCode.OK {
+                
+                if statusCode == HTTPStatusCode.OK {
+                    if let result = self.parseResponse(response, expectedBody: expectedSuccessBody) {
+                        completion(result, statusCode, response.headers)
+                        return
+                    }
+                }
+                else {
                     // for header in response.headers {
                     //     Log.debug(message: "Header: \(header)")
                     // }
@@ -255,37 +298,14 @@ class AccountAPICall {
                     // The actual `TODO` item here is to respond to the client in such a way so the client can prompt the user to re-sign in to generate an updated refresh token.
                     
                     if !returnResultWhenNon200Code {
-                        completion(nil, statusCode, nil)
-                        return
-                    }
-                }
-                
-                var body = Data()
-                do {
-                    try response.readAllData(into: &body)
-                    var result:APICallResult?
-
-                    if let expectingData = expectingData, expectingData {
-                        result = .data(body)
-                    }
-                    else {
-                        let jsonResult:Any = try JSONSerialization.jsonObject(with: body, options: [])
-                        
-                        if let dictionary = jsonResult as? [String : Any] {
-                            result = .dictionary(dictionary)
-                        }
-                        else if let array = jsonResult as? [Any] {
-                            result = .array(array)
+                        if let result = self.parseResponse(response, expectedBody: expectedFailureBody) {
+                            completion(result, statusCode, response.headers)
                         }
                         else {
-                            result = .data(body)
+                            completion(nil, statusCode, nil)
                         }
+                        return
                     }
-                    
-                    completion(result, statusCode, response.headers)
-                    return
-                } catch (let error) {
-                    Log.error("Failed to read response: \(error)")
                 }
             }
             

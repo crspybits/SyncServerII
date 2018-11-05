@@ -25,11 +25,14 @@ public enum CloudStorageError : Int, Swift.Error {
     case alreadyUploaded
 }
 
-public struct DownloadResult {
-    let data: Data
+public enum DownloadResult {
+    // Checksum: value defined by the cloud storage system. This is the checksum value *before* the download.
+    case success (data: Data, checkSum: String)
     
-    // A checksum value defined by the cloud storage system. This is the checksum value *before* the download.
-    let checkSum: String
+    // This is distinguished from the more general failure case because (a) it definitively relects the file not being present in cloud storage, and (b) because it could be due to the user either renaming the file in cloud storage or the file being deleted by the user.
+    case fileNotFound
+    
+    case failure(Swift.Error)
 }
 
 protocol CloudStorage {
@@ -38,7 +41,7 @@ protocol CloudStorage {
     func uploadFile(cloudFileName:String, data:Data, options:CloudStorageFileNameOptions?,
         completion:@escaping (Result<String>)->())
     
-    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<DownloadResult>)->())
+    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (DownloadResult)->())
     
     func deleteFile(cloudFileName:String, options:CloudStorageFileNameOptions?,
         completion:@escaping (Swift.Error?)->())

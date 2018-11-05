@@ -154,7 +154,7 @@ extension DropboxCreds : CloudStorage {
         }
     }
     
-    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions? = nil, completion:@escaping (Result<DownloadResult>)->()) {
+    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions? = nil, completion:@escaping (DownloadResult)->()) {
         
         // https://www.dropbox.com/developers/documentation/http/documentation#files-download
         /*
@@ -171,9 +171,26 @@ extension DropboxCreds : CloudStorage {
         // "The response body contains file content, so the result will appear as JSON in the Dropbox-API-Result response header"
         // See https://www.dropbox.com/developers/documentation/http/documentation#formats
 
-        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/download", additionalHeaders: headers, expectingData: true) { (apiResult, statusCode, responseHeaders) in
+        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/download", additionalHeaders: headers, expectedSuccessBody: .data, expectedFailureBody: .json) { (apiResult, statusCode, responseHeaders) in
             
-            // QUESTION: What does dropbox respond with if the file is not present? Is this a non-OK status code?
+            /* Example of what is returned when a file is not found:
+                HTTPStatusCode.conflict
+                (["error": ["path": [".tag": "not_found"], ".tag": "path"], "error_summary": "path/not_found/"]))
+                See also https://www.dropbox.com/developers/documentation/http/documentation#error-handling and
+                https://www.dropboxforum.com/t5/API-Support-Feedback/Did-404-change-to-409-in-v2/td-p/208370
+            */
+            
+            if statusCode == HTTPStatusCode.conflict,
+                case .dictionary(let dict)? = apiResult,
+                let path = dict["error"] as? [String: Any],
+                let tag = path["path"] as? [String: Any],
+                let message = tag[".tag"] as? String,
+                message == "not_found" {
+                
+                Log.warning("Dropbox: File \(cloudFileName) not found.")
+                completion(.fileNotFound)
+                return
+            }
             
             guard statusCode == HTTPStatusCode.OK else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))
@@ -208,8 +225,8 @@ extension DropboxCreds : CloudStorage {
                 return
             }
 
-            let downloadResult = DownloadResult(data: data, checkSum: checkSum)
-            completion(.success(downloadResult))
+            let downloadResult:DownloadResult = .success(data: data, checkSum: checkSum)
+            completion(downloadResult)
         }
     }
     

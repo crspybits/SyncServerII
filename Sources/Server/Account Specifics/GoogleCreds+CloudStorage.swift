@@ -515,9 +515,10 @@ extension GoogleCreds : CloudStorage {
         case noDataInAPIResult
         case noOptions
         case noCloudFolderName
+        case fileNotFound
     }
-
-    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (Result<DownloadResult>)->()) {
+    
+    func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (DownloadResult)->()) {
         
         guard let options = options else {
             completion(.failure(DownloadSmallFileError.noOptions))
@@ -534,22 +535,32 @@ extension GoogleCreds : CloudStorage {
                 // File was found! Need to download it now.
                 self.completeSmallFileDownload(fileId: cloudFileId!) { (data, error) in
                     if error == nil {
-                        let downloadResult = DownloadResult(data: data!, checkSum: checkSum!)
-                        completion(.success(downloadResult))
+                        let downloadResult:DownloadResult = .success(data: data!, checkSum: checkSum!)
+                        completion(downloadResult)
                     }
                     else {
-                        completion(.failure(error!))
+                        switch error! {
+                        case DownloadSmallFileError.fileNotFound:
+                            completion(.fileNotFound)
+                        default:
+                            completion(.failure(error!))
+                        }
                     }
                 }
             }
             else {
-                // Error may be: SearchForFileError.cloudFileDoesNotExist
-                completion(.failure(error!))
+                switch error! {
+                case SearchForFileError.cloudFileDoesNotExist:
+                    completion(.fileNotFound)
+                default:
+                    completion(.failure(error!))
+                }
             }
         }
     }
 
-    private func completeSmallFileDownload(fileId:String, completion:@escaping (_ data:Data?, Swift.Error?)->()) {
+    // Not `private` because of some testing.
+    func completeSmallFileDownload(fileId:String, completion:@escaping (_ data:Data?, Swift.Error?)->()) {
         // See https://developers.google.com/drive/v3/web/manage-downloads
         /*
         GET https://www.googleapis.com/drive/v3/files/0B9jNhSvVjoIVM3dKcGRKRmVIOVU?alt=media
@@ -558,8 +569,40 @@ extension GoogleCreds : CloudStorage {
         
         let path = "/drive/v3/files/\(fileId)?alt=media"
         
-        self.apiCall(method: "GET", path: path, expectingData: true) { (apiResult, statusCode, responseHeaders) in
+        self.apiCall(method: "GET", path: path, expectedSuccessBody: .data, expectedFailureBody: .json) { (apiResult, statusCode, responseHeaders) in
         
+            Log.debug("Google: apiResult: \(String(describing: apiResult))")
+            Log.debug("Google: status code: \(String(describing: statusCode))")
+            
+            /* When the fileId doesn't exist, apiResult from body as JSON is:
+            apiResult: Optional(Server.APICallResult.dictionary(
+                ["error":
+                    ["code": 404,
+                    "errors": [
+                        ["locationType": "parameter",
+                            "reason": "notFound",
+                            "location": "fileId",
+                            "message": "File not found: foobar.",
+                            "domain": "global"
+                        ]
+                    ],
+                    "message": "File not found: foobar."]
+                ]))
+            */
+            
+            if statusCode == HTTPStatusCode.notFound,
+                case .dictionary(let dict)? = apiResult,
+                let error = dict["error"] as? [String: Any],
+                let errors = error["errors"] as? [[String: Any]],
+                errors.count == 1,
+                let reason = errors[0]["reason"] as? String,
+                reason == "notFound" {
+                
+                completion(nil, DownloadSmallFileError.fileNotFound)
+                return
+            }
+            
+            
             if statusCode != HTTPStatusCode.OK {
                 completion(nil, DownloadSmallFileError.badStatusCode(statusCode))
                 return

@@ -156,6 +156,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
                     XCTFail()
                     Log.error("Failed download: \(error)")
                 }
+            case .fileNotFound:
+                XCTFail()
             }
             
             exp.fulfill()
