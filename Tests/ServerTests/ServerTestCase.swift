@@ -1418,7 +1418,7 @@ class ServerTestCase : XCTestCase {
                         else {
                             XCTAssert(downloadFileResponse.contentsChanged == contentsChangedExpected)
                             XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
-                            XCTAssert(downloadFileResponse.checkSum == actualCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(actualCheckSum)")
+                            XCTAssert(downloadFileResponse.checkSum == actualCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(String(describing: actualCheckSum))")
                             XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
                             guard let type = downloadFileResponse.cloudStorageType,
                                 let _ = CloudStorageType(rawValue: type) else {

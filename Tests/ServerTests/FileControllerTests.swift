@@ -262,6 +262,57 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         downloadTextFile(testAccount: testAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadResult.request, contentsChangedExpected: true)
     }
     
+    func testDownloadTextFileWhereFileDeletedGivesGoneResponse() {
+        let testAccount:TestAccount = .primaryOwningAccount
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        guard let uploadResult = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        
+        var checkSum:String!
+        let file = TestFile.test2
+        
+        checkSum = file.checkSum(type: testAccount.type)
+
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : uploadResult.request.fileUUID,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 1,
+            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
+            UploadFileRequest.checkSumKey: checkSum
+        ])!
+    
+        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
+
+        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
+
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            
+            let downloadFileRequest = DownloadFileRequest(json: [
+                DownloadFileRequest.fileUUIDKey: uploadRequest.fileUUID,
+                DownloadFileRequest.masterVersionKey : 1,
+                DownloadFileRequest.fileVersionKey : 0,
+                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
+            ])
+            
+            self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                
+                XCTAssert(response!.statusCode == .gone)
+                
+                expectation.fulfill()
+            }
+        }
+    }
+    
     func testDownloadFileTextWhereMasterVersionDiffersFails() {
         downloadTextFile(masterVersionExpectedWithDownload: 0, expectUpdatedMasterUpdate:true)
     }
@@ -323,16 +374,18 @@ extension FileControllerTests {
             ("testMasterVersionConflict1", testMasterVersionConflict1),
             ("testMasterVersionConflict2", testMasterVersionConflict2),
             ("testIndexWithNoFiles", testIndexWithNoFiles),
+            ("testGetIndexForOnlySharingGroupsWorks", testGetIndexForOnlySharingGroupsWorks),
             ("testIndexWithOneFile", testIndexWithOneFile),
             ("testIndexWithTwoFiles", testIndexWithTwoFiles),
             ("testDownloadFileTextSucceeds", testDownloadFileTextSucceeds),
             ("testDownloadFileTextWithASimulatedUserChangeSucceeds", testDownloadFileTextWithASimulatedUserChangeSucceeds),
+            ("testDownloadTextFileWhereFileDeletedGivesGoneResponse",
+                testDownloadTextFileWhereFileDeletedGivesGoneResponse),
             ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
             ("testIndexWithFakeSharingGroupUUIDFails", testIndexWithFakeSharingGroupUUIDFails),
-            ("testIndexWithBadSharingGroupUUIDFails", testIndexWithBadSharingGroupUUIDFails),
-            ("testGetIndexForOnlySharingGroupsWorks", testGetIndexForOnlySharingGroupsWorks)
+            ("testIndexWithBadSharingGroupUUIDFails", testIndexWithBadSharingGroupUUIDFails)
         ]
     }
     

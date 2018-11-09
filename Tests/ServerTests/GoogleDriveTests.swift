@@ -287,7 +287,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
-    func downloadFile(cloudFileName:String, expectError:Bool = false) {
+    func downloadFile(cloudFileName:String, expectError:Bool = false, expectedFileNotFound: Bool = false) {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -307,7 +307,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
                 case .failure:
                     XCTFail()
                 case .fileNotFound:
-                    if !expectError {
+                    if !expectedFileNotFound {
                         XCTFail()
                     }
                 }
@@ -334,7 +334,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testFileDownloadOfNonExistentFileFails() {
-        downloadFile(cloudFileName: self.knownAbsentFile, expectError: true)
+        downloadFile(cloudFileName: self.knownAbsentFile, expectedFileNotFound: true)
     }
     
     func testFileDirectDownloadOfNonExistentFileFails() {

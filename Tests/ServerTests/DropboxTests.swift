@@ -126,7 +126,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
-    func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedStringFile:TestFile? = nil, expectedFailure: Bool = false) {
+    func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedStringFile:TestFile? = nil, expectedFailure: Bool = false, expectedFileNotFound: Bool = false) {
         let exp = expectation(description: "\(#function)\(#line)")
 
         creds.downloadFile(cloudFileName: cloudFileName) { result in
@@ -157,7 +157,9 @@ class DropboxTests: ServerTestCase, LinuxTestable {
                     Log.error("Failed download: \(error)")
                 }
             case .fileNotFound:
-                XCTFail()
+                if !expectedFileNotFound {
+                    XCTFail()
+                }
             }
             
             exp.fulfill()
@@ -170,7 +172,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         let creds = DropboxCreds()
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
-        downloadFile(creds: creds, cloudFileName: knownAbsentFile, expectedFailure: true)
+        downloadFile(creds: creds, cloudFileName: knownAbsentFile, expectedFileNotFound: true)
     }
     
     func testSimpleDownloadWorks() {
