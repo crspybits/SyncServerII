@@ -183,8 +183,11 @@ extension FileController {
             case .success:
                 break
             case .accessTokenRevokedOrExpired:
-                assert(false)
+                // As in [1].
+                Log.warning("Error deleting file from cloud storage: Access token revoked or expired")
+                
             case .failure(let error):
+                // [1]
                 Log.warning("Error deleting file from cloud storage: \(error)!")
                 // I'm not going to fail if this fails-- this is for debugging and it's not a big deal. Drop through and report success.
             }

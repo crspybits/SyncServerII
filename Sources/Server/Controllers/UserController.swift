@@ -145,11 +145,18 @@ class UserController : ControllerProtocol {
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
         profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
         
-            UserController.createInitialFileForOwningUser(cloudFolderName: addUserRequest.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
-                if success {
+            UserController.createInitialFileForOwningUser(cloudFolderName: addUserRequest.cloudFolderName, cloudStorage: cloudStorageCreds) { creationResponse in
+                switch creationResponse {
+                case .success:
                     params.completion(.success(response))
-                }
-                else {
+                    
+                case .accessTokenRevokedOrExpired:
+                    // This is a fatal error. Trying to create an account for which an access token has expired or been revoked. Yikes. Bail out.
+                    let message = "Yikes: Access token expired or revoked!"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
+                    
+                case .failure:
                     params.completion(.failure(nil))
                 }
             }

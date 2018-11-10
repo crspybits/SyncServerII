@@ -52,7 +52,7 @@ extension DropboxCreds {
                 return
             }
             
-            Log.debug("apiResult: \(String(describing: apiResult)); statusCode: \(statusCode)")
+            Log.debug("apiResult: \(String(describing: apiResult)); statusCode: \(String(describing: statusCode))")
 
             guard statusCode == HTTPStatusCode.OK || statusCode?.rawValue == DropboxCreds.requestFailureCode else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))

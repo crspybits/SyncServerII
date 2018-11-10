@@ -74,7 +74,7 @@ class SharingAccountsController : ControllerProtocol {
         // I'm not requiring a master version from the client-- because they don't yet have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
         
         guard let masterVersion = Controllers.getMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, params: params) else {
-            let message = "Could not get master version for sharing group uuid: \(sharingInvitation.sharingGroupUUID)"
+            let message = "Could not get master version for sharing group uuid: \(String(describing: sharingInvitation.sharingGroupUUID))"
             Log.error(message)
             completion(.failure(.message(message)))
             return
@@ -115,7 +115,7 @@ class SharingAccountsController : ControllerProtocol {
         let result = params.repos.sharingGroupUser.lookup(key: key, modelInit: SharingGroupUser.init)
         switch result {
         case .found:
-            let message = "User id: \(existingUser.userId!) was already in sharing group: \(sharingInvitation.sharingGroupUUID)"
+            let message = "User id: \(existingUser.userId!) was already in sharing group: \(String(describing: sharingInvitation.sharingGroupUUID))"
             Log.error(message)
             completion(.failure(.message(message)))
             return
@@ -212,11 +212,18 @@ class SharingAccountsController : ControllerProtocol {
                     return
                 }
         
-                UserController.createInitialFileForOwningUser(cloudFolderName: user.cloudFolderName, cloudStorage: cloudStorageCreds) { success in
-                    if success {
+                UserController.createInitialFileForOwningUser(cloudFolderName: user.cloudFolderName, cloudStorage: cloudStorageCreds) { createResponse in
+                    switch createResponse {
+                    case .success:
                         completion(.success(response))
-                    }
-                    else {
+                        
+                    case .accessTokenRevokedOrExpired:
+                        // We're creating an account for an owning user. This is a fatal error-- we shouldn't have gotten to this point. Somehow authentication worked, but then a moment later the access token was revoked or expired.
+                        let message = "Yikes: Access token expired or revoked. Fatal error."
+                        Log.error(message)
+                        completion(.failure(.message(message)))
+                        
+                    case .failure:
                         completion(.failure(nil))
                     }
                 }
@@ -257,7 +264,7 @@ class SharingAccountsController : ControllerProtocol {
         
         guard case .found(let model) = lookupResult,
             let sharingInvitation = model as? SharingInvitation else {
-            let message = "Could not find sharing invitation: \(request.sharingInvitationUUID). Was it stale?"
+                let message = "Could not find sharing invitation: \(String(describing: request.sharingInvitationUUID)). Was it stale?"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

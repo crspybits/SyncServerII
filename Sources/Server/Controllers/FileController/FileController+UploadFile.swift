@@ -305,7 +305,10 @@ extension FileController {
                     }
                     
                 case .accessTokenRevokedOrExpired:
-                    assert(false)
+                    // Not going to do any cleanup. The access token has expired/been revoked. Presumably, the file wasn't uploaded.
+                    let message = "Access token revoked or expired."
+                    Log.error(message)
+                    params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
                     
                 case .failure(let error):
                     self.errorCleanup("Could not uploadFile: error: \(error)", errorDeletion: errorDeletion)

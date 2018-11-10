@@ -13,7 +13,6 @@ import Foundation
 import SyncServerShared
 
 class FileController_UploadTests: ServerTestCase, LinuxTestable {
-
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -46,6 +45,24 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         case .error(_):
             XCTFail()
         }
+    }
+    
+    func testUploadWithRevokedAccessToken() {
+        var testAccount:TestAccount = .primaryOwningAccount
+        
+        switch testAccount.type {
+        case .Dropbox:
+            testAccount = TestAccount.dropbox1Revoked
+        case .Google:
+            testAccount = TestAccount.googleRevoked
+        case .Facebook:
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        let result = uploadTextFile(testAccount: testAccount, deviceUUID:deviceUUID, errorExpected: true, statusCodeExpected: .gone)
+        XCTAssert(result == nil)
     }
     
     func testUploadJPEGFile() {
@@ -212,6 +229,7 @@ extension FileController_UploadTests {
     static var allTests : [(String, (FileController_UploadTests) -> () throws -> Void)] {
         return [
             ("testUploadTextFile", testUploadTextFile),
+            ("testUploadWithRevokedAccessToken", testUploadWithRevokedAccessToken),
             ("testUploadJPEGFile", testUploadJPEGFile),
             ("testUploadTextAndJPEGFile", testUploadTextAndJPEGFile),
             ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),

@@ -9,7 +9,13 @@ import Foundation
 import LoggerAPI
 
 extension UserController {
-    static func createInitialFileForOwningUser(cloudFolderName: String?, cloudStorage: CloudStorage, completion: @escaping (_ success: Bool)->()) {
+    enum CreateInitialFileResponse {
+        case success
+        case accessTokenRevokedOrExpired
+        case failure
+    }
+    
+    static func createInitialFileForOwningUser(cloudFolderName: String?, cloudStorage: CloudStorage, completion: @escaping (CreateInitialFileResponse)->()) {
     
         guard let fileName = Constants.session.owningUserAccountCreation.initialFileName,
                 let fileContents = Constants.session.owningUserAccountCreation.initialFileContents,
@@ -17,7 +23,7 @@ extension UserController {
                 
             // Note: This is not an error-- the server just isn't configured to create these files for owning user accounts.
             Log.info("No file name and/or contents for initial user file.")
-            completion(true)
+            completion(.success)
             return
         }
         
@@ -29,15 +35,15 @@ extension UserController {
         
             switch result {
             case .success:
-                completion(true)
+                completion(.success)
                 
             case .accessTokenRevokedOrExpired:
-                assert(false)
+                completion(.accessTokenRevokedOrExpired)
                 
             case .failure(CloudStorageError.alreadyUploaded):
                 // Not considering it an error when the initial file is already there-- user might be recreating an account.
                 Log.info("Could not upload initial file: It already exists.")
-                completion(true)
+                completion(.success)
                 
             case .failure(let error):
                 // It's possible the file was successfully uploaded, but we got an error anyways. Delete it.
@@ -45,7 +51,7 @@ extension UserController {
                     // Ignore any error from deletion. We've alread got an error.
                     
                     Log.error("Could not upload initial file: error: \(error)")
-                    completion(false)
+                    completion(.failure)
                 }
             }
         }
