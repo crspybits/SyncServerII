@@ -530,9 +530,9 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             case .success:
                 XCTFail()
             case .failure:
-                break
-            case .accessTokenRevokedOrExpired:
                 XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
             case .fileNotFound:
                 XCTFail()
             }

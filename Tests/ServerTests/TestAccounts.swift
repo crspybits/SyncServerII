@@ -85,7 +85,7 @@ struct TestAccount {
     
     static let dropbox2 = TestAccount(tokenKey: "DropboxAccessToken2", idKey: "DropboxId2", type: .Dropbox, tokenType: .DropboxToken)
     
-    static let dropboxRevoked = TestAccount(tokenKey: "DropboxAccessTokenRevoked", idKey: "DropboxId3", type: .Dropbox, tokenType: .DropboxToken)
+    static let dropbox1Revoked = TestAccount(tokenKey: "DropboxAccessTokenRevoked", idKey: "DropboxId3", type: .Dropbox, tokenType: .DropboxToken)
     
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     private func configValue(key:String) -> String {

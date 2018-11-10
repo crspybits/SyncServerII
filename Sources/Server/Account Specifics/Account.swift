@@ -237,7 +237,7 @@ class AccountAPICall {
     func apiCall(method:String, baseURL:String? = nil, path:String,
                  additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
                  body:APICallBody? = nil,
-                 returnResultWhenNon200Code:Bool = false,
+                 returnResultWhenNon200Code:Bool = true,
                  expectedSuccessBody:ExpectedResponse? = nil,
                  expectedFailureBody:ExpectedResponse? = nil,
         completion:@escaping (_ result: APICallResult?, HTTPStatusCode?, _ responseHeaders: HeadersContainer?)->()) {
@@ -288,7 +288,7 @@ class AccountAPICall {
                     }
                 }
                 else {                    
-                    if !returnResultWhenNon200Code {
+                    if returnResultWhenNon200Code {
                         if let result = self.parseResponse(response, expectedBody: expectedFailureBody) {
                             completion(result, statusCode, response.headers)
                         }

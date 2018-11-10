@@ -45,9 +45,14 @@ extension DropboxCreds {
         // It's hard to see in here, but I've put an explicit "/" before the file name. Dropbox needs this to precede file names.
         let body = "{\"path\": \"/\(fileName)\",\"include_media_info\": false,\"include_deleted\": false,\"include_has_explicit_shared_members\": false}"
         
-        self.apiCall(method: "POST", path: "/2/files/get_metadata", additionalHeaders: basicHeaders(), body: .string(body), returnResultWhenNon200Code: true) { (apiResult, statusCode, responseHeaders) in
+        self.apiCall(method: "POST", path: "/2/files/get_metadata", additionalHeaders: basicHeaders(), body: .string(body), expectedFailureBody: .json) { (apiResult, statusCode, responseHeaders) in
+        
+            if self.revokedAccessToken(result: apiResult, statusCode: statusCode) {
+                completion(.accessTokenRevokedOrExpired)
+                return
+            }
             
-            // Log.debug("apiResult: \(String(describing: apiResult))")
+            Log.debug("apiResult: \(String(describing: apiResult)); statusCode: \(statusCode)")
 
             guard statusCode == HTTPStatusCode.OK || statusCode?.rawValue == DropboxCreds.requestFailureCode else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))
@@ -277,7 +282,7 @@ extension DropboxCreds : CloudStorage {
         
         let body = "{\"path\": \"/\(cloudFileName)\"}"
         
-        self.apiCall(method: "POST", path: "/2/files/delete_v2", additionalHeaders: headers, body: .string(body)) { (apiResult, statusCode, responseHeaders) in
+        self.apiCall(method: "POST", path: "/2/files/delete_v2", additionalHeaders: headers, body: .string(body), expectedFailureBody: .json) { (apiResult, statusCode, responseHeaders) in
         
             if self.revokedAccessToken(result: apiResult, statusCode: statusCode) {
                 completion(.accessTokenRevokedOrExpired)

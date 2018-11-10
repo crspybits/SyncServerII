@@ -39,7 +39,9 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             switch result {
             case .success(let found):
                 XCTAssert(!found)
-            case .failure, .accessTokenRevokedOrExpired:
+            case .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
                 XCTFail()
             }
 
@@ -107,8 +109,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         let fileName = Foundation.UUID().uuidString
         
         let creds = DropboxCreds()
-        creds.accessToken = TestAccount.dropboxRevoked.token()
-        creds.accountId = TestAccount.dropboxRevoked.id()
+        creds.accessToken = TestAccount.dropbox1Revoked.token()
+        creds.accountId = TestAccount.dropbox1Revoked.id()
         let exp = expectation(description: "\(#function)\(#line)")
         
         let stringFile = TestFile.test1
@@ -162,7 +164,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
-    func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedStringFile:TestFile? = nil, expectedFailure: Bool = false, expectedFileNotFound: Bool = false) {
+    func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedStringFile:TestFile? = nil, expectedFailure: Bool = false, expectedFileNotFound: Bool = false, expectedRevokedToken: Bool = false) {
         let exp = expectation(description: "\(#function)\(#line)")
 
         creds.downloadFile(cloudFileName: cloudFileName) { result in
@@ -184,18 +186,20 @@ class DropboxTests: ServerTestCase, LinuxTestable {
                     XCTAssert(str == expectedContents)
                 }
                 
-                if expectedFailure {
+                if expectedFailure || expectedRevokedToken || expectedFileNotFound {
                     XCTFail()
                 }
             case .failure(let error):
-                if !expectedFailure {
+                if !expectedFailure || expectedRevokedToken || expectedFileNotFound {
                     XCTFail()
                     Log.error("Failed download: \(error)")
                 }
             case .accessTokenRevokedOrExpired:
-                XCTFail()
+                if !expectedRevokedToken || expectedFileNotFound || expectedFailure {
+                    XCTFail()
+                }
             case .fileNotFound:
-                if !expectedFileNotFound {
+                if !expectedFileNotFound || expectedRevokedToken || expectedFailure{
                     XCTFail()
                 }
             }
@@ -219,6 +223,14 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         creds.accountId = TestAccount.dropbox1.id()
         
         downloadFile(creds: creds, cloudFileName: knownPresentFile)
+    }
+    
+    func testDownloadWithRevokedToken() {
+        let creds = DropboxCreds()
+        creds.accessToken = TestAccount.dropbox1Revoked.token()
+        creds.accountId = TestAccount.dropbox1Revoked.id()
+        
+        downloadFile(creds: creds, cloudFileName: knownPresentFile, expectedRevokedToken: true)
     }
     
     func testSimpleDownloadWorks2() {
@@ -281,6 +293,34 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         }
         
         waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testDeletionWithRevokedAccessToken() {
+        let creds = DropboxCreds()
+        creds.accessToken = TestAccount.dropbox1Revoked.token()
+        creds.accountId = TestAccount.dropbox1Revoked.id()
+        
+        let existingFile = knownPresentFile
+        
+        let exp = expectation(description: "\(#function)\(#line)")
+
+        creds.deleteFile(cloudFileName: existingFile) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            case .failure:
+                XCTFail()
+            }
+
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+        
+        let result = lookupFile(cloudFileName: existingFile)
+        XCTAssert(result == true)
     }
     
     func testDeletionOfNonExistingFileFails() {
@@ -348,14 +388,35 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         return foundResult
     }
     
-    func testLookupFileThatDoesNotExist() {
+    func testLookupFileThatExists() {
         let result = lookupFile(cloudFileName: knownPresentFile)
         XCTAssert(result == true)
     }
     
-    func testLookupFileThatExists() {
+    func testLookupFileThatDoesNotExist() {
         let result = lookupFile(cloudFileName: knownAbsentFile)
         XCTAssert(result == false)
+    }
+    
+    func testLookupWithRevokedAccessToken() {
+        let creds = DropboxCreds()
+        creds.accessToken = TestAccount.dropbox1Revoked.token()
+        creds.accountId = TestAccount.dropbox1Revoked.id()
+        
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.lookupFile(cloudFileName:knownPresentFile) { result in
+            switch result {
+            case .success, .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
     }
 }
 
@@ -369,12 +430,15 @@ extension DropboxTests {
             ("testFullUploadWorks", testFullUploadWorks),
             ("testDownloadOfNonExistingFileFails", testDownloadOfNonExistingFileFails),
             ("testSimpleDownloadWorks", testSimpleDownloadWorks),
+            ("testDownloadWithRevokedToken", testDownloadWithRevokedToken),
             ("testSimpleDownloadWorks2", testSimpleDownloadWorks2),
             ("testUploadAndDownloadWorks", testUploadAndDownloadWorks),
+            ("testDeletionWithRevokedAccessToken", testDeletionWithRevokedAccessToken),
             ("testDeletionOfNonExistingFileFails", testDeletionOfNonExistingFileFails),
             ("testDeletionOfExistingFileWorks", testDeletionOfExistingFileWorks),
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
-            ("testLookupFileThatExists", testLookupFileThatExists)
+            ("testLookupFileThatExists", testLookupFileThatExists),
+            ("testLookupWithRevokedAccessToken", testLookupWithRevokedAccessToken)
         ]
     }
     
