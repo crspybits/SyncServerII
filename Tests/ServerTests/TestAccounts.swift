@@ -61,11 +61,14 @@ struct TestAccount {
 #endif
 
     static let nonOwningSharingAccount:TestAccount = .facebook1
-
+    
     static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google, tokenType: .GoogleToken)
     static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google, tokenType: .GoogleToken)
     static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google, tokenType: .GoogleToken)
-    
+
+    // https://myaccount.google.com/permissions?pli=1
+    static let googleRevoked = TestAccount(tokenKey: "GoogleRefreshTokenRevoked", idKey: "GoogleSub4", type: .Google, tokenType: .GoogleToken)
+
     static func isGoogle(_ account: TestAccount) -> Bool {
         return account.type == .Google
     }
@@ -81,6 +84,8 @@ struct TestAccount {
     static let dropbox1 = TestAccount(tokenKey: "DropboxAccessToken1", idKey: "DropboxId1", type: .Dropbox, tokenType: .DropboxToken)
     
     static let dropbox2 = TestAccount(tokenKey: "DropboxAccessToken2", idKey: "DropboxId2", type: .Dropbox, tokenType: .DropboxToken)
+    
+    static let dropboxRevoked = TestAccount(tokenKey: "DropboxAccessTokenRevoked", idKey: "DropboxId3", type: .Dropbox, tokenType: .DropboxToken)
     
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     private func configValue(key:String) -> String {

@@ -177,9 +177,15 @@ extension FileController {
         
         let options = CloudStorageFileNameOptions(cloudFolderName: effectiveOwningUserCreds.cloudFolderName, mimeType: fileIndexObj.mimeType!)
         
-        cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
-            if error != nil  {
-                Log.warning("Error deleting file from cloud storage: \(error!)!")
+        cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { result in
+        
+            switch result {
+            case .success:
+                break
+            case .accessTokenRevokedOrExpired:
+                assert(false)
+            case .failure(let error):
+                Log.warning("Error deleting file from cloud storage: \(error)!")
                 // I'm not going to fail if this fails-- this is for debugging and it's not a big deal. Drop through and report success.
             }
             

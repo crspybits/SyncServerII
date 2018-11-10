@@ -10,6 +10,10 @@ import SyncServerShared
 
 enum Result<T> {
     case success(T)
+    
+    // If a user revokes their access token, or it expires, I want to make sure we provide gracefully degraded service.
+    case accessTokenRevokedOrExpired
+    
     case failure(Swift.Error)
 }
 
@@ -32,6 +36,9 @@ public enum DownloadResult {
     // This is distinguished from the more general failure case because (a) it definitively relects the file not being present in cloud storage, and (b) because it could be due to the user either renaming the file in cloud storage or the file being deleted by the user.
     case fileNotFound
     
+    // Similarly, if a user revokes their access token, I want to make sure we provide gracefully degraded service.
+    case accessTokenRevokedOrExpired
+    
     case failure(Swift.Error)
 }
 
@@ -44,7 +51,7 @@ protocol CloudStorage {
     func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (DownloadResult)->())
     
     func deleteFile(cloudFileName:String, options:CloudStorageFileNameOptions?,
-        completion:@escaping (Swift.Error?)->())
+        completion:@escaping (Result<()>)->())
 
     // On success, returns true iff the file was found.
     // Used primarily for testing.

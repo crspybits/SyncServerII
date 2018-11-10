@@ -151,6 +151,9 @@ extension FileController {
                     response.contentsChanged = contentsChanged
                     params.completion(.success(response))
                     
+                case .accessTokenRevokedOrExpired:
+                    assert(false)
+                    
                 case .fileNotFound:
                     let message = "File not found."
                     Log.error(message)

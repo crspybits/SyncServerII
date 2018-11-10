@@ -214,6 +214,80 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testCloudStorageFileDeleteWorks() {
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.google1.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            XCTAssert(error == nil)
+            XCTAssert(creds.accessToken != nil)
+            exp.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+        
+        // Do the upload
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let file = TestFile.test1
+        
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : fileUUID,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 1,
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: file.md5CheckSum
+        ])!
+
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options)
+        
+        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        
+        deleteFile(testAccount: TestAccount.google1, cloudFileName: cloudFileName, options: options)
+    }
+    
+    func testCloudStorageFileDeleteWithRevokedRefreshToken() {
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.googleRevoked.token()
+
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        let file = TestFile.test1
+        
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : Foundation.UUID().uuidString,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 1,
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: file.md5CheckSum
+        ])!
+        
+        let deviceUUID = Foundation.UUID().uuidString
+
+        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        let exp = expectation(description: "\(#function)\(#line)")
+
+        creds.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            case .failure:
+                XCTFail()
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testCreateFolderIfDoesNotExist() {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
@@ -287,6 +361,30 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
+    func testUploadWithRevokedRefreshToken() {
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.googleRevoked.token()
+        
+        // Do the upload
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let file = TestFile.test1
+        
+        let uploadRequest = UploadFileRequest(json: [
+            UploadFileRequest.fileUUIDKey : fileUUID,
+            UploadFileRequest.mimeTypeKey: "text/plain",
+            UploadFileRequest.fileVersionKey: 0,
+            UploadFileRequest.masterVersionKey: 1,
+            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
+            UploadFileRequest.checkSumKey: file.md5CheckSum
+        ])!
+
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options, expectAccessTokenRevokedOrExpired: true)
+    }
+    
     func downloadFile(cloudFileName:String, expectError:Bool = false, expectedFileNotFound: Bool = false) {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
@@ -304,7 +402,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
                     if expectError {
                         XCTFail()
                     }
-                case .failure:
+                case .failure, .accessTokenRevokedOrExpired:
                     XCTFail()
                 case .fileNotFound:
                     if !expectedFileNotFound {
@@ -335,6 +433,33 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     
     func testFileDownloadOfNonExistentFileFails() {
         downloadFile(cloudFileName: self.knownAbsentFile, expectedFileNotFound: true)
+    }
+    
+    func testDownloadWithRevokedRefreshToken() {
+        let cloudFileName = self.knownPresentFile
+        
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.googleRevoked.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        creds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure(let error):
+                XCTFail("error: \(error)")
+            case .accessTokenRevokedOrExpired:
+                break
+            case .fileNotFound:
+                XCTFail()
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testFileDirectDownloadOfNonExistentFileFails() {
@@ -371,7 +496,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
-        // Use a known incorrect access token. We expect this to generate a 401 unauthorized, and thus cause an access token refresh.
+        // Use a known incorrect access token. We expect this to generate a 401 unauthorized, and thus cause an access token refresh. But, the refresh will work.
         creds.accessToken = "foobar"
         
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
@@ -380,10 +505,59 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             switch result {
             case .success:
                 break
-            case .failure:
+            case .failure, .accessTokenRevokedOrExpired:
                 XCTFail()
             case .fileNotFound:
                 XCTFail()
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testThatAccessTokenRefreshFailsWithBadRefreshToken() {
+        let creds = GoogleCreds()
+        creds.refreshToken = "foobar"
+        
+        let exp = expectation(description: "\(#function)\(#line)")
+
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        creds.downloadFile(cloudFileName: self.knownPresentFile, options:options) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure:
+                break
+            case .accessTokenRevokedOrExpired:
+                XCTFail()
+            case .fileNotFound:
+                XCTFail()
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testLookupFileWithRevokedRefreshToken() {
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.googleRevoked.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        
+        creds.lookupFile(cloudFileName:knownPresentFile, options:options) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
             }
             
             exp.fulfill()
@@ -414,7 +588,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
                     else {
                        foundResult = found
                     }
-                case .failure:
+                case .failure, .accessTokenRevokedOrExpired:
                     if !expectError {
                         XCTFail()
                     }
@@ -437,6 +611,30 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let result = lookupFile(cloudFileName: knownAbsentFile)
         XCTAssert(result == false)
     }
+    
+    func testRevokedGoogleRefreshToken() {
+        let creds = GoogleCreds()
+        creds.refreshToken = TestAccount.googleRevoked.token()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.refresh { error in
+            if let error = error {
+                switch error {
+                case GoogleCreds.RefreshError.expiredOrRevokedAccessToken:
+                    break
+                default:
+                    XCTFail()
+                }
+            }
+            else {
+                XCTFail()
+            }
+
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
 }
 
 extension GoogleDriveTests {
@@ -452,16 +650,23 @@ extension GoogleDriveTests {
             ("testSearchForAbsentFileInFolder", testSearchForAbsentFileInFolder),
             ("testCreateAndDeleteFolder", testCreateAndDeleteFolder),
             ("testDeleteFolderThatDoesNotExistFailure", testDeleteFolderThatDoesNotExistFailure),
+            ("testCloudStorageFileDeleteWorks", testCloudStorageFileDeleteWorks),
+            ("testCloudStorageFileDeleteWithRevokedRefreshToken", testCloudStorageFileDeleteWithRevokedRefreshToken),
             ("testCreateFolderIfDoesNotExist", testCreateFolderIfDoesNotExist),
+            ("testUploadWithRevokedRefreshToken", testUploadWithRevokedRefreshToken),
             ("testFullUploadWorks", testFullUploadWorks),
             ("testBasicFileDownloadWorks", testBasicFileDownloadWorks),
             ("testSearchForPresentFile2", testSearchForPresentFile2),
             ("testBasicFileDownloadWorks2", testBasicFileDownloadWorks2),
             ("testFileDownloadOfNonExistentFileFails", testFileDownloadOfNonExistentFileFails),
+            ("testDownloadWithRevokedRefreshToken", testDownloadWithRevokedRefreshToken),
             ("testFileDirectDownloadOfNonExistentFileFails", testFileDirectDownloadOfNonExistentFileFails),
             ("testThatAccessTokenRefreshOccursWithBadToken", testThatAccessTokenRefreshOccursWithBadToken),
+            ("testThatAccessTokenRefreshFailsWithBadRefreshToken", testThatAccessTokenRefreshFailsWithBadRefreshToken),
+            ("testLookupFileWithRevokedRefreshToken", testLookupFileWithRevokedRefreshToken),
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
-            ("testLookupFileThatExists", testLookupFileThatExists)
+            ("testLookupFileThatExists", testLookupFileThatExists),
+            ("testRevokedGoogleRefreshToken", testRevokedGoogleRefreshToken)
         ]
     }
     

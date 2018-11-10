@@ -237,6 +237,7 @@ class GoogleCreds : AccountAPICall, Account {
     case badJSONResult
     case errorSavingCredsToDatabase
     case noRefreshToken
+    case expiredOrRevokedAccessToken
     }
     
     // Use the refresh token to generate a new access token.
@@ -255,7 +256,21 @@ class GoogleCreds : AccountAPICall, Account {
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
         
-        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters)) { apiResult, statusCode, responseHeaders in
+        self.apiCall(method: "POST", path: "/oauth2/v4/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters), expectedFailureBody: .json) { apiResult, statusCode, responseHeaders in
+
+            // When the refresh token has been revoked
+            // ["error": "invalid_grant", "error_description": "Token has been expired or revoked."]
+            
+            // [1]
+            if statusCode == HTTPStatusCode.badRequest,
+                case .dictionary(let dict)? = apiResult,
+                let error = dict["error"] as? String,
+                error == "invalid_grant" {
+                
+                completion(RefreshError.expiredOrRevokedAccessToken)
+                return
+            }
+
             guard statusCode == HTTPStatusCode.OK else {
                 Log.error("Bad status code: \(String(describing: statusCode))")
                 completion(RefreshError.badStatusCode(statusCode))
@@ -298,6 +313,8 @@ class GoogleCreds : AccountAPICall, Account {
         }
     }
     
+    let tokenRevokedOrExpired = "accessTokenRevokedOrExpired"
+    
     override func apiCall(method:String, baseURL:String? = nil, path:String,
                  additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
                  body:APICallBody? = nil,
@@ -315,22 +332,63 @@ class GoogleCreds : AccountAPICall, Account {
 
         super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody) { (apiCallResult, statusCode, responseHeaders) in
         
+            /* So far, I've seen two results from a Google expired or revoked refresh token:
+                1) an unauthorized http status here followed by [1] in refresh.
+                2) The following response here:
+                    ["error":
+                        ["code": 403,
+                         "message": "Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.",
+                         "errors":
+                            [
+                                ["message": "Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.",
+                                "reason": "dailyLimitExceededUnreg",
+                                "extendedHelp": "https://code.google.com/apis/console",
+                                "domain": "usageLimits"]
+                            ]
+                        ]
+                    ]
+            */
+            
+            if statusCode == HTTPStatusCode.forbidden,
+                case .dictionary(let dict)? = apiCallResult,
+                let error = dict["error"] as? [String: Any],
+                let errors = error["errors"] as? [[String: Any]],
+                errors.count > 0,
+                let reason = errors[0]["reason"] as? String,
+                reason == "dailyLimitExceededUnreg" {
+                
+                Log.info("Google API Call: Daily limit exceeded.")
+                
+                completion(APICallResult.dictionary(
+                    ["error":self.tokenRevokedOrExpired]),
+                    .forbidden, nil)
+                return
+            }
+            
             if statusCode == self.expiredAccessTokenHTTPCode && !self.alreadyRefreshed {
                 self.alreadyRefreshed = true
                 Log.info("Attempting to refresh access token...")
                 
                 self.refresh() { error in
-                    if error == nil {
+                    if let error = error {
+                        switch error {
+                        case RefreshError.expiredOrRevokedAccessToken:
+                            Log.info("Refresh token expired or revoked")
+                            completion(
+                                APICallResult.dictionary(
+                                    ["error":self.tokenRevokedOrExpired]),
+                                .unauthorized, nil)
+                        default:
+                            Log.error("Failed to refresh access token: \(String(describing: error))")
+                        }
+                    }
+                    else {
                         Log.info("Successfully refreshed access token!")
 
                         // Refresh was successful, update the authorization header and try the operation again.
                         headers["Authorization"] = "Bearer \(self.accessToken!)"
 
                         super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody, completion: completion)
-                    }
-                    else {
-                        Log.error("Failed to refresh access token: \(String(describing: error))")
-                        completion(nil, .internalServerError, nil)
                     }
                 }
             }

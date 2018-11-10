@@ -78,7 +78,7 @@ class ServerTestCase : XCTestCase {
         var sharingGroupUser1: Server.SharingGroupUser!
         switch sharingResult {
         case .found(let model):
-            sharingGroupUser1 = model as! Server.SharingGroupUser
+            sharingGroupUser1 = (model as! Server.SharingGroupUser)
         case .error, .noObjectFound:
             XCTFail()
             return false
@@ -113,7 +113,7 @@ class ServerTestCase : XCTestCase {
         var sharingGroupUser2: Server.SharingGroupUser!
         switch owningResult {
         case .found(let model):
-            sharingGroupUser2 = model as! Server.SharingGroupUser
+            sharingGroupUser2 = (model as! Server.SharingGroupUser)
         case .error, .noObjectFound:
             XCTFail()
             return false
@@ -356,8 +356,16 @@ class ServerTestCase : XCTestCase {
                     return
                 }
                 
-                creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
-                    XCTAssert(error == nil)
+                creds.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+                    switch result {
+                    case .success:
+                        break
+                    case .accessTokenRevokedOrExpired:
+                        XCTFail()
+                    case .failure:
+                        XCTFail()
+                    }
+                    
                     expectation.fulfill()
                 }
             }
@@ -366,8 +374,16 @@ class ServerTestCase : XCTestCase {
             let creds = DropboxCreds()
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
-            creds.deleteFile(cloudFileName:cloudFileName, options:options) { error in
-                XCTAssert(error == nil)
+            creds.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+                switch result {
+                case .success:
+                    break
+                case .accessTokenRevokedOrExpired:
+                    XCTFail()
+                case .failure:
+                    XCTFail()
+                }
+
                 expectation.fulfill()
             }
             
@@ -404,7 +420,7 @@ class ServerTestCase : XCTestCase {
                     switch result {
                     case .success (let found):
                         lookupResult = found
-                    case .failure:
+                    case .failure, .accessTokenRevokedOrExpired:
                         XCTFail()
                     }
                     
@@ -421,7 +437,7 @@ class ServerTestCase : XCTestCase {
                 switch result {
                 case .success (let found):
                     lookupResult = found
-                case .failure:
+                case .failure, .accessTokenRevokedOrExpired:
                     XCTFail()
                 }
                 
@@ -1479,7 +1495,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func uploadFile(accountType: AccountType, creds: CloudStorage, deviceUUID:String, stringFile: TestFile, uploadRequest:UploadFileRequest, options:CloudStorageFileNameOptions? = nil, failureExpected: Bool = false, errorExpected: CloudStorageError? = nil) -> String? {
+    func uploadFile(accountType: AccountType, creds: CloudStorage, deviceUUID:String, stringFile: TestFile, uploadRequest:UploadFileRequest, options:CloudStorageFileNameOptions? = nil, failureExpected: Bool = false, errorExpected: CloudStorageError? = nil, expectAccessTokenRevokedOrExpired: Bool = false) -> String? {
         
         guard case .string(let fileContents) = stringFile.contents else {
             XCTFail()
@@ -1513,6 +1529,10 @@ class ServerTestCase : XCTestCase {
                     }
                     
                     XCTAssert(error == errorExpected)
+                }
+            case .accessTokenRevokedOrExpired:
+                if !expectAccessTokenRevokedOrExpired {
+                    XCTFail()
                 }
             }
             

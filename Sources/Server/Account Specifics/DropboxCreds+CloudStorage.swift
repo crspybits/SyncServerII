@@ -97,8 +97,13 @@ extension DropboxCreds {
         headers["Dropbox-API-Arg"] = "{\"path\": \"/\(fileName)\",\"mode\": \"add\",\"autorename\": false,\"mute\": false}"
         headers["Content-Type"] = "application/octet-stream"
             
-        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/upload", additionalHeaders: headers, body: .data(data)) { (apiResult, statusCode, responseHeaders) in
+        self.apiCall(method: "POST", baseURL: "content.dropboxapi.com", path: "/2/files/upload", additionalHeaders: headers, body: .data(data), expectedFailureBody: .json) {[unowned self] (apiResult, statusCode, responseHeaders) in
             
+            if self.revokedAccessToken(result: apiResult, statusCode: statusCode) {
+                completion(.accessTokenRevokedOrExpired)
+                return
+            }
+
             guard statusCode == HTTPStatusCode.OK else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))
                 return
@@ -124,6 +129,26 @@ extension DropboxCreds {
             }
         }
     }
+    
+    // See https://github.com/dropbox/dropbox-sdk-obj-c/issues/83
+    func revokedAccessToken(result: APICallResult?, statusCode: HTTPStatusCode?) -> Bool {
+        /* ["error_summary": "invalid_access_token/...",
+            "error":
+                [".tag": "invalid_access_token"]
+            ]
+        */
+        
+        if statusCode == HTTPStatusCode.unauthorized,
+            case .dictionary(let dict)? = result,
+            let tag = dict["error"] as? [String: Any],
+            let message = tag[".tag"] as? String,
+            message == "invalid_access_token" {
+            return true
+        }
+        else {
+            return false
+        }
+    }
 }
 
 extension DropboxCreds : CloudStorage {
@@ -140,6 +165,8 @@ extension DropboxCreds : CloudStorage {
             switch result {
             case .failure(let error):
                 completion(.failure(UploadFileError.fileCheckFailed(error)))
+            case .accessTokenRevokedOrExpired:
+                completion(.accessTokenRevokedOrExpired)
             case .success(let found):
                 if found {
                    // Don't need to upload it again.
@@ -192,6 +219,11 @@ extension DropboxCreds : CloudStorage {
                 return
             }
             
+            if self.revokedAccessToken(result: apiResult, statusCode: statusCode) {
+                completion(.accessTokenRevokedOrExpired)
+                return
+            }
+            
             guard statusCode == HTTPStatusCode.OK else {
                 completion(.failure(DropboxError.badStatusCode(statusCode)))
                 return
@@ -231,7 +263,7 @@ extension DropboxCreds : CloudStorage {
     }
     
     func deleteFile(cloudFileName:String, options:CloudStorageFileNameOptions? = nil,
-        completion:@escaping (Swift.Error?)->()) {
+        completion:@escaping (Result<()>)->()) {
         // https://www.dropbox.com/developers/documentation/http/documentation#files-delete_v2
         /*
         curl -X POST https://api.dropboxapi.com/2/files/delete_v2 \
@@ -246,29 +278,34 @@ extension DropboxCreds : CloudStorage {
         let body = "{\"path\": \"/\(cloudFileName)\"}"
         
         self.apiCall(method: "POST", path: "/2/files/delete_v2", additionalHeaders: headers, body: .string(body)) { (apiResult, statusCode, responseHeaders) in
+        
+            if self.revokedAccessToken(result: apiResult, statusCode: statusCode) {
+                completion(.accessTokenRevokedOrExpired)
+                return
+            }
             
             guard statusCode == HTTPStatusCode.OK else {
-                completion(DropboxError.badStatusCode(statusCode))
+                completion(.failure(DropboxError.badStatusCode(statusCode)))
                 return
             }
             
             guard let apiResult = apiResult else {
-                completion(DropboxError.nilAPIResult)
+                completion(.failure(DropboxError.nilAPIResult))
                 return
             }
             
             guard case .dictionary(let dictionary) = apiResult else {
-                completion(DropboxError.badJSONResult)
+                completion(.failure(DropboxError.badJSONResult))
                 return
             }
 
             if let metaData = dictionary["metadata"] as? [String: Any],
                 let idJson = metaData["id"] as? String,
                 idJson != "" {
-                completion(nil)
+                completion(.success(()))
             }
             else {
-                completion(DropboxError.couldNotGetId)
+                completion(.failure(DropboxError.couldNotGetId))
             }
         }
     }

@@ -261,7 +261,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
                 switch result {
                 case .success(let found):
                     XCTAssert(!found)
-                case .failure:
+                case .failure, .accessTokenRevokedOrExpired:
                     XCTFail()
                 }
                 

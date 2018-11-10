@@ -25,9 +25,25 @@ extension GoogleCreds : CloudStorage {
     case badStatusCode(HTTPStatusCode?)
     case nilAPIResult
     case badJSONResult
+    case expiredOrRevokedToken
     }
     
     private static let md5ChecksumKey = "md5Checksum"
+    
+    private func revokedOrExpiredToken(result: APICallResult?) -> Bool {
+        if let result = result {
+            switch result {
+            case .dictionary(let dict):
+                if dict["error"] as? String == self.tokenRevokedOrExpired {
+                    return true
+                }
+            default:
+                break
+            }
+        }
+
+        return false
+    }
     
     /* If this isn't working for you, try:
         curl -H "Authorization: Bearer YourAccessToken" https://www.googleapis.com/drive/v3/files
@@ -62,7 +78,12 @@ extension GoogleCreds : CloudStorage {
             urlParams = nil
         }
         
-        self.apiCall(method: "GET", path: "/drive/v3/files", urlParameters:urlParams) { (apiResult, statusCode, responseHeaders) in
+        self.apiCall(method: "GET", path: "/drive/v3/files", urlParameters:urlParams) {[unowned self] (apiResult, statusCode, responseHeaders) in
+        
+            if self.revokedOrExpiredToken(result: apiResult) {
+                completion(nil, ListFilesError.expiredOrRevokedToken)
+                return
+            }
             
             var error:ListFilesError?
             if statusCode != HTTPStatusCode.OK {
@@ -87,6 +108,7 @@ extension GoogleCreds : CloudStorage {
     case noIdInResultingJSON
     case moreThanOneItemWithName
     case noJSONDictionaryResult
+    case expiredOrRevokedToken
     }
     
     enum SearchType {
@@ -151,6 +173,14 @@ extension GoogleCreds : CloudStorage {
                 if error == nil {
                     resultError = SearchError.noJSONDictionaryResult
                 }
+                else {
+                    switch error! {
+                    case ListFilesError.expiredOrRevokedToken:
+                        resultError = SearchError.expiredOrRevokedToken
+                    default:
+                        break
+                    }
+                }
             }
             else {
                 if let filesArray = dictionary!["files"] as? [Any]  {
@@ -189,6 +219,7 @@ extension GoogleCreds : CloudStorage {
     case noJSONDictionaryResult
     case noIdInResultingJSON
     case nilAPIResult
+    case expiredOrRevokedToken
     }
     
     // Create a folder-- assumes it doesn't yet exist. This won't fail if you use it more than once with the same folder name, you just get multiple instances of a folder with the same name.
@@ -215,6 +246,11 @@ extension GoogleCreds : CloudStorage {
         self.apiCall(method: "POST", path: "/drive/v3/files", additionalHeaders:additionalHeaders, body: .string(jsonString)) { (apiResult, statusCode, responseHeaders) in
             var resultId:String?
             var resultError:Swift.Error?
+            
+            if self.revokedOrExpiredToken(result: apiResult) {
+                completion(nil, CreateFolderError.expiredOrRevokedToken)
+                return
+            }
             
             guard apiResult != nil else {
                 completion(nil, CreateFolderError.nilAPIResult)
@@ -244,6 +280,7 @@ extension GoogleCreds : CloudStorage {
     
     // Creates a root level folder if it doesn't exist. Returns the folderId in the completion if no error.
     // Not marked private for testing purposes. Don't call this directly outside of this class otherwise.
+    // CreateFolderError.expiredOrRevokedToken or SearchError.expiredOrRevokedToken for expiry.
     func createFolderIfDoesNotExist(rootFolderName folderName:String,
         completion:@escaping (_ folderId:String?, Swift.Error?)->()) {
         self.searchFor(.folder, itemName: folderName) { (result, error) in
@@ -300,6 +337,7 @@ extension GoogleCreds : CloudStorage {
 
     enum DeleteFileError :Swift.Error {
     case badStatusCode(HTTPStatusCode?)
+    case expiredOrRevokedToken
     }
     
     // Permanently delete a file or folder
@@ -311,7 +349,13 @@ extension GoogleCreds : CloudStorage {
             "Content-Type": "application/json; charset=UTF-8",
         ]
         
-        self.apiCall(method: "DELETE", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders) { (json, statusCode, responseHeaders) in
+        self.apiCall(method: "DELETE", path: "/drive/v3/files/\(fileId)", additionalHeaders:additionalHeaders) { (apiResult, statusCode, responseHeaders) in
+        
+            if self.revokedOrExpiredToken(result: apiResult) {
+                completion(DeleteFileError.expiredOrRevokedToken)
+                return
+            }
+            
             // The "noContent" correct result was not apparent from the docs-- figured this out by experimentation.
             if statusCode == HTTPStatusCode.noContent {
                 completion(nil)
@@ -328,6 +372,7 @@ extension GoogleCreds : CloudStorage {
     case noCloudFolderName
     case noOptions
     case missingCloudFolderNameOrMimeType
+    case expiredOrRevokedToken
     }
     
     // TODO: *1* It would be good to put some retry logic in here. With a timed fallback as well. e.g., if an upload fails the first time around, retry after a period of time. OR, do this when I generalize this scheme to use other cloud storage services-- thus the retry logic could work across each scheme.
@@ -349,8 +394,15 @@ extension GoogleCreds : CloudStorage {
         }
         
         self.createFolderIfDoesNotExist(rootFolderName: cloudFolderName) { (folderId, error) in
-            if error != nil {
-                completion(.failure(error!))
+            if let error = error {
+                switch error {
+                case CreateFolderError.expiredOrRevokedToken,
+                    SearchError.expiredOrRevokedToken:
+                    completion(.accessTokenRevokedOrExpired)
+                default:
+                    completion(.failure(error))
+                }
+
                 return
             }
             
@@ -367,8 +419,13 @@ extension GoogleCreds : CloudStorage {
                     }
                 }
                 else {
-                    Log.error("Error in searchFor: \(String(describing: error))")
-                    completion(.failure(error!))
+                    switch error! {
+                    case SearchError.expiredOrRevokedToken:
+                        completion(.accessTokenRevokedOrExpired)
+                    default:
+                        Log.error("Error in searchFor: \(String(describing: error))")
+                        completion(.failure(error!))
+                    }
                 }
             }
         }
@@ -408,13 +465,13 @@ extension GoogleCreds : CloudStorage {
         multiPartData.append(endBoundary)
 
         self.apiCall(method: "POST", path: "/upload/drive/v3/files", additionalHeaders:additionalHeaders, urlParameters:urlParameters, body: .data(multiPartData)) { (json, statusCode, responseHeaders) in
-
-            if statusCode != HTTPStatusCode.OK {
-                // Error case
-                Log.error("Error in completeSmallFileUpload: statusCode=\(String(describing: statusCode))")
-                completion(.failure(UploadError.badStatusCode(statusCode)))
+        
+            if self.revokedOrExpiredToken(result: json) {
+                completion(.accessTokenRevokedOrExpired)
+                return
             }
-            else {
+
+            if statusCode == HTTPStatusCode.OK {
                 guard let json = json,
                     case .dictionary(let dict) = json,
                     let checkSum = dict[GoogleCreds.md5ChecksumKey] as? String else {
@@ -423,27 +480,11 @@ extension GoogleCreds : CloudStorage {
                 }
                 
                 completion(.success(checkSum))
-
-                // Success case
-                // TODO: *4* This probably doesn't have to do another Google Drive API call, rather it can just put the fields parameter on the call to upload the file-- and we'll get back the size.
-
-                /*
-                self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
-                    if error == nil {
-                        if let sizeString = result?.dictionary["size"] as? String,
-                            let size = Int(sizeString) {
-                            completion(.success(size))
-                        }
-                        else {
-                            completion(.failure(UploadError.couldNotObtainFileSize))
-                        }
-                    }
-                    else {
-                        Log.error("Error in completeSmallFileUpload.searchFor: statusCode=\(String(describing: error))")
-                        completion(.failure(error!))
-                    }
-                }
-                */
+            }
+            else {
+                // Error case
+                Log.error("Error in completeSmallFileUpload: statusCode=\(String(describing: statusCode))")
+                completion(.failure(UploadError.badStatusCode(statusCode)))
             }
         }
     }
@@ -451,6 +492,7 @@ extension GoogleCreds : CloudStorage {
     enum SearchForFileError : Swift.Error {
         case cloudFolderDoesNotExist
         case cloudFileDoesNotExist(cloudFileName:String)
+        case expiredOrRevokedToken
     }
     
     enum LookupFileError: Swift.Error {
@@ -478,7 +520,10 @@ extension GoogleCreds : CloudStorage {
                 completion(.success(true))
                 
             case .some(SearchForFileError.cloudFileDoesNotExist):
-                 completion(.success(false))
+                completion(.success(false))
+                
+            case .some(SearchForFileError.expiredOrRevokedToken):
+                completion(.accessTokenRevokedOrExpired)
                 
             default:
                  completion(.failure(error!))
@@ -489,6 +534,16 @@ extension GoogleCreds : CloudStorage {
     func searchFor(cloudFileName:String, inCloudFolder cloudFolderName:String, fileMimeType mimeType:String, completion:@escaping (_ cloudFileId: String?, _ checkSum: String?, Swift.Error?) -> ()) {
         
         self.searchFor(.folder, itemName: cloudFolderName) { (result, error) in
+            if let error = error {
+                switch error {
+                case SearchError.expiredOrRevokedToken:
+                    completion(nil, nil, SearchForFileError.expiredOrRevokedToken)
+                    return
+                default:
+                    break
+                }
+            }
+            
             if result == nil {
                 // Folder doesn't exist. Yikes!
                 completion(nil, nil, SearchForFileError.cloudFolderDoesNotExist)
@@ -498,6 +553,15 @@ extension GoogleCreds : CloudStorage {
                 
                 let searchType = SearchType.file(mimeType: mimeType, parentFolderId: result!.itemId)
                 self.searchFor(searchType, itemName: cloudFileName) { (result, error) in
+                    if let error = error {
+                        switch error {
+                        case SearchError.expiredOrRevokedToken:
+                            completion(nil, nil, SearchForFileError.expiredOrRevokedToken)
+                        default:
+                            break
+                        }
+                    }
+                    
                     if result == nil {
                         completion(nil, nil, SearchForFileError.cloudFileDoesNotExist(cloudFileName: cloudFileName))
                     }
@@ -516,6 +580,7 @@ extension GoogleCreds : CloudStorage {
         case noOptions
         case noCloudFolderName
         case fileNotFound
+        case expiredOrRevokedToken
     }
     
     func downloadFile(cloudFileName:String, options:CloudStorageFileNameOptions?, completion:@escaping (DownloadResult)->()) {
@@ -531,6 +596,7 @@ extension GoogleCreds : CloudStorage {
         }
         
         searchFor(cloudFileName: cloudFileName, inCloudFolder: cloudFolderName, fileMimeType: options.mimeType) { (cloudFileId, checkSum, error) in
+
             if error == nil {
                 // File was found! Need to download it now.
                 self.completeSmallFileDownload(fileId: cloudFileId!) { (data, error) in
@@ -542,6 +608,8 @@ extension GoogleCreds : CloudStorage {
                         switch error! {
                         case DownloadSmallFileError.fileNotFound:
                             completion(.fileNotFound)
+                        case DownloadSmallFileError.expiredOrRevokedToken:
+                            completion(.accessTokenRevokedOrExpired)
                         default:
                             completion(.failure(error!))
                         }
@@ -552,6 +620,8 @@ extension GoogleCreds : CloudStorage {
                 switch error! {
                 case SearchForFileError.cloudFileDoesNotExist:
                     completion(.fileNotFound)
+                case SearchForFileError.expiredOrRevokedToken:
+                    completion(.accessTokenRevokedOrExpired)
                 default:
                     completion(.failure(error!))
                 }
@@ -570,9 +640,11 @@ extension GoogleCreds : CloudStorage {
         let path = "/drive/v3/files/\(fileId)?alt=media"
         
         self.apiCall(method: "GET", path: path, expectedSuccessBody: .data, expectedFailureBody: .json) { (apiResult, statusCode, responseHeaders) in
-        
-            Log.debug("Google: apiResult: \(String(describing: apiResult))")
-            Log.debug("Google: status code: \(String(describing: statusCode))")
+            
+            if self.revokedOrExpiredToken(result: apiResult) {
+                completion(nil, DownloadSmallFileError.expiredOrRevokedToken)
+                return
+            }
             
             /* When the fileId doesn't exist, apiResult from body as JSON is:
             apiResult: Optional(Server.APICallResult.dictionary(
@@ -602,7 +674,6 @@ extension GoogleCreds : CloudStorage {
                 return
             }
             
-            
             if statusCode != HTTPStatusCode.OK {
                 completion(nil, DownloadSmallFileError.badStatusCode(statusCode))
                 return
@@ -628,15 +699,15 @@ extension GoogleCreds : CloudStorage {
     }
     
     func deleteFile(cloudFileName:String, options:CloudStorageFileNameOptions?,
-        completion:@escaping (Swift.Error?)->()) {
+        completion:@escaping (Result<()>)->()) {
         
         guard let options = options else {
-            completion(DeletionError.noOptions)
+            completion(.failure(DeletionError.noOptions))
             return
         }
         
         guard let cloudFolderName = options.cloudFolderName else {
-            completion(DeletionError.noCloudFolderName)
+            completion(.failure(DeletionError.noCloudFolderName))
             return
         }
         
@@ -645,15 +716,25 @@ extension GoogleCreds : CloudStorage {
                 // File was found! Need to delete it now.
                 self.deleteFile(fileId: cloudFileId!) { error in
                     if error == nil {
-                        completion(nil)
+                        completion(.success(()))
                     }
                     else {
-                        completion(error)
+                        switch error! {
+                        case DeleteFileError.expiredOrRevokedToken:
+                            completion(.accessTokenRevokedOrExpired)
+                        default:
+                            completion(.failure(error!))
+                        }
                     }
                 }
             }
             else {
-                completion(error)
+                switch error! {
+                case SearchForFileError.expiredOrRevokedToken:
+                    completion(.accessTokenRevokedOrExpired)
+                default:
+                    completion(.failure(error!))
+                }
             }
         }
     }

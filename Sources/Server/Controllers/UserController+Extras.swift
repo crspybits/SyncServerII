@@ -31,6 +31,9 @@ extension UserController {
             case .success:
                 completion(true)
                 
+            case .accessTokenRevokedOrExpired:
+                assert(false)
+                
             case .failure(CloudStorageError.alreadyUploaded):
                 // Not considering it an error when the initial file is already there-- user might be recreating an account.
                 Log.info("Could not upload initial file: It already exists.")

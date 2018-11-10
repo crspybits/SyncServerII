@@ -39,7 +39,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             switch result {
             case .success(let found):
                 XCTAssert(!found)
-            case .failure:
+            case .failure, .accessTokenRevokedOrExpired:
                 XCTFail()
             }
 
@@ -59,7 +59,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             switch result {
             case .success(let found):
                 XCTAssert(found)
-            case .failure:
+            case .failure, .accessTokenRevokedOrExpired:
                 XCTFail()
             }
             
@@ -93,6 +93,42 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             case .failure(let error):
                 Log.error("uploadFile: \(error)")
                 XCTFail()
+            case .accessTokenRevokedOrExpired:
+                XCTFail()
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testUploadWithRevokedToken() {
+        let fileName = Foundation.UUID().uuidString
+        
+        let creds = DropboxCreds()
+        creds.accessToken = TestAccount.dropboxRevoked.token()
+        creds.accountId = TestAccount.dropboxRevoked.id()
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        let stringFile = TestFile.test1
+        
+        guard case .string(let stringContents) = stringFile.contents else {
+            XCTFail()
+            return
+        }
+        
+        let fileContentsData = stringContents.data(using: .ascii)!
+        
+        creds.uploadFile(withName: fileName, data: fileContentsData) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure(let error):
+                Log.error("uploadFile: \(error)")
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
             }
             
             exp.fulfill()
@@ -156,6 +192,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
                     XCTFail()
                     Log.error("Failed download: \(error)")
                 }
+            case .accessTokenRevokedOrExpired:
+                XCTFail()
             case .fileNotFound:
                 if !expectedFileNotFound {
                     XCTFail()
@@ -224,19 +262,21 @@ class DropboxTests: ServerTestCase, LinuxTestable {
     func deleteFile(creds: DropboxCreds, cloudFileName: String, expectedFailure: Bool = false) {
         let exp = expectation(description: "\(#function)\(#line)")
 
-        creds.deleteFile(cloudFileName: cloudFileName) { error in
-            if error == nil {
-                 if expectedFailure {
+        creds.deleteFile(cloudFileName: cloudFileName) { result in
+            switch result {
+            case .success:
+                if expectedFailure {
                     XCTFail()
                 }
-            }
-            else {
+            case .accessTokenRevokedOrExpired:
+                XCTFail()
+            case .failure(let error):
                 if !expectedFailure {
                     XCTFail()
-                    Log.error("Failed download: \(error!)")
+                    Log.error("Failed download: \(error)")
                 }
             }
-            
+
             exp.fulfill()
         }
         
@@ -295,7 +335,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
                 else {
                    foundResult = found
                 }
-            case .failure:
+            case .failure, .accessTokenRevokedOrExpired:
                 if !expectError {
                     XCTFail()
                 }
@@ -325,6 +365,7 @@ extension DropboxTests {
             ("testCheckForFileFailsWithFileThatDoesNotExist", testCheckForFileFailsWithFileThatDoesNotExist),
             ("testCheckForFileWorksWithExistingFile", testCheckForFileWorksWithExistingFile),
             ("testUploadFileWorks", testUploadFileWorks),
+            ("testUploadWithRevokedToken", testUploadWithRevokedToken),
             ("testFullUploadWorks", testFullUploadWorks),
             ("testDownloadOfNonExistingFileFails", testDownloadOfNonExistingFileFails),
             ("testSimpleDownloadWorks", testSimpleDownloadWorks),

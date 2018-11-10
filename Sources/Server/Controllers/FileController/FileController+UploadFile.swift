@@ -45,7 +45,7 @@ extension FileController {
         }
         
         guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
-            let message = "Unknown mime type passed: \(uploadRequest.mimeType) (see SyncServer-Shared)"
+            let message = "Unknown mime type passed: \(String(describing: uploadRequest.mimeType)) (see SyncServer-Shared)"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
@@ -58,7 +58,7 @@ extension FileController {
             return
         }
         
-        Log.debug("uploadRequest.sharingGroupUUID: \(uploadRequest.sharingGroupUUID)")
+        Log.debug("uploadRequest.sharingGroupUUID: \(String(describing: uploadRequest.sharingGroupUUID))")
         
         Controllers.getMasterVersion(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params) { error, masterVersion in
             if error != nil {
@@ -114,14 +114,14 @@ extension FileController {
             
                 newFile = false
                 guard existingFileInFileIndex.fileVersion + 1 == uploadRequest.fileVersion else {
-                    let message = "File version being uploaded (\(uploadRequest.fileVersion)) is not +1 of current version: \(existingFileInFileIndex.fileVersion)"
+                    let message = "File version being uploaded (\(String(describing: uploadRequest.fileVersion))) is not +1 of current version: \(String(describing: existingFileInFileIndex.fileVersion))"
                     Log.error(message)
                     params.completion(.failure(.message(message)))
                     return
                 }
                 
                 guard existingFileInFileIndex.mimeType == uploadRequest.mimeType else {
-                    let message = "File being uploaded(\(uploadRequest.mimeType)) doesn't have the same mime type as current version: \(existingFileInFileIndex.mimeType)"
+                    let message = "File being uploaded(\(String(describing: uploadRequest.mimeType))) doesn't have the same mime type as current version: \(String(describing: existingFileInFileIndex.mimeType))"
                     Log.error(message)
                     params.completion(.failure(.message(message)))
                     return
@@ -139,7 +139,7 @@ extension FileController {
                 
                 // File isn't yet in the FileIndex-- must be a new file. Thus, must be version 0.
                 guard uploadRequest.fileVersion == 0 else {
-                    let message = "File is new, but file version being uploaded (\(uploadRequest.fileVersion)) is not 0"
+                    let message = "File is new, but file version being uploaded (\(String(describing: uploadRequest.fileVersion))) is not 0"
                     Log.error(message)
                     params.completion(.failure(.message(message)))
                     return
@@ -278,7 +278,7 @@ extension FileController {
                     
                     // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
                     guard checkSum == uploadRequest.checkSum else {
-                        self.errorCleanup("Checksum after upload to cloud storage (\(checkSum) is not the same as before upload \(uploadRequest.checkSum).", errorDeletion: errorDeletion)
+                        self.errorCleanup("Checksum after upload to cloud storage (\(checkSum) is not the same as before upload \(String(describing: uploadRequest.checkSum)).", errorDeletion: errorDeletion)
                         return
                     }
                     
@@ -303,6 +303,10 @@ extension FileController {
                     else {
                         self.errorCleanup("Could not update UploadRepository: \(String(describing: error))", errorDeletion: errorDeletion)
                     }
+                    
+                case .accessTokenRevokedOrExpired:
+                    assert(false)
+                    
                 case .failure(let error):
                     self.errorCleanup("Could not uploadFile: error: \(error)", errorDeletion: errorDeletion)
                 }

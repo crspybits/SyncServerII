@@ -277,16 +277,21 @@ extension FileController {
         
         let options = CloudStorageFileNameOptions(cloudFolderName: owningUserCreds.cloudFolderName, mimeType: cloudDeletion.mimeType!)
         
-        cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { error in
+        cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { result in
 
             let tail = (cloudDeletions.count > 0) ?
                 Array(cloudDeletions[1..<cloudDeletions.count]) : []
             var numberAdditionalErrors:Int32 = 0
             
-            if error != nil {
+            switch result {
+            case .success:
+                break
+            case .accessTokenRevokedOrExpired:
+                assert(false)
+            case .failure(let error):
                 // We could get into some odd situations here if we actually report an error by failing. Failing will cause a db transaction rollback. Which could mean we had some files deleted, but *all* of the entries would still be present in the FileIndex/Uploads directory. So, I'm not going to fail, but forge on. I'll report the errors in the DoneUploadsResponse message though.
                 // TODO: *1* A better way to deal with this situation could be to use transactions at a finer grained level. Each deletion we do from Upload and FileIndex for an UploadDeletion could be in a transaction that we don't commit until the deletion succeeds with cloud storage.
-                Log.warning("Error occurred while deleting file: \(error!)")
+                Log.warning("Error occurred while deleting file: \(error)")
                 numberAdditionalErrors = 1
             }
             

@@ -553,6 +553,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
                     break
                 case .failure(let error):
                     XCTFail("\(error)")
+                case .accessTokenRevokedOrExpired:
+                    XCTFail()
                 }
                 exp.fulfill()
             }
