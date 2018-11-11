@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
           "branch": null,
-          "revision": "2bf9fd19e21cae84c8050623437562da083c501a",
-          "version": "1.0.16"
+          "revision": "9866d5f5f7e5f02f905fa944852978bc793ee7f3",
+          "version": "1.0.18"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura.git",
         "state": {
           "branch": null,
-          "revision": "ea8567a48b6039d2c819bb8ff9d84778c068bfee",
-          "version": "2.5.4"
+          "revision": "7be7789757105e3b804aedf477fb54ea8d45eaee",
+          "version": "2.5.5"
         }
       },
       {
@@ -195,8 +195,8 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "1c5b1dc14e8baa0a90a5626cb197b5be1384615d",
-          "version": "9.3.1"
+          "revision": "f5884f842833b1728c011f0cf3075a1b814d1e1d",
+          "version": "9.3.2"
         }
       },
       {

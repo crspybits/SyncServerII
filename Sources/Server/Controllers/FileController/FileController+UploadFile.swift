@@ -168,7 +168,8 @@ extension FileController {
             guard ownerCloudStorage != nil && ownerAccount != nil else {
                 let message = "Could not obtain creds for v0 file: Assuming this means owning user is no longer on system."
                 Log.error(message)
-                params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
+                params.completion(.failure(
+                    .goneWithReason(message: message, .userRemoved)))
                 return
             }
             
@@ -308,7 +309,8 @@ extension FileController {
                     // Not going to do any cleanup. The access token has expired/been revoked. Presumably, the file wasn't uploaded.
                     let message = "Access token revoked or expired."
                     Log.error(message)
-                    params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
+                    params.completion(.failure(
+                        .goneWithReason(message: message, .authTokenExpiredOrRevoked)))
                     
                 case .failure(let error):
                     self.errorCleanup("Could not uploadFile: error: \(error)", errorDeletion: errorDeletion)

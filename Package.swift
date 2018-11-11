@@ -11,7 +11,7 @@ let package = Package(
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.2.0"),
         
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.3.1"),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.3.2"),
         
         // .package(url: "../../repos/SMServerLib", .branch("master")),
         .package(url: "https://github.com/crspybits/SMServerLib.git", from: "1.0.0"),

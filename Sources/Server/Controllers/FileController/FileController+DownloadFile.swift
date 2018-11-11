@@ -154,12 +154,14 @@ extension FileController {
                 case .accessTokenRevokedOrExpired:
                     let message = "Access token revoked or expired."
                     Log.error(message)
-                    params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
+                    params.completion(.failure(
+                        .goneWithReason(message: message, .authTokenExpiredOrRevoked)))
                     
                 case .fileNotFound:
                     let message = "File not found."
                     Log.error(message)
-                    params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
+                    params.completion(.failure(
+                        .goneWithReason(message: message, .fileRemovedOrRenamed)))
                 
                 case .failure(let error):
                     let message = "Failed downloading file: \(error)"

@@ -52,17 +52,44 @@ class RequestHandler : AccountDelegate {
         ServerStatsKeeper.session.increment(stat: .apiRequestsDeleted)
         Log.info("RequestHandler.deinit: numberCreated: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsCreated)); numberDeleted: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsDeleted));")
     }
+    
+    public func failWithError(message: String, statusCode:HTTPStatusCode = .internalServerError) {
+        failWithError(failureResult: .messageWithStatus(message, statusCode))
+    }
 
-    public func failWithError(message:String, statusCode:HTTPStatusCode = .internalServerError) {
-        
+    public func failWithError(failureResult: FailureResult) {
         setJsonResponseHeaders()
-        Log.error(message)
-
-        self.response.statusCode = statusCode
         
-        let result = [
-            "error" : message
-        ]
+        let code: HTTPStatusCode
+        var result: [String: Any]
+        let errorKey = "error"
+        let goneReasonKey = "goneReason"
+
+        switch failureResult {
+        case .message(let message):
+            Log.error(message)
+            code = .internalServerError
+            result = [
+                errorKey: message
+            ]
+        
+        case .messageWithStatus(let message, let statusCode):
+            Log.error(message)
+            code = statusCode
+            result = [
+                errorKey: message
+            ]
+            
+        case .goneWithReason(message: let message, let goneReason):
+            code = .gone
+            result = [
+                errorKey: message,
+                goneReasonKey: goneReason.rawValue
+            ]
+        }
+
+        self.response.statusCode = code
+        
         self.endWith(clientResponse: .json(result))
     }
     
@@ -128,6 +155,7 @@ class RequestHandler : AccountDelegate {
     enum FailureResult {
         case message(String)
         case messageWithStatus(String, HTTPStatusCode)
+        case goneWithReason(message: String, GoneReason)
     }
     
     enum ServerResult {
@@ -169,7 +197,8 @@ class RequestHandler : AccountDelegate {
                 
             case .noObjectFound:
                 // One reason that the sharing group user might not be found is that the SharingGroupUser was removed from the system-- e.g., if an owning user is deleted, SharingGroupUser rows that have it as their owningUserId will be removed.
-                self.failWithError(message: "SharingGroupUser object not found!", statusCode: HTTPStatusCode.gone)
+                self.failWithError(failureResult:
+                        .goneWithReason(message: "SharingGroupUser object not found!", .fileRemovedOrRenamed))
                 return .failure
             case .error(let error):
                 self.failWithError(message: error)
@@ -286,7 +315,7 @@ class RequestHandler : AccountDelegate {
         var dbCreds:Account?
         
         guard let requestObject = createRequest(request) else {
-            self.failWithError(message: "Could not create request object from RouterRequest: \(request)")
+            self.failWithError(message: "Could not create request object from RouterRequest: \(String(describing: request))")
             return
         }
     
@@ -316,7 +345,7 @@ class RequestHandler : AccountDelegate {
                 }
                 
                 if errorString != nil || dbCreds == nil {
-                    self.failWithError(message: "Could not convert Creds of type: \(currentSignedInUser!.accountType) from JSON: \(currentSignedInUser!.creds); error: \(String(describing: errorString))")
+                    self.failWithError(message: "Could not convert Creds of type: \(String(describing: currentSignedInUser!.accountType)) from JSON: \(String(describing: currentSignedInUser!.creds)); error: \(String(describing: errorString))")
                     return
                 }
                 
@@ -401,11 +430,8 @@ class RequestHandler : AccountDelegate {
         case .success(.nothing):
             endWith(clientResponse: .json([:]))
             
-        case .failure(.message(let message)):
-            failWithError(message: message)
-        
-        case .failure(.messageWithStatus(let message, let statusCode)):
-            failWithError(message: message, statusCode: statusCode)
+        case .failure(let failureResult):
+            failWithError(failureResult: failureResult)
         }
     }
     

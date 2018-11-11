@@ -1,5 +1,10 @@
 SyncServer
 
+Version 0.18.1
+	* Download endpoint returns HTTP status gone when a file has been removed/renamed.
+	* Endpoints now return HTTP status "gone" when an owning user's access token has expired or been revoked. 
+	* Endpoints returning "gone" now also have a reason field in the return result.
+	
 Version 0.18.0 (11/4/18)
 	* Removing byte sizes from server/database; replacing with checksums.
 	* Enabled download endpoint to return the checksum for the file currently in cloud storage so a client can (a) check it against the last uploaded file checksum, and (b) check for network transmission errors.

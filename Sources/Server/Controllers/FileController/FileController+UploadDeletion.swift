@@ -160,8 +160,8 @@ extension FileController {
         guard let cloudStorageCreds = FileController.getCreds(forUserId: fileIndexObj.userId, from: params.db) as? CloudStorage else {
             let message = "Could not obtain CloudStorage creds for original v0 owner of file."
             Log.error(message)
-            
-            params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
+            params.completion(.failure(
+                    .goneWithReason(message: message, .userRemoved)))
             return
         }
 
@@ -171,7 +171,8 @@ extension FileController {
         guard let effectiveOwningUserCreds = params.effectiveOwningUserCreds else {
             let message = "No effectiveOwningUserCreds"
             Log.debug(message)
-            params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
+            params.completion(.failure(
+                    .goneWithReason(message: message, .userRemoved)))
             return
         }
         
