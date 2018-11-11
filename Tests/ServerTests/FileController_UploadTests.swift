@@ -47,24 +47,6 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         }
     }
     
-    func testUploadWithRevokedAccessToken() {
-        var testAccount:TestAccount = .primaryOwningAccount
-        
-        switch testAccount.type {
-        case .Dropbox:
-            testAccount = TestAccount.dropbox1Revoked
-        case .Google:
-            testAccount = TestAccount.googleRevoked
-        case .Facebook:
-            XCTFail()
-            return
-        }
-        
-        let deviceUUID = Foundation.UUID().uuidString
-        let result = uploadTextFile(testAccount: testAccount, deviceUUID:deviceUUID, errorExpected: true, statusCodeExpected: .gone)
-        XCTAssert(result == nil)
-    }
-    
     func testUploadJPEGFile() {
         guard let _ = uploadJPEGFile() else {
             XCTFail()
@@ -229,7 +211,6 @@ extension FileController_UploadTests {
     static var allTests : [(String, (FileController_UploadTests) -> () throws -> Void)] {
         return [
             ("testUploadTextFile", testUploadTextFile),
-            ("testUploadWithRevokedAccessToken", testUploadWithRevokedAccessToken),
             ("testUploadJPEGFile", testUploadJPEGFile),
             ("testUploadTextAndJPEGFile", testUploadTextAndJPEGFile),
             ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
