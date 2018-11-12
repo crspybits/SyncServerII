@@ -91,7 +91,7 @@ extension RepositoryLookup {
         case 1:
             var result:MODEL!
             select.forEachRow { rowModel in
-                result = rowModel as! MODEL
+                result = (rowModel as! MODEL)
             }
             
             if select.forEachRowStatus != nil {

@@ -256,24 +256,33 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-    
-        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: request.sharingGroupUUID, fileUUID: request.fileUUID)
-        guard case .found(let obj) = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init), let fileIndexObj = obj as? FileIndex else {
+        
+        var fileIndexObj: FileInfo!
+        
+        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: request.sharingGroupUUID)
+        switch fileIndexResult {
+        case .fileIndex(let fileIndex):
+            guard fileIndex.count > 0 else {
+                XCTFail("fileIndex.count: \(fileIndex.count)")
+                return
+            }
+            
+            let filtered = fileIndex.filter {$0.fileUUID == request.fileUUID}
+            guard filtered.count == 1 else {
+                XCTFail()
+                return
+            }
+            
+            fileIndexObj = filtered[0]
+            
+        case .error(_):
             XCTFail()
-            return
         }
         
-        XCTAssert(fileIndexObj.userId == ownerUserId)
+        XCTAssert(fileIndexObj.cloudStorageType != nil)
         
         // Need to make sure that the cloud storage type of the file, in the file index, corresponds to the cloud storage type of the owningAccount.
-        guard let rawAccountType = fileIndexObj.accountType,
-            let accountType = AccountType(rawValue: rawAccountType),
-            let cloudStorageType = accountType.cloudStorageType else {
-            XCTFail()
-            return
-        }
-        
-        XCTAssert(owningAccount.type.cloudStorageType == cloudStorageType)
+        XCTAssert(owningAccount.type.cloudStorageType?.rawValue == fileIndexObj.cloudStorageType)
     }
 
     // Check to make sure that if the invited user owns cloud storage that the file was uploaded to their cloud storage.
