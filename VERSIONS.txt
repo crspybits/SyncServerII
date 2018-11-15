@@ -4,6 +4,10 @@ Version 0.18.1 (11/11/18)
 	* Download endpoint returns HTTP status gone when a file has been removed/renamed.
 	* Endpoints now return HTTP status "gone" when an owning user's access token has expired or been revoked. 
 	* Endpoints returning "gone" now also have a reason field in the return result.
+	* For Version 0.18.*, the following apply:
+		https://github.com/crspybits/SyncServerII/issues/75
+		https://github.com/crspybits/SyncServerII/issues/63
+		https://github.com/crspybits/SyncServerII/issues/93
 	
 Version 0.18.0 (11/4/18)
 	* Removing byte sizes from server/database; replacing with checksums.
