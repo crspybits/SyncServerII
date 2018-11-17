@@ -197,8 +197,9 @@ class RequestHandler : AccountDelegate {
                 
             case .noObjectFound:
                 // One reason that the sharing group user might not be found is that the SharingGroupUser was removed from the system-- e.g., if an owning user is deleted, SharingGroupUser rows that have it as their owningUserId will be removed.
+                // If a client fails with this error, it seems like some kind of client error or edge case where the client should have been updated already (i.e., from an Index endpoint call) so that it doesn't make such a request. Therefore, I'm not going to code a special case on the client to deal with this.
                 self.failWithError(failureResult:
-                        .goneWithReason(message: "SharingGroupUser object not found!", .fileRemovedOrRenamed))
+                        .goneWithReason(message: "SharingGroupUser object not found!", .userRemoved))
                 return .failure
             case .error(let error):
                 self.failWithError(message: error)
