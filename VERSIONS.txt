@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.19.0
+	* Changed reason type for gone response endpoints that use sharing group uuid's.
+
 Version 0.18.1 (11/11/18)
 	* Download endpoint returns HTTP status gone when a file has been removed/renamed.
 	* Endpoints now return HTTP status "gone" when an owning user's access token has expired or been revoked. 
