@@ -1,6 +1,6 @@
 SyncServer
 
-Version 0.19.0
+Version 0.18.2 (11/18/18)
 	* Changed reason type for gone response endpoints that use sharing group uuid's.
 
 Version 0.18.1 (11/11/18)
