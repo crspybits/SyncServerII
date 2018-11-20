@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.18.3 (11/19/18)
+	* Returning gone for file downloads via a normal response-- to also return app meta data
+		to client.
+
 Version 0.18.2 (11/18/18)
 	* Changed reason type for gone response endpoints that use sharing group uuid's.
 
