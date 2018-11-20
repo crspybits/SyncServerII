@@ -150,18 +150,25 @@ extension FileController {
                     response.cloudStorageType = cloudStorageType.rawValue
                     response.contentsChanged = contentsChanged
                     params.completion(.success(response))
-                    
+                
+                // Don't consider the following two cases as HTTP status errors, so we can return appMetaData back to client. appMetaData, for v0 files, can be necessary for clients to deal more completely with these error conditions.
                 case .accessTokenRevokedOrExpired:
                     let message = "Access token revoked or expired."
                     Log.error(message)
-                    params.completion(.failure(
-                        .goneWithReason(message: message, .authTokenExpiredOrRevoked)))
+                    let response = DownloadFileResponse()!
+                    response.appMetaData = fileIndexObj!.appMetaData
+                    response.cloudStorageType = cloudStorageType.rawValue
+                    response.gone = GoneReason.authTokenExpiredOrRevoked.rawValue
+                    params.completion(.success(response))
                     
                 case .fileNotFound:
                     let message = "File not found."
                     Log.error(message)
-                    params.completion(.failure(
-                        .goneWithReason(message: message, .fileRemovedOrRenamed)))
+                    let response = DownloadFileResponse()!
+                    response.appMetaData = fileIndexObj!.appMetaData
+                    response.cloudStorageType = cloudStorageType.rawValue
+                    response.gone = GoneReason.fileRemovedOrRenamed.rawValue
+                    params.completion(.success(response))
                 
                 case .failure(let error):
                     let message = "Failed downloading file: \(error)"
