@@ -82,7 +82,7 @@ extension FileController {
             }
             
             if fileIndexObj.fileVersion != uploadDeletionRequest.fileVersion {
-                let message = "File index version is: \(fileIndexObj.fileVersion), but you asked to delete version: \(uploadDeletionRequest.fileVersion)"
+                let message = "File index version is: \(String(describing: fileIndexObj.fileVersion)), but you asked to delete version: \(String(describing: uploadDeletionRequest.fileVersion))"
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return

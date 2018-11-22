@@ -181,7 +181,7 @@ class UserRepository : Repository, RepositoryLookup {
         
         // Validate the JSON before we insert it.
         guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountType: user.accountType, user: .user(user), delegate: nil) else {
-            Log.error("Invalid creds JSON: \(user.creds) for accountType: \(user.accountType)")
+            Log.error("Invalid creds JSON: \(String(describing: user.creds)) for accountType: \(String(describing: user.accountType))")
             return nil
         }
 

@@ -91,15 +91,21 @@ extension FileController {
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
         
         guard let staleVersionsToDelete = getIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
-            return .doCompletion(.failure(nil))
+            let message = "Failed to getIndexEntries for staleVersionsFromUploads: \(String(describing: staleVersionsFromUploads))"
+            Log.error(message)
+            return .doCompletion(.failure(.message(message)))
         }
         
         guard let fileIndexDeletions = getIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
-            return .doCompletion(.failure(nil))
+            let message = "Failed to getIndexEntries for uploadDeletions: \(String(describing: uploadDeletions))"
+            Log.error(message)
+            return .doCompletion(.failure(.message(message)))
         }
 
         guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
-            return .doCompletion(.failure(nil))
+            let message = "Failed to getEffectiveOwningUserId"
+            Log.error(message)
+            return .doCompletion(.failure(.message(message)))
         }
         
         // 3) Transfer info to the FileIndex repository from Upload.
@@ -202,7 +208,7 @@ extension FileController {
         }
 
         guard case .success(let numberTransferred, let uploadDeletions, let staleVersionsToDelete) = result else {
-            Log.error("Error in doInitialDoneUploads!")
+            Log.error("Error in doInitialDoneUploads: \(result)")
             switch result {
             case .doCompletion(let response):
                 params.completion(response)

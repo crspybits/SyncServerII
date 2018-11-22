@@ -153,7 +153,7 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(fileIndexId); fileUUID: \(fileUUID); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(updateDate); userId: \(userId); mimeTypeKey: \(mimeType); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(deleted); fileVersion: \(fileVersion); lastUploadedCheckSum: \(String(describing: lastUploadedCheckSum))"
+        return "fileIndexId: \(String(describing: fileIndexId)); fileUUID: \(String(describing: fileUUID)); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(String(describing: updateDate)); userId: \(String(describing: userId)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(String(describing: deleted)); fileVersion: \(String(describing: fileVersion)); lastUploadedCheckSum: \(String(describing: lastUploadedCheckSum))"
     }
 }
 
@@ -632,7 +632,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             guard let rawAccountType = rowModel.accountType,
                 let accountType = AccountType(rawValue: rawAccountType),
                 let cloudStorageType = accountType.cloudStorageType else {
-                error = .error("Failed getting cloud storage type for fileUUID: \(rowModel.fileUUID)")
+                    error = .error("Failed getting cloud storage type for fileUUID: \(String(describing: rowModel.fileUUID))")
                 return
             }
             

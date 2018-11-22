@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.18.4 (11/22/18)
+	* Added debugging/logging output code.
+	
 Version 0.18.3 (11/19/18)
 	* Returning gone for file downloads via a normal response-- to also return app meta data
 		to client.
