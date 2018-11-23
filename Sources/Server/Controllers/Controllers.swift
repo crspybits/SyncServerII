@@ -243,6 +243,7 @@ public class Controllers {
     enum EffectiveOwningUserId {
         case found(UserId)
         case noObjectFound
+        case gone
         case error
     }
     
@@ -262,13 +263,14 @@ public class Controllers {
                 return .found(owningUserId)
             }
             else {
-                return .error
+                return .gone
             }
             
         case .noObjectFound:
             return .noObjectFound
             
-        case .error(_):
+        case .error(let error):
+            Log.error("getEffectiveOwningUserIds: \(error)")
             return .error
         }
     }

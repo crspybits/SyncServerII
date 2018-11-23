@@ -418,15 +418,22 @@ class FileIndexRepository : Repository, RepositoryLookup {
             where <fileVersion> is the new file version, and
                 <Uploading-deviceUUID> is the device UUID of the uploading device.
     */
-    // Returns nil on failure, and on success returns the number of uploads transferred.
-    func transferUploads(uploadUserId: UserId, owningUserId: UserId, sharingGroupUUID: String, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> Int32? {
+
+    enum TransferUploadsResult {
+        case success(numberUploadsTransferred: Int32)
+        case failure(RequestHandler.FailureResult?)
+    }
+    
+    func transferUploads(uploadUserId: UserId,
+        owningUserId: @escaping ()->(FileController.EffectiveOwningUser), sharingGroupUUID: String, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> TransferUploadsResult {
         
         var error = false
+        var failureResult:RequestHandler.FailureResult?
         var numberTransferred:Int32 = 0
         
         // [1] Fetch the uploaded files for the user, device, and sharing group.
         guard let uploadSelect = uploadRepo.select(forUserId: uploadUserId, sharingGroupUUID: sharingGroupUUID, deviceUUID: uploadingDeviceUUID) else {
-            return nil
+            return .failure(nil)
         }
         
         uploadSelect.forEachRow { rowModel in
@@ -464,8 +471,15 @@ class FileIndexRepository : Repository, RepositoryLookup {
                     
                     // OWNER
                     // version 0 of a file establishes the owning user. The owning user doesn't change if new versions are uploaded.
-                    fileIndex.userId = owningUserId
-                    
+                    switch owningUserId() {
+                    case .success(let userId):
+                        fileIndex.userId = userId
+                    case .failure(let failure):
+                        failureResult = failure
+                        error = true
+                        return
+                    }
+
                     // Similarly, the sharing group id doesn't change over time.
                     fileIndex.sharingGroupUUID = upload.sharingGroupUUID
                 }
@@ -551,14 +565,14 @@ class FileIndexRepository : Repository, RepositoryLookup {
         }
         
         if error {
-            return nil
+            return .failure(failureResult)
         }
         
         if uploadSelect.forEachRowStatus == nil {
-            return numberTransferred
+            return .success(numberUploadsTransferred: numberTransferred)
         }
         else {
-            return nil
+            return .failure(nil)
         }
     }
     

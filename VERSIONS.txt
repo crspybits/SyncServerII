@@ -1,5 +1,10 @@
 SyncServer
 
+Version 0.18.6 (11/23/18)
+	* Improved "gone" case in DoneUploads-- now this will occur in fewer situations.
+		Should be only when a sharing user, who's owning user was removed, tries to upload
+		a v0 file.
+
 Version 0.18.5 (11/23/18)
 	* Dealing with a "gone" case in DoneUploads.
 

@@ -13,6 +13,11 @@ import LoggerAPI
 import SyncServerShared
 
 extension FileController {
+    enum EffectiveOwningUser {
+        case success(UserId)
+        case failure(RequestHandler.FailureResult)
+    }
+    
     // Returns nil on an error.
     private func getIndexEntries(forUploadFiles uploadFiles:[Upload], params:RequestProcessingParameters) -> [FileInfo]? {
         var primaryFileIndexKeys = [FileIndexRepository.LookupKey]()
@@ -102,30 +107,44 @@ extension FileController {
             return .doCompletion(.failure(.message(message)))
         }
 
-        var effectiveOwningUserId: UserId!
-        switch Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) {
-        case .found(let userId):
-            effectiveOwningUserId = userId
-        case .noObjectFound:
-            let message = "No effectiveOwningUserId"
-            Log.debug(message)
-            return .doCompletion(.failure(.goneWithReason(message: message, .userRemoved)))
-        case .error:
-            let message = "Failed to getEffectiveOwningUserId"
-            Log.error(message)
-            return .doCompletion(.failure(.message(message)))
+
+        // Deferring computation of `effectiveOwningUserId` because: (a) don't always need it in the `transferUploads` below, and (b) it will cause unecessary failures in some cases where a sharing owner user has been removed. effectiveOwningUserId is only needed when v0 of a file is being uploaded.
+        var effectiveOwningUserId: UserId?
+        func getEffectiveOwningUserId() -> EffectiveOwningUser {
+            if let effectiveOwningUserId = effectiveOwningUserId {
+                return .success(effectiveOwningUserId)
+            }
+            
+            let geouiResult = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser)
+            switch geouiResult {
+            case .found(let userId):
+                effectiveOwningUserId = userId
+                return .success(userId)
+            case .noObjectFound, .gone:
+                let message = "No effectiveOwningUserId: \(geouiResult)"
+                Log.debug(message)
+                return .failure(.goneWithReason(message: message, .userRemoved))
+            case .error:
+                let message = "Failed to getEffectiveOwningUserId"
+                Log.error(message)
+                return .failure(.message(message))
+            }
         }
         
         // 3) Transfer info to the FileIndex repository from Upload.
-        let numberTransferred =
-            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: effectiveOwningUserId, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID,
+        let numberTransferredResult =
+            params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: getEffectiveOwningUserId, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID,
                 uploadingDeviceUUID: params.deviceUUID!,
                 uploadRepo: params.repos.upload)
         
-        if numberTransferred == nil  {
+        var numberTransferred: Int32!
+        switch numberTransferredResult {
+        case .success(numberUploadsTransferred: let num):
+            numberTransferred = num
+        case .failure(let failureResult):
             let message = "Failed on transfer to FileIndex!"
             Log.error(message)
-            return .doCompletion(.failure(.message(message)))
+            return .doCompletion(.failure(failureResult))
         }
         
         // 4) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
