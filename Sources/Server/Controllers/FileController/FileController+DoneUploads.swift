@@ -102,7 +102,15 @@ extension FileController {
             return .doCompletion(.failure(.message(message)))
         }
 
-        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
+        var effectiveOwningUserId: UserId!
+        switch Controllers.getEffectiveOwningUserId(user: params.currentSignedInUser!, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) {
+        case .found(let userId):
+            effectiveOwningUserId = userId
+        case .noObjectFound:
+            let message = "No effectiveOwningUserId"
+            Log.debug(message)
+            return .doCompletion(.failure(.goneWithReason(message: message, .userRemoved)))
+        case .error:
             let message = "Failed to getEffectiveOwningUserId"
             Log.error(message)
             return .doCompletion(.failure(.message(message)))

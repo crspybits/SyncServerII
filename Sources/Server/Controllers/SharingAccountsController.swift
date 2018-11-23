@@ -45,7 +45,7 @@ class SharingAccountsController : ControllerProtocol {
         
         // 6/20/18; The current user can be a sharing or owning user, and whether or not these users can invite others depends on the permissions they have. See https://github.com/crspybits/SyncServerII/issues/76 And permissions have already been checked before this point in request handling.
 
-        guard let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: currentSignedInUser, sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
+        guard case .found(let effectiveOwningUserId) = Controllers.getEffectiveOwningUserId(user: currentSignedInUser, sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID, sharingGroupUserRepo: params.repos.sharingGroupUser) else {
             let message = "Could not get effectiveOwningUserId for inviting user."
             Log.error(message)
             params.completion(.failure(.message(message)))

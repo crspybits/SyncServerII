@@ -443,7 +443,8 @@ class RequestHandler : AccountDelegate {
         // For secondary authentication, we'll have a current signed in user.
         // Not treating a nil effectiveOwningUserId for the same reason as the `.noObjectFound` case below.
         
-        if let user = currentSignedInUser, let sharingGroupUUID = sharingGroupUUID, let effectiveOwningUserId = Controllers.getEffectiveOwningUserId(user: user, sharingGroupUUID: sharingGroupUUID, sharingGroupUserRepo: repositories.sharingGroupUser) {
+        if let user = currentSignedInUser, let sharingGroupUUID = sharingGroupUUID,
+            case .found(let effectiveOwningUserId) = Controllers.getEffectiveOwningUserId(user: user, sharingGroupUUID: sharingGroupUUID, sharingGroupUserRepo: repositories.sharingGroupUser) {
 
             let effectiveOwningUserKey = UserRepository.LookupKey.userId(effectiveOwningUserId)
             Log.debug("effectiveOwningUserId: \(effectiveOwningUserId)")

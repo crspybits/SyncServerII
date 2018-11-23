@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.18.5 
+	* Dealing with a "gone" case in DoneUploads.
+
 Version 0.18.4 (11/22/18)
 	* Added debugging/logging output code.
 	

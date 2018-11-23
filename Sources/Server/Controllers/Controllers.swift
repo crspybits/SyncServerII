@@ -240,10 +240,16 @@ public class Controllers {
         }
     }
     
-    static func getEffectiveOwningUserId(user: User, sharingGroupUUID: String, sharingGroupUserRepo: SharingGroupUserRepository) -> UserId? {
+    enum EffectiveOwningUserId {
+        case found(UserId)
+        case noObjectFound
+        case error
+    }
+    
+    static func getEffectiveOwningUserId(user: User, sharingGroupUUID: String, sharingGroupUserRepo: SharingGroupUserRepository) -> EffectiveOwningUserId {
         
         if user.accountType.userType == .owning {
-            return user.userId
+            return .found(user.userId)
         }
         
         let sharingUserKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, userId: user.userId)
@@ -252,9 +258,18 @@ public class Controllers {
         switch lookupResult {
         case .found(let model):
             let sharingGroupUser = model as! SharingGroupUser
-            return sharingGroupUser.owningUserId
-        case .noObjectFound, .error(_):
-            return nil
+            if let owningUserId = sharingGroupUser.owningUserId {
+                return .found(owningUserId)
+            }
+            else {
+                return .error
+            }
+            
+        case .noObjectFound:
+            return .noObjectFound
+            
+        case .error(_):
+            return .error
         }
     }
 }
