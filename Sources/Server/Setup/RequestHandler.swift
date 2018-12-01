@@ -101,6 +101,10 @@ class RequestHandler : AccountDelegate {
     
     private func endWith(clientResponse:EndWithResponse) {
         self.response.headers.append(ServerConstants.httpResponseCurrentServerVersion, value: Constants.session.deployedGitTag)
+        if let minIOSClientVersion = Constants.session.iOSMinimumClientVersion {
+            self.response.headers.append(
+                ServerConstants.httpResponseMinimumIOSClientAppVersion, value: minIOSClientVersion)
+        }
         
         switch clientResponse {
         case .json(let jsonDict):

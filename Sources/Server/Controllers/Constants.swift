@@ -77,6 +77,8 @@ class Constants {
     }
     var owningUserAccountCreation = OwningUserAccountCreation()
     
+    var iOSMinimumClientVersion: String?
+
     // MARK: These are not obtained from the Server.json file, but are basically configuration items.
 
     var deployedGitTag:String!
@@ -170,6 +172,9 @@ class Constants {
         
         owningUserAccountCreation.initialFileName = try? config.getString(varName: "owningUserAccountCreation.initialFileName")
         owningUserAccountCreation.initialFileContents = try? config.getString(varName: "owningUserAccountCreation.initialFileContents")
+        
+        // If present, in format X.Y.Z
+        iOSMinimumClientVersion = try? config.getString(varName: "iOSMinimumClientVersion")
         
         // MARK: Items not obtained from the Server.json file.
         
