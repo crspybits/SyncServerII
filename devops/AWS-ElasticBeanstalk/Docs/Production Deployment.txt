@@ -1,0 +1,25 @@
+1) In the configure.yml files for environments, need to increase the   		
+	aws:autoscaling:asg:
+    	MaxSize: '1'
+
+2) In configure.yml need to increase beyond the bare minimum sized EC2 instance:
+  aws:autoscaling:launchconfiguration:
+    InstanceType: t2.micro
+    
+    QUESTION: What does it take to change the InstanceType?
+    	Do all instances need to have the same instance type?
+    	
+3) In the configure.yml, add:
+  aws:elasticbeanstalk:command:
+    DeploymentPolicy: Rolling
+    BatchSizeType: Percentage
+    BatchSizeType: 50
+  aws:elb:policies:
+    ConnectionDrainingEnabled: true
+    ConnectionDrainingTimeout: 300
+    	
+4) Need to determine policies/policy for autoscaling
+
+	Can a text message be sent if autoscaling (up or down) is invoked?
+    
+5) Production database changes

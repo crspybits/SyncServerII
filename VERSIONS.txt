@@ -1,5 +1,9 @@
 SyncServer
 
+12/2/18
+	* Now have CloudWatch integrated; no new server version.
+		https://github.com/crspybits/SyncServerII/issues/94
+
 Version 0.19.0 (12/1/18)
 	* Force iOS client app update
 		https://github.com/crspybits/SyncServerII/issues/71
