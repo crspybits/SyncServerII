@@ -94,9 +94,10 @@ public class RequestProcessingParameters {
         case failure(RequestHandler.FailureResult?)
     }
     
+    let accountDelegate: AccountDelegate
     let completion: (Response)->()
     
-    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, completion: @escaping (Response)->()) {
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, accountDelegate: AccountDelegate, completion: @escaping (Response)->()) {
         self.request = request
         self.ep = ep
         self.creds = creds
@@ -109,6 +110,7 @@ public class RequestProcessingParameters {
         self.routerResponse = routerResponse
         self.deviceUUID = deviceUUID
         self.completion = completion
+        self.accountDelegate = accountDelegate
     }
     
     func fail(_ message: String) {

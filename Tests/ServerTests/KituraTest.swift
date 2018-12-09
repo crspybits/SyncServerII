@@ -54,7 +54,7 @@ class GoogleCredsCache {
             cache[googleAccount.id()] = creds
             creds.refreshToken = googleAccount.token()
             creds.refresh {[unowned creds] error in
-                XCTAssert(error == nil)
+                XCTAssert(error == nil, "\(error!)")
                 completion(creds)
             }
         }

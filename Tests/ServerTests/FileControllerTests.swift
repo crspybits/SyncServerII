@@ -306,7 +306,13 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 
-                XCTAssert(response!.statusCode == .gone)
+                if let dict = dict,
+                    let downloadFileResponse = DownloadFileResponse(json: dict) {
+                    XCTAssert(downloadFileResponse.gone == GoneReason.fileRemovedOrRenamed.rawValue)
+                }
+                else {
+                    XCTFail()
+                }
                 
                 expectation.fulfill()
             }

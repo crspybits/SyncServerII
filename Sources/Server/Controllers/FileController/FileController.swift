@@ -51,7 +51,7 @@ class FileController : ControllerProtocol {
     }
     
     // OWNER
-    static func getCreds(forUserId userId: UserId, from db: Database) -> Account? {
+    static func getCreds(forUserId userId: UserId, from db: Database, delegate: AccountDelegate) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
         let userResults = UserRepository(db).lookup(key: userKey, modelInit: User.init)
         guard case .found(let model) = userResults,
@@ -60,10 +60,12 @@ class FileController : ControllerProtocol {
             return nil
         }
     
-        guard let creds = user.credsObject else {
+        guard var creds = user.credsObject else {
             Log.error("Could not get user creds.")
             return nil
         }
+        
+        creds.delegate = delegate
         
         return creds
     }

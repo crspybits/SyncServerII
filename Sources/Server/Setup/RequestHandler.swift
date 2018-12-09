@@ -9,7 +9,6 @@
 import LoggerAPI
 import Kitura
 import KituraNet
-//import Gloss
 import KituraSession
 import Credentials
 import CredentialsGoogle
@@ -23,7 +22,7 @@ See also: https://github.com/IBM-Swift/Kitura-net/issues/196
 
 public typealias ProcessRequest = (RequestProcessingParameters)->()
 
-class RequestHandler : AccountDelegate {
+class RequestHandler {
     private var request:RouterRequest!
     private var response:RouterResponse!
     
@@ -32,6 +31,7 @@ class RequestHandler : AccountDelegate {
     private var currentSignedInUser:User?
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
+    private var accountDelegate: AccountDelegateHandler!
     
     init(request:RouterRequest, response:RouterResponse, endpoint:ServerEndpoint? = nil) {
         self.request = request
@@ -292,6 +292,7 @@ class RequestHandler : AccountDelegate {
 
         let db = Database()
         repositories = Repositories(db: db)
+        accountDelegate = AccountDelegateHandler(userRepository: repositories.user)
         
         switch authenticationLevel! {
         case .none:
@@ -344,7 +345,7 @@ class RequestHandler : AccountDelegate {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountType: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: self)
+                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountType: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: accountDelegate)
                 } catch (let error) {
                     errorString = "\(error)"  
                 }
@@ -408,7 +409,7 @@ class RequestHandler : AccountDelegate {
                 assertionFailure("Should never get here with authenticationLevel == .none!")
             }
             
-            if let profileCreds = AccountManager.session.accountFromProfile(profile: profile!, user: credsUser, delegate: self) {
+            if let profileCreds = AccountManager.session.accountFromProfile(profile: profile!, user: credsUser, delegate: accountDelegate) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
                     doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
@@ -467,7 +468,7 @@ class RequestHandler : AccountDelegate {
                     return
                 }
                 
-                effectiveOwningUserCreds!.delegate = self
+                effectiveOwningUserCreds!.delegate = accountDelegate
 
             case .noObjectFound:
                 // Not treating this as an error. Downstream from this, where needed, we check to see if effectiveOwningUserCreds is nil. See also [1] in Controllers.swift.
@@ -479,7 +480,7 @@ class RequestHandler : AccountDelegate {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID) { response in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountDelegate: accountDelegate) { response in
         
             // If we locked before, do unlock now.
             if lockedSharingGroup, let sharingGroupUUID = sharingGroupUUID {
@@ -545,11 +546,7 @@ class RequestHandler : AccountDelegate {
     
     // MARK: AccountDelegate
     
-    func saveToDatabase(account creds:Account) -> Bool {
-        let result = self.repositories.user.updateCreds(creds: creds, forUser: creds.accountCreationUser!)
-        Log.debug("saveToDatabase: result: \(result)")
-        return result
-    }
+
     
     enum CheckDeviceUUIDResult {
         case success
