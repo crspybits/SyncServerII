@@ -1,5 +1,9 @@
 SyncServer
 
+Version 0.19.1 (12/8/18)
+	* Fixing issue where sharing users couldn't update (refresh and save to database) owning user access token.
+		https://github.com/crspybits/SyncServerII/issues/89
+		
 12/2/18
 	* Now have CloudWatch integrated; no new server version.
 		https://github.com/crspybits/SyncServerII/issues/94
