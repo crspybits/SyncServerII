@@ -100,7 +100,7 @@ class SharingGroup : NSObject, Model {
         clientGroup.permission = permission
         clientGroup.sharingGroupUsers = sharingGroupUsers
         
-        Log.debug("accountType: \(String(describing: accountType))")
+        Log.debug("accountType: \(String(describing: accountType)) (expected to be nil for an owning user)")
         
         if let accountType = accountType {
             clientGroup.cloudStorageType = AccountType(rawValue: accountType)?.cloudStorageType?.rawValue
