@@ -33,6 +33,9 @@ class User : NSObject, Model {
     static let cloudFolderNameKey = "cloudFolderName"
     var cloudFolderName: String?
     
+    static let pushNotificationTopicKey = "pushNotificationTopic"
+    var pushNotificationTopic: String?
+    
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -53,6 +56,9 @@ class User : NSObject, Model {
             
             case User.cloudFolderNameKey:
                 cloudFolderName = newValue as! String?
+                
+            case User.pushNotificationTopicKey:
+                pushNotificationTopic = newValue as! String?
                 
             default:
                 assert(false)
@@ -122,6 +128,9 @@ class UserRepository : Repository, RepositoryLookup {
             
             // Can be null because only some cloud storage accounts use this and only owning user accounts use this.
             "cloudFolderName VARCHAR(\(AddUserRequest.maxCloudFolderNameLength)), " +
+            
+            // A push notification topic for AWS SNS is a group containing endpoint ARN's for all the users registered devices. This will be NULL if a user has no registered devices.
+            "pushNotificationTopic TEXT, " +
             
             // I'm not going to require that the username be unique. The userId is unique.
             
@@ -260,6 +269,28 @@ class UserRepository : Repository, RepositoryLookup {
         }
         else {
             return nil
+        }
+    }
+    
+    func updatePushNotificationTopic(forUserId userId: UserId, topic: String?) -> Bool {
+        let topicText = topic ?? "NULL"
+        let query = "UPDATE \(tableName) SET pushNotificationTopic = '\(topicText)' WHERE " +
+            lookupConstraint(key: .userId(userId))
+        
+        if db.connection.query(statement: query) {
+            let numberUpdates = db.connection.numberAffectedRows()
+            // 7/6/18; I'm allowing 0 updates -- in case the update doesn't change the roow.
+            guard numberUpdates <= 1 else {
+                Log.error("Expected <= 1 updated, but had \(numberUpdates)")
+                return false
+            }
+
+            return true
+        }
+        else {
+            let error = db.error
+            Log.error("Could not update row for \(tableName): \(error)")
+            return false
         }
     }
 }

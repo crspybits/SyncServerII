@@ -42,5 +42,8 @@ public class ServerRoutes {
         proxyRouter.addRoute(ep: ServerEndpoints.updateSharingGroup, processRequest: sharingGroupsController.updateSharingGroup)
         proxyRouter.addRoute(ep: ServerEndpoints.removeSharingGroup, processRequest: sharingGroupsController.removeSharingGroup)
         proxyRouter.addRoute(ep: ServerEndpoints.removeUserFromSharingGroup, processRequest: sharingGroupsController.removeUserFromSharingGroup)
+        
+        let pushNotificationsController = PushNotificationsController()
+        proxyRouter.addRoute(ep: ServerEndpoints.registerPushNotificationToken, processRequest: pushNotificationsController.registerPushNotificationToken)
     }
 }

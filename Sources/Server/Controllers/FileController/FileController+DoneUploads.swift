@@ -256,34 +256,50 @@ extension FileController {
         }
         
         if cloudDeletions.count == 0  {
-            let response = DoneUploadsResponse()!
-            response.numberUploadsTransferred = numberTransferred
-            Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
-            params.completion(.success(response))
-            return
+            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: doneUploadsRequest.sharingGroupUUID, numberUploads: Int(numberTransferred), numberDeletions: 0, params: params) { error in
+                if error {
+                    params.completion(.failure(nil))
+                }
+                else {
+                    let response = DoneUploadsResponse()!
+                    response.numberUploadsTransferred = numberTransferred
+                    Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
+                    params.completion(.success(response))
+                }
+                return
+            }
         }
         
         let async = AsyncTailRecursion()
         async.start {
-            self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, numberTransferred: numberTransferred, async:async)
+            self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, numberTransferred: numberTransferred, uploadDeletions: uploadDeletions?.count ?? 0, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, async:async)
         }
     }
 
-     private func finishDoneUploads(cloudDeletions:[FileInfo], params:RequestProcessingParameters, numberTransferred:Int32, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
+     private func finishDoneUploads(cloudDeletions:[FileInfo], params:RequestProcessingParameters, numberTransferred:Int32, uploadDeletions: Int, sharingGroupUUID: String, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
     
         // Base case.
         if cloudDeletions.count == 0 {
-            let response = DoneUploadsResponse()!
-            
-            if numberErrorsDeletingFiles > 0 {
-                response.numberDeletionErrors = numberErrorsDeletingFiles
-                Log.debug("doneUploads.numberDeletionErrors: \(numberErrorsDeletingFiles)")
+            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: sharingGroupUUID, numberUploads: Int(numberTransferred), numberDeletions: uploadDeletions, params: params) { error in
+                if error {
+                    params.completion(.failure(nil))
+                }
+                else {
+                    let response = DoneUploadsResponse()!
+                    
+                    if numberErrorsDeletingFiles > 0 {
+                        response.numberDeletionErrors = numberErrorsDeletingFiles
+                        Log.debug("doneUploads.numberDeletionErrors: \(numberErrorsDeletingFiles)")
+                    }
+                    
+                    response.numberUploadsTransferred = numberTransferred
+                    Log.debug("base case: doneUploads.numberUploadsTransferred: \(numberTransferred)")
+                    params.completion(.success(response))
+                }
+                
+                async.done()
             }
-            
-            response.numberUploadsTransferred = numberTransferred
-            Log.debug("base case: doneUploads.numberUploadsTransferred: \(numberTransferred)")
-            params.completion(.success(response))
-            async.done()
+
             return
         }
         
@@ -332,8 +348,68 @@ extension FileController {
             }
             
             async.next() {
-                self.finishDoneUploads(cloudDeletions: tail, params: params, numberTransferred: numberTransferred, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+                self.finishDoneUploads(cloudDeletions: tail, params: params, numberTransferred: numberTransferred, uploadDeletions: uploadDeletions, sharingGroupUUID: sharingGroupUUID, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
             }
         }
+    }
+    
+    private func sendNotifications(fromUser: User, forSharingGroupUUID sharingGroupUUID: String, numberUploads: Int, numberDeletions: Int, params:RequestProcessingParameters, completion: @escaping (Bool)->()) {
+
+        guard var users:[User] = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: sharingGroupUUID) else {
+            completion(false)
+            return
+        }
+        
+        // Remove sending user from users. They already know they uploaded/deleted-- no point in sending them a notification.
+        // Also remove any users that don't have topics-- i.e., they don't have any devices registered for push notifications.
+        users.removeAll(where: { user in
+            user.userId == fromUser.userId || user.pushNotificationTopic == nil
+        })
+        
+        let key = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
+        let sharingGroupResult = params.repos.sharingGroup.lookup(key: key, modelInit: SharingGroup.init)
+        var sharingGroup: SharingGroup!
+        
+        switch sharingGroupResult {
+        case .found(let model):
+            sharingGroup = (model as! SharingGroup)
+        case .error(let error):
+            Log.error("\(error)")
+            completion(false)
+            return
+        case .noObjectFound:
+            completion(false)
+            return
+        }
+                
+        var message = "\(fromUser.username!) "
+        if numberUploads > 0 {
+            message += "uploaded \(numberUploads) image"
+            if numberUploads > 1 {
+                message += "s"
+            }
+        }
+        
+        if numberDeletions > 0 {
+            if numberUploads > 0 {
+                message += " and "
+            }
+            
+            message += "deleted \(numberDeletions) image"
+            if numberDeletions > 1 {
+                message += "s"
+            }
+        }
+        
+        if let name = sharingGroup.sharingGroupName {
+            message += " in sharing group \(name)."
+        }
+        
+        guard let pn = PushNotifications() else {
+            completion(false)
+            return
+        }
+        
+        pn.send(message: message, toUsers: users, completion: completion)
     }
 }

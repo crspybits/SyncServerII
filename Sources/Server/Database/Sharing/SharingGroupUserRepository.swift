@@ -180,12 +180,22 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         }
     }
     
-    enum SharingGroupUserResult {
-        case sharingGroupUsers([SyncServerShared.SharingGroupUser])
-        case error(String)
+    func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> [SyncServerShared.SharingGroupUser]? {
+        guard let users: [User] = sharingGroupUsers(forSelectQuery: sharingGroupUUID) else {
+            return nil
+        }
+        
+        let result = users.map { user -> SyncServerShared.SharingGroupUser in
+            let sharingGroupUser = SyncServerShared.SharingGroupUser()!
+            sharingGroupUser.name = user.username
+            sharingGroupUser.userId = user.userId
+            return sharingGroupUser
+        }
+        
+        return result
     }
     
-    func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> SharingGroupUserResult {
+    func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> [User]? {
         let query = "select \(UserRepository.tableName).\(User.usernameKey),  \(UserRepository.tableName).\(User.userIdKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupUUID = '\(sharingGroupUUID)'"
         return sharingGroupUsers(forSelectQuery: query)
     }
@@ -194,39 +204,30 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
 #if DEBUG
     func count() -> Int? {
         let query = "SELECT * FROM \(tableName)"
-        let result = sharingGroupUsers(forSelectQuery: query)
-        switch result {
-        case .sharingGroupUsers(let sgus):
-            return sgus.count
-        case .error:
-            return nil
-        }
+        let users: [User]? = sharingGroupUsers(forSelectQuery: query)
+        return users?.count
     }
 #endif
-
-    private func sharingGroupUsers(forSelectQuery selectQuery: String) -> SharingGroupUserResult {
-        
+    
+    private func sharingGroupUsers(forSelectQuery selectQuery: String) -> [User]? {
         guard let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false) else {
-            return .error("Failed on Select!")
+            Log.error("Failed on Select!")
+            return nil
         }
         
-        var result:[SyncServerShared.SharingGroupUser] = []
+        var result:[User] = []
         
         select.forEachRow { rowModel in
             let rowModel = rowModel as! User
-
-            let sharingGroupUser = SyncServerShared.SharingGroupUser()!
-            sharingGroupUser.name = rowModel.username
-            sharingGroupUser.userId = rowModel.userId
-            
-            result.append(sharingGroupUser)
+            result.append(rowModel)
         }
         
         if select.forEachRowStatus == nil {
-            return .sharingGroupUsers(result)
+            return result
         }
         else {
-            return .error("\(select.forEachRowStatus!)")
+            Log.error("Failed on forEachRowStatus: \(select.forEachRowStatus!)")
+            return nil
         }
     }
     

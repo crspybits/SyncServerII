@@ -185,15 +185,13 @@ class SharingGroupsController : ControllerProtocol {
         
         // Need to count number of users in sharing group-- if this will be the last user need to "remove" the sharing group because no other people will be able to enter it. ("remove" ==  mark the sharing group as deleted).
         var numberSharingUsers:Int!
-        let result = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: request.sharingGroupUUID)
-        switch result {
-        case .sharingGroupUsers(let sgus):
-            numberSharingUsers = sgus.count
-        case .error(let error):
-            Log.error(error)
-            params.completion(.failure(.message(error)))
+        if let result:[SyncServerShared.SharingGroupUser] = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: request.sharingGroupUUID) {
+            numberSharingUsers = result.count
         }
-        
+        else {
+            params.completion(.failure(nil))
+        }
+
         // If we're going to remove the user from the sharing group, and this user is an owning user, we should mark any of their sharing users in that sharing group as removed.
         let resetKey = SharingGroupUserRepository.LookupKey.owningUserAndSharingGroup(owningUserId: params.currentSignedInUser!.userId, uuid: request.sharingGroupUUID)
         if params.currentSignedInUser!.accountType.userType == .owning {

@@ -225,12 +225,10 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         select.forEachRow { rowModel in
             let sharingGroup = rowModel as! SharingGroup
             
-            let sguResult = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupUUID: sharingGroup.sharingGroupUUID)
-            switch sguResult {
-            case .sharingGroupUsers(let sgus):
+            if let sgus:[SyncServerShared.SharingGroupUser] = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupUUID: sharingGroup.sharingGroupUUID) {
                 sharingGroup.sharingGroupUsers = sgus
-            case .error(let error):
-                Log.error(error)
+            }
+            else {
                 errorGettingSgus = true
                 return
             }

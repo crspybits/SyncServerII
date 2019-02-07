@@ -4,6 +4,8 @@ import PackageDescription
 let package = Package(
     name: "Server",
     dependencies: [
+        .package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", .branch("master")),
+
         // 7/2/17; See comment in SwiftMain with the same date.
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
         
@@ -11,8 +13,9 @@ let package = Package(
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.2.0"),
         
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.5.0"),
-        
+        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.5.0"),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
+
         // .package(url: "../../repos/SMServerLib", .branch("master")),
         .package(url: "https://github.com/crspybits/SMServerLib.git", from: "1.0.0"),
 
@@ -35,7 +38,7 @@ let package = Package(
         .target(name: "Main",
             dependencies: ["Server"]),
         .target(name: "Server",
-            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "SMServerLib", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib"]),
+            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "SMServerLib", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS"]),
         .testTarget(name: "ServerTests",
             dependencies: ["Server", "Main", "CredentialsDropbox"])
     ]

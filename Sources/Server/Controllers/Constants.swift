@@ -85,6 +85,14 @@ class Constants {
     // The following file is assumed to be at the root of the running, deployed server-- e.g., I'm putting it there when I build the Docker image. File is assumed to contain one line of text.
     private let deployedGitTagFilename = "VERSION"
     
+    struct AWSSNS {
+        var accessKeyId: String?
+        var secretKey: String?
+        var region: String?
+        var platformApplicationArn: String?
+    }
+    var awssns = AWSSNS()
+    
     static var session:Constants!
 
     // If there is a delegate, then use this to get the config file path. This is purely a hack for testing-- because I've not been able to get access to the Server.config file otherwise.
@@ -175,7 +183,12 @@ class Constants {
         
         // If present, in format X.Y.Z
         iOSMinimumClientVersion = try? config.getString(varName: "iOSMinimumClientVersion")
-        
+
+        awssns.accessKeyId = try? config.getString(varName: "awssns.accessKeyId")
+        awssns.secretKey = try? config.getString(varName: "awssns.secretKey")
+        awssns.region = try? config.getString(varName: "awssns.region")
+        awssns.platformApplicationArn = try? config.getString(varName: "awssns.platformApplicationArn")
+
         // MARK: Items not obtained from the Server.json file.
         
         let file = File(deployedGitTagFilename)
