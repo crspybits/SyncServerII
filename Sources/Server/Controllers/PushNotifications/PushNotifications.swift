@@ -23,6 +23,11 @@ class PushNotifications {
             return nil
         }
         
+        Log.debug("accessKeyId: \(accessKeyId)")
+        Log.debug(("secretKey: \(secretKey)"))
+        Log.debug("region: \(region)")
+        Log.debug("platformApplicationArn: \(platformApplicationArn)")
+        
         sns = SwiftyAWSSNS(accessKeyId: accessKeyId, secretKey: secretKey, region: region, platformApplicationArn: platformApplicationArn)
     }
     
@@ -88,7 +93,7 @@ class PushNotifications {
                     self.send(formattedMessage: message, toUsers: tail, completion: completion)
                 }
             case .error(let error):
-                Log.error("\(error)")
+                Log.error("Failed on SNS publish: \(error); sending message: \(message)")
                 completion(false)
             }
         }
