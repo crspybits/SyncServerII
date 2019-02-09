@@ -405,11 +405,12 @@ extension FileController {
             message += " in sharing group \(name)."
         }
         
-        guard let pn = PushNotifications() else {
+        guard let pn = PushNotifications(),
+            let formattedMessage = PushNotifications.format(message: message) else {
             completion(false)
             return
         }
         
-        pn.send(message: message, toUsers: users, completion: completion)
+        pn.send(formattedMessage: formattedMessage, toUsers: users, completion: completion)
     }
 }

@@ -30,8 +30,41 @@ class PushNotifications {
         return "\(userId)"
     }
     
+    static func format(message: String) -> String? {
+       // Format of messages: https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CreatingtheNotificationPayload.html
+        // https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html
+        
+        func strForJSON(json: Any) -> String? {
+            if let result = try? JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions(rawValue: 0)) {
+                return String(data: result, encoding: .utf8)
+            }
+            return nil
+        }
+        
+        let messageContentsDict = ["aps":
+            ["alert": message,
+            "sound": "default"]
+        ]
+        
+        guard let messageContentsString = strForJSON(json: messageContentsDict) else {
+            return nil
+        }
+        
+        // Looks like the top level key must be "APNS" for production; see https://forums.aws.amazon.com/thread.jspa?threadID=145907
+        let messageDict = ["APNS_SANDBOX": messageContentsString,
+            "APNS": messageContentsString
+        ]
+
+        guard let messageString = strForJSON(json: messageDict) else {
+            return nil
+        }
+        
+        return messageString
+    }
+    
     // The users in the given array will all have PN topics.
-    func send(message: String, toUsers users: [User], completion: @escaping (Bool)->()) {
+    // Use the format method above to format the message before passing to this method.
+    func send(formattedMessage message: String, toUsers users: [User], completion: @escaping (Bool)->()) {
         // Base case.
         if users.count == 0 {
             completion(true)
@@ -47,7 +80,7 @@ class PushNotifications {
                 DispatchQueue.main.async {
                     let tail = (users.count > 0) ?
                         Array(users[1..<users.count]) : []
-                    self.send(message: message, toUsers: tail, completion: completion)
+                    self.send(formattedMessage: message, toUsers: tail, completion: completion)
                 }
             case .error(let error):
                 Log.error("\(error)")

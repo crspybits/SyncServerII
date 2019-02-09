@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.20.0
+	* Adding push notifications (APNS) using AWS SNS.
+
 Version 0.19.1 (12/8/18)
 	* Fixing issue where sharing users couldn't update (refresh and save to database) owning user access token.
 		https://github.com/crspybits/SyncServerII/issues/89
