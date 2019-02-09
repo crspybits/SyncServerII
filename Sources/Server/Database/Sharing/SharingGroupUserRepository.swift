@@ -181,7 +181,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     }
     
     func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> [SyncServerShared.SharingGroupUser]? {
-        guard let users: [User] = sharingGroupUsers(forSelectQuery: sharingGroupUUID) else {
+        guard let users: [User] = sharingGroupUsers(forSharingGroupUUID: sharingGroupUUID) else {
             return nil
         }
         
