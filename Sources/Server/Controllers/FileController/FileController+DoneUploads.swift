@@ -266,8 +266,9 @@ extension FileController {
                     Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
                     params.completion(.success(response))
                 }
-                return
             }
+            
+            return
         }
         
         let async = AsyncTailRecursion()
@@ -356,6 +357,7 @@ extension FileController {
     private func sendNotifications(fromUser: User, forSharingGroupUUID sharingGroupUUID: String, numberUploads: Int, numberDeletions: Int, params:RequestProcessingParameters, completion: @escaping (Bool)->()) {
 
         guard var users:[User] = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: sharingGroupUUID) else {
+            Log.error(("sendNotifications: Failed to get sharing group users!"))
             completion(false)
             return
         }
@@ -374,10 +376,11 @@ extension FileController {
         case .found(let model):
             sharingGroup = (model as! SharingGroup)
         case .error(let error):
-            Log.error("\(error)")
+            Log.error("sendNotifications: \(error)")
             completion(false)
             return
         case .noObjectFound:
+            Log.error("sendNotifications: No object found!")
             completion(false)
             return
         }
@@ -405,8 +408,14 @@ extension FileController {
             message += " in sharing group \(name)."
         }
         
-        guard let pn = PushNotifications(),
-            let formattedMessage = PushNotifications.format(message: message) else {
+        guard let formattedMessage = PushNotifications.format(message: message) else {
+            Log.error("sendNotifications: Failed on formatting message.")
+            completion(false)
+            return
+        }
+        
+        guard let pn = PushNotifications() else {
+            Log.error("sendNotifications: Failed on PushNotifications constructor.")
             completion(false)
             return
         }
