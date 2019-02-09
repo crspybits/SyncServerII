@@ -362,9 +362,9 @@ extension FileController {
         
         // Remove sending user from users. They already know they uploaded/deleted-- no point in sending them a notification.
         // Also remove any users that don't have topics-- i.e., they don't have any devices registered for push notifications.
-        users.removeAll(where: { user in
-            user.userId == fromUser.userId || user.pushNotificationTopic == nil
-        })
+        users = users.filter { user in
+            user.userId != fromUser.userId && user.pushNotificationTopic != nil
+        }
         
         let key = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
         let sharingGroupResult = params.repos.sharingGroup.lookup(key: key, modelInit: SharingGroup.init)
