@@ -11,15 +11,6 @@
         }
       },
       {
-        "package": "Signals",
-        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
-        "state": {
-          "branch": null,
-          "revision": "23f62ec7a38a837e1c14acffc2e963b667a88b46",
-          "version": "1.0.16"
-        }
-      },
-      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
@@ -35,24 +26,6 @@
           "branch": null,
           "revision": "6910763b0dfa6f95a75217215d8cdce3ee11a6ae",
           "version": "1.0.44"
-        }
-      },
-      {
-        "package": "CCurl",
-        "repositoryURL": "https://github.com/IBM-Swift/CCurl.git",
-        "state": {
-          "branch": null,
-          "revision": "2a431e3a5fb8d004aa7d4d1bebb5d511f568c43e",
-          "version": "1.0.0"
-        }
-      },
-      {
-        "package": "CEpoll",
-        "repositoryURL": "https://github.com/IBM-Swift/CEpoll.git",
-        "state": {
-          "branch": null,
-          "revision": "4e56acbea4d452110236dcbfcee0045a697c0e9f",
-          "version": "1.0.0"
         }
       },
       {
@@ -164,15 +137,6 @@
         }
       },
       {
-        "package": "OpenSSL",
-        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
-        "state": {
-          "branch": null,
-          "revision": "a39f93450e25345c97deb1a9b88e224189fdc28e",
-          "version": "1.0.2"
-        }
-      },
-      {
         "package": "PerfectLib",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
         "state": {
@@ -191,15 +155,6 @@
         }
       },
       {
-        "package": "LinuxBridge",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
-        "state": {
-          "branch": null,
-          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
-          "version": "3.1.0"
-        }
-      },
-      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -210,10 +165,10 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
         "state": {
           "branch": null,
-          "revision": "5401a4713557237baabaef1caea93467cf5af138",
+          "revision": "afec636bfa3302ea155f462f139da46a53fd351a",
           "version": "2.1.0"
         }
       },
