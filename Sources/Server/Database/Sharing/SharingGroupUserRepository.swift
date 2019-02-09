@@ -196,7 +196,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     }
     
     func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> [User]? {
-        let query = "select \(UserRepository.tableName).\(User.usernameKey),  \(UserRepository.tableName).\(User.userIdKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupUUID = '\(sharingGroupUUID)'"
+        let query = "select \(UserRepository.tableName).\(User.usernameKey),  \(UserRepository.tableName).\(User.userIdKey), \(UserRepository.tableName).\(User.pushNotificationTopicKey) from \(tableName), \(UserRepository.tableName) where \(tableName).userId = \(UserRepository.tableName).userId and \(tableName).sharingGroupUUID = '\(sharingGroupUUID)'"
         return sharingGroupUsers(forSelectQuery: query)
     }
     
@@ -211,7 +211,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     
     private func sharingGroupUsers(forSelectQuery selectQuery: String) -> [User]? {
         guard let select = Select(db:db, query: selectQuery, modelInit: User.init, ignoreErrors:false) else {
-            Log.error("Failed on Select!")
+            Log.error("Failed on Select: query: \(selectQuery)")
             return nil
         }
         
