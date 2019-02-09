@@ -68,7 +68,9 @@ class PushNotifications {
             return nil
         }
         
-        return messageString
+        //return messageString
+        
+        return "{\"APNS\":\"{\\\"aps\\\":{\\\"sound\\\":\\\"default\\\",\\\"alert\\\":\\\"Hello!\\\"}}\",\"APNS_SANDBOX\":\"{\\\"aps\\\":{\\\"sound\\\":\\\"default\\\",\\\"alert\\\":\\\"Hello!\\\"}}\"}"
     }
     
     // The users in the given array will all have PN topics.
