@@ -59,8 +59,10 @@ class PushNotifications {
         }
         
         // Looks like the top level key must be "APNS" for production; see https://forums.aws.amazon.com/thread.jspa?threadID=145907
+        // 2/9/19; Without the "default" key, I'm getting a failure.
         let messageDict = ["APNS_SANDBOX": messageContentsString,
-            "APNS": messageContentsString
+            "APNS": messageContentsString,
+            "default": messageContentsString
         ]
 
         guard let messageString = strForJSON(json: messageDict) else {
@@ -68,35 +70,44 @@ class PushNotifications {
             return nil
         }
         
-        //return messageString
-        
-        return "{\"APNS\":\"{\\\"aps\\\":{\\\"sound\\\":\\\"default\\\",\\\"alert\\\":\\\"Hello!\\\"}}\",\"APNS_SANDBOX\":\"{\\\"aps\\\":{\\\"sound\\\":\\\"default\\\",\\\"alert\\\":\\\"Hello!\\\"}}\"}"
+        return messageString
     }
     
     // The users in the given array will all have PN topics.
     // Use the format method above to format the message before passing to this method.
     // Returns true iff success
     func send(formattedMessage message: String, toUsers users: [User], completion: @escaping (_ success: Bool)->()) {
+        let async = AsyncTailRecursion()
+        async.start {
+            self.sendAux(formattedMessage: message, toUsers: users, async: async, completion: completion)
+        }
+    }
+    
+    func sendAux(formattedMessage message: String, toUsers users: [User], async: AsyncTailRecursion, completion: @escaping (_ success: Bool)->()) {
         // Base case.
         if users.count == 0 {
             completion(true)
+            async.done()
             return
         }
         
         let user = users[0]
         let topic = user.pushNotificationTopic!
         
+        Log.debug("Sending push notification: \(message) to devices subscribed to topic \(topic) for user \(user.username!)")
+        
         sns.publish(message: message, target: .topicArn(topic)) { [unowned self] response in
             switch response {
             case .success:
-                DispatchQueue.main.async {
+                async.next {
                     let tail = (users.count > 0) ?
                         Array(users[1..<users.count]) : []
-                    self.send(formattedMessage: message, toUsers: tail, completion: completion)
+                    self.sendAux(formattedMessage: message, toUsers: tail, async: async, completion: completion)
                 }
             case .error(let error):
                 Log.error("Failed on SNS publish: \(error); sending message: \(message)")
                 completion(false)
+                async.done()
             }
         }
     }

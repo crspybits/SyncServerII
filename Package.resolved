@@ -249,7 +249,7 @@
         "repositoryURL": "https://github.com/crspybits/SwiftyAWSSNS.git",
         "state": {
           "branch": "master",
-          "revision": "5a2c6cb53bc2f16b5fc0830691bfbdf15c0cc074",
+          "revision": "cb75fb8551b581ef12aa1e9ca654c5c384995245",
           "version": null
         }
       },
@@ -258,7 +258,7 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": "dev",
-          "revision": "62a602450e0eadf4773384dfc789479f81ff7851",
+          "revision": "16d969722570b5e95807e93b6f5dccd3087b70a4",
           "version": null
         }
       },

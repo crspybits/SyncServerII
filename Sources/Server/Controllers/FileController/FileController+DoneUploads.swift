@@ -283,13 +283,9 @@ extension FileController {
     
         // Base case.
         if cloudDeletions.count == 0 {
-            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: sharingGroupUUID, numberUploads: Int(numberTransferred), numberDeletions: uploadDeletions, params: params) { error in
-                if error {
-                    let message = "Failed on sendNotifications in finishDoneUploads"
-                    Log.error(message)
-                    params.completion(.failure(.message(message)))
-                }
-                else {
+            // deletions are included in numberTransferred, so have to subtract those off.
+            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: sharingGroupUUID, numberUploads: Int(numberTransferred) - uploadDeletions, numberDeletions: uploadDeletions, params: params) { success in
+                if success {
                     let response = DoneUploadsResponse()!
                     
                     if numberErrorsDeletingFiles > 0 {
@@ -300,6 +296,11 @@ extension FileController {
                     response.numberUploadsTransferred = numberTransferred
                     Log.debug("base case: doneUploads.numberUploadsTransferred: \(numberTransferred)")
                     params.completion(.success(response))
+                }
+                else {
+                    let message = "Failed on sendNotifications in finishDoneUploads"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                 }
                 
                 async.done()
@@ -392,7 +393,7 @@ extension FileController {
                 
         var message = "\(fromUser.username!) "
         if numberUploads > 0 {
-            message += "uploaded \(numberUploads) image"
+            message += "uploaded \(numberUploads) file"
             if numberUploads > 1 {
                 message += "s"
             }
@@ -403,7 +404,7 @@ extension FileController {
                 message += " and "
             }
             
-            message += "deleted \(numberDeletions) image"
+            message += "deleted \(numberDeletions) file"
             if numberDeletions > 1 {
                 message += "s"
             }
