@@ -38,6 +38,8 @@ class PushNotifications {
             if let result = try? JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions(rawValue: 0)) {
                 return String(data: result, encoding: .utf8)
             }
+            
+            Log.error("Failed in strForJSON: \(json)")
             return nil
         }
         
@@ -47,6 +49,7 @@ class PushNotifications {
         ]
         
         guard let messageContentsString = strForJSON(json: messageContentsDict) else {
+            Log.error("Failed converting messageContentsString: \(messageContentsDict)")
             return nil
         }
         
@@ -56,6 +59,7 @@ class PushNotifications {
         ]
 
         guard let messageString = strForJSON(json: messageDict) else {
+            Log.error("Failed converting messageString: \(messageDict)")
             return nil
         }
         
@@ -64,7 +68,8 @@ class PushNotifications {
     
     // The users in the given array will all have PN topics.
     // Use the format method above to format the message before passing to this method.
-    func send(formattedMessage message: String, toUsers users: [User], completion: @escaping (Bool)->()) {
+    // Returns true iff success
+    func send(formattedMessage message: String, toUsers users: [User], completion: @escaping (_ success: Bool)->()) {
         // Base case.
         if users.count == 0 {
             completion(true)

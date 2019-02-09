@@ -256,15 +256,17 @@ extension FileController {
         }
         
         if cloudDeletions.count == 0  {
-            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: doneUploadsRequest.sharingGroupUUID, numberUploads: Int(numberTransferred), numberDeletions: 0, params: params) { error in
-                if error {
-                    params.completion(.failure(nil))
-                }
-                else {
+            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: doneUploadsRequest.sharingGroupUUID, numberUploads: Int(numberTransferred), numberDeletions: 0, params: params) { success in
+                if success {
                     let response = DoneUploadsResponse()!
                     response.numberUploadsTransferred = numberTransferred
                     Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
                     params.completion(.success(response))
+                }
+                else {
+                    let message = "Failed on sendNotifications with no cloud deletions."
+                    Log.debug(message)
+                    params.completion(.failure(.message(message)))
                 }
             }
             
@@ -283,7 +285,9 @@ extension FileController {
         if cloudDeletions.count == 0 {
             sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: sharingGroupUUID, numberUploads: Int(numberTransferred), numberDeletions: uploadDeletions, params: params) { error in
                 if error {
-                    params.completion(.failure(nil))
+                    let message = "Failed on sendNotifications in finishDoneUploads"
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
                 }
                 else {
                     let response = DoneUploadsResponse()!
@@ -354,7 +358,8 @@ extension FileController {
         }
     }
     
-    private func sendNotifications(fromUser: User, forSharingGroupUUID sharingGroupUUID: String, numberUploads: Int, numberDeletions: Int, params:RequestProcessingParameters, completion: @escaping (Bool)->()) {
+    // Returns true iff success.
+    private func sendNotifications(fromUser: User, forSharingGroupUUID sharingGroupUUID: String, numberUploads: Int, numberDeletions: Int, params:RequestProcessingParameters, completion: @escaping (_ success: Bool)->()) {
 
         guard var users:[User] = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: sharingGroupUUID) else {
             Log.error(("sendNotifications: Failed to get sharing group users!"))
