@@ -256,18 +256,27 @@ extension FileController {
         }
         
         if cloudDeletions.count == 0  {
-            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: doneUploadsRequest.sharingGroupUUID, numberUploads: Int(numberTransferred), numberDeletions: 0, params: params) { success in
-                if success {
-                    let response = DoneUploadsResponse()!
-                    response.numberUploadsTransferred = numberTransferred
-                    Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
-                    params.completion(.success(response))
+            func successResponse() {
+                let response = DoneUploadsResponse()!
+                response.numberUploadsTransferred = numberTransferred
+                Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
+                params.completion(.success(response))
+            }
+            
+            if let pushNotificationMessage = doneUploadsRequest.pushNotificationMessage {
+                sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: doneUploadsRequest.sharingGroupUUID, message: pushNotificationMessage, params: params) { success in
+                    if success {
+                        successResponse()
+                    }
+                    else {
+                        let message = "Failed on sendNotifications with no cloud deletions."
+                        Log.debug(message)
+                        params.completion(.failure(.message(message)))
+                    }
                 }
-                else {
-                    let message = "Failed on sendNotifications with no cloud deletions."
-                    Log.debug(message)
-                    params.completion(.failure(.message(message)))
-                }
+            }
+            else {
+                successResponse()
             }
             
             return
@@ -275,35 +284,44 @@ extension FileController {
         
         let async = AsyncTailRecursion()
         async.start {
-            self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, numberTransferred: numberTransferred, uploadDeletions: uploadDeletions?.count ?? 0, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, async:async)
+            self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, numberTransferred: Int(numberTransferred), pushNotificationMessage: doneUploadsRequest.pushNotificationMessage, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, async:async)
         }
     }
 
-     private func finishDoneUploads(cloudDeletions:[FileInfo], params:RequestProcessingParameters, numberTransferred:Int32, uploadDeletions: Int, sharingGroupUUID: String, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
+     private func finishDoneUploads(cloudDeletions:[FileInfo], params:RequestProcessingParameters, numberTransferred: Int, pushNotificationMessage: String?, sharingGroupUUID: String, async:AsyncTailRecursion, numberErrorsDeletingFiles:Int32 = 0) {
     
         // Base case.
         if cloudDeletions.count == 0 {
-            // deletions are included in numberTransferred, so have to subtract those off.
-            sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: sharingGroupUUID, numberUploads: Int(numberTransferred) - uploadDeletions, numberDeletions: uploadDeletions, params: params) { success in
-                if success {
-                    let response = DoneUploadsResponse()!
-                    
-                    if numberErrorsDeletingFiles > 0 {
-                        response.numberDeletionErrors = numberErrorsDeletingFiles
-                        Log.debug("doneUploads.numberDeletionErrors: \(numberErrorsDeletingFiles)")
+            func successResponse() {
+                let response = DoneUploadsResponse()!
+            
+                if numberErrorsDeletingFiles > 0 {
+                    response.numberDeletionErrors = numberErrorsDeletingFiles
+                    Log.debug("doneUploads.numberDeletionErrors: \(numberErrorsDeletingFiles)")
+                }
+            
+                response.numberUploadsTransferred = Int32(numberTransferred)
+                Log.debug("base case: doneUploads.numberUploadsTransferred: \(numberTransferred)")
+                params.completion(.success(response))
+            }
+            
+            if pushNotificationMessage == nil {
+                successResponse()
+                async.done()
+            }
+            else {
+                sendNotifications(fromUser: params.currentSignedInUser!, forSharingGroupUUID: sharingGroupUUID, message: pushNotificationMessage!, params: params) { success in
+                    if success {
+                        successResponse()
+                    }
+                    else {
+                        let message = "Failed on sendNotifications in finishDoneUploads"
+                        Log.error(message)
+                        params.completion(.failure(.message(message)))
                     }
                     
-                    response.numberUploadsTransferred = numberTransferred
-                    Log.debug("base case: doneUploads.numberUploadsTransferred: \(numberTransferred)")
-                    params.completion(.success(response))
+                    async.done()
                 }
-                else {
-                    let message = "Failed on sendNotifications in finishDoneUploads"
-                    Log.error(message)
-                    params.completion(.failure(.message(message)))
-                }
-                
-                async.done()
             }
 
             return
@@ -354,13 +372,13 @@ extension FileController {
             }
             
             async.next() {
-                self.finishDoneUploads(cloudDeletions: tail, params: params, numberTransferred: numberTransferred, uploadDeletions: uploadDeletions, sharingGroupUUID: sharingGroupUUID, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
+                self.finishDoneUploads(cloudDeletions: tail, params: params, numberTransferred: numberTransferred, pushNotificationMessage: pushNotificationMessage, sharingGroupUUID: sharingGroupUUID, async:async, numberErrorsDeletingFiles: numberErrorsDeletingFiles + numberAdditionalErrors)
             }
         }
     }
     
     // Returns true iff success.
-    private func sendNotifications(fromUser: User, forSharingGroupUUID sharingGroupUUID: String, numberUploads: Int, numberDeletions: Int, params:RequestProcessingParameters, completion: @escaping (_ success: Bool)->()) {
+    private func sendNotifications(fromUser: User, forSharingGroupUUID sharingGroupUUID: String, message: String, params:RequestProcessingParameters, completion: @escaping (_ success: Bool)->()) {
 
         guard var users:[User] = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: sharingGroupUUID) else {
             Log.error(("sendNotifications: Failed to get sharing group users!"))
@@ -390,31 +408,16 @@ extension FileController {
             completion(false)
             return
         }
-                
-        var message = "\(fromUser.username!) "
-        if numberUploads > 0 {
-            message += "uploaded \(numberUploads) file"
-            if numberUploads > 1 {
-                message += "s"
-            }
-        }
         
-        if numberDeletions > 0 {
-            if numberUploads > 0 {
-                message += " and "
-            }
-            
-            message += "deleted \(numberDeletions) file"
-            if numberDeletions > 1 {
-                message += "s"
-            }
-        }
+        var modifiedMessage = "\(fromUser.username!)"
         
         if let name = sharingGroup.sharingGroupName {
-            message += " in sharing group \(name)."
+            modifiedMessage += ", \(name)"
         }
         
-        guard let formattedMessage = PushNotifications.format(message: message) else {
+        modifiedMessage += ": " + message
+        
+        guard let formattedMessage = PushNotifications.format(message: modifiedMessage) else {
             Log.error("sendNotifications: Failed on formatting message.")
             completion(false)
             return
