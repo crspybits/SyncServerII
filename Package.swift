@@ -4,17 +4,18 @@ import PackageDescription
 let package = Package(
     name: "Server",
     dependencies: [
-        .package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", .branch("master")),
+        //.package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", .branch("master")),
+        .package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", from: "0.2.0"),
 
         // 7/2/17; See comment in SwiftMain with the same date.
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
         
         // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.2.0"),
-        
+
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.5.0"),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
+        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "9.7.0"),
 
         // .package(url: "../../repos/SMServerLib", .branch("master")),
         .package(url: "https://github.com/crspybits/SMServerLib.git", from: "1.0.0"),

@@ -1,0 +1,16 @@
+1) Dev versus Production Push Notifications
+	a) Dev
+		* Create a debug build of the iOS app
+		* Use a empty server database: The User table stores the topic names per user and these are different for Dev versus Production. You probably don't want to have both types of topic names (for Dev and Production) in the same server/User table. It is also OK to use a User table that only had debug topic ARN's in it before.
+		* Follow the procedure on https://crspybits.github.io/SyncServerII/ for setting up for push notifications using the Sync Server.
+		* The .json file that you use to start the server must contain the "awssns.platformApplicationArn" key value for the dev AWS SNS platform application.
+
+		See also https://stackoverflow.com/questions/12447025/
+		* Note that this will use the development APNS certificate in AWS.
+	
+	b) Production (read above for Dev first)
+		* Create an AppStore build of the iOS app.
+		* Use an empty server database, or at least one where the User table only has only Production topic ARN's. See above also.
+		* The .json file that you use to start the server must contain the "awssns.platformApplicationArn" key value for the production AWS SNS platform application.
+		* Note that this will use the production APNS certificate in AWS.
+		* Testing should comprise installing this iOS app build onto multiple devices, which use the production server, and following the test cases in the spreadsheet. E.g., an image upload should result in push notifications to all but the uploading user's devices.

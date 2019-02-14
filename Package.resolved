@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura.git",
         "state": {
           "branch": null,
-          "revision": "be8075725e77a1d6ff3ed22bb607030fff58cb7f",
-          "version": "2.6.1"
+          "revision": "a571d7aacd4c966fa7919a20ad344f3f55bd76a1",
+          "version": "2.6.2"
         }
       },
       {
@@ -204,8 +204,8 @@
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
           "branch": null,
-          "revision": "c96be8e03e4e1cd50dc82307c381be1e7c75f13d",
-          "version": "3.4.0"
+          "revision": "f9af3a9984aa4785fcbe7126eaf0bc39320296ec",
+          "version": "3.4.1"
         }
       },
       {
@@ -239,27 +239,27 @@
         "package": "SwiftAWSSignatureV4",
         "repositoryURL": "https://github.com/crspybits/SwiftAWSSignatureV4.git",
         "state": {
-          "branch": "master",
-          "revision": "60ccaf959d628d919eeb11f92104692bef0865b5",
-          "version": null
+          "branch": null,
+          "revision": "c16a6194e92df11931b0e1afa6d1e361c74ca901",
+          "version": "1.1.0"
         }
       },
       {
         "package": "SwiftyAWSSNS",
         "repositoryURL": "https://github.com/crspybits/SwiftyAWSSNS.git",
         "state": {
-          "branch": "master",
-          "revision": "cb75fb8551b581ef12aa1e9ca654c5c384995245",
-          "version": null
+          "branch": null,
+          "revision": "087ea80d67ed8a0b7e7078dd085ba5f67c74a56c",
+          "version": "0.2.0"
         }
       },
       {
         "package": "SyncServerShared",
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
-          "branch": "dev",
+          "branch": null,
           "revision": "d627f8beb91f90b6e004a02635d69e30b171093b",
-          "version": null
+          "version": "9.7.0"
         }
       },
       {
