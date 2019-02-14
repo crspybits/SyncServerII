@@ -1,6 +1,6 @@
 SyncServer
 
-Version 0.20.0 (2/8/19)
+Version 0.20.9 (2/14/19)
 	* Adding push notifications (APNS) using AWS SNS.
 
 Version 0.19.1 (12/8/18)
