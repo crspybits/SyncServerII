@@ -14,3 +14,8 @@
 		* The .json file that you use to start the server must contain the "awssns.platformApplicationArn" key value for the production AWS SNS platform application.
 		* Note that this will use the production APNS certificate in AWS.
 		* Testing should comprise installing this iOS app build onto multiple devices, which use the production server, and following the test cases in the spreadsheet. E.g., an image upload should result in push notifications to all but the uploading user's devices.
+		
+2) Minimum iOS app version
+	When a new version of the iOS app is released and we need users to update to that version, we can force this by use of the "iOSMinimumClientVersion" key/value pair in the server .json config file. This is reflected with the iOS app HTTP header "syncserver-minimum-ios-client-app-version". So, to require the users to update their app need to:
+	a) First release the new iOS app version to the App Store.
+	b) Second, update the server .json config file and restart the server.
