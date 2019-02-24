@@ -37,6 +37,9 @@ class Constants {
     
     var port:Int!
     
+    // For Kitura Credentials plugins
+    var signInTokenTimeToLive: TimeInterval?
+    
     // If you are using Google Accounts
     var googleClientId:String? = ""
     var googleClientSecret:String? = ""
@@ -85,6 +88,7 @@ class Constants {
     // The following file is assumed to be at the root of the running, deployed server-- e.g., I'm putting it there when I build the Docker image. File is assumed to contain one line of text.
     private let deployedGitTagFilename = "VERSION"
     
+    // For AWS SNS (Push Notifications)
     struct AWSSNS {
         var accessKeyId: String?
         var secretKey: String?
@@ -131,6 +135,10 @@ class Constants {
         else {
             let path = Constants.delegate!.configFilePath(forConstants: self)
             config = try ConfigLoader(usingPath: path, andFileName: configFileName, forConfigType: .jsonDictionary)
+        }
+        
+        if let credsTtl = try? config.getInt(varName: "signInTokenTimeToLive") {
+            signInTokenTimeToLive = TimeInterval(credsTtl)
         }
         
         googleClientId = try? config.getString(varName: "GoogleServerClientId")

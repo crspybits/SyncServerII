@@ -11,15 +11,6 @@
         }
       },
       {
-        "package": "Signals",
-        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
-        "state": {
-          "branch": null,
-          "revision": "23f62ec7a38a837e1c14acffc2e963b667a88b46",
-          "version": "1.0.16"
-        }
-      },
-      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
@@ -38,30 +29,12 @@
         }
       },
       {
-        "package": "CCurl",
-        "repositoryURL": "https://github.com/IBM-Swift/CCurl.git",
-        "state": {
-          "branch": null,
-          "revision": "2a431e3a5fb8d004aa7d4d1bebb5d511f568c43e",
-          "version": "1.0.0"
-        }
-      },
-      {
-        "package": "CEpoll",
-        "repositoryURL": "https://github.com/IBM-Swift/CEpoll.git",
-        "state": {
-          "branch": null,
-          "revision": "4e56acbea4d452110236dcbfcee0045a697c0e9f",
-          "version": "1.0.0"
-        }
-      },
-      {
         "package": "CredentialsDropbox",
         "repositoryURL": "https://github.com/crspybits/CredentialsDropbox.git",
         "state": {
           "branch": null,
-          "revision": "4baa60378d94b0c6d5fac11c43109d2a69b11a94",
-          "version": "0.2.0"
+          "revision": "803dc4ee888be0c8073512dd0f7a1e2322568259",
+          "version": "0.3.0"
         }
       },
       {
@@ -105,8 +78,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git",
         "state": {
           "branch": null,
-          "revision": "4fddd914d74c46770126b41544027d6d44e52d59",
-          "version": "2.2.3"
+          "revision": "e76aa9f06473a5a2c08e6215fb58b652f4e5d7ab",
+          "version": "2.3.0"
         }
       },
       {
@@ -114,8 +87,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git",
         "state": {
           "branch": null,
-          "revision": "2e7da505b2ee0d7ef045db8f7e427b9e247d37f9",
-          "version": "2.2.1"
+          "revision": "86db4d2805a79b2974fafae71b06dbdb7315e551",
+          "version": "2.3.0"
         }
       },
       {
@@ -164,15 +137,6 @@
         }
       },
       {
-        "package": "OpenSSL",
-        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
-        "state": {
-          "branch": null,
-          "revision": "a39f93450e25345c97deb1a9b88e224189fdc28e",
-          "version": "1.0.2"
-        }
-      },
-      {
         "package": "PerfectLib",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
         "state": {
@@ -191,15 +155,6 @@
         }
       },
       {
-        "package": "LinuxBridge",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
-        "state": {
-          "branch": null,
-          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
-          "version": "3.1.0"
-        }
-      },
-      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -210,10 +165,10 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
         "state": {
           "branch": null,
-          "revision": "5401a4713557237baabaef1caea93467cf5af138",
+          "revision": "afec636bfa3302ea155f462f139da46a53fd351a",
           "version": "2.1.0"
         }
       },
@@ -231,8 +186,8 @@
         "repositoryURL": "https://github.com/crspybits/SMServerLib.git",
         "state": {
           "branch": null,
-          "revision": "4795a8069e85c8c25912e174ff0af8b82dd05444",
-          "version": "1.0.0"
+          "revision": "bb5d9d473f4e13a00aef9de16e669ae6bc9ad564",
+          "version": "1.1.0"
         }
       },
       {
@@ -267,8 +222,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/TypeDecoder.git",
         "state": {
           "branch": null,
-          "revision": "2fd9b413df610a526ae5291aaf860cbb8b1856b5",
-          "version": "1.3.0"
+          "revision": "e891b73f69f197ad236a888034a7f42d47fd9064",
+          "version": "1.3.1"
         }
       }
     ]

@@ -235,7 +235,7 @@ extension FileController {
         }
 
         guard case .success(let numberTransferred, let uploadDeletions, let staleVersionsToDelete) = result else {
-            Log.error("Error in doInitialDoneUploads: \(result)")
+            Log.debug("Success on doInitialDoneUploads: \(result)")
             switch result {
             case .doCompletion(let response):
                 params.completion(response)

@@ -11,7 +11,7 @@ let package = Package(
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
         
         // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
-        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.2.0"),
+        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.3.0"),
 
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
         // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),

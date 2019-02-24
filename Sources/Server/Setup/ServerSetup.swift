@@ -51,19 +51,19 @@ class ServerSetup {
         AccountManager.session.reset()
         
         if Constants.session.allowedSignInTypes.Google {
-            let googleCredentials = CredentialsGoogleToken()
+            let googleCredentials = CredentialsGoogleToken(tokenTimeToLive: Constants.session.signInTokenTimeToLive)
             credentials.register(plugin: googleCredentials)
             AccountManager.session.addAccountType(GoogleCreds.self)
         }
         
         if Constants.session.allowedSignInTypes.Facebook {
-            let facebookCredentials = CredentialsFacebookToken()
+            let facebookCredentials = CredentialsFacebookToken(tokenTimeToLive: Constants.session.signInTokenTimeToLive)
             credentials.register(plugin: facebookCredentials)
             AccountManager.session.addAccountType(FacebookCreds.self)
         }
 
         if Constants.session.allowedSignInTypes.Dropbox {
-            let dropboxCredentials = CredentialsDropboxToken()
+            let dropboxCredentials = CredentialsDropboxToken(tokenTimeToLive: Constants.session.signInTokenTimeToLive)
             credentials.register(plugin: dropboxCredentials)
             AccountManager.session.addAccountType(DropboxCreds.self)
         }

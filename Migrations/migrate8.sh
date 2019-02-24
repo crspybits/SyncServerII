@@ -5,6 +5,7 @@
 #	arg2: The name of the sql script.
 #	arg3: (optional) host-- replaces the host from the configuratin file.
 # e.g., ./Migrations/migrate8.sh ~/Desktop/Apps/SyncServerII/Private/Server/SharedImages-local.json Migrations/8.sql localhost
+# e.g., ./Migrations/migrate8.sh ~/Desktop/Apps/SyncServerII/Private/Server.json.aws.app.bundles/SharedImages-production.json Migrations/8.sql
 
 CONFIG_FILE=$1
 SQL_SCRIPT=$2
