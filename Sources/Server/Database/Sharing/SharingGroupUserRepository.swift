@@ -186,7 +186,7 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         }
         
         let result = users.map { user -> SyncServerShared.SharingGroupUser in
-            let sharingGroupUser = SyncServerShared.SharingGroupUser()!
+            let sharingGroupUser = SyncServerShared.SharingGroupUser()
             sharingGroupUser.name = user.username
             sharingGroupUser.userId = user.userId
             return sharingGroupUser

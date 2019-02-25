@@ -175,9 +175,10 @@ class RequestHandler {
     func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsAndLockingResult {
         if let sharing = endpoint.sharing {
             // Endpoint uses sharing group. Must give sharingGroupUUID in request.
-            guard let dict = requestObject.toJSON(), let sharingGroupUUID = dict[ServerEndpoint.sharingGroupUUIDKey] as? String else {
             
-                self.failWithError(message: "Could not get sharing group uuid from request that uses sharing group: \(String(describing: requestObject.toJSON()))")
+            guard let dict = requestObject.toDictionary, let sharingGroupUUID = dict[ServerEndpoint.sharingGroupUUIDKey] as? String else {
+            
+                self.failWithError(message: "Could not get sharing group uuid from request that uses sharing group: \(String(describing: requestObject.toDictionary))")
                 return .failure
             }
             
@@ -376,7 +377,7 @@ class RequestHandler {
             }
         }
         
-        Log.debug("requestObject: \(String(describing: requestObject.toJSON()))")
+        Log.debug("requestObject: \(String(describing: requestObject.toDictionary))")
         
 #if DEBUG
         // Failure testing.
@@ -504,7 +505,7 @@ class RequestHandler {
                 return
             }
 
-            let jsonDict = message.toJSON()
+            let jsonDict = message.toDictionary
             if nil == jsonDict {
                 handleResult(.failure(.message("Could not convert response object to json dictionary")))
                 return

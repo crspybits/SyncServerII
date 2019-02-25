@@ -43,7 +43,7 @@ extension FileController {
             }
 
             if masterVersion != uploadDeletionRequest.masterVersion {
-                let response = UploadDeletionResponse()!
+                let response = UploadDeletionResponse()
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(.success(response))
@@ -91,7 +91,7 @@ extension FileController {
             Log.debug("uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
             
 #if DEBUG
-            if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion != 0 {
+            if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion {
                 actuallyDeleteFileFromServer(key:key, uploadDeletionRequest:uploadDeletionRequest, fileIndexObj:fileIndexObj, params:params)
                 return
             }
@@ -112,13 +112,13 @@ extension FileController {
             
             switch uploadAddResult {
             case .success(_):
-                let response = UploadDeletionResponse()!
+                let response = UploadDeletionResponse()
                 params.completion(.success(response))
                 return
                 
             case .duplicateEntry:
                 Log.info("File was already marked for deletion: Not adding again.")
-                let response = UploadDeletionResponse()!
+                let response = UploadDeletionResponse()
                 params.completion(.success(response))
                 return
                 
@@ -193,7 +193,7 @@ extension FileController {
                 // I'm not going to fail if this fails-- this is for debugging and it's not a big deal. Drop through and report success.
             }
             
-            let response = UploadDeletionResponse()!
+            let response = UploadDeletionResponse()
             params.completion(.success(response))
             return
         }

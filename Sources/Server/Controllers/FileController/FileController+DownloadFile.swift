@@ -38,7 +38,7 @@ extension FileController {
             }
 
             if masterVersion != downloadRequest.masterVersion {
-                let response = DownloadFileResponse()!
+                let response = DownloadFileResponse()
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(.success(response))
@@ -143,7 +143,7 @@ extension FileController {
                         contentsChanged = downloadResult.checkSum != lastUploadedCheckSum
                     }
                     
-                    let response = DownloadFileResponse()!
+                    let response = DownloadFileResponse()
                     response.appMetaData = fileIndexObj!.appMetaData
                     response.data = downloadResult.data
                     response.checkSum = downloadResult.checkSum
@@ -155,7 +155,7 @@ extension FileController {
                 case .accessTokenRevokedOrExpired:
                     let message = "Access token revoked or expired."
                     Log.error(message)
-                    let response = DownloadFileResponse()!
+                    let response = DownloadFileResponse()
                     response.appMetaData = fileIndexObj!.appMetaData
                     response.cloudStorageType = cloudStorageType.rawValue
                     response.gone = GoneReason.authTokenExpiredOrRevoked.rawValue
@@ -164,7 +164,7 @@ extension FileController {
                 case .fileNotFound:
                     let message = "File not found."
                     Log.error(message)
-                    let response = DownloadFileResponse()!
+                    let response = DownloadFileResponse()
                     response.appMetaData = fileIndexObj!.appMetaData
                     response.cloudStorageType = cloudStorageType.rawValue
                     response.gone = GoneReason.fileRemovedOrRenamed.rawValue

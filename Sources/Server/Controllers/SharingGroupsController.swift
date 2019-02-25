@@ -52,7 +52,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        let response = CreateSharingGroupResponse()!
+        let response = CreateSharingGroupResponse()
         params.completion(.success(response))
     }
     
@@ -68,7 +68,7 @@ class SharingGroupsController : ControllerProtocol {
         guard let sharingGroupUUID = request.sharingGroupUUID,
             let sharingGroupName = request.sharingGroupName else {
             Log.info("No name given in sharing group update request-- no change made.")
-            let response = UpdateSharingGroupResponse()!
+            let response = UpdateSharingGroupResponse()
             params.completion(.success(response))
             return
         }
@@ -96,7 +96,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        let response = UpdateSharingGroupResponse()!
+        let response = UpdateSharingGroupResponse()
         params.completion(.success(response))
     }
     
@@ -124,7 +124,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        let response = RemoveSharingGroupResponse()!
+        let response = RemoveSharingGroupResponse()
         params.completion(.success(response))
     }
     
@@ -226,7 +226,7 @@ class SharingGroupsController : ControllerProtocol {
             }
         }
         
-        let response = RemoveUserFromSharingGroupResponse()!
+        let response = RemoveUserFromSharingGroupResponse()
         params.completion(.success(response))
     }
 }

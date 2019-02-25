@@ -49,7 +49,7 @@ class PushNotificationsController : ControllerProtocol {
                                 }
                                 
                                 let response = RegisterPushNotificationTokenResponse()
-                                params.completion(.success(response!))
+                                params.completion(.success(response))
                                 return
                             case .error(let error):
                                 let message = "Failed on subscribe: \(error)"

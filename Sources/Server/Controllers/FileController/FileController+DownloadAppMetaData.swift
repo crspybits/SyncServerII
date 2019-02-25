@@ -32,7 +32,7 @@ extension FileController {
             }
 
             if masterVersion != downloadAppMetaDataRequest.masterVersion {
-                let response = DownloadAppMetaDataResponse()!
+                let response = DownloadAppMetaDataResponse()
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(.success(response))
@@ -91,7 +91,7 @@ extension FileController {
                 return
             }
             
-            let response = DownloadAppMetaDataResponse()!
+            let response = DownloadAppMetaDataResponse()
             response.appMetaData = fileIndexObj.appMetaData
             params.completion(.success(response))
         }

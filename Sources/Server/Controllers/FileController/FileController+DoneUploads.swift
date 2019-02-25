@@ -257,7 +257,7 @@ extension FileController {
         
         if cloudDeletions.count == 0  {
             func successResponse() {
-                let response = DoneUploadsResponse()!
+                let response = DoneUploadsResponse()
                 response.numberUploadsTransferred = numberTransferred
                 Log.debug("no upload deletions or stale file versions: doneUploads.numberUploadsTransferred: \(numberTransferred)")
                 params.completion(.success(response))
@@ -293,7 +293,7 @@ extension FileController {
         // Base case.
         if cloudDeletions.count == 0 {
             func successResponse() {
-                let response = DoneUploadsResponse()!
+                let response = DoneUploadsResponse()
             
                 if numberErrorsDeletingFiles > 0 {
                     response.numberDeletionErrors = numberErrorsDeletingFiles

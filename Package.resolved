@@ -38,15 +38,6 @@
         }
       },
       {
-        "package": "Gloss",
-        "repositoryURL": "https://github.com/crspybits/Gloss.git",
-        "state": {
-          "branch": null,
-          "revision": "4bba1107e35aa091c25d94a4a808f052f4ba6a06",
-          "version": "1.2.7"
-        }
-      },
-      {
         "package": "HeliumLogger",
         "repositoryURL": "https://github.com/IBM-Swift/HeliumLogger.git",
         "state": {
@@ -210,11 +201,11 @@
       },
       {
         "package": "SyncServerShared",
-        "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
+        "repositoryURL": "/Users/chris/Desktop/Apps/repos/SyncServer-Shared",
         "state": {
-          "branch": null,
-          "revision": "d627f8beb91f90b6e004a02635d69e30b171093b",
-          "version": "9.7.0"
+          "branch": "dev",
+          "revision": "e22dca7a0a3b6e5eaad33c5dd1cb0ae62ac19a9d",
+          "version": null
         }
       },
       {

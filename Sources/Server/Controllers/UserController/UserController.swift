@@ -125,7 +125,7 @@ class UserController : ControllerProtocol {
             return
         }
         
-        let response = AddUserResponse()!
+        let response = AddUserResponse()
         response.userId = userId
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
@@ -168,7 +168,7 @@ class UserController : ControllerProtocol {
     func checkCreds(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
         
-        let response = CheckCredsResponse()!
+        let response = CheckCredsResponse()
         response.userId = params.currentSignedInUser!.userId
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
@@ -265,7 +265,7 @@ class UserController : ControllerProtocol {
             return
         }
         
-        let response = RemoveUserResponse()!
+        let response = RemoveUserResponse()
         params.completion(.success(response))
     }
 }

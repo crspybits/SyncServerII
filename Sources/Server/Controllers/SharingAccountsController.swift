@@ -63,7 +63,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        let response = CreateSharingInvitationResponse()!
+        let response = CreateSharingInvitationResponse()
         response.sharingInvitationUUID = sharingInvitationUUID
         params.completion(.success(response))
     }
@@ -140,7 +140,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
 
-        let response = RedeemSharingInvitationResponse()!
+        let response = RedeemSharingInvitationResponse()
         response.sharingGroupUUID = sharingInvitation.sharingGroupUUID
         response.userId = existingUser.userId
         
@@ -193,7 +193,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
 
-        let response = RedeemSharingInvitationResponse()!
+        let response = RedeemSharingInvitationResponse()
         response.sharingGroupUUID = sharingInvitation.sharingGroupUUID
         response.userId = userId
         

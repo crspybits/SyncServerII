@@ -477,7 +477,7 @@ class UploadRepository : Repository, RepositoryLookup {
         var result = [FileInfo]()
         
         for upload in uploads {
-            let fileInfo = FileInfo()!
+            let fileInfo = FileInfo()
             
             fileInfo.fileUUID = upload.fileUUID
             fileInfo.fileVersion = upload.fileVersion

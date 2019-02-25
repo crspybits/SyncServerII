@@ -92,7 +92,7 @@ class SharingGroup : NSObject, Model {
     }
     
     func toClient() -> SyncServerShared.SharingGroup  {
-        let clientGroup = SyncServerShared.SharingGroup()!
+        let clientGroup = SyncServerShared.SharingGroup()
         clientGroup.sharingGroupUUID = sharingGroupUUID
         clientGroup.sharingGroupName = sharingGroupName
         clientGroup.deleted = deleted

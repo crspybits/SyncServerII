@@ -225,9 +225,9 @@ public class Controllers {
         case .masterVersionUpdate(let updatedMasterVersion):
             Log.warning("Master version update: \(updatedMasterVersion)")
             if let responseType = responseType {
-                var response = responseType.init(json: [:])
-                response!.masterVersionUpdate = updatedMasterVersion
-                return .success(response!)
+                var response = responseType.init()
+                response.masterVersionUpdate = updatedMasterVersion
+                return .success(response)
             }
             else {
                 let message = "Master version update but no response type was given."

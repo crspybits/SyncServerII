@@ -99,7 +99,7 @@ class FileController : ControllerProtocol {
         
         guard let sharingGroupUUID = indexRequest.sharingGroupUUID else {
             // Not an error-- caller just didn't give a sharing group uuid-- only returning sharing group info.
-            let response = IndexResponse()!
+            let response = IndexResponse()
             response.sharingGroups = clientSharingGroups
             params.completion(.success(response))
             return
@@ -152,7 +152,7 @@ class FileController : ControllerProtocol {
             switch fileIndexResult {
             case .fileIndex(let fileIndex):
                 Log.info("Number of entries in FileIndex: \(fileIndex.count)")
-                let response = IndexResponse()!
+                let response = IndexResponse()
                 response.fileIndex = fileIndex
                 response.masterVersion = masterVersion
                 response.sharingGroups = clientSharingGroups
@@ -187,7 +187,7 @@ class FileController : ControllerProtocol {
         switch uploadsResult {
         case .uploads(let uploads):
             let fileInfo = UploadRepository.uploadsToFileInfo(uploads: uploads)
-            let response = GetUploadsResponse()!
+            let response = GetUploadsResponse()
             response.uploads = fileInfo
             params.completion(.success(response))
             

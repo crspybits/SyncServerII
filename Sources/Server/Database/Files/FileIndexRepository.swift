@@ -630,7 +630,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             
             let rowModel = rowModel as! FileIndex
 
-            let fileInfo = FileInfo()!
+            let fileInfo = FileInfo()
             fileInfo.fileUUID = rowModel.fileUUID
             fileInfo.deviceUUID = rowModel.deviceUUID
             fileInfo.fileVersion = rowModel.fileVersion

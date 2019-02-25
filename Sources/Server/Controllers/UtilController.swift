@@ -20,7 +20,7 @@ class UtilController : ControllerProtocol {
     }
     
     func healthCheck(params:RequestProcessingParameters) {
-        let response = HealthCheckResponse()!
+        let response = HealthCheckResponse()
         
         response.currentServerDateTime = Date()
         response.serverUptime = -UtilController.serverStart.timeIntervalSinceNow
@@ -41,6 +41,6 @@ class UtilController : ControllerProtocol {
     
     func checkPrimaryCreds(params:RequestProcessingParameters) {
         let response = CheckPrimaryCredsResponse()
-        params.completion(.success(response!))
+        params.completion(.success(response))
     }
 }

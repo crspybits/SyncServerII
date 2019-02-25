@@ -32,7 +32,7 @@ extension FileController {
             }
 
             if masterVersion != uploadAppMetaDataRequest.masterVersion {
-                let response = UploadAppMetaDataResponse()!    
+                let response = UploadAppMetaDataResponse()
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(.success(response))
@@ -110,7 +110,7 @@ extension FileController {
                 return
             }
 
-            let response = UploadAppMetaDataResponse()!
+            let response = UploadAppMetaDataResponse()
             params.completion(.success(response))
         }
     }

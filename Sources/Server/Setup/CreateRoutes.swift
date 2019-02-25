@@ -18,12 +18,15 @@ class CreateRoutes {
     }
     
     func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest) {
-
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info("parsedURL: \(routerRequest.parsedURL)")
             let handler = RequestHandler(request: routerRequest, response: routerResponse, endpoint:ep)
             
-            let create:(RouterRequest) -> (RequestMessage?) = ep.requestMessageType.init
+            func create(routerRequest: RouterRequest) -> RequestMessage? {
+                let queryDict = routerRequest.queryParameters
+                return try? ep.requestMessageType.decode(queryDict)
+            }
+            
             handler.doRequest(createRequest: create, processRequest: processRequest)
         }
         

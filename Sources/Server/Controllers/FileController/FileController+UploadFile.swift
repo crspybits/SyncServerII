@@ -13,7 +13,7 @@ import Kitura
 
 extension FileController {
     private func success(params:RequestProcessingParameters, upload:Upload, creationDate:Date) {
-        let response = UploadFileResponse()!
+        let response = UploadFileResponse()
 
         // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
         response.creationDate = creationDate
@@ -69,7 +69,7 @@ extension FileController {
             }
 
             if masterVersion != uploadRequest.masterVersion {
-                let response = UploadFileResponse()!
+                let response = UploadFileResponse()
                 Log.warning("Master version update: \(String(describing: masterVersion))")
                 response.masterVersionUpdate = masterVersion
                 params.completion(.success(response))
@@ -105,7 +105,7 @@ extension FileController {
             
             var newFile = true
             if let existingFileInFileIndex = existingFileInFileIndex {
-                if existingFileInFileIndex.deleted && (uploadRequest.undeleteServerFile == nil || uploadRequest.undeleteServerFile == 0) {
+                if existingFileInFileIndex.deleted && (uploadRequest.undeleteServerFile == nil || uploadRequest.undeleteServerFile == false) {
                     let message = "Attempt to upload an existing file, but it has already been deleted."
                     Log.error(message)
                     params.completion(.failure(.message(message)))
@@ -130,7 +130,7 @@ extension FileController {
                 creationDate = existingFileInFileIndex.creationDate
             }
             else {
-                if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile != 0  {
+                if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile == true  {
                     let message = "Attempt to undelete a file but it's a new file!"
                     Log.error(message)
                     params.completion(.failure(.message(message)))
@@ -193,7 +193,7 @@ extension FileController {
                 upload.fileGroupUUID = fileGroupUUID
             }
             
-            if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile != 0 {
+            if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile == true {
                 Log.info("Undeleting server file.")
                 upload.state = .uploadingUndelete
             }
