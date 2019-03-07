@@ -240,14 +240,13 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         checkSum = file.checkSum(type: testAccount.type)
 
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : uploadResult.request.fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            UploadFileRequest.checkSumKey: checkSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = uploadResult.request.fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = sharingGroupUUID
+        uploadRequest.checkSum = checkSum
     
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
 
@@ -279,14 +278,13 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         checkSum = file.checkSum(type: testAccount.type)
 
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : uploadResult.request.fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            UploadFileRequest.checkSumKey: checkSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = uploadResult.request.fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = sharingGroupUUID
+        uploadRequest.checkSum = checkSum
     
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
 
@@ -296,18 +294,17 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
-            let downloadFileRequest = DownloadFileRequest(json: [
-                DownloadFileRequest.fileUUIDKey: uploadRequest.fileUUID,
-                DownloadFileRequest.masterVersionKey : 1,
-                DownloadFileRequest.fileVersionKey : 0,
-                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-            ])
+            let downloadFileRequest = DownloadFileRequest()
+            downloadFileRequest.fileUUID = uploadRequest.fileUUID
+            downloadFileRequest.masterVersion = 1
+            downloadFileRequest.fileVersion = 0
+            downloadFileRequest.sharingGroupUUID = sharingGroupUUID
             
-            self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 
                 if let dict = dict,
-                    let downloadFileResponse = DownloadFileResponse(json: dict) {
+                    let downloadFileResponse = try? DownloadFileResponse.decode(dict) {
                     XCTAssert(downloadFileResponse.gone == GoneReason.fileRemovedOrRenamed.rawValue)
                 }
                 else {

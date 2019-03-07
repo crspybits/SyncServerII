@@ -131,12 +131,11 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let deviceUUID2 = Foundation.UUID().uuidString
 
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion
+        uploadDeletionRequest.masterVersion = masterVersion + 1
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(testAccount: sharingUser, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false, expectError: failureExpected)
         sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion + 1, sharingGroupUUID: sharingGroupUUID, failureExpected:failureExpected)
@@ -192,12 +191,11 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
         sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion
+        uploadDeletionRequest.masterVersion = uploadResult.request.masterVersion + MasterVersionInt(1)
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID1, addUser: false, expectError: failureExpected)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: uploadResult.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID, failureExpected:failureExpected)
@@ -356,21 +354,19 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
 
         masterVersion += 1
         
-        let uploadDeletionRequest1 = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: upload1.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: upload1.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest1 = UploadDeletionRequest()
+        uploadDeletionRequest1.fileUUID = upload1.request.fileUUID
+        uploadDeletionRequest1.fileVersion = upload1.request.fileVersion
+        uploadDeletionRequest1.masterVersion = masterVersion + 1
+        uploadDeletionRequest1.sharingGroupUUID = sharingGroupUUID
 
         uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest1, deviceUUID: deviceUUID, addUser: false)
 
-        let uploadDeletionRequest2 = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: upload2.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: upload2.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest2 = UploadDeletionRequest()
+        uploadDeletionRequest2.fileUUID = upload2.request.fileUUID
+        uploadDeletionRequest2.fileVersion = upload2.request.fileVersion
+        uploadDeletionRequest2.masterVersion = masterVersion + 1
+        uploadDeletionRequest2.sharingGroupUUID = sharingGroupUUID
 
         uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest2, deviceUUID: deviceUUID, addUser: false)
 
@@ -399,12 +395,11 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         masterVersion += 2
         
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: 1,
-            UploadDeletionRequest.masterVersionKey: masterVersion,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
+        uploadDeletionRequest.fileVersion = 1
+        uploadDeletionRequest.masterVersion = masterVersion
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         // Original v0 uploader deletes file.
         uploadDeletion(testAccount: .primaryOwningAccount, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -421,12 +416,11 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let masterVersion: MasterVersionInt = 2
         
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: result.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: 0,
-            UploadDeletionRequest.masterVersionKey: masterVersion,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = result.request.fileUUID
+        uploadDeletionRequest.fileVersion = 0
+        uploadDeletionRequest.masterVersion = masterVersion
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         // Original v0 uploader deletes file.
         uploadDeletion(testAccount: result.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: result.uploadedDeviceUUID, addUser: false)

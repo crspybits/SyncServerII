@@ -116,14 +116,13 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
             return
         }
 
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
-            UploadFileRequest.mimeTypeKey: "foobar",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 0,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            UploadFileRequest.checkSumKey: file.checkSum(type: testAccount.type)
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUIDToSend
+        uploadRequest.mimeType = "foobar"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 0
+        uploadRequest.sharingGroupUUID = sharingGroupUUID
+        uploadRequest.checkSum = file.checkSum(type: testAccount.type)
         
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)
     }
@@ -139,15 +138,14 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         
         let fileUUIDToSend = Foundation.UUID().uuidString
         
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 0,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])
-
-        XCTAssert(uploadRequest == nil)
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUIDToSend
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 0
+        uploadRequest.sharingGroupUUID = sharingGroupUUID
+        
+        XCTAssert(uploadRequest.valid())
     }
 
     func testUploadWithBadCheckSumFails() {
@@ -169,14 +167,13 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
             return
         }
 
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 0,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            UploadFileRequest.checkSumKey: "foobar"
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUIDToSend
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 0
+        uploadRequest.sharingGroupUUID = sharingGroupUUID
+        uploadRequest.checkSum = "foobar"
         
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)
     }

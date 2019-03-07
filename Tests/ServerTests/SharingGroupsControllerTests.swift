@@ -31,7 +31,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()!
+        let sharingGroup = SyncServerShared.SharingGroup()
         sharingGroup.sharingGroupName = "Louisiana Guys"
         let sharingGroupUUID2 = UUID().uuidString
         
@@ -90,7 +90,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()!
+        let sharingGroup = SyncServerShared.SharingGroup()
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
         let sharingGroupUUID2 = Foundation.UUID().uuidString
@@ -153,7 +153,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()!
+        let sharingGroup = SyncServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
@@ -177,7 +177,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()!
+        let sharingGroup = SyncServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
@@ -380,12 +380,11 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
 
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion + 1,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion
+        uploadDeletionRequest.masterVersion = masterVersion + 1
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
     }
@@ -499,7 +498,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         
         masterVersion += 1
         
-        let sharingGroup = SyncServerShared.SharingGroup()!
+        let sharingGroup = SyncServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
@@ -711,7 +710,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()!
+        let sharingGroup = SyncServerShared.SharingGroup()
         let sharingGroupUUID2 = UUID().uuidString
         
         guard createSharingGroup(sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {

@@ -180,12 +180,11 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
         
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion
+        uploadDeletionRequest.masterVersion = uploadResult.request.masterVersion + MasterVersionInt(1)
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)

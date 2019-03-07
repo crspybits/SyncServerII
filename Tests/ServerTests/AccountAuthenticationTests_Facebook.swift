@@ -49,7 +49,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     }
     
     func testBadPathWithGoodCredsFails() {
-        let badRoute = ServerEndpoint("foobar", method: .post, messageType: AddUserRequest.self)
+        let badRoute = ServerEndpoint("foobar", method: .post, requestMessageType: AddUserRequest.self)
         let deviceUUID = Foundation.UUID().uuidString
         
         performServerTest(testAccount: .facebook1) { expectation, fbCreds in
@@ -62,7 +62,7 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     }
     
     func testGoodPathWithBadMethodWithGoodCredsFails() {
-        let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post, messageType: CheckCredsRequest.self)
+        let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post, requestMessageType: CheckCredsRequest.self)
         XCTAssert(ServerEndpoints.checkCreds.method != .post)
         let deviceUUID = Foundation.UUID().uuidString
         

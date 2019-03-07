@@ -233,14 +233,13 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         
         let file = TestFile.test1
         
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
-            UploadFileRequest.checkSumKey: file.md5CheckSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = UUID().uuidString
+        uploadRequest.checkSum = file.md5CheckSum
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
         
@@ -258,14 +257,13 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
         let file = TestFile.test1
         
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : Foundation.UUID().uuidString,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
-            UploadFileRequest.checkSumKey: file.md5CheckSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = Foundation.UUID().uuidString
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = UUID().uuidString
+        uploadRequest.checkSum = file.md5CheckSum
         
         let deviceUUID = Foundation.UUID().uuidString
 
@@ -344,14 +342,13 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         
         let file = TestFile.test1
         
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
-            UploadFileRequest.checkSumKey: file.md5CheckSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = UUID().uuidString
+        uploadRequest.checkSum = file.md5CheckSum
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
         
@@ -371,14 +368,13 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         
         let file = TestFile.test1
         
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
-            UploadFileRequest.checkSumKey: file.md5CheckSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = UUID().uuidString
+        uploadRequest.checkSum = file.md5CheckSum
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
         

@@ -110,12 +110,11 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         
         var masterVersion:MasterVersionInt = uploadResult1.request.masterVersion + MasterVersionInt(1)
         
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadResult1.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadResult1.request.fileVersion,
-            UploadDeletionRequest.masterVersionKey: masterVersion,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult1.request.fileVersion
+        uploadDeletionRequest.masterVersion = masterVersion
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
 
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
 

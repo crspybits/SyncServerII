@@ -19,3 +19,11 @@
 	When a new version of the iOS app is released and we need users to update to that version, we can force this by use of the "iOSMinimumClientVersion" key/value pair in the server .json config file. This is reflected with the iOS app HTTP header "syncserver-minimum-ios-client-app-version". So, to require the users to update their app need to:
 	a) First release the new iOS app version to the App Store.
 	b) Second, update the server .json config file and restart the server.
+	
+3) How to scale the server?
+	a) Scaling the size/type of the EC2 instance.
+		Are there parameters other than EC2 instance type? RAM size? Disk size?
+	b) Criteria for scaling the number of EC2 instances?
+	
+4) How to scale the database?
+

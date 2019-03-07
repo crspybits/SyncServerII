@@ -146,7 +146,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         case .owning:
             XCTAssert(invitation.owningUserId == adminUserId)
         case .sharing:
-            XCTAssert(invitation.owningUserId == testAccountUserId, "ERROR: invitation.owningUserId: \(invitation.owningUserId) was not equal to \(testAccountUserId)")
+            XCTAssert(invitation.owningUserId == testAccountUserId, "ERROR: invitation.owningUserId: \(String(describing: invitation.owningUserId)) was not equal to \(testAccountUserId)")
         }
     }
     
@@ -198,13 +198,12 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     
     func testSharingInvitationCreationFailsWithNoAuthorization() {
         self.performServerTest { expectation, creds in
-            let request = CreateSharingInvitationRequest(json: [
-                CreateSharingInvitationRequest.permissionKey : Permission.read,
-                // A fake sharing group id. This shouldn't be the issue that fails the request. It should fail because there is no authorization.
-                ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString
-            ])
+            let request = CreateSharingInvitationRequest()
+            request.permission = Permission.read
+            // A fake sharing group id. This shouldn't be the issue that fails the request. It should fail because there is no authorization.
+            request.sharingGroupUUID = UUID().uuidString
             
-            self.performRequest(route: ServerEndpoints.createSharingInvitation, urlParameters: "?" + request!.urlParameters()!, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.createSharingInvitation, urlParameters: "?" + request.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode != .OK, "Worked with bad request!")
                 expectation.fulfill()

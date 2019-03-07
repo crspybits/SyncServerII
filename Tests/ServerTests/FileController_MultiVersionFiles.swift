@@ -316,12 +316,11 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         // Send DoneUploads-- to commit version 0.
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
 
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: uploadResult.request.fileUUID,
-            UploadDeletionRequest.fileVersionKey: uploadResult.request.fileVersion + 1,
-            UploadDeletionRequest.masterVersionKey: uploadResult.request.masterVersion + MasterVersionInt(1),
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion + 1
+        uploadDeletionRequest.masterVersion = uploadResult.request.masterVersion + MasterVersionInt(1)
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID1, addUser: false, expectError: true)
     }
@@ -333,12 +332,11 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
             return
         }
         
-        let uploadDeletionRequest = UploadDeletionRequest(json: [
-            UploadDeletionRequest.fileUUIDKey: fileUUID,
-            UploadDeletionRequest.fileVersionKey: 2,
-            UploadDeletionRequest.masterVersionKey: masterVersion,
-            ServerEndpoint.sharingGroupUUIDKey: uploadRequest.sharingGroupUUID
-        ])!
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = fileUUID
+        uploadDeletionRequest.fileVersion = 2
+        uploadDeletionRequest.masterVersion = masterVersion
+        uploadDeletionRequest.sharingGroupUUID = uploadRequest.sharingGroupUUID
         
         let deviceUUID = Foundation.UUID().uuidString
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)

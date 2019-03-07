@@ -149,14 +149,13 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         
         let file = TestFile.test1
         
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
-            UploadFileRequest.checkSumKey: file.dropboxCheckSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = UUID().uuidString
+        uploadRequest.checkSum = file.dropboxCheckSum
         
         uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: TestFile.test1, uploadRequest:uploadRequest)
         
@@ -255,14 +254,13 @@ class DropboxTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
-            UploadFileRequest.checkSumKey: file.dropboxCheckSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = UUID().uuidString
+        uploadRequest.checkSum = file.dropboxCheckSum
 
         uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest)
         
@@ -340,14 +338,13 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         
         let file = TestFile.test1
 
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUID,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: 0,
-            UploadFileRequest.masterVersionKey: 1,
-            ServerEndpoint.sharingGroupUUIDKey: UUID().uuidString,
-            UploadFileRequest.checkSumKey: file.dropboxCheckSum
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUID
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = 0
+        uploadRequest.masterVersion = 1
+        uploadRequest.sharingGroupUUID = UUID().uuidString
+        uploadRequest.checkSum = file.dropboxCheckSum
         
         guard let fileName = uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile:file, uploadRequest:uploadRequest) else {
             XCTFail()

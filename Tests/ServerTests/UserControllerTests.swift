@@ -130,7 +130,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "checkCreds failed")
                 
-                if let dict = dict, let checkCredsResponse = CheckCredsResponse(json: dict) {
+                if let dict = dict,
+                    let checkCredsResponse = try? CheckCredsResponse.decode(dict) {
                     XCTAssert(checkCredsResponse.userId != nil)
                 }
                 else {

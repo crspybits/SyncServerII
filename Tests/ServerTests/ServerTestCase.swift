@@ -239,9 +239,9 @@ class ServerTestCase : XCTestCase {
                 }
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on uploadAppMetaDataRequest request")
-                    
+
                     if let dict = dict,
-                        let uploadAppMetaDataResponse = UploadAppMetaDataResponse(json: dict) {
+                        let uploadAppMetaDataResponse = try? UploadAppMetaDataResponse.decode(dict) {
                         if uploadAppMetaDataResponse.masterVersionUpdate == nil {
                             result = uploadAppMetaDataResponse
                         }
@@ -269,14 +269,13 @@ class ServerTestCase : XCTestCase {
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
 
-            let downloadAppMetaDataRequest = DownloadAppMetaDataRequest(json: [
-                DownloadAppMetaDataRequest.fileUUIDKey: fileUUID,
-                DownloadAppMetaDataRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadAppMetaDataRequest.appMetaDataVersionKey: appMetaDataVersion as Any,
-                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-            ])
+            let downloadAppMetaDataRequest = DownloadAppMetaDataRequest()
+            downloadAppMetaDataRequest.fileUUID = fileUUID
+            downloadAppMetaDataRequest.masterVersion = masterVersionExpectedWithDownload
+            downloadAppMetaDataRequest.appMetaDataVersion = appMetaDataVersion
+            downloadAppMetaDataRequest.sharingGroupUUID = sharingGroupUUID
             
-            if downloadAppMetaDataRequest == nil {
+            if !downloadAppMetaDataRequest.valid() {
                 if !expectedError {
                     XCTFail()
                 }
@@ -284,7 +283,7 @@ class ServerTestCase : XCTestCase {
                 return
             }
             
-            self.performRequest(route: ServerEndpoints.downloadAppMetaData, headers: headers, urlParameters: "?" + downloadAppMetaDataRequest!.urlParameters()!, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.downloadAppMetaData, headers: headers, urlParameters: "?" + downloadAppMetaDataRequest.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 
                 if expectedError {
@@ -292,9 +291,9 @@ class ServerTestCase : XCTestCase {
                 }
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on downloadAppMetaDataRequest request")
-                    
+
                     if let dict = dict,
-                        let downloadAppMetaDataResponse = DownloadAppMetaDataResponse(json: dict) {
+                        let downloadAppMetaDataResponse = try? DownloadAppMetaDataResponse.decode(dict) {
                         result = downloadAppMetaDataResponse
                         if expectUpdatedMasterUpdate {
                             XCTAssert(downloadAppMetaDataResponse.masterVersionUpdate != nil)
@@ -322,8 +321,8 @@ class ServerTestCase : XCTestCase {
         performServerTest { expectation, creds in
             self.performRequest(route: ServerEndpoints.healthCheck) { response, dict in
                 XCTAssert(response!.statusCode == .OK, "Failed on healthcheck request")
-                
-                guard let dict = dict, let healthCheckResponse = HealthCheckResponse(json: dict) else {
+
+                guard let dict = dict, let healthCheckResponse = try? HealthCheckResponse.decode(dict) else {
                     XCTFail()
                     return
                 }
@@ -474,11 +473,10 @@ class ServerTestCase : XCTestCase {
     private func addNewUser2(testAccount:TestAccount, sharingGroupUUID: String, deviceUUID:String, cloudFolderName: String?, sharingGroupName:String?) -> AddUserResponse? {
         var result:AddUserResponse?
         
-        let addUserRequest = AddUserRequest(json: [
-            AddUserRequest.cloudFolderNameKey : cloudFolderName as Any,
-            AddUserRequest.sharingGroupNameKey: sharingGroupName as Any,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let addUserRequest = AddUserRequest()
+        addUserRequest.cloudFolderName = cloudFolderName
+        addUserRequest.sharingGroupName = sharingGroupName
+        addUserRequest.sharingGroupUUID = sharingGroupUUID
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -492,7 +490,8 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request: \(response!.statusCode)")
                 
-                if let dict = dict, let addUserResponse = AddUserResponse(json: dict) {
+                
+                if let dict = dict, let addUserResponse = try? AddUserResponse.decode(dict) {
                     XCTAssert(addUserResponse.userId != nil)
                     result = addUserResponse
                 }
@@ -512,10 +511,9 @@ class ServerTestCase : XCTestCase {
     func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, sharingGroupUUID:String, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup? = nil, errorExpected: Bool = false) -> Bool {
         var result: Bool = false
         
-        let createRequest = CreateSharingGroupRequest(json: [
-            CreateSharingGroupRequest.sharingGroupNameKey: sharingGroup?.sharingGroupName as Any,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])!
+        let createRequest = CreateSharingGroupRequest()
+        createRequest.sharingGroupName = sharingGroup?.sharingGroupName
+        createRequest.sharingGroupUUID = sharingGroupUUID
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -533,9 +531,9 @@ class ServerTestCase : XCTestCase {
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on create sharing group request: \(response!.statusCode)")
                 }
-                
+
                 if !errorExpected {
-                    if let dict = dict, let _ = CreateSharingGroupResponse(json: dict) {
+                    if let dict = dict, let _ = try? CreateSharingGroupResponse.decode(dict) {
                         result = true
                     }
                     else {
@@ -554,11 +552,10 @@ class ServerTestCase : XCTestCase {
     func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false, expectFailure: Bool = false) -> Bool {
         var result: Bool = false
         
-        let updateRequest = UpdateSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroup.sharingGroupUUID as Any,
-            UpdateSharingGroupRequest.sharingGroupNameKey: sharingGroup.sharingGroupName as Any,
-            ServerEndpoint.masterVersionKey: masterVersion
-        ])!
+        let updateRequest = UpdateSharingGroupRequest()
+        updateRequest.sharingGroupUUID = sharingGroup.sharingGroupUUID
+        updateRequest.sharingGroupName = sharingGroup.sharingGroupName
+        updateRequest.masterVersion = masterVersion
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -576,8 +573,8 @@ class ServerTestCase : XCTestCase {
                 }
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on update sharing group request: \(response!.statusCode)")
-                    
-                    if let dict = dict, let response = UpdateSharingGroupResponse(json: dict) {
+
+                    if let dict = dict, let response = try? UpdateSharingGroupResponse.decode(dict) {
                         if let _ = response.masterVersionUpdate {
                             XCTAssert(expectMasterVersionUpdate)
                         }
@@ -603,10 +600,9 @@ class ServerTestCase : XCTestCase {
     func removeSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupUUID: String, masterVersion: MasterVersionInt) -> Bool {
         var result: Bool = false
         
-        let removeRequest = RemoveSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            ServerEndpoint.masterVersionKey: masterVersion
-        ])!
+        let removeRequest = RemoveSharingGroupRequest()
+        removeRequest.sharingGroupUUID = sharingGroupUUID
+        removeRequest.masterVersion = masterVersion
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -619,8 +615,8 @@ class ServerTestCase : XCTestCase {
             self.performRequest(route: ServerEndpoints.removeSharingGroup, headers: headers, urlParameters: queryParams) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on remove sharing group request: \(response!.statusCode)")
-                
-                if let dict = dict, let response = RemoveSharingGroupResponse(json: dict) {
+
+                if let dict = dict, let response = try? RemoveSharingGroupResponse.decode(dict) {
                     if let _ = response.masterVersionUpdate {
                         result = false
                     }
@@ -643,10 +639,9 @@ class ServerTestCase : XCTestCase {
     func removeUserFromSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroupUUID: String, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false) -> Bool {
         var result: Bool = false
         
-        let removeRequest = RemoveUserFromSharingGroupRequest(json: [
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            ServerEndpoint.masterVersionKey: masterVersion
-        ])!
+        let removeRequest = RemoveUserFromSharingGroupRequest()
+        removeRequest.sharingGroupUUID = sharingGroupUUID
+        removeRequest.masterVersion = masterVersion
         
         self.performServerTest(testAccount:testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -660,7 +655,7 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on remove user from sharing group request: \(response!.statusCode)")
                 
-                if let dict = dict, let response = RemoveUserFromSharingGroupResponse(json: dict) {
+                if let dict = dict, let response = try? RemoveUserFromSharingGroupResponse.decode(dict) {
                     if let _ = response.masterVersionUpdate {
                         XCTAssert(expectMasterVersionUpdate)
                     }
@@ -740,20 +735,19 @@ class ServerTestCase : XCTestCase {
             checkSumType = testAccount.type
         }
 
-        let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUIDToSend,
-            UploadFileRequest.mimeTypeKey: "text/plain",
-            UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: masterVersion,
-            UploadFileRequest.undeleteServerFileKey: undelete,
-            UploadFileRequest.fileGroupUUIDKey: fileGroupUUID as Any,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            UploadFileRequest.checkSumKey: stringFile.checkSum(type: checkSumType)
-        ])!
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUIDToSend
+        uploadRequest.mimeType = "text/plain"
+        uploadRequest.fileVersion = fileVersion
+        uploadRequest.masterVersion = masterVersion
+        uploadRequest.undeleteServerFile = undelete == 1
+        uploadRequest.fileGroupUUID = fileGroupUUID
+        uploadRequest.sharingGroupUUID = sharingGroupUUID
+        uploadRequest.checkSum = stringFile.checkSum(type: checkSumType)
         
         uploadRequest.appMetaData = appMetaData
         
-        Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toJSON()))")
+        Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toDictionary))")
         guard runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
             if !errorExpected {
                 XCTFail()
@@ -805,8 +799,8 @@ class ServerTestCase : XCTestCase {
                         expectation.fulfill()
                         return
                     }
-                    
-                    if let uploadResponse = UploadFileResponse(json: dict!) {
+
+                    if let uploadResponse = try? UploadFileResponse.decode(dict!) {
                         if updatedMasterVersionExpected == nil {
                             guard uploadResponse.creationDate != nil, uploadResponse.updateDate != nil else {
                                 result = false
@@ -866,14 +860,15 @@ class ServerTestCase : XCTestCase {
             checkSumType = testAccount.type
         }
 
-        guard let uploadRequest = UploadFileRequest(json: [
-            UploadFileRequest.fileUUIDKey : fileUUID,
-            UploadFileRequest.mimeTypeKey: ServerTestCase.jpegMimeType,
-            UploadFileRequest.fileVersionKey: fileVersion,
-            UploadFileRequest.masterVersionKey: expectedMasterVersion,
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID,
-            UploadFileRequest.checkSumKey: jpegFile.checkSum(type: checkSumType)
-            ]) else {
+        let uploadRequest = UploadFileRequest()
+        uploadRequest.fileUUID = fileUUID
+        uploadRequest.mimeType = ServerTestCase.jpegMimeType
+        uploadRequest.fileVersion = fileVersion
+        uploadRequest.masterVersion = expectedMasterVersion
+        uploadRequest.sharingGroupUUID = sharingGroupUUID
+        uploadRequest.checkSum = jpegFile.checkSum(type: checkSumType)
+        
+        guard uploadRequest.valid() else {
             XCTFail()
             return nil
         }
@@ -892,16 +887,15 @@ class ServerTestCase : XCTestCase {
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
-            let doneUploadsRequest = DoneUploadsRequest(json: [
-                ServerEndpoint.masterVersionKey : "\(masterVersion)",
-                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-            ])
+            let doneUploadsRequest = DoneUploadsRequest()
+            doneUploadsRequest.masterVersion = masterVersion
+            doneUploadsRequest.sharingGroupUUID = sharingGroupUUID
             
             if let sharingGroupName = sharingGroupName {
-                doneUploadsRequest?.sharingGroupName = sharingGroupName
+                doneUploadsRequest.sharingGroupName = sharingGroupName
             }
             
-            self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest!.urlParameters()!, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 
                 if failureExpected {
@@ -911,7 +905,7 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
                     XCTAssert(dict != nil)
                     
-                    if let doneUploadsResponse = DoneUploadsResponse(json: dict!) {
+                    if let doneUploadsResponse = try? DoneUploadsResponse.decode(dict!) {
                         XCTAssert(doneUploadsResponse.masterVersionUpdate == updatedMasterVersionExpected)
                         XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads, "doneUploadsResponse.numberUploadsTransferred: \(String(describing: doneUploadsResponse.numberUploadsTransferred)); expectedNumberOfUploads: \(String(describing: expectedNumberOfUploads))")
                         XCTAssert(doneUploadsResponse.numberDeletionErrors == nil)
@@ -928,11 +922,10 @@ class ServerTestCase : XCTestCase {
     
     func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
         
-        let indexRequest = IndexRequest(json: [
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID as Any
-        ])
+        let request = IndexRequest()
+        request.sharingGroupUUID = sharingGroupUUID
     
-        guard let request = indexRequest,
+        guard request.valid(),
             let parameters = request.urlParameters() else {
             XCTFail()
             return
@@ -951,7 +944,7 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode == .OK, "Did not work on IndexRequest request")
                     XCTAssert(dict != nil)
 
-                    if let indexResponse = IndexResponse(json: dict!) {
+                    if let indexResponse = try? IndexResponse.decode(dict!) {
                         XCTAssert(indexResponse.masterVersion == masterVersionExpected)
                         if let expectedFiles = expectedFiles {
                             guard let fileIndex = indexResponse.fileIndex else {
@@ -1002,11 +995,10 @@ class ServerTestCase : XCTestCase {
         self.performServerTest(testAccount: testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
-            let indexRequest = IndexRequest(json: [
-                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID as Any
-            ])
+            let request = IndexRequest()
+            request.sharingGroupUUID = sharingGroupUUID
             
-            guard let request = indexRequest else {
+            guard request.valid() else {
                 expectation.fulfill()
                 XCTFail()
                 return
@@ -1021,8 +1013,8 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on IndexRequest")
                 XCTAssert(dict != nil)
-                
-                guard let indexResponse = IndexResponse(json: dict!),
+
+                guard let indexResponse = try? IndexResponse.decode(dict!),
                     let groups = indexResponse.sharingGroups else {
                     expectation.fulfill()
                     XCTFail()
@@ -1052,11 +1044,10 @@ class ServerTestCase : XCTestCase {
         self.performServerTest(testAccount: testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
-            let indexRequest = IndexRequest(json: [
-                ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID as Any
-            ])
+            let request = IndexRequest()
+            request.sharingGroupUUID = sharingGroupUUID
             
-            guard let request = indexRequest else {
+            guard request.valid() else {
                 expectation.fulfill()
                 XCTFail()
                 return
@@ -1072,7 +1063,7 @@ class ServerTestCase : XCTestCase {
                 XCTAssert(response!.statusCode == .OK, "Did not work on IndexRequest")
                 XCTAssert(dict != nil)
                 
-                guard let indexResponse = IndexResponse(json: dict!) else {
+                guard let indexResponse = try? IndexResponse.decode(dict!) else {
                     expectation.fulfill()
                     XCTFail()
                     return
@@ -1092,11 +1083,10 @@ class ServerTestCase : XCTestCase {
             XCTAssert(expectedFiles.count == expectedCheckSums!.count)
         }
         
-        let getUploadsRequest = GetUploadsRequest(json: [
-            ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-        ])
+        let request = GetUploadsRequest()
+        request.sharingGroupUUID = sharingGroupUUID
         
-        guard let request = getUploadsRequest,
+        guard request.valid(),
             let params = request.urlParameters() else {
             XCTFail()
             return
@@ -1116,7 +1106,7 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(dict != nil)
                 }
                 
-                if let getUploadsResponse = GetUploadsResponse(json: dict!) {
+                if let getUploadsResponse = try? GetUploadsResponse.decode(dict!) {
                     if getUploadsResponse.uploads == nil {
                         XCTAssert(expectedFiles.count == 0)
                         if expectedCheckSums != nil {
@@ -1168,18 +1158,16 @@ class ServerTestCase : XCTestCase {
             
             var request:CreateSharingInvitationRequest!
             if permission == nil {
-                request = CreateSharingInvitationRequest(json: [
-                    ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-                ])
+                request = CreateSharingInvitationRequest()
+                request.sharingGroupUUID = sharingGroupUUID
             }
             else {
-                request = CreateSharingInvitationRequest(json: [
-                    CreateSharingInvitationRequest.permissionKey : permission!,
-                    ServerEndpoint.sharingGroupUUIDKey: sharingGroupUUID
-                ])
+                request = CreateSharingInvitationRequest()
+                request.permission = permission!
+                request.sharingGroupUUID = sharingGroupUUID
             }
             
-            self.performRequest(route: ServerEndpoints.createSharingInvitation, headers: headers, urlParameters: "?" + request!.urlParameters()!, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.createSharingInvitation, headers: headers, urlParameters: "?" + request.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 if errorExpected {
                     XCTAssert(response!.statusCode != .OK)
@@ -1188,7 +1176,7 @@ class ServerTestCase : XCTestCase {
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on request: \(response!.statusCode)")
                     XCTAssert(dict != nil)
-                    let response = CreateSharingInvitationResponse(json: dict!)
+                    let response = try? CreateSharingInvitationResponse.decode(dict!)
                     completion(expectation, response?.sharingInvitationUUID)
                 }
             }
@@ -1297,11 +1285,10 @@ class ServerTestCase : XCTestCase {
             var urlParameters:String?
             
             if sharingInvitationUUID != nil {
-                let request = RedeemSharingInvitationRequest(json: [
-                    RedeemSharingInvitationRequest.sharingInvitationUUIDKey : sharingInvitationUUID!,
-                    AddUserRequest.cloudFolderNameKey: actualCloudFolderName as Any
-                ])
-                urlParameters = "?" + request!.urlParameters()!
+                let request = RedeemSharingInvitationRequest()
+                request.sharingInvitationUUID = sharingInvitationUUID!
+                request.cloudFolderName = actualCloudFolderName
+                urlParameters = "?" + request.urlParameters()!
             }
             
             self.performRequest(route: ServerEndpoints.redeemSharingInvitation, headers: headers, urlParameters: urlParameters, body:nil) { response, dict in
@@ -1316,7 +1303,7 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode == .OK, "Did not work on request")
                     
                     if let dict = dict,
-                        let redeemSharingInvitationResponse = RedeemSharingInvitationResponse(json: dict) {
+                        let redeemSharingInvitationResponse = try? RedeemSharingInvitationResponse.decode(dict) {
                         result = redeemSharingInvitationResponse
                     }
                     else {
@@ -1351,7 +1338,7 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode == .OK, "Did not work on upload deletion request")
                     XCTAssert(dict != nil)
                     
-                    if let uploadDeletionResponse = UploadDeletionResponse(json: dict!) {
+                    if let uploadDeletionResponse = try? UploadDeletionResponse.decode(dict!) {
                         if updatedMasterVersionExpected != nil {
                             XCTAssert(uploadDeletionResponse.masterVersionUpdate == updatedMasterVersionExpected)
                         }
@@ -1406,15 +1393,14 @@ class ServerTestCase : XCTestCase {
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
-            let downloadFileRequest = DownloadFileRequest(json: [
-                DownloadFileRequest.fileUUIDKey: actualUploadFileRequest!.fileUUID,
-                DownloadFileRequest.masterVersionKey : "\(masterVersionExpectedWithDownload)",
-                DownloadFileRequest.fileVersionKey : downloadFileVersion,
-                DownloadFileRequest.appMetaDataVersionKey: appMetaData?.version as Any,
-                ServerEndpoint.sharingGroupUUIDKey: actualSharingGroupUUID
-            ])
+            let downloadFileRequest = DownloadFileRequest()
+            downloadFileRequest.fileUUID = actualUploadFileRequest!.fileUUID
+            downloadFileRequest.masterVersion = MasterVersionInt(masterVersionExpectedWithDownload)
+            downloadFileRequest.fileVersion = downloadFileVersion
+            downloadFileRequest.appMetaDataVersion = appMetaData?.version
+            downloadFileRequest.sharingGroupUUID = actualSharingGroupUUID
             
-            self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest!.urlParameters()!, body:nil) { response, dict in
+            self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest.urlParameters()!, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 
                 if expectedError {
@@ -1426,7 +1412,7 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(dict != nil)
                     
                     if let dict = dict,
-                        let downloadFileResponse = DownloadFileResponse(json: dict) {
+                        let downloadFileResponse = try? DownloadFileResponse.decode(dict) {
                         result = downloadFileResponse
                         if expectUpdatedMasterUpdate {
                             XCTAssert(downloadFileResponse.masterVersionUpdate != nil)
