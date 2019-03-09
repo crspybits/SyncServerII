@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "Signals",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+        "state": {
+          "branch": null,
+          "revision": "23f62ec7a38a837e1c14acffc2e963b667a88b46",
+          "version": "1.0.16"
+        }
+      },
+      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
@@ -26,6 +35,24 @@
           "branch": null,
           "revision": "6910763b0dfa6f95a75217215d8cdce3ee11a6ae",
           "version": "1.0.44"
+        }
+      },
+      {
+        "package": "CCurl",
+        "repositoryURL": "https://github.com/IBM-Swift/CCurl.git",
+        "state": {
+          "branch": null,
+          "revision": "2a431e3a5fb8d004aa7d4d1bebb5d511f568c43e",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "CEpoll",
+        "repositoryURL": "https://github.com/IBM-Swift/CEpoll.git",
+        "state": {
+          "branch": null,
+          "revision": "4e56acbea4d452110236dcbfcee0045a697c0e9f",
+          "version": "1.0.0"
         }
       },
       {
@@ -87,8 +114,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
         "state": {
           "branch": null,
-          "revision": "9806d353eb31b3a37e6b92cd05482ae81483b47c",
-          "version": "2.1.6"
+          "revision": "d837d453a72fe914b91354708b1afb13a2b411a6",
+          "version": "2.1.7"
         }
       },
       {
@@ -128,6 +155,15 @@
         }
       },
       {
+        "package": "OpenSSL",
+        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
+        "state": {
+          "branch": null,
+          "revision": "273fe9fa8f751bc278469b31ba3f1fe7a2b03723",
+          "version": "1.0.3"
+        }
+      },
+      {
         "package": "PerfectLib",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
         "state": {
@@ -146,6 +182,15 @@
         }
       },
       {
+        "package": "LinuxBridge",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+        "state": {
+          "branch": null,
+          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
+          "version": "3.1.0"
+        }
+      },
+      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -156,10 +201,10 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
         "state": {
           "branch": null,
-          "revision": "afec636bfa3302ea155f462f139da46a53fd351a",
+          "revision": "5401a4713557237baabaef1caea93467cf5af138",
           "version": "2.1.0"
         }
       },
@@ -201,10 +246,10 @@
       },
       {
         "package": "SyncServerShared",
-        "repositoryURL": "/Users/chris/Desktop/Apps/repos/SyncServer-Shared",
+        "repositoryURL": "/root/Apps/repos/SyncServer-Shared",
         "state": {
-          "branch": "dev",
-          "revision": "181bf0eaa8771902fd9b205ce22c0606ec72b8a7",
+          "branch": "master",
+          "revision": "5a592341b0bcf5ace2bf58887e8b2ca4cbd226d7",
           "version": null
         }
       },

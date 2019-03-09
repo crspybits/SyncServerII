@@ -24,7 +24,19 @@ class CreateRoutes {
             
             func create(routerRequest: RouterRequest) -> RequestMessage? {
                 let queryDict = routerRequest.queryParameters
-                return try? ep.requestMessageType.decode(queryDict)
+                guard let request = try? ep.requestMessageType.decode(queryDict) else {
+                    Log.error("Error doing request decode")
+                    return nil
+                }
+                
+                do {
+                    try request.setup(request: routerRequest)
+                } catch (let error) {
+                    Log.error("Error doing request setup: \(error)")
+                    return nil
+                }
+                
+                return request
             }
             
             handler.doRequest(createRequest: create, processRequest: processRequest)

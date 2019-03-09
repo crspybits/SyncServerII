@@ -166,7 +166,7 @@ extension KituraTest {
             
         case .header:
             guard let params = response.headers[ServerConstants.httpResponseMessageParams.lowercased()], params.count > 0 else {
-                Log.error("Could not obtain parameters from header")
+                Log.error("Could not obtain response parameters from header")
                 return nil
             }
             

@@ -235,7 +235,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         
         return fileIndex
     }
-    
+
     func testAddFileIndex() {
         let user1 = User()
         user1.username = "Chris"
@@ -254,7 +254,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
     }
-    
+
     func testUpdateFileIndexWithNoChanges() {
         let user1 = User()
         user1.username = "Chris"
@@ -381,7 +381,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail("No Upload Found")
         }
     }
-    
+
     func testFileIndexWithNoFiles() {
         let user1 = User()
         user1.username = "Chris"
@@ -413,7 +413,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail()
         }
     }
-    
+
     func testFileIndexWithOneFile() {
         let user1 = User()
         user1.username = "Chris"
@@ -479,24 +479,28 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     
     func testAddDeviceUUIDFailsAfterMax() {
         let repo = DeviceUUIDRepository(db)
-        let number = repo.maximumNumberOfDeviceUUIDsPerUser! + 1
-        for curr in 1...number {
-            if curr < number {
-                XCTAssert(doAddDeviceUUID(repo: repo) != nil)
-            }
-            else {
-                XCTAssert(doAddDeviceUUID(repo: repo) == nil)
+        if let maxNumber = repo.maximumNumberOfDeviceUUIDsPerUser {
+            let number = maxNumber + 1
+            for curr in 1...number {
+                if curr < number {
+                    XCTAssert(doAddDeviceUUID(repo: repo) != nil)
+                }
+                else {
+                    XCTAssert(doAddDeviceUUID(repo: repo) == nil)
+                }
             }
         }
     }
-    
+
     func testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax() {
         let repo = DeviceUUIDRepository(db)
-        let number = repo.maximumNumberOfDeviceUUIDsPerUser! + 1
-        repo.maximumNumberOfDeviceUUIDsPerUser = nil
-        
-        for _ in 1...number {
-            XCTAssert(doAddDeviceUUID(repo: repo) != nil)
+        if let maxNumber = repo.maximumNumberOfDeviceUUIDsPerUser {
+            let number = maxNumber + 1
+            repo.maximumNumberOfDeviceUUIDsPerUser = nil
+            
+            for _ in 1...number {
+                XCTAssert(doAddDeviceUUID(repo: repo) != nil)
+            }
         }
     }
     

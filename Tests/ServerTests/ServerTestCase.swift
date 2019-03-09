@@ -747,6 +747,12 @@ class ServerTestCase : XCTestCase {
         
         uploadRequest.appMetaData = appMetaData
         
+        guard uploadRequest.valid() else {
+            XCTFail()
+            Log.error("Invalid upload request!")
+            return nil
+        }
+        
         Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toDictionary))")
         guard runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
             if !errorExpected {

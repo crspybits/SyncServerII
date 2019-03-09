@@ -376,9 +376,7 @@ class RequestHandler {
                 return
             }
         }
-        
-        Log.debug("requestObject: \(String(describing: requestObject.toDictionary))")
-        
+                
 #if DEBUG
         // Failure testing.
         if request.headers[ServerConstants.httpRequestEndpointFailureTestKey] != nil {

@@ -14,13 +14,13 @@ import SyncServerShared
 class MessageTests: ServerTestCase, LinuxTestable {
 
     override func setUp() {
-        super.setUp()
+         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
     
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+         super.tearDown()
     }
     
     func testIntConversions() {
@@ -48,34 +48,43 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let sharingGroupUUID = UUID().uuidString
         
         let uploadRequest = UploadFileRequest()
+        uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
         uploadRequest.fileUUID = uuidString1
-        uploadRequest.mimeType = "text/plain"
         uploadRequest.fileVersion = FileVersionInt(1)
         uploadRequest.masterVersion = MasterVersionInt(42)
-        uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
-        
-        let result = uploadRequest.urlParameters()
-        
-        XCTAssert(result == "fileUUID=\(uuidString1)&mimeType=text%2Fplain&fileVersion=1&masterVersion=42&sharingGroupUUID=\(sharingGroupUUID)&checkSum=\(TestFile.test1.dropboxCheckSum)", "Result was: \(String(describing: result))")
-    }
-    
-    func testURLParametersWithIntegersAsStrings() {
-        let uuidString1 = Foundation.UUID().uuidString
-
-        let sharingGroupUUID = UUID().uuidString
-        
-        let uploadRequest = UploadFileRequest()
-        uploadRequest.fileUUID = uuidString1
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 1
-        uploadRequest.masterVersion = 42
         uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
+
+        guard let result = uploadRequest.urlParameters() else {
+            XCTFail()
+            return
+        }
         
-        let result = uploadRequest.urlParameters()
+        let resultArray = result.components(separatedBy: "&")
         
-        XCTAssert(result == "fileUUID=\(uuidString1)&mimeType=text%2Fplain&fileVersion=1&masterVersion=42&sharingGroupUUID=\(sharingGroupUUID)&checkSum=\(TestFile.test1.dropboxCheckSum)", "Result was: \(String(describing: result))")
+        let expectedCheckSum = "checkSum=\(TestFile.test1.dropboxCheckSum)"
+        let expectedFileUUID = "fileUUID=\(uuidString1)"
+        let expectedFileVersion = "fileVersion=1"
+        let expectedMasterVersion = "masterVersion=42"
+        let expectedMimeType = "mimeType=text%2Fplain"
+        let expectedSharingGroupUUID = "sharingGroupUUID=\(sharingGroupUUID)"
+
+        XCTAssert(resultArray[0] == expectedCheckSum)
+        XCTAssert(resultArray[1] == expectedFileUUID)
+        XCTAssert(resultArray[2] == expectedFileVersion)
+        XCTAssert(resultArray[3] == expectedMasterVersion)
+        XCTAssert(resultArray[4] == expectedMimeType)
+        XCTAssert(resultArray[5] == expectedSharingGroupUUID)
+
+        let expected =
+            expectedCheckSum + "&" +
+            expectedFileUUID + "&" +
+            expectedFileVersion + "&" +
+            expectedMasterVersion + "&" +
+            expectedMimeType + "&" +
+            expectedSharingGroupUUID
+
+        XCTAssert(result == expected, "Result was: \(String(describing: result))")
     }
     
     func testURLParametersForUploadDeletion() {
@@ -93,18 +102,17 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let result = uploadDeletionRequest.urlParameters()
         
         let expectedURLParams =
+            "actualDeletion=true&" +
             "fileUUID=\(uuidString)&" +
             "fileVersion=99&" +
             "masterVersion=23&" +
-            "sharingGroupUUID=\(sharingGroupUUID)&" +
-            "actualDeletion=1"
+            "sharingGroupUUID=\(sharingGroupUUID)"
         
-        XCTAssert(result == expectedURLParams, "Result was: \(String(describing: result))")
+        XCTAssert(result == expectedURLParams, "Result was: \(String(describing: expectedURLParams))")
     }
     
     func testBadUUIDForFileName() {
         let sharingGroupUUID = UUID().uuidString
-
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = "foobar"
         uploadRequest.mimeType = "text/plain"
@@ -112,7 +120,8 @@ class MessageTests: ServerTestCase, LinuxTestable {
         uploadRequest.masterVersion = MasterVersionInt(42)
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
-        XCTAssert(uploadRequest.valid())
+        
+        XCTAssert(!uploadRequest.valid())
     }
     
     func testPropertyHasValue() {
@@ -160,7 +169,12 @@ class MessageTests: ServerTestCase, LinuxTestable {
         }
         
         // Could not cast value of type 'Foundation.NSNumber' (0x7fd77dcf8188) to 'Swift.Int32' (0x7fd77e0c9b18).
-        XCTAssert(jsonDict["numberUploadsTransferred"] as! Int32 == numberUploads)
+        guard let response2 = try? DoneUploadsResponse.decode(jsonDict) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(response2.numberUploadsTransferred == numberUploads)
     }
 }
 
@@ -169,7 +183,6 @@ extension MessageTests {
         return [
             ("testIntConversions", testIntConversions),
             ("testURLParameters", testURLParameters),
-            ("testURLParametersWithIntegersAsStrings", testURLParametersWithIntegersAsStrings),
             ("testURLParametersForUploadDeletion", testURLParametersForUploadDeletion),
             ("testBadUUIDForFileName", testBadUUIDForFileName),
             ("testPropertyHasValue", testPropertyHasValue),

@@ -28,6 +28,8 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
+        XCTAssert(addUserResponse.userId != nil)
+        
         let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)
         switch result {
         case .error(let error):
