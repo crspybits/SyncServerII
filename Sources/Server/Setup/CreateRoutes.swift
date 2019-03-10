@@ -36,6 +36,11 @@ class CreateRoutes {
                     return nil
                 }
                 
+                guard request.valid() else {
+                    Log.error("Error: Request is not valid.")
+                    return nil
+                }
+                
                 return request
             }
             
