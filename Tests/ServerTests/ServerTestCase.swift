@@ -656,6 +656,7 @@ class ServerTestCase : XCTestCase {
                 XCTAssert(response!.statusCode == .OK, "Did not work on remove user from sharing group request: \(response!.statusCode)")
                 
                 if let dict = dict, let response = try? RemoveUserFromSharingGroupResponse.decode(dict) {
+                    Log.debug("RemoveUserFromSharingGroupResponse: Decoded sucessfully")
                     if let _ = response.masterVersionUpdate {
                         XCTAssert(expectMasterVersionUpdate)
                     }
@@ -665,6 +666,7 @@ class ServerTestCase : XCTestCase {
                     result = true
                 }
                 else {
+                    Log.error("RemoveUserFromSharingGroupResponse: Decode failed.")
                     XCTFail()
                 }
 
@@ -734,6 +736,9 @@ class ServerTestCase : XCTestCase {
         else {
             checkSumType = testAccount.type
         }
+        
+        let requestCheckSum = stringFile.checkSum(type: checkSumType)
+        Log.info("Starting runUploadTest: uploadTextFile: requestCheckSum: \(String(describing: requestCheckSum))")
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUIDToSend
@@ -743,9 +748,11 @@ class ServerTestCase : XCTestCase {
         uploadRequest.undeleteServerFile = undelete == 1
         uploadRequest.fileGroupUUID = fileGroupUUID
         uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = stringFile.checkSum(type: checkSumType)
+        uploadRequest.checkSum = requestCheckSum
         
         uploadRequest.appMetaData = appMetaData
+        
+        Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toDictionary))")
         
         guard uploadRequest.valid() else {
             XCTFail()
@@ -753,7 +760,6 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toDictionary))")
         guard runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
             if !errorExpected {
                 XCTFail()

@@ -670,13 +670,14 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
     func testRemoveUserFromSharingGroup_owningUserHasSharingUsers() {
         let deviceUUID = Foundation.UUID().uuidString
         let sharingGroupUUID = Foundation.UUID().uuidString
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
+        let owningUser:TestAccount = .primaryOwningAccount
+        guard let _ = self.addNewUser(testAccount: owningUser, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
         
         var sharingInvitationUUID:String!
-        createSharingInvitation(permission: .write, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: owningUser, permission: .write, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
@@ -692,12 +693,12 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeUserFromSharingGroup(testAccount: owningUser, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
             XCTFail()
             return
         }
         
-        let result = uploadTextFile(testAccount: sharingUser, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
+        let result = uploadTextFile(testAccount: sharingUser, owningAccountType: owningUser.type, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
         XCTAssert(result == nil)
     }
     
