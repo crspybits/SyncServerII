@@ -14,9 +14,9 @@ ONE-TIME INSTALL
 PER SERVER ENVIRONMENT INSTALLS
 ===============================
 
-  Note that I'm not making a big difference here between Elastic Beanstalk Applications and Environments becaise I'm just using a single environment within each of my applications.
+  Note that I'm not making a big difference here between Elastic Beanstalk Applications and Environments because I'm just using a single environment within each of my applications.
 
-* Configure the eb cli for an environment in a folder. I've put mine in subfolders of EBSEnvironments in the repo. See http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configuration.html
+* Configure the eb cli for an environment in a folder. I've put mine in subfolders of devops/AWS-ElasticBeanstalk/Environments in the repo. See http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-configuration.html
 I get rid of the .gitignore files in these directories. I like to put them under version control.
 
 * In your environment folder, add the following to the `.elasticbeanstalk/config.yml` file in that folder. It tells the eb cli where to find your application bundle, which the make.sh script is going to place on your desktop.
@@ -46,9 +46,21 @@ global:
 
   You will need the `arn` reference for this SSL certificate in the configure.yml file below.
   
+* The configure.yml file (below) will specify an SSL certificate. You need to set up a DNS CNAME record to direct the domain or subdomain referenced by that SSL certificate to the CNAME address for the load balancer for the server. (I do this DNS work on a separate, different from AWS, hosting service-- for me, the hosting service for cprince.com). The URL for your load balancer will be something like:
+
+```
+sharedimages-staging.us-west-2.elasticbeanstalk.com
+```
+
+NOTE: The configuration I'm using is for a Classical Elastic Beanstalk load balancer (not a Network Load Balancer) and so its CNAME doesn't have a static IP address. Hence, you can't use redirection with a DNS A record (I learned this the hard way!). See also:
+https://forums.aws.amazon.com/thread.jspa?threadID=9061
+http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-nlb.html
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-loadbalancer.html
+https://stackoverflow.com/questions/9935229/cname-ssl-certificates
+  
 * If you want your database secured not only by password and username, but also secured behind an AWS Virtual Private Cloud (VPC), then [also follow these steps](LaunchingEnvironment-VPC.md).
 
-* Create a yml file for your environmnent (I'm calling them `configure.yml` files). There's an example in EBSEnvironments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. While much of it can just be copied and used for other environments, you will need to change the value of at least two parameters:
+* Create a yml file for your environmnent (I'm calling them `configure.yml` files). There's an example in Environments/sharedimages-staging/configure.yml. It's suitable to put these files in your environment folder because they are specific to the environment. These files contain many of the parameters needed for your environment. While much of it can just be copied and used for other environments, you will probably need to change the value of a few parameters:
 
 1. `SSLCertificateId` -- which you generated with the AWS Certificate Manager above, and is tied to a particular URL. 
 
@@ -82,17 +94,5 @@ eb create sharedimages-staging --cname sharedimages-staging
   See also http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-create.html
 
   You can control this Elastic Beanstalk environment at the AWS UI web console. Use https://aws.amazon.com/console/ and find Elastic Beanstalk.
-
-* The configure.yml file specified an SSL certificate. Now, finally, you have to set up a DNS CNAME record to direct the domain or subdomain referenced by that SSL certificate to the CNAME address for the load balancer for the server. The URL for your load balancer will be something like:
-
-```
-sharedimages-staging.us-west-2.elasticbeanstalk.com
-```
-
-NOTE: The configuration I'm using is for a Classical Elastic Beanstalk load balancer (not a Network Load Balancer) and so its CNAME doesn't have a static IP address. Hence, you can't use redirection with a DNS A record (I learned this the hard way!). See also:
-https://forums.aws.amazon.com/thread.jspa?threadID=9061
-http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-nlb.html
-http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-loadbalancer.html
-https://stackoverflow.com/questions/9935229/cname-ssl-certificates
 
 * Hit on your server!
