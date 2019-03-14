@@ -1,0 +1,268 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Cryptor",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
+        "state": {
+          "branch": null,
+          "revision": "fe59cc1fcabb390bf9b3b6dd4f8cacc897d91cf6",
+          "version": "1.0.24"
+        }
+      },
+      {
+        "package": "Signals",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+        "state": {
+          "branch": null,
+          "revision": "23f62ec7a38a837e1c14acffc2e963b667a88b46",
+          "version": "1.0.16"
+        }
+      },
+      {
+        "package": "Socket",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
+        "state": {
+          "branch": null,
+          "revision": "a40b405bdf32bc853307dd5dee8d00636e394013",
+          "version": "1.0.44"
+        }
+      },
+      {
+        "package": "SSLService",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
+        "state": {
+          "branch": null,
+          "revision": "6910763b0dfa6f95a75217215d8cdce3ee11a6ae",
+          "version": "1.0.44"
+        }
+      },
+      {
+        "package": "CCurl",
+        "repositoryURL": "https://github.com/IBM-Swift/CCurl.git",
+        "state": {
+          "branch": null,
+          "revision": "2a431e3a5fb8d004aa7d4d1bebb5d511f568c43e",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "CEpoll",
+        "repositoryURL": "https://github.com/IBM-Swift/CEpoll.git",
+        "state": {
+          "branch": null,
+          "revision": "4e56acbea4d452110236dcbfcee0045a697c0e9f",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "CredentialsDropbox",
+        "repositoryURL": "https://github.com/crspybits/CredentialsDropbox.git",
+        "state": {
+          "branch": null,
+          "revision": "803dc4ee888be0c8073512dd0f7a1e2322568259",
+          "version": "0.3.0"
+        }
+      },
+      {
+        "package": "HeliumLogger",
+        "repositoryURL": "https://github.com/IBM-Swift/HeliumLogger.git",
+        "state": {
+          "branch": null,
+          "revision": "5ad546a39376b911a6cd4b06e8cadf60aa9e9472",
+          "version": "1.8.0"
+        }
+      },
+      {
+        "package": "Kitura",
+        "repositoryURL": "https://github.com/IBM-Swift/Kitura.git",
+        "state": {
+          "branch": null,
+          "revision": "a571d7aacd4c966fa7919a20ad344f3f55bd76a1",
+          "version": "2.6.2"
+        }
+      },
+      {
+        "package": "Kitura-Credentials",
+        "repositoryURL": "https://github.com/IBM-Swift/Kitura-Credentials.git",
+        "state": {
+          "branch": null,
+          "revision": "4012937238ba58fecd3c11dda4b69ebcd0fc89fd",
+          "version": "2.4.0"
+        }
+      },
+      {
+        "package": "Kitura-CredentialsFacebook",
+        "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git",
+        "state": {
+          "branch": null,
+          "revision": "e76aa9f06473a5a2c08e6215fb58b652f4e5d7ab",
+          "version": "2.3.0"
+        }
+      },
+      {
+        "package": "Kitura-CredentialsGoogle",
+        "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git",
+        "state": {
+          "branch": null,
+          "revision": "86db4d2805a79b2974fafae71b06dbdb7315e551",
+          "version": "2.3.0"
+        }
+      },
+      {
+        "package": "Kitura-net",
+        "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
+        "state": {
+          "branch": null,
+          "revision": "d837d453a72fe914b91354708b1afb13a2b411a6",
+          "version": "2.1.7"
+        }
+      },
+      {
+        "package": "Kitura-Session",
+        "repositoryURL": "https://github.com/IBM-Swift/Kitura-Session.git",
+        "state": {
+          "branch": null,
+          "revision": "6e732826c27d6bbb6156b46fc33504e8b31fb03b",
+          "version": "3.3.2"
+        }
+      },
+      {
+        "package": "Kitura-TemplateEngine",
+        "repositoryURL": "https://github.com/IBM-Swift/Kitura-TemplateEngine.git",
+        "state": {
+          "branch": null,
+          "revision": "b030d2d176719acc6a902c40db1b87dc6a83e2fc",
+          "version": "2.0.0"
+        }
+      },
+      {
+        "package": "KituraContracts",
+        "repositoryURL": "https://github.com/IBM-Swift/KituraContracts.git",
+        "state": {
+          "branch": null,
+          "revision": "acfad5b37e70590261c1181b1ad29758d20bf167",
+          "version": "1.1.1"
+        }
+      },
+      {
+        "package": "LoggerAPI",
+        "repositoryURL": "https://github.com/IBM-Swift/LoggerAPI.git",
+        "state": {
+          "branch": null,
+          "revision": "d0ccb4158b83f8692531892a9c894bb757593c6f",
+          "version": "1.8.0"
+        }
+      },
+      {
+        "package": "OpenSSL",
+        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
+        "state": {
+          "branch": null,
+          "revision": "273fe9fa8f751bc278469b31ba3f1fe7a2b03723",
+          "version": "1.0.3"
+        }
+      },
+      {
+        "package": "PerfectLib",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
+        "state": {
+          "branch": null,
+          "revision": "60e44e4c62e293844581205528eefdc7e1153199",
+          "version": "3.1.2"
+        }
+      },
+      {
+        "package": "PerfectCRUD",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-CRUD.git",
+        "state": {
+          "branch": null,
+          "revision": "2fffbdc4d9c33e6c980a51768abe7d9f6d9bbac0",
+          "version": "1.2.2"
+        }
+      },
+      {
+        "package": "LinuxBridge",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+        "state": {
+          "branch": null,
+          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
+          "version": "3.1.0"
+        }
+      },
+      {
+        "package": "PerfectMySQL",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
+        "state": {
+          "branch": null,
+          "revision": "f9af3a9984aa4785fcbe7126eaf0bc39320296ec",
+          "version": "3.4.1"
+        }
+      },
+      {
+        "package": "mysqlclient",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+        "state": {
+          "branch": null,
+          "revision": "5401a4713557237baabaef1caea93467cf5af138",
+          "version": "2.1.0"
+        }
+      },
+      {
+        "package": "PerfectThread",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Thread.git",
+        "state": {
+          "branch": null,
+          "revision": "04fcd2d29f50e05dbca907219322fd475c205c33",
+          "version": "3.0.5"
+        }
+      },
+      {
+        "package": "SMServerLib",
+        "repositoryURL": "https://github.com/crspybits/SMServerLib.git",
+        "state": {
+          "branch": null,
+          "revision": "bb5d9d473f4e13a00aef9de16e669ae6bc9ad564",
+          "version": "1.1.0"
+        }
+      },
+      {
+        "package": "SwiftAWSSignatureV4",
+        "repositoryURL": "https://github.com/crspybits/SwiftAWSSignatureV4.git",
+        "state": {
+          "branch": null,
+          "revision": "c16a6194e92df11931b0e1afa6d1e361c74ca901",
+          "version": "1.1.0"
+        }
+      },
+      {
+        "package": "SwiftyAWSSNS",
+        "repositoryURL": "https://github.com/crspybits/SwiftyAWSSNS.git",
+        "state": {
+          "branch": null,
+          "revision": "087ea80d67ed8a0b7e7078dd085ba5f67c74a56c",
+          "version": "0.2.0"
+        }
+      },
+      {
+        "package": "SyncServerShared",
+        "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
+        "state": {
+          "branch": null,
+          "revision": "f4d194e93bcc9e945c8b19dfd3e1268ae8fae064",
+          "version": "9.8.1"
+        }
+      },
+      {
+        "package": "TypeDecoder",
+        "repositoryURL": "https://github.com/IBM-Swift/TypeDecoder.git",
+        "state": {
+          "branch": null,
+          "revision": "66550c1643740c58eae87df099c66144a85ae572",
+          "version": "1.3.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

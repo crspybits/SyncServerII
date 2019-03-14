@@ -1,11 +1,12 @@
 SyncServer
 
-Version 0.21.0
+Version 0.21.0 (3/13/19)
 	* Updated SMServerLib Swift version
 	* Making use of Token Time To Live on Kitura Credentials for Google and Facebook
 	* Updated Dropbox Credentials with Token Time To Live
 	* Converting to using Codable for request/response messages (away from Gloss)
 		Codable provides a simpler notation, and Gloss is not supporting Linux any more.
+		Due to this change, this is a breaking change for the iOS client library.
 
 Version 0.20.10 (2/14/19)
 	* Adding push notifications (APNS) using AWS SNS.
