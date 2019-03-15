@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.21.1 (3/14/19)
+	* Update version of shared library to fix Bool decoding issue.
+
 Version 0.21.0 (3/13/19)
 	* Updated SMServerLib Swift version
 	* Making use of Token Time To Live on Kitura Credentials for Google and Facebook
