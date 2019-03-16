@@ -42,6 +42,13 @@ https://github.com/jorgebastida/awslogs
 Seems like the final secret sauce in all this was:
 "Before you can configure integration with CloudWatch Logs using configuration files, you must set up IAM permissions to use with the CloudWatch Logs agent. You can attach the following custom policy to the instance profile that you assign to your environment." (https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.cloudwatchlogs.html#AWSHowTo.cloudwatchlogs.streaming). I attached that custom policy to the IAM aws-elasticbeanstalk-ec2-role.
 
+You attach that custom policy to aws-elasticbeanstalk-ec2-role by going to:
+https://console.aws.amazon.com/iam/home#roles
+and
+https://console.aws.amazon.com/iam/home?#/roles/aws-elasticbeanstalk-ec2-role
+
+This policy will be applied to *all* of your Elastic Beanstalk Applications/Environments.
+
 "When you launch an environment in the AWS Elastic Beanstalk environment management console, the console creates a default instance profile, called aws-elasticbeanstalk-ec2-role, and assigns managed policies with default permissions to it." (https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/iam-instanceprofile.html)
 
 It also looks like the prefix "/etc/awslogs/config/" in the .config file is necessary. I restarted the staging environment with the above custom policy change in place, and that didn't do the job. But with that policy change *and* the prefix "/etc/awslogs/config/" in the .config file, I *am* now seeing the log in CloudWatch.

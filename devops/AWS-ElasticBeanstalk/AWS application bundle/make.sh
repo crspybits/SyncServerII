@@ -12,6 +12,9 @@
 
 # Examples: 
 
+# Neebla production server
+# ./make.sh 0.21.2 ../Environments/neebla-production/Server.json ../Environments/neebla-production/configure.yml
+
 # SharedImages production server
 # ./make.sh 0.7.7 ../Environments/sharedimages-production/Server.json ../Environments/sharedimages-production/configure.yml
 
