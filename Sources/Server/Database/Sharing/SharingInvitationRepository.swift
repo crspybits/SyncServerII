@@ -17,10 +17,7 @@ class SharingInvitation : NSObject, Model {
     static let expiryKey = "expiry"
     var expiry:Date!
     
-    // 60 seconds/minute * 60 minutes/hour * 24 hours/day == seconds/day
-    static let expiryDuration:TimeInterval = 60*60*24
-    
-    // If you are inviting someone to join a sharing group, they may join as a sharing user. i.e., they may not own cloud storage. That user will use your cloud storage.
+    // If you are inviting someone to join a sharing group, they may (depending on allowSocialAcceptance) join as a sharing user. i.e., they may not own cloud storage. That user will use your cloud storage.
     static let owningUserIdKey = "owningUserId"
     var owningUserId:UserId!
     
@@ -29,6 +26,12 @@ class SharingInvitation : NSObject, Model {
     
     static let permissionKey = "permission"
     var permission: Permission!
+    
+    static let allowSocialAcceptanceKey = "allowSocialAcceptance"
+    var allowSocialAcceptance: Bool!
+    
+    static let numberAcceptorsKey = "numberAcceptors"
+    var numberAcceptors: UInt32!
     
     subscript(key:String) -> Any? {
         set {
@@ -47,6 +50,12 @@ class SharingInvitation : NSObject, Model {
             
             case SharingInvitation.permissionKey:
                 permission = newValue as! Permission?
+                
+            case SharingInvitation.allowSocialAcceptanceKey:
+                allowSocialAcceptance = newValue as! Bool?
+                
+            case SharingInvitation.numberAcceptorsKey:
+                numberAcceptors = newValue as! UInt32?
                 
             default:
                 Log.error("key not found: \(key)")
@@ -69,6 +78,11 @@ class SharingInvitation : NSObject, Model {
             case SharingInvitation.expiryKey:
                 return {(x:Any) -> Any? in
                     return DateExtras.date(x as! String, fromFormat: .DATETIME)
+                }
+            
+            case SharingInvitation.allowSocialAcceptanceKey:
+                return {(x:Any) -> Any? in
+                    return (x as! Int8) == 1
                 }
             
             default:
@@ -114,6 +128,10 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
 
             "permission VARCHAR(\(spMaxLen)) NOT NULL, " +
         
+            "allowSocialAcceptance BOOL NOT NULL, " +
+
+            "numberAcceptors INT UNSIGNED NOT NULL, " +    
+        
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
             "UNIQUE (sharingInvitationUUID))"
         
@@ -154,14 +172,14 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
         case error(String)
     }
     
-    func add(owningUserId:UserId, sharingGroupUUID:String, permission:Permission, expiryDuration:TimeInterval = SharingInvitation.expiryDuration) -> AddResult {
+    func add(owningUserId:UserId, sharingGroupUUID:String, permission:Permission, allowSocialAcceptance: Bool, numberAcceptors: UInt, expiryDuration:TimeInterval = ServerConstants.sharingInvitationExpiryDuration) -> AddResult {
         let calendar = Calendar.current
         let expiryDate = calendar.date(byAdding: .second, value: Int(expiryDuration), to: Date())!
         let expiryDateString = DateExtras.date(expiryDate, toFormat: dateFormat)
         
         let uuid = UUID().uuidString
         
-        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingGroupUUID, permission) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(sharingGroupUUID)', '\(permission.rawValue)');"
+        let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingGroupUUID, permission, allowSocialAcceptance, numberAcceptors) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(sharingGroupUUID)', '\(permission.rawValue)', \(allowSocialAcceptance), \(numberAcceptors));"
         
         if db.connection.query(statement: query) {
             Log.info("Sucessfully created sharing invitation!")
@@ -171,6 +189,21 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
             let error = db.error
             Log.error("Could not insert into \(tableName): \(error)")
             return .error(error)
+        }
+    }
+    
+    // numberAcceptors must be > 1 beforehand.
+    func decrementNumberAcceptors(sharingInvitationUUID: String) -> Bool {
+        let query = "UPDATE \(tableName) SET \(SharingInvitation.numberAcceptorsKey)=\(SharingInvitation.numberAcceptorsKey) - 1 WHERE \(SharingInvitation.sharingInvitationUUIDKey)='\(sharingInvitationUUID)' AND \(SharingInvitation.numberAcceptorsKey) > 1"
+        
+        if db.connection.query(statement: query) && db.connection.numberAffectedRows() == 1 {
+            Log.info("Sucessfully updated sharing invitation!")
+            return true
+        }
+        else {
+            let error = db.error
+            Log.error("Could not update sharing invitation: \(error)")
+            return false
         }
     }
 }

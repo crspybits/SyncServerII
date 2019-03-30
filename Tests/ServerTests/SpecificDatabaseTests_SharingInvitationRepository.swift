@@ -33,7 +33,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         }
         
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read, allowSocialAcceptance: true, numberAcceptors: 2)
 
         guard case .success(let uuid) = result else {
             XCTFail()
@@ -56,6 +56,8 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         XCTAssert(invitation.owningUserId == userId)
         XCTAssert(invitation.permission == .read)
         XCTAssert(invitation.sharingInvitationUUID == uuid)
+        XCTAssert(invitation.numberAcceptors == 2)
+        XCTAssert(invitation.allowSocialAcceptance == true)
     }
     
     func testAttemptToRemoveStaleInvitationsThatAreNotStale() {
@@ -67,7 +69,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         }
         
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .write)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .write, allowSocialAcceptance: false, numberAcceptors: 1)
         
         guard case .success(let uuid) = result else {
             XCTFail()
@@ -107,6 +109,8 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
             XCTAssert(invitation.permission == .write)
             XCTAssert(invitation.sharingInvitationUUID == uuid)
             XCTAssert(invitation.sharingGroupUUID == sharingGroupUUID)
+            XCTAssert(invitation.numberAcceptors == 1)
+            XCTAssert(invitation.allowSocialAcceptance == false)
             
             exp.fulfill()
         }
@@ -134,7 +138,7 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         }
         
         let userId:UserId = 100
-        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read, expiryDuration: 2)
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read, allowSocialAcceptance: false, numberAcceptors: 1, expiryDuration: 2)
         
         guard case .success(let uuid) = result else {
             XCTFail()
@@ -181,6 +185,80 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         
         waitForExpectations(timeout: 20, handler: nil)
     }
+    
+    func testDecrementSharingInvitationWithNumberAcceptorsGreaterThan1() {
+        let sharingGroupUUID = UUID().uuidString
+
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let userId:UserId = 100
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read, allowSocialAcceptance: true, numberAcceptors: 2)
+
+        guard case .success(let uuid) = result else {
+            XCTFail()
+            return
+        }
+        
+        guard SharingInvitationRepository(db).decrementNumberAcceptors(sharingInvitationUUID: uuid) else {
+            XCTFail()
+            return
+        }
+        
+        let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: uuid)
+        let results = SharingInvitationRepository(db).lookup(key: key, modelInit: SharingInvitation.init)
+
+        guard case .found(let model) = results,
+            let invitation = model as? SharingInvitation else {
+            XCTFail()
+            return
+        }
+
+        XCTAssert(invitation.owningUserId == userId)
+        XCTAssert(invitation.permission == .read)
+        XCTAssert(invitation.sharingInvitationUUID == uuid)
+        XCTAssert(invitation.numberAcceptors == 1)
+        XCTAssert(invitation.allowSocialAcceptance == true)
+    }
+    
+    func testDecrementSharingInvitationWithNumberAcceptorsEqualTo1() {
+        let sharingGroupUUID = UUID().uuidString
+
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let userId:UserId = 100
+        let result = SharingInvitationRepository(db).add(owningUserId: userId, sharingGroupUUID: sharingGroupUUID, permission: .read, allowSocialAcceptance: true, numberAcceptors: 1)
+
+        guard case .success(let uuid) = result else {
+            XCTFail()
+            return
+        }
+        
+        guard !SharingInvitationRepository(db).decrementNumberAcceptors(sharingInvitationUUID: uuid) else {
+            XCTFail()
+            return
+        }
+        
+        let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: uuid)
+        let results = SharingInvitationRepository(db).lookup(key: key, modelInit: SharingInvitation.init)
+
+        guard case .found(let model) = results,
+            let invitation = model as? SharingInvitation else {
+            XCTFail()
+            return
+        }
+
+        XCTAssert(invitation.owningUserId == userId)
+        XCTAssert(invitation.permission == .read)
+        XCTAssert(invitation.sharingInvitationUUID == uuid)
+        XCTAssert(invitation.numberAcceptors == 1)
+        XCTAssert(invitation.allowSocialAcceptance == true)
+    }
 }
 
 extension SpecificDatabaseTests_SharingInvitationRepository {
@@ -188,7 +266,9 @@ extension SpecificDatabaseTests_SharingInvitationRepository {
         return [
             ("testAddingSharingInvitation", testAddingSharingInvitation),
             ("testAttemptToRemoveStaleInvitationsThatAreNotStale", testAttemptToRemoveStaleInvitationsThatAreNotStale),
-            ("testRemoveStaleSharingInvitations", testRemoveStaleSharingInvitations)
+            ("testRemoveStaleSharingInvitations", testRemoveStaleSharingInvitations),
+            ("testDecrementSharingInvitationWithNumberAcceptorsGreaterThan1", testDecrementSharingInvitationWithNumberAcceptorsGreaterThan1),
+            ("testDecrementSharingInvitationWithNumberAcceptorsEqualTo1", testDecrementSharingInvitationWithNumberAcceptorsEqualTo1)
         ]
     }
     

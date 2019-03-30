@@ -9,6 +9,7 @@
 import Credentials
 import SyncServerShared
 import LoggerAPI
+import KituraNet
 
 class SharingAccountsController : ControllerProtocol {
     class func setup() -> Bool {
@@ -52,9 +53,19 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
+        let allowSocialAcceptance = createSharingInvitationRequest.allowSocialAcceptance
+        let numberAcceptors = createSharingInvitationRequest.numberOfAcceptors
+        
+        guard numberAcceptors >= 1 && numberAcceptors <= ServerConstants.maxNumberSharingInvitationAcceptors else {
+            let message = "numberAcceptors <= 0 or > \(ServerConstants.maxNumberSharingInvitationAcceptors)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         let result = params.repos.sharing.add(
             owningUserId: effectiveOwningUserId, sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID,
-            permission: createSharingInvitationRequest.permission)
+            permission: createSharingInvitationRequest.permission, allowSocialAcceptance: allowSocialAcceptance, numberAcceptors: numberAcceptors)
         
         guard case .success(let sharingInvitationUUID) = result else {
             let message = "Failed to add Sharing Invitation"
@@ -71,6 +82,29 @@ class SharingAccountsController : ControllerProtocol {
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         
+        guard let userType = AccountType.for(userProfile: params.userProfile!)?.userType else {
+            let message = "Could not get user type for user profile!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+
+        if !sharingInvitation.allowSocialAcceptance {
+            guard userType == .owning else {
+                let message = "Invitation does not allow social acceptance, but signed in user is not owning"
+                Log.error(message)
+                params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.forbidden)))
+                return
+            }
+        }
+
+        guard sharingInvitation.numberAcceptors >= 1 else {
+            let message = "Number of acceptors was 0 or less."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         // I'm not requiring a master version from the client-- because they don't yet have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
         
         guard let masterVersion = Controllers.getMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, params: params) else {
@@ -84,15 +118,26 @@ class SharingAccountsController : ControllerProtocol {
             completion(response)
             return
         }
-        
-        let removalResult2 = SharingInvitationRepository(params.db).remove(key: sharingInvitationKey)
-        guard case .removed(let numberRemoved) = removalResult2, numberRemoved == 1 else {
-            let message = "Failed removing sharing invitation!"
-            Log.error(message)
-            completion(.failure(.message(message)))
-            return
+
+        if sharingInvitation.numberAcceptors == 1 {
+            let removalResult2 = params.repos.sharing.remove(key: sharingInvitationKey)
+            guard case .removed(let numberRemoved) = removalResult2, numberRemoved == 1 else {
+                let message = "Failed removing sharing invitation!"
+                Log.error(message)
+                completion(.failure(.message(message)))
+                return
+            }
         }
-        
+        else {
+            // numberAcceptors should be > 1
+            guard params.repos.sharing.decrementNumberAcceptors(sharingInvitationUUID: sharingInvitation.sharingInvitationUUID) else {
+                let message = "Could not decrement number acceptors."
+                Log.error(message)
+                completion(.failure(.message(message)))
+                return
+            }
+        }
+
         // The user can either: (a) already be on the system -- so this will be a request to add a sharing group to an existing user, or (b) this is a request to both create a user and have them join a sharing group.
         
         let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
