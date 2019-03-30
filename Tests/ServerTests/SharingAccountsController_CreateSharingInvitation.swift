@@ -24,7 +24,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         super.tearDown()
     }
     
-    func testSuccessfulReadSharingInvitationCreationByAnOwningUser() {
+    func successfulSharingInvitationCreation(sharingPermission: Permission, numberAcceptors: UInt = 1, allowSharingAcceptance: Bool = true, errorExpected: Bool = false) {
         let deviceUUID = Foundation.UUID().uuidString
         let sharingGroupUUID = Foundation.UUID().uuidString
 
@@ -33,58 +33,30 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        self.createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            XCTAssert(invitationUUID != nil)
-            guard let _ = UUID(uuidString: invitationUUID!) else {
-                XCTFail()
-                expectation.fulfill()
-                return
+        self.createSharingInvitation(permission: sharingPermission, numberAcceptors: numberAcceptors, allowSharingAcceptance:allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID, errorExpected: errorExpected) { expectation, invitationUUID in
+            if !errorExpected {
+                XCTAssert(invitationUUID != nil)
+                guard let _ = UUID(uuidString: invitationUUID!) else {
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
             }
             
             expectation.fulfill()
         }
     }
     
+    func testSuccessfulReadSharingInvitationCreationByAnOwningUser() {
+         successfulSharingInvitationCreation(sharingPermission: .read)
+    }
+    
     func testSuccessfulWriteSharingInvitationCreationByAnOwningUser() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
-            XCTFail()
-            return
-        }
-        
-        createSharingInvitation(permission: .write, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            XCTAssert(invitationUUID != nil)
-            guard let _ = UUID(uuidString: invitationUUID!) else {
-                XCTFail()
-                expectation.fulfill()
-                return
-            }
-
-            expectation.fulfill()
-        }
+        successfulSharingInvitationCreation(sharingPermission: .write)
     }
 
     func testSuccessfulAdminSharingInvitationCreationByAnOwningUser() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
-            XCTFail()
-            return
-        }
-        
-        createSharingInvitation(permission: .admin, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            XCTAssert(invitationUUID != nil)
-            guard let _ = UUID(uuidString: invitationUUID!) else {
-                XCTFail()
-                expectation.fulfill()
-                return
-            }
-
-            expectation.fulfill()
-        }
+        successfulSharingInvitationCreation(sharingPermission: .admin)
     }
     
     func sharingInvitationCreationByAnAdminSharingUser(sharingUser:TestAccount, failureExpected: Bool = false) {
@@ -231,6 +203,26 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             expectation.fulfill()
         }
     }
+    
+    func testDisallowingSharingAcceptanceWorks() {
+         successfulSharingInvitationCreation(sharingPermission: .read, allowSharingAcceptance: false)
+    }
+    
+    func testThatNoAcceptorsFails() {
+         successfulSharingInvitationCreation(sharingPermission: .read, numberAcceptors: 0, errorExpected: true)
+    }
+    
+    func testThat1AcceptorsWorks() {
+         successfulSharingInvitationCreation(sharingPermission: .read, numberAcceptors: 1)
+    }
+    
+    func testThatMaxAcceptorsWorks() {
+         successfulSharingInvitationCreation(sharingPermission: .read, numberAcceptors: ServerConstants.maxNumberSharingInvitationAcceptors)
+    }
+    
+    func testThatMaxPlusOneAcceptorsFails() {
+         successfulSharingInvitationCreation(sharingPermission: .read, numberAcceptors: ServerConstants.maxNumberSharingInvitationAcceptors + 1, errorExpected: true)
+    }
 }
 
 extension SharingAccountsController_CreateSharingInvitation {
@@ -243,7 +235,13 @@ extension SharingAccountsController_CreateSharingInvitation {
             ("testFailureOfSharingInvitationCreationByAReadSharingUser", testFailureOfSharingInvitationCreationByAReadSharingUser),
             ("testFailureOfSharingInvitationCreationByAWriteSharingUser", testFailureOfSharingInvitationCreationByAWriteSharingUser),
             ("testSharingInvitationCreationFailsWithNoAuthorization", testSharingInvitationCreationFailsWithNoAuthorization),
-            ("testSharingInvitationCreationFailsWithoutMembershipInSharingGroup", testSharingInvitationCreationFailsWithoutMembershipInSharingGroup)
+            ("testSharingInvitationCreationFailsWithoutMembershipInSharingGroup", testSharingInvitationCreationFailsWithoutMembershipInSharingGroup),
+            
+            ("testDisallowingSharingAcceptanceWorks", testDisallowingSharingAcceptanceWorks),
+            ("testThatNoAcceptorsFails", testThatNoAcceptorsFails),
+            ("testThat1AcceptorsWorks", testThat1AcceptorsWorks),
+            ("testThatMaxAcceptorsWorks", testThatMaxAcceptorsWorks),
+            ("testThatMaxPlusOneAcceptorsFails", testThatMaxPlusOneAcceptorsFails)
         ]
     }
     

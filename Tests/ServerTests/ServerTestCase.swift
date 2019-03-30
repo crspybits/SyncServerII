@@ -1163,20 +1163,18 @@ class ServerTestCase : XCTestCase {
         }
     }
 
-    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, numberAcceptors: UInt = 1, allowSharingAcceptance: Bool = true, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
-            var request:CreateSharingInvitationRequest!
-            if permission == nil {
-                request = CreateSharingInvitationRequest()
-                request.sharingGroupUUID = sharingGroupUUID
-            }
-            else {
-                request = CreateSharingInvitationRequest()
+            let request = CreateSharingInvitationRequest()
+            request.sharingGroupUUID = sharingGroupUUID
+            request.numberOfAcceptors = numberAcceptors
+            request.allowSocialAcceptance = allowSharingAcceptance
+            
+            if permission != nil {
                 request.permission = permission!
-                request.sharingGroupUUID = sharingGroupUUID
             }
             
             self.performRequest(route: ServerEndpoints.createSharingInvitation, headers: headers, urlParameters: "?" + request.urlParameters()!, body:nil) { response, dict in
