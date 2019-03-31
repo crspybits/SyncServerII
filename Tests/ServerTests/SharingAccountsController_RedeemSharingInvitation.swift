@@ -31,7 +31,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         var sharingGroupUUID: String!
         var newSharingUserId: UserId!
         
-        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sid in
+        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sid, _ in
             sharingGroupUUID = sid
             newSharingUserId = userId
         }
@@ -52,7 +52,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         var sharingGroupUUID: String!
         var newSharingUserId: UserId!
         
-        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sid in
+        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sid, _ in
             sharingGroupUUID = sid
             newSharingUserId = userId
         }
@@ -252,7 +252,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         var newSharingUserId:UserId!
         let owningUser:TestAccount = .primaryOwningAccount
         
-        createSharingUser(withSharingPermission: perm, sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: perm, sharingUser: sharingUser, owningUserWhenCreating: owningUser) { userId, sharingGroupUUID, _ in
             actualSharingGroupUUID = sharingGroupUUID
             newSharingUserId = userId
         }
@@ -365,6 +365,81 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         
         checkOwingUserForSharingGroupUser(sharingGroupUUID: sharingGroupUUID1, sharingUserId: redeemResult!.userId, sharingUser: .secondaryOwningAccount, owningUser: .primaryOwningAccount)
     }
+    
+    func testRedeemingSharingInvitationThatHasAlreadyBeenRedeemedFails() {
+        let sharingUser1:TestAccount = .primarySharingAccount
+        let sharingUser2:TestAccount = .secondarySharingAccount
+        let owningUser:TestAccount = .primaryOwningAccount
+
+        var sharingGroupUUID: String!
+        var newSharingUserId: UserId!
+        var sharingInvitationUUID: String!
+        
+        createSharingUser(sharingUser: sharingUser1, owningUserWhenCreating: owningUser) { userId, sid, sharingInviteUUID in
+            sharingGroupUUID = sid
+            newSharingUserId = userId
+            sharingInvitationUUID = sharingInviteUUID
+        }
+        
+        guard sharingGroupUUID != nil, newSharingUserId != nil else {
+            XCTFail()
+            return
+        }
+        
+        redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
+            expectation.fulfill()
+        }
+    }
+    
+    func testTwoAcceptorsSharingInvitationCanBeRedeemedTwice() {
+        let sharingUser1:TestAccount = .primarySharingAccount
+        let sharingUser2:TestAccount = .secondarySharingAccount
+        let owningUser:TestAccount = .primaryOwningAccount
+
+        var sharingGroupUUID: String!
+        var newSharingUserId: UserId!
+        var sharingInvitationUUID: String!
+        
+        createSharingUser(sharingUser: sharingUser1, owningUserWhenCreating: owningUser, numberAcceptors: 2) { userId, sid, sharingInviteUUID in
+            sharingGroupUUID = sid
+            newSharingUserId = userId
+            sharingInvitationUUID = sharingInviteUUID
+        }
+        
+        guard sharingGroupUUID != nil, newSharingUserId != nil else {
+            XCTFail()
+            return
+        }
+        
+        redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
+            expectation.fulfill()
+        }
+        
+        // Make sure the sharing invitation has now been removed.
+        let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
+        let results = SharingInvitationRepository(self.db).lookup(key: key, modelInit: SharingInvitation.init)
+    
+        guard case .noObjectFound = results else {
+            XCTFail()
+            return
+        }
+    }
+
+    func testNonSocialSharingInvitationRedeemedSociallyFails() {
+        let sharingUser:TestAccount = .nonOwningSharingAccount
+        let owningUser:TestAccount = .primaryOwningAccount
+
+        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser, allowSharingAcceptance: false, failureExpected: true) { userId, sid, sharingInviteUUID in
+        }
+    }
+
+    func testNonSocialSharingInvitationRedeemedNonSociallyWorks() {
+        let sharingUser:TestAccount = .secondaryOwningAccount
+        let owningUser:TestAccount = .primaryOwningAccount
+
+        createSharingUser(sharingUser: sharingUser, owningUserWhenCreating: owningUser, allowSharingAcceptance: false) { userId, sid, sharingInviteUUID in
+        }
+    }
 }
 
 extension SharingAccountsController_RedeemSharingInvitation {
@@ -393,7 +468,15 @@ extension SharingAccountsController_RedeemSharingInvitation {
             
             ("testThatDeletingSharingUserWorks", testThatDeletingSharingUserWorks),
             
-            ("testThatRedeemingWithAnExistingOwningAccountWorks", testThatRedeemingWithAnExistingOwningAccountWorks)
+            ("testThatRedeemingWithAnExistingOwningAccountWorks", testThatRedeemingWithAnExistingOwningAccountWorks),
+            
+            ("testRedeemingSharingInvitationThatHasAlreadyBeenRedeemedFails", testRedeemingSharingInvitationThatHasAlreadyBeenRedeemedFails),
+            
+            ("testTwoAcceptorsSharingInvitationCanBeRedeemedTwice", testTwoAcceptorsSharingInvitationCanBeRedeemedTwice),
+            
+            ("testNonSocialSharingInvitationRedeemedSociallyFails", testNonSocialSharingInvitationRedeemedSociallyFails),
+            
+            ("testNonSocialSharingInvitationRedeemedNonSociallyWorks", testNonSocialSharingInvitationRedeemedNonSociallyWorks)
         ]
     }
     

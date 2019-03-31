@@ -66,7 +66,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         
         var adminUserId:UserId!
         
-        createSharingUser(withSharingPermission: .admin, sharingUser: sharingUser) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: .admin, sharingUser: sharingUser) { userId, sharingGroupUUID, _ in
             actualSharingGroupUUID = sharingGroupUUID
             adminUserId = userId
         }
@@ -128,7 +128,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     
     func failureOfSharingInvitationCreationByAReadSharingUser(sharingUser: TestAccount) {
         var actualSharingGroupUUID: String!
-        createSharingUser(withSharingPermission: .read, sharingUser: sharingUser) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: .read, sharingUser: sharingUser) { userId, sharingGroupUUID, _ in
             actualSharingGroupUUID = sharingGroupUUID
         }
         
@@ -150,7 +150,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     
     func failureOfSharingInvitationCreationByAWriteSharingUser(sharingUser: TestAccount) {
         var actualSharingGroupUUID: String!
-        createSharingUser(withSharingPermission: .write, sharingUser: sharingUser) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingUser) { userId, sharingGroupUUID, _ in
             actualSharingGroupUUID = sharingGroupUUID
         }
         

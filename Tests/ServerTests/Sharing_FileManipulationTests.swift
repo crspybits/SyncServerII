@@ -530,7 +530,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let sharingUser:TestAccount = .primarySharingAccount
         
         if sharingUser.type.userType == .owning {
-            createSharingUser(sharingUser: sharingUser) { newUserId, _ in
+            createSharingUser(sharingUser: sharingUser) { newUserId, _, _ in
                 sharingUserId = newUserId
             }
             
@@ -575,7 +575,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         // Using an owning account here as sharing user because we always want the upload to work after deleting the inviting user.
         let sharingAccount: TestAccount = .secondaryOwningAccount
         
-        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount) { userId, sharingGroupUUID, _ in
             actualSharingGroupUUID = sharingGroupUUID
         }
         
@@ -637,7 +637,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let sharingAccount: TestAccount = .nonOwningSharingAccount
         let owningUserWhenCreating:TestAccount = .primaryOwningAccount
         
-        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount, owningUserWhenCreating: owningUserWhenCreating) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount, owningUserWhenCreating: owningUserWhenCreating) { userId, sharingGroupUUID, _ in
             actualSharingGroupUUID = sharingGroupUUID
         }
         
@@ -673,7 +673,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         // This account must be an owning account.
         let sharingAccount2: TestAccount = .secondaryOwningAccount
         
-        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount1) { userId, sharingGroupUUID in
+        createSharingUser(withSharingPermission: .write, sharingUser: sharingAccount1) { userId, sharingGroupUUID, _ in
             actualSharingGroupUUID = sharingGroupUUID
         }
         

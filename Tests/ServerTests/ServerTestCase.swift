@@ -1194,7 +1194,7 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, owningUserWhenCreating:TestAccount = .primaryOwningAccount, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupUUID: String?)->())? = nil) {
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, owningUserWhenCreating:TestAccount = .primaryOwningAccount, numberAcceptors: UInt = 1, allowSharingAcceptance: Bool = true, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupUUID: String?, _ sharingInvitationUUID:String?)->())? = nil) {
         // a) Create sharing invitation with one account.
         // b) Next, need to "sign out" of that account, and sign into another account
         // c) And, redeem sharing invitation with that new account.
@@ -1210,25 +1210,27 @@ class ServerTestCase : XCTestCase {
             actualSharingGroupUUID = Foundation.UUID().uuidString
             guard let _ = self.addNewUser(testAccount: owningUserWhenCreating, sharingGroupUUID: actualSharingGroupUUID, deviceUUID:deviceUUID) else {
                 XCTFail()
-                completion?(nil, nil)
+                completion?(nil, nil, nil)
                 return
             }
         }
 
         var sharingInvitationUUID:String!
         
-        createSharingInvitation(testAccount: owningUserWhenCreating, permission: permission, sharingGroupUUID:actualSharingGroupUUID) { expectation, invitationUUID in
+        createSharingInvitation(testAccount: owningUserWhenCreating, permission: permission, numberAcceptors: numberAcceptors, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:actualSharingGroupUUID) { expectation, invitationUUID in
             sharingInvitationUUID = invitationUUID
             expectation.fulfill()
         }
         
         redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
-            XCTAssert(result?.userId != nil && result?.sharingGroupUUID != nil)
+            if !failureExpected {
+                XCTAssert(result?.userId != nil && result?.sharingGroupUUID != nil)
+            }
             expectation.fulfill()
         }
 
         if failureExpected {
-            completion?(nil, nil)
+            completion?(nil, nil, nil)
         }
         else {
             // Check to make sure we have a new user:
@@ -1237,17 +1239,19 @@ class ServerTestCase : XCTestCase {
             guard case .found(let model) = userResults else {
                 Log.debug("sharingUser.type: \(sharingUser.type); sharingUser.id(): \(sharingUser.id())")
                 XCTFail()
-                completion?(nil, nil)
+                completion?(nil, nil, nil)
                 return
             }
             
             let key = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: sharingInvitationUUID)
             let results = SharingInvitationRepository(self.db).lookup(key: key, modelInit: SharingInvitation.init)
             
-            guard case .noObjectFound = results else {
-                XCTFail()
-                completion?(nil, nil)
-                return
+            if numberAcceptors <= 1 {
+                guard case .noObjectFound = results else {
+                    XCTFail()
+                    completion?(nil, nil, nil)
+                    return
+                }
             }
             
             guard let (_, sharingGroups) = getIndex() else {
@@ -1278,7 +1282,7 @@ class ServerTestCase : XCTestCase {
                 XCTAssert(sgu.userId != nil)
             }
             
-            completion?((model as! User).userId, actualSharingGroupUUID)
+            completion?((model as! User).userId, actualSharingGroupUUID, sharingInvitationUUID)
         }
     }
     
