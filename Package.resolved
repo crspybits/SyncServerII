@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
           "branch": null,
-          "revision": "187dbf53f70e9d1dc4fb8bcd3087e89f58170f46",
-          "version": "1.0.25"
+          "revision": "3730de858ac464ce0d3f8e604e21fcaaf2fb4e33",
+          "version": "1.0.26"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "133b6ca7833a385466d56675937db98223ad89e3",
-          "version": "9.9.1"
+          "revision": "467613ea97af4a73760f84bb4fe4b62196ba275e",
+          "version": "9.9.2"
         }
       },
       {

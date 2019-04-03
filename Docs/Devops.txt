@@ -1,7 +1,7 @@
 1) Dev versus Production Push Notifications
 	a) Dev
 		* Create a debug build of the iOS app
-		* Use a empty server database: The User table stores the topic names per user and these are different for Dev versus Production. You probably don't want to have both types of topic names (for Dev and Production) in the same server/User table. It is also OK to use a User table that only had debug topic ARN's in it before.
+		* Use an empty server database: The User table stores the topic names per user and these are different for Dev versus Production. You probably don't want to have both types of topic names (for Dev and Production) in the same server/User table. It is also OK to use a User table that only had debug topic ARN's in it before.
 		* Follow the procedure on https://crspybits.github.io/SyncServerII/ for setting up for push notifications using the Sync Server.
 		* The .json file that you use to start the server must contain the "awssns.platformApplicationArn" key value for the dev AWS SNS platform application.
 
@@ -19,11 +19,20 @@
 	When a new version of the iOS app is released and we need users to update to that version, we can force this by use of the "iOSMinimumClientVersion" key/value pair in the server .json config file. This is reflected with the iOS app HTTP header "syncserver-minimum-ios-client-app-version". So, to require the users to update their app need to:
 	a) First release the new iOS app version to the App Store.
 	b) Second, update the server .json config file and restart the server.
-	
-3) How to scale the server?
+
+3) Performing a database migration on AWS:
+	3.1) Shut the server down for maintenance. Follow devops/MaintenanceShutdown/README.txt
+	This will shut the server down but the database can still be accessed in the migration.
+		
+	3.2) Carry out the database migration.
+		
+	3.3) Start the server again. Follow devops/MaintenanceShutdown/README.txt
+		This will optionally let you bring up a new server version. E.g., if the database migrations require a new server version.
+
+4) How to scale the server?
 	a) Scaling the size/type of the EC2 instance.
 		Are there parameters other than EC2 instance type? RAM size? Disk size?
 	b) Criteria for scaling the number of EC2 instances?
 	
-4) How to scale the database?
+5) How to scale the database?
 
