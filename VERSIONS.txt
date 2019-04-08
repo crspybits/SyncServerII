@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.22.1 (4/8/19)
+	* Updated shared library (SyncServer-Shared) to 10.0.0.
+
 Version 0.22.0 (4/2/19)
 	* Added new parameters (numberAcceptors, allowSharingAcceptance) to create sharing invitation and redeem sharing invitation, with defaults so this should still allow clients to run with no change.
 
