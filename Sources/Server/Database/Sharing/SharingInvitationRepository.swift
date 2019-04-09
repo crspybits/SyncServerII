@@ -139,12 +139,15 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
     }
     
     enum LookupKey : CustomStringConvertible {
+        case unexpiredSharingInvitationUUID(uuid: String)
         case sharingInvitationUUID(uuid: String)
         case staleExpiryDates
         case owningUserId(UserId)
         
         var description : String {
             switch self {
+            case .unexpiredSharingInvitationUUID(let uuid):
+                return "unexpiredSharingInvitationUUID(\(uuid))"
             case .sharingInvitationUUID(let uuid):
                 return "sharingInvitationUUID(\(uuid))"
             case .staleExpiryDates:
@@ -157,6 +160,9 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
     
     func lookupConstraint(key:LookupKey) -> String {
         switch key {
+        case .unexpiredSharingInvitationUUID(let uuid):
+            let staleDateString = DateExtras.date(Date(), toFormat: dateFormat)
+            return "sharingInvitationUUID = '\(uuid)' and expiry > '\(staleDateString)'"
         case .sharingInvitationUUID(let uuid):
             return "sharingInvitationUUID = '\(uuid)'"
         case .staleExpiryDates:

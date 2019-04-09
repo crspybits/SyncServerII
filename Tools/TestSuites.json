@@ -6,6 +6,7 @@
     "owning_google",
     "owning_dropbox",
     "sharing_create",
+    "sharing_info",
     "sharing_redeem",
     "sharing_file",
     "sharing_groups",
@@ -256,6 +257,88 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "PRIMARY_SHARING_DROPBOX2"
+      ]
+    }
+  ],
+  "sharing_info": [
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1"
       ]
     }
   ],

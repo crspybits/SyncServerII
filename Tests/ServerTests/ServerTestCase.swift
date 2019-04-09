@@ -1330,6 +1330,93 @@ class ServerTestCase : XCTestCase {
         }
     }
     
+    func getSharingInvitationInfo(sharingInvitationUUID:String? = nil, errorExpected:Bool=false, httpStatusCodeExpected: HTTPStatusCode = .OK, completion:@escaping (_ result: GetSharingInvitationInfoResponse?, _ expectation: XCTestExpectation)->()) {
+
+        self.performServerTest() { expectation in
+            var urlParameters:String?
+            
+            if sharingInvitationUUID != nil {
+                let request = GetSharingInvitationInfoRequest()
+                request.sharingInvitationUUID = sharingInvitationUUID!
+                urlParameters = "?" + request.urlParameters()!
+            }
+            
+            self.performRequest(route: ServerEndpoints.getSharingInvitationInfo, urlParameters: urlParameters) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+
+                var result: GetSharingInvitationInfoResponse?
+                
+                if errorExpected {
+                    XCTAssert(response!.statusCode == httpStatusCodeExpected, "ERROR: Worked on request!")
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on request")
+                    
+                    if let dict = dict,
+                        let getSharingInvitationInfoResponse = try? GetSharingInvitationInfoResponse.decode(dict) {
+                        result = getSharingInvitationInfoResponse
+                    }
+                    else {
+                        XCTFail()
+                    }
+                }
+                
+                completion(result, expectation)
+            }
+        }
+    }
+    
+    func getSharingInvitationInfo(sharingInvitationUUID:String? = nil, errorExpected:Bool=false, httpStatusCodeExpected: HTTPStatusCode = .OK) -> GetSharingInvitationInfoResponse? {
+        var result:GetSharingInvitationInfoResponse?
+        
+        getSharingInvitationInfo(sharingInvitationUUID: sharingInvitationUUID, errorExpected: errorExpected, httpStatusCodeExpected: httpStatusCodeExpected) { response, exp in
+            result = response
+            exp.fulfill()
+        }
+        
+        return result
+    }
+    
+    func getSharingInvitationInfoWithSecondaryAuth(testAccount: TestAccount, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, httpStatusCodeExpected: HTTPStatusCode = .OK, completion:@escaping (_ result: GetSharingInvitationInfoResponse?, _ expectation: XCTestExpectation)->()) {
+
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        self.performServerTest(testAccount: testAccount) { expectation, account in
+            var urlParameters:String?
+
+            let headers = self.setupHeaders(testUser:testAccount, accessToken: account.accessToken, deviceUUID:deviceUUID)
+
+            if sharingInvitationUUID != nil {
+                let request = GetSharingInvitationInfoRequest()
+                request.sharingInvitationUUID = sharingInvitationUUID!
+                urlParameters = "?" + request.urlParameters()!
+            }
+            
+            self.performRequest(route: ServerEndpoints.getSharingInvitationInfo, headers: headers, urlParameters: urlParameters) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+
+                var result: GetSharingInvitationInfoResponse?
+                
+                if errorExpected {
+                    XCTAssert(response!.statusCode == httpStatusCodeExpected, "ERROR: Worked on request!")
+                }
+                else {
+                    XCTAssert(response!.statusCode == .OK, "Did not work on request")
+                    
+                    if let dict = dict,
+                        let getSharingInvitationInfoResponse = try? GetSharingInvitationInfoResponse.decode(dict) {
+                        result = getSharingInvitationInfoResponse
+                    }
+                    else {
+                        XCTFail()
+                    }
+                }
+                
+                completion(result, expectation)
+            }
+        }
+    }
+    
     func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
 
         if addUser {

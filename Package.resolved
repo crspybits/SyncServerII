@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-Credentials.git",
         "state": {
           "branch": null,
-          "revision": "4012937238ba58fecd3c11dda4b69ebcd0fc89fd",
-          "version": "2.4.0"
+          "revision": "1daf65e3f89280fb22afbb9d46d15c89d2f7918c",
+          "version": "2.4.1"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "82d121b3c8c42f12e46629e296b4feeb95d1d29e",
-          "version": "10.0.0"
+          "revision": "a9c00eb2a8e622855139fb29675439975fa730c1",
+          "version": "10.1.0"
         }
       },
       {

@@ -79,6 +79,34 @@ class SharingAccountsController : ControllerProtocol {
         params.completion(.success(response))
     }
     
+    func getSharingInvitationInfo(params:RequestProcessingParameters) {
+        assert(params.ep.authenticationLevel == .none)
+        
+        guard let request = params.request as? GetSharingInvitationInfoRequest else {
+            let message = "Did not receive GetSharingInvitationInfoRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // I'm not going to fiddle with removing expired invitations here. Just seems wrong with a get info method.
+        let sharingInvitationKey = SharingInvitationRepository.LookupKey.unexpiredSharingInvitationUUID(uuid: request.sharingInvitationUUID)
+        let lookupResult = SharingInvitationRepository(params.db).lookup(key: sharingInvitationKey, modelInit: SharingInvitation.init)
+        
+        guard case .found(let model) = lookupResult,
+            let sharingInvitation = model as? SharingInvitation else {
+                let message = "Could not find sharing invitation: \(String(describing: request.sharingInvitationUUID)). Was it stale?"
+            Log.error(message)
+            params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.gone)))
+            return
+        }
+        
+        let response = GetSharingInvitationInfoResponse()
+        response.permission = sharingInvitation.permission
+        response.allowSocialAcceptance = sharingInvitation.allowSocialAcceptance
+        params.completion(.success(response))
+    }
+    
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         

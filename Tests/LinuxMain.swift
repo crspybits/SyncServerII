@@ -33,5 +33,6 @@ XCTMain([
     testCase(FileController_FileGroupUUIDTests.allTests),
     testCase(SpecificDatabaseTests_SharingGroups.allTests),
     testCase(SpecificDatabaseTests_SharingGroupUsers.allTests),
-    testCase(SharingGroupsControllerTests.allTests)
+    testCase(SharingGroupsControllerTests.allTests),
+    testCase(SharingAccountsController_GetSharingInvitationInfo.allTests)
 ])

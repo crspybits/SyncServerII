@@ -176,6 +176,18 @@ class MessageTests: ServerTestCase, LinuxTestable {
         
         XCTAssert(response2.numberUploadsTransferred == numberUploads)
     }
+    
+    func testValidGetSharingInvitationInfoRequest() {
+        let request = GetSharingInvitationInfoRequest()
+        request.sharingInvitationUUID = Foundation.UUID().uuidString
+        XCTAssert(request.valid())
+    }
+    
+    func testInvalidGetSharingInvitationInfoRequest() {
+        let request = GetSharingInvitationInfoRequest()
+        request.sharingInvitationUUID = "foobar"
+        XCTAssert(!request.valid())
+    }
 }
 
 extension MessageTests {
@@ -187,7 +199,9 @@ extension MessageTests {
             ("testBadUUIDForFileName", testBadUUIDForFileName),
             ("testPropertyHasValue", testPropertyHasValue),
             ("testNonNilRequestMessageParams", testNonNilRequestMessageParams),
-            ("testDoneUploadsResponse", testDoneUploadsResponse)
+            ("testDoneUploadsResponse", testDoneUploadsResponse),
+            ("testValidGetSharingInvitationInfoRequest", testValidGetSharingInvitationInfoRequest),
+            ("testInvalidGetSharingInvitationInfoRequest", testInvalidGetSharingInvitationInfoRequest)
         ]
     }
 

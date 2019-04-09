@@ -1,5 +1,8 @@
 SyncServer
 
+Version 0.23.0 (4/9/19)
+	* Added new endpoint to get sharing invitation info.
+
 Version 0.22.1 (4/8/19)
 	* Updated shared library (SyncServer-Shared) to 10.0.0.
 

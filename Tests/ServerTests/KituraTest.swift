@@ -50,11 +50,12 @@ class GoogleCredsCache {
             completion(creds)
         }
         else {
+            Log.info("Attempting to refresh Google Creds...")
             let creds = GoogleCreds()
             cache[googleAccount.id()] = creds
             creds.refreshToken = googleAccount.token()
             creds.refresh {[unowned creds] error in
-                XCTAssert(error == nil, "\(error!)")
+                XCTAssert(error == nil, "credsFor: Failure on refresh: \(error!)")
                 completion(creds)
             }
         }
@@ -66,6 +67,7 @@ extension KituraTest {
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
         
         func runTest(usingCreds creds:Account) {
+            Log.info("performServerTest: Starts")
             ServerMain.startup(type: .nonBlocking)
             
             let requestQueue = DispatchQueue(label: "Request queue")
@@ -84,6 +86,7 @@ extension KituraTest {
             if testAccount.type == .Google {
                 sleep(5)
             }
+            Log.info("performServerTest: Ends")
         }
         
         switch testAccount.type {
@@ -103,6 +106,25 @@ extension KituraTest {
             creds.accountId = testAccount.id()
             runTest(usingCreds: creds)
         }
+    }
+    
+    // Perform server test, with no creds. e.g., health check.
+    func performServerTest(asyncTask: @escaping (XCTestExpectation) -> Void) {
+        Log.info("performServerTest: Starts")
+        ServerMain.startup(type: .nonBlocking)
+        
+        let requestQueue = DispatchQueue(label: "Request queue")
+        let expectation = self.expectation(0)
+        requestQueue.async() {
+            asyncTask(expectation)
+        }
+
+        // blocks test until request completes
+        self.waitExpectation(timeout: 60) { error in
+            ServerMain.shutdown()
+            XCTAssertNil(error)
+        }
+        Log.info("performServerTest: Ends")
     }
     
     func performRequest(route:ServerEndpoint, responseDictFrom:ResponseDictFrom = .body, headers: [String: String]? = nil, urlParameters:String? = nil, body:Data? = nil, callback: @escaping (ClientResponse?, [String:Any]?) -> Void) {
