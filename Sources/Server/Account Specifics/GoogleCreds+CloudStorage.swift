@@ -11,9 +11,6 @@ import KituraNet
 import Foundation
 import SyncServerShared
 
-// TODO: *5* MD5 checksums can be obtained from Google Drive: http://stackoverflow.com/questions/23462168/google-drive-md5-checksum-for-files 
-// At least for Google Drive this ought to enable us to deal with issues of users modifying files and messing us up. i.e., we should drop the byte count support we have and go with a checksum validation.
-
 // TODO: *0* Need automatic refreshing of the access token-- this should make client side testing easier: There should be no need to create a new access token every hour.
 
 // TODO: *5* It looks like if we give the user a reader-only role on a file, then they will not be able to modify it. Which will help in terms of users potentially modifying SyncServer files and messing things up. See https://developers.google.com/drive/v3/reference/permissions QUESTION: Will the user then be able to delete the file?

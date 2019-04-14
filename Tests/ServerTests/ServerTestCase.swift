@@ -1582,22 +1582,36 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func uploadFile(accountType: AccountType, creds: CloudStorage, deviceUUID:String, stringFile: TestFile, uploadRequest:UploadFileRequest, options:CloudStorageFileNameOptions? = nil, failureExpected: Bool = false, errorExpected: CloudStorageError? = nil, expectAccessTokenRevokedOrExpired: Bool = false) -> String? {
+    func uploadFile(accountType: AccountType, creds: CloudStorage, deviceUUID:String, testFile: TestFile, uploadRequest:UploadFileRequest, options:CloudStorageFileNameOptions? = nil, nonStandardFileName: String? = nil, failureExpected: Bool = false, errorExpected: CloudStorageError? = nil, expectAccessTokenRevokedOrExpired: Bool = false) -> String? {
+    
+        var fileContentsData: Data!
         
-        guard case .string(let fileContents) = stringFile.contents else {
+        switch testFile.contents {
+        case .string(let fileContents):
+            fileContentsData = fileContents.data(using: .ascii)!
+        case .url(let url):
+            fileContentsData = try? Data(contentsOf: url)
+        }
+        
+        guard fileContentsData != nil else {
             XCTFail()
             return nil
         }
         
-        let fileContentsData = fileContents.data(using: .ascii)!
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        var cloudFileName:String
+        if let nonStandardFileName = nonStandardFileName {
+            cloudFileName = nonStandardFileName
+        }
+        else {
+            cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        }
         
         let exp = expectation(description: "\(#function)\(#line)")
 
         creds.uploadFile(cloudFileName: cloudFileName, data: fileContentsData, options: options) { result in
             switch result {
             case .success(let checkSum):
-                XCTAssert(stringFile.checkSum(type: accountType) == checkSum)
+                XCTAssert(testFile.checkSum(type: accountType) == checkSum)
                 Log.debug("checkSum: \(checkSum)")
                 if failureExpected {
                     XCTFail()

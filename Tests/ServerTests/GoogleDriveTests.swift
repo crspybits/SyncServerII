@@ -19,12 +19,14 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     let knownPresentFile = "DO-NOT-REMOVE.txt"
     
     let knownPresentImageFile = "DO-NOT-REMOVE.png"
+    let knownPresentURLFile = "DO-NOT-REMOVE.url"
 
     // This is special in that (a) it contains only two characters, and (b) it was causing me problems for downloading on 2/4/18.
     let knownPresentFile2 = "DO-NOT-REMOVE2.txt"
     
     let knownAbsentFolder = "Markwa.Farkwa.Blarkwa"
     let knownAbsentFile = "Markwa.Farkwa.Blarkwa"
+    let knownAbsentURLFile = "Markwa.Farkwa.Blarkwa.url"
 
     // Folder that will be created and removed.
     let folderCreatedAndDeleted = "abcdefg12345temporary"
@@ -86,10 +88,12 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
+        Log.debug("Folder name: \(String(describing: folderName))")
+        
         func searchForFile(parentFolderId:String?) {
             creds.searchFor(.file(mimeType:mimeType, parentFolderId:parentFolderId), itemName: name) { result, error in
                 if presentExpected {
-                    XCTAssert(result != nil)
+                    XCTAssert(result != nil, "\(String(describing: error))")
                 }
                 else {
                     XCTAssert(result == nil)
@@ -134,16 +138,45 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         searchForFile(name: knownPresentImageFile, withMimeType: "image/png", inFolder: nil, presentExpected: true)
     }
     
+    func testBootStrapTestSearchForPresentURLFile() {
+        let file = knownPresentURLFile
+        if let found = lookupFile(cloudFileName: file, mimeType: .url) {
+            // Uploads to knownPresentFolder
+            if !found {
+                fullUpload(file: TestFile.testUrlFile, mimeType: MimeType.url.rawValue, nonStandardFileName: file)
+            }
+        }
+        else {
+            XCTFail()
+        }
+    }
+    
+    func testSearchForPresentURLFile() {
+        searchForFile(name: knownPresentURLFile, withMimeType: MimeType.url.rawValue, inFolder: knownPresentFolder, presentExpected: true)
+    }
+    
     func testSearchForAbsentFile() {
         searchForFile(name: knownAbsentFile, withMimeType: "text/plain", inFolder: nil, presentExpected: false)
+    }
+    
+   func testSearchForAbsentURLFile() {
+        searchForFile(name: knownAbsentURLFile, withMimeType: MimeType.url.rawValue, inFolder: nil, presentExpected: false)
     }
     
     func testSearchForPresentFileInFolder() {
         searchForFile(name: knownPresentFile, withMimeType: "text/plain", inFolder: knownPresentFolder, presentExpected: true)
     }
     
+    func testSearchForPresentURLFileInFolder() {
+        searchForFile(name: knownPresentURLFile, withMimeType: MimeType.url.rawValue, inFolder: knownPresentFolder, presentExpected: true)
+    }
+    
     func testSearchForAbsentFileInFolder() {
         searchForFile(name: knownAbsentFile, withMimeType: "text/plain", inFolder: knownPresentFolder, presentExpected: false)
+    }
+    
+    func testSearchForAbsentURLFileInFolder() {
+        searchForFile(name: knownAbsentURLFile, withMimeType: MimeType.url.rawValue, inFolder: knownPresentFolder, presentExpected: false)
     }
     
     // Haven't been able to get trashFile to work yet.
@@ -214,7 +247,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    func testCloudStorageFileDeleteWorks() {
+    func cloudStorageFileDelete(file: TestFile, mimeType: MimeType) {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -231,23 +264,29 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let file = TestFile.test1
-        
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
-        uploadRequest.mimeType = "text/plain"
+        uploadRequest.mimeType = mimeType.rawValue
         uploadRequest.fileVersion = 0
         uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.md5CheckSum
 
-        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: mimeType.rawValue)
         
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options)
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
         
         let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         
         deleteFile(testAccount: TestAccount.google1, cloudFileName: cloudFileName, options: options)
+    }
+    
+    func testCloudStorageFileDeleteWorks() {
+        cloudStorageFileDelete(file: .test1, mimeType: .text)
+    }
+    
+    func testCloudStorageURLFileDeleteWorks() {
+        cloudStorageFileDelete(file: .testUrlFile, mimeType: .url)
     }
     
     func testCloudStorageFileDeleteWithRevokedRefreshToken() {
@@ -323,7 +362,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    func testFullUploadWorks() {
+    func fullUpload(file: TestFile, mimeType: String, nonStandardFileName: String? = nil) {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -340,22 +379,28 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let file = TestFile.test1
-        
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
-        uploadRequest.mimeType = "text/plain"
+        uploadRequest.mimeType = mimeType
         uploadRequest.fileVersion = 0
         uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.md5CheckSum
 
-        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+        let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: mimeType)
         
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options)
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, nonStandardFileName: nonStandardFileName)
         
         // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, nonStandardFileName: nonStandardFileName, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+    }
+    
+    func testFullUploadWorks() {
+        fullUpload(file: TestFile.test1, mimeType: MimeType.text.rawValue)
+    }
+    
+    func testFullUploadWorksForURLFile() {
+        fullUpload(file: TestFile.testUrlFile, mimeType: MimeType.url.rawValue)
     }
     
     func testUploadWithRevokedRefreshToken() {
@@ -378,10 +423,10 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
         
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, stringFile: file, uploadRequest: uploadRequest, options: options, expectAccessTokenRevokedOrExpired: true)
+        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, expectAccessTokenRevokedOrExpired: true)
     }
     
-    func downloadFile(cloudFileName:String, expectError:Bool = false, expectedFileNotFound: Bool = false) {
+    func downloadFile(cloudFileName:String, mimeType: MimeType, expectError:Bool = false, expectedFileNotFound: Bool = false) {
         let creds = GoogleCreds()
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -390,7 +435,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             XCTAssert(error == nil)
             XCTAssert(creds.accessToken != nil)
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: mimeType.rawValue)
             
             creds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
                 switch result {
@@ -416,7 +461,11 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testBasicFileDownloadWorks() {
-        downloadFile(cloudFileName: self.knownPresentFile)
+        downloadFile(cloudFileName: self.knownPresentFile, mimeType: .text)
+    }
+    
+    func testBasicURLFileDownloadWorks() {
+        downloadFile(cloudFileName: self.knownPresentURLFile, mimeType: .url)
     }
     
     func testSearchForPresentFile2() {
@@ -424,11 +473,11 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testBasicFileDownloadWorks2() {
-        downloadFile(cloudFileName: self.knownPresentFile2)
+        downloadFile(cloudFileName: self.knownPresentFile2, mimeType: .text)
     }
     
     func testFileDownloadOfNonExistentFileFails() {
-        downloadFile(cloudFileName: self.knownAbsentFile, expectedFileNotFound: true)
+        downloadFile(cloudFileName: self.knownAbsentFile, mimeType: .text, expectedFileNotFound: true)
     }
     
     func testDownloadWithRevokedRefreshToken() {
@@ -562,7 +611,8 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    func lookupFile(cloudFileName: String, expectError:Bool = false) -> Bool? {
+    // Searches in knownPresentFolder
+    func lookupFile(cloudFileName: String, mimeType: MimeType = .text, expectError:Bool = false) -> Bool? {
         var foundResult: Bool?
         
         let creds = GoogleCreds()
@@ -573,7 +623,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
             XCTAssert(error == nil)
             XCTAssert(creds.accessToken != nil)
             
-            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
+            let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: mimeType.rawValue)
             
             creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
                 switch result {
@@ -598,12 +648,17 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         return foundResult
     }
 
-    func testLookupFileThatDoesNotExist() {
+    func testLookupFileThatExists() {
         let result = lookupFile(cloudFileName: knownPresentFile)
         XCTAssert(result == true)
     }
     
-    func testLookupFileThatExists() {
+    func testLookupURLFileThatExists() {
+        let result = lookupFile(cloudFileName: knownPresentURLFile, mimeType: .url)
+        XCTAssert(result == true)
+    }
+    
+    func testLookupFileThatDoesNotExist() {
         let result = lookupFile(cloudFileName: knownAbsentFile)
         XCTAssert(result == false)
     }
@@ -641,17 +696,25 @@ extension GoogleDriveTests {
             ("testSearchForAbsentFolder", testSearchForAbsentFolder),
             ("testSearchForPresentFile", testSearchForPresentFile),
             ("testSearchForPresentImageFile", testSearchForPresentImageFile),
+            ("testBootStrapTestSearchForPresentURLFile", testBootStrapTestSearchForPresentURLFile),
+            ("testSearchForPresentURLFile", testSearchForPresentURLFile),
             ("testSearchForAbsentFile", testSearchForAbsentFile),
+            ("testSearchForAbsentURLFile", testSearchForAbsentURLFile),
             ("testSearchForPresentFileInFolder", testSearchForPresentFileInFolder),
+            ("testSearchForPresentURLFileInFolder", testSearchForPresentURLFileInFolder),
             ("testSearchForAbsentFileInFolder", testSearchForAbsentFileInFolder),
+            ("testSearchForAbsentURLFileInFolder", testSearchForAbsentURLFileInFolder),
             ("testCreateAndDeleteFolder", testCreateAndDeleteFolder),
             ("testDeleteFolderThatDoesNotExistFailure", testDeleteFolderThatDoesNotExistFailure),
             ("testCloudStorageFileDeleteWorks", testCloudStorageFileDeleteWorks),
+            ("testCloudStorageURLFileDeleteWorks", testCloudStorageURLFileDeleteWorks),
             ("testCloudStorageFileDeleteWithRevokedRefreshToken", testCloudStorageFileDeleteWithRevokedRefreshToken),
             ("testCreateFolderIfDoesNotExist", testCreateFolderIfDoesNotExist),
             ("testUploadWithRevokedRefreshToken", testUploadWithRevokedRefreshToken),
             ("testFullUploadWorks", testFullUploadWorks),
+            ("testFullUploadWorksForURLFile", testFullUploadWorksForURLFile),
             ("testBasicFileDownloadWorks", testBasicFileDownloadWorks),
+            ("testBasicURLFileDownloadWorks", testBasicURLFileDownloadWorks),
             ("testSearchForPresentFile2", testSearchForPresentFile2),
             ("testBasicFileDownloadWorks2", testBasicFileDownloadWorks2),
             ("testFileDownloadOfNonExistentFileFails", testFileDownloadOfNonExistentFileFails),
@@ -662,6 +725,7 @@ extension GoogleDriveTests {
             ("testLookupFileWithRevokedRefreshToken", testLookupFileWithRevokedRefreshToken),
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
             ("testLookupFileThatExists", testLookupFileThatExists),
+            ("testLookupURLFileThatExists", testLookupURLFileThatExists),
             ("testRevokedGoogleRefreshToken", testRevokedGoogleRefreshToken)
         ]
     }

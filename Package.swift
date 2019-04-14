@@ -14,8 +14,8 @@ let package = Package(
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.3.0"),
 
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "10.1.0"),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
+        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "10.1.0"),
 
         // .package(url: "../../repos/SMServerLib", .branch("master")),
         .package(url: "https://github.com/crspybits/SMServerLib.git", from: "1.0.0"),
