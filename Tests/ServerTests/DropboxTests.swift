@@ -71,7 +71,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    func testUploadFileWorks() {
+    func uploadFile(file: TestFile, mimeType: MimeType) {
         let fileName = Foundation.UUID().uuidString
         
         let creds = DropboxCreds()
@@ -79,19 +79,24 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         creds.accountId = TestAccount.dropbox1.id()
         let exp = expectation(description: "\(#function)\(#line)")
         
-        let stringFile = TestFile.test1
+        let fileContentsData: Data!
+
+        switch file.contents {
+        case .string(let fileContents):
+            fileContentsData = fileContents.data(using: .ascii)!
+        case .url(let url):
+            fileContentsData = try? Data(contentsOf: url)
+        }
         
-        guard case .string(let stringContents) = stringFile.contents else {
+        guard fileContentsData != nil else {
             XCTFail()
             return
         }
         
-        let fileContentsData = stringContents.data(using: .ascii)!
-        
         creds.uploadFile(withName: fileName, data: fileContentsData) { result in
             switch result {
             case .success(let hash):
-                XCTAssert(hash == stringFile.dropboxCheckSum)
+                XCTAssert(hash == file.dropboxCheckSum)
             case .failure(let error):
                 Log.error("uploadFile: \(error)")
                 XCTFail()
@@ -103,6 +108,14 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         }
         
         waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testUploadFileWorks() {
+        uploadFile(file: .test1, mimeType: .text)
+    }
+    
+    func testUploadURLFileWorks() {
+        uploadFile(file: .testUrlFile, mimeType: .url)
     }
     
     func testUploadWithRevokedToken() {
@@ -139,7 +152,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    func testFullUploadWorks() {
+    func fullUpload(file: TestFile, mimeType: MimeType) {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
@@ -147,20 +160,26 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         
-        let file = TestFile.test1
-        
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
-        uploadRequest.mimeType = "text/plain"
+        uploadRequest.mimeType = mimeType.rawValue
         uploadRequest.fileVersion = 0
         uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         
-        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: TestFile.test1, uploadRequest:uploadRequest)
+        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
         
         // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
-        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+    }
+    
+    func testFullUploadWorks() {
+        fullUpload(file: .test1, mimeType: .text)
+    }
+    
+    func testFullUploadURLWorks() {
+        fullUpload(file: .testUrlFile, mimeType: .url)
     }
     
     func downloadFile(creds: DropboxCreds, cloudFileName: String, expectedStringFile:TestFile? = nil, expectedFailure: Bool = false, expectedFileNotFound: Bool = false, expectedRevokedToken: Bool = false) {
@@ -262,7 +281,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
 
-        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile: file, uploadRequest:uploadRequest)
+        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
         
         let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         Log.debug("cloudFileName: \(cloudFileName)")
@@ -328,30 +347,36 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         deleteFile(creds: creds, cloudFileName: knownAbsentFile, expectedFailure: true)
     }
 
-    func testDeletionOfExistingFileWorks() {
+    func deletionOfExistingFile(file: TestFile, mimeType: MimeType) {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
         let creds = DropboxCreds()
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
-        
-        let file = TestFile.test1
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
-        uploadRequest.mimeType = "text/plain"
+        uploadRequest.mimeType = mimeType.rawValue
         uploadRequest.fileVersion = 0
         uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         
-        guard let fileName = uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, stringFile:file, uploadRequest:uploadRequest) else {
+        guard let fileName = uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile:file, uploadRequest:uploadRequest) else {
             XCTFail()
             return
         }
         
         deleteFile(creds: creds, cloudFileName: fileName)
+    }
+    
+    func testDeletionOfExistingFileWorks() {
+        deletionOfExistingFile(file: .test1, mimeType: .text)
+    }
+    
+    func testDeletionOfExistingURLFileWorks() {
+        deletionOfExistingFile(file: .testUrlFile, mimeType: .url)
     }
     
     func lookupFile(cloudFileName: String, expectError:Bool = false) -> Bool? {
@@ -423,8 +448,10 @@ extension DropboxTests {
             ("testCheckForFileFailsWithFileThatDoesNotExist", testCheckForFileFailsWithFileThatDoesNotExist),
             ("testCheckForFileWorksWithExistingFile", testCheckForFileWorksWithExistingFile),
             ("testUploadFileWorks", testUploadFileWorks),
+            ("testUploadURLFileWorks", testUploadURLFileWorks),
             ("testUploadWithRevokedToken", testUploadWithRevokedToken),
             ("testFullUploadWorks", testFullUploadWorks),
+            ("testFullUploadURLWorks", testFullUploadURLWorks),
             ("testDownloadOfNonExistingFileFails", testDownloadOfNonExistingFileFails),
             ("testSimpleDownloadWorks", testSimpleDownloadWorks),
             ("testDownloadWithRevokedToken", testDownloadWithRevokedToken),
@@ -433,6 +460,7 @@ extension DropboxTests {
             ("testDeletionWithRevokedAccessToken", testDeletionWithRevokedAccessToken),
             ("testDeletionOfNonExistingFileFails", testDeletionOfNonExistingFileFails),
             ("testDeletionOfExistingFileWorks", testDeletionOfExistingFileWorks),
+            ("testDeletionOfExistingURLFileWorks", testDeletionOfExistingURLFileWorks),
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
             ("testLookupFileThatExists", testLookupFileThatExists),
             ("testLookupWithRevokedAccessToken", testLookupWithRevokedAccessToken)

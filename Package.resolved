@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
           "branch": null,
-          "revision": "3730de858ac464ce0d3f8e604e21fcaaf2fb4e33",
-          "version": "1.0.26"
+          "revision": "5ae583051e20dd7731171abb2927e8558f8d966e",
+          "version": "1.0.27"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
         "state": {
           "branch": null,
-          "revision": "52126a2b40e175659124e73532f8f0d21c6a324f",
-          "version": "1.0.17"
+          "revision": "e52aec0e67e40ddfdfa51b468d7ac2c1cfdaebcd",
+          "version": "1.0.19"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "ea61f532dd46c876f7bb8e1f8e849cac96b23b77",
-          "version": "1.0.45"
+          "revision": "ccc671b022bc60e5fffcb2aa15f499c6331bfd18",
+          "version": "1.0.46"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
         "state": {
           "branch": null,
-          "revision": "655299a84254737b55c777c11f0fe5d5915e1f4b",
-          "version": "1.0.45"
+          "revision": "0127cd4156bb0ba702894f2509199e4b65ca1db5",
+          "version": "1.0.46"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git",
         "state": {
           "branch": null,
-          "revision": "e76aa9f06473a5a2c08e6215fb58b652f4e5d7ab",
-          "version": "2.3.0"
+          "revision": "acf1b5e4de813582fb9520189f4613559185f7bc",
+          "version": "2.3.1"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git",
         "state": {
           "branch": null,
-          "revision": "86db4d2805a79b2974fafae71b06dbdb7315e551",
-          "version": "2.3.0"
+          "revision": "a68feb5789625ec8ffb50829ef0f1ed0d7f08574",
+          "version": "2.3.1"
         }
       },
       {
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-Session.git",
         "state": {
           "branch": null,
-          "revision": "6e732826c27d6bbb6156b46fc33504e8b31fb03b",
-          "version": "3.3.2"
+          "revision": "24f18691d1f03162e2726a4e2dd2cbf5cb1741cb",
+          "version": "3.3.3"
         }
       },
       {
@@ -249,8 +249,8 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": null,
-          "revision": "a9c00eb2a8e622855139fb29675439975fa730c1",
-          "version": "10.1.0"
+          "revision": "80b2ffea73474f7380077a323b5d4191bfc94181",
+          "version": "10.2.0"
         }
       },
       {

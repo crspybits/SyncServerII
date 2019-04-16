@@ -341,10 +341,10 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
                 XCTAssert(rowModel.c13 == self.c13Value, "Value was not \(self.c13Value)")
                 //XCTAssert(rowModel.c14 == self.c14Value, "Value was not \(self.c14Value)")
                 
-                XCTAssert(rowModel.c15 == self.c15String, "Value was not \(self.c15String)")
-                XCTAssert(rowModel.c16 == self.c16String, "Value was not \(self.c16String)")
-                XCTAssert(rowModel.c17 == self.c17String, "Value was not \(self.c17String)")
-                XCTAssert(rowModel.c18 == self.c18String, "Value was not \(self.c18String)")
+                XCTAssert(rowModel.c15 == self.c15String, "Value was not \(String(describing: self.c15String))")
+                XCTAssert(rowModel.c16 == self.c16String, "Value was not \(String(describing: self.c16String))")
+                XCTAssert(rowModel.c17 == self.c17String, "Value was not \(String(describing: self.c17String))")
+                XCTAssert(rowModel.c18 == self.c18String, "Value was not \(String(describing: self.c18String))")
             }
             
             row += 1
@@ -399,7 +399,7 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             XCTAssert(rowModel.c1 == .TestEnum1, "TestEnum value was wrong")
             
             XCTAssert(self.equalDMY(date1: rowModel.c2, date2: self.c2Table2Value),
-                "c2 date value was wrong: rowModel.c2=\(rowModel.c2); self.c2Table2Value=\(self.c2Table2Value)")
+                      "c2 date value was wrong: rowModel.c2=\(String(describing: rowModel.c2)); self.c2Table2Value=\(self.c2Table2Value)")
         }
         
         XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(String(describing: select.forEachRowStatus))")

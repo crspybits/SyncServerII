@@ -54,6 +54,10 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    func testUploadURLFile() {
+        _ = uploadFileUsingServer(mimeType: .url, file: .testUrlFile)
+    }
+    
     func testUploadTextAndJPEGFile() {
         let deviceUUID = Foundation.UUID().uuidString
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
@@ -209,6 +213,7 @@ extension FileController_UploadTests {
         return [
             ("testUploadTextFile", testUploadTextFile),
             ("testUploadJPEGFile", testUploadJPEGFile),
+            ("testUploadURLFile", testUploadURLFile),
             ("testUploadTextAndJPEGFile", testUploadTextAndJPEGFile),
             ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
             ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
