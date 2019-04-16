@@ -1,6 +1,6 @@
 SyncServer
 
-Version 0.24.0
+Version 0.24.0 (4/15/19)
 	* Added url mime type.
 
 Version 0.23.0 (4/9/19)
