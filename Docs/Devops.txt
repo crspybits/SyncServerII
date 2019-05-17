@@ -28,11 +28,26 @@
 		
 	3.3) Start the server again. Follow devops/MaintenanceShutdown/README.txt
 		This will optionally let you bring up a new server version. E.g., if the database migrations require a new server version.
+		
+4) An app change that requires all users to immediately use the new version of the app.
+	This situation arose with version 1.5 of the app: I added a new media type to the app, URL media. In releasing it there is at least theoretically a race condition:
+	a) I release the app to the app store.
+	b) I have to wait a period of time for the app to be available on the app store before I can use the "iOSMinimumClientVersion" server key to force app updates.
+	c) Someone gets a download of version 1.5 and adds a URL media instance.
+	d) Someone with a prior version of the app tries to access that URL media instance and it fails.
 
-4) How to scale the server?
+One possible way around this is to add a "ServerMaintenance" mode for the server and that the app will respond to. The app would show "The app is undergoing maintenance. Please check back..." in response to this key from the server. So, the process would then be:
+	a) First, change the server into maintenance mode.
+	b) Release the app to the app store.
+	c) Wait for the app to propagate and be available on the app store.
+	d) Change the server out of maintenance mode and simultaneously increase the app version in "iOSMinimumClientVersion".
+	
+This way, no one can use the app for a period of time, but the race condition is avoided.
+
+5) How to scale the server?
 	a) Scaling the size/type of the EC2 instance.
 		Are there parameters other than EC2 instance type? RAM size? Disk size?
 	b) Criteria for scaling the number of EC2 instances?
 	
-5) How to scale the database?
+6) How to scale the database?
 
