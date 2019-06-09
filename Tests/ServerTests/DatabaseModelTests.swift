@@ -40,31 +40,6 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         XCTAssert(deviceUUID.userId == nil)
     }
     
-    func testLock() {
-        let lock = Lock(sharingGroupUUID: UUID().uuidString, deviceUUID: Foundation.UUID().uuidString)
-        lock[Lock.deviceUUIDKey] = Foundation.UUID().uuidString
-        
-        let newDate = Date()
-        let newSharingGroupUUID = UUID().uuidString
-        let newDeviceUUID = Foundation.UUID().uuidString
-        
-        lock[Lock.expiryKey] = newDate
-        lock[Lock.sharingGroupUUIDKey] = newSharingGroupUUID
-        lock[Lock.deviceUUIDKey] = newDeviceUUID
-        
-        XCTAssert(lock.deviceUUID == newDeviceUUID)
-        XCTAssert(lock.sharingGroupUUID == newSharingGroupUUID)
-        XCTAssert(lock.expiry.compare(newDate) == .orderedSame)
-        
-        lock[Lock.expiryKey] = nil
-        lock[Lock.sharingGroupUUIDKey] = nil
-        lock[Lock.deviceUUIDKey] = nil
-        
-        XCTAssert(lock.deviceUUID == nil)
-        XCTAssert(lock.sharingGroupUUID == nil)
-        XCTAssert(lock.expiry == nil)
-    }
-    
     func testMasterVersion() {
         let masterVersion = MasterVersion()
         
@@ -291,7 +266,6 @@ extension DatabaseModelTests {
     static var allTests : [(String, (DatabaseModelTests) -> () throws -> Void)] {
         return [
             ("testDeviceUUID", testDeviceUUID),
-            ("testLock", testLock),
             ("testMasterVersion", testMasterVersion),
             ("testSharingInvitation", testSharingInvitation),
             ("testUser", testUser),

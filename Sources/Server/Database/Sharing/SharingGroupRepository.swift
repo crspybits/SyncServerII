@@ -257,8 +257,8 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     
     func markAsDeleted(forCriteria criteria: MarkDeletionCriteria) -> Int64? {
         let query = "UPDATE \(tableName) SET \(SharingGroup.deletedKey)=1 WHERE " + criteria.toString()
-        if db.connection.query(statement: query) {
-            return db.connection.numberAffectedRows()
+        if db.query(statement: query) {
+            return db.numberAffectedRows()
         }
         else {
             let error = db.error

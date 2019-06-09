@@ -278,8 +278,9 @@ extension FileController {
                     Log.debug("File with checkSum \(checkSum) successfully uploaded!")
                     
                     // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
-                    guard checkSum == uploadRequest.checkSum else {
-                        self.errorCleanup("Checksum after upload to cloud storage (\(checkSum) is not the same as before upload \(String(describing: uploadRequest.checkSum)).", errorDeletion: errorDeletion)
+                    let expectedCheckSum = uploadRequest.checkSum?.lowercased()
+                    guard checkSum == expectedCheckSum else {
+                        self.errorCleanup("Checksum after upload to cloud storage (\(checkSum) is not the same as before upload \(String(describing: expectedCheckSum)).", errorDeletion: errorDeletion)
                         return
                     }
                     

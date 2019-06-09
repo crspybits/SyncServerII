@@ -27,13 +27,15 @@ let package = Package(
         .package(url: "https://github.com/PerfectlySoft/Perfect.git", .upToNextMajor(from: "3.1.1")),
         .package(url: "https://github.com/PerfectlySoft/Perfect-Thread.git", .upToNextMajor(from: "3.0.4")),
 
-        .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMajor(from: "2.4.0")),
+        // 2.7 is for Swift 5
+        .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "2.6.0")),
         
-        .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMajor(from: "2.2.0")),
-        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .upToNextMajor(from: "2.2.0")),
-        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", .upToNextMajor(from: "2.2.0")),
+        // Versions are specific to avoid Swift 5 for now
+        .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .exact("2.4.0")),
+        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .exact("2.3.0")),
+        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", .exact("2.3.0")),
 
-        .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMajor(from: "1.7.1"))
+        .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .exact("1.8.0"))
 	],
     targets: [
         .target(name: "Main",

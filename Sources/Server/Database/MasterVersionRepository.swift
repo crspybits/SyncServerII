@@ -92,7 +92,7 @@ class MasterVersionRepository : Repository, RepositoryLookup {
         let query = "INSERT INTO \(tableName) (sharingGroupUUID, masterVersion) " +
             "VALUES('\(sharingGroupUUID)', \(initialMasterVersion)) "
         
-        if db.connection.query(statement: query) {
+        if db.query(statement: query) {
             return true
         }
         else {
@@ -115,8 +115,8 @@ class MasterVersionRepository : Repository, RepositoryLookup {
             "WHERE sharingGroupUUID = '\(current.sharingGroupUUID!)' and " +
             "masterVersion = \(current.masterVersion!)"
         
-        if db.connection.query(statement: query) {
-            if db.connection.numberAffectedRows() == 1 {
+        if db.query(statement: query) {
+            if db.numberAffectedRows() == 1 {
                 return UpdateToNextResult.success
             }
             else {

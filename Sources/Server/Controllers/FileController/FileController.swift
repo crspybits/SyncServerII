@@ -115,19 +115,8 @@ class FileController : ControllerProtocol {
             return
         }
         
-        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:params.deviceUUID!)
-        switch params.repos.lock.lock(lock: lock) {
-        case .success:
-            break
-        
-        case .lockAlreadyHeld:
-            let message = "Error: Lock already held!"
-            Log.debug(message)
-            params.completion(.failure(.message(message)))
-            return
-        
-        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-            let message = "Error removing locks!"
+        guard Lock.lock(db: params.db, sharingGroupUUID:sharingGroupUUID) else {
+            let message = "Error acquiring lock!"
             Log.debug(message)
             params.completion(.failure(.message(message)))
             return
@@ -135,14 +124,14 @@ class FileController : ControllerProtocol {
         
         Controllers.getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
             if error != nil {
-                params.repos.lock.unlock(sharingGroupUUID: sharingGroupUUID)
+                Lock.unlock(db: params.db, sharingGroupUUID: sharingGroupUUID)
                 params.completion(.failure(.message("\(error!)")))
                 return
             }
             
             let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)
             
-            if !params.repos.lock.unlock(sharingGroupUUID: sharingGroupUUID) {
+            if !Lock.unlock(db: params.db, sharingGroupUUID: sharingGroupUUID) {
                 let message = "Error in unlock!"
                 Log.debug(message)
                 params.completion(.failure(.message(message)))

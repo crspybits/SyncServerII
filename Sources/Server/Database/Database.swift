@@ -25,7 +25,7 @@ class Database {
     static let duplicateEntryForKey = UInt32(1062)
     
     private var closed = false
-    public private(set) var connection: MySQL!
+    fileprivate var connection: MySQL!
 
     var error: String {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
@@ -53,6 +53,27 @@ class Database {
             Log.error("Failure: \(self.error)")
             return
         }
+    }
+    
+    func query(statement: String) -> Bool {
+        DBLog.query(statement)
+        return connection.query(statement: statement)
+    }
+    
+    func numberAffectedRows() -> Int64 {
+        return connection.numberAffectedRows()
+    }
+    
+    func lastInsertId() -> Int64 {
+        return connection.lastInsertId()
+    }
+    
+    func errorCode() -> UInt32 {
+        return connection.errorCode()
+    }
+    
+    func errorMessage() -> String {
+        return connection.errorMessage()
     }
     
     deinit {
@@ -95,7 +116,7 @@ class Database {
             "AND table_name = '\(tableName)' " +
             "LIMIT 1;"
         
-        guard connection.query(statement: checkForTable) else {
+        guard query(statement: checkForTable) else {
             Log.error("Failure: \(self.error)")
             return .failure(.query)
         }
@@ -107,8 +128,8 @@ class Database {
         
         Log.info("**** Table \(tableName) was not already in database")
 
-        let query = "CREATE TABLE \(tableName) \(columnCreateQuery) ENGINE=InnoDB;"
-        guard connection.query(statement: query) else {
+        let createTable = "CREATE TABLE \(tableName) \(columnCreateQuery) ENGINE=InnoDB;"
+        guard query(statement: createTable) else {
             Log.error("Failure: \(self.error)")
             return .failure(.tableCreation)
         }
@@ -125,7 +146,7 @@ class Database {
             "AND column_name = '\(column)' " +
             "LIMIT 1;"
         
-        guard connection.query(statement: checkForColumn) else {
+        guard query(statement: checkForColumn) else {
             Log.error("Failure: \(self.error)")
             return nil
         }
@@ -141,9 +162,9 @@ class Database {
     
     // column should be something like "newStrCol VARCHAR(255)"
     func addColumn(_ column:String, to tableName:String) -> Bool {
-        let query = "ALTER TABLE \(tableName) ADD \(column)"
+        let alterTable = "ALTER TABLE \(tableName) ADD \(column)"
         
-        guard connection.query(statement: query) else {
+        guard query(statement: alterTable) else {
             Log.error("Failure: \(self.error)")
             return false
         }
@@ -152,9 +173,9 @@ class Database {
     }
     
     func removeColumn(_ columnName:String, from tableName:String) -> Bool {
-        let query = "ALTER TABLE \(tableName) DROP \(columnName)"
+        let alterTable = "ALTER TABLE \(tableName) DROP \(columnName)"
         
-        guard connection.query(statement: query) else {
+        guard query(statement: alterTable) else {
             Log.error("Failure: \(self.error)")
             return false
         }
@@ -169,8 +190,8 @@ class Database {
         See https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html#isolevel_repeatable-read
     */
     func startTransaction() -> Bool {
-        let query = "START TRANSACTION;"
-        if connection.query(statement: query) {
+        let start = "START TRANSACTION;"
+        if query(statement: start) {
             return true
         }
         else {
@@ -180,8 +201,8 @@ class Database {
     }
     
     func commit() -> Bool {
-        let query = "COMMIT;"
-        if connection.query(statement: query) {
+        let commit = "COMMIT;"
+        if query(statement: commit) {
             return true
         }
         else {
@@ -191,14 +212,20 @@ class Database {
     }
     
     func rollback() -> Bool {
-        let query = "ROLLBACK;"
-        if connection.query(statement: query) {
+        let rollback = "ROLLBACK;"
+        if query(statement: rollback) {
             return true
         }
         else {
             Log.error("Could not rollback transaction: \(self.error)")
             return false
         }
+    }
+}
+
+private struct DBLog {
+    static func query(_ query: String) {
+        Log.debug("DB QUERY: \(query)")
     }
 }
 
@@ -210,12 +237,13 @@ class Select {
     private var ignoreErrors:Bool!
     
     // Pass a mySQL select statement; the modelInit will be used to create the object type that will be returned in forEachRow
-    // ignoreErrors, if true, will ignore type conversion errors and missing fields in your model.
-    init?(db:Database, query:String, modelInit:@escaping () -> Model, ignoreErrors:Bool=true) {
+    // ignoreErrors, if true, will ignore type conversion errors and missing fields in your model. ignoreErrors is only used with `forEachRow`.
+    init?(db:Database, query:String, modelInit:(() -> Model)? = nil, ignoreErrors:Bool = true) {
         self.modelInit = modelInit
         self.stmt = MySQLStmt(db.connection)
         self.ignoreErrors = ignoreErrors
         
+        DBLog.query(query)
         if !self.stmt.prepare(statement: query) {
             Log.error("Failed on preparing statement: \(query)")
             return nil
@@ -320,6 +348,32 @@ class Select {
             self.forEachRowStatus = .failedRowIterator
         }
     }
+
+    enum SingleValueResult {
+        case success(Any?)
+        case error
+    }
+    
+    // Returns a single value from a single row result. E.g., for SELECT GET_LOCK.
+    func getSingleRowValue() -> SingleValueResult {
+        let stmtResults = self.stmt.results()
+        
+        guard stmtResults.numRows == 1, stmtResults.numFields == 1 else {
+            return .error
+        }
+        
+        var result: Any?
+        
+        let returnCode = stmtResults.forEachRow { row in
+            result = row[0]
+        }
+        
+        if !returnCode {
+            return .error
+        }
+        
+        return .success(result)
+    }
 }
 
 extension Database {
@@ -421,6 +475,7 @@ extension Database {
             
             Log.debug("Preparing query: \(query)")
         
+            DBLog.query(query)
             guard self.stmt.prepare(statement: query) else {
                 Log.error("Failed on preparing statement: \(query)")
                 throw Errors.failedOnPreparingStatement

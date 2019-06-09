@@ -45,7 +45,7 @@ enum RepositoryLookupResult {
 extension RepositoryBasics {
     // Remove entire table.
     func remove() -> Bool {
-        return db.connection.query(statement: "DROP TABLE \(tableName)")
+        return db.query(statement: "DROP TABLE \(tableName)")
     }
 }
 
@@ -54,8 +54,8 @@ extension RepositoryLookup {
     func remove(key:LOOKUPKEY) -> RepositoryRemoveResult {
         let query = "delete from \(tableName) where " + lookupConstraint(key: key)
         
-        if db.connection.query(statement: query) {
-            let numberRows = db.connection.numberAffectedRows()
+        if db.query(statement: query) {
+            let numberRows = db.numberAffectedRows()
             
             var initialMessage:String
             if numberRows == 0 {

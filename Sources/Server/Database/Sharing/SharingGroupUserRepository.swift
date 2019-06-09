@@ -169,9 +169,9 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         let owningUserIdValue = owningUserId == nil ? "NULL" : "\(owningUserId!)"
         let query = "INSERT INTO \(tableName) (sharingGroupUUID, userId, permission, owningUserId) VALUES('\(sharingGroupUUID)', \(userId), '\(permission.rawValue)', \(owningUserIdValue));"
         
-        if db.connection.query(statement: query) {
+        if db.query(statement: query) {
             Log.info("Sucessfully created sharing user group")
-            return .success(db.connection.lastInsertId())
+            return .success(db.lastInsertId())
         }
         else {
             let error = db.error
@@ -235,8 +235,8 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
     func resetOwningUserIds(key: LookupKey) -> Bool {
         let query = "UPDATE \(tableName) SET owningUserId = NULL WHERE " + lookupConstraint(key: key)
         
-        if db.connection.query(statement: query) {
-            let numberUpdates = db.connection.numberAffectedRows()
+        if db.query(statement: query) {
+            let numberUpdates = db.numberAffectedRows()
             Log.info("\(numberUpdates) users had their owningUserId set to NULL.")
             return true
         }

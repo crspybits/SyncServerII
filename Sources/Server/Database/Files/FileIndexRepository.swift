@@ -288,8 +288,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
         
         let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.lastUploadedCheckSumKey), \(FileIndex.sharingGroupUUIDKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), '\(fileIndex.lastUploadedCheckSum!)', '\(fileIndex.sharingGroupUUID!)' \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
         
-        if db.connection.query(statement: query) {
-            return db.connection.lastInsertId()
+        if db.query(statement: query) {
+            return db.lastInsertId()
         }
         else {
             let error = db.error
@@ -355,13 +355,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
 
         let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
-        if db.connection.query(statement: query) {
+        if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
-            if db.connection.numberAffectedRows() <= 1 {
+            if db.numberAffectedRows() <= 1 {
                 return true
             }
             else {
-                Log.error("Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
+                Log.error("Did not have <= 1 row updated: \(db.numberAffectedRows())")
                 return false
             }
         }
@@ -592,8 +592,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
     
     func markFilesAsDeleted(key:LookupKey) -> Int64? {
         let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + lookupConstraint(key: key)
-        if db.connection.query(statement: query) {
-            let numberRows = db.connection.numberAffectedRows()
+        if db.query(statement: query) {
+            let numberRows = db.numberAffectedRows()
             Log.debug("Number rows: \(numberRows) for query: \(query)")
             return numberRows
         }

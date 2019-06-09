@@ -212,20 +212,12 @@ class RequestHandler {
             }
             
             if sharing.needsLock {
-                let lock = Lock(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID!)
-                switch repositories.lock.lock(lock: lock) {
-                case .success:
-                    return .success(sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: true)
-                
-                // 2/11/16. We should never get here. With the transaction support just added, when server thread/request X attempts to obtain a lock and (a) another server thread/request (Y) has previously started a transaction, and (b) has obtained a lock in this manner, but (c) not ended the transaction, (d) a *transaction-level* lock will be obtained on the lock table row by request Y. Request X will be *blocked* in the server until the request Y completes its transaction.
-                case .lockAlreadyHeld:
-                    self.failWithError(message: "Could not obtain lock!!")
-                    return .failure
-                
-                case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
+                guard Lock.lock(db: repositories.db, sharingGroupUUID: sharingGroupUUID) else {
                     self.failWithError(message: "Error obtaining lock!")
                     return .failure
                 }
+ 
+                return .success(sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: true)
             }
             else {
                 return .success(sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: false)
@@ -483,7 +475,7 @@ class RequestHandler {
         
             // If we locked before, do unlock now.
             if lockedSharingGroup, let sharingGroupUUID = sharingGroupUUID {
-                _ = self.repositories.lock.unlock(sharingGroupUUID: sharingGroupUUID)
+                _ = Lock.unlock(db: db, sharingGroupUUID: sharingGroupUUID)
             }
         
             var message:ResponseMessage!
@@ -536,7 +528,7 @@ class RequestHandler {
                         [ServerConstants.httpResponseMessageParams:jsonString])))
                 }
             }
-        }
+        } // end: let params = RequestProcessingParameters
 
         // 7/16/17; Until today I had another large bug that was undetected. I was calling `processRequest` below assuming that request processing was being done *synchronously*, which was blatently untrue! This was causing `end` to be called for some requests prematurely. I've now made changes to use callbacks, and deal with the fact that asynchronous request processing is happening in many cases.
 

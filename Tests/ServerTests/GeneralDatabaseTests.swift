@@ -208,9 +208,9 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         c18String = DateExtras.date(c18Value, toFormat: .TIME)
 
         // Ignore any failure in dropping: E.g., a failure resulting from the table not existing the first time around.
-        let _ = db.connection.query(statement: "DROP TABLE \(testTableName)")
-        let _ = db.connection.query(statement: "DROP TABLE \(testTableName2)")
-        let _ = db.connection.query(statement: "DROP TABLE \(GeneralDatabaseTests.testTableName3)")
+        let _ = db.query(statement: "DROP TABLE \(testTableName)")
+        let _ = db.query(statement: "DROP TABLE \(testTableName2)")
+        let _ = db.query(statement: "DROP TABLE \(GeneralDatabaseTests.testTableName3)")
         
         XCTAssert(createTable())
         XCTAssert(createTable2())
@@ -287,15 +287,15 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func insertRows() {
         // Make sure NULL values can be handled.
         let insertRow1 = "INSERT INTO \(testTableName) (c1, c2, c3, c4) VALUES('\(c1Value)', '\(c2Value)', '\(c3Value)', '\(c4Value)');"
-        guard db.connection.query(statement: insertRow1) else {
-            XCTFail(db.connection.errorMessage())
+        guard db.query(statement: insertRow1) else {
+            XCTFail(db.errorMessage())
             return
         }
         
         let insertRow2 = "INSERT INTO \(testTableName) (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c15, c16, c17, c18) VALUES('\(c1Value)', '\(c2Value)', '\(c3Value)', '\(c4Value)','\(c5Value)', '\(c6Value)', '\(c7Value)', '\(c8Value)','\(c9Value)', '\(c10Value)', '\(c11Value)', '\(c12Value)', '\(c13Value)', '\(c15String!)', '\(c16String!)', '\(c17String!)', '\(c18String!)');"
         Log.debug(insertRow2)
-        guard db.connection.query(statement: insertRow2) else {
-            XCTFail(db.connection.errorMessage())
+        guard db.query(statement: insertRow2) else {
+            XCTFail(db.errorMessage())
             return
         }
     }
@@ -305,8 +305,8 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         let c2Value = DateExtras.date(c2Table2Value, toFormat: .DATE)
         
         let insertRow1 = "INSERT INTO \(testTableName2) (c1, c2) VALUES('\(c1Value.rawValue)', '\(c2Value)');"
-        guard db.connection.query(statement: insertRow1) else {
-            XCTFail(db.connection.errorMessage())
+        guard db.query(statement: insertRow1) else {
+            XCTFail(db.errorMessage())
             return
         }
     }

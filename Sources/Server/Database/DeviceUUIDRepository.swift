@@ -131,8 +131,8 @@ class DeviceUUIDRepository : Repository, RepositoryLookup {
         "(select count(*) from \(tableName) where userId = \(deviceUUID.userId!)) < \(maximumNumberOfDeviceUUIDsPerUser!)"
         }
 
-        if db.connection.query(statement: query) {
-            if db.connection.numberAffectedRows() == 1 {
+        if db.query(statement: query) {
+            if db.numberAffectedRows() == 1 {
                 return .success
             }
             else {

@@ -1,4 +1,0 @@
-module hcapiplugin {
-    umbrella "/Users/chris/Dropbox/Ubuntu/SyncServerII/SwiftySyncServer-Github/Server/.build/checkouts/SwiftMetrics.git-8417478658542232501/Sources/hcapiplugin/include"
-    export *
-}

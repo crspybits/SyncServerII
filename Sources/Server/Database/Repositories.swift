@@ -12,7 +12,6 @@ struct Repositories {
     let db: Database
     
     lazy var user = UserRepository(db)
-    lazy var lock = LockRepository(db)
     lazy var masterVersion = MasterVersionRepository(db)
     lazy var fileIndex = FileIndexRepository(db)
     lazy var upload = UploadRepository(db)

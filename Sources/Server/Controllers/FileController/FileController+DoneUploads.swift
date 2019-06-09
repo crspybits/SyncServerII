@@ -200,19 +200,8 @@ extension FileController {
             return
         }
         
-        let lock = Lock(sharingGroupUUID:doneUploadsRequest.sharingGroupUUID, deviceUUID:params.deviceUUID!)
-        switch params.repos.lock.lock(lock: lock) {
-        case .success:
-            break
-        
-        case .lockAlreadyHeld:
-            let message = "Error: Lock already held!"
-            Log.debug(message)
-            params.completion(.failure(.message(message)))
-            return
-        
-        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-            let message = "Error removing locks!"
+        guard Lock.lock(db: params.db, sharingGroupUUID:doneUploadsRequest.sharingGroupUUID) else {
+            let message = "Error acquiring lock!"
             Log.debug(message)
             params.completion(.failure(.message(message)))
             return
@@ -220,7 +209,7 @@ extension FileController {
         
         let result = doInitialDoneUploads(params: params, doneUploadsRequest: doneUploadsRequest)
         
-        if !params.repos.lock.unlock(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID) {
+        if !Lock.unlock(db: params.db, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID) {
             let message = "Error in unlock!"
             Log.debug(message)
             
@@ -282,6 +271,7 @@ extension FileController {
             return
         }
         
+        // Do deletions
         let async = AsyncTailRecursion()
         async.start {
             self.finishDoneUploads(cloudDeletions: cloudDeletions, params: params, numberTransferred: Int(numberTransferred), pushNotificationMessage: doneUploadsRequest.pushNotificationMessage, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, async:async)

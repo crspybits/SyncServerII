@@ -2,7 +2,7 @@
 
 # Usage: numberUsers.sh <Server.json>
 
-# e.g., ./numberUsers.sh ~/Desktop/Apps/SyncServerII/Private/Server.json.aws.app.bundles/SharedImages-production.json
+# e.g., ./numberUsers.sh ~/Desktop/Apps/SyncServerII/Private/Server.json.aws.app.bundles/Neebla-production.json
 
 MY_SQL_JSON=$1
 DATABASE=`jq -r '.["mySQL.database"]' < ${MY_SQL_JSON}`

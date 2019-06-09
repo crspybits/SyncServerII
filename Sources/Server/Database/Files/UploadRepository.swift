@@ -348,10 +348,10 @@ class UploadRepository : Repository, RepositoryLookup {
         
         let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey), \(Upload.sharingGroupUUIDKey) \(creationDateFieldName) \(updateDateFieldName) \(lastUploadedCheckSumFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName) \(fileGroupUUIDFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)', '\(upload.sharingGroupUUID!)' \(creationDateFieldValue) \(updateDateFieldValue) \(lastUploadedCheckSumFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue) \(fileGroupUUIDFieldValue));"
         
-        if db.connection.query(statement: query) {
-            return .success(uploadId: db.connection.lastInsertId())
+        if db.query(statement: query) {
+            return .success(uploadId: db.lastInsertId())
         }
-        else if db.connection.errorCode() == Database.duplicateEntryForKey {
+        else if db.errorCode() == Database.duplicateEntryForKey {
             return .duplicateEntry
         }
         else {
@@ -380,13 +380,13 @@ class UploadRepository : Repository, RepositoryLookup {
         
         let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) WHERE uploadId=\(upload.uploadId!)"
         
-        if db.connection.query(statement: query) {
+        if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
-            if db.connection.numberAffectedRows() <= 1 {
+            if db.numberAffectedRows() <= 1 {
                 return true
             }
             else {
-                Log.error("Did not have <= 1 row updated: \(db.connection.numberAffectedRows())")
+                Log.error("Did not have <= 1 row updated: \(db.numberAffectedRows())")
                 return false
             }
         }
@@ -413,7 +413,7 @@ class UploadRepository : Repository, RepositoryLookup {
             case .userId(let userId):
                 return "userId(\(userId))"
             case .filesForUserDevice(let userId, let deviceUUID, let sharingGroupUUID):
-                return "userId(\(userId)); deviceUUID(\(deviceUUID); sharingGroupUUID(\(sharingGroupUUID))"
+                return "userId(\(userId)); deviceUUID(\(deviceUUID)); sharingGroupUUID(\(sharingGroupUUID))"
             case .primaryKey(let fileUUID, let userId, let deviceUUID):
                 return "fileUUID(\(fileUUID)); userId(\(userId)); deviceUUID(\(deviceUUID))"
             }

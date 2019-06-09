@@ -187,7 +187,7 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
         
         let query = "INSERT INTO \(tableName) (sharingInvitationUUID, expiry, owningUserId, sharingGroupUUID, permission, allowSocialAcceptance, numberAcceptors) VALUES('\(uuid)', '\(expiryDateString)', \(owningUserId), '\(sharingGroupUUID)', '\(permission.rawValue)', \(allowSocialAcceptance), \(numberAcceptors));"
         
-        if db.connection.query(statement: query) {
+        if db.query(statement: query) {
             Log.info("Sucessfully created sharing invitation!")
             return .success(sharingInvitationUUID: uuid)
         }
@@ -202,7 +202,7 @@ class SharingInvitationRepository : Repository, RepositoryLookup {
     func decrementNumberAcceptors(sharingInvitationUUID: String) -> Bool {
         let query = "UPDATE \(tableName) SET \(SharingInvitation.numberAcceptorsKey)=\(SharingInvitation.numberAcceptorsKey) - 1 WHERE \(SharingInvitation.sharingInvitationUUIDKey)='\(sharingInvitationUUID)' AND \(SharingInvitation.numberAcceptorsKey) > 1"
         
-        if db.connection.query(statement: query) && db.connection.numberAffectedRows() == 1 {
+        if db.query(statement: query) && db.numberAffectedRows() == 1 {
             Log.info("Sucessfully updated sharing invitation!")
             return true
         }

@@ -15,7 +15,6 @@ extension Database {
         DeviceUUIDRepository.self,
         UploadRepository.self,
         FileIndexRepository.self,
-        LockRepository.self,
         SharingInvitationRepository.self,
         SharingGroupUserRepository.self,
         MasterVersionRepository.self

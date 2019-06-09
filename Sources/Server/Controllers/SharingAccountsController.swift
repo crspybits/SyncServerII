@@ -343,19 +343,8 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        let lock = Lock(sharingGroupUUID:sharingInvitation.sharingGroupUUID, deviceUUID:params.deviceUUID!)
-        switch params.repos.lock.lock(lock: lock) {
-        case .success:
-            break
-        
-        case .lockAlreadyHeld:
-            let message = "Error: Lock already held!"
-            Log.debug(message)
-            params.completion(.failure(.message(message)))
-            return
-        
-        case .errorRemovingStaleLocks, .modelValueWasNil, .otherError:
-            let message = "Error removing locks!"
+        guard Lock.lock(db: params.db, sharingGroupUUID: sharingInvitation.sharingGroupUUID) else {
+            let message = "Error acquiring lock!"
             Log.debug(message)
             params.completion(.failure(.message(message)))
             return
@@ -363,22 +352,14 @@ class SharingAccountsController : ControllerProtocol {
         
         redeem(params: params, request: request, sharingInvitation: sharingInvitation, sharingInvitationKey: sharingInvitationKey) { response in
         
-            let unlockResult = params.repos.lock.unlock(sharingGroupUUID: sharingInvitation.sharingGroupUUID)
-            
-            switch response {
-            case .success:
-                if unlockResult {
-                    params.completion(response)
-                }
-                else {
-                    let message = "Error in unlock!"
-                    Log.debug(message)
-                    params.completion(.failure(.message(message)))
-                }
-                
-            case .failure:
-                params.completion(response)
+            guard Lock.unlock(db: params.db, sharingGroupUUID: sharingInvitation.sharingGroupUUID) else {
+                let message = "Error in unlock!"
+                Log.debug(message)
+                params.completion(.failure(.message(message)))
+                return
             }
+
+            params.completion(response)
         }
     }
 }

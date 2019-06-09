@@ -198,8 +198,8 @@ class UserRepository : Repository, RepositoryLookup {
         
         let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.credsId!)', '\(user.creds!)' \(cloudFolderNameFieldValue));"
         
-        if db.connection.query(statement: query) {
-            return db.connection.lastInsertId()
+        if db.query(statement: query) {
+            return db.lastInsertId()
         }
         else {
             let error = db.error
@@ -230,8 +230,8 @@ class UserRepository : Repository, RepositoryLookup {
         let query = "UPDATE \(tableName) SET creds = '\(credsJSONString)' WHERE " +
             lookupConstraint(key: .userId(userId))
         
-        if db.connection.query(statement: query) {
-            let numberUpdates = db.connection.numberAffectedRows()
+        if db.query(statement: query) {
+            let numberUpdates = db.numberAffectedRows()
             // 7/6/18; I'm allowing 0 updates because in some cases, e.g., Dropbox, there will be no change in the row.
             guard numberUpdates <= 1 else {
                 Log.error("Expected <= 1 updated, but had \(numberUpdates)")
@@ -277,8 +277,8 @@ class UserRepository : Repository, RepositoryLookup {
         let query = "UPDATE \(tableName) SET pushNotificationTopic = '\(topicText)' WHERE " +
             lookupConstraint(key: .userId(userId))
         
-        if db.connection.query(statement: query) {
-            let numberUpdates = db.connection.numberAffectedRows()
+        if db.query(statement: query) {
+            let numberUpdates = db.numberAffectedRows()
             // 7/6/18; I'm allowing 0 updates -- in case the update doesn't change the roow.
             guard numberUpdates <= 1 else {
                 Log.error("Expected <= 1 updated, but had \(numberUpdates)")

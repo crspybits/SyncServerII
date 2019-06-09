@@ -44,10 +44,16 @@ One possible way around this is to add a "ServerMaintenance" mode for the server
 	
 This way, no one can use the app for a period of time, but the race condition is avoided.
 
-5) How to scale the server?
+5) Scaling the server: "Manually" changing the number of EC2 instances.
+	The simplest way to do this seems to be changing MinSize, MaxSize 
+	See https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/command-options-general.html#command-options-general-autoscalingasg
+	These are specified in the particular devops/AWS-Elasticbeanstalk/Environments configure.yml file under `aws:autoscaling:asg`
+	E.g., devops/AWS-ElasticBeanstalk/Environments/neebla-production/configure.yml
+	
+6) How to scale the server?
 	a) Scaling the size/type of the EC2 instance.
 		Are there parameters other than EC2 instance type? RAM size? Disk size?
 	b) Criteria for scaling the number of EC2 instances?
 	
-6) How to scale the database?
+7) How to scale the database?
 

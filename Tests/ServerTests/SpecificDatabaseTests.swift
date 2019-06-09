@@ -103,15 +103,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupUUID: sharingGroupUUID, expectedError: true)
     }
     
-    func lockIt(lock:Lock, removeStale:Bool = true) -> Bool {
-        if case .success = LockRepository(db).lock(lock: lock, removeStale:removeStale) {
-            return true
-        }
-        else {
-            return false
-        }
-    }
-    
     func testLock() {
         let sharingGroupUUID = UUID().uuidString
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
@@ -119,84 +110,15 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString)
-        XCTAssert(lockIt(lock: lock))
-        XCTAssert(!lockIt(lock: lock))
-    }
-    
-    func testThatNewlyAddedLocksAreNotStale() {
-        let sharingGroupUUID = UUID().uuidString
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString)
-        XCTAssert(lockIt(lock: lock))
-        XCTAssert(LockRepository(db).removeStaleLock() == 0)
-        XCTAssert(!lockIt(lock: lock))
-    }
-    
-    func testThatStaleALockIsRemoved() {
-        let sharingGroupUUID = UUID().uuidString
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        let duration:TimeInterval = 1
-        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
-        XCTAssert(lockIt(lock: lock))
-        
-        let sleepDuration = UInt32(duration) + UInt32(1)
-        sleep(sleepDuration)
-        
-        XCTAssert(LockRepository(db).removeStaleLock(forSharingGroupUUID: sharingGroupUUID) == 1)
-        XCTAssert(lockIt(lock: lock, removeStale:false))
-    }
-    
-    func testRemoveAllStaleLocks() {
-        let sharingGroupUUID1 = UUID().uuidString
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID1) else {
+        guard Lock.lock(db: db, sharingGroupUUID:sharingGroupUUID) else {
             XCTFail()
             return
         }
 
-        let sharingGroupUUID2 = UUID().uuidString
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID2) else {
+        guard Lock.unlock(db: db, sharingGroupUUID:sharingGroupUUID) else {
             XCTFail()
             return
         }
-        
-        let duration:TimeInterval = 1
-        
-        let lock1 = Lock(sharingGroupUUID:sharingGroupUUID1, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
-        XCTAssert(lockIt(lock: lock1))
-        
-        let lock2 = Lock(sharingGroupUUID:sharingGroupUUID2, deviceUUID:Foundation.UUID().uuidString, expiryDuration:duration)
-        XCTAssert(lockIt(lock: lock2))
-        
-        let sleepDuration = UInt32(duration) + UInt32(1)
-        sleep(sleepDuration)
-        
-        XCTAssert(LockRepository(db).removeStaleLock() == 2)
-        
-        XCTAssert(lockIt(lock: lock1, removeStale:false))
-        XCTAssert(lockIt(lock: lock2, removeStale:false))
-    }
-    
-    func testRemoveLock() {
-        let sharingGroupUUID = UUID().uuidString
-        
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        let lock = Lock(sharingGroupUUID:sharingGroupUUID, deviceUUID:Foundation.UUID().uuidString)
-        XCTAssert(lockIt(lock: lock))
-        XCTAssert(LockRepository(db).unlock(sharingGroupUUID:sharingGroupUUID))
-        XCTAssert(lockIt(lock: lock))
     }
     
     func doAddFileIndex(userId:UserId = 1, sharingGroupUUID:String, createSharingGroup: Bool) -> FileIndex? {
@@ -529,10 +451,6 @@ extension SpecificDatabaseTests {
             ("testUpdateToNextTwiceMasterVersion", testUpdateToNextTwiceMasterVersion),
             ("testUpdateToNextFailsWithWrongExpectedMasterVersion", testUpdateToNextFailsWithWrongExpectedMasterVersion),
             ("testLock", testLock),
-            ("testThatNewlyAddedLocksAreNotStale", testThatNewlyAddedLocksAreNotStale),
-            ("testThatStaleALockIsRemoved", testThatStaleALockIsRemoved),
-            ("testRemoveAllStaleLocks", testRemoveAllStaleLocks),
-            ("testRemoveLock", testRemoveLock),
             ("testAddFileIndex", testAddFileIndex),
             ("testUpdateFileIndexWithNoChanges", testUpdateFileIndexWithNoChanges),
             ("testUpdateFileIndexWithAChange", testUpdateFileIndexWithAChange),
