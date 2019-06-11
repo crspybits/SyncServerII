@@ -16,14 +16,14 @@ Create the image based on the Dockerfile using:
 docker build -t swift-ubuntu:latest .
 
 docker tag swift-ubuntu:latest crspybits/swift-ubuntu:latest 
-docker tag swift-ubuntu:latest crspybits/swift-ubuntu:4.1
+docker tag swift-ubuntu:latest crspybits/swift-ubuntu:5.0.1
 docker push crspybits/swift-ubuntu:latest
-docker push crspybits/swift-ubuntu:4.1
+docker push crspybits/swift-ubuntu:5.0.1
 
 Also relying on https://github.com/hopsoft/relay/wiki/How-to-Deploy-Docker-apps-to-Elastic-Beanstalk
 
 Run this with:
-docker run --rm -i -t -v /Users/chris/Desktop/Apps/:/root/Apps crspybits/swift-ubuntu:4.1
+docker run --rm -i -t -v /Users/chris/Desktop/Apps/:/root/Apps crspybits/swift-ubuntu:5.0.1
 
 To figure out the IP address of the docker host:
 ip addr show eth0
@@ -33,4 +33,8 @@ https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-h
 
 # To access mysql running on Docker host on MacOS for testing, use docker.for.mac.localhost for the mysql host.
 See https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach?noredirect=1&lq=1
+
+6/10/19
+I tried to get Ubuntu 18.04 working with Swift 5 and my server, but ran into a problem. I was getting the error "Parsed fewer bytes than were passed to the HTTP parser" during request parsing. See also https://github.com/IBM-Swift/Kitura/issues/1146
+I have gone back to 16.04 and the server is working again.
 

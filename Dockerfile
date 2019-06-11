@@ -1,6 +1,6 @@
 # Builds a Docker image for running SyncServer.
 
-FROM crspybits/swift-ubuntu-runtime:latest
+FROM crspybits/swift-ubuntu:latest
 MAINTAINER Spastic Muffin, LLC
 LABEL Description="Docker image for running SyncServer."
 

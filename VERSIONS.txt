@@ -4,7 +4,7 @@ Version 0.25.0
 	* Now lower casing expected checksum value before check with the upload-- in case upload request leaves checksum in upper case.
 	* Changed locking mechanism for requests. Removed ShortLocks table and relying on GET_LOCK/RELEASE_LOCK mySQL distributed locking mechanism.
 	* Added debugging output for mySQL queries.
-	* Changes to Package.swift to avoid Swift 5.
+	* Updating to Swift 5.
 
 Version 0.24.0 (4/15/19)
 	* Added url mime type.

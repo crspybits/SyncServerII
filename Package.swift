@@ -1,41 +1,39 @@
-// swift-tools-version:4.0
+// swift-tools-version:5.0
 import PackageDescription
 
 let package = Package(
     name: "Server",
     dependencies: [
         //.package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", .branch("master")),
-        .package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", from: "0.2.0"),
+        .package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", .upToNextMajor(from: "0.3.0")),
 
         // 7/2/17; See comment in SwiftMain with the same date.
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
         
         // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
-        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.3.0"),
+        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", .upToNextMajor(from: "0.4.0")),
 
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
         // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", from: "10.2.0"),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMajor(from: "10.3.2")),
 
         // .package(url: "../../repos/SMServerLib", .branch("master")),
-        .package(url: "https://github.com/crspybits/SMServerLib.git", from: "1.0.0"),
+        .package(url: "https://github.com/crspybits/SMServerLib.git", .upToNextMajor(from: "1.2.0")),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
         // .package(url:"https://github.com/crspybits/Perfect-MySQL.git", from: "3.1.3"),
-        .package(url:"https://github.com/PerfectlySoft/Perfect-MySQL.git", from: "3.2.0"),
+        .package(url:"https://github.com/PerfectlySoft/Perfect-MySQL.git", .upToNextMajor(from: "3.4.1")),
 
-        .package(url: "https://github.com/PerfectlySoft/Perfect.git", .upToNextMajor(from: "3.1.1")),
-        .package(url: "https://github.com/PerfectlySoft/Perfect-Thread.git", .upToNextMajor(from: "3.0.4")),
+        .package(url: "https://github.com/PerfectlySoft/Perfect.git", .upToNextMajor(from: "3.1.4")),
+        .package(url: "https://github.com/PerfectlySoft/Perfect-Thread.git", .upToNextMajor(from: "3.0.6")),
 
-        // 2.7 is for Swift 5
-        .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "2.6.0")),
+        .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMajor(from: "2.7.0")),
         
-        // Versions are specific to avoid Swift 5 for now
-        .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .exact("2.4.0")),
-        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .exact("2.3.0")),
-        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", .exact("2.3.0")),
+        .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMajor(from: "2.4.1")),
+        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .upToNextMajor(from: "2.3.1")),
+        .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", .upToNextMajor(from: "2.3.1")),
 
-        .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .exact("1.8.0"))
+        .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMajor(from: "1.8.1"))
 	],
     targets: [
         .target(name: "Main",
