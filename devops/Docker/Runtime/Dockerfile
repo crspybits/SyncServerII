@@ -1,59 +1,20 @@
-# This is a Swift environment paired down to just for runtime.
-# Adapted from https://github.com/swiftdocker/docker-swift/blob/49f192d9218dbbc6438224ccc776e21b08e5dabe/4.1/Dockerfile
-
-FROM ubuntu:16.04
+# For Ubuntu 16.04, Swift 5.0.1 (IBM only has a `latest` at least as of 6/12/19)
+FROM ibmcom/swift-ubuntu-xenial-runtime:latest
 LABEL maintainer="Chris Prince <chris@SpasticMuffin.biz>"
 LABEL Description="Runtime Docker Container for the Apple's Swift programming language"
 
-# Install related packages
+# 6/15/19; I got a failure in running SyncServerII due to not finding libbsd; apparently this is present in the development build of Kitura/Ubuntu, but not in the runtime. Though I can't find it in the development build with `dpkg -l libbsd` or `dpkg -l libbsd-dev`. `apt-get install libbsd` doesn't find a package.
+
+# Install additional packages
 RUN apt-get -q update && \
-    apt-get -q install -y \
-    libicu-dev \
-    libcurl4-openssl-dev \
-    libxml2 \
-    libbsd0 \
-    uuid-dev \
-    libmysqlclient-dev \
-    tzdata \
-    curl \
-    && rm -r /var/lib/apt/lists/*    
-
-# Everything up to here should cache nicely between Swift versions, assuming dev dependencies change little
-ARG SWIFT_PLATFORM=ubuntu16.04
-ARG SWIFT_BRANCH=swift-4.1-release
-ARG SWIFT_VERSION=swift-4.1-RELEASE
-
-ENV SWIFT_PLATFORM=$SWIFT_PLATFORM \
-    SWIFT_BRANCH=$SWIFT_BRANCH \
-    SWIFT_VERSION=$SWIFT_VERSION
-
-# Download GPG keys, signature and Swift package, then unpack, cleanup and execute permissions for foundation libs
-RUN SWIFT_URL=https://swift.org/builds/$SWIFT_BRANCH/$(echo "$SWIFT_PLATFORM" | tr -d .)/$SWIFT_VERSION/$SWIFT_VERSION-$SWIFT_PLATFORM.tar.gz \
-    && curl -fSsL $SWIFT_URL -o swift.tar.gz \
-    && curl -fSsL $SWIFT_URL.sig -o swift.tar.gz.sig \
-    && export GNUPGHOME="$(mktemp -d)" \
-    && set -e; \
-        for key in \
-      # pub   rsa4096 2017-11-07 [SC] [expires: 2019-11-07]
-      # 8513444E2DA36B7C1659AF4D7638F1FB2B2B08C4
-      # uid           [ unknown] Swift Automatic Signing Key #2 <swift-infrastructure@swift.org>
-          8513444E2DA36B7C1659AF4D7638F1FB2B2B08C4 \
-      # pub   4096R/91D306C6 2016-05-31 [expires: 2018-05-31]
-      #       Key fingerprint = A3BA FD35 56A5 9079 C068  94BD 63BC 1CFE 91D3 06C6
-      # uid                  Swift 3.x Release Signing Key <swift-infrastructure@swift.org>
-          A3BAFD3556A59079C06894BD63BC1CFE91D306C6 \
-      # pub   4096R/71E1B235 2016-05-31 [expires: 2019-06-14]
-      #       Key fingerprint = 5E4D F843 FB06 5D7F 7E24  FBA2 EF54 30F0 71E1 B235
-      # uid                  Swift 4.x Release Signing Key <swift-infrastructure@swift.org>          
-          5E4DF843FB065D7F7E24FBA2EF5430F071E1B235 \
-        ; do \
-          gpg --quiet --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-        done \
-    && gpg --batch --verify --quiet swift.tar.gz.sig swift.tar.gz \
-    && tar -xzf swift.tar.gz --directory / --strip-components=1 \
-    && rm -r "$GNUPGHOME" swift.tar.gz.sig swift.tar.gz \
-    && chmod -R o+r /usr/lib/swift \
-  	&& apt-get remove -y icu-devtools libc6-dev manpages-dev manpages perl curl \
-  	&& rm -rf /tmp/* /var/tmp/*
+	apt-get -q install -y \
+		uuid-dev \
+    	libmysqlclient-dev \
+    	openssl \
+    	libssl-dev \
+    	pkg-config \
+    	tzdata \
+    	libbsd-dev \
+    && rm -r /var/lib/apt/lists/*  
 
 CMD /bin/bash

@@ -90,11 +90,12 @@ class RequestHandler {
 
         self.response.statusCode = code
         
-        self.endWith(clientResponse: .json(result))
+        self.endWith(clientResponse: .jsonDict(result))
     }
     
     enum EndWithResponse {
-    case json([String: Any])
+    case jsonDict([String: Any])
+    case jsonString(String)
     case data(data:Data?, headers:[String:String])
     case headers([String:String])
     }
@@ -107,7 +108,10 @@ class RequestHandler {
         }
         
         switch clientResponse {
-        case .json(let jsonDict):
+        case .jsonString(let jsonString):
+            self.response.send(jsonString)
+            
+        case .jsonDict(let jsonDict):
             if let jsonString = JSONExtras.toJSONString(dict: jsonDict) {
                 self.response.send(jsonString)
             }
@@ -150,7 +154,7 @@ class RequestHandler {
     }
     
     enum SuccessResult {
-        case json([String: Any])
+        case jsonString(String)
         case dataWithHeaders(Data?, headers:[String:String])
         case headers([String:String])
         case nothing
@@ -415,9 +419,9 @@ class RequestHandler {
     private func handleTransactionResult(_ result:ServerResult) {
         // `endWith` and `failWithError` call the `RouterResponse` `end` method, and thus we have waited until the very end of processing of the request to finish and return control back to the caller.
         switch result {
-        case .success(.json(let json)):
-            endWith(clientResponse: .json(json))
-        
+        case .success(.jsonString(let jsonString)):
+            endWith(clientResponse: .jsonString(jsonString))
+            
         case .success(.dataWithHeaders(let data, headers: let headers)):
             endWith(clientResponse: .data(data: data, headers: headers))
         
@@ -425,7 +429,7 @@ class RequestHandler {
             endWith(clientResponse: .headers(headers))
         
         case .success(.nothing):
-            endWith(clientResponse: .json([:]))
+            endWith(clientResponse: .jsonDict([:]))
             
         case .failure(let failureResult):
             failWithError(failureResult: failureResult)
@@ -495,38 +499,21 @@ class RequestHandler {
                 return
             }
 
-            let jsonDict = message.toDictionary
-            if nil == jsonDict {
-                handleResult(.failure(.message("Could not convert response object to json dictionary")))
+            guard let jsonString = message.jsonString else {
+                handleResult(.failure(.message("Could not convert response message to a JSON string")))
                 return
-            }
-            
-            func getJSONString() -> String? {
-                var result:String?
-                
-                do {
-                    result = try jsonDict!.jsonEncodedString()
-                } catch (let error) {
-                    handleResult(.failure(.message("Could not convert json dict to string: \(error)")))
-                }
-                
-                return result
             }
             
             switch message.responseType {
             case .json:
-                handleResult(.success(.json(jsonDict!)))
+                handleResult(.success(.jsonString(jsonString)))
 
             case .data(let data):
-                if let jsonString = getJSONString() {
-                    handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString])))
-                }
+                handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString])))
                 
             case .header:
-                if let jsonString = getJSONString() {
-                    handleResult(.success(.headers(
-                        [ServerConstants.httpResponseMessageParams:jsonString])))
-                }
+                handleResult(.success(.headers(
+                    [ServerConstants.httpResponseMessageParams:jsonString])))
             }
         } // end: let params = RequestProcessingParameters
 

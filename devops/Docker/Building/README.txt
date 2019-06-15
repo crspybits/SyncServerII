@@ -36,5 +36,5 @@ See https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-contain
 
 6/10/19
 I tried to get Ubuntu 18.04 working with Swift 5 and my server, but ran into a problem. I was getting the error "Parsed fewer bytes than were passed to the HTTP parser" during request parsing. See also https://github.com/IBM-Swift/Kitura/issues/1146
-I have gone back to 16.04 and the server is working again.
+I have gone back to 16.04 and the server is working again. I wonder if this is at least part of the reason why IBM doesn't overtly support 18.04 in their released Docker images.
 

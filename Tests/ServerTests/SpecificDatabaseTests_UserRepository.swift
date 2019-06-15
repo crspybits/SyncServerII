@@ -29,7 +29,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         user1.cloudFolderName = "folder1"
         
-        let result1 = UserRepository(db).add(user: user1)
+        let result1 = UserRepository(db).add(user: user1, validateJSON: false)
         XCTAssert(result1 == 1, "Bad credentialsId!")
 
         let user2 = User()
@@ -39,7 +39,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user2.credsId = "200"
         user2.cloudFolderName = "folder2"
         
-        let result2 = UserRepository(db).add(user: user2)
+        let result2 = UserRepository(db).add(user: user2, validateJSON: false)
         XCTAssert(result2 == 2, "Bad credentialsId!")
     }
     
@@ -54,7 +54,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let _ = UserRepository(db).add(user: user1) else {
+        guard let _ = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -77,7 +77,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         
 
-        guard let _ = UserRepository(db).add(user: user1) else {
+        guard let _ = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail()
             return
         }

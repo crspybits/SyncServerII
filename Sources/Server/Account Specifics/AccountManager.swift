@@ -101,6 +101,8 @@ class AccountManager {
             }
         }
         
+        Log.error("Could not find accountType: \(type)")
+        
         return nil
     }
 }

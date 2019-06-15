@@ -1,13 +1,18 @@
-# For the available tags on swiftdocker/swift, see https://hub.docker.com/r/library/swift/tags/
-# For the Docker files see https://hub.docker.com/r/_/swift/
+# See https://github.com/IBM-Swift/swift-ubuntu-docker
 
-# xenial is for Ubuntu 16.04; this pulls from the Docker Official Swift image
-FROM swift:5.0.1-xenial
+# Note that I'm not using Ubuntu 14.04 because I'm currently using Perfect for mySQL interface
+# and that has problems with the mysqlclient for 14.04. See https://github.com/PerfectlySoft/Perfect-MySQL
+
+# This is for Ubuntu 16.04; It's for Swift 5.0.1 as of 6/12/19, there just is only a `latest` tag.
+FROM ibmcom/swift-ubuntu-xenial:latest
 LABEL maintainer="Chris Prince <chris@SpasticMuffin.biz>"
 LABEL Description="Docker image for building the Swift SyncServer server"
 
+# pkg-config below is trying to avoid:
+# 	warning: failed to retrieve search paths with pkg-config; maybe pkg-config is not installed
+# Without tzdata, the TimeZone Swift method fails, at least sometimes.
+
 # Install additional packages
-# 6/9/19; As of today, I get a warning and then a Swift build failure that I need openssl and libssl-dev; and I get a further Swift build failure on curl dependencies
 RUN apt-get -q update && \
 	apt-get -q install -y \
 		uuid-dev \
@@ -15,7 +20,8 @@ RUN apt-get -q update && \
     	jq \
     	openssl \
     	libssl-dev \
-    	libcurl4-openssl-dev \
+    	pkg-config \
+    	tzdata \
     && rm -r /var/lib/apt/lists/*  
 
 # Print Installed Swift Version

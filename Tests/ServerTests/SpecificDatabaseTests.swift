@@ -165,7 +165,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = UserRepository(db).add(user: user1) else {
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -184,7 +184,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = UserRepository(db).add(user: user1) else {
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -206,7 +206,8 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1) else {
+        // 6/12/19; Just added the JSON validation paramter. I have *no* idea how this was working before this. It ought to have required the server to be running for it to work.
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -228,7 +229,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1) else {
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -249,7 +250,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1) else {
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -271,7 +272,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1) else {
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -312,7 +313,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1) else {
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -344,7 +345,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1) else {
+        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
             XCTFail()
             return
         }

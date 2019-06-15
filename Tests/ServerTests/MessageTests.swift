@@ -100,15 +100,15 @@ class MessageTests: ServerTestCase, LinuxTestable {
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         let result = uploadDeletionRequest.urlParameters()
-        
+
         let expectedURLParams =
-            "actualDeletion=true&" +
+            "actualDeletion=1&" +
             "fileUUID=\(uuidString)&" +
             "fileVersion=99&" +
             "masterVersion=23&" +
             "sharingGroupUUID=\(sharingGroupUUID)"
         
-        XCTAssert(result == expectedURLParams, "Result was: \(String(describing: expectedURLParams))")
+        XCTAssert(result == expectedURLParams, "Expected: \(String(describing: expectedURLParams)); actual: \(String(describing: result))")
     }
     
     func testBadUUIDForFileName() {

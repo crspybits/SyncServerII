@@ -358,18 +358,27 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func testSelectForEachRowIgnoringErrors() {
         runSelectTestForEachRow(ignoreErrors: true)
     }
-    
+
     func testSelectForEachRowNotIgnoringErrors() {
         runSelectTestForEachRow(ignoreErrors: false)
     }
 
     func equalDMY(date1:Date, date2:Date) -> Bool {
-        let utc = TimeZone(abbreviation: "UTC")!
-    
-        let componentsDate1 = Calendar.current.dateComponents(in: utc, from: date1)
-        let componentsDate2 = Calendar.current.dateComponents(in: utc, from: date2)
+        Log.info("In equalDMY")
+        guard let utc = TimeZone(abbreviation: "UTC") else {
+            Log.error("Could not convert to UTC timezone!")
+            return false
+        }
         
+        Log.info("After TimeZone: \(utc)")
         Log.info("date1: \(date1); date2: \(date2)")
+
+        // 6/12/19; Due to Swift 5.0.1 issue; See https://stackoverflow.com/questions/56555005/swift-5-ubuntu-16-04-crash-with-datecomponents
+        // not using Calendar.current
+        let calendar = Calendar(identifier: .gregorian)
+        let componentsDate1 = calendar.dateComponents(in: utc, from: date1)
+        let componentsDate2 = calendar.dateComponents(in: utc, from: date2)
+        
         Log.info("componentsDate1.year: \(String(describing: componentsDate1.year)) componentsDate2.year: \(String(describing: componentsDate2.year))")
         Log.info("componentsDate1.month: \(String(describing: componentsDate1.month)) componentsDate2.month: \(String(describing: componentsDate2.month))")
         Log.info("componentsDate1.day: \(String(describing: componentsDate1.day)) componentsDate2.day: \(String(describing: componentsDate2.day))")
@@ -382,14 +391,16 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     func testTypeConverters() {
         let query = "select * from \(testTableName2)"
         
+        Log.info("Before select")
         guard let select = Select(db:db, query: query, modelInit: model2.init, ignoreErrors:false) else {
             XCTFail()
             return
         }
         
         var rows = 0
-        
+        Log.info("Before each row")
         select.forEachRow { rowModel in
+            Log.info("In forEachRow callback")
             rows += 1
             guard let rowModel = rowModel as? model2 else {
                 XCTFail()
@@ -398,14 +409,23 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             
             XCTAssert(rowModel.c1 == .TestEnum1, "TestEnum value was wrong")
             
-            XCTAssert(self.equalDMY(date1: rowModel.c2, date2: self.c2Table2Value),
-                      "c2 date value was wrong: rowModel.c2=\(String(describing: rowModel.c2)); self.c2Table2Value=\(self.c2Table2Value)")
+            guard let date = rowModel.c2 else {
+                XCTFail()
+                return
+            }
+            
+            Log.info("Before equalDMY")
+            XCTAssert(self.equalDMY(date1: date, date2: self.c2Table2Value),
+                      "c2 date value was wrong: rowModel.c2=\(String(describing: date)); self.c2Table2Value=\(self.c2Table2Value)")
+            
+            Log.info("End of a row")
         }
-        
+        Log.info("After forEachRow")
+
         XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(String(describing: select.forEachRowStatus))")
         XCTAssert(rows == 1, "Didn't find expected number of rows")
     }
-    
+    /*
     func testColumnExists() {
         XCTAssert(db.columnExists("c1", in: testTableName) == true)
         XCTAssert(db.columnExists("c3", in: testTableName2) == false)
@@ -497,7 +517,7 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         catch {
         }
     }
-    
+
     func testDatabaseInsertValuesIntoColumnsWorks() {
         let repo = Table3()
         repo.db = db
@@ -570,14 +590,17 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail("\(error)")
         }
     }
+    */
 }
 
 extension GeneralDatabaseTests {
     static var allTests : [(String, (GeneralDatabaseTests) -> () throws -> Void)] {
         return [
             ("testSelectForEachRowIgnoringErrors", testSelectForEachRowIgnoringErrors),
+
             ("testSelectForEachRowNotIgnoringErrors", testSelectForEachRowNotIgnoringErrors),
             ("testTypeConverters", testTypeConverters),
+            /*
             ("testColumnExists", testColumnExists),
             ("testAddColumn", testAddColumn),
             ("testRemoveColumn", testRemoveColumn),
@@ -587,13 +610,13 @@ extension GeneralDatabaseTests {
             ("testDatabaseInsertBoolValueIntoBoolColumnWorks", testDatabaseInsertBoolValueIntoBoolColumnWorks),
             ("testDatabaseInsertNullValueIntoIntColumnWorks", testDatabaseInsertNullValueIntoIntColumnWorks),
             ("testDatabaseInsertStringValueIntoIntColumnFails", testDatabaseInsertStringValueIntoIntColumnFails),
+
             ("testDatabaseInsertValuesIntoColumnsWorks", testDatabaseInsertValuesIntoColumnsWorks),
             ("testDatabaseUpdateWorks", testDatabaseUpdateWorks),
             ("testDatabaseUpdateWithTwoFieldsInWhereClauseWorks", testDatabaseUpdateWithTwoFieldsInWhereClauseWorks)
+            */
         ]
     }
-    
-    
     
     func testLinuxTestSuiteIncludesAllTests() {
         linuxTestSuiteIncludesAllTests(testType:GeneralDatabaseTests.self)

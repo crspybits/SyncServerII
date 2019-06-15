@@ -1,2 +1,0 @@
-6/10/19
-I have given up on having a separate runtime (aside from the build environment) for Swift. It was getting too complex for questionable return.

@@ -225,7 +225,7 @@ class Database {
 
 private struct DBLog {
     static func query(_ query: String) {
-        Log.debug("DB QUERY: \(query)")
+        // Log.debug("DB QUERY: \(query)")
     }
 }
 
@@ -262,6 +262,11 @@ class Select {
 		}
         
         self.fieldNames = self.stmt.fieldNames()
+        
+        if self.fieldNames == nil {
+            Log.error("Failed on stmt.fieldNames: \(query)")
+            return nil
+        }
     }
     
     enum ProcessResultRowsError : Error {
@@ -290,30 +295,46 @@ class Select {
                 return
             }
             
-            let rowModel = self.modelInit!()
+            guard let rowModel = self.modelInit?() else {
+                failure = true
+                return
+            }
             
 			for fieldNumber in 0 ..< results.numFields {
-                let fieldName = self.fieldNames[fieldNumber]!
+                guard let fieldName = self.fieldNames[fieldNumber] else {
+                    Log.error("Failed on getting field name for field number: \(fieldNumber)")
+                    failure = true
+                    return
+                }
                 
-                // If this particular field is NULL (not given), then skip it. Won't return it in the row.
-                var rowFieldValue:Any? = row[fieldNumber]
-                if rowFieldValue == nil {
+                guard fieldNumber < row.count else {
+                    Log.error("Field number exceeds row.count: \(fieldNumber)")
+                    failure = true
+                    return
+                }
+                
+                // If this particular field is nil (not given), then skip it. Won't return it in the row.
+                guard var rowFieldValue: Any = row[fieldNumber] else {
                     continue
                 }
                 
-				switch self.fieldTypes[fieldNumber]! {
+                guard let fieldType = self.fieldTypes[fieldNumber] else {
+                    failure = true
+                    return
+                }
+                
+				switch fieldType {
 				case "integer", "double", "string", "date":
                     break
                 case "bytes":
-                    if rowFieldValue! is Array<UInt8> {
+                    if let bytes = rowFieldValue as? Array<UInt8> {
                         // Assume this is actually a String. Some Text fields come back this way.
-                        let bytes = rowFieldValue! as! Array<UInt8>
                         if let str = String(bytes: bytes, encoding: String.Encoding.utf8) {
                             rowFieldValue = str
                         }
                     }
                 default:
-                    Log.error("Unknown field type: \(self.fieldTypes[fieldNumber]!); fieldNumber: \(fieldNumber)")
+                    Log.error("Unknown field type: \(String(describing: self.fieldTypes[fieldNumber])); fieldNumber: \(fieldNumber)")
                     if !ignoreErrors {
                         self.forEachRowStatus = .unknownFieldType
                         failure = true
@@ -322,23 +343,26 @@ class Select {
 				}
                 
                 if let converter = rowModel.typeConvertersToModel(propertyName: fieldName) {
-                    rowFieldValue = converter(rowFieldValue!)
+                    let value = converter(rowFieldValue)
                     
-                    if rowFieldValue == nil {
+                    if value == nil {
                         if ignoreErrors! {
                             continue
                         }
                         else {
-                            let message = "Problem with converting: \(self.fieldTypes[fieldNumber]!); fieldNumber: \(fieldNumber)"
+                            let message = "Problem with converting: \(String(describing: self.fieldTypes[fieldNumber])); fieldNumber: \(fieldNumber)"
                             Log.error(message)
                             self.forEachRowStatus = .problemConvertingFieldValueToModel(message)
                             failure = true
                             return
                         }
                     }
+                    else {
+                        rowFieldValue = value!
+                    }
                 }
                 
-                rowModel[fieldName] = rowFieldValue!
+                rowModel[fieldName] = rowFieldValue
 			} // end for
             
             callback(rowModel)

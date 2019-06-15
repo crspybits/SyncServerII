@@ -21,8 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		6E08043DD765DDCE76990F46 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2CC50D578D0BE2E7F3A07DC1 /* ServerTests.json */; };
-		CD8571A1300776C5BAD0E15E /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45BF8DBC9FBB044A3876B3FF /* Server.json */; };
+		997EB481E86155ED47DE12F1 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = F274DDDFD2B2C84CE4418DFD /* ServerTests.json */; };
+		D4081ECD53B95C3C69E339E8 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 944C9910A130497DBD11B89E /* Server.json */; };
 		OBJ_1038 /* Coding.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_151 /* Coding.swift */; };
 		OBJ_1039 /* CodingBindings.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_152 /* CodingBindings.swift */; };
 		OBJ_1040 /* CodingJoins.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_153 /* CodingJoins.swift */; };
@@ -567,24 +567,24 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		C9F283A6E56A320063566144 /* CopyFiles */ = {
+		CD15FB5A8B86D27A8B293BCD /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				CD8571A1300776C5BAD0E15E /* Server.json in CopyFiles */,
-				6E08043DD765DDCE76990F46 /* ServerTests.json in CopyFiles */,
+				D4081ECD53B95C3C69E339E8 /* Server.json in CopyFiles */,
+				997EB481E86155ED47DE12F1 /* ServerTests.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2CC50D578D0BE2E7F3A07DC1 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
-		45BF8DBC9FBB044A3876B3FF /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
+		944C9910A130497DBD11B89E /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
 		CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */ = {isa = PBXFileReference; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Cryptor::Cryptor::Product /* Cryptor.framework */ = {isa = PBXFileReference; path = Cryptor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F274DDDFD2B2C84CE4418DFD /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */ = {isa = PBXFileReference; path = HeliumLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-Credentials::Credentials::Product /* Credentials.framework */ = {isa = PBXFileReference; path = Credentials.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */ = {isa = PBXFileReference; path = CredentialsFacebook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1339,7 +1339,7 @@
 				OBJ_141 /* PerfectMySQL 3.4.1 */,
 				OBJ_148 /* PerfectCRUD 1.2.3 */,
 				OBJ_179 /* SMServerLib 1.2.0 */,
-				OBJ_183 /* SyncServerShared 10.3.2 */,
+				OBJ_183 /* SyncServerShared 10.4.3 */,
 				OBJ_221 /* PerfectLib 3.1.4 */,
 				OBJ_233 /* CredentialsDropbox 0.4.0 */,
 				OBJ_239 /* Kitura-Credentials 2.4.1 */,
@@ -1572,13 +1572,13 @@
 			path = .build/checkouts/SMServerLib/Sources/SMServerLib;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_183 /* SyncServerShared 10.3.2 */ = {
+		OBJ_183 /* SyncServerShared 10.4.3 */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_184 /* SyncServerShared */,
 				OBJ_220 /* Package.swift */,
 			);
-			name = "SyncServerShared 10.3.2";
+			name = "SyncServerShared 10.4.3";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
@@ -2272,34 +2272,34 @@
 		OBJ_441 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				Socket::Socket::Product /* Socket.framework */,
-				Server::Main::Product /* Main */,
-				Kitura-net::KituraNet::Product /* KituraNet.framework */,
 				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
+				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
+				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
+				SSLService::SSLService::Product /* SSLService.framework */,
+				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
+				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
+				swift-log::Logging::Product /* Logging.framework */,
+				Socket::Socket::Product /* Socket.framework */,
+				SMServerLib::SMServerLib::Product /* SMServerLib.framework */,
+				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
+				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
+				SyncServerShared::SyncServerShared::Product /* SyncServerShared.framework */,
+				Server::Main::Product /* Main */,
+				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
+				Server::ServerTests::Product /* ServerTests.xctest */,
+				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
+				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
+				Kitura::Kitura::Product /* Kitura.framework */,
+				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
+				Server::Server::Product /* Server.framework */,
 				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
 				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
-				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
-				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
 				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
-				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
-				Server::ServerTests::Product /* ServerTests.xctest */,
-				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
-				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
-				Cryptor::Cryptor::Product /* Cryptor.framework */,
-				Server::Server::Product /* Server.framework */,
-				SyncServerShared::SyncServerShared::Product /* SyncServerShared.framework */,
 				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
-				SMServerLib::SMServerLib::Product /* SMServerLib.framework */,
-				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
-				Kitura::Kitura::Product /* Kitura.framework */,
-				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
 				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
-				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
+				Cryptor::Cryptor::Product /* Cryptor.framework */,
 				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
-				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
-				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
-				SSLService::SSLService::Product /* SSLService.framework */,
-				swift-log::Logging::Product /* Logging.framework */,
+				Kitura-net::KituraNet::Product /* KituraNet.framework */,
 			);
 			name = Products;
 			path = "";
@@ -3146,7 +3146,7 @@
 			buildPhases = (
 				OBJ_1154 /* Sources */,
 				OBJ_1202 /* Frameworks */,
-				C9F283A6E56A320063566144 /* CopyFiles */,
+				CD15FB5A8B86D27A8B293BCD /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -3188,7 +3188,7 @@
 			buildPhases = (
 				OBJ_1268 /* Sources */,
 				OBJ_1307 /* Frameworks */,
-				079866D488EC88BF30B90A4B /* ShellScript */,
+				97306289892469FC09811011 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -3523,7 +3523,7 @@
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		079866D488EC88BF30B90A4B /* ShellScript */ = {
+		97306289892469FC09811011 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (

@@ -254,7 +254,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let result1 = UserRepository(db).add(user: user1)
+        let result1 = UserRepository(db).add(user: user1, validateJSON: false)
         XCTAssert(result1 == 1, "Bad credentialsId!")
         
         let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, sharingGroupUUID: UUID().uuidString, deviceUUID: Foundation.UUID().uuidString)
@@ -274,7 +274,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = UserRepository(db).add(user: user1)
+        let userId = UserRepository(db).add(user: user1, validateJSON: false)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
@@ -309,7 +309,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = UserRepository(db).add(user: user1)
+        let userId = UserRepository(db).add(user: user1, validateJSON: false)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID1) else {

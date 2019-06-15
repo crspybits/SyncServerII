@@ -182,18 +182,21 @@ class UserRepository : Repository, RepositoryLookup {
     }
     
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
-    func add(user:User) -> Int64? {
+    // 6/12/19; Added `validateJSON`-- this is only for testing and normally should be left with the true default value.
+    func add(user:User, validateJSON: Bool = true) -> Int64? {
         if user.username == nil || user.accountType == nil || user.credsId == nil {
             Log.error("One of the model values was nil!")
             return nil
         }
         
-        // Validate the JSON before we insert it.
-        guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountType: user.accountType, user: .user(user), delegate: nil) else {
-            Log.error("Invalid creds JSON: \(String(describing: user.creds)) for accountType: \(String(describing: user.accountType))")
-            return nil
+        if validateJSON {
+            // Validate the JSON before we insert it.
+            guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountType: user.accountType, user: .user(user), delegate: nil) else {
+                Log.error("Invalid creds JSON: \(String(describing: user.creds)) for accountType: \(String(describing: user.accountType))")
+                return nil
+            }
         }
-
+        
         let (cloudFolderNameFieldValue, cloudFolderNameFieldName) = getInsertFieldValueAndName(fieldValue: user.cloudFolderName, fieldName: User.cloudFolderNameKey)
         
         let query = "INSERT INTO \(tableName) (username, accountType, credsId, creds \(cloudFolderNameFieldName)) VALUES('\(user.username!)', '\(user.accountType!)', '\(user.credsId!)', '\(user.creds!)' \(cloudFolderNameFieldValue));"

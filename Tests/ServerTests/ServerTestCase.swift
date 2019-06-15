@@ -66,8 +66,10 @@ class ServerTestCase : XCTestCase {
     override func tearDown() {
         super.tearDown()
         
+        Log.info("About to close...")
         // Otherwise we can have too many db connections open during testing.
         self.db.close()
+        Log.info("Closed")
     }
     
     @discardableResult
@@ -1580,7 +1582,11 @@ class ServerTestCase : XCTestCase {
         
         // I've been having problems here comparing dates. It seems that this is akin to the problem of comparing real numbers, and the general rule that you shouldn't test real numbers for equality. To help in this, I'm going to just use the mm/dd/yy and hh:mm:ss components of the dates.
         func clean(_ date: Date) -> Date {
-            let orig = Calendar.current.dateComponents(
+            // 6/12/19; Due to Swift 5.0.1 issue; See https://stackoverflow.com/questions/56555005/swift-5-ubuntu-16-04-crash-with-datecomponents
+            // not using Calendar.current
+            let calendar = Calendar(identifier: .gregorian)
+
+            let orig = calendar.dateComponents(
                 [.day, .month, .year, .hour, .minute, .second], from: date)
 
             var new = DateComponents()

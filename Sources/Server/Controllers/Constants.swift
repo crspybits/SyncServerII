@@ -9,6 +9,7 @@
 import Foundation
 import SMServerLib
 import PerfectLib
+import LoggerAPI
 
 // Server startup configuration info. Mostly pulled from the Server.json file.
 
@@ -141,6 +142,8 @@ class Constants {
             signInTokenTimeToLive = TimeInterval(credsTtl)
         }
         
+        Log.info("signInTokenTimeToLive: \(String(describing: signInTokenTimeToLive))")
+        
         googleClientId = try? config.getString(varName: "GoogleServerClientId")
         googleClientSecret = try? config.getString(varName: "GoogleServerSecret")
 
@@ -155,7 +158,7 @@ class Constants {
         port = try config.getInt(varName: "port")
         
         maxNumberDeviceUUIDPerUser = try? config.getInt(varName: "maxNumberDeviceUUIDPerUser")
-        print("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")
+        Log.info("maxNumberDeviceUUIDPerUser: \(String(describing: maxNumberDeviceUUIDPerUser))")
  
         if let usingKituraSSL = try? config.getBool(varName: "ssl.usingKituraSSL"), usingKituraSSL {
             ssl.usingKituraSSL = true

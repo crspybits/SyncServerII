@@ -4,7 +4,11 @@ Version 0.25.0
 	* Now lower casing expected checksum value before check with the upload-- in case upload request leaves checksum in upper case.
 	* Changed locking mechanism for requests. Removed ShortLocks table and relying on GET_LOCK/RELEASE_LOCK mySQL distributed locking mechanism.
 	* Added debugging output for mySQL queries.
-	* Updating to Swift 5.
+	* Updating to Swift 5
+		Put in fixes in testing code for Swift 5.0.1 dateComponents bug:
+			https://stackoverflow.com/questions/56555005
+	* Have now switched over to using IBM-Kitura-based Docker images:
+		https://github.com/IBM-Swift/swift-ubuntu-docker
 
 Version 0.24.0 (4/15/19)
 	* Added url mime type.
