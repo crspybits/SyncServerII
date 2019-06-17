@@ -13,6 +13,9 @@ with open('accessTokens.json') as json_file:
 user1Id = 1
 user2Id = 2
 
+numberOfSharingGroupsPerUser = 5
+numberOfCommonSharingGroups = 2
+
 user1SharingGroups = []
 user2SharingGroups = []
 
@@ -45,8 +48,26 @@ def sharingGroupsForUser(indexResponse, userId):
     return result
 
 # Pass in two arrays.
-def sharingGroupIntersection(sharingGroups1, sharingGroup2):
+def intersection(sharingGroups1, sharingGroup2):
     return list(set(sharingGroups1) & set(sharingGroup2))
+
+# Given set1 = {A, B, C}, set2 = {A, D, E}
+# Want: {B, C, D, E}
+def exclusion(list1, list2):
+    s1 = set(list1)
+    s2 = set(list2)
+    intersection = s1 & s2
+    union = s1.union(s2)
+    result = union.difference(intersection)
+    return list(result)
+
+# Given set1 = {A, B, C}, set2 = {A}
+# Want: {B, C}
+def difference(list1, list2):
+    s1 = set(list1)
+    s2 = set(list2)
+    difference = s1.difference(s2)
+    return list(difference)
 
 def sharingGroupForUser(userId):
     if userId == user1Id:
@@ -70,11 +91,60 @@ class MyTaskSet(TaskSet):
         
         response = self.generalIndex(user1AccessToken)
         user1SharingGroups = sharingGroupsForUser(response, user1Id)
-        print("User 1 sharing groups: " + ''.join(user1SharingGroups))
         response = self.generalIndex(user2AccessToken)
         user2SharingGroups = sharingGroupsForUser(response, user2Id)
-        print("User 2 sharing groups: " + ''.join(user2SharingGroups))
-
+        
+        commonSharingGroups = intersection(user1SharingGroups, user2SharingGroups)
+        numberCommonNeeded = numberOfCommonSharingGroups - len(commonSharingGroups)
+        if numberCommonNeeded < 0:
+            numberCommonNeeded = 0
+        
+        if len(user1SharingGroups) < numberOfSharingGroupsPerUser:
+            print("Creating sharing groups for user1")
+            additional = []
+            for x in range(0, numberOfSharingGroupsPerUser - len(user1SharingGroups)):
+                # Create a sharing group
+                result = self.createSharingGroup(user1AccessToken)
+                if result is None:
+                    print("Could not create sharing groups for user1!")
+                else:
+                    additional.append(result)
+            user1SharingGroups.extend(additional)
+            
+        if len(user2SharingGroups) < numberOfSharingGroupsPerUser:
+            print("Creating sharing groups for user2")
+            additional = []
+            for x in range(0, numberOfSharingGroupsPerUser - len(user2SharingGroups)):
+                # Create a sharing group
+                result = self.createSharingGroup(user2AccessToken)
+                if result is None:
+                    print("Could not create sharing groups for user1!")
+                else:
+                    additional.append(result)
+            user2SharingGroups.extend(additional)
+        
+        if numberCommonNeeded > 0:
+            print("Inviting user 2 to sharing group(s)")
+            user1Only = difference(user1SharingGroups, commonSharingGroups)
+            # Assumes that the number of sharing groups per user > number common.
+            for user1SharingGroup in user1Only:
+                # Invite user 2 to this sharing group.
+                sharingInvitation = self.createSharingInvitation(user1AccessToken, user1SharingGroup)
+                if sharingInvitation is None:
+                    print("Error creating sharing invitation")
+                    exit()
+                result = self.redeemSharingInvitation(user2AccessToken, sharingInvitation)
+                if result is None:
+                    print("Error redeeming sharing invitation")
+                    exit()
+                commonSharingGroups.append(user1SharingGroup)
+                if len(commonSharingGroups) >= numberOfCommonSharingGroups:
+                    break
+                    
+        print("User 1 sharing groups: " + ' '.join(user1SharingGroups))
+        print("User 2 sharing groups: " + ' '.join(user2SharingGroups))
+        print("Common sharing groups: " + ' '.join(commonSharingGroups))
+        
     # Returns the new sharingGroupUUID, or None if the request fails.
     def createSharingGroup(self, accessToken):
         newSharingGroupUUID = str(uuid.uuid1())
@@ -259,7 +329,7 @@ class MyTaskSet(TaskSet):
             
         return True
     
-    @task
+    @task(10)
     def downloadFile(self):
         deviceUUID = str(uuid.uuid1())
         userId = randomUser()
@@ -267,8 +337,12 @@ class MyTaskSet(TaskSet):
         accessToken = accessTokenForUser(userId)
         indexResponse = self.indexSharingGroup(accessToken, deviceUUID, sharingGroupUUID)
         if indexResponse is None:
+            print("Error: Could not get index for downloading.")
             return
         notDeleted = list(filter(lambda file: not file["deleted"], indexResponse["fileIndex"]))
+        if len(notDeleted) == 0:
+            print("Cannot download file: All files deleted")
+            return
         exampleFile = notDeleted[0]
         masterVersion = indexResponse["masterVersion"]
         paramDict = {
@@ -284,15 +358,16 @@ class MyTaskSet(TaskSet):
             print("ERROR DownloadFile GET")
             return
 
-        print("SUCCESS DownloadFile GET")
+        print("SUCCESS DownloadFile GET: User: " + str(userId))
 
-    @task
+    @task(20)
     def index(self):
         userId = randomUser()
         accessToken = accessTokenForUser(userId)
         self.generalIndex(accessToken)
+        print("SUCCESS on Index: User: " + str(userId))
 
-    @task
+    @task(3)
     def uploadFile(self):
         userId = randomUser()
         accessToken = accessTokenForUser(userId)
@@ -301,9 +376,9 @@ class MyTaskSet(TaskSet):
         if self.uploadFileAux(accessToken, deviceUUID, sharingGroupUUID) is None:
             print("Error on UploadFile")
             return
-        print("SUCCESS on UploadFile")
+        print("SUCCESS on UploadFile: User: " + str(userId))
 
-    @task
+    @task(1)
     def deleteFile(self):
         userId = randomUser()
         sharingGroupUUID = sharingGroupForUser(userId)
@@ -334,7 +409,7 @@ class MyTaskSet(TaskSet):
             print("Error on DoneUploads/DeleteFile")
             return
 
-        print("SUCCESS on DeleteFile")
+        print("SUCCESS on DeleteFile: User: " + str(userId))
 
 class MyLocust(HttpLocust):
     task_set = MyTaskSet

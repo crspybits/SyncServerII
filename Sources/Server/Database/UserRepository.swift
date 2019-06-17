@@ -116,6 +116,8 @@ class UserRepository : Repository, RepositoryLookup {
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(userId BIGINT NOT NULL AUTO_INCREMENT, " +
+            
+            // Just a displayable/UI textual name for the user. Not a login name or email address.
             "username VARCHAR(\(usernameMaxLength)) NOT NULL, " +
         
             "accountType VARCHAR(\(accountTypeMaxLength)) NOT NULL, " +
@@ -123,7 +125,7 @@ class UserRepository : Repository, RepositoryLookup {
             // An id specific to the particular type of credentials, e.g., Google.
             "credsId VARCHAR(\(credsIdMaxLength)) NOT NULL, " +
         
-            // Stored as JSON
+            // Stored as JSON. Credential specifics for the particular accountType.
             "creds TEXT NOT NULL, " +
             
             // Can be null because only some cloud storage accounts use this and only owning user accounts use this.
