@@ -278,7 +278,7 @@ class SharingAccountsController : ControllerProtocol {
         profileCreds.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
             if createInitialOwningUserFile {
                 // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
-                guard let cloudStorageCreds = profileCreds as? CloudStorage else {
+                guard let cloudStorageCreds = profileCreds.cloudStorage else {
                     let message = "Could not obtain CloudStorage Creds"
                     Log.error(message)
                     completion(.failure(.message(message)))

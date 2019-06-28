@@ -61,7 +61,7 @@ enum FromJSONError : Swift.Error {
     case noRequiredKeyValue
 }
 
-extension Account {    
+extension Account {
     // Only use this for owning accounts.
     var cloudFolderName: String? {
         guard let accountCreationUser = accountCreationUser,
@@ -111,6 +111,21 @@ extension Account {
         }
 
         setWithValue(keyValue)
+    }
+}
+
+extension Account {
+    var cloudStorage:CloudStorage? {
+#if DEBUG
+        if let loadTesting = Constants.session.loadTestingCloudStorage, loadTesting {
+            return TestingStorage()
+        }
+        else {
+            return self as? CloudStorage
+        }
+#else
+        return self as? CloudStorage
+#endif
     }
 }
 

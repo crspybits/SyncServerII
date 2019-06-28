@@ -186,7 +186,7 @@ extension FileController {
                 ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db, delegate: params.accountDelegate)
             }
             
-            ownerCloudStorage = ownerAccount as? CloudStorage
+            ownerCloudStorage = ownerAccount.cloudStorage
             guard ownerCloudStorage != nil && ownerAccount != nil else {
                 let message = "Could not obtain creds for v0 file: Assuming this means owning user is no longer on system."
                 Log.error(message)

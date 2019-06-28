@@ -98,6 +98,9 @@ class Constants {
     }
     var awssns = AWSSNS()
     
+    // If set to true, uses TestingStorage.
+    var loadTestingCloudStorage: Bool?
+    
     static var session:Constants!
 
     // If there is a delegate, then use this to get the config file path. This is purely a hack for testing-- because I've not been able to get access to the Server.config file otherwise.
@@ -199,6 +202,8 @@ class Constants {
         awssns.secretKey = try? config.getString(varName: "awssns.secretKey")
         awssns.region = try? config.getString(varName: "awssns.region")
         awssns.platformApplicationArn = try? config.getString(varName: "awssns.platformApplicationArn")
+        
+        loadTestingCloudStorage = try? config.getBool(varName: "loadTestingCloudStorage")
 
         // MARK: Items not obtained from the Server.json file.
         

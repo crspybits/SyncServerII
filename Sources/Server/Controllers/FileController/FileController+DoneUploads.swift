@@ -331,7 +331,7 @@ extension FileController {
             return
         }
     
-        guard let cloudStorageCreds = owningUserCreds as? CloudStorage else {
+        guard let cloudStorageCreds = owningUserCreds.cloudStorage else {
             let message = "Could not obtain cloud storage creds."
             Log.error(message)
             params.completion(.failure(.message(message)))
