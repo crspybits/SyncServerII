@@ -45,6 +45,12 @@
     },
     {
       "name": "SpecificDatabaseTests_SharingGroupUsers"
+    },
+    {
+      "name": "TestingStorageTests"
+    },
+    {
+      "name": "TestingStorageLiveTests"
     }
   ],
   "google": [

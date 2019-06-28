@@ -23,6 +23,7 @@
 /* Begin PBXBuildFile section */
 		7830F6D337E975E0C9009A39 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = E4C8AFF0C7DCC669351B708B /* ServerTests.json */; };
 		83BC68B022C5B7F400C9E954 /* TestingStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BC68AF22C5B7F400C9E954 /* TestingStorageTests.swift */; };
+		83BC68B222C5C78200C9E954 /* TestingStorageLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BC68B122C5C78200C9E954 /* TestingStorageLiveTests.swift */; };
 		A211772E57272EA66CFD942D /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 20569E547177F03233402E0D /* Server.json */; };
 		OBJ_1000 /* PerfectLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "PerfectLib::PerfectLib::Product" /* PerfectLib.framework */; };
 		OBJ_1040 /* Coding.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_152 /* Coding.swift */; };
@@ -1897,6 +1898,7 @@
 /* Begin PBXFileReference section */
 		20569E547177F03233402E0D /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		83BC68AF22C5B7F400C9E954 /* TestingStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingStorageTests.swift; sourceTree = "<group>"; };
+		83BC68B122C5C78200C9E954 /* TestingStorageLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingStorageLiveTests.swift; sourceTree = "<group>"; };
 		"CredentialsDropbox::CredentialsDropbox::Product" /* CredentialsDropbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Cryptor::Cryptor::Product" /* Cryptor.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Cryptor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4C8AFF0C7DCC669351B708B /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
@@ -3725,6 +3727,7 @@
 		OBJ_70 /* ServerTests */ = {
 			isa = PBXGroup;
 			children = (
+				83BC68B122C5C78200C9E954 /* TestingStorageLiveTests.swift */,
 				83BC68AF22C5B7F400C9E954 /* TestingStorageTests.swift */,
 				OBJ_71 /* AccountAuthenticationTests_Dropbox.swift */,
 				OBJ_72 /* AccountAuthenticationTests_Facebook.swift */,
@@ -5106,6 +5109,7 @@
 				OBJ_1291 /* HealthCheckTests.swift in Sources */,
 				OBJ_1292 /* KituraTest.swift in Sources */,
 				OBJ_1293 /* MessageTests.swift in Sources */,
+				83BC68B222C5C78200C9E954 /* TestingStorageLiveTests.swift in Sources */,
 				OBJ_1294 /* ServerTestCase.swift in Sources */,
 				OBJ_1295 /* SharingAccountsController_CreateSharingInvitation.swift in Sources */,
 				OBJ_1296 /* SharingAccountsController_GetSharingInvitationInfo.swift in Sources */,

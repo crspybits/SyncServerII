@@ -357,7 +357,13 @@ class ServerTestCase : XCTestCase {
                     return
                 }
                 
-                creds.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+                guard let cloudStorage = creds.cloudStorage else {
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+                
+                cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
                     switch result {
                     case .success:
                         break
@@ -375,7 +381,14 @@ class ServerTestCase : XCTestCase {
             let creds = DropboxCreds()
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
-            creds.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+            
+            guard let cloudStorage = creds.cloudStorage else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
+            
+            cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
                 switch result {
                 case .success:
                     break
@@ -392,7 +405,7 @@ class ServerTestCase : XCTestCase {
             assert(false)
         }
         
-        waitForExpectations(timeout: 10.0, handler: nil)
+        waitForExpectations(timeout: 20.0, handler: nil)
     }
     
     enum LookupFileError : Error {

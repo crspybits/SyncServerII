@@ -280,7 +280,16 @@ extension FileController {
         upload.sharingGroupUUID = uploadRequest.sharingGroupUUID
         
         // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
-        let expectedCheckSum = uploadRequest.checkSum?.lowercased()
+        var expectedCheckSum: String?
+        expectedCheckSum = uploadRequest.checkSum?.lowercased()
+        
+#if DEBUG
+        // Short-circuit check sum test in the case of load testing. 'cause it won't be right :).
+        if let loadTesting = Constants.session.loadTestingCloudStorage, loadTesting {
+            expectedCheckSum = uploadedCheckSum
+        }
+#endif
+
         guard uploadedCheckSum == expectedCheckSum else {
             let message = "Checksum after upload to cloud storage (\(uploadedCheckSum) is not the same as before upload \(String(describing: expectedCheckSum))."
             finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
