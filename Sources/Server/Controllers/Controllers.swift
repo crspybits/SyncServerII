@@ -135,10 +135,25 @@ public class Controllers {
         return true
     }
     
-    enum UpdateMasterVersionResult : Error {
-    case success
-    case error(String)
-    case masterVersionUpdate(MasterVersionInt)
+    enum UpdateMasterVersionResult : Error, RetryRequest {
+        case success
+        case error(String)
+        case masterVersionUpdate(MasterVersionInt)
+        
+        case deadlock
+        case waitTimeout
+        
+        var shouldRetry: Bool {
+            if case .deadlock = self {
+                return true
+            }
+            else if case .waitTimeout = self {
+                return true
+            }
+            else {
+                return false
+            }
+        }
     }
     
     private static func updateMasterVersion(sharingGroupUUID:String, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
@@ -155,20 +170,26 @@ public class Controllers {
         
         switch updateMasterVersionResult {
         case .success:
-            result = UpdateMasterVersionResult.success
+            result = .success
             
         case .error(let error):
             let message = "Failed lookup in MasterVersionRepository: \(error)"
             Log.error(message)
-            result = UpdateMasterVersionResult.error(message)
+            result = .error(message)
+            
+        case .deadlock:
+            result = .deadlock
+            
+        case .waitTimeout:
+            result = .waitTimeout
             
         case .didNotMatchCurrentMasterVersion:
             getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
                 if error == nil {
-                    result = UpdateMasterVersionResult.masterVersionUpdate(masterVersion!)
+                    result = .masterVersionUpdate(masterVersion!)
                 }
                 else {
-                    result = UpdateMasterVersionResult.error("\(error!)")
+                    result = .error("\(error!)")
                 }
             }
         }
@@ -217,7 +238,11 @@ public class Controllers {
     
     // Returns nil on success.
     static func updateMasterVersion(sharingGroupUUID: String, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type?) -> RequestProcessingParameters.Response? {
-        let updateResult = updateMasterVersion(sharingGroupUUID: sharingGroupUUID, currentMasterVersion: masterVersion, params: params)
+    
+        let updateResult = params.repos.masterVersion.retry {
+            return updateMasterVersion(sharingGroupUUID: sharingGroupUUID, currentMasterVersion: masterVersion, params: params)
+        }
+                
         switch updateResult {
         case .success:
             return nil
@@ -234,6 +259,12 @@ public class Controllers {
                 Log.error(message)
                 return .failure(.message(message))
             }
+            
+        case .deadlock:
+            return .failure(.message("Deadlock!"))
+
+        case .waitTimeout:
+            return .failure(.message("Timeout!"))
             
         case .error(let error):
             let message = "Failed on updateMasterVersion: \(error)"

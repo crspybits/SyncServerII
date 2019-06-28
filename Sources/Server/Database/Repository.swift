@@ -70,7 +70,7 @@ extension RepositoryLookup {
         }
         else {
             let error = db.error
-            Log.error("Could not remove rows from \(tableName): \(error)")
+            Log.error("Could not remove rows from \(tableName): \(error); \(key)")
             return .error("\(error)")
         }
     }
@@ -144,5 +144,29 @@ extension Repository {
         }
         
         return (queryFieldValue, queryFieldName)
+    }
+}
+
+protocol RetryRequest {
+    var shouldRetry: Bool {  get }
+}
+
+
+extension Repository {
+    func retry<T: RetryRequest>(request: @escaping ()->(T)) -> T {
+        let maxNumberRetries = 3
+        
+        var result = request()
+        var count = 1
+        
+        while result.shouldRetry && count < maxNumberRetries {
+            let sleepDuration = TimeInterval(count) * TimeInterval(0.1)
+            Log.info("Deadlock found: Retrying after \(sleepDuration)s")
+            Thread.sleep(forTimeInterval: sleepDuration)
+            result = request()
+            count += 1
+        }
+        
+        return result
     }
 }

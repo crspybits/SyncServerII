@@ -125,6 +125,12 @@ extension FileController {
             case .aModelValueWasNil:
                 errorString = "A model value was nil!"
                 
+            case .deadlock:
+                errorString = "Deadlock"
+
+            case .waitTimeout:
+                errorString = "waitTimeout"
+                
             case .otherError(let error):
                 errorString = error
             }

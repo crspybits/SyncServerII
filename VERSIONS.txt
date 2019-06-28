@@ -9,6 +9,8 @@ Version 0.25.0
 			https://stackoverflow.com/questions/56555005
 	* Have now switched over to using IBM-Kitura-based Docker images:
 		https://github.com/IBM-Swift/swift-ubuntu-docker
+	* Working on other deadlock issues: With file uploads, master version and device UUID.
+		And with timeout issues.
 
 Version 0.24.0 (4/15/19)
 	* Added url mime type.

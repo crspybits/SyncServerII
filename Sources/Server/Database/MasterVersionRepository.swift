@@ -103,14 +103,15 @@ class MasterVersionRepository : Repository, RepositoryLookup {
     }
     
     enum UpdateToNextResult {
-    case error(String)
-    case didNotMatchCurrentMasterVersion
-    case success
+        case error(String)
+        case didNotMatchCurrentMasterVersion
+        case success
+        case deadlock
+        case waitTimeout
     }
     
     // Increments master version for specific sharingGroupUUID
     func updateToNext(current:MasterVersion) -> UpdateToNextResult {
-    
         let query = "UPDATE \(tableName) SET masterVersion = masterVersion + 1 " +
             "WHERE sharingGroupUUID = '\(current.sharingGroupUUID!)' and " +
             "masterVersion = \(current.masterVersion!)"
@@ -122,6 +123,12 @@ class MasterVersionRepository : Repository, RepositoryLookup {
             else {
                 return UpdateToNextResult.didNotMatchCurrentMasterVersion
             }
+        }
+        else if db.errorCode() == Database.deadlockError {
+            return .deadlock
+        }
+        else if db.errorCode() == Database.lockWaitTimeout {
+            return .waitTimeout
         }
         else {
             let message = "Could not updateToNext MasterVersion: \(db.error)"

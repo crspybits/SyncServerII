@@ -233,19 +233,18 @@ class RequestHandler {
     
     // Starts a transaction, and calls the `dbOperations` closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.
     private func dbTransaction(_ db:Database, handleResult:@escaping (ServerResult) ->(), dbOperations:(_ callback: @escaping (ServerResult) ->())->()) {
-    
+
+        // 6/24/19; While I used to, I'm no longer including this in the transaction. This is because I can get a deadlock just on the insert of a record into the DeviceUUID table. The consequence of not including it in the transaction may include creating a db record even though the rest of the request fails. No biggie. Presumably the device would have made another successful request and the device record would get created in any event. Why not creat it now?
+        if case .error(let errorMessage) = checkDeviceUUID() {
+            handleResult(.failure(.message("Failed checkDeviceUUID: \(errorMessage)")))
+            return
+        }
+        
         if !db.startTransaction() {
             handleResult(.failure(.message("Could not start a transaction!")))
             return
         }
         
-        // Waiting until this point to call `checkDeviceUUID` because it may create a db record.
-        if case .error(let errorMessage) = checkDeviceUUID() {
-            _ = db.rollback()
-            handleResult(.failure(.message("Failed checkDeviceUUID: \(errorMessage)")))
-            return
-        }
-
         func dbTransactionHandleResult(_ result: ServerResult) {
             switch result {
             case .success(_):

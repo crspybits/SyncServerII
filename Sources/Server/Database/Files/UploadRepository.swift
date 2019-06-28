@@ -304,11 +304,26 @@ class UploadRepository : Repository, RepositoryLookup {
         return upload.lastUploadedCheckSum == nil
     }
     
-    enum AddResult {
-    case success(uploadId:Int64)
-    case duplicateEntry
-    case aModelValueWasNil
-    case otherError(String)
+    enum AddResult: RetryRequest {
+        case success(uploadId:Int64)
+        case duplicateEntry
+        case aModelValueWasNil
+        case otherError(String)
+        
+        case deadlock
+        case waitTimeout
+        
+        var shouldRetry: Bool {
+            if case .deadlock = self {
+                return true
+            }
+            if case .waitTimeout = self {
+                return true
+            }
+            else {
+                return false
+            }
+        }
     }
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
@@ -350,6 +365,12 @@ class UploadRepository : Repository, RepositoryLookup {
         
         if db.query(statement: query) {
             return .success(uploadId: db.lastInsertId())
+        }
+        else if db.errorCode() == Database.deadlockError {
+            return .deadlock
+        }
+        else if db.errorCode() == Database.lockWaitTimeout {
+            return .waitTimeout
         }
         else if db.errorCode() == Database.duplicateEntryForKey {
             return .duplicateEntry

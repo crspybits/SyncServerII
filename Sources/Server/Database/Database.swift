@@ -24,6 +24,12 @@ class Database {
     // E.g.,[ERR] Could not insert into ShortLocks: Failure: 1062 Duplicate entry '1' for key 'userId'
     static let duplicateEntryForKey = UInt32(1062)
     
+    // Failure: 1213 Deadlock found when trying to get lock; try restarting transaction
+    static let deadlockError = UInt32(1213)
+    
+    // Failure: 1205 Lock wait timeout exceeded; try restarting transaction
+    static let lockWaitTimeout = UInt32(1205)
+
     private var closed = false
     fileprivate var connection: MySQL!
 
