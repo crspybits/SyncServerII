@@ -89,20 +89,28 @@ class DropboxCreds : AccountAPICall, Account {
         accessToken = newerDropboxCreds.accessToken
     }
     
-    // Only updates the user profile if the request header has the Account's specific token.
-    static func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest) {
-        userProfile.extendedProperties[ServerConstants.HTTPAccountIdKey] = request.headers[ServerConstants.HTTPAccountIdKey]
-        userProfile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey]
+    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
+        var result = [String: Any]()
+        
+        if let accountId = request.headers[ServerConstants.HTTPAccountIdKey] {
+            result[ServerConstants.HTTPAccountIdKey] = accountId
+        }
+        
+        if let accessToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+            result[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
+        }
+        
+        return result
     }
     
-    static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         let creds = DropboxCreds()
         creds.accountCreationUser = user
         creds.delegate = delegate
         creds.accessToken =
-            profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
+            properties.properties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
         creds.accountId =
-            profile.extendedProperties[ServerConstants.HTTPAccountIdKey] as? String
+            properties.properties[ServerConstants.HTTPAccountIdKey] as? String
         return creds
     }
     

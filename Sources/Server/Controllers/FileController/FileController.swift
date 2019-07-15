@@ -115,7 +115,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        guard Lock.lock(db: params.db, sharingGroupUUID:sharingGroupUUID) else {
+        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: sharingGroupUUID) else {
             let message = "Error acquiring lock!"
             Log.debug(message)
             params.completion(.failure(.message(message)))
@@ -123,20 +123,8 @@ class FileController : ControllerProtocol {
         }
         
         Controllers.getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
-            if error != nil {
-                Lock.unlock(db: params.db, sharingGroupUUID: sharingGroupUUID)
-                params.completion(.failure(.message("\(error!)")))
-                return
-            }
             
             let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)
-            
-            if !Lock.unlock(db: params.db, sharingGroupUUID: sharingGroupUUID) {
-                let message = "Error in unlock!"
-                Log.debug(message)
-                params.completion(.failure(.message(message)))
-                return
-            }
 
             switch fileIndexResult {
             case .fileIndex(let fileIndex):

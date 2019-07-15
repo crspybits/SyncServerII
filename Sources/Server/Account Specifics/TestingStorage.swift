@@ -18,7 +18,7 @@ class TestingStorage: CloudStorage {
     }
     
     private func runAfterDuration(completion: @escaping ()->()) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(duration)) {
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(duration)) {
             completion()
         }
     }

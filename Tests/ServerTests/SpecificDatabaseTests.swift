@@ -103,24 +103,6 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupUUID: sharingGroupUUID, expectedError: true)
     }
     
-    func testLock() {
-        let sharingGroupUUID = UUID().uuidString
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard Lock.lock(db: db, sharingGroupUUID:sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-
-        guard Lock.unlock(db: db, sharingGroupUUID:sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-    }
-    
     func doAddFileIndex(userId:UserId = 1, sharingGroupUUID:String, createSharingGroup: Bool) -> FileIndex? {
 
         if createSharingGroup {
@@ -148,12 +130,13 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         fileIndex.updateDate = Date()
         fileIndex.sharingGroupUUID = sharingGroupUUID
         
-        guard let result1 = FileIndexRepository(db).add(fileIndex: fileIndex) else {
+        let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
+        guard case .success(let uploadId) = result1 else {
             XCTFail()
             return nil
         }
 
-        fileIndex.fileIndexId = result1
+        fileIndex.fileIndexId = uploadId
         
         return fileIndex
     }
@@ -451,7 +434,6 @@ extension SpecificDatabaseTests {
             ("testUpdateToNextMasterVersion", testUpdateToNextMasterVersion),
             ("testUpdateToNextTwiceMasterVersion", testUpdateToNextTwiceMasterVersion),
             ("testUpdateToNextFailsWithWrongExpectedMasterVersion", testUpdateToNextFailsWithWrongExpectedMasterVersion),
-            ("testLock", testLock),
             ("testAddFileIndex", testAddFileIndex),
             ("testUpdateFileIndexWithNoChanges", testUpdateFileIndexWithNoChanges),
             ("testUpdateFileIndexWithAChange", testUpdateFileIndexWithAChange),

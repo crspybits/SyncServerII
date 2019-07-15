@@ -10,6 +10,7 @@ import Credentials
 import SyncServerShared
 import LoggerAPI
 import KituraNet
+import Foundation
 
 class SharingAccountsController : ControllerProtocol {
     class func setup() -> Bool {
@@ -110,15 +111,15 @@ class SharingAccountsController : ControllerProtocol {
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         
-        guard let userType = AccountType.for(userProfile: params.userProfile!)?.userType else {
-            let message = "Could not get user type for user profile!"
+        guard let accountType = params.accountProperties?.accountType else {
+            let message = "Could not get account type from account properties!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
 
         if !sharingInvitation.allowSocialAcceptance {
-            guard userType == .owning else {
+            guard accountType.userType == .owning else {
                 let message = "Invitation does not allow social acceptance, but signed in user is not owning"
                 Log.error(message)
                 params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.forbidden)))
@@ -168,7 +169,14 @@ class SharingAccountsController : ControllerProtocol {
 
         // The user can either: (a) already be on the system -- so this will be a request to add a sharing group to an existing user, or (b) this is a request to both create a user and have them join a sharing group.
         
-        let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
+        guard let credsId = params.userProfile?.id else {
+            let message = "Could not get credsId from user profile."
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        let userExists = UserController.userExists(accountType: accountType, credsId: credsId, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
             redeemSharingInvitationForNewUser(params:params, request: request, sharingInvitation: sharingInvitation, completion: completion)
@@ -226,7 +234,15 @@ class SharingAccountsController : ControllerProtocol {
         
         let user = User()
         user.username = params.userProfile!.displayName
-        user.accountType = AccountType.for(userProfile: params.userProfile!)
+        
+        guard let accountType = params.accountProperties?.accountType else {
+            let message = "Could not get account type from properties!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        user.accountType = accountType
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
         
@@ -343,22 +359,14 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        guard Lock.lock(db: params.db, sharingGroupUUID: sharingInvitation.sharingGroupUUID) else {
-            let message = "Error acquiring lock!"
+        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: sharingInvitation.sharingGroupUUID) else {
+            let message = "Error acquiring lock: Thread.current: \(Thread.current)"
             Log.debug(message)
             params.completion(.failure(.message(message)))
             return
         }
         
         redeem(params: params, request: request, sharingInvitation: sharingInvitation, sharingInvitationKey: sharingInvitationKey) { response in
-        
-            guard Lock.unlock(db: params.db, sharingGroupUUID: sharingInvitation.sharingGroupUUID) else {
-                let message = "Error in unlock!"
-                Log.debug(message)
-                params.completion(.failure(.message(message)))
-                return
-            }
-
             params.completion(response)
         }
     }

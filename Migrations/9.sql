@@ -12,7 +12,7 @@
 -- mysqldump -h url.for.db -P 3306 -u username -p --databases SyncServer_SharedImages > dump.sql
 
 -- use SyncServer_SharedImages;
--- drop table DeviceUUID; drop table ShortLocks; drop table FileIndex; drop table MasterVersion; drop table SharingGroupUser; drop table Upload; drop table User; drop table SharingInvitation; drop table SharingGroup;
+-- drop table DeviceUUID; drop table SharingGroupLock; drop table FileIndex; drop table MasterVersion; drop table SharingGroupUser; drop table Upload; drop table User; drop table SharingInvitation; drop table SharingGroup;
 
 -- importing to local db
 -- mysql -u root -p < ~/Desktop/dump.sql

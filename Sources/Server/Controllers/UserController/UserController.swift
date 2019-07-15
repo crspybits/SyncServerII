@@ -26,13 +26,9 @@ class UserController : ControllerProtocol {
         case exists(User)
     }
     
-    // Looks up UserProfile in mySQL database.
-    static func userExists(userProfile:UserProfile, userRepository:UserRepository) -> UserStatus {
-        guard let accountType = AccountType.for(userProfile: userProfile) else {
-            return .error
-        }
-        
-        let result = userRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:userProfile.id), modelInit: User.init)
+    // Looks up user in mySQL database. credsId is typically from userProfile.id
+    static func userExists(accountType: AccountType, credsId: String,  userRepository:UserRepository) -> UserStatus {
+        let result = userRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:credsId), modelInit: User.init)
         
         switch result {
         case .found(let object):
@@ -55,7 +51,21 @@ class UserController : ControllerProtocol {
             return
         }
         
-        let userExists = UserController.userExists(userProfile: params.userProfile!, userRepository: params.repos.user)
+        guard let accountType = params.accountProperties?.accountType else {
+            let message = "Could not get account type."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard let credsId = params.userProfile?.id else {
+            let message = "Could not get credsId."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        let userExists = UserController.userExists(accountType: accountType, credsId: credsId, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
             break
@@ -72,7 +82,7 @@ class UserController : ControllerProtocol {
         // No database creds because this is a new user-- so use params.profileCreds
         let user = User()
         user.username = params.userProfile!.displayName
-        user.accountType = AccountType.for(userProfile: params.userProfile!)
+        user.accountType = accountType
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType: userType)
         
@@ -103,7 +113,7 @@ class UserController : ControllerProtocol {
         
         user.userId = userId
 
-        guard case .success = params.repos.sharingGroup.add(sharingGroupUUID: addUserRequest.sharingGroupUUID, sharingGroupName: addUserRequest.sharingGroupName) else {
+        guard SharingGroupsController.addSharingGroup(sharingGroupUUID: addUserRequest.sharingGroupUUID, sharingGroupName: addUserRequest.sharingGroupName, params: params) else {
             let message = "Failed on adding new sharing group."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -186,7 +196,7 @@ class UserController : ControllerProtocol {
         
         // I'm not going to remove the users files in their cloud storage. They own those. I think SyncServer doesn't have any business removing their files in this context.
         
-        guard let accountType = AccountType.for(userProfile: params.userProfile!) else {
+        guard let accountType = params.accountProperties?.accountType else {
             let message = "Could not get accountType!"
             Log.error(message)
             params.completion(.failure(.message(message)))

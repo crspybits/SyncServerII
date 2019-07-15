@@ -31,7 +31,7 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        guard case .success = params.repos.sharingGroup.add(sharingGroupUUID: request.sharingGroupUUID, sharingGroupName: request.sharingGroupName) else {
+        guard SharingGroupsController.addSharingGroup(sharingGroupUUID: request.sharingGroupUUID, sharingGroupName: request.sharingGroupName, params: params) else {
             let message = "Failed on adding new sharing group."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -228,5 +228,26 @@ class SharingGroupsController : ControllerProtocol {
         
         let response = RemoveUserFromSharingGroupResponse()
         params.completion(.success(response))
+    }
+}
+
+extension SharingGroupsController {
+    // Adds a sharing group, and also adds a sharing group lock.
+    // Return true iff success.
+    static func addSharingGroup(sharingGroupUUID: String, sharingGroupName: String?, params:RequestProcessingParameters) -> Bool {
+        
+        guard case .success = params.repos.sharingGroup.add(sharingGroupUUID: sharingGroupUUID, sharingGroupName: sharingGroupName) else {
+            let message = "Failed on adding new sharing group."
+            Log.error(message)
+            return false
+        }
+        
+        guard case .success = params.repos.sharingGroupLock.add(sharingGroupUUID: sharingGroupUUID) else {
+            let message = "Failed on adding new sharing group lock."
+            Log.error(message)
+            return false
+        }
+        
+        return true
     }
 }

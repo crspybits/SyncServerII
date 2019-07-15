@@ -17,9 +17,6 @@ enum AccountCreationUser {
     case userId(UserId, UserType) // and this if we don't.
 }
 
-// SyncServer specific Keys for UserProfile extendedProperties
-let SyncServerAccountType = "syncServerAccountType" // In Dictionary as a String
-
 protocol AccountDelegate : class {
     // This is delegated because (a) it enables me to only sometimes allow an Account to save to the database, and (b) because knowledge of how to save to a database seems outside of the responsibilities of `Account`s. Returns false iff an error occurred on database save.
     func saveToDatabase(account:Account) -> Bool
@@ -49,11 +46,11 @@ protocol Account {
     func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->())
     
     func merge(withNewer account:Account)
+
+    // Gets account specific properties, if any, from the request.
+    static func getProperties(fromRequest request:RouterRequest) -> [String: Any]
     
-    // Only updates the user profile if the request header has the Account's specific token.
-    static func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest)
-    
-    static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
+    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
     static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account?
 }
 
@@ -133,14 +130,6 @@ enum AccountType : String {
     case Google
     case Facebook
     case Dropbox
-    
-    static func `for`(userProfile:UserProfile) -> AccountType? {
-        guard let accountTypeString = userProfile.extendedProperties[SyncServerAccountType] as? String else {
-            return nil
-        }
-        
-        return AccountType(rawValue: accountTypeString)
-    }
     
     var userType: UserType {
         switch self {

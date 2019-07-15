@@ -369,8 +369,8 @@ class ServerTestCase : XCTestCase {
                         break
                     case .accessTokenRevokedOrExpired:
                         XCTFail()
-                    case .failure:
-                        XCTFail()
+                    case .failure(let error):
+                        XCTFail("\(error)")
                     }
                     
                     expectation.fulfill()
@@ -1551,7 +1551,16 @@ class ServerTestCase : XCTestCase {
                         else {
                             XCTAssert(downloadFileResponse.contentsChanged == contentsChangedExpected)
                             XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
-                            XCTAssert(downloadFileResponse.checkSum == actualCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(String(describing: actualCheckSum))")
+
+                            var loadTesting = false
+                            if let loadTestingCloudStorage = Constants.session.loadTestingCloudStorage, loadTestingCloudStorage {
+                                loadTesting = true
+                            }
+        
+                            if !loadTesting {
+                                XCTAssert(downloadFileResponse.checkSum == actualCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(String(describing: actualCheckSum))")
+                            }
+                            
                             XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
                             guard let type = downloadFileResponse.cloudStorageType,
                                 let _ = CloudStorageType(rawValue: type) else {

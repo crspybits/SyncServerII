@@ -216,7 +216,7 @@ class RequestHandler {
             }
             
             if sharing.needsLock {
-                guard Lock.lock(db: repositories.db, sharingGroupUUID: sharingGroupUUID) else {
+                guard repositories.sharingGroupLock.lock(sharingGroupUUID: sharingGroupUUID) else {
                     self.failWithError(message: "Error obtaining lock!")
                     return .failure
                 }
@@ -279,9 +279,9 @@ class RequestHandler {
         Log.info("self.deviceUUID: \(String(describing: self.deviceUUID))")
         
 #if DEBUG
-        if profile != nil {
-            let userId = profile!.id
-            let userName = profile!.displayName
+        if let profile = profile {
+            let userId = profile.id
+            let userName = profile.displayName
             Log.info("Profile: \(String(describing: profile)); userId: \(userId); userName: \(userName)")
         }
 #endif
@@ -290,24 +290,18 @@ class RequestHandler {
         repositories = Repositories(db: db)
         accountDelegate = AccountDelegateHandler(userRepository: repositories.user)
         
+        var accountProperties: AccountManager.AccountProperties?
+        
         switch authenticationLevel! {
         case .none:
             break
             
         case .primary, .secondary:
-            if profile == nil {
-                // We should really never get here. Credentials security check should make sure of that. This is a double check.
-                let message = "YIKES: Should have had a user profile!"
-                Log.error(message)
-                failWithError(message: message)
-                return
-            }
-            
-            // Only do this if we are requiring primary or secondary authorization-- this updates the profile from the request, assuming we are using authorization.
+            // Only do this if we are requiring primary or secondary authorization-- this gets account specific properties from the request, assuming we are using authorization.
             do {
-                try AccountManager.session.updateUserProfile(profile!, fromRequest: request)
+                accountProperties = try AccountManager.session.getProperties(fromRequest: request)
             } catch (let error) {
-                let message = "YIKES: Non-nil UserProfile, but could not do profile update: \(error)"
+                let message = "YIKES: could not get account properties from request: \(error)"
                 Log.error(message)
                 failWithError(message: message)
                 return
@@ -327,12 +321,12 @@ class RequestHandler {
         if authenticationLevel! == .secondary {
             // We have .secondary authentication-- i.e., we should have the user recorded in the database already.
             
-            guard let accountType = AccountType.for(userProfile: profile!) else {
-                self.failWithError(message: "Could not get accountType.")
+            guard let accountProperties = accountProperties else {
+                self.failWithError(message: "Could not get accountProperties.")
                 return
             }
             
-            let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountType, credsId: profile!.id)
+            let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountProperties.accountType, credsId: profile!.id)
             let userLookup = self.repositories.user.lookup(key: key, modelInit: User.init)
             
             switch userLookup {
@@ -386,7 +380,7 @@ class RequestHandler {
             assert(authenticationLevel! == .none)
             
             dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
+                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
@@ -403,10 +397,15 @@ class RequestHandler {
                 assertionFailure("Should never get here with authenticationLevel == .none!")
             }
             
-            if let profileCreds = AccountManager.session.accountFromProfile(profile: profile!, user: credsUser, delegate: accountDelegate) {
+            guard let accountProperties = accountProperties else {
+                self.failWithError(message: "Do not have AccountProperties!s")
+                return
+            }
+            
+            if let profileCreds = AccountManager.session.accountFromProperties(properties: accountProperties, user: credsUser, delegate: accountDelegate) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
+                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
@@ -435,7 +434,7 @@ class RequestHandler {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, sharingGroupUUID: String?, lockedSharingGroup: Bool, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountManager.AccountProperties?, sharingGroupUUID: String?, lockedSharingGroup: Bool, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         
@@ -474,12 +473,7 @@ class RequestHandler {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountDelegate: accountDelegate) { response in
-        
-            // If we locked before, do unlock now.
-            if lockedSharingGroup, let sharingGroupUUID = sharingGroupUUID {
-                _ = Lock.unlock(db: db, sharingGroupUUID: sharingGroupUUID)
-            }
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountDelegate: accountDelegate) { response in
         
             var message:ResponseMessage!
             

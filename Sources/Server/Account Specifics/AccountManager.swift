@@ -58,8 +58,16 @@ class AccountManager {
         case badTokenFoundInHeaders
     }
     
-    // Allow the specific Account's to process headers in their own special way, and modify the UserProfile accordingly if they need to. Must be called at the very start of request processing.
-    func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest) throws {
+    // Account specific properties obtained from a request.
+    struct AccountProperties {
+        let accountType: AccountType
+        let properties: [String: Any]
+    }
+    
+    // Allow the specific Account's to process headers in their own special way, and get values from the request.
+    // 7/14/19; Previously, I was using the UserProfile (from Kitura Credentials) to bridge these properties. However, that ran into crashes during load testing. See https://forums.swift.org/t/kitura-perfect-mysql-server-crash-double-free-or-corruption-prev/26740/10
+    // So, I changed to using a thread-safe mechanism (AccountProperties).
+    func getProperties(fromRequest request:RouterRequest) throws -> AccountProperties {
         guard let tokenTypeString = request.headers[ServerConstants.XTokenTypeKey] else {
             throw UpdateUserProfileError.noTokenFoundInHeaders
         }
@@ -68,25 +76,21 @@ class AccountManager {
             throw UpdateUserProfileError.badTokenFoundInHeaders
         }
         
-        let accountType = AccountType.fromAuthTokenType(tokenType)
-        userProfile.extendedProperties[SyncServerAccountType] = accountType.rawValue
-        
         for accountType in accountTypes {
             if tokenType == accountType.accountType.toAuthTokenType() {
-                accountType.updateUserProfile(userProfile, fromRequest: request)
-                return
+                return AccountProperties(accountType: AccountType.fromAuthTokenType(tokenType), properties: accountType.getProperties(fromRequest: request))
             }
         }
         
         throw UpdateUserProfileError.noAccountWithThisToken
     }
     
-    func accountFromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    func accountFromProperties(properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         
-        let currentAccountType = AccountType.for(userProfile: profile)
+        let currentAccountType = properties.accountType
         for accountType in accountTypes {
             if accountType.accountType == currentAccountType {
-                return accountType.fromProfile(profile: profile, user: user, delegate: delegate)
+                return accountType.fromProperties(properties, user: user, delegate: delegate)
             }
         }
         

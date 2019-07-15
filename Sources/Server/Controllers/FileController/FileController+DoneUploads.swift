@@ -200,7 +200,7 @@ extension FileController {
             return
         }
         
-        guard Lock.lock(db: params.db, sharingGroupUUID:doneUploadsRequest.sharingGroupUUID) else {
+        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID) else {
             let message = "Error acquiring lock!"
             Log.debug(message)
             params.completion(.failure(.message(message)))
@@ -208,20 +208,6 @@ extension FileController {
         }
         
         let result = doInitialDoneUploads(params: params, doneUploadsRequest: doneUploadsRequest)
-        
-        if !Lock.unlock(db: params.db, sharingGroupUUID: doneUploadsRequest.sharingGroupUUID) {
-            let message = "Error in unlock!"
-            Log.debug(message)
-            
-            // So in the case of multiple errors, don't get a completion in the unlock AND a completion in doInitialDoneUploads.
-            switch result {
-            case .doCompletion(let response):
-                params.completion(response)
-            case .success:
-                params.completion(.failure(.message(message)))
-            }
-            return
-        }
 
         guard case .success(let numberTransferred, let uploadDeletions, let staleVersionsToDelete) = result else {
             Log.debug("Success on doInitialDoneUploads: \(result)")

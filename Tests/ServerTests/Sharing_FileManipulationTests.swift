@@ -449,7 +449,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     func testThatWriteSharingUserCanDownloadAFile() {
         downloadFileBySharingUser(withPermission: .write)
     }
-    
+
     func testThatWriteSharingUserCanDownloadDeleteAFile() {
         downloadDeleteFileBySharingUser(withPermission: .write)
     }
@@ -523,7 +523,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     func testThatSharingUserCanDownloadSharingUserFile() {
         sharingUserCanDownloadSharingUserFile()
     }
-    
+
     // After accepting a sharing invitation as an owning user (e.g., Google or Dropbox user), make sure auth tokens are stored, for that redeeming user, so that we can access cloud storage of that user.
     func testCanAccessCloudStorageOfRedeemingUser() {
         var sharingUserId: UserId!
@@ -663,7 +663,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         let result = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningUserWhenCreating.type, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:actualSharingGroupUUID), masterVersion: 1, errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
         XCTAssert(result == nil)
     }
-    
+
+#if false
     // Similar to that above, but the non-owning, sharing user downloads a file-- that was owned by a third user, that is still on the system, and was in the same sharing group.
     func testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks() {
         var actualSharingGroupUUID:String!
@@ -802,6 +803,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request)
     }
+#endif
 }
 
 extension Sharing_FileManipulationTests {
@@ -815,8 +817,6 @@ extension Sharing_FileManipulationTests {
             ("testThatV0FileOwnerRemainsFileOwner", testThatV0FileOwnerRemainsFileOwner),
             ("testUploadDeletionWithDifferentV0OwnersWorks",
                 testUploadDeletionWithDifferentV0OwnersWorks),
-            ("testUploadByOwningSharingUserThenDownloadByBothWorks",
-                testUploadByOwningSharingUserThenDownloadByBothWorks),
             ("testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks", testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks),
             ("testUploadDeletionForNonRootOwningUserWorks", testUploadDeletionForNonRootOwningUserWorks),
             ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
@@ -828,16 +828,21 @@ extension Sharing_FileManipulationTests {
             ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
             ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
             ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile),
+
+            ("testUploadByOwningSharingUserThenDownloadByBothWorks",
+                testUploadByOwningSharingUserThenDownloadByBothWorks),
             ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser),
             ("testUploadByOwningSharingUserAfterInvitingUserDeletedWorks",
                 testUploadByOwningSharingUserAfterInvitingUserDeletedWorks),
             ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone",
                 testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone),
+/*
             ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
                 testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks),
             ("testThatUploadForSecondSharingGroupWorks", testThatUploadForSecondSharingGroupWorks),
             ("testThatDoneUploadsForSecondSharingGroupWorks", testThatDoneUploadsForSecondSharingGroupWorks),
             ("testThatDownloadForSecondSharingGroupWorks", testThatDownloadForSecondSharingGroupWorks)
+*/
         ]
     }
     

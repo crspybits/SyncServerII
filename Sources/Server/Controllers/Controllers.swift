@@ -81,6 +81,7 @@ public class RequestProcessingParameters {
     let profileCreds: Account?
     
     let userProfile: UserProfile?
+    let accountProperties:AccountManager.AccountProperties?
     let currentSignedInUser:User?
     let db:Database!
     var repos:Repositories!
@@ -97,13 +98,14 @@ public class RequestProcessingParameters {
     let accountDelegate: AccountDelegate
     let completion: (Response)->()
     
-    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, accountDelegate: AccountDelegate, completion: @escaping (Response)->()) {
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountManager.AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, accountDelegate: AccountDelegate, completion: @escaping (Response)->()) {
         self.request = request
         self.ep = ep
         self.creds = creds
         self.effectiveOwningUserCreds = effectiveOwningUserCreds
         self.profileCreds = profileCreds
         self.userProfile = userProfile
+        self.accountProperties = accountProperties
         self.currentSignedInUser = currentSignedInUser
         self.db = db
         self.repos = repos

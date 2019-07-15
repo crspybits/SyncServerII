@@ -267,11 +267,26 @@ class FileIndexRepository : Repository, RepositoryLookup {
         return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.lastUploadedCheckSum == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
     }
     
+    enum AddFileIndexResponse: RetryRequest {
+        case success(uploadId: Int64)
+        case error
+        case deadlock
+        
+        var shouldRetry: Bool {
+            if case .deadlock = self {
+                return true
+            }
+            else {
+                return false
+            }
+        }
+    }
+    
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
-    func add(fileIndex:FileIndex) -> Int64? {
+    func add(fileIndex:FileIndex) -> AddFileIndexResponse {
         if haveNilFieldForAdd(fileIndex: fileIndex) {
             Log.error("One of the model values was nil: \(fileIndex)")
-            return nil
+            return .error
         }
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
@@ -289,12 +304,15 @@ class FileIndexRepository : Repository, RepositoryLookup {
         let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.lastUploadedCheckSumKey), \(FileIndex.sharingGroupUUIDKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), '\(fileIndex.lastUploadedCheckSum!)', '\(fileIndex.sharingGroupUUID!)' \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
         
         if db.query(statement: query) {
-            return db.lastInsertId()
+            return .success(uploadId: db.lastInsertId())
+        }
+        else if db.errorCode() == Database.deadlockError {
+            return .deadlock
         }
         else {
             let error = db.error
             Log.error("Could not insert row into \(tableName): \(error)")
-            return nil
+            return .error
         }
     }
     
@@ -552,8 +570,14 @@ class FileIndexRepository : Repository, RepositoryLookup {
                         return
                     }
                     
-                    let fileIndexId = self.add(fileIndex: fileIndex)
-                    if fileIndexId == nil {
+                    let result = self.retry(request: {
+                        self.add(fileIndex: fileIndex)
+                    })
+                    
+                    switch result {
+                    case .success:
+                        break
+                    case .deadlock, .error:
                         Log.error("Could not add new FileIndex!")
                         error = true
                         return

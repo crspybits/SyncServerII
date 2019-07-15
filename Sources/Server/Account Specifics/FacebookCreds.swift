@@ -102,17 +102,19 @@ class FacebookCreds : AccountAPICall,  Account {
     func merge(withNewer account:Account) {
     }
     
-    // Only updates the user profile if the request header has the Account's specific token.
-    static func updateUserProfile(_ userProfile:UserProfile, fromRequest request:RouterRequest) {
-        userProfile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey]
+    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
+        if let accessToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+            return [ServerConstants.HTTPOAuth2AccessTokenKey: accessToken]
+        } else {
+            return [:]
+        }
     }
     
-    static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        
+    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         let creds = FacebookCreds()
         creds.accountCreationUser = user
         creds.delegate = delegate
-        creds.accessToken = profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
+        creds.accessToken = properties.properties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
         return creds
     }
     

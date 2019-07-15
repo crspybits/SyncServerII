@@ -14,7 +14,7 @@ user1Id = 1
 user2Id = 2
 
 numberOfSharingGroupsPerUser = 5
-numberOfCommonSharingGroups = 2
+numberOfCommonSharingGroups = 0 # across users
 
 user1SharingGroups = []
 user2SharingGroups = []
@@ -329,8 +329,7 @@ class MyTaskSet(TaskSet):
             
         return True
     
-    @task(10)
-    def downloadFile(self):
+    def downloadFileMain(self):
         deviceUUID = str(uuid.uuid1())
         userId = randomUser()
         sharingGroupUUID = sharingGroupForUser(userId)
@@ -359,16 +358,24 @@ class MyTaskSet(TaskSet):
             return
 
         print("SUCCESS DownloadFile GET: User: " + str(userId))
-
-    @task(20)
-    def index(self):
+    
+    def indexMain(self):
         userId = randomUser()
         accessToken = accessTokenForUser(userId)
         self.generalIndex(accessToken)
         print("SUCCESS on Index: User: " + str(userId))
+    
+    def indexSharingGroupMain(self):
+        deviceUUID = str(uuid.uuid1())
+        userId = randomUser()
+        sharingGroupUUID = sharingGroupForUser(userId)
+        accessToken = accessTokenForUser(userId)
+        indexResponse = self.indexSharingGroup(accessToken, deviceUUID, sharingGroupUUID)
+        if indexResponse is None:
+            print("Error: Could not get index for indexSharingGroupMain.")
+            return
 
-    @task(3)
-    def uploadFile(self):
+    def uploadFileMain(self):
         userId = randomUser()
         accessToken = accessTokenForUser(userId)
         sharingGroupUUID = sharingGroupForUser(userId)
@@ -377,9 +384,8 @@ class MyTaskSet(TaskSet):
             print("Error on UploadFile")
             return
         print("SUCCESS on UploadFile: User: " + str(userId))
-
-    @task(1)
-    def deleteFile(self):
+        
+    def deleteFileMain(self):
         userId = randomUser()
         sharingGroupUUID = sharingGroupForUser(userId)
         accessToken = accessTokenForUser(userId)
@@ -410,6 +416,26 @@ class MyTaskSet(TaskSet):
             return
 
         print("SUCCESS on DeleteFile: User: " + str(userId))
+
+    @task(5)
+    def index(self):
+        self.indexMain()
+
+    @task(5)
+    def indexSharingGroupTask(self):
+        self.indexSharingGroupMain()
+    
+    @task(0)
+    def downloadFile(self):
+        self.downloadFileMain()
+
+    @task(1)
+    def uploadFile(self):
+        self.uploadFileMain()
+
+    @task(0)
+    def deleteFile(self):
+        self.deleteFileMain()
 
 class MyLocust(HttpLocust):
     task_set = MyTaskSet

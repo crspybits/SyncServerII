@@ -76,9 +76,29 @@ class GoogleCreds : AccountAPICall, Account {
         baseURL = "www.googleapis.com"
     }
     
-    static func updateUserProfile(_ userProfile: UserProfile, fromRequest request: RouterRequest) {
-        userProfile.extendedProperties[ServerConstants.HTTPOAuth2AuthorizationCodeKey] = request.headers[ServerConstants.HTTPOAuth2AuthorizationCodeKey]
-        userProfile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey]
+    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
+        var result = [String: Any]()
+        
+        if let authCode = request.headers[ServerConstants.HTTPOAuth2AuthorizationCodeKey] {
+            result[ServerConstants.HTTPOAuth2AuthorizationCodeKey] = authCode
+        }
+        
+        if let accessToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+            result[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
+        }
+        
+        return result
+    }
+    
+    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+        let creds = GoogleCreds()
+        creds.accountCreationUser = user
+        creds.delegate = delegate
+        creds.accessToken =
+            properties.properties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
+        creds.serverAuthCode =
+            properties.properties[ServerConstants.HTTPOAuth2AuthorizationCodeKey] as? String
+        return creds
     }
     
     static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
@@ -127,18 +147,6 @@ class GoogleCreds : AccountAPICall, Account {
         jsonDict[GoogleCreds.serverAuthCodeKey] = self.serverAuthCode
 
         return JSONExtras.toJSONString(dict: jsonDict)
-    }
-    
-    static func fromProfile(profile:UserProfile, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        
-        let creds = GoogleCreds()
-        creds.accountCreationUser = user
-        creds.delegate = delegate
-        creds.accessToken =
-            profile.extendedProperties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
-        creds.serverAuthCode =
-            profile.extendedProperties[ServerConstants.HTTPOAuth2AuthorizationCodeKey] as? String
-        return creds
     }
     
     static let googleAPIAccessTokenKey = "access_token"

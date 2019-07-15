@@ -25,18 +25,7 @@ extension FileController {
         case errorCleanup(message: String, cleanup: Cleanup)
     }
 
-    private func finish(_ info: Info, params:RequestProcessingParameters) {
-        // This is just a convenience so I don't have to pass the sharingGroupUUID on each call to `finish`-- It won't fail since we already did this befe.
-        guard let uploadRequest = params.request as? UploadFileRequest,
-            let sharingGroupUUID = uploadRequest.sharingGroupUUID else {
-            let message = "Should never get here: We already did this before."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-    
-        Lock.unlock(db: params.db, sharingGroupUUID: sharingGroupUUID)
-        
+    private func finish(_ info: Info, params:RequestProcessingParameters) {        
         switch info {
         case .errorResponse(let response):
             params.completion(response)
@@ -66,7 +55,7 @@ extension FileController {
         
         // 6/23/19; Putting a lock here because of a deadlock issue. See [1].
         
-        guard Lock.lock(db: params.db, sharingGroupUUID: uploadRequest.sharingGroupUUID) else {
+        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: uploadRequest.sharingGroupUUID) else {
             finish(.errorMessage("Failed to get lock for: \(String(describing: uploadRequest.sharingGroupUUID))"), params: params)
             return
         }
@@ -230,12 +219,7 @@ extension FileController {
                 return
             }
             
-            // Releasing the lock because we don't want to hold it for the arbitrarily long duration of the upload. This will mean someone else could sneek in and upload the next version of the same file while we don't have the lock. Not sure what to do about that tho.
-            guard Lock.unlock(db: params.db, sharingGroupUUID: uploadRequest.sharingGroupUUID) else {
-                let message = "Could not release lock!"
-                finish(.errorMessage(message), params: params)
-                return
-            }
+            // Lock will be held for the duration of the upload. Not the best, but don't have a better mechanism yet.
             
             Log.info("File being sent to cloud storage: \(cloudFileName)")
 
@@ -248,12 +232,8 @@ extension FileController {
                 case .success(let checkSum):
                     Log.debug("File with checkSum \(checkSum) successfully uploaded!")
                     
-                    // Reacquire the lock
-                    guard Lock.lock(db: params.db, sharingGroupUUID: uploadRequest.sharingGroupUUID) else {
-                        self.finish(.errorCleanup(message: "Failed to get lock after upload", cleanup: cleanup), params: params)
-                        return
-                    }
-                    
+                    /* 6/29/19; Doesn't seem like we need to acquire the lock again. We just need to add an entry into the Upload table. And what will it help to have the lock for that? Plus, I'm running into locking problems if I have the lock here. My hypothesis is: The Upload somehow acquires a lock that is needed by the DoneUploads. While the Upload is "uploading" its file, the DoneUploads acquires the GET_LOCK but is blocked on the other lock that the Upload has. The Upload tries to get the GET_LOCK once it finishes its upload, but can't since the DoneUploads has it. The Upload times out on its GET_LOCK request and fails. The DoneUploads completes, having gotten the lock that the Upload had.
+                    */
                     self.addUploadEntry(newFile: newFile, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest)
                     
                 case .accessTokenRevokedOrExpired:

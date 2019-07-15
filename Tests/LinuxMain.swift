@@ -36,5 +36,6 @@ XCTMain([
     testCase(SharingGroupsControllerTests.allTests),
     testCase(SharingAccountsController_GetSharingInvitationInfo.allTests),
     testCase(TestingStorageTests.allTests),
-    testCase(TestingStorageLiveTests.allTests)
+    testCase(TestingStorageLiveTests.allTests),
+    testCase(SpecificDatabaseTests_SharingGroupLock.allTests)
 ])
