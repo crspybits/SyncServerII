@@ -175,7 +175,7 @@ extension FileController {
                 ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db, delegate: params.accountDelegate)
             }
             
-            ownerCloudStorage = ownerAccount.cloudStorage
+            ownerCloudStorage = ownerAccount?.cloudStorage
             guard ownerCloudStorage != nil && ownerAccount != nil else {
                 let message = "Could not obtain creds for v0 file: Assuming this means owning user is no longer on system."
                 Log.error(message)
@@ -189,7 +189,7 @@ extension FileController {
             // Check to see if the file is present already-- i.e., if has been uploaded already.
             let key = UploadRepository.LookupKey.primaryKey(fileUUID: uploadRequest.fileUUID, userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
             let lookupResult = params.repos.upload.lookup(key: key, modelInit: Upload.init)
-        
+                    
             switch lookupResult {
             case .found(let model):
                 Log.info("File was already present: Not uploading again.")

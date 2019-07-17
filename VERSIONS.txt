@@ -12,8 +12,8 @@ Version 0.25.0
 		https://github.com/IBM-Swift/swift-ubuntu-docker
 	* Working on other deadlock issues: With file uploads, master version and device UUID.
 		And with timeout issues.
-	* Added in TestingStorage a form of CloudStorage which doesn't actually interact with cloud storage, but rather is suited for load testing-- so as to not exceed limits with Google Drive.
-	* Removed my usage of Kitura Credentials UserProfile extendedProperties. It looks like it was causing crashes in load testing because my usage wasn't thread safe. Plus, I found a better method to bridge data from the request.
+	* Added TestingStorage a form of CloudStorage which doesn't actually interact with cloud storage, but rather is suited for load testing-- so as to not exceed limits with Google Drive.
+	* Removed my usage of Kitura Credentials UserProfile extendedProperties. It looks like it was causing crashes in load testing because my usage wasn't thread safe. Plus, I found a better method to bridge data from the request. See also https://forums.swift.org/t/kitura-perfect-mysql-server-crash-double-free-or-corruption-prev/26740/10
 
 Version 0.24.0 (4/15/19)
 	* Added url mime type.

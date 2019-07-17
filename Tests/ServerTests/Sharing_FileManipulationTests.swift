@@ -225,7 +225,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         XCTAssert(fileIndex[0].deleted == true)
     }
-    
+
     // MARK: Read sharing user
     func testThatReadSharingUserCannotUploadAFile() {
         let sharingGroupUUID = UUID().uuidString
@@ -568,6 +568,33 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    // User A invites B. B has cloud storage. B uploads. It goes to B's storage. Both A and B can download the file.
+    func testUploadByOwningSharingUserThenDownloadByBothWorks() {
+        let sharingAccount: TestAccount = .secondaryOwningAccount
+        let sharingGroupUUID = UUID().uuidString
+        guard let result = uploadFileBySharingUser(withPermission: .write, owningAccount: .primaryOwningAccount, sharingUser: sharingAccount, sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        makeSureSharingOwnerOwnsUploadedFile(result: result)
+        
+        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+
+        guard let _ = downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion), uploadFileRequest: result.request) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: Int(masterVersion), uploadFileRequest: result.request) else {
+            XCTFail()
+            return
+        }
+    }
+    
     // Add a regular user. Invite a sharing user. Delete that regular user. See what happens if the sharing user tries to upload a file.
     func testUploadByOwningSharingUserAfterInvitingUserDeletedWorks() {
         var actualSharingGroupUUID:String!
@@ -603,34 +630,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
     }
-    
-    // User A invites B. B has cloud storage. B uploads. It goes to B's storage. Both A and B can download the file.
-    func testUploadByOwningSharingUserThenDownloadByBothWorks() {
-        let sharingAccount: TestAccount = .secondaryOwningAccount
-        let sharingGroupUUID = UUID().uuidString
-        guard let result = uploadFileBySharingUser(withPermission: .write, owningAccount: .primaryOwningAccount, sharingUser: sharingAccount, sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        makeSureSharingOwnerOwnsUploadedFile(result: result)
-        
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
 
-        guard let _ = downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion), uploadFileRequest: result.request) else {
-            XCTFail()
-            return
-        }
-        
-        guard let _ = downloadTextFile(testAccount: .primaryOwningAccount, masterVersionExpectedWithDownload: Int(masterVersion), uploadFileRequest: result.request) else {
-            XCTFail()
-            return
-        }
-    }
-    
     func testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone() {
         var actualSharingGroupUUID:String!
         
@@ -659,12 +659,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             }
         }
         
+
         // Attempting to upload a file by our sharing user-- this should fail with HTTP 410 (Gone) because the sharing user does not own cloud storage.
         let result = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningUserWhenCreating.type, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:actualSharingGroupUUID), masterVersion: 1, errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
         XCTAssert(result == nil)
     }
 
-#if false
     // Similar to that above, but the non-owning, sharing user downloads a file-- that was owned by a third user, that is still on the system, and was in the same sharing group.
     func testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks() {
         var actualSharingGroupUUID:String!
@@ -803,7 +803,6 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request)
     }
-#endif
 }
 
 extension Sharing_FileManipulationTests {
@@ -828,7 +827,6 @@ extension Sharing_FileManipulationTests {
             ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
             ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
             ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile),
-
             ("testUploadByOwningSharingUserThenDownloadByBothWorks",
                 testUploadByOwningSharingUserThenDownloadByBothWorks),
             ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser),
@@ -836,13 +834,11 @@ extension Sharing_FileManipulationTests {
                 testUploadByOwningSharingUserAfterInvitingUserDeletedWorks),
             ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone",
                 testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone),
-/*
             ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
                 testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks),
             ("testThatUploadForSecondSharingGroupWorks", testThatUploadForSecondSharingGroupWorks),
             ("testThatDoneUploadsForSecondSharingGroupWorks", testThatDoneUploadsForSecondSharingGroupWorks),
             ("testThatDownloadForSecondSharingGroupWorks", testThatDownloadForSecondSharingGroupWorks)
-*/
         ]
     }
     

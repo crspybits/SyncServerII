@@ -425,15 +425,15 @@ class MyTaskSet(TaskSet):
     def indexSharingGroupTask(self):
         self.indexSharingGroupMain()
     
-    @task(0)
+    @task(3)
     def downloadFile(self):
         self.downloadFileMain()
 
-    @task(1)
+    @task(2)
     def uploadFile(self):
         self.uploadFileMain()
 
-    @task(0)
+    @task(1)
     def deleteFile(self):
         self.deleteFileMain()
 
