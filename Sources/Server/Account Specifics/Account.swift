@@ -115,7 +115,7 @@ extension Account {
     var cloudStorage:CloudStorage? {
 #if DEBUG
         if let loadTesting = Constants.session.loadTestingCloudStorage, loadTesting {
-            return TestingStorage()
+            return MockStorage()
         }
         else {
             return self as? CloudStorage

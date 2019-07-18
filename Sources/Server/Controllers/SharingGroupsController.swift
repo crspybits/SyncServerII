@@ -242,12 +242,6 @@ extension SharingGroupsController {
             return false
         }
         
-        guard case .success = params.repos.sharingGroupLock.add(sharingGroupUUID: sharingGroupUUID) else {
-            let message = "Failed on adding new sharing group lock."
-            Log.error(message)
-            return false
-        }
-        
         return true
     }
 }

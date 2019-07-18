@@ -51,9 +51,6 @@
     },
     {
       "name": "TestingStorageLiveTests"
-    },
-    {
-      "name": "SpecificDatabaseTests_SharingGroupLock"
     }
   ],
   "google": [

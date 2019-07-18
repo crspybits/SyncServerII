@@ -359,13 +359,6 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: sharingInvitation.sharingGroupUUID) else {
-            let message = "Error acquiring lock: Thread.current: \(Thread.current)"
-            Log.debug(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         redeem(params: params, request: request, sharingInvitation: sharingInvitation, sharingInvitationKey: sharingInvitationKey) { response in
             params.completion(response)
         }

@@ -53,13 +53,6 @@ extension FileController {
             return
         }
         
-        // 6/23/19; Putting a lock here because of a deadlock issue. See [1].
-        
-        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: uploadRequest.sharingGroupUUID) else {
-            finish(.errorMessage("Failed to get lock for: \(String(describing: uploadRequest.sharingGroupUUID))"), params: params)
-            return
-        }
-        
         guard sharingGroupSecurityCheck(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params) else {
             finish(.errorMessage("Failed in sharing group security check."), params: params)
             return

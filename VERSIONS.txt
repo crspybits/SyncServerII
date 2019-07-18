@@ -2,17 +2,17 @@ SyncServer
 
 Version 0.25.0
 	* Now lower casing expected checksum value before check with the upload-- in case upload request leaves checksum in upper case.
-	* Load testing for server.
-	* Changed locking mechanism for requests. Removed ShortLocks table and relying on GET_LOCK/RELEASE_LOCK mySQL distributed locking mechanism.
+	* Locust load testing for server: Added locustfile.py
+	* Working on other deadlock issues: With file uploads, master version and device UUID.
+		And with timeout issues.
+	* Changed locking mechanism for requests. Removed ShortLocks table and relying on mySQL exclusive and shared locks for master version.
 	* Added debugging output for mySQL queries.
 	* Updating to Swift 5
 		Put in fixes in testing code for Swift 5.0.1 dateComponents bug:
 			https://stackoverflow.com/questions/56555005
 	* Have now switched over to using IBM-Kitura-based Docker images:
 		https://github.com/IBM-Swift/swift-ubuntu-docker
-	* Working on other deadlock issues: With file uploads, master version and device UUID.
-		And with timeout issues.
-	* Added TestingStorage a form of CloudStorage which doesn't actually interact with cloud storage, but rather is suited for load testing-- so as to not exceed limits with Google Drive.
+	* Added MockStorage, a form of CloudStorage which doesn't actually interact with cloud storage, but rather is suited for load testing-- so as to not exceed limits with Google Drive. This goes hand in hand with server configuration key "loadTestingCloudStorage".
 	* Removed my usage of Kitura Credentials UserProfile extendedProperties. It looks like it was causing crashes in load testing because my usage wasn't thread safe. Plus, I found a better method to bridge data from the request. See also https://forums.swift.org/t/kitura-perfect-mysql-server-crash-double-free-or-corruption-prev/26740/10
 
 Version 0.24.0 (4/15/19)

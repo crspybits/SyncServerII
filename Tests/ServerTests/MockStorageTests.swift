@@ -1,5 +1,5 @@
 //
-//  TestingStorageTests.swift
+//  MockStorageTests.swift
 //  ServerTests
 //
 //  Created by Christopher G Prince on 6/27/19.
@@ -8,9 +8,9 @@
 import XCTest
 @testable import Server
 
-class TestingStorageTests: XCTestCase, LinuxTestable {
+class MockStorageTests: XCTestCase, LinuxTestable {
     func testUploadFile() {
-        let storage = TestingStorage()
+        let storage = MockStorage()
         
         let exp = expectation(description: "upload")
         
@@ -29,7 +29,7 @@ class TestingStorageTests: XCTestCase, LinuxTestable {
     }
     
     func testDownloadFile() {
-        let storage = TestingStorage()
+        let storage = MockStorage()
         
         let exp = expectation(description: "download")
         
@@ -48,7 +48,7 @@ class TestingStorageTests: XCTestCase, LinuxTestable {
     }
 
     func testDeleteFile() {
-        let storage = TestingStorage()
+        let storage = MockStorage()
         
         let exp = expectation(description: "delete")
         
@@ -67,7 +67,7 @@ class TestingStorageTests: XCTestCase, LinuxTestable {
     }
     
     func testLookupFile() {
-        let storage = TestingStorage()
+        let storage = MockStorage()
         
         let exp = expectation(description: "lookup")
         
@@ -86,8 +86,8 @@ class TestingStorageTests: XCTestCase, LinuxTestable {
     }
 }
 
-extension TestingStorageTests {
-    static var allTests : [(String, (TestingStorageTests) -> () throws -> Void)] {
+extension MockStorageTests {
+    static var allTests : [(String, (MockStorageTests) -> () throws -> Void)] {
         return [
             ("testUploadFile", testUploadFile),
             ("testDownloadFile", testDownloadFile),
@@ -97,6 +97,6 @@ extension TestingStorageTests {
     }
     
     func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: TestingStorageTests.self)
+        linuxTestSuiteIncludesAllTests(testType: MockStorageTests.self)
     }
 }

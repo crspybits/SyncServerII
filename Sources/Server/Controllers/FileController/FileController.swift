@@ -115,13 +115,6 @@ class FileController : ControllerProtocol {
             return
         }
         
-        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: sharingGroupUUID) else {
-            let message = "Error acquiring lock!"
-            Log.debug(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         Controllers.getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
             
             let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)

@@ -1,5 +1,5 @@
 //
-//  TestingStorage.swift
+//  MockStorage.swift
 //  ServerPackageDescription
 //
 //  Created by Christopher G Prince on 6/27/19.
@@ -9,7 +9,7 @@ import Foundation
 
 // Stubs of the CloudStorage protocol for load testing so that I don't run into limits with particular cloud storage systems under higher loads.
 
-class TestingStorage: CloudStorage {
+class MockStorage: CloudStorage {
     let lowDuration: Int = 1
     let highDuration: Int = 20
     

@@ -171,12 +171,12 @@ class RequestHandler {
         case failure(FailureResult)
     }
     
-    enum PermissionsAndLockingResult {
-        case success(sharingGroupUUID: String?, lockedSharingGroup: Bool)
+    enum PermissionsResult {
+        case success(sharingGroupUUID: String?)
         case failure
     }
     
-    func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsAndLockingResult {
+    func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsResult {
         if let sharing = endpoint.sharing {
             // Endpoint uses sharing group. Must give sharingGroupUUID in request.
             
@@ -215,20 +215,10 @@ class RequestHandler {
                 return .failure
             }
             
-            if sharing.needsLock {
-                guard repositories.sharingGroupLock.lock(sharingGroupUUID: sharingGroupUUID) else {
-                    self.failWithError(message: "Error obtaining lock!")
-                    return .failure
-                }
- 
-                return .success(sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: true)
-            }
-            else {
-                return .success(sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: false)
-            }
+            return .success(sharingGroupUUID: sharingGroupUUID)
         }
         
-        return .success(sharingGroupUUID: nil, lockedSharingGroup: false)
+        return .success(sharingGroupUUID: nil)
     }
     
     // Starts a transaction, and calls the `dbOperations` closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.
@@ -316,7 +306,6 @@ class RequestHandler {
         }
     
         var sharingGroupUUID: String?
-        var lockedSharingGroup: Bool = false
 
         if authenticationLevel! == .secondary {
             // We have .secondary authentication-- i.e., we should have the user recorded in the database already.
@@ -350,8 +339,7 @@ class RequestHandler {
                 case .failure:
                     return
                     
-                case .success(sharingGroupUUID: let sgid, lockedSharingGroup: let locked):
-                    lockedSharingGroup = locked
+                case .success(sharingGroupUUID: let sgid):
                     sharingGroupUUID = sgid
                 }
                 
@@ -380,7 +368,7 @@ class RequestHandler {
             assert(authenticationLevel! == .none)
             
             dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
+                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
@@ -405,7 +393,7 @@ class RequestHandler {
             if let profileCreds = AccountManager.session.accountFromProperties(properties: accountProperties, user: credsUser, delegate: accountDelegate) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, lockedSharingGroup: lockedSharingGroup, processRequest: processRequest, handleResult: handleResult)
+                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
@@ -434,7 +422,7 @@ class RequestHandler {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountManager.AccountProperties?, sharingGroupUUID: String?, lockedSharingGroup: Bool, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountManager.AccountProperties?, sharingGroupUUID: String?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         

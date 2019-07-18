@@ -200,13 +200,6 @@ extension FileController {
             return
         }
         
-        guard params.repos.sharingGroupLock.lock(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID) else {
-            let message = "Error acquiring lock!"
-            Log.debug(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         let result = doInitialDoneUploads(params: params, doneUploadsRequest: doneUploadsRequest)
 
         guard case .success(let numberTransferred, let uploadDeletions, let staleVersionsToDelete) = result else {
