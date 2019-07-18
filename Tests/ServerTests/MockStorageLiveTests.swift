@@ -1,5 +1,5 @@
 //
-//  TestingStorageLiveTests.swift
+//  MockStorageLiveTests.swift
 //  ServerTests
 //
 //  Created by Christopher G Prince on 6/27/19.
@@ -11,7 +11,7 @@ import LoggerAPI
 import HeliumLogger
 import SyncServerShared
 
-class TestingStorageLiveTests: ServerTestCase, LinuxTestable {
+class MockStorageLiveTests: ServerTestCase, LinuxTestable {
     override func setUp() {
         super.setUp()
         Constants.session.loadTestingCloudStorage = true
@@ -69,8 +69,8 @@ class TestingStorageLiveTests: ServerTestCase, LinuxTestable {
     }
 }
 
-extension TestingStorageLiveTests {
-    static var allTests : [(String, (TestingStorageLiveTests) -> () throws -> Void)] {
+extension MockStorageLiveTests {
+    static var allTests : [(String, (MockStorageLiveTests) -> () throws -> Void)] {
         return [
             ("testUploadFile", testUploadFile),
             ("testDeleteFile", testDeleteFile),
@@ -79,6 +79,6 @@ extension TestingStorageLiveTests {
     }
     
     func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: TestingStorageLiveTests.self)
+        linuxTestSuiteIncludesAllTests(testType: MockStorageLiveTests.self)
     }
 }

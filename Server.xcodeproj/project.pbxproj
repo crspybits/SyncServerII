@@ -190,7 +190,7 @@
 		OBJ_1309 /* SpecificDatabaseTests_UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_105 /* SpecificDatabaseTests_UserRepository.swift */; };
 		OBJ_1310 /* TestAccounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_106 /* TestAccounts.swift */; };
 		OBJ_1311 /* TestFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_107 /* TestFiles.swift */; };
-		OBJ_1312 /* TestingStorageLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_108 /* TestingStorageLiveTests.swift */; };
+		OBJ_1312 /* MockStorageLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_108 /* MockStorageLiveTests.swift */; };
 		OBJ_1313 /* MockStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_109 /* MockStorageTests.swift */; };
 		OBJ_1314 /* UserControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_110 /* UserControllerTests.swift */; };
 		OBJ_1315 /* VersionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_111 /* VersionTests.swift */; };
@@ -1917,7 +1917,7 @@
 		OBJ_105 /* SpecificDatabaseTests_UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificDatabaseTests_UserRepository.swift; sourceTree = "<group>"; };
 		OBJ_106 /* TestAccounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAccounts.swift; sourceTree = "<group>"; };
 		OBJ_107 /* TestFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFiles.swift; sourceTree = "<group>"; };
-		OBJ_108 /* TestingStorageLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingStorageLiveTests.swift; sourceTree = "<group>"; };
+		OBJ_108 /* MockStorageLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStorageLiveTests.swift; sourceTree = "<group>"; };
 		OBJ_109 /* MockStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStorageTests.swift; sourceTree = "<group>"; };
 		OBJ_110 /* UserControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserControllerTests.swift; sourceTree = "<group>"; };
 		OBJ_111 /* VersionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionTests.swift; sourceTree = "<group>"; };
@@ -3760,7 +3760,7 @@
 				OBJ_105 /* SpecificDatabaseTests_UserRepository.swift */,
 				OBJ_106 /* TestAccounts.swift */,
 				OBJ_107 /* TestFiles.swift */,
-				OBJ_108 /* TestingStorageLiveTests.swift */,
+				OBJ_108 /* MockStorageLiveTests.swift */,
 				OBJ_109 /* MockStorageTests.swift */,
 				OBJ_110 /* UserControllerTests.swift */,
 				OBJ_111 /* VersionTests.swift */,
@@ -5119,7 +5119,7 @@
 				OBJ_1309 /* SpecificDatabaseTests_UserRepository.swift in Sources */,
 				OBJ_1310 /* TestAccounts.swift in Sources */,
 				OBJ_1311 /* TestFiles.swift in Sources */,
-				OBJ_1312 /* TestingStorageLiveTests.swift in Sources */,
+				OBJ_1312 /* MockStorageLiveTests.swift in Sources */,
 				OBJ_1313 /* MockStorageTests.swift in Sources */,
 				OBJ_1314 /* UserControllerTests.swift in Sources */,
 				OBJ_1315 /* VersionTests.swift in Sources */,
