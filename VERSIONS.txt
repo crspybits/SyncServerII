@@ -1,11 +1,12 @@
 SyncServer
 
-Version 0.25.0
+Version 0.25.0 (7/20/19)
 	* Now lower casing expected checksum value before check with the upload-- in case upload request leaves checksum in upper case.
 	* Locust load testing for server: Added locustfile.py
 	* Working on other deadlock issues: With file uploads, master version and device UUID.
 		And with timeout issues.
 	* Changed locking mechanism for requests. Removed ShortLocks table and relying on mySQL exclusive and shared locks for master version.
+		I believe my explicit locking mechanism, in addition to the intrinsic mySQL locks, were what were causing the deadlock issues I was running into.
 	* Added debugging output for mySQL queries.
 	* Updating to Swift 5
 		Put in fixes in testing code for Swift 5.0.1 dateComponents bug:
