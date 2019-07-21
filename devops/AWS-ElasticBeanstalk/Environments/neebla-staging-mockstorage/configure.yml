@@ -18,7 +18,17 @@ option_settings:
     InstanceType: t2.micro
     EC2KeyName: amazon1
   aws:autoscaling:asg:
-    MaxSize: '1'
+    MinSize: '1'
+    MaxSize: '10'
+  aws:autoscaling:trigger:
+    BreachDuration: 5
+    LowerBreachScaleIncrement: -1
+    UpperBreachScaleIncrement: 1
+    MeasureName: CPUUtilization
+    Unit: Percent
+    Statistic: Average
+    LowerThreshold: 30
+    UpperThreshold: 70
   aws:elasticbeanstalk:environment:
     EnvironmentType: LoadBalanced
     LoadBalancerType: classic
