@@ -204,7 +204,10 @@ class UserController : ControllerProtocol {
         }
         
         let deviceUUIDRepoKey = DeviceUUIDRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        guard case .removed(_) = params.repos.deviceUUID.remove(key: deviceUUIDRepoKey) else {
+        let removeResult = params.repos.deviceUUID.retry {
+            return params.repos.deviceUUID.remove(key: deviceUUIDRepoKey)
+        }
+        guard case .removed = removeResult else {
             let message = "Could not remove deviceUUID's for user!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -213,8 +216,11 @@ class UserController : ControllerProtocol {
         
         // When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
         
-        let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)        
-        guard case .removed(_) = params.repos.upload.remove(key: uploadRepoKey) else {
+        let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        let removeResult2 = params.repos.upload.retry {
+            return params.repos.upload.remove(key: uploadRepoKey)
+        }
+        guard case .removed = removeResult2 else {
             let message = "Could not remove upload files for user!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -232,11 +238,11 @@ class UserController : ControllerProtocol {
         
         // The user will no longer be part of any sharing groups
         let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        switch params.repos.sharingGroupUser.remove(key: sharingGroupUserKey) {
-        case .removed:
-            break
-        case .error(let error):
-            let message = "Could not remove sharing group references for user: \(error)"
+        let removeResult3 = params.repos.sharingGroupUser.retry {
+            return params.repos.sharingGroupUser.remove(key: sharingGroupUserKey)
+        }
+        guard case .removed = removeResult3 else {
+            let message = "Could not remove sharing group references for user: \(removeResult3)"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
@@ -256,11 +262,11 @@ class UserController : ControllerProtocol {
         // When removing an owning user: Also remove any sharing invitations that have that owning user in them-- this is just in case there are non-expired invitations from that sharing user. They will be invalid now.
         let sharingInvitationsKey = SharingInvitationRepository.LookupKey
             .owningUserId(params.currentSignedInUser!.userId)
-        switch params.repos.sharing.remove(key: sharingInvitationsKey) {
-        case .removed:
-            break
-        case .error(let error):
-            let message = "Could not remove sharing invitations for user: \(error)"
+        let removeResult4 = params.repos.sharing.retry {
+            return params.repos.sharing.remove(key: sharingInvitationsKey)
+        }
+        guard case .removed = removeResult4 else {
+            let message = "Could not remove sharing invitations for user: \(removeResult4)"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
@@ -268,7 +274,10 @@ class UserController : ControllerProtocol {
         
         // This has to be last-- we have to remove all references to the user first-- due to foreign key constraints.
         let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
-        guard case .removed(let numberRows) = params.repos.user.remove(key: userRepoKey), numberRows == 1 else {
+        let removeResult5 = params.repos.user.retry {
+            return params.repos.user.remove(key: userRepoKey)
+        }
+        guard case .removed(let numberRows) = removeResult5, numberRows == 1 else {
             let message = "Could not remove user!"
             Log.error(message)
             params.completion(.failure(.message(message)))

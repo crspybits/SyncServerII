@@ -139,9 +139,25 @@ class SharingGroupsController : ControllerProtocol {
         
         // Any users who were members of the sharing group should no longer be members.
         let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
-        switch params.repos.sharingGroupUser.remove(key: sharingGroupUserKey) {
+        let removeResult = params.repos.sharingGroupUser.retry {
+            return params.repos.sharingGroupUser.remove(key: sharingGroupUserKey)
+        }
+        switch removeResult {
         case .removed:
             break
+            
+        case .deadlock:
+            let message = "Could not remove sharing group user references: deadlock"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return false
+            
+        case .waitTimeout:
+            let message = "Could not remove sharing group user references: waitTimeout"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return false
+            
         case .error(let error):
             let message = "Could not remove sharing group user references: \(error)"
             Log.error(message)
@@ -204,7 +220,10 @@ class SharingGroupsController : ControllerProtocol {
         }
         
         let removalKey = SharingGroupUserRepository.LookupKey.primaryKeys(sharingGroupUUID: request.sharingGroupUUID, userId: params.currentSignedInUser!.userId)
-        guard case .removed(let numberRows) = params.repos.sharingGroupUser.remove(key: removalKey), numberRows == 1 else {
+        let removalResult = params.repos.sharingGroupUser.retry {
+            return params.repos.sharingGroupUser.remove(key: removalKey)
+        }
+        guard case .removed(let numberRows) = removalResult, numberRows == 1 else {
             let message = "Could not remove user from SharingGroup."
             Log.error(message)
             params.completion(.failure(.message(message)))

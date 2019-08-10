@@ -31,9 +31,24 @@ protocol Repository {
     func upcreate() -> Database.TableUpcreateResult
 }
 
-enum RepositoryRemoveResult {
+enum RepositoryRemoveResult: RetryRequest {
     case removed(numberRows:Int32)
     case error(String)
+    
+    case deadlock
+    case waitTimeout
+
+    var shouldRetry: Bool {
+        if case .deadlock = self {
+            return true
+        }
+        else if case .waitTimeout = self {
+            return true
+        }
+        else {
+            return false
+        }
+    }
 }
 
 enum RepositoryLookupResult {
@@ -67,6 +82,12 @@ extension RepositoryLookup {
             Log.info("\(initialMessage) from \(tableName): \(key)")
             
             return .removed(numberRows:Int32(numberRows))
+        }
+        else if db.errorCode() == Database.deadlockError {
+            return .deadlock
+        }
+        else if db.errorCode() == Database.lockWaitTimeout {
+            return .waitTimeout
         }
         else {
             let error = db.error

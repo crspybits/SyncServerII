@@ -149,7 +149,9 @@ class SharingAccountsController : ControllerProtocol {
         }
 
         if sharingInvitation.numberAcceptors == 1 {
-            let removalResult2 = params.repos.sharing.remove(key: sharingInvitationKey)
+            let removalResult2 = params.repos.sharing.retry {
+                return params.repos.sharing.remove(key: sharingInvitationKey)
+            }
             guard case .removed(let numberRemoved) = removalResult2, numberRemoved == 1 else {
                 let message = "Failed removing sharing invitation!"
                 Log.error(message)
@@ -337,8 +339,9 @@ class SharingAccountsController : ControllerProtocol {
         
         // Remove stale invitations.
         let removalKey = SharingInvitationRepository.LookupKey.staleExpiryDates
-        let removalResult = SharingInvitationRepository(params.db).remove(key: removalKey)
-        
+        let removalResult = params.repos.sharing.retry {
+            return params.repos.sharing.remove(key: removalKey)
+        }
         guard case .removed(_) = removalResult else {
             let message = "Failed removing stale sharing invitations"
             Log.error(message)
@@ -349,7 +352,7 @@ class SharingAccountsController : ControllerProtocol {
         // What I want to do at this point is to simultaneously and atomically, (a) lookup the sharing invitation, and (b) delete it. I believe that since (i) I'm using mySQL transactions, and (ii) InnoDb with a default transaction level of REPEATABLE READ, this should work by first doing the lookup, and then doing the delete.
         
         let sharingInvitationKey = SharingInvitationRepository.LookupKey.sharingInvitationUUID(uuid: request.sharingInvitationUUID)
-        let lookupResult = SharingInvitationRepository(params.db).lookup(key: sharingInvitationKey, modelInit: SharingInvitation.init)
+        let lookupResult = params.repos.sharing.lookup(key: sharingInvitationKey, modelInit: SharingInvitation.init)
         
         guard case .found(let model) = lookupResult,
             let sharingInvitation = model as? SharingInvitation else {

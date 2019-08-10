@@ -144,7 +144,10 @@ extension FileController {
 #if DEBUG
     func actuallyDeleteFileFromServer(key:FileIndexRepository.LookupKey, uploadDeletionRequest: Filenaming, fileIndexObj:FileIndex, params:RequestProcessingParameters) {
     
-        let result = params.repos.fileIndex.remove(key: key)
+        let result = params.repos.fileIndex.retry {
+            return params.repos.fileIndex.remove(key: key)
+        }
+        
         switch result {
         case .removed(numberRows: let numberRows):
             if numberRows != 1 {
@@ -153,6 +156,18 @@ extension FileController {
                 params.completion(.failure(.message(message)))
                 return
             }
+            
+        case .deadlock:
+            let message = "Error deleting from FileIndex: deadlock"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        
+        case .waitTimeout:
+            let message = "Error deleting from FileIndex: waitTimeout"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
             
         case .error(let error):
             let message = "Error deleting from FileIndex: \(error)"

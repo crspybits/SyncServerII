@@ -155,13 +155,27 @@ extension FileController {
         // How could this happen?
         // 9/23/18; It could have been a race condition across test cases with the same device UUID and user. I'm now adding in a sharing group UUID qualifier, so I wonder if this will solve that problem too?
         
-        switch params.repos.upload.remove(key: filesForUserDevice) {
+        let removalResult = params.repos.upload.retry {
+            return params.repos.upload.remove(key: filesForUserDevice)
+        }
+        
+        switch removalResult {
         case .removed(let numberRows):
             if numberRows != numberTransferred {
                 let message = "Number rows removed from Upload was \(numberRows) but should have been \(String(describing: numberTransferred))!"
                 Log.error(message)
                 return .doCompletion(.failure(.message(message)))
             }
+        
+        case .deadlock:
+            let message = "Failed removing rows from Upload: deadlock!"
+            Log.error(message)
+            return .doCompletion(.failure(.message(message)))
+        
+        case .waitTimeout:
+            let message = "Failed removing rows from Upload: wait timeout!"
+            Log.error(message)
+            return .doCompletion(.failure(.message(message)))
             
         case .error(_):
             let message = "Failed removing rows from Upload!"
