@@ -84,6 +84,7 @@ done < "${SERVER_JSON}"
 mv -f tmp/Server.json.config .ebextensions
 cp -f raw.materials/SyncServer.ngnix.config .ebextensions
 cp -f raw.materials/SyncServer.logging.config .ebextensions
+cp -f raw.materials/cloudwatch.config .ebextensions
 
 if [ -e ${ZIPFILE} ]; then
 	echo "Removing old ${ZIPFILE}"
