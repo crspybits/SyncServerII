@@ -1,6 +1,6 @@
 SyncServer
 
-Version 0.25.1
+Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.
 	* Adding CloudWatch agent into Elastic Beanstalk deployment.
 		This seems necessary to monitor % memory utilization of the EC2 instance, which load testing suggests is an important variable.
