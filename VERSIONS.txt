@@ -4,7 +4,7 @@ Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.
 	* Adding CloudWatch agent into Elastic Beanstalk deployment.
 		This seems necessary to monitor % memory utilization of the EC2 instance, which load testing suggests is an important variable.
-	* Current testing with SyncServerII has taken place with v5.7.23 of mySQL. This version seems necessary. I did some load testing on AWS RDS with v5.7.22 and ran into long request latencies (averaging 82.9s). NOTE: To deploy this to production, I'm going to have to update the production mySQL RDS to v5.7.23.
+	* Current testing with SyncServerII has taken place with v5.7.23 of mySQL. This version seems necessary. I did some load testing on AWS RDS with v5.7.22 and ran into long request latencies (averaging 82.9s). NOTE: To deploy this to production, I'm going to have to update the production mySQL RDS to v5.7.23. [8/31/19: Note that the long latencies seem actually to do with the type of EC2 instance being used for the server-- t2.micro, which are burstable, and can have CPU throttling.]
 
 Version 0.25.0 (7/20/19)
 	* Now lower casing expected checksum value before check with the upload-- in case upload request leaves checksum in upper case.
