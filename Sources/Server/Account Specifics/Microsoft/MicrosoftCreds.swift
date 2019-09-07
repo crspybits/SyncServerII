@@ -29,11 +29,11 @@ class MicrosoftCreds : AccountAPICall, Account {
         baseURL = ""
     }
     
-    func toJSON(userType: UserType) -> String? {
+    func toJSON() -> String? {
         return nil
     }
     
-    func needToGenerateTokens(userType: UserType, dbCreds: Account?) -> Bool {
+    func needToGenerateTokens(dbCreds: Account?) -> Bool {
         return false
     }
     

@@ -37,10 +37,10 @@ protocol Account {
     // Currently assuming all Account's use access tokens.
     var accessToken: String! {get set}
     
-    func toJSON(userType: UserType) -> String?
+    func toJSON() -> String?
     
     // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
-    func needToGenerateTokens(userType:UserType, dbCreds:Account?) -> Bool
+    func needToGenerateTokens(dbCreds:Account?) -> Bool
     
     // Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
     func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->())
@@ -77,9 +77,9 @@ extension Account {
         return cloudFolderName
     }
     
-    func generateTokensIfNeeded(userType:UserType, dbCreds:Account?, routerResponse:RouterResponse, success:@escaping ()->(), failure: @escaping ()->()) {
+    func generateTokensIfNeeded(dbCreds:Account?, routerResponse:RouterResponse, success:@escaping ()->(), failure: @escaping ()->()) {
     
-        if needToGenerateTokens(userType: userType, dbCreds: dbCreds) {
+        if needToGenerateTokens(dbCreds: dbCreds) {
             generateTokens(response: routerResponse) { error in
                 if error == nil {
                     success()

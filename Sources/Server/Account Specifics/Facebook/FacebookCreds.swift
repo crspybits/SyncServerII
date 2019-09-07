@@ -37,15 +37,13 @@ class FacebookCreds : AccountAPICall,  Account {
     }
     
     // There is no need to put any tokens into the database for Facebook. We don't need to access Facebook creds when the mobile user is offline, and this would just make an extra security issue.
-    func toJSON(userType: UserType) -> String? {
+    func toJSON() -> String? {
         let jsonDict = [String:String]()
         return JSONExtras.toJSONString(dict: jsonDict)
     }
     
     // We're using token generation with Facebook to exchange a short-lived access token for a long-lived one. See https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension and https://stackoverflow.com/questions/37674620/do-facebook-has-a-refresh-token-of-oauth/37683233
-    func needToGenerateTokens(userType:UserType, dbCreds:Account? = nil) -> Bool {
-        assert(userType == .sharing)
-    
+    func needToGenerateTokens(dbCreds:Account? = nil) -> Bool {    
         // 11/5/17; See SharingAccountsController.swift comment with the same date for the reason for this conditional compilation. When running the server XCTest cases, make sure to turn on this flag.
 #if DEVTESTING
         return false

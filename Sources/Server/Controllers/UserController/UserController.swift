@@ -84,7 +84,7 @@ class UserController : ControllerProtocol {
         user.username = params.userProfile!.displayName
         user.accountType = accountScheme.accountName
         user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON(userType: userType)
+        user.creds = params.profileCreds!.toJSON()
         
         if params.profileCreds!.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
@@ -153,7 +153,7 @@ class UserController : ControllerProtocol {
         Log.info("About to check if we need to generate tokens...")
         
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
-        profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(dbCreds: nil, routerResponse: params.routerResponse, success: {
         
             UserController.createInitialFileForOwningUser(cloudFolderName: addUserRequest.cloudFolderName, cloudStorage: cloudStorageCreds) { creationResponse in
                 switch creationResponse {
@@ -181,15 +181,8 @@ class UserController : ControllerProtocol {
         let response = CheckCredsResponse()
         response.userId = params.currentSignedInUser!.userId
         
-        guard let accountScheme = params.accountProperties?.accountScheme else {
-            let message = "Could not get account scheme!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
-        params.profileCreds!.generateTokensIfNeeded(userType: accountScheme.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
+        params.profileCreds!.generateTokensIfNeeded(dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
             params.completion(.success(response))
         }, failure: {
             params.completion(.failure(nil))

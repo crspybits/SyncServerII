@@ -254,7 +254,7 @@ class SharingAccountsController : ControllerProtocol {
         
         user.accountType = accountScheme.accountName
         user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON(userType:accountScheme.userType)
+        user.creds = params.profileCreds!.toJSON()
         
         var createInitialOwningUserFile = false
         var owningUserId: UserId?
@@ -301,7 +301,7 @@ class SharingAccountsController : ControllerProtocol {
         var profileCreds = params.profileCreds!
         profileCreds.accountCreationUser = .userId(userId, accountScheme.userType)
         
-        profileCreds.generateTokensIfNeeded(userType: accountScheme.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(dbCreds: nil, routerResponse: params.routerResponse, success: {
             if createInitialOwningUserFile {
                 // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
                 guard let cloudStorageCreds = profileCreds.cloudStorage else {

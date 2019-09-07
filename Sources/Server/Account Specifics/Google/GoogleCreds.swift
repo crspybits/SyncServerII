@@ -138,7 +138,7 @@ class GoogleCreds : AccountAPICall, Account {
         return result
     }
     
-    func toJSON(userType: UserType) -> String? {
+    func toJSON() -> String? {
         var jsonDict = [String:String]()
         
         // 8/8/17; Only if a Google user is an owning user should we be storing creds info into the database. https://github.com/crspybits/SyncServerII/issues/13
@@ -153,10 +153,7 @@ class GoogleCreds : AccountAPICall, Account {
     static let googleAPIAccessTokenKey = "access_token"
     static let googleAPIRefreshTokenKey = "refresh_token"
     
-    func needToGenerateTokens(userType:UserType, dbCreds:Account? = nil) -> Bool {
-        // 7/6/18; Google Drive accounts are always owning.
-        assert(userType == .owning)
-
+    func needToGenerateTokens(dbCreds:Account? = nil) -> Bool {
         var result = serverAuthCode != nil
             
         // If no dbCreds, then we generate tokens.
