@@ -103,7 +103,7 @@ class SharingGroup : NSObject, Model {
         Log.debug("accountType: \(String(describing: accountType)) (expected to be nil for an owning user)")
         
         if let accountType = accountType {
-            clientGroup.cloudStorageType = AccountType(rawValue: accountType)?.cloudStorageType?.rawValue
+            clientGroup.cloudStorageType = AccountScheme(.accountName(accountType))?.cloudStorageType
         }
 
         return clientGroup
@@ -206,7 +206,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         for sharingGroup in sharingGroups {
             let owningUser = owningUsers.filter {sharingGroup.owningUserId != nil && $0.userId == sharingGroup.owningUserId}
             if owningUser.count == 1 {
-                sharingGroup.accountType = owningUser[0].accountType.rawValue
+                sharingGroup.accountType = owningUser[0].accountType
             }
         }
         

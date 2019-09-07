@@ -284,7 +284,7 @@ public class Controllers {
     
     static func getEffectiveOwningUserId(user: User, sharingGroupUUID: String, sharingGroupUserRepo: SharingGroupUserRepository) -> EffectiveOwningUserId {
         
-        if user.accountType.userType == .owning {
+        if AccountScheme(.accountName(user.accountType))?.userType == .owning {
             return .found(user.userId)
         }
         

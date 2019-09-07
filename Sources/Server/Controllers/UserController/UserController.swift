@@ -27,7 +27,7 @@ class UserController : ControllerProtocol {
     }
     
     // Looks up user in mySQL database. credsId is typically from userProfile.id
-    static func userExists(accountType: AccountType, credsId: String,  userRepository:UserRepository) -> UserStatus {
+    static func userExists(accountType: AccountScheme.AccountName, credsId: String,  userRepository:UserRepository) -> UserStatus {
         let result = userRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:credsId), modelInit: User.init)
         
         switch result {
@@ -51,8 +51,8 @@ class UserController : ControllerProtocol {
             return
         }
         
-        guard let accountType = params.accountProperties?.accountType else {
-            let message = "Could not get account type."
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
@@ -65,7 +65,7 @@ class UserController : ControllerProtocol {
             return
         }
         
-        let userExists = UserController.userExists(accountType: accountType, credsId: credsId, userRepository: params.repos.user)
+        let userExists = UserController.userExists(accountType: accountScheme.accountName, credsId: credsId, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
             break
@@ -82,7 +82,7 @@ class UserController : ControllerProtocol {
         // No database creds because this is a new user-- so use params.profileCreds
         let user = User()
         user.username = params.userProfile!.displayName
-        user.accountType = accountType
+        user.accountType = accountScheme.accountName
         user.credsId = params.userProfile!.id
         user.creds = params.profileCreds!.toJSON(userType: userType)
         
@@ -97,7 +97,7 @@ class UserController : ControllerProtocol {
             user.cloudFolderName = addUserRequest.cloudFolderName
         }
         
-        guard params.profileCreds?.accountType.userType == .owning else {
+        guard params.profileCreds?.accountScheme.userType == .owning else {
             let message = "Attempting to add a user with an Account that only allows sharing users!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -181,8 +181,15 @@ class UserController : ControllerProtocol {
         let response = CheckCredsResponse()
         response.userId = params.currentSignedInUser!.userId
         
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
-        params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.accountType.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
+        params.profileCreds!.generateTokensIfNeeded(userType: accountScheme.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
             params.completion(.success(response))
         }, failure: {
             params.completion(.failure(nil))
@@ -196,8 +203,8 @@ class UserController : ControllerProtocol {
         
         // I'm not going to remove the users files in their cloud storage. They own those. I think SyncServer doesn't have any business removing their files in this context.
         
-        guard let accountType = params.accountProperties?.accountType else {
-            let message = "Could not get accountType!"
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get accountScheme!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
@@ -273,7 +280,7 @@ class UserController : ControllerProtocol {
         }
         
         // This has to be last-- we have to remove all references to the user first-- due to foreign key constraints.
-        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
+        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountScheme.accountName, credsId: params.userProfile!.id)
         let removeResult5 = params.repos.user.retry {
             return params.repos.user.remove(key: userRepoKey)
         }

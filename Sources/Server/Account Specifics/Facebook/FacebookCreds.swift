@@ -15,12 +15,12 @@ import KituraNet
 class FacebookCreds : AccountAPICall,  Account {
     var accessToken: String!
     
-    static var accountType:AccountType {
-        return .Facebook
+    static var accountScheme:AccountScheme {
+        return .facebook
     }
     
-    var accountType:AccountType {
-        return FacebookCreds.accountType
+    var accountScheme:AccountScheme {
+        return FacebookCreds.accountScheme
     }
     
     var owningAccountsNeedCloudFolderName: Bool {

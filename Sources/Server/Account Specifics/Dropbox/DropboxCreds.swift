@@ -13,12 +13,12 @@ import LoggerAPI
 import KituraNet
 
 class DropboxCreds : AccountAPICall, Account {
-    static var accountType:AccountType {
-        return .Dropbox
+    static var accountScheme:AccountScheme {
+        return .dropbox
     }
     
-    var accountType:AccountType {
-        return DropboxCreds.accountType
+    var accountScheme:AccountScheme {
+        return DropboxCreds.accountScheme
     }
     
     var owningAccountsNeedCloudFolderName: Bool {
@@ -126,7 +126,7 @@ class DropboxCreds : AccountAPICall, Account {
         
         // Owning users have access token's in creds.
         switch user {
-        case .user(let user) where user.accountType.userType == .owning:
+        case .user(let user) where AccountScheme(.accountName(user.accountType))?.userType == .owning:
             fallthrough
         case .userId(_, .owning):
             try setProperty(jsonDict:jsonDict, key: accessTokenKey) { value in

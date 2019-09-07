@@ -20,7 +20,7 @@ class User : NSObject, Model {
     var username: String!
     
     static let accountTypeKey = "accountType"
-    var accountType: AccountType!
+    var accountType: AccountScheme.AccountName!
 
     // Account type specific id. E.g., for Google, this is the "sub".
     static let credsIdKey = "credsId"
@@ -46,7 +46,7 @@ class User : NSObject, Model {
                 username = newValue as! String?
                 
             case User.accountTypeKey:
-                accountType = newValue as! AccountType?
+                accountType = newValue as! AccountScheme.AccountName?
                 
             case User.credsIdKey:
                 credsId = newValue as! String?
@@ -73,23 +73,12 @@ class User : NSObject, Model {
     // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
     var credsObject:Account? {
         do {
-            let credsObj = try AccountManager.session.accountFromJSON(creds, accountType: accountType, user: .user(self), delegate: nil)
+            let credsObj = try AccountManager.session.accountFromJSON(creds, accountName: accountType, user: .user(self), delegate: nil)
             return credsObj
         }
         catch (let error) {
             Log.error("\(error)")
             return nil
-        }
-    }
-    
-    func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
-        switch propertyName {
-            case User.accountTypeKey:
-                return {(x:Any) -> Any? in
-                    return AccountType(rawValue: x as! String)
-                }
-            default:
-                return nil
         }
     }
 }
@@ -161,7 +150,7 @@ class UserRepository : Repository, RepositoryLookup {
     
     enum LookupKey : CustomStringConvertible {
         case userId(UserId)
-        case accountTypeInfo(accountType:AccountType, credsId:String)
+        case accountTypeInfo(accountType:AccountScheme.AccountName, credsId:String)
         
         var description : String {
             switch self {
@@ -193,7 +182,7 @@ class UserRepository : Repository, RepositoryLookup {
         
         if validateJSON {
             // Validate the JSON before we insert it.
-            guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountType: user.accountType, user: .user(user), delegate: nil) else {
+            guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountName: user.accountType, user: .user(user), delegate: nil) else {
                 Log.error("Invalid creds JSON: \(String(describing: user.creds)) for accountType: \(String(describing: user.accountType))")
                 return nil
             }
@@ -224,7 +213,7 @@ class UserRepository : Repository, RepositoryLookup {
             // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
             let oldCreds = user.credsObject!
             oldCreds.merge(withNewer: newCreds)
-            credsJSONString = oldCreds.toJSON(userType:user.accountType.userType)!
+            credsJSONString = oldCreds.toJSON(userType:newCreds.accountScheme.userType)!
             userId = user.userId
             
         case .userId(let id, let userType):

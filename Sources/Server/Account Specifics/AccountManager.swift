@@ -24,7 +24,7 @@ class AccountManager {
         var number = 0
         
         for accountType in accountTypes {
-            if accountType.accountType.userType == .owning {
+            if accountType.accountScheme.userType == .owning {
                 number += 1
             }
         }
@@ -43,7 +43,7 @@ class AccountManager {
     func addAccountType(_ newAccountType:Account.Type) {
         for accountType in accountTypes {
             // Don't add the same account type twice!
-            if newAccountType.accountType.toAuthTokenType() == accountType.accountType.toAuthTokenType() {
+            if newAccountType == accountType {
                 assert(false)
             }
         }
@@ -55,12 +55,11 @@ class AccountManager {
     enum UpdateUserProfileError : Error {
         case noAccountWithThisToken
         case noTokenFoundInHeaders
-        case badTokenFoundInHeaders
     }
     
     // Account specific properties obtained from a request.
     struct AccountProperties {
-        let accountType: AccountType
+        let accountScheme: AccountScheme
         let properties: [String: Any]
     }
     
@@ -72,13 +71,9 @@ class AccountManager {
             throw UpdateUserProfileError.noTokenFoundInHeaders
         }
         
-        guard let tokenType = ServerConstants.AuthTokenType(rawValue: tokenTypeString) else {
-            throw UpdateUserProfileError.badTokenFoundInHeaders
-        }
-        
         for accountType in accountTypes {
-            if tokenType == accountType.accountType.toAuthTokenType() {
-                return AccountProperties(accountType: AccountType.fromAuthTokenType(tokenType), properties: accountType.getProperties(fromRequest: request))
+            if tokenTypeString == accountType.accountScheme.authTokenType {
+                return AccountProperties(accountScheme: accountType.accountScheme, properties: accountType.getProperties(fromRequest: request))
             }
         }
         
@@ -87,9 +82,9 @@ class AccountManager {
     
     func accountFromProperties(properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         
-        let currentAccountType = properties.accountType
+        let currentAccountScheme = properties.accountScheme
         for accountType in accountTypes {
-            if accountType.accountType == currentAccountType {
+            if accountType.accountScheme == currentAccountScheme {
                 return accountType.fromProperties(properties, user: user, delegate: delegate)
             }
         }
@@ -97,15 +92,15 @@ class AccountManager {
         return nil
     }
     
-    func accountFromJSON(_ json:String, accountType type: AccountType, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
+    func accountFromJSON(_ json:String, accountName name: AccountScheme.AccountName, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
     
         for accountType in accountTypes {
-            if accountType.accountType == type {
+            if accountType.accountScheme.accountName == name {
                 return try accountType.fromJSON(json, user: user, delegate: delegate)
             }
         }
         
-        Log.error("Could not find accountType: \(type)")
+        Log.error("Could not find accountName: \(name)")
         
         return nil
     }

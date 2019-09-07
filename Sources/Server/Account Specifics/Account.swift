@@ -23,8 +23,8 @@ protocol AccountDelegate : class {
 }
 
 protocol Account {
-    static var accountType:AccountType {get}
-    var accountType:AccountType {get}
+    static var accountScheme:AccountScheme {get}
+    var accountScheme:AccountScheme {get}
     
     // Sharing always need to return false.
     // Owning accounts return true iff they need a cloud folder name (e.g., Google Drive).
@@ -126,56 +126,6 @@ extension Account {
     }
 }
 
-enum AccountType : String {
-    case Google
-    case Facebook
-    case Dropbox
-    
-    var userType: UserType {
-        switch self {
-        case .Google:
-            return .owning
-        case .Facebook:
-            return .sharing
-        case .Dropbox:
-            return .owning
-        }
-    }
-    
-    var cloudStorageType: CloudStorageType? {
-        switch self {
-        case .Google:
-            return .Google
-        case .Dropbox:
-            return .Dropbox
-        case .Facebook:
-            return nil
-        }
-    }
-    
-    func toAuthTokenType() -> ServerConstants.AuthTokenType {
-        switch self {
-            case .Google:
-                return .GoogleToken
-            case .Facebook:
-                return .FacebookToken
-            case .Dropbox:
-                return .DropboxToken
-        }
-    }
-    
-    static func fromAuthTokenType(_ authTokenType: ServerConstants.AuthTokenType) -> AccountType {
-        switch authTokenType {
-            case .GoogleToken:
-                return .Google
-            case .FacebookToken:
-                return .Facebook
-            case .DropboxToken:
-                return .Dropbox
-        }
-    }
-}
-
 enum APICallBody {
     case string(String)
     case data(Data)
@@ -194,7 +144,7 @@ enum GenerateTokensError : Swift.Error {
     case errorSavingCredsToDatabase
 }
 
-// I didn't just use a protocol extension for this because I want to be able to override `apiCall` and call "super to get the base definition.
+// I didn't just use a protocol extension for this because I want to be able to override `apiCall` and call "super" to get the base definition.
 class AccountAPICall {
     // Used by `apiCall` function to make a REST call to an Account service.
     var baseURL:String?

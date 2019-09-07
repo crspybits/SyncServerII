@@ -23,8 +23,15 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme from properties!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         // My logic here is that a sharing user should only be able to create files in the same sharing group(s) to which they were originally invited. The only way they'll get access to another sharing group is through invitation, not by creating new sharing groups.
-        guard params.currentSignedInUser!.accountType.userType == .owning else {
+        guard accountScheme.userType == .owning else {
             let message = "Current signed in user is not an owning user."
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -207,10 +214,17 @@ class SharingGroupsController : ControllerProtocol {
         else {
             params.completion(.failure(nil))
         }
+        
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme from properties!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
 
         // If we're going to remove the user from the sharing group, and this user is an owning user, we should mark any of their sharing users in that sharing group as removed.
         let resetKey = SharingGroupUserRepository.LookupKey.owningUserAndSharingGroup(owningUserId: params.currentSignedInUser!.userId, uuid: request.sharingGroupUUID)
-        if params.currentSignedInUser!.accountType.userType == .owning {
+        if accountScheme.userType == .owning {
             guard params.repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
                 let message = "Could not reset owning users ids."
                 Log.error(message)

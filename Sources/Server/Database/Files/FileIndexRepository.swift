@@ -666,15 +666,15 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
-
-            guard let rawAccountType = rowModel.accountType,
-                let accountType = AccountType(rawValue: rawAccountType),
-                let cloudStorageType = accountType.cloudStorageType else {
+            
+            guard let accountType = rowModel.accountType,
+                let accountScheme = AccountScheme(.accountName(accountType)),
+                let cloudStorageType = accountScheme.cloudStorageType else {
                     error = .error("Failed getting cloud storage type for fileUUID: \(String(describing: rowModel.fileUUID))")
                 return
             }
             
-            fileInfo.cloudStorageType = cloudStorageType.rawValue
+            fileInfo.cloudStorageType = cloudStorageType
 
             result.append(fileInfo)
         }

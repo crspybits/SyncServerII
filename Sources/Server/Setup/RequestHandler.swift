@@ -315,7 +315,7 @@ class RequestHandler {
                 return
             }
             
-            let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountProperties.accountType, credsId: profile!.id)
+            let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountProperties.accountScheme.accountName, credsId: profile!.id)
             let userLookup = self.repositories.user.lookup(key: key, modelInit: User.init)
             
             switch userLookup {
@@ -324,7 +324,7 @@ class RequestHandler {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountType: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: accountDelegate)
+                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: accountDelegate)
                 } catch (let error) {
                     errorString = "\(error)"  
                 }

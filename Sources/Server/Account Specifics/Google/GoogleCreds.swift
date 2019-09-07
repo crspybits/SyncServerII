@@ -57,12 +57,12 @@ class GoogleCreds : AccountAPICall, Account {
         return true
     }
     
-    static var accountType:AccountType {
-        return .Google
+    static var accountScheme:AccountScheme {
+        return .google
     }
     
-    var accountType:AccountType {
-        return GoogleCreds.accountType
+    var accountScheme:AccountScheme {
+        return GoogleCreds.accountScheme
     }
 
     weak var delegate:AccountDelegate?
@@ -112,8 +112,9 @@ class GoogleCreds : AccountAPICall, Account {
         result.accountCreationUser = user
         
         // Only owning users have access token's in creds. Sharing users have empty creds stored in the database.
+        
         switch user {
-        case .user(let user) where user.accountType.userType == .owning:
+        case .user(let user) where AccountScheme(.accountName(user.accountType))?.userType == .owning:
             fallthrough
         case .userId(_, .owning):
             try setProperty(jsonDict:jsonDict, key: accessTokenKey) { value in

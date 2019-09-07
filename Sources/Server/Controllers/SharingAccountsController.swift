@@ -111,15 +111,15 @@ class SharingAccountsController : ControllerProtocol {
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         
-        guard let accountType = params.accountProperties?.accountType else {
-            let message = "Could not get account type from account properties!"
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme from account properties!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
 
         if !sharingInvitation.allowSocialAcceptance {
-            guard accountType.userType == .owning else {
+            guard accountScheme.userType == .owning else {
                 let message = "Invitation does not allow social acceptance, but signed in user is not owning"
                 Log.error(message)
                 params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.forbidden)))
@@ -178,7 +178,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        let userExists = UserController.userExists(accountType: accountType, credsId: credsId, userRepository: params.repos.user)
+        let userExists = UserController.userExists(accountType: accountScheme.accountName, credsId: credsId, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
             redeemSharingInvitationForNewUser(params:params, request: request, sharingInvitation: sharingInvitation, completion: completion)
@@ -212,7 +212,15 @@ class SharingAccountsController : ControllerProtocol {
         }
         
         var owningUserId: UserId?
-        if existingUser.accountType.userType == .sharing {
+        
+        guard let accountScheme = AccountScheme(.accountName(existingUser.accountType)) else {
+            let message = "Could not look up AccountScheme from account type: \(String(describing: existingUser.accountType))"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        if accountScheme.userType == .sharing {
             owningUserId = sharingInvitation.owningUserId
         }
 
@@ -237,21 +245,21 @@ class SharingAccountsController : ControllerProtocol {
         let user = User()
         user.username = params.userProfile!.displayName
         
-        guard let accountType = params.accountProperties?.accountType else {
-            let message = "Could not get account type from properties!"
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme from properties!"
             Log.error(message)
             completion(.failure(.message(message)))
             return
         }
         
-        user.accountType = accountType
+        user.accountType = accountScheme.accountName
         user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
+        user.creds = params.profileCreds!.toJSON(userType:accountScheme.userType)
         
         var createInitialOwningUserFile = false
         var owningUserId: UserId?
 
-        switch user.accountType.userType {
+        switch accountScheme.userType {
         case .sharing:
             owningUserId = sharingInvitation.owningUserId
         case .owning:
@@ -291,9 +299,9 @@ class SharingAccountsController : ControllerProtocol {
         // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
 
         var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId, user.accountType.userType)
+        profileCreds.accountCreationUser = .userId(userId, accountScheme.userType)
         
-        profileCreds.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(userType: accountScheme.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
             if createInitialOwningUserFile {
                 // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
                 guard let cloudStorageCreds = profileCreds.cloudStorage else {

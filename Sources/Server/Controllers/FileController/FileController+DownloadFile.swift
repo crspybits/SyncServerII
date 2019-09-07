@@ -121,7 +121,7 @@ extension FileController {
             }
             
             guard let cloudStorageCreds = owningUserCreds.cloudStorage,
-                let cloudStorageType = owningUserCreds.accountType.cloudStorageType else {
+                let cloudStorageType = owningUserCreds.accountScheme.cloudStorageType else {
                 let message = "Could not obtain cloud storage creds or cloud storage type."
                 Log.error(message)
                 params.completion(.failure(.message(message)))
@@ -147,7 +147,7 @@ extension FileController {
                     response.appMetaData = fileIndexObj!.appMetaData
                     response.data = downloadResult.data
                     response.checkSum = downloadResult.checkSum
-                    response.cloudStorageType = cloudStorageType.rawValue
+                    response.cloudStorageType = cloudStorageType
                     response.contentsChanged = contentsChanged
                     params.completion(.success(response))
                 
@@ -157,7 +157,7 @@ extension FileController {
                     Log.error(message)
                     let response = DownloadFileResponse()
                     response.appMetaData = fileIndexObj!.appMetaData
-                    response.cloudStorageType = cloudStorageType.rawValue
+                    response.cloudStorageType = cloudStorageType
                     response.gone = GoneReason.authTokenExpiredOrRevoked.rawValue
                     params.completion(.success(response))
                     
@@ -166,7 +166,7 @@ extension FileController {
                     Log.error(message)
                     let response = DownloadFileResponse()
                     response.appMetaData = fileIndexObj!.appMetaData
-                    response.cloudStorageType = cloudStorageType.rawValue
+                    response.cloudStorageType = cloudStorageType
                     response.gone = GoneReason.fileRemovedOrRenamed.rawValue
                     params.completion(.success(response))
                 
