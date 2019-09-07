@@ -19,8 +19,7 @@ struct TestAccount {
     let tokenKey:String // key values: e.g., Google: a refresh token; Facebook:long-lived access token.
     let idKey:String
     
-    let type:AccountType
-    let tokenType:ServerConstants.AuthTokenType
+    let scheme: AccountScheme
     
     // The main owning account on which tests are conducted.
 #if PRIMARY_OWNING_GOOGLE1
@@ -62,30 +61,30 @@ struct TestAccount {
 
     static let nonOwningSharingAccount:TestAccount = .facebook1
     
-    static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", type: .Google, tokenType: .GoogleToken)
-    static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", type: .Google, tokenType: .GoogleToken)
-    static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", type: .Google, tokenType: .GoogleToken)
+    static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", scheme: AccountScheme.google)
+    static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", scheme: AccountScheme.google)
+    static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", scheme: .google)
 
     // https://myaccount.google.com/permissions?pli=1
-    static let googleRevoked = TestAccount(tokenKey: "GoogleRefreshTokenRevoked", idKey: "GoogleSub4", type: .Google, tokenType: .GoogleToken)
+    static let googleRevoked = TestAccount(tokenKey: "GoogleRefreshTokenRevoked", idKey: "GoogleSub4", scheme: .google)
 
     static func isGoogle(_ account: TestAccount) -> Bool {
-        return account.type == .Google
+        return account.scheme == AccountScheme.google
     }
     
     static func needsCloudFolder(_ account: TestAccount) -> Bool {
-        return account.type == .Google
+        return account.scheme == AccountScheme.google
     }
     
-    static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", type: .Facebook, tokenType: .FacebookToken)
+    static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", scheme: .facebook)
 
-    static let facebook2 = TestAccount(tokenKey: "FacebookLongLivedToken2", idKey: "FacebookId2", type: .Facebook, tokenType: .FacebookToken)
+    static let facebook2 = TestAccount(tokenKey: "FacebookLongLivedToken2", idKey: "FacebookId2", scheme: .facebook)
     
-    static let dropbox1 = TestAccount(tokenKey: "DropboxAccessToken1", idKey: "DropboxId1", type: .Dropbox, tokenType: .DropboxToken)
+    static let dropbox1 = TestAccount(tokenKey: "DropboxAccessToken1", idKey: "DropboxId1", scheme: .dropbox)
     
-    static let dropbox2 = TestAccount(tokenKey: "DropboxAccessToken2", idKey: "DropboxId2", type: .Dropbox, tokenType: .DropboxToken)
+    static let dropbox2 = TestAccount(tokenKey: "DropboxAccessToken2", idKey: "DropboxId2", scheme: .dropbox)
     
-    static let dropbox1Revoked = TestAccount(tokenKey: "DropboxAccessTokenRevoked", idKey: "DropboxId3", type: .Dropbox, tokenType: .DropboxToken)
+    static let dropbox1Revoked = TestAccount(tokenKey: "DropboxAccessTokenRevoked", idKey: "DropboxId3", scheme: .dropbox)
     
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     private func configValue(key:String) -> String {

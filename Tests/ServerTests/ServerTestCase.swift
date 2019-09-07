@@ -99,7 +99,7 @@ class ServerTestCase : XCTestCase {
         
         let sharingGroup = filtered[0]
         
-        if sharingUser.type.userType == .owning {
+        if sharingUser.scheme.userType == .owning {
             XCTAssert(sharingGroup.cloudStorageType == nil)
             XCTAssert(sharingGroupUser1.owningUserId == nil)
             return sharingGroupUser1.owningUserId == nil
@@ -121,7 +121,7 @@ class ServerTestCase : XCTestCase {
             return false
         }
         
-        guard owningUser.type.userType == .owning,
+        guard owningUser.scheme.userType == .owning,
             sharingGroupUser2.owningUserId == nil else {
             XCTFail()
             return false
@@ -135,7 +135,7 @@ class ServerTestCase : XCTestCase {
         switch userResult {
         case .found(let model):
             guard let userObj = model as? User,
-                userObj.accountType == owningUser.type else {
+                userObj.accountType == owningUser.scheme.accountName else {
                 XCTFail()
                 return false
             }
@@ -151,8 +151,8 @@ class ServerTestCase : XCTestCase {
             XCTFail()
             return false
         }
-        
-        guard resultOwningUser.accountType.cloudStorageType?.rawValue == ownersCloudStorageType else {
+
+        guard AccountScheme(.accountName(resultOwningUser.accountType))?.cloudStorageType == ownersCloudStorageType else {
             XCTFail()
             return false
         }
@@ -345,8 +345,8 @@ class ServerTestCase : XCTestCase {
         
         let expectation = self.expectation(description: "expectation")
 
-        switch testAccount.type {
-        case .Google:
+        switch testAccount.scheme.accountName {
+        case AccountScheme.google.accountName:
             let creds = GoogleCreds()
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
@@ -377,7 +377,7 @@ class ServerTestCase : XCTestCase {
                 }
             }
             
-        case .Dropbox:
+        case AccountScheme.dropbox.accountName:
             let creds = DropboxCreds()
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
@@ -419,8 +419,8 @@ class ServerTestCase : XCTestCase {
         
         let expectation = self.expectation(description: "expectation")
     
-        switch testAccount.type {
-        case .Google:
+        switch testAccount.scheme.accountName {
+        case AccountScheme.google.accountName:
             let creds = GoogleCreds()
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
@@ -442,7 +442,7 @@ class ServerTestCase : XCTestCase {
                 }
             }
             
-        case .Dropbox:
+        case AccountScheme.dropbox.accountName:
             let creds = DropboxCreds()
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
@@ -712,7 +712,7 @@ class ServerTestCase : XCTestCase {
     // statusCodeExpected is only used if an error is expected.
     // owningAccountType will be the same type as testAccount when an owning user is uploading (you can pass nil here), and the type of the "parent" owner when a sharing user is uploading.
     @discardableResult
-    func uploadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountType? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         var sharingGroupUUID = UUID().uuidString
         var uploadingUserId: UserId?
@@ -750,12 +750,12 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        var checkSumType: AccountType
+        var checkSumType: AccountScheme.AccountName
         if let owningAccountType = owningAccountType {
             checkSumType = owningAccountType
         }
         else {
-            checkSumType = testAccount.type
+            checkSumType = testAccount.scheme.accountName
         }
         
         let requestCheckSum = file.checkSum(type: checkSumType)
@@ -799,7 +799,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountType? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         return uploadServerFile(testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, updatedMasterVersionExpected:updatedMasterVersionExpected, fileVersion:fileVersion, masterVersion:masterVersion, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, fileGroupUUID:fileGroupUUID, statusCodeExpected: statusCodeExpected)
     }
@@ -864,7 +864,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountType? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> UploadFileResult? {
     
         var sharingGroupUUID: String!
         var uploadingUserId: UserId?
@@ -887,12 +887,12 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        var checkSumType: AccountType
+        var checkSumType: AccountScheme.AccountName
         if let owningAccountType = owningAccountType {
             checkSumType = owningAccountType
         }
         else {
-            checkSumType = testAccount.type
+            checkSumType = testAccount.scheme.accountName
         }
 
         let uploadRequest = UploadFileRequest()
@@ -916,7 +916,7 @@ class ServerTestCase : XCTestCase {
         return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId:uploadingUserId, data: data, checkSum: file.checkSum(type: checkSumType))
     }
     
-    func uploadJPEGFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountType? = nil, deviceUUID:String = Foundation.UUID().uuidString,
+    func uploadJPEGFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString,
         fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> UploadFileResult? {
         
         let jpegFile = TestFile.catJpg
@@ -1264,10 +1264,10 @@ class ServerTestCase : XCTestCase {
         }
         else {
             // Check to make sure we have a new user:
-            let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
+            let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.scheme.accountName, credsId: sharingUser.id())
             let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
             guard case .found(let model) = userResults else {
-                Log.debug("sharingUser.type: \(sharingUser.type); sharingUser.id(): \(sharingUser.id())")
+                Log.debug("sharingUser.type: \(sharingUser.scheme.accountName); sharingUser.id(): \(sharingUser.id())")
                 XCTFail()
                 completion?(nil, nil, nil)
                 return
@@ -1319,7 +1319,7 @@ class ServerTestCase : XCTestCase {
     func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
     
         var actualCloudFolderName: String?
-        if sharingUser.type == .Google && canGiveCloudFolderName {
+        if sharingUser.scheme.accountName == AccountScheme.google.accountName && canGiveCloudFolderName {
             actualCloudFolderName = ServerTestCase.cloudFolderName
         }
 
@@ -1631,7 +1631,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func uploadFile(accountType: AccountType, creds: CloudStorage, deviceUUID:String, testFile: TestFile, uploadRequest:UploadFileRequest, options:CloudStorageFileNameOptions? = nil, nonStandardFileName: String? = nil, failureExpected: Bool = false, errorExpected: CloudStorageError? = nil, expectAccessTokenRevokedOrExpired: Bool = false) -> String? {
+    func uploadFile(accountType: AccountScheme.AccountName, creds: CloudStorage, deviceUUID:String, testFile: TestFile, uploadRequest:UploadFileRequest, options:CloudStorageFileNameOptions? = nil, nonStandardFileName: String? = nil, failureExpected: Bool = false, errorExpected: CloudStorageError? = nil, expectAccessTokenRevokedOrExpired: Bool = false) -> String? {
     
         var fileContentsData: Data!
         

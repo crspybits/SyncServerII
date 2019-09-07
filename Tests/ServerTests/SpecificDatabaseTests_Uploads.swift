@@ -250,7 +250,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
     func testGetUploadsWithNoFiles() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -270,7 +270,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let sharingGroupUUID = UUID().uuidString
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -305,7 +305,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
 
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         

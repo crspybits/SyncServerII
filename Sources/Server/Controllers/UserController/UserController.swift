@@ -75,9 +75,6 @@ class UserController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
-        
-        // This necessarily is an owning user-- sharing users are created by the redeemSharingInvitation endpoint.
-        let userType:UserType = .owning
 
         // No database creds because this is a new user-- so use params.profileCreds
         let user = User()
@@ -140,7 +137,7 @@ class UserController : ControllerProtocol {
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
         var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId, userType)
+        profileCreds.accountCreationUser = .userId(userId)
 
         // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
         guard let cloudStorageCreds = profileCreds.cloudStorage else {

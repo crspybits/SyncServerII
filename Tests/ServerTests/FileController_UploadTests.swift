@@ -126,7 +126,7 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         uploadRequest.fileVersion = 0
         uploadRequest.masterVersion = 0
         uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = file.checkSum(type: testAccount.type)
+        uploadRequest.checkSum = file.checkSum(type: testAccount.scheme.accountName)
         
         runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)
     }

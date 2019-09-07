@@ -76,13 +76,12 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         
         for sharingGroup in sharingGroups {
             if sharingGroup.sharingGroupUUID == sharingGroupUUID {
-                guard let type = sharingGroup.cloudStorageType,
-                    let cloudStorageType = CloudStorageType(rawValue: type) else {
+                guard let cloudStorageType = sharingGroup.cloudStorageType else {
                     XCTFail()
                     return
                 }
          
-                XCTAssert(owningUser.type.cloudStorageType == cloudStorageType)
+                XCTAssert(owningUser.scheme.cloudStorageType == cloudStorageType)
                 found = true
             }
         }
@@ -216,7 +215,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
             
         // Check to make sure we have a new user:
-        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.type, credsId: sharingUser.id())
+        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: sharingUser.scheme.accountName, credsId: sharingUser.id())
         let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
         guard case .found(_) = userResults else {
             XCTFail()

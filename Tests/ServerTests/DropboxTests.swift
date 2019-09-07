@@ -168,10 +168,10 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         
-        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
+        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
         
         // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
-        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
     func testFullUploadWorks() {
@@ -281,7 +281,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
 
-        uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
+        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
         
         let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         Log.debug("cloudFileName: \(cloudFileName)")
@@ -363,7 +363,7 @@ class DropboxTests: ServerTestCase, LinuxTestable {
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         
-        guard let fileName = uploadFile(accountType: .Dropbox, creds: creds, deviceUUID:deviceUUID, testFile:file, uploadRequest:uploadRequest) else {
+        guard let fileName = uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile:file, uploadRequest:uploadRequest) else {
             XCTFail()
             return
         }

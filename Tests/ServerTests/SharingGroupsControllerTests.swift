@@ -698,7 +698,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let result = uploadTextFile(testAccount: sharingUser, owningAccountType: owningUser.type, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
+        let result = uploadTextFile(testAccount: sharingUser, owningAccountType: owningUser.scheme.accountName, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
         XCTAssert(result == nil)
     }
     

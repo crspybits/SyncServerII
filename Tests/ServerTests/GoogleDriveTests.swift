@@ -274,7 +274,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: mimeType.rawValue)
         
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
+        uploadFile(accountType: AccountScheme.google.accountName, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
         
         let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         
@@ -389,10 +389,10 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: mimeType)
         
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, nonStandardFileName: nonStandardFileName)
+        uploadFile(accountType: AccountScheme.google.accountName, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, nonStandardFileName: nonStandardFileName)
         
         // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, nonStandardFileName: nonStandardFileName, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+        uploadFile(accountType: AccountScheme.google.accountName, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, nonStandardFileName: nonStandardFileName, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
     func testFullUploadWorks() {
@@ -423,7 +423,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
         
-        uploadFile(accountType: .Google, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, expectAccessTokenRevokedOrExpired: true)
+        uploadFile(accountType: AccountScheme.google.accountName, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options, expectAccessTokenRevokedOrExpired: true)
     }
     
     func downloadFile(cloudFileName:String, mimeType: MimeType, expectError:Bool = false, expectedFileNotFound: Bool = false) {

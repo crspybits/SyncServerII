@@ -161,13 +161,8 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
                 return
             }
             
-            guard let type = CloudStorageType(rawValue: cloudStorageType) else {
-                XCTFail()
-                return
-            }
-            
             if file.fileUUID == uploadResult.request.fileUUID {
-                XCTAssert(testAccount.type.cloudStorageType == type)
+                XCTAssert(testAccount.scheme.cloudStorageType == cloudStorageType)
             }
         }
     }
@@ -214,14 +209,14 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         var checkSum:String!
         var cloudStorageCreds: CloudStorage!
         
-        switch testAccount.type {
-        case .Dropbox:
+        switch testAccount.scheme.accountName {
+        case AccountScheme.dropbox.accountName:
             let creds = DropboxCreds()
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             cloudStorageCreds = creds
 
-        case .Google:
+        case AccountScheme.google.accountName:
             let creds = GoogleCreds()
             creds.refreshToken = testAccount.token()
             let exp = expectation(description: "\(#function)\(#line)")
@@ -235,14 +230,18 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             waitForExpectations(timeout: 10, handler: nil)
             cloudStorageCreds = creds
 
-        case .Facebook:
+        case AccountScheme.facebook.accountName:
+            XCTFail()
+            return
+        
+        default:
             XCTFail()
             return
         }
         
         let file = TestFile.test2
         
-        checkSum = file.checkSum(type: testAccount.type)
+        checkSum = file.checkSum(type: testAccount.scheme.accountName)
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uploadResult.request.fileUUID
@@ -257,7 +256,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
 
-        uploadFile(accountType: testAccount.type, creds: cloudStorageCreds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
+        uploadFile(accountType: testAccount.scheme.accountName, creds: cloudStorageCreds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
         
         // Don't want the download to fail just due to a checksum mismatch.
         uploadResult.request.checkSum = checkSum
@@ -280,7 +279,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         var checkSum:String!
         let file = TestFile.test2
         
-        checkSum = file.checkSum(type: testAccount.type)
+        checkSum = file.checkSum(type: testAccount.scheme.accountName)
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uploadResult.request.fileUUID

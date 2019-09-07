@@ -56,7 +56,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -80,7 +80,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
 
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -96,7 +96,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         
         let user2 = User()
         user2.username = "Chris"
-        user2.accountType = .Google
+        user2.accountType = AccountScheme.google.accountName
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user2.credsId = "101"
         
@@ -122,7 +122,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
 
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -153,7 +153,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
 
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -219,7 +219,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
 
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         

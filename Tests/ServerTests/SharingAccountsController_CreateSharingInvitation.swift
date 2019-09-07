@@ -78,7 +78,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
         
         // Lookup the userId for the freshly created owning user.
         
-        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: testAccount.type, credsId: testAccount.id())
+        let userKey = UserRepository.LookupKey.accountTypeInfo(accountType: testAccount.scheme.accountName, credsId: testAccount.id())
         let userResults = UserRepository(self.db).lookup(key: userKey, modelInit: User.init)
         guard case .found(let model) = userResults,
             let testAccountUserId = (model as? User)?.userId else {
@@ -114,7 +114,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        switch sharingUser.type.userType {
+        switch sharingUser.scheme.userType {
         case .owning:
             XCTAssert(invitation.owningUserId == adminUserId)
         case .sharing:

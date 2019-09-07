@@ -7,6 +7,7 @@
 
 import Foundation
 @testable import Server
+import XCTest
 
 struct TestFile {
     enum FileContents {
@@ -18,13 +19,16 @@ struct TestFile {
     let md5CheckSum:String // Google
     let contents: FileContents
     
-    func checkSum(type: AccountType) -> String! {
+    func checkSum(type: AccountScheme.AccountName) -> String! {
         switch type {
-        case .Google:
+        case AccountScheme.google.accountName:
             return md5CheckSum
-        case .Dropbox:
+        case AccountScheme.dropbox.accountName:
             return dropboxCheckSum
-        case .Facebook:
+        case AccountScheme.facebook.accountName:
+            return nil
+        default:
+            XCTFail()
             return nil
         }
     }

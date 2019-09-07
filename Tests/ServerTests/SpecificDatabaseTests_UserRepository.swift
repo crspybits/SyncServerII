@@ -24,7 +24,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
     func addOwningUsers() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         user1.cloudFolderName = "folder1"
@@ -34,7 +34,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
 
         let user2 = User()
         user2.username = "Natasha"
-        user2.accountType = .Google
+        user2.accountType = AccountScheme.google.accountName
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue2\"}"
         user2.credsId = "200"
         user2.cloudFolderName = "folder2"
@@ -50,7 +50,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
     func testAddOwningUserWorksIfYouGivePermissions() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -60,18 +60,20 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         }
     }
     
-    func addUser(accountType:AccountType = .Google, sharing: Bool = true) {
+    func addUser(accountType:AccountScheme.AccountName = AccountScheme.google.accountName, sharing: Bool = true) {
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = accountType
         
         switch (accountType) {
-        case .Google:
+        case AccountScheme.google.accountName:
             user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
-        case .Facebook:
+        case AccountScheme.facebook.accountName:
             user1.creds = "{}"
-        case .Dropbox:
+        case AccountScheme.dropbox.accountName:
             user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        default:
+            XCTFail()
         }
         
         user1.credsId = "100"
@@ -88,11 +90,11 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
     }
     
     func testAddSharingFacebookUser() {
-        addUser(accountType: .Facebook)
+        addUser(accountType: AccountScheme.facebook.accountName)
     }
     
     func testAddDropboxUser() {
-        addUser(accountType: .Dropbox, sharing: false)
+        addUser(accountType: AccountScheme.dropbox.accountName, sharing: false)
     }
     
     func testUserLookup1() {
@@ -105,7 +107,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
             
         case .found(let object):
             let user = object as! User
-            XCTAssert(user.accountType == .Google)
+            XCTAssert(user.accountType == AccountScheme.google.accountName)
             XCTAssert(user.username == "Chris")
             XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
             XCTAssert(user.userId == 1)
@@ -126,7 +128,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
             
         case .found(let object):
             let user = object as! User
-            XCTAssert(user.accountType == .Google)
+            XCTAssert(user.accountType == AccountScheme.google.accountName)
             XCTAssert(user.username == "Chris")
             XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
             XCTAssert(user.userId == 1)
@@ -143,14 +145,14 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         
         addOwningUsers()
 
-        let result = UserRepository(db).lookup(key: .accountTypeInfo(accountType:.Google, credsId:"100"), modelInit:User.init)
+        let result = UserRepository(db).lookup(key: .accountTypeInfo(accountType:AccountScheme.google.accountName, credsId:"100"), modelInit:User.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")
             
         case .found(let object):
             let user = object as! User
-            XCTAssert(user.accountType == .Google)
+            XCTAssert(user.accountType == AccountScheme.google.accountName)
             XCTAssert(user.username == "Chris")
             XCTAssert(user.creds == "{\"accessToken\": \"SomeAccessTokenValue1\"}")
             XCTAssert(user.userId == 1)

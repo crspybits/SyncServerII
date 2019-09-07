@@ -83,28 +83,31 @@ extension KituraTest {
             }
             
             // At least with Google accounts, I'm having problems with periodic `unauthorized` responses. Could be due to some form of throttling?
-            if testAccount.type == .Google {
+            if testAccount.scheme.accountName == AccountScheme.google.accountName {
                 sleep(5)
             }
             Log.info("performServerTest: Ends")
         }
         
-        switch testAccount.type {
-        case .Google:
+        switch testAccount.scheme.accountName {
+        case AccountScheme.google.accountName:
             GoogleCredsCache.credsFor(googleAccount: testAccount) { creds in
                 runTest(usingCreds: creds)
             }
             
-        case .Facebook:
+        case AccountScheme.facebook.accountName:
             let creds = FacebookCreds()
             creds.accessToken = testAccount.token()
             runTest(usingCreds: creds)
             
-        case .Dropbox:
+        case AccountScheme.dropbox.accountName:
             let creds = DropboxCreds()
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             runTest(usingCreds: creds)
+            
+        default:
+            XCTFail()
         }
     }
     
@@ -219,11 +222,11 @@ extension KituraTest {
     func setupHeaders(testUser: TestAccount, accessToken:String, deviceUUID:String) -> [String: String] {
         var headers = [String: String]()
         
-        headers[ServerConstants.XTokenTypeKey] = testUser.tokenType.rawValue
+        headers[ServerConstants.XTokenTypeKey] = testUser.scheme.authTokenType
         headers[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
         headers[ServerConstants.httpRequestDeviceUUID] = deviceUUID
         
-        if testUser.type == .Dropbox {
+        if testUser.scheme.accountName == AccountScheme.dropbox.accountName {
             headers[ServerConstants.HTTPAccountIdKey] = testUser.id()
         }
 

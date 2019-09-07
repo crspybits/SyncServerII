@@ -116,13 +116,14 @@ class GoogleCreds : AccountAPICall, Account {
         switch user {
         case .user(let user) where AccountScheme(.accountName(user.accountType))?.userType == .owning:
             fallthrough
-        case .userId(_, .owning):
+        case .userId:
             try setProperty(jsonDict:jsonDict, key: accessTokenKey) { value in
                 result.accessToken = value
             }
             
         default:
-            break
+            // Sharing users not allowed.
+            assert(false)
         }
         
         // Considering the refresh token and serverAuthCode as optional because (a) I think I don't always get these from the client, and (b) during testing, I don't always have these.

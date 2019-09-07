@@ -216,7 +216,7 @@ class UserRepository : Repository, RepositoryLookup {
             credsJSONString = oldCreds.toJSON()!
             userId = user.userId
             
-        case .userId(let id, _):
+        case .userId(let id):
             credsJSONString = newCreds.toJSON()!
             userId = id
         }

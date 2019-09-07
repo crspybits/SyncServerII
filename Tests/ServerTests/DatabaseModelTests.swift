@@ -93,7 +93,7 @@ class DatabaseModelTests: XCTestCase, LinuxTestable {
         
         let newUserId = UserId(43287)
         let newUsername = "foobar"
-        let newAccountType: AccountType = .Google
+        let newAccountType: AccountScheme.AccountName = AccountScheme.google.accountName
         let newCredsId = "d392y2t3"
         let newCreds = "fd9eu23y4"
         

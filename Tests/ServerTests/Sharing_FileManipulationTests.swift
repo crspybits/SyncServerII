@@ -67,18 +67,18 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let deviceUUID2 = Foundation.UUID().uuidString
         
-        var owningAccountType: AccountType
+        var owningAccountType: AccountScheme.AccountName
         
         if fileVersion == 0 {
-            switch sharingUser.type.userType {
+            switch sharingUser.scheme.userType {
             case .owning:
-                owningAccountType = sharingUser.type
+                owningAccountType = sharingUser.scheme.accountName
             case .sharing:
-                owningAccountType = owningAccount.type
+                owningAccountType = owningAccount.scheme.accountName
             }
         }
         else {
-            owningAccountType = owningAccount.type
+            owningAccountType = owningAccount.scheme.accountName
         }
         
         // Attempting to upload a file by our sharing user
@@ -280,12 +280,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         XCTAssert(fileIndexObj.cloudStorageType != nil)
         
         // Need to make sure that the cloud storage type of the file, in the file index, corresponds to the cloud storage type of the owningAccount.
-        XCTAssert(owningAccount.type.cloudStorageType?.rawValue == fileIndexObj.cloudStorageType)
+        XCTAssert(owningAccount.scheme.cloudStorageType == fileIndexObj.cloudStorageType)
     }
 
     // Check to make sure that if the invited user owns cloud storage that the file was uploaded to their cloud storage.
     func makeSureSharingOwnerOwnsUploadedFile(result: SharingUploadResult) {
-        if result.sharingTestAccount.type.userType == .owning {
+        if result.sharingTestAccount.scheme.userType == .owning {
             checkFileOwner(uploadedDeviceUUID: result.uploadedDeviceUUID, owningAccount: result.sharingTestAccount, ownerUserId: result.redeemResponse.userId, request: result.request)
         }
     }
@@ -431,7 +431,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         // The owner of the file will be either (a) the sharing user if that user is an owning user, or (b) the inviting user otherwise.
         
         var owningUser: TestAccount!
-        if result.sharingTestAccount.type.userType == .owning {
+        if result.sharingTestAccount.scheme.userType == .owning {
             owningUser = result.sharingTestAccount
         }
         else {
@@ -529,7 +529,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         var sharingUserId: UserId!
         let sharingUser:TestAccount = .primarySharingAccount
         
-        if sharingUser.type.userType == .owning {
+        if sharingUser.scheme.userType == .owning {
             createSharingUser(sharingUser: sharingUser) { newUserId, _, _ in
                 sharingUserId = newUserId
             }
@@ -661,7 +661,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
 
         // Attempting to upload a file by our sharing user-- this should fail with HTTP 410 (Gone) because the sharing user does not own cloud storage.
-        let result = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningUserWhenCreating.type, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:actualSharingGroupUUID), masterVersion: 1, errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
+        let result = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningUserWhenCreating.scheme.accountName, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:actualSharingGroupUUID), masterVersion: 1, errorExpected: true, statusCodeExpected: HTTPStatusCode.gone)
         XCTAssert(result == nil)
     }
 
@@ -730,12 +730,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        var owningAccountType: AccountType?
-        if sharingAccount.type.userType == .owning {
-            owningAccountType = sharingAccount.type
+        var owningAccountType: AccountScheme.AccountName?
+        if sharingAccount.scheme.userType == .owning {
+            owningAccountType = sharingAccount.scheme.accountName
         }
         else {
-            owningAccountType = owningAccount.type
+            owningAccountType = owningAccount.scheme.accountName
         }
         
         guard let _ = uploadTextFile(testAccount: sharingAccount, owningAccountType: owningAccountType, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion) else {
@@ -756,12 +756,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        var owningAccountType: AccountType?
-        if sharingAccount.type.userType == .owning {
-            owningAccountType = sharingAccount.type
+        var owningAccountType: AccountScheme.AccountName?
+        if sharingAccount.scheme.userType == .owning {
+            owningAccountType = sharingAccount.scheme.accountName
         }
         else {
-            owningAccountType = owningAccount.type
+            owningAccountType = owningAccount.scheme.accountName
         }
         
         let deviceUUID = Foundation.UUID().uuidString
@@ -785,12 +785,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        var owningAccountType: AccountType?
-        if sharingAccount.type.userType == .owning {
-            owningAccountType = sharingAccount.type
+        var owningAccountType: AccountScheme.AccountName?
+        if sharingAccount.scheme.userType == .owning {
+            owningAccountType = sharingAccount.scheme.accountName
         }
         else {
-            owningAccountType = owningAccount.type
+            owningAccountType = owningAccount.scheme.accountName
         }
         
         let deviceUUID = Foundation.UUID().uuidString

@@ -124,7 +124,7 @@ class DropboxCreds : AccountAPICall, Account {
         switch user {
         case .user(let user) where AccountScheme(.accountName(user.accountType))?.userType == .owning:
             fallthrough
-        case .userId(_, .owning):
+        case .userId(_):
             try setProperty(jsonDict:jsonDict, key: accessTokenKey) { value in
                 result.accessToken = value
             }

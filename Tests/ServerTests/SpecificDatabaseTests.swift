@@ -144,7 +144,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testAddFileIndex() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -163,7 +163,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testUpdateFileIndexWithNoChanges() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
@@ -184,7 +184,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testUpdateFileIndexWithAChange() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
@@ -207,7 +207,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testUpdateFileIndexFailsWithoutFileIndexId() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
@@ -228,7 +228,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testUpdateUploadSucceedsWithNilAppMetaData() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
@@ -250,7 +250,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testLookupFromFileIndex() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
@@ -291,7 +291,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testFileIndexWithNoFiles() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
@@ -323,7 +323,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
     func testFileIndexWithOneFile() {
         let user1 = User()
         user1.username = "Chris"
-        user1.accountType = .Google
+        user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
