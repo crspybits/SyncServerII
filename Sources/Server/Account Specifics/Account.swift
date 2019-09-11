@@ -43,7 +43,7 @@ protocol Account {
     func needToGenerateTokens(dbCreds:Account?) -> Bool
     
     // Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
-    func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->())
+    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->())
     
     func merge(withNewer account:Account)
 

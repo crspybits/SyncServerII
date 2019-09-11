@@ -1562,8 +1562,7 @@ class ServerTestCase : XCTestCase {
                             }
                             
                             XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
-                            guard let type = downloadFileResponse.cloudStorageType,
-                                let _ = CloudStorageType(rawValue: type) else {
+                            guard let _ = downloadFileResponse.cloudStorageType else {
                                 XCTFail()
                                 return
                             }

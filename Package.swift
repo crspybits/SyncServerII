@@ -12,10 +12,12 @@ let package = Package(
         
         // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
         .package(url: "https://github.com/crspybits/CredentialsDropbox.git", .upToNextMajor(from: "0.4.0")),
+        
+        .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", .branch("master")),
 
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMajor(from: "11.0.0")),
+         .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
+        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMajor(from: "11.0.0")),
 
         // .package(url: "../../repos/SMServerLib", .branch("master")),
         .package(url: "https://github.com/crspybits/SMServerLib.git", .upToNextMajor(from: "1.2.0")),
@@ -39,7 +41,7 @@ let package = Package(
         .target(name: "Main",
             dependencies: ["Server"]),
         .target(name: "Server",
-            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "SMServerLib", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS"]),
+            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "SMServerLib", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft"]),
         .testTarget(name: "ServerTests",
             dependencies: ["Server", "Main", "CredentialsDropbox"])
     ]

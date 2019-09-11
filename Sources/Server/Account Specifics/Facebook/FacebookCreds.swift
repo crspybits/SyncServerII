@@ -58,7 +58,7 @@ class FacebookCreds : AccountAPICall,  Account {
         case noAccessTokenInResult
     }
     
-    func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->())  {
+    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->())  {
         let fbAppId = Constants.session.facebookClientId!
         let fbAppSecret = Constants.session.facebookClientSecret!
         
@@ -83,7 +83,7 @@ class FacebookCreds : AccountAPICall,  Account {
                         return
                     }
                     
-                    response.headers[ServerConstants.httpResponseOAuth2AccessTokenKey] = accessToken
+                    response?.headers[ServerConstants.httpResponseOAuth2AccessTokenKey] = accessToken
                     completion(nil)
                     
                 default:

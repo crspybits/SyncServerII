@@ -86,6 +86,8 @@ struct TestAccount {
     
     static let dropbox1Revoked = TestAccount(tokenKey: "DropboxAccessTokenRevoked", idKey: "DropboxId3", scheme: .dropbox)
     
+    static let microsoft1 = TestAccount(tokenKey: "MicrosoftRefreshToken1", idKey: "MicrosoftId1", scheme: .microsoft)
+    
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     private func configValue(key:String) -> String {
 #if os(macOS)
@@ -103,5 +105,59 @@ struct TestAccount {
     
     func id() -> String {
         return configValue(key: idKey)
+    }
+    
+    func registerHandlers() {
+        // MARK: Google
+        AccountScheme.google.registerHandler(type: .getCredentials) { testAccount, callback in
+            GoogleCredsCache.credsFor(googleAccount: testAccount) { creds in
+                callback(creds)
+            }
+        }
+        
+        // MARK: Dropbox
+        AccountScheme.dropbox.registerHandler(type: .getCredentials) { testAccount, callback in
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
+            callback(creds)
+        }
+        
+        // MARK: Facebook
+        AccountScheme.facebook.registerHandler(type: .getCredentials) { testAccount, callback in
+            let creds = FacebookCreds()
+            creds.accessToken = testAccount.token()
+            callback(creds)
+        }
+        
+        // MARK: Microsoft
+        AccountScheme.microsoft.registerHandler(type: .getCredentials) { testAccount, callback in
+        }
+    }
+}
+
+typealias Handler = (TestAccount, @escaping (Account)->())->()
+private var handlers = [String: Handler]()
+
+extension AccountScheme {
+    enum HandlerType: String {
+        case getCredentials
+    }
+    
+    private func key(for type: HandlerType) -> String {
+        return "\(type.rawValue).\(accountName)"
+    }
+    
+    func registerHandler(type: HandlerType, handler:@escaping Handler) {
+        handlers[key(for: type)] = handler
+    }
+    
+    func doHandler(for type: HandlerType, testAccount: TestAccount, callback: @escaping ((Account)->())) {
+        guard let handler = handlers[key(for: type)] else {
+            assert(false)
+            return
+        }
+        
+        handler(testAccount, callback)
     }
 }

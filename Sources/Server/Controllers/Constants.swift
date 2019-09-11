@@ -48,6 +48,10 @@ class Constants {
     // If you are using Facebook Accounts
     var facebookClientId:String? = "" // This is the AppId from Facebook
     var facebookClientSecret:String? = "" // App Secret from Facebook
+    
+    // If you are using Microsoft Accounts
+    var microsoftClientId:String? = ""
+    var microsoftClientSecret:String? = ""
 
     var maxNumberDeviceUUIDPerUser:Int?
     
@@ -72,6 +76,7 @@ class Constants {
         var Google = false
         var Facebook = false
         var Dropbox = false
+        var Microsoft = false
     }
     var allowedSignInTypes = AllowedSignInTypes()
     
@@ -190,6 +195,10 @@ class Constants {
         
         if let dropboxSignIn = try? config.getBool(varName: "allowedSignInTypes.Dropbox"), dropboxSignIn {
             allowedSignInTypes.Dropbox = true
+        }
+
+        if let microsoftSignIn = try? config.getBool(varName: "allowedSignInTypes.Microsoft"), microsoftSignIn {
+            allowedSignInTypes.Microsoft = true
         }
         
         owningUserAccountCreation.initialFileName = try? config.getString(varName: "owningUserAccountCreation.initialFileName")

@@ -57,7 +57,7 @@ class DropboxCreds : AccountAPICall, Account {
     private static let apiAccessTokenKey = "access_token"
     private static let apiTokenTypeKey = "token_type"
     
-    func generateTokens(response: RouterResponse, completion:@escaping (Swift.Error?)->()) {
+    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->()) {
         // Not generating tokens, just saving.
         guard let delegate = delegate else {
             Log.warning("No Dropbox Creds delegate!")

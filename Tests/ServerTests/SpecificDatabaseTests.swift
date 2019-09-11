@@ -360,7 +360,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             XCTAssert(fileIndexInserted.fileVersion == fileIndex[0].fileVersion)
             XCTAssert(fileIndexInserted.mimeType == fileIndex[0].mimeType)
             XCTAssert(fileIndexInserted.deleted == fileIndex[0].deleted)
-            XCTAssert(fileIndex[0].cloudStorageType == CloudStorageType.Google.rawValue)
+            XCTAssert(fileIndex[0].cloudStorageType == AccountScheme.google.cloudStorageType)
             
         case .error(_):
             XCTFail()

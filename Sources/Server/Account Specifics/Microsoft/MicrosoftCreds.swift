@@ -8,6 +8,7 @@
 import Foundation
 import Kitura
 import SyncServerShared
+import LoggerAPI
 
 class MicrosoftCreds : AccountAPICall, Account {
     static var accountScheme: AccountScheme = .microsoft
@@ -24,9 +25,11 @@ class MicrosoftCreds : AccountAPICall, Account {
     
     var accessToken: String!
     
+    private(set) var refreshToken: String?
+    
     override init() {
         super.init()
-        baseURL = ""
+        baseURL = "login.microsoftonline.com"
     }
     
     func toJSON() -> String? {
@@ -37,7 +40,71 @@ class MicrosoftCreds : AccountAPICall, Account {
         return false
     }
     
-    func generateTokens(response: RouterResponse, completion: @escaping (Error?) -> ()) {
+    /// If successful, sets the `refreshToken`. The `accessToken` must be set prior to this call.
+    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->()) {
+        guard let accessToken = accessToken else{
+            Log.info("No accessToken from client.")
+            completion(nil)
+            return
+        }
+        
+        // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow
+
+        let grantType = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+        let clientId = ""
+        let clientSecret = ""
+        let scopes = ""
+        
+        let bodyParameters =
+            "grant_type=\(grantType)" + "&"
+            + "client_id=\(clientId)" + "&"
+            + "client_secret=\(clientSecret)" + "&"
+            + "assertion=\(accessToken)" + "&"
+            + "scope=\(scopes)"
+            + "requested_token_use=on_behalf_of"
+        
+        Log.debug("bodyParameters: \(bodyParameters)")
+        
+        let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
+
+        self.apiCall(method: "POST", path: "/oauth2/v2.0/token", additionalHeaders:additionalHeaders, body: .string(bodyParameters), expectedSuccessBody: .data) { apiResult, statusCode, responseHeaders in
+            guard statusCode == HTTPStatusCode.OK else {
+                completion(GenerateTokensError.badStatusCode(statusCode))
+                return
+            }
+            
+            /*
+            guard apiResult != nil else {
+                completion(GenerateTokensError.nilAPIResult)
+                return
+            }
+            
+            if case .dictionary(let dictionary) = apiResult!,
+                let accessToken = dictionary[GoogleCreds.googleAPIAccessTokenKey] as? String,
+                let refreshToken = dictionary[GoogleCreds.googleAPIRefreshTokenKey] as? String {
+                
+                self.accessToken = accessToken
+                self.refreshToken = refreshToken
+                Log.debug("Obtained tokens: accessToken: \(accessToken)\n refreshToken: \(refreshToken)")
+                
+                if self.delegate == nil {
+                    Log.warning("No Google Creds delegate!")
+                    completion(nil)
+                    return
+                }
+                
+                if self.delegate!.saveToDatabase(account: self) {
+                    completion(nil)
+                    return
+                }
+                
+                completion(GenerateTokensError.errorSavingCredsToDatabase)
+                return
+            }
+            
+            completion(GenerateTokensError.couldNotObtainParameterFromJSON)
+            */
+        }
     }
     
     func merge(withNewer account: Account) {

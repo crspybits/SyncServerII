@@ -89,25 +89,8 @@ extension KituraTest {
             Log.info("performServerTest: Ends")
         }
         
-        switch testAccount.scheme.accountName {
-        case AccountScheme.google.accountName:
-            GoogleCredsCache.credsFor(googleAccount: testAccount) { creds in
-                runTest(usingCreds: creds)
-            }
-            
-        case AccountScheme.facebook.accountName:
-            let creds = FacebookCreds()
-            creds.accessToken = testAccount.token()
+        testAccount.scheme.doHandler(for: .getCredentials, testAccount: testAccount) { creds in
             runTest(usingCreds: creds)
-            
-        case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()
-            creds.accessToken = testAccount.token()
-            creds.accountId = testAccount.id()
-            runTest(usingCreds: creds)
-            
-        default:
-            XCTFail()
         }
     }
     
