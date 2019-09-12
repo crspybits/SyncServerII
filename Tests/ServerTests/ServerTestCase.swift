@@ -47,13 +47,14 @@ class ServerTestCase : XCTestCase {
     
     override func setUp() {
         super.setUp()
-#if os(macOS)
-        Constants.delegate = self
-        try! Constants.setup(configFileName: "ServerTests.json")
-#else // Linux
-        try! Constants.setup(configFileFullPath: "./ServerTests.json")
+        // The same file is assumed to contain both the server configuration and test configuration keys.
+#if os(Linux)
+        try! Configuration.setup(configFileFullPath: "./ServerTests.json", testConfigFileFullPath: "./ServerTests.json")
+#else
+        // Assume that the configuration file(s) have been copied to /tmp before running the test.
+        try! Configuration.setup(configFileFullPath: "/tmp/ServerTests.json", testConfigFileFullPath: "/tmp/ServerTests.json")
 #endif
-        
+
         Database.remove()
         _ = Database.setup()
         
@@ -471,7 +472,7 @@ class ServerTestCase : XCTestCase {
     func addNewUser(testAccount:TestAccount = .primaryOwningAccount, sharingGroupUUID: String, deviceUUID:String, cloudFolderName: String? = ServerTestCase.cloudFolderName, sharingGroupName:String? = nil) -> AddUserResponse? {
         var result:AddUserResponse?
 
-        if let fileName = Constants.session.owningUserAccountCreation.initialFileName {
+        if let fileName = Configuration.server.owningUserAccountCreation.initialFileName {
             // Need to delete the initialization file in the test account, so that if we're creating the user test account for a 2nd, 3rd etc time, we don't fail.
             let options = CloudStorageFileNameOptions(cloudFolderName: cloudFolderName, mimeType: "text/plain")
             
@@ -1553,7 +1554,7 @@ class ServerTestCase : XCTestCase {
                             XCTAssert(downloadFileResponse.masterVersionUpdate == nil)
 
                             var loadTesting = false
-                            if let loadTestingCloudStorage = Constants.session.loadTestingCloudStorage, loadTestingCloudStorage {
+                            if let loadTestingCloudStorage = Configuration.server.loadTestingCloudStorage, loadTestingCloudStorage {
                                 loadTesting = true
                             }
         
@@ -1704,13 +1705,6 @@ class ServerTestCase : XCTestCase {
         }
         
         return false
-    }
-}
-
-extension ServerTestCase : ConstantsDelegate {
-    // A hack to get access to Server.json during testing.
-    public func configFilePath(forConstants:Constants) -> String {
-        return "/tmp"
     }
 }
 

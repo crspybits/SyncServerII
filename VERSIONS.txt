@@ -1,5 +1,9 @@
 SyncServer
 
+Version
+	* Change configuration files to use Codable
+	* Adding Microsoft authentication and OneDrive
+
 Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.
 	* Adding CloudWatch agent into Elastic Beanstalk deployment.

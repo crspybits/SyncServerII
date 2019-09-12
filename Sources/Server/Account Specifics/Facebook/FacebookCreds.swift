@@ -56,11 +56,15 @@ class FacebookCreds : AccountAPICall,  Account {
         case non200ErrorCode(Int?)
         case didNotReceiveJSON
         case noAccessTokenInResult
+        case noAppIdOrSecret
     }
     
     func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->())  {
-        let fbAppId = Constants.session.facebookClientId!
-        let fbAppSecret = Constants.session.facebookClientSecret!
+        guard let fbAppId = Configuration.server.FacebookClientId,
+            let fbAppSecret = Configuration.server.FacebookClientSecret else {
+            completion(GenerateTokensError.noAppIdOrSecret)
+            return
+        }
         
         let urlParameters = "grant_type=fb_exchange_token&client_id=\(fbAppId)&client_secret=\(fbAppSecret)&fb_exchange_token=\(accessToken!)"
 

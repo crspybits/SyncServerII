@@ -179,7 +179,14 @@ class GoogleCreds : AccountAPICall, Account {
             return
         }
 
-        let bodyParameters = "code=\(self.serverAuthCode!)&client_id=\(Constants.session.googleClientId!)&client_secret=\(Constants.session.googleClientSecret!)&redirect_uri=&grant_type=authorization_code"
+        guard let clientId = Configuration.server.GoogleServerClientId,
+            let clientSecret = Configuration.server.GoogleServerClientSecret else {
+            Log.info("No client or secret from in configuration.")
+            completion(CredentialsError.noClientIdOrSecret)
+            return
+        }
+        
+        let bodyParameters = "code=\(self.serverAuthCode!)&client_id=\(clientId)&client_secret=\(clientSecret)&redirect_uri=&grant_type=authorization_code"
         Log.debug("bodyParameters: \(bodyParameters)")
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
@@ -237,14 +244,15 @@ class GoogleCreds : AccountAPICall, Account {
         self.accessToken = newerGoogleCreds.accessToken
     }
     
-    enum RefreshError : Swift.Error {
-    case badStatusCode(HTTPStatusCode?)
-    case couldNotObtainParameterFromJSON
-    case nilAPIResult
-    case badJSONResult
-    case errorSavingCredsToDatabase
-    case noRefreshToken
-    case expiredOrRevokedAccessToken
+    enum CredentialsError : Swift.Error {
+        case badStatusCode(HTTPStatusCode?)
+        case couldNotObtainParameterFromJSON
+        case nilAPIResult
+        case badJSONResult
+        case errorSavingCredsToDatabase
+        case noRefreshToken
+        case expiredOrRevokedAccessToken
+        case noClientIdOrSecret
     }
     
     // Use the refresh token to generate a new access token.
@@ -254,11 +262,18 @@ class GoogleCreds : AccountAPICall, Account {
 
         // TODO: *0* Sometimes we've been ending up in a situation where we don't have a refresh token. The database somehow doesn't get the refresh token saved in certain situations. What are those situations?
         guard self.refreshToken != nil else {
-            completion(RefreshError.noRefreshToken)
+            completion(CredentialsError.noRefreshToken)
             return
         }
         
-        let bodyParameters = "client_id=\(Constants.session.googleClientId!)&client_secret=\(Constants.session.googleClientSecret!)&refresh_token=\(self.refreshToken!)&grant_type=refresh_token"
+        guard let clientId = Configuration.server.GoogleServerClientId,
+            let clientSecret = Configuration.server.GoogleServerClientSecret else {
+            Log.info("No client or secret from in configuration.")
+            completion(CredentialsError.noClientIdOrSecret)
+            return
+        }
+        
+        let bodyParameters = "client_id=\(clientId)&client_secret=\(clientSecret)&refresh_token=\(self.refreshToken!)&grant_type=refresh_token"
         Log.debug("bodyParameters: \(bodyParameters)")
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
@@ -274,25 +289,25 @@ class GoogleCreds : AccountAPICall, Account {
                 let error = dict["error"] as? String,
                 error == "invalid_grant" {
                 
-                completion(RefreshError.expiredOrRevokedAccessToken)
+                completion(CredentialsError.expiredOrRevokedAccessToken)
                 return
             }
 
             guard statusCode == HTTPStatusCode.OK else {
                 Log.error("Bad status code: \(String(describing: statusCode))")
-                completion(RefreshError.badStatusCode(statusCode))
+                completion(CredentialsError.badStatusCode(statusCode))
                 return
             }
             
             guard apiResult != nil else {
                 Log.error("API result was nil!")
-                completion(RefreshError.nilAPIResult)
+                completion(CredentialsError.nilAPIResult)
                 return
             }
             
             guard case .dictionary(let dictionary) = apiResult! else {
                 Log.error("Bad JSON result: \(String(describing: apiResult))")
-                completion(RefreshError.badJSONResult)
+                completion(CredentialsError.badJSONResult)
                 return
             }
             
@@ -311,12 +326,12 @@ class GoogleCreds : AccountAPICall, Account {
                     return
                 }
                 
-                completion(RefreshError.errorSavingCredsToDatabase)
+                completion(CredentialsError.errorSavingCredsToDatabase)
                 return
             }
             
             Log.error("Could not obtain parameter from JSON!")
-            completion(RefreshError.couldNotObtainParameterFromJSON)
+            completion(CredentialsError.couldNotObtainParameterFromJSON)
         }
     }
     
@@ -379,7 +394,7 @@ class GoogleCreds : AccountAPICall, Account {
                 self.refresh() { error in
                     if let error = error {
                         switch error {
-                        case RefreshError.expiredOrRevokedAccessToken:
+                        case CredentialsError.expiredOrRevokedAccessToken:
                             Log.info("Refresh token expired or revoked")
                             completion(
                                 APICallResult.dictionary(

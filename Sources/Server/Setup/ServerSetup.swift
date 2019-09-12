@@ -51,26 +51,26 @@ class ServerSetup {
         // Needed for testing.
         AccountManager.session.reset()
         
-        if Constants.session.allowedSignInTypes.Google {
-            let googleCredentials = CredentialsGoogleToken(tokenTimeToLive: Constants.session.signInTokenTimeToLive)
+        if Configuration.server.allowedSignInTypes.Google == true {
+            let googleCredentials = CredentialsGoogleToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: googleCredentials)
             AccountManager.session.addAccountType(GoogleCreds.self)
         }
         
-        if Constants.session.allowedSignInTypes.Facebook {
-            let facebookCredentials = CredentialsFacebookToken(tokenTimeToLive: Constants.session.signInTokenTimeToLive)
+        if Configuration.server.allowedSignInTypes.Facebook == true {
+            let facebookCredentials = CredentialsFacebookToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: facebookCredentials)
             AccountManager.session.addAccountType(FacebookCreds.self)
         }
 
-        if Constants.session.allowedSignInTypes.Dropbox {
-            let dropboxCredentials = CredentialsDropboxToken(tokenTimeToLive: Constants.session.signInTokenTimeToLive)
+        if Configuration.server.allowedSignInTypes.Dropbox == true {
+            let dropboxCredentials = CredentialsDropboxToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: dropboxCredentials)
             AccountManager.session.addAccountType(DropboxCreds.self)
         }
         
-        if Constants.session.allowedSignInTypes.Microsoft {
-            let microsoftCredentials = CredentialsMicrosoftToken(tokenTimeToLive: Constants.session.signInTokenTimeToLive)
+        if Configuration.server.allowedSignInTypes.Microsoft == true {
+            let microsoftCredentials = CredentialsMicrosoftToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: microsoftCredentials)
             AccountManager.session.addAccountType(MicrosoftCreds.self)
         }

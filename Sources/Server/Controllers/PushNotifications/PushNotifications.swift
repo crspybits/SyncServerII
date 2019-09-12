@@ -14,11 +14,11 @@ class PushNotifications {
     private(set) var sns:SwiftyAWSSNS!
     
     init?() {
-        guard let accessKeyId = Constants.session.awssns.accessKeyId,
-            let secretKey = Constants.session.awssns.secretKey,
-            let region = Constants.session.awssns.region,
-            let platformApplicationArn = Constants.session.awssns.platformApplicationArn else {
-            let message = "Missing one of the Constants.session.awssns values!"
+        guard let accessKeyId = Configuration.server.awssns?.accessKeyId,
+            let secretKey = Configuration.server.awssns?.secretKey,
+            let region = Configuration.server.awssns?.region,
+            let platformApplicationArn = Configuration.server.awssns?.platformApplicationArn else {
+            let message = "Missing one of the Configuration.server.awssns values!"
             Log.error(message)
             return nil
         }

@@ -46,12 +46,12 @@ public class ServerMain {
             do {
                 // When we launch the server from within Xcode (or just with no explicit arguments), we have 1 "argument" (CommandLine.arguments[0]).
                 if CommandLine.arguments.count == 1 {
-                    try Constants.setup(configFileName: Constants.serverConfigFile)
+                    try Configuration.setup(configFileFullPath: ServerConfiguration.serverConfigFile)
                 }
                 else {
                     let configFile = CommandLine.arguments[1]
                     Log.info("Loading server config file from: \(configFile)")
-                    try Constants.setup(configFileFullPath: configFile)
+                    try Configuration.setup(configFileFullPath: configFile)
                 }
             } catch (let error) {
                 Log.error("Failed during startup: Could not load config file: \(error)")
@@ -70,32 +70,7 @@ public class ServerMain {
         }
 
         let serverRoutes = CreateRoutes()
-
-        if Constants.session.ssl.usingKituraSSL {
-#if os(Linux)
-            let sslConfig = SSLConfig(
-                    withCACertificateDirectory: Constants.session.ssl.caCertificateDirectory,
-                    usingCertificateFile: Constants.session.ssl.certFile,
-                    withKeyFile: Constants.session.ssl.keyFile,
-                    usingSelfSignedCerts: Constants.session.ssl.selfSigning)
-#else // on macOS
-            let sslConfig = SSLConfig(
-                    withChainFilePath: Constants.session.ssl.certPfxFile,
-                    withPassword: Constants.session.ssl.configPassword,
-                    usingSelfSignedCerts: Constants.session.ssl.selfSigning)
-#endif
-
-            var signingType = "CA Signed"
-            if Constants.session.ssl.selfSigning {
-                signingType = "Self-Signed"
-            }
-
-            Log.info("Using \(signingType) SSL Certificate")
-            Kitura.addHTTPServer(onPort: Constants.session.port, with: serverRoutes.getRoutes(), withSSL: sslConfig)
-        }
-        else {
-            Kitura.addHTTPServer(onPort: Constants.session.port, with: serverRoutes.getRoutes())
-        }
+        Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
         
         switch type {
         case .blocking:

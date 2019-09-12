@@ -101,8 +101,8 @@ class RequestHandler {
     }
     
     private func endWith(clientResponse:EndWithResponse) {
-        self.response.headers.append(ServerConstants.httpResponseCurrentServerVersion, value: Constants.session.deployedGitTag)
-        if let minIOSClientVersion = Constants.session.iOSMinimumClientVersion {
+        self.response.headers.append(ServerConstants.httpResponseCurrentServerVersion, value: Configuration.misc.deployedGitTag)
+        if let minIOSClientVersion = Configuration.server.iOSMinimumClientVersion {
             self.response.headers.append(
                 ServerConstants.httpResponseMinimumIOSClientAppVersion, value: minIOSClientVersion)
         }

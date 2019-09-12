@@ -3,6 +3,7 @@ import Kitura
 import KituraNet
 @testable import Server
 import LoggerAPI
+import HeliumLogger
 import CredentialsDropbox
 import Foundation
 import SyncServerShared

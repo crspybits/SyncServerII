@@ -40,22 +40,22 @@ class Database {
     init(showStartupInfo:Bool = false) {
         self.connection = MySQL()
         if showStartupInfo {
-            Log.info("Connecting to database with host: \(Constants.session.db.host)...")
+            Log.info("Connecting to database with host: \(Configuration.server.db.host)...")
         }
-        guard self.connection.connect(host: Constants.session.db.host, user: Constants.session.db.user, password: Constants.session.db.password ) else {
-            Log.error("Failure connecting to mySQL server \(Constants.session.db.host): \(self.error)")
+        guard self.connection.connect(host: Configuration.server.db.host, user: Configuration.server.db.user, password: Configuration.server.db.password ) else {
+            Log.error("Failure connecting to mySQL server \(Configuration.server.db.host): \(self.error)")
             return
         }
         
         ServerStatsKeeper.session.increment(stat: .dbConnectionsOpened)
 
         if showStartupInfo {
-            Log.info("Connecting to database named: \(Constants.session.db.database)...")
+            Log.info("Connecting to database named: \(Configuration.server.db.database)...")
         }
         
         Log.info("DB CONNECTION STATS: opened: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsOpened)); closed: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsClosed))")
 
-        guard self.connection.selectDatabase(named: Constants.session.db.database) else {
+        guard self.connection.selectDatabase(named: Configuration.server.db.database) else {
             Log.error("Failure: \(self.error)")
             return
         }
@@ -118,7 +118,7 @@ class Database {
     func createTableIfNeeded(tableName:String, columnCreateQuery:String) -> TableUpcreateResult {
         let checkForTable = "SELECT * " +
             "FROM information_schema.tables " +
-            "WHERE table_schema = '\(Constants.session.db.database)' " +
+            "WHERE table_schema = '\(Configuration.server.db.database)' " +
             "AND table_name = '\(tableName)' " +
             "LIMIT 1;"
         
@@ -147,7 +147,7 @@ class Database {
     func columnExists(_ column:String, in tableName:String) -> Bool? {
         let checkForColumn = "SELECT * " +
             "FROM information_schema.columns " +
-            "WHERE table_schema = '\(Constants.session.db.database)' " +
+            "WHERE table_schema = '\(Configuration.server.db.database)' " +
             "AND table_name = '\(tableName)' " +
             "AND column_name = '\(column)' " +
             "LIMIT 1;"

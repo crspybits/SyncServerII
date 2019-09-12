@@ -38,30 +38,6 @@ case body
 case header
 }
 
-// 12/20/17; I'm doing this because I suspect that I get test failures that occur simply because I'm asking to generate an access token from a refresh token too frequently in my tests.
-class GoogleCredsCache {
-    // The key is the `sub` or id for the particular account.
-    static var cache = [String: GoogleCreds]()
-    
-    static func credsFor(googleAccount:TestAccount,
-                         completion: @escaping (_ creds: GoogleCreds)->()) {
-        
-        if let creds = cache[googleAccount.id()] {
-            completion(creds)
-        }
-        else {
-            Log.info("Attempting to refresh Google Creds...")
-            let creds = GoogleCreds()
-            cache[googleAccount.id()] = creds
-            creds.refreshToken = googleAccount.token()
-            creds.refresh {[unowned creds] error in
-                XCTAssert(error == nil, "credsFor: Failure on refresh: \(error!)")
-                completion(creds)
-            }
-        }
-    }
-}
-
 extension KituraTest {
     func performServerTest(testAccount:TestAccount = .primaryOwningAccount,
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
@@ -129,17 +105,9 @@ extension KituraTest {
         
         allHeaders["Content-Type"] = "text/plain"
         
-        var options: [ClientRequest.Options] =
+        let options: [ClientRequest.Options] =
             [.method(route.method.rawValue), .hostname("localhost"),
-                .port(Int16(Constants.session.port)), .path(path), .headers(allHeaders)]
-        
-        if Constants.session.ssl.usingKituraSSL {
-            // .disableSSLVerification is used here because we'll likely be using a self-signed SSL certificate for testing.
-            options += [.disableSSLVerification, .schema("https://")]
-        }
-        else {
-            options += [.schema("http://")]
-        }
+                .port(Int16(Configuration.server.port)), .path(path), .headers(allHeaders), .schema("http://")]
         
         let req:ClientRequest = HTTP.request(options) { (response:ClientResponse?) in
             var dict:[String:Any]?

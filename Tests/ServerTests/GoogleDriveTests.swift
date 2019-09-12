@@ -671,7 +671,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         creds.refresh { error in
             if let error = error {
                 switch error {
-                case GoogleCreds.RefreshError.expiredOrRevokedAccessToken:
+                case GoogleCreds.CredentialsError.expiredOrRevokedAccessToken:
                     break
                 default:
                     XCTFail()

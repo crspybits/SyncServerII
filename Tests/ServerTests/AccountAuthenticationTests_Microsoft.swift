@@ -12,9 +12,21 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
 
     func testBootstrapRefreshToken() {
         let microsoftCreds = MicrosoftCreds()
-        microsoftCreds.generateTokens(response: nil, completion) { error in
-        
+        guard let test = Configuration.test else {
+            XCTFail()
+            return
         }
+        
+        let accessToken1 = test.microsoft1.accessToken
+        microsoftCreds.accessToken = accessToken1
+        
+        let exp = expectation(description: "generate")
+        microsoftCreds.generateTokens(response: nil) { error in
+            XCTAssert(error == nil)
+            Log.info("Refresh token: \(String(describing: microsoftCreds.refreshToken))")
+            exp.fulfill()
+        }
+        waitExpectation(timeout: 10, handler: nil)
     }
     
     func testGoodEndpointWithBadCredsFails() {
@@ -92,6 +104,7 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
 extension AccountAuthenticationTests_Microsoft {
     static var allTests : [(String, (AccountAuthenticationTests_Microsoft) -> () throws -> Void)] {
         let result:[(String, (AccountAuthenticationTests_Microsoft) -> () throws -> Void)] = [
+            ("testBootstrapRefreshToken", testBootstrapRefreshToken),
             ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
             ("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks),
 /*

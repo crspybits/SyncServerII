@@ -9,6 +9,9 @@ import Foundation
 import SyncServerShared
 import SMServerLib
 @testable import Server
+import LoggerAPI
+import HeliumLogger
+import XCTest
 
 func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
     return lhs.tokenKey == rhs.tokenKey && lhs.idKey == rhs.idKey
@@ -16,8 +19,9 @@ func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
 
 struct TestAccount {
     // These String's are keys into a .json file.
-    let tokenKey:String // key values: e.g., Google: a refresh token; Facebook:long-lived access token.
-    let idKey:String
+    
+    let tokenKey:KeyPath<TestConfiguration, String> // key values: e.g., Google: a refresh token; Facebook:long-lived access token.
+    let idKey:KeyPath<TestConfiguration, String>
     
     let scheme: AccountScheme
     
@@ -61,12 +65,12 @@ struct TestAccount {
 
     static let nonOwningSharingAccount:TestAccount = .facebook1
     
-    static let google1 = TestAccount(tokenKey: "GoogleRefreshToken", idKey: "GoogleSub", scheme: AccountScheme.google)
-    static let google2 = TestAccount(tokenKey: "GoogleRefreshToken2", idKey: "GoogleSub2", scheme: AccountScheme.google)
-    static let google3 = TestAccount(tokenKey: "GoogleRefreshToken3", idKey: "GoogleSub3", scheme: .google)
+    static let google1 = TestAccount(tokenKey: \.GoogleRefreshToken, idKey: \.GoogleSub, scheme: AccountScheme.google)
+    static let google2 = TestAccount(tokenKey: \.GoogleRefreshToken2, idKey: \.GoogleSub2, scheme: AccountScheme.google)
+    static let google3 = TestAccount(tokenKey: \.GoogleRefreshToken3, idKey: \.GoogleSub3, scheme: .google)
 
     // https://myaccount.google.com/permissions?pli=1
-    static let googleRevoked = TestAccount(tokenKey: "GoogleRefreshTokenRevoked", idKey: "GoogleSub4", scheme: .google)
+    static let googleRevoked = TestAccount(tokenKey: \.GoogleRefreshTokenRevoked, idKey: \.GoogleSub4, scheme: .google)
 
     static func isGoogle(_ account: TestAccount) -> Bool {
         return account.scheme == AccountScheme.google
@@ -76,17 +80,17 @@ struct TestAccount {
         return account.scheme == AccountScheme.google
     }
     
-    static let facebook1 = TestAccount(tokenKey: "FacebookLongLivedToken1", idKey: "FacebookId1", scheme: .facebook)
+    static let facebook1 = TestAccount(tokenKey: \.FacebookLongLivedToken1, idKey: \.FacebookId1, scheme: .facebook)
 
-    static let facebook2 = TestAccount(tokenKey: "FacebookLongLivedToken2", idKey: "FacebookId2", scheme: .facebook)
+    static let facebook2 = TestAccount(tokenKey: \.FacebookLongLivedToken2, idKey: \.FacebookId2, scheme: .facebook)
     
-    static let dropbox1 = TestAccount(tokenKey: "DropboxAccessToken1", idKey: "DropboxId1", scheme: .dropbox)
+    static let dropbox1 = TestAccount(tokenKey: \.DropboxAccessToken1, idKey: \.DropboxId1, scheme: .dropbox)
     
-    static let dropbox2 = TestAccount(tokenKey: "DropboxAccessToken2", idKey: "DropboxId2", scheme: .dropbox)
+    static let dropbox2 = TestAccount(tokenKey: \.DropboxAccessToken2, idKey: \.DropboxId2, scheme: .dropbox)
     
-    static let dropbox1Revoked = TestAccount(tokenKey: "DropboxAccessTokenRevoked", idKey: "DropboxId3", scheme: .dropbox)
+    static let dropbox1Revoked = TestAccount(tokenKey: \.DropboxAccessTokenRevoked, idKey: \.DropboxId3, scheme: .dropbox)
     
-    static let microsoft1 = TestAccount(tokenKey: "MicrosoftRefreshToken1", idKey: "MicrosoftId1", scheme: .microsoft)
+    static let microsoft1 = TestAccount(tokenKey: \.microsoft1.refreshToken, idKey: \.microsoft1.id, scheme: .microsoft)
     
     // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
     private func configValue(key:String) -> String {
@@ -100,11 +104,11 @@ struct TestAccount {
     }
     
     func token() -> String {
-        return configValue(key: tokenKey)
+        return Configuration.test![keyPath: tokenKey]
     }
     
     func id() -> String {
-        return configValue(key: idKey)
+        return Configuration.test![keyPath: idKey]
     }
     
     func registerHandlers() {
@@ -159,5 +163,29 @@ extension AccountScheme {
         }
         
         handler(testAccount, callback)
+    }
+}
+
+// 12/20/17; I'm doing this because I suspect that I get test failures that occur simply because I'm asking to generate an access token from a refresh token too frequently in my tests.
+class GoogleCredsCache {
+    // The key is the `sub` or id for the particular account.
+    static var cache = [String: GoogleCreds]()
+    
+    static func credsFor(googleAccount:TestAccount,
+                         completion: @escaping (_ creds: GoogleCreds)->()) {
+        
+        if let creds = cache[googleAccount.id()] {
+            completion(creds)
+        }
+        else {
+            Log.info("Attempting to refresh Google Creds...")
+            let creds = GoogleCreds()
+            cache[googleAccount.id()] = creds
+            creds.refreshToken = googleAccount.token()
+            creds.refresh {[unowned creds] error in
+                XCTAssert(error == nil, "credsFor: Failure on refresh: \(error!)")
+                completion(creds)
+            }
+        }
     }
 }

@@ -39,7 +39,7 @@ phase.add_file_reference(fileRef2)
 target = project.targets.select { |target| target.name == 'ServerTests' }.first
 puts "Add Script Phase to #{target}"
 phase = target.new_shell_script_build_phase()
-phase.shell_script = "cp Server.json /tmp; cp ServerTests.json /tmp; cp Resources/Cat.jpg /tmp"
+phase.shell_script = "cp Server.json /tmp; cp ServerTests.json /tmp; cp Resources/Cat.jpg /tmp; cp VERSION /tmp"
 
 # 3) Add in DEBUG and SERVER flags
 	

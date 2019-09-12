@@ -258,7 +258,7 @@ extension FileController {
         
 #if DEBUG
         // Short-circuit check sum test in the case of load testing. 'cause it won't be right :).
-        if let loadTesting = Constants.session.loadTestingCloudStorage, loadTesting {
+        if let loadTesting = Configuration.server.loadTestingCloudStorage, loadTesting {
             expectedCheckSum = uploadedCheckSum
         }
 #endif

@@ -14,7 +14,7 @@ import SyncServerShared
 class MockStorageLiveTests: ServerTestCase, LinuxTestable {
     override func setUp() {
         super.setUp()
-        Constants.session.loadTestingCloudStorage = true
+        Configuration.setupLoadTestingCloudStorage()
     }
 
     func testUploadFile() {

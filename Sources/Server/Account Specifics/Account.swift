@@ -11,6 +11,7 @@ import Credentials
 import KituraNet
 import LoggerAPI
 import Kitura
+import HeliumLogger
 
 enum AccountCreationUser {
     case user(User) // use this if we have it.
@@ -114,7 +115,7 @@ extension Account {
 extension Account {
     var cloudStorage:CloudStorage? {
 #if DEBUG
-        if let loadTesting = Constants.session.loadTestingCloudStorage, loadTesting {
+        if let loadTesting = Configuration.server.loadTestingCloudStorage, loadTesting {
             return MockStorage()
         }
         else {
@@ -155,6 +156,9 @@ class AccountAPICall {
         do {
             var body = Data()
             try response.readAllData(into: &body)
+            
+            let string = String(data: body, encoding: .utf8)
+            Log.debug("response string: \(String(describing: string))")
 
             if let expectedBody = expectedBody, expectedBody == .data {
                 result = .data(body)
@@ -267,6 +271,8 @@ class AccountAPICall {
         case .some(.data(let data)):
             req.end(data)
         }
+        
+        Log.debug("Request URL: \(req.url)")
     }
 }
 

@@ -24,7 +24,7 @@ class UtilController : ControllerProtocol {
         
         response.currentServerDateTime = Date()
         response.serverUptime = -UtilController.serverStart.timeIntervalSinceNow
-        response.deployedGitTag = Constants.session.deployedGitTag
+        response.deployedGitTag = Configuration.misc.deployedGitTag
         
         let stats = ServerStatsKeeper.session.stats
         var diagnostics = ""
