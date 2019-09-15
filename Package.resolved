@@ -11,6 +11,24 @@
         }
       },
       {
+        "package": "CryptorECC",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueECC.git",
+        "state": {
+          "branch": null,
+          "revision": "73a43a5102eafaf4668dbd6e0163bed21c776b9c",
+          "version": "1.2.4"
+        }
+      },
+      {
+        "package": "CryptorRSA",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueRSA.git",
+        "state": {
+          "branch": null,
+          "revision": "e906f5e93426bb43ad7ac37cc20008d8fae608d9",
+          "version": "1.0.34"
+        }
+      },
+      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
@@ -42,7 +60,7 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsMicrosoft.git",
         "state": {
           "branch": "master",
-          "revision": "aa29374ee649b4e66dc2a8fc076b76bc4cf71df9",
+          "revision": "8bee2c5dac0fa530c0f582cd7f5e77200a9966bc",
           "version": null
         }
       },
@@ -191,6 +209,15 @@
         }
       },
       {
+        "package": "SwiftJWT",
+        "repositoryURL": "https://github.com/IBM-Swift/Swift-JWT.git",
+        "state": {
+          "branch": null,
+          "revision": "a0a89d62b8276635f430dfaf8688051cac6b9342",
+          "version": "3.5.3"
+        }
+      },
+      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
@@ -222,7 +249,7 @@
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
           "branch": "dev",
-          "revision": "909855448b5123b8736d24fa71104adc5d8b4f08",
+          "revision": "20ec81e954e946b23539bf87ea410871bb4552aa",
           "version": null
         }
       },

@@ -177,9 +177,7 @@ extension KituraTest {
         headers[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
         headers[ServerConstants.httpRequestDeviceUUID] = deviceUUID
         
-        if testUser.scheme.accountName == AccountScheme.dropbox.accountName {
-            headers[ServerConstants.HTTPAccountIdKey] = testUser.id()
-        }
+        testUser.scheme.specificHeaderSetup(headers: &headers, testUser: testUser)
 
         return headers
     }

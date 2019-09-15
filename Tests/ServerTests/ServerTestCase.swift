@@ -62,6 +62,8 @@ class ServerTestCase : XCTestCase {
         
         Log.logger = HeliumLogger()
         HeliumLogger.use(.debug)
+        
+        TestAccount.registerHandlers()
     }
     
     override func tearDown() {
@@ -346,65 +348,7 @@ class ServerTestCase : XCTestCase {
         
         let expectation = self.expectation(description: "expectation")
 
-        switch testAccount.scheme.accountName {
-        case AccountScheme.google.accountName:
-            let creds = GoogleCreds()
-            creds.refreshToken = testAccount.token()
-            creds.refresh { error in
-                guard error == nil, creds.accessToken != nil else {
-                    print("Error: \(error!)")
-                    XCTFail()
-                    expectation.fulfill()
-                    return
-                }
-                
-                guard let cloudStorage = creds.cloudStorage else {
-                    XCTFail()
-                    expectation.fulfill()
-                    return
-                }
-                
-                cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
-                    switch result {
-                    case .success:
-                        break
-                    case .accessTokenRevokedOrExpired:
-                        XCTFail()
-                    case .failure(let error):
-                        XCTFail("\(error)")
-                    }
-                    
-                    expectation.fulfill()
-                }
-            }
-            
-        case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()
-            creds.accessToken = testAccount.token()
-            creds.accountId = testAccount.id()
-            
-            guard let cloudStorage = creds.cloudStorage else {
-                XCTFail()
-                expectation.fulfill()
-                return
-            }
-            
-            cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
-                switch result {
-                case .success:
-                    break
-                case .accessTokenRevokedOrExpired:
-                    XCTFail()
-                case .failure:
-                    XCTFail()
-                }
-
-                expectation.fulfill()
-            }
-            
-        default:
-            assert(false)
-        }
+        testAccount.scheme.deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options, expectation: expectation)
         
         waitForExpectations(timeout: 20.0, handler: nil)
     }
@@ -1647,7 +1591,7 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        var cloudFileName:String
+        var cloudFileName:String!
         if let nonStandardFileName = nonStandardFileName {
             cloudFileName = nonStandardFileName
         }
@@ -1666,6 +1610,11 @@ class ServerTestCase : XCTestCase {
                     XCTFail()
                 }
             case .failure(let error):
+                if expectAccessTokenRevokedOrExpired {
+                    XCTFail()
+                }
+                
+                cloudFileName = nil
                 Log.debug("uploadFile: \(error)")
                 if !failureExpected {
                     XCTFail()

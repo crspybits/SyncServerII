@@ -18,12 +18,22 @@ func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
 }
 
 struct TestAccount {
-    // These String's are keys into a .json file.
-    
     let tokenKey:KeyPath<TestConfiguration, String> // key values: e.g., Google: a refresh token; Facebook:long-lived access token.
+    
+    // For Microsoft, their idToken
+    let secondTokenKey:KeyPath<TestConfiguration, String>?
+    
     let idKey:KeyPath<TestConfiguration, String>
     
     let scheme: AccountScheme
+    
+    // tokenKey: \.DropboxAccessTokenRevoked, idKey: \.DropboxId3, scheme: .dropbox
+    init(tokenKey:KeyPath<TestConfiguration, String>, secondTokenKey:KeyPath<TestConfiguration, String>? = nil, idKey:KeyPath<TestConfiguration, String>, scheme: AccountScheme) {
+        self.tokenKey = tokenKey
+        self.secondTokenKey = secondTokenKey
+        self.idKey = idKey
+        self.scheme = scheme
+    }
     
     // The main owning account on which tests are conducted.
 #if PRIMARY_OWNING_GOOGLE1
@@ -90,28 +100,27 @@ struct TestAccount {
     
     static let dropbox1Revoked = TestAccount(tokenKey: \.DropboxAccessTokenRevoked, idKey: \.DropboxId3, scheme: .dropbox)
     
-    static let microsoft1 = TestAccount(tokenKey: \.microsoft1.refreshToken, idKey: \.microsoft1.id, scheme: .microsoft)
+    static let microsoft1 = TestAccount(tokenKey: \.microsoft1.refreshToken, secondTokenKey: \.microsoft1.idToken, idKey: \.microsoft1.id, scheme: .microsoft)
     
-    // I've put this method here (instead of in Constants) because it is just a part of testing, not part of the full-blown server.
-    private func configValue(key:String) -> String {
-#if os(macOS)
-        let config = try! ConfigLoader(usingPath: "/tmp", andFileName: "ServerTests.json", forConfigType: .jsonDictionary)
-#else // Linux
-        let config = try! ConfigLoader(usingPath: "./", andFileName: "ServerTests.json", forConfigType: .jsonDictionary)
-#endif
-        let token = try! config.getString(varName: key)
-        return token
-    }
+    static let microsoft1ExpiredAccessToken = TestAccount(tokenKey: \.microsoft1ExpiredAccessToken.refreshToken, secondTokenKey: \.microsoft1ExpiredAccessToken.accessToken, idKey: \.microsoft1ExpiredAccessToken.id, scheme: .microsoft)
     
     func token() -> String {
         return Configuration.test![keyPath: tokenKey]
+    }
+    
+    func secondToken() -> String? {
+        guard let secondTokenKey = secondTokenKey else {
+            return nil
+        }
+        
+        return Configuration.test![keyPath: secondTokenKey]
     }
     
     func id() -> String {
         return Configuration.test![keyPath: idKey]
     }
     
-    func registerHandlers() {
+    static func registerHandlers() {
         // MARK: Google
         AccountScheme.google.registerHandler(type: .getCredentials) { testAccount, callback in
             GoogleCredsCache.credsFor(googleAccount: testAccount) { creds in
@@ -157,12 +166,90 @@ extension AccountScheme {
     }
     
     func doHandler(for type: HandlerType, testAccount: TestAccount, callback: @escaping ((Account)->())) {
-        guard let handler = handlers[key(for: type)] else {
+        let handlerKey = key(for: type)
+        guard let handler = handlers[handlerKey] else {
             assert(false)
             return
         }
         
         handler(testAccount, callback)
+    }
+    
+    func specificHeaderSetup(headers: inout [String: String], testUser: TestAccount) {
+        switch accountName {
+        case AccountScheme.dropbox.accountName:
+            headers[ServerConstants.HTTPAccountIdKey] = testUser.id()
+        case AccountScheme.microsoft.accountName:
+            headers[ServerConstants.HTTPMicrosoftAccessToken] = testUser.secondToken()
+        default:
+            break
+        }
+    }
+    
+    func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions, expectation:XCTestExpectation) {
+
+        switch testAccount.scheme.accountName {
+        case AccountScheme.google.accountName:
+            let creds = GoogleCreds()
+            creds.refreshToken = testAccount.token()
+            creds.refresh { error in
+                guard error == nil, creds.accessToken != nil else {
+                    print("Error: \(error!)")
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard let cloudStorage = creds.cloudStorage else {
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+                
+                cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+                    switch result {
+                    case .success:
+                        break
+                    case .accessTokenRevokedOrExpired:
+                        XCTFail()
+                    case .failure(let error):
+                        XCTFail("\(error)")
+                    }
+                    
+                    expectation.fulfill()
+                }
+            }
+            
+        case AccountScheme.dropbox.accountName:
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
+            
+            guard let cloudStorage = creds.cloudStorage else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
+            
+            cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+                switch result {
+                case .success:
+                    break
+                case .accessTokenRevokedOrExpired:
+                    XCTFail()
+                case .failure:
+                    XCTFail()
+                }
+
+                expectation.fulfill()
+            }
+            
+        case AccountScheme.microsoft.accountName:
+            break
+            
+        default:
+            assert(false)
+        }
     }
 }
 

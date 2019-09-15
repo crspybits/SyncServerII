@@ -13,7 +13,7 @@ import LoggerAPI
 import HeliumLogger
 import SyncServerShared
 
-class DropboxTests: ServerTestCase, LinuxTestable {
+class FileDropboxTests: ServerTestCase, LinuxTestable {
     // In my Dropbox:
     let knownPresentFile = "DO-NOT-REMOVE.txt"
     let knownPresentFile2 = "DO-NOT-REMOVE2.txt"
@@ -442,8 +442,8 @@ class DropboxTests: ServerTestCase, LinuxTestable {
     }
 }
 
-extension DropboxTests {
-    static var allTests : [(String, (DropboxTests) -> () throws -> Void)] {
+extension FileDropboxTests {
+    static var allTests : [(String, (FileDropboxTests) -> () throws -> Void)] {
         return [
             ("testCheckForFileFailsWithFileThatDoesNotExist", testCheckForFileFailsWithFileThatDoesNotExist),
             ("testCheckForFileWorksWithExistingFile", testCheckForFileWorksWithExistingFile),
@@ -468,7 +468,7 @@ extension DropboxTests {
     }
     
     func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:DropboxTests.self)
+        linuxTestSuiteIncludesAllTests(testType:FileDropboxTests.self)
     }
 }
 

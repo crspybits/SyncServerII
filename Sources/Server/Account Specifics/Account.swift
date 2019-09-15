@@ -110,6 +110,14 @@ extension Account {
 
         setWithValue(keyValue)
     }
+    
+    static var accessTokenKey: String {
+        return "accessToken"
+    }
+    
+    static var refreshTokenKey: String {
+        return "refreshToken"
+    }
 }
 
 extension Account {
@@ -193,7 +201,7 @@ class AccountAPICall {
     // Does an HTTP call to the endpoint constructed by baseURL with path, the HTTP method, and the given body parameters (if any). BaseURL is given without any http:// or https:// (https:// is used). If baseURL is nil, then self.baseURL is used-- which must not be nil in that case.
     // expectingData == true means return Data. false or nil just look for Data or JSON result.
     func apiCall(method:String, baseURL:String? = nil, path:String,
-                 additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
+                 additionalHeaders: [String:String]? = nil, additionalOptions: [ClientRequest.Options] = [], urlParameters:String? = nil,
                  body:APICallBody? = nil,
                  returnResultWhenNon200Code:Bool = true,
                  expectedSuccessBody:ExpectedResponse? = nil,
@@ -205,7 +213,7 @@ class AccountAPICall {
             hostname = self.baseURL
         }
         
-        var requestOptions: [ClientRequest.Options] = []
+        var requestOptions: [ClientRequest.Options] = additionalOptions
         requestOptions.append(.schema("https://"))
         requestOptions.append(.hostname(hostname!))
         requestOptions.append(.method(method))

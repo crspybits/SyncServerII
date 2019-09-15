@@ -39,10 +39,8 @@ d) The rationale for the two kinds of access tokens (client-side, and server-sid
 class GoogleCreds : AccountAPICall, Account {    
     // The following keys are for conversion <-> JSON (e.g., to store this into a database).
     
-    static let accessTokenKey = "accessToken"
     var accessToken: String!
     
-    static let refreshTokenKey = "refreshToken"
     // This is obtained via the serverAuthCode
     var refreshToken: String!
     
@@ -338,7 +336,7 @@ class GoogleCreds : AccountAPICall, Account {
     let tokenRevokedOrExpired = "accessTokenRevokedOrExpired"
     
     override func apiCall(method:String, baseURL:String? = nil, path:String,
-                 additionalHeaders: [String:String]? = nil, urlParameters:String? = nil,
+                 additionalHeaders: [String:String]? = nil,additionalOptions: [ClientRequest.Options] = [], urlParameters:String? = nil,
                  body:APICallBody? = nil,
                  returnResultWhenNon200Code:Bool = true,
                  expectedSuccessBody:ExpectedResponse? = nil,
@@ -352,7 +350,7 @@ class GoogleCreds : AccountAPICall, Account {
             headers["Authorization"] = "Bearer \(self.accessToken!)"
         }
 
-        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody) { (apiCallResult, statusCode, responseHeaders) in
+        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, additionalOptions: additionalOptions, urlParameters: urlParameters, body: body, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody) { (apiCallResult, statusCode, responseHeaders) in
         
             /* So far, I've seen two results from a Google expired or revoked refresh token:
                 1) an unauthorized http status here followed by [1] in refresh.

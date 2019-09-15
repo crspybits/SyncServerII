@@ -47,11 +47,23 @@ struct TestConfiguration: Decodable {
 
     struct MicrosoftTokens: Decodable {
         let refreshToken: String
-        let accessToken: String // For bootstrapping the refresh token
+        
+        // For bootstrapping the refresh token-- must be the "idToken" from iOS MSAL (and not the accessToken from that).
+        // See https://docs.microsoft.com/en-us/azure/active-directory/develop/id-tokens
+        // https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-scenarios
+        // https://medium.com/@nilasini/id-token-vs-access-token-17e7dd622084
+        let idToken: String
+        
+        // The "accessToken" from iOS MSAL
+        let accessToken: String
+        
         let id: String
     }
     
     // for chris@cprince.com
     let microsoft1: MicrosoftTokens
+    
+    // for chris@cprince.com, but an expired access token
+    let microsoft1ExpiredAccessToken: MicrosoftTokens
 }
 #endif
