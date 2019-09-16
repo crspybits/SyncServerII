@@ -59,6 +59,32 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testCheckForFileFailsWithExpiredAccessToken() {
+        let creds = MicrosoftCreds()
+        creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
+
+        let existingFile = self.knownPresentFile
+        
+        let exp = expectation(description: "\(#function)\(#line)")
+        
+        creds.checkForFile(fileName: existingFile) { result in
+            switch result {
+            case .success(.fileFound):
+                XCTFail()
+            case .success((.fileNotFound)):
+                XCTFail()
+            case .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            }
+
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testCheckForFileWorksWithExistingFile() {
         let creds = MicrosoftCreds()
         creds.refreshToken = TestAccount.microsoft1.token()
@@ -134,6 +160,41 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
                 
                 exp.fulfill()
             }
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testSimpleUploadWithExpiredAccessToken() {
+        let file = TestFile.test1
+        let ext = Extension.forMimeType(mimeType: file.mimeType.rawValue)
+        let fileName = Foundation.UUID().uuidString + ".\(ext)"
+        
+        let creds = MicrosoftCreds()
+        creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
+        
+        let exp = expectation(description: "\(#function)\(#line)")
+            
+        let fileContentsData: Data
+
+        switch file.contents {
+        case .string(let fileContents):
+            fileContentsData = fileContents.data(using: .ascii)!
+        case .url(let url):
+            fileContentsData = try! Data(contentsOf: url)
+        }
+        
+        creds.uploadFile(withName: fileName, mimeType: file.mimeType, data: fileContentsData) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            }
+            
+            exp.fulfill()
         }
         
         waitForExpectations(timeout: 10, handler: nil)
@@ -319,11 +380,32 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
                     break
                 case .failure:
                     XCTFail()
+                case .accessTokenRevokedOrExpired:
+                    XCTFail()
                 }
                 exp.fulfill()
             }
             self.waitExpectation(timeout: 10, handler: nil)
         }
+    }
+    
+    func testSimpleDownloadWithExpiredAccessTokenFails() {
+        let creds = MicrosoftCreds()
+        creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
+
+        let exp = self.expectation(description: "download")
+        creds.downloadFile(cloudFileName: self.knownPresentFile) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            }
+            exp.fulfill()
+        }
+        self.waitExpectation(timeout: 10, handler: nil)
     }
     
     // See above for revoked token test conditions
@@ -445,6 +527,55 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    func testSimpleDeletionWithExpiredAccessTokenFails() {
+        // First need to get item id of the file in the normal way so it doesn't fail.
+        
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft1.token()
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "delete")
+            
+            creds.checkForFile(fileName: self.knownPresentFile) { result in
+                switch result {
+                case .success(.fileFound(let checkResult)):
+                    self.deleteExpectingExpiredAccessToken(itemId: checkResult.id, expectation: exp)
+                case .success(.fileNotFound):
+                    XCTFail()
+                    exp.fulfill()
+                case .accessTokenRevokedOrExpired, .failure:
+                    XCTFail()
+                    exp.fulfill()
+                }
+            }
+            
+            self.waitForExpectations(timeout: 10, handler: nil)
+        }
+    }
+    
+    func deleteExpectingExpiredAccessToken(itemId: String, expectation: XCTestExpectation) {
+        let creds = MicrosoftCreds()
+        creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
+        
+        creds.deleteFile(itemId: itemId) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            }
+            
+            expectation.fulfill()
+        }
+    }
+    
     func testDeletionOfExistingFileWorks() {
         deletionOfExistingFile(file: .test1)
     }
@@ -520,6 +651,10 @@ extension FileMicrosftOneDriveTests {
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
             ("testLookupFileThatExists", testLookupFileThatExists),
             // ("testLookupWithRevokedAccessToken", testLookupWithRevokedAccessToken)
+            ("testUploadWithExpiredToken", testUploadWithExpiredToken),
+            ("testCheckForFileFailsWithExpiredAccessToken", testCheckForFileFailsWithExpiredAccessToken),
+            ("testSimpleDownloadWithExpiredAccessTokenFails", testSimpleDownloadWithExpiredAccessTokenFails),
+            ("testSimpleDeletionWithExpiredAccessTokenFails", testSimpleDeletionWithExpiredAccessTokenFails)
         ]
     }
     

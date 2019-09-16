@@ -81,6 +81,8 @@ extension MicrosoftCreds : CloudStorage {
                             checkSum: fileResult.file.hashes.sha1Hash))
                     case .failure(let error):
                         completion(.failure(error))
+                    case .accessTokenRevokedOrExpired:
+                        completion(.accessTokenRevokedOrExpired)
                     }
                 }
                 
@@ -117,6 +119,15 @@ extension MicrosoftCreds : CloudStorage {
 // MARK: Helpers
 
 extension MicrosoftCreds {
+    func accessTokenIsRevokedOrExpired(errorResult: ErrorResult, statusCode: HTTPStatusCode?) -> Bool {
+
+        if errorResult.error.code == MicrosoftCreds.ErrorResult.expiredAuthCode {
+            return true
+        }
+        
+        return false
+    }
+    
     struct ErrorResult: Decodable {
         // Assuming this response means an expired auth code
         static let expiredAuthCode = "InvalidAuthenticationToken"
@@ -171,8 +182,13 @@ extension MicrosoftCreds {
             return
         }
         
-        self.apiCall(method: "GET", baseURL: graphBaseURL, path: encodedPath, additionalHeaders: basicHeaders(), expectedSuccessBody: .data, expectedFailureBody: .data) { apiResult, statusCode, responseHeaders in
+        self.apiCall(method: "GET", baseURL: graphBaseURL, path: encodedPath, additionalHeaders: basicHeaders(), expectedSuccessBody: .data, expectedFailureBody: .data) {[weak self] apiResult, statusCode, responseHeaders in
         
+            guard let self = self else {
+                completion(.failure(OneDriveFailure.couldNotGetSelf))
+                return
+            }
+            
             Log.debug("apiResult: \(String(describing: apiResult)); statusCode: \(String(describing: statusCode))")
             
             guard let apiResult = apiResult else {
@@ -193,16 +209,16 @@ extension MicrosoftCreds {
                     return
                 }
                 
-                if errorResult.error.code == "itemNotFound" {
-                    completion(.success(.fileNotFound))
-                    return
-                }
-                
-                if errorResult.error.code == MicrosoftCreds.ErrorResult.expiredAuthCode {
+                guard !self.accessTokenIsRevokedOrExpired(errorResult: errorResult, statusCode: statusCode) else {
                     completion(.accessTokenRevokedOrExpired)
                     return
                 }
             
+                if errorResult.error.code == "itemNotFound" {
+                    completion(.success(.fileNotFound))
+                    return
+                }
+
                 completion(.failure(OneDriveFailure.badStatusCode(statusCode, errorResult)))
                 return
             }
@@ -296,15 +312,23 @@ extension MicrosoftCreds {
                 return
             }
             
-            guard statusCode == HTTPStatusCode.created || statusCode == HTTPStatusCode.OK else {
+            let decoder = JSONDecoder()
             
-                // TODO: Parse failure data to see if we have token expiry.
-                //  And add test case for this.
-                completion(.failure(OneDriveFailure.badStatusCode(statusCode, nil)))
+            guard statusCode == HTTPStatusCode.created || statusCode == HTTPStatusCode.OK else {
+                guard let errorResult = try? decoder.decode(ErrorResult.self, from: data) else {
+                    completion(.failure(OneDriveFailure.couldNotDecodeError))
+                    return
+                }
+                
+                guard !self.accessTokenIsRevokedOrExpired(errorResult: errorResult, statusCode: statusCode) else {
+                    completion(.accessTokenRevokedOrExpired)
+                    return
+                }
+                
+                completion(.failure(OneDriveFailure.badStatusCode(statusCode, errorResult)))
                 return
             }
             
-            let decoder = JSONDecoder()
             guard let uploadResult = try? decoder.decode(FileResult.self, from: data) else {
                 completion(.failure(OneDriveFailure.couldNotDecodeResult))
                 return
@@ -315,7 +339,7 @@ extension MicrosoftCreds {
     }
     
     /// Download the file, but don't get the checksum.
-    func downloadFile(cloudFileName: String, completion: @escaping (Swift.Result<Data, Swift.Error>) -> ()) {
+    func downloadFile(cloudFileName: String, completion: @escaping (Result<Data>) -> ()) {
     
         // https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_get_content?view=odsp-graph-online
         // Note that this endpoint initially generates a "302 Found" response-- and I think the HTTP library I'm using must follow it because I get the downloaded file-- and not the preauthenticated link.
@@ -357,9 +381,18 @@ extension MicrosoftCreds {
             */
             
             guard statusCode == HTTPStatusCode.OK else {
-                // TODO: Add in parsing of error data to see if this reflects an expired access token.
-                // and a test case for this.
-                completion(.failure(OneDriveFailure.badStatusCode(statusCode, nil)))
+                let decoder = JSONDecoder()
+                guard let errorResult = try? decoder.decode(ErrorResult.self, from: data) else {
+                    completion(.failure(OneDriveFailure.couldNotDecodeError))
+                    return
+                }
+                
+                guard !self.accessTokenIsRevokedOrExpired(errorResult: errorResult, statusCode: statusCode) else {
+                    completion(.accessTokenRevokedOrExpired)
+                    return
+                }
+                
+                completion(.failure(OneDriveFailure.badStatusCode(statusCode, errorResult)))
                 return
             }
             
@@ -383,11 +416,30 @@ extension MicrosoftCreds {
             return
         }
         
-        self.apiCall(method: "DELETE", baseURL: graphBaseURL, path: encodedPath, additionalHeaders: basicHeaders()) { apiResult, statusCode, responseHeaders in
+        self.apiCall(method: "DELETE", baseURL: graphBaseURL, path: encodedPath, additionalHeaders: basicHeaders(), expectedFailureBody: .data) { apiResult, statusCode, responseHeaders in
             
             guard statusCode == HTTPStatusCode.noContent else {
-                // TODO: Add in parsing of error data to see if this reflects an expired access token.
-                // and a test case for this.
+                guard let apiResult = apiResult else {
+                    completion(.failure(OneDriveFailure.noAPIResult))
+                    return
+                }
+                
+                guard case .data(let data) = apiResult else {
+                    completion(.failure(OneDriveFailure.noDataInAPIResult))
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                guard let errorResult = try? decoder.decode(ErrorResult.self, from: data) else {
+                    completion(.failure(OneDriveFailure.couldNotDecodeError))
+                    return
+                }
+                
+                guard !self.accessTokenIsRevokedOrExpired(errorResult: errorResult, statusCode: statusCode) else {
+                    completion(.accessTokenRevokedOrExpired)
+                    return
+                }
+                
                 completion(.failure(OneDriveFailure.badStatusCode(statusCode, nil)))
                 return
             }
