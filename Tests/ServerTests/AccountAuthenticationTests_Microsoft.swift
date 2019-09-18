@@ -10,7 +10,7 @@ import SyncServerShared
 class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
     let serverResponseTime:TimeInterval = 10
 
-    // Need to use this test to get an initial refresh token for the TestCredentials. Put an idToken in the TestCredentials for .microsoft1 before this.
+    // Need to use this test to get an initial refresh token for the TestCredentials. Put an id token in the TestCredentials for .microsoft1 before this.
     func testBootstrapRefreshToken() {
         let microsoftCreds = MicrosoftCreds()
         guard let test = Configuration.test else {
@@ -18,7 +18,7 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
             return
         }
         
-        let accessToken1 = test.microsoft1.idToken
+        let accessToken1 = test.microsoft2RevokedAccessToken.idToken
         microsoftCreds.accessToken = accessToken1
         
         let exp = expectation(description: "generate")
@@ -37,7 +37,7 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
         }
         
         let microsoftCreds = MicrosoftCreds()
-        microsoftCreds.refreshToken = test.microsoft1.refreshToken
+        microsoftCreds.refreshToken = test.microsoft2RevokedAccessToken.refreshToken
         let exp = expectation(description: "refresh")
         microsoftCreds.refresh() { error in
             XCTAssert(error == nil)

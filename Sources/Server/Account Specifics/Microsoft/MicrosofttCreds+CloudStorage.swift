@@ -24,9 +24,11 @@ extension MicrosoftCreds : CloudStorage {
         case couldNotGetOptions
         case couldNotGetSelf
         case fileNotFound
+        case couldNotEncodeBody
+        case couldNotCreateUploadState
     }
     
-    private func basicHeaders(withContentTypeHeader contentType:String = "application/json") -> [String: String] {
+    func basicHeaders(withContentTypeHeader contentType:String = "application/json") -> [String: String] {
         var headers = [String:String]()
         headers["Authorization"] = "Bearer \(accessToken!)"
         headers["Content-Type"] = contentType
@@ -51,7 +53,8 @@ extension MicrosoftCreds : CloudStorage {
                 completion(.failure(CloudStorageError.alreadyUploaded))
                 
             case .success(.fileNotFound):
-                self.uploadFile(withName: cloudFileName, mimeType: mimeType, data: data, completion: completion)
+                //self.uploadFile(withName: cloudFileName, mimeType: mimeType, data: data, completion: completion)
+                self.uploadFileUsingSession(withName: cloudFileName, mimeType: mimeType, data: data, completion: completion)
 
             case .failure(let error):
                 completion(.failure(error))
@@ -121,7 +124,8 @@ extension MicrosoftCreds : CloudStorage {
 extension MicrosoftCreds {
     func accessTokenIsRevokedOrExpired(errorResult: ErrorResult, statusCode: HTTPStatusCode?) -> Bool {
 
-        if errorResult.error.code == MicrosoftCreds.ErrorResult.expiredAuthCode {
+        // From my testing, this error catches only an expired token. So far in my testing it seems there is no such thing as a revoked access token. See testSimpleDownloadWithRevokedAccessTokenFails.
+        if errorResult.error.code == MicrosoftCreds.ErrorResult.invalidAuthToken {
             return true
         }
         
@@ -130,7 +134,7 @@ extension MicrosoftCreds {
     
     struct ErrorResult: Decodable {
         // Assuming this response means an expired auth code
-        static let expiredAuthCode = "InvalidAuthenticationToken"
+        static let invalidAuthToken = "InvalidAuthenticationToken"
         
         struct TheError: Decodable {
             let code: String
@@ -336,6 +340,11 @@ extension MicrosoftCreds {
             
             completion(.success(uploadResult.file.hashes.sha1Hash))
         }
+    }
+    
+    func uploadLargeFile(withName fileName: String, mimeType: MimeType, data:Data, completion:@escaping (Result<String>)->()) {
+    
+        // https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_createuploadsession?view=odsp-graph-online
     }
     
     /// Download the file, but don't get the checksum.

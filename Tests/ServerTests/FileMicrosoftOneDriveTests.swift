@@ -389,6 +389,7 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    // Reason code 80049228
     func testSimpleDownloadWithExpiredAccessTokenFails() {
         let creds = MicrosoftCreds()
         creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
@@ -408,6 +409,28 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
         self.waitExpectation(timeout: 10, handler: nil)
     }
     
+    // From my testing it looks like if you (a) generate an access token from a refresh token, and (b) then revoke access for the account, then the access token still works-- until it expires. The test below fails with .failure, not with .accessTokenRevokedOrExpired.
+#if false
+    func testSimpleDownloadWithRevokedAccessTokenFails() {
+        let creds = MicrosoftCreds()
+        creds.accessToken = TestAccount.microsoft2RevokedAccessToken.secondToken()
+
+        let exp = self.expectation(description: "download")
+        creds.downloadFile(cloudFileName: self.knownPresentFile) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            }
+            exp.fulfill()
+        }
+        self.waitExpectation(timeout: 10, handler: nil)
+    }
+#endif
+
     // See above for revoked token test conditions
     // func testDownloadWithRevokedToken() {
     // }
@@ -626,6 +649,385 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
     // See comments for revoked access token
     // func testLookupWithRevokedAccessToken() {
     // }
+    
+    // MARK: Large file upload
+    
+    func testCreateUploadSession() {
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft1.token()
+        let fileName = UUID().uuidString
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "uploadSession")
+            
+            creds.createUploadSession(cloudFileName: fileName) { result in
+                switch result {
+                case .success:
+                    break
+                case .failure, .accessTokenRevokedOrExpired:
+                    break
+                }
+                
+                exp.fulfill()
+            }
+            
+            self.waitExpectation(timeout: 10, handler: nil)
+        }
+    }
+    
+    func testUploadStateComputedValues() {
+        let inputData: [(numberBytes: UInt, blockSize: UInt,
+            expectedNumberFullBlocks: UInt, expectedPartialLastBlock: Bool, expectedPartialLastBlockLength: Int)] = [
+            
+            (numberBytes: 99, blockSize: 100, expectedNumberFullBlocks: 0, expectedPartialLastBlock: true, expectedPartialLastBlockLength: 99),
+            
+            (numberBytes: 100, blockSize: 100, expectedNumberFullBlocks: 1, expectedPartialLastBlock: false, expectedPartialLastBlockLength: 0),
+            
+            (numberBytes: 100, blockSize: 50, expectedNumberFullBlocks: 2, expectedPartialLastBlock: false, expectedPartialLastBlockLength: 0),
+            
+            (numberBytes: 101, blockSize: 50, expectedNumberFullBlocks: 2, expectedPartialLastBlock: true, expectedPartialLastBlockLength: 1),
+        ]
+        
+        for (numberBytes, blockSize,
+            expectedNumberFullBlocks, expectedPartialLastBlock, expectedPartialLastBlockLength) in inputData {
+            let data = Data(count: Int(numberBytes))
+            
+            guard let state = MicrosoftCreds.UploadState(blockSize: blockSize, data: data, checkBlockSize: false) else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(state.numberFullBlocks == expectedNumberFullBlocks)
+            XCTAssert(state.partialLastBlock == expectedPartialLastBlock)
+            XCTAssert(state.partialLastBlockLength == expectedPartialLastBlockLength)
+        }
+    }
+    
+    func testUploadStateOffsetsOnePartialBlock() {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(99))) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(state.currentStartOffset == 0)
+        XCTAssert(state.currentEndOffset == 99)
+        
+        XCTAssert(!state.advanceToNextBlock())
+    }
+    
+    func testUploadStateOffsetsOneFullOnePartialBlock() {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(199))) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(state.currentStartOffset == 0)
+        XCTAssert(state.currentEndOffset == 100)
+        
+        XCTAssert(state.advanceToNextBlock())
+
+        XCTAssert(state.currentStartOffset == 100)
+        XCTAssert(state.currentEndOffset == 199)
+        
+        XCTAssert(!state.advanceToNextBlock())
+    }
+    
+    func testUploadStateOffsetsOneFullOnePartialBlock2() {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(101))) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(state.currentStartOffset == 0)
+        XCTAssert(state.currentEndOffset == 100)
+        
+        XCTAssert(state.advanceToNextBlock())
+
+        XCTAssert(state.currentStartOffset == 100)
+        XCTAssert(state.currentEndOffset == 101)
+        
+        XCTAssert(!state.advanceToNextBlock())
+    }
+    
+    func testUploadStateOffsetsExactlyTwoBlocks() {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(200))) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(state.currentStartOffset == 0)
+        XCTAssert(state.currentEndOffset == 100)
+        
+        XCTAssert(state.advanceToNextBlock())
+
+        XCTAssert(state.currentStartOffset == 100)
+        XCTAssert(state.currentEndOffset == 200)
+        
+        XCTAssert(!state.advanceToNextBlock())
+    }
+    
+    func testUploadStateOffsetsTwoBlocksAndOnePartial() {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(250))) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(state.currentStartOffset == 0)
+        XCTAssert(state.currentEndOffset == 100)
+        
+        XCTAssert(state.contentRange == "bytes 0-99/250")
+        
+        XCTAssert(state.advanceToNextBlock())
+
+        XCTAssert(state.currentStartOffset == 100)
+        XCTAssert(state.currentEndOffset == 200)
+        
+        XCTAssert(state.advanceToNextBlock())
+        
+        XCTAssert(state.currentStartOffset == 200)
+        XCTAssert(state.currentEndOffset == 250)
+        
+        XCTAssert(!state.advanceToNextBlock())
+    }
+    
+    func testCreateUploadSessionWithExpiredToken() {
+        let creds = MicrosoftCreds()
+        creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
+        let fileName = UUID().uuidString
+
+        let exp = self.expectation(description: "uploadSession")
+        
+        creds.createUploadSession(cloudFileName: fileName) { result in
+            switch result {
+            case .success, .failure:
+                XCTFail()
+            case .accessTokenRevokedOrExpired:
+                break
+            }
+            
+            exp.fulfill()
+        }
+    
+        self.waitExpectation(timeout: 10, handler: nil)
+    }
+    
+    func testUploadWithAPartialBlock() {
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft1.token()
+        let fileName = UUID().uuidString
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "uploadSession")
+            
+            creds.createUploadSession(cloudFileName: fileName) { result in
+                switch result {
+                case .success(let session):
+                    let blockSize = MicrosoftCreds.UploadState.blockMultipleInBytes
+                    guard let state = MicrosoftCreds.UploadState(blockSize: UInt(blockSize), data: Data(count: blockSize/2)) else {
+                        XCTFail()
+                        exp.fulfill()
+                        return
+                    }
+                
+                    creds.uploadBytes(toUploadSession: session, withUploadState: state) { result in
+                        switch result {
+                        case .success:
+                            break
+                        case .failure, .accessTokenRevokedOrExpired:
+                            XCTFail()
+                        }
+                        
+                        exp.fulfill()
+                    }
+                    
+                case .failure, .accessTokenRevokedOrExpired:
+                    exp.fulfill()
+                }
+            }
+            
+            self.waitExpectation(timeout: 10, handler: nil)
+        }
+    }
+    
+    func testUploadWithSingleBlock() {
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft1.token()
+        let fileName = UUID().uuidString
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "uploadSession")
+            
+            creds.createUploadSession(cloudFileName: fileName) { result in
+                switch result {
+                case .success(let session):
+                    let blockSize = MicrosoftCreds.UploadState.blockMultipleInBytes
+                    guard let state = MicrosoftCreds.UploadState(blockSize: UInt(blockSize), data: Data(count: blockSize)) else {
+                        XCTFail()
+                        exp.fulfill()
+                        return
+                    }
+                
+                    creds.uploadBytes(toUploadSession: session, withUploadState: state) { result in
+                        switch result {
+                        case .success:
+                            break
+                        case .failure, .accessTokenRevokedOrExpired:
+                            XCTFail()
+                        }
+                        
+                        exp.fulfill()
+                    }
+                    
+                case .failure, .accessTokenRevokedOrExpired:
+                    exp.fulfill()
+                }
+            }
+            
+            self.waitExpectation(timeout: 10, handler: nil)
+        }
+    }
+    
+    func testUploadWithTwoBlocks() {
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft1.token()
+        let fileName = UUID().uuidString
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "uploadSession")
+            
+            creds.createUploadSession(cloudFileName: fileName) { result in
+                switch result {
+                case .success(let session):
+                    let blockSize = MicrosoftCreds.UploadState.blockMultipleInBytes
+                    guard let state = MicrosoftCreds.UploadState(blockSize: UInt(blockSize), data: Data(count: blockSize*2)) else {
+                        XCTFail()
+                        exp.fulfill()
+                        return
+                    }
+                
+                    creds.uploadBytes(toUploadSession: session, withUploadState: state) { result in
+                        switch result {
+                        case .success:
+                            break
+                        case .failure, .accessTokenRevokedOrExpired:
+                            XCTFail()
+                        }
+                        
+                        exp.fulfill()
+                    }
+                    
+                case .failure, .accessTokenRevokedOrExpired:
+                    exp.fulfill()
+                }
+            }
+            
+            self.waitExpectation(timeout: 10, handler: nil)
+        }
+    }
+    
+    func testUploadWithTwoBlocksAndAPartial() {
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft1.token()
+        let fileName = UUID().uuidString
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "uploadSession")
+            
+            creds.createUploadSession(cloudFileName: fileName) { result in
+                switch result {
+                case .success(let session):
+                    let blockSize = MicrosoftCreds.UploadState.blockMultipleInBytes
+                    guard let state = MicrosoftCreds.UploadState(blockSize: UInt(blockSize), data: Data(count: blockSize*2 + 100)) else {
+                        XCTFail()
+                        exp.fulfill()
+                        return
+                    }
+                
+                    creds.uploadBytes(toUploadSession: session, withUploadState: state) { result in
+                        switch result {
+                        case .success:
+                            break
+                        case .failure, .accessTokenRevokedOrExpired:
+                            XCTFail()
+                        }
+                        
+                        exp.fulfill()
+                    }
+                    
+                case .failure, .accessTokenRevokedOrExpired:
+                    exp.fulfill()
+                }
+            }
+            
+            self.waitExpectation(timeout: 10, handler: nil)
+        }
+    }
+    
+    func testUploadImageUsingSessionMethod() {
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft1.token()
+        
+        let file = TestFile.catJpg
+        
+        let ext = Extension.forMimeType(mimeType: file.mimeType.rawValue)
+        let fileName = Foundation.UUID().uuidString + ".\(ext)"
+    
+        guard case .url(let url) = file.contents,
+            let fileContentsData = try? Data(contentsOf: url) else {
+            XCTFail()
+            return
+        }
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "uploadSession")
+            
+            creds.uploadFileUsingSession(withName: fileName, mimeType: file.mimeType, data: fileContentsData) { result in
+            
+                switch result {
+                case .success(let checkSum):
+                    XCTAssert(file.sha1Hash == checkSum)
+                case .failure:
+                    XCTFail()
+                case .accessTokenRevokedOrExpired:
+                    XCTFail()
+                }
+                
+                exp.fulfill()
+            }
+            
+            self.waitExpectation(timeout: 10, handler: nil)
+        }
+    }
 }
 
 extension FileMicrosftOneDriveTests {
@@ -636,25 +1038,35 @@ extension FileMicrosftOneDriveTests {
             ("testUploadTextFileWorks", testUploadTextFileWorks),
             ("testUploadImageFileWorks", testUploadImageFileWorks),
             ("testUploadURLFileWorks", testUploadURLFileWorks),
-            //("testUploadWithRevokedToken", testUploadWithRevokedToken),
             ("testFullUploadWorks", testFullUploadWorks),
             ("testFullImageUploadWorks", testFullImageUploadWorks),
             ("testFullUploadURLWorks", testFullUploadURLWorks),
             ("testDownloadOfNonExistingFileFails", testDownloadOfNonExistingFileFails),
             ("testSimpleDownloadWorks", testSimpleDownloadWorks),
-            //("testDownloadWithRevokedToken", testDownloadWithRevokedToken),
             ("testUploadAndDownloadWorks", testUploadAndDownloadWorks),
-            //("testDeletionWithRevokedAccessToken", testDeletionWithRevokedAccessToken),
             ("testDeletionOfNonExistingFileFails", testDeletionOfNonExistingFileFails),
             ("testDeletionOfExistingFileWorks", testDeletionOfExistingFileWorks),
             ("testDeletionOfExistingURLFileWorks", testDeletionOfExistingURLFileWorks),
             ("testLookupFileThatDoesNotExist", testLookupFileThatDoesNotExist),
             ("testLookupFileThatExists", testLookupFileThatExists),
-            // ("testLookupWithRevokedAccessToken", testLookupWithRevokedAccessToken)
             ("testUploadWithExpiredToken", testUploadWithExpiredToken),
             ("testCheckForFileFailsWithExpiredAccessToken", testCheckForFileFailsWithExpiredAccessToken),
             ("testSimpleDownloadWithExpiredAccessTokenFails", testSimpleDownloadWithExpiredAccessTokenFails),
-            ("testSimpleDeletionWithExpiredAccessTokenFails", testSimpleDeletionWithExpiredAccessTokenFails)
+            ("testSimpleDeletionWithExpiredAccessTokenFails", testSimpleDeletionWithExpiredAccessTokenFails),
+            ("testSimpleUploadWithExpiredAccessToken", testSimpleUploadWithExpiredAccessToken),
+            ("testCreateUploadSession", testCreateUploadSession),
+            ("testUploadStateComputedValues", testUploadStateComputedValues),
+            ("testUploadStateOffsetsOnePartialBlock", testUploadStateOffsetsOnePartialBlock),
+            ("testUploadStateOffsetsOneFullOnePartialBlock", testUploadStateOffsetsOneFullOnePartialBlock),
+            ("testUploadStateOffsetsOneFullOnePartialBlock2", testUploadStateOffsetsOneFullOnePartialBlock2),
+            ("testUploadStateOffsetsExactlyTwoBlocks", testUploadStateOffsetsExactlyTwoBlocks),
+            ("testUploadStateOffsetsTwoBlocksAndOnePartial", testUploadStateOffsetsTwoBlocksAndOnePartial),
+            ("testCreateUploadSessionWithExpiredToken", testCreateUploadSessionWithExpiredToken),
+            ("testUploadWithAPartialBlock", testUploadWithAPartialBlock),
+            ("testUploadWithSingleBlock", testUploadWithSingleBlock),
+            ("testUploadWithTwoBlocks", testUploadWithTwoBlocks),
+            ("testUploadWithTwoBlocksAndAPartial", testUploadWithTwoBlocksAndAPartial),
+            ("testUploadImageUsingSessionMethod", testUploadImageUsingSessionMethod)
         ]
     }
     

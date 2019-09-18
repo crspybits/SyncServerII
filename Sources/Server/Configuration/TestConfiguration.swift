@@ -7,6 +7,8 @@
 
 import Foundation
 
+// I've put this in the Server files because I've added it into the Configuration as well, for easier access.
+
 #if DEBUG
 struct TestConfiguration: Decodable {
     // This is from crspybits@gmail.com; I created this and the two other Google refresh tokens below on 8/26/18 using method: 1) boot up testing SyncServer on AWS or locally, 2) sign in using SyncServer Example client, 3) connect into the RDS mySQL or the mySQL db locally, 4) Look at the User table for the refresh token
@@ -65,5 +67,13 @@ struct TestConfiguration: Decodable {
     
     // for chris@cprince.com, but an expired access token
     let microsoft1ExpiredAccessToken: MicrosoftTokens
+    
+    /* This is somewhat tricky to generate.
+        1) Make a new account,
+        1) Generate an accessToken (in iOS MSAL's terminology).
+        2) Revoke the rights of Neebla from this account
+        The access token, at least until it is expired, should be purely a revoked access token.
+    */
+    let microsoft2RevokedAccessToken: MicrosoftTokens
 }
 #endif

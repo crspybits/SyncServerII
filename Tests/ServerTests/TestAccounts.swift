@@ -104,6 +104,8 @@ struct TestAccount {
     
     static let microsoft1ExpiredAccessToken = TestAccount(tokenKey: \.microsoft1ExpiredAccessToken.refreshToken, secondTokenKey: \.microsoft1ExpiredAccessToken.accessToken, idKey: \.microsoft1ExpiredAccessToken.id, scheme: .microsoft)
     
+    static let microsoft2RevokedAccessToken = TestAccount(tokenKey: \.microsoft2RevokedAccessToken.refreshToken, secondTokenKey: \.microsoft2RevokedAccessToken.accessToken, idKey: \.microsoft2RevokedAccessToken.id, scheme: .microsoft)
+    
     func token() -> String {
         return Configuration.test![keyPath: tokenKey]
     }
