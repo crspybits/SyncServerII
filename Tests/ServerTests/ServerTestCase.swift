@@ -344,72 +344,13 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) {
+    func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions, fileNotFoundOK: Bool = false) {
         
         let expectation = self.expectation(description: "expectation")
 
-        testAccount.scheme.deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options, expectation: expectation)
+        testAccount.scheme.deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options, fileNotFoundOK: fileNotFoundOK, expectation: expectation)
         
         waitForExpectations(timeout: 20.0, handler: nil)
-    }
-    
-    enum LookupFileError : Error {
-    case errorOrNoAccessToken
-    }
-    
-    @discardableResult
-    func lookupFile(forOwningTestAccount testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) -> Bool? {
-    
-        var lookupResult: Bool?
-        
-        let expectation = self.expectation(description: "expectation")
-    
-        switch testAccount.scheme.accountName {
-        case AccountScheme.google.accountName:
-            let creds = GoogleCreds()
-            creds.refreshToken = testAccount.token()
-            creds.refresh { error in
-                guard error == nil, creds.accessToken != nil else {
-                    XCTFail()
-                    expectation.fulfill()
-                    return
-                }
-            
-                creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
-                    switch result {
-                    case .success (let found):
-                        lookupResult = found
-                    case .failure, .accessTokenRevokedOrExpired:
-                        XCTFail()
-                    }
-                    
-                    expectation.fulfill()
-                }
-            }
-            
-        case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()
-            creds.accessToken = testAccount.token()
-            creds.accountId = testAccount.id()
-            
-            creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
-                switch result {
-                case .success (let found):
-                    lookupResult = found
-                case .failure, .accessTokenRevokedOrExpired:
-                    XCTFail()
-                }
-                
-                expectation.fulfill()
-            }
-            
-        default:
-            assert(false)
-        }
-        
-        waitForExpectations(timeout: 10.0, handler: nil)
-        
-        return lookupResult
     }
     
     @discardableResult
@@ -419,8 +360,8 @@ class ServerTestCase : XCTestCase {
         if let fileName = Configuration.server.owningUserAccountCreation.initialFileName {
             // Need to delete the initialization file in the test account, so that if we're creating the user test account for a 2nd, 3rd etc time, we don't fail.
             let options = CloudStorageFileNameOptions(cloudFolderName: cloudFolderName, mimeType: "text/plain")
-            
-            deleteFile(testAccount: testAccount, cloudFileName: fileName, options: options)
+            Log.debug("About to delete file.")
+            deleteFile(testAccount: testAccount, cloudFileName: fileName, options: options, fileNotFoundOK: true)
             result = addNewUser2(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName, sharingGroupName: sharingGroupName)
         }
         else {
@@ -449,7 +390,6 @@ class ServerTestCase : XCTestCase {
             self.performRequest(route: ServerEndpoints.addUser, headers: headers, urlParameters: queryParams) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on addUser request: \(response!.statusCode)")
-                
                 
                 if let dict = dict, let addUserResponse = try? AddUserResponse.decode(dict) {
                     XCTAssert(addUserResponse.userId != nil)

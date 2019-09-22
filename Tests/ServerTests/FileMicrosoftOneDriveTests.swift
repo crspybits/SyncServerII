@@ -13,7 +13,7 @@ import LoggerAPI
 import HeliumLogger
 import SyncServerShared
 
-class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
+class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     // In my OneDrive:
     let knownPresentFile = "DO-NOT-REMOVE.txt"
 
@@ -709,7 +709,7 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadStateOffsetsOnePartialBlock() {
-        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(99))) else {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(99)), checkBlockSize: false) else {
             XCTFail()
             return
         }
@@ -721,7 +721,7 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadStateOffsetsOneFullOnePartialBlock() {
-        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(199))) else {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(199)), checkBlockSize: false) else {
             XCTFail()
             return
         }
@@ -738,7 +738,7 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadStateOffsetsOneFullOnePartialBlock2() {
-        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(101))) else {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(101)), checkBlockSize: false) else {
             XCTFail()
             return
         }
@@ -755,7 +755,7 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadStateOffsetsExactlyTwoBlocks() {
-        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(200))) else {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(200)), checkBlockSize: false) else {
             XCTFail()
             return
         }
@@ -772,7 +772,7 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadStateOffsetsTwoBlocksAndOnePartial() {
-        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(250))) else {
+        guard let state = MicrosoftCreds.UploadState(blockSize: 100, data: Data(count: Int(250)), checkBlockSize: false) else {
             XCTFail()
             return
         }
@@ -1030,8 +1030,8 @@ class FileMicrosftOneDriveTests: ServerTestCase, LinuxTestable {
     }
 }
 
-extension FileMicrosftOneDriveTests {
-    static var allTests : [(String, (FileMicrosftOneDriveTests) -> () throws -> Void)] {
+extension FileMicrosoftOneDriveTests {
+    static var allTests : [(String, (FileMicrosoftOneDriveTests) -> () throws -> Void)] {
         return [
             ("testCheckForFileFailsWithFileThatDoesNotExist", testCheckForFileFailsWithFileThatDoesNotExist),
             ("testCheckForFileWorksWithExistingFile", testCheckForFileWorksWithExistingFile),
@@ -1071,7 +1071,7 @@ extension FileMicrosftOneDriveTests {
     }
     
     func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:FileMicrosftOneDriveTests.self)
+        linuxTestSuiteIncludesAllTests(testType:FileMicrosoftOneDriveTests.self)
     }
 }
 

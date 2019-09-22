@@ -50,7 +50,7 @@ struct TestFile {
     static let test2 = TestFile(
         dropboxCheckSum: "3e1c5665be7f2f5552efb9fd93df8fe9d58c54619fefe1a5b474e38464391011",
         md5CheckSum: "a9d2b23e3001e558213c4ee056f31ba1",
-        sha1Hash: "",
+        sha1Hash: "3480185FC5811EC5F242E13B23E2D9274B080EF1",
         contents: .string("This is some longer text that I'm typing here and hopefullly I don't get too bored"),
         mimeType: .text)
 

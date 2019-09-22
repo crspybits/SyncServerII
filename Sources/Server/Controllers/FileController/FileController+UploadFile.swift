@@ -263,7 +263,7 @@ extension FileController {
         }
 #endif
 
-        guard uploadedCheckSum == expectedCheckSum else {
+        guard uploadedCheckSum.lowercased() == expectedCheckSum else {
             let message = "Checksum after upload to cloud storage (\(uploadedCheckSum) is not the same as before upload \(String(describing: expectedCheckSum))."
             finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
             return

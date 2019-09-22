@@ -10,6 +10,7 @@ import Kitura
 import SyncServerShared
 import LoggerAPI
 import HeliumLogger
+import KituraNet
 
 // Assumes that the microsft app has been registered as multi-tenant. E.g., see https://docs.microsoft.com/en-us/graph/auth-register-app-v2?context=graph%2Fapi%2F1.0&view=graph-rest-1.0
 // Originally, I thought I had to register two apps (a server and a client)-- E.g., https://paulryan.com.au/2017/oauth-on-behalf-of-flow-adal/ HOWEVER, I have only a client iOS app registered (and using that client id and secret) and thats working.
@@ -32,6 +33,8 @@ class MicrosoftCreds : AccountAPICall, Account {
     
     var refreshToken: String?
     
+    private var alreadyRefreshed = false
+
     private let scopes = "https://graph.microsoft.com/user.read+offline_access"
 
     override init() {
@@ -44,7 +47,7 @@ class MicrosoftCreds : AccountAPICall, Account {
         return true
     }
     
-    enum MicrosoftError: Error {
+    enum MicrosoftError: Swift.Error {
         case noAccessToken
         case failedGettingClientIdOrSecret
         case badStatusCode(HTTPStatusCode?)
@@ -68,7 +71,7 @@ class MicrosoftCreds : AccountAPICall, Account {
         let id: String
         let secret: String
     }
-    
+        
     func encoded(string: String, baseCharSet: CharacterSet = .urlQueryAllowed, additionalExcludedCharacters: String? = nil) -> String? {
         var charSet: CharacterSet = baseCharSet
         
@@ -127,7 +130,7 @@ class MicrosoftCreds : AccountAPICall, Account {
             + "scope=\(scopes)" + "&"
             + "requested_token_use=on_behalf_of"
         
-        Log.debug("bodyParameters: \(bodyParameters)")
+        // Log.debug("bodyParameters: \(bodyParameters)")
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
 
@@ -200,7 +203,7 @@ class MicrosoftCreds : AccountAPICall, Account {
             + "scope=\(scopes)" + "&"
             + "refresh_token=\(refreshToken)"
 
-        Log.debug("bodyParameters: \(bodyParameters)")
+        // Log.debug("bodyParameters: \(bodyParameters)")
         
         let additionalHeaders = ["Content-Type": "application/x-www-form-urlencoded"]
         
@@ -234,7 +237,7 @@ class MicrosoftCreds : AccountAPICall, Account {
                 return
             }
             
-            Log.debug("tokens.access_token: \(tokens.access_token)")
+            // Log.debug("tokens.access_token: \(tokens.access_token)")
             
             self.accessToken = tokens.access_token
             self.refreshToken = tokens.refresh_token
@@ -324,6 +327,73 @@ class MicrosoftCreds : AccountAPICall, Account {
         }
         
         return result
+    }
+    
+    override func apiCall(method:String, baseURL:String? = nil, path:String,
+                 additionalHeaders: [String:String]? = nil, additionalOptions: [ClientRequest.Options] = [], urlParameters:String? = nil,
+                 body:APICallBody? = nil,
+                 returnResultWhenNon200Code:Bool = true,
+                 expectedSuccessBody:ExpectedResponse? = nil,
+                 expectedFailureBody:ExpectedResponse? = nil,
+        completion:@escaping (_ result: APICallResult?, HTTPStatusCode?, _ responseHeaders: HeadersContainer?)->()) {
+
+        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: additionalHeaders, additionalOptions: additionalOptions, urlParameters: urlParameters, body: body,
+            returnResultWhenNon200Code: returnResultWhenNon200Code,
+            expectedSuccessBody: expectedSuccessBody,
+            expectedFailureBody: expectedFailureBody) { (apiCallResult, statusCode, responseHeaders) in
+            
+            var headers:[String:String] = additionalHeaders ?? [:]
+            
+            if self.expiredAccessToken(apiResult: apiCallResult, statusCode: statusCode) && !self.alreadyRefreshed {
+                self.alreadyRefreshed = true
+                Log.info("Attempting to refresh Microsoft access token...")
+                
+                self.refresh() { error in
+                    if let error = error {
+                        let message = "Failed refreshing access token: \(error)"
+                        let errorResult = ErrorResult(error: MicrosoftCreds.ErrorResult.TheError(code: MicrosoftCreds.ErrorResult.invalidAuthToken, message: message))
+                        
+                        let encoder = JSONEncoder()
+                        guard let response = try? encoder.encode(errorResult) else {
+                            completion( APICallResult.dictionary(["error": message]),
+                                .unauthorized, nil)
+                            return
+                        }
+                        
+                        Log.error("\(message)")
+                        completion(APICallResult.data(response), .unauthorized, nil)
+                    }
+                    else {
+                        Log.info("Successfully refreshed access token!")
+
+                        // Refresh was successful, update the authorization header and try the operation again.
+                        headers["Authorization"] = "Bearer \(self.accessToken!)"
+                        
+                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, additionalOptions: additionalOptions, urlParameters: urlParameters, body: body, returnResultWhenNon200Code: returnResultWhenNon200Code, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody, completion: completion)
+                    }
+                }
+            }
+            else {
+                completion(apiCallResult, statusCode, responseHeaders)
+            }
+        }
+    }
+    
+    private func expiredAccessToken(apiResult: APICallResult?, statusCode: HTTPStatusCode?) -> Bool {
+        guard let apiResult = apiResult else {
+            return false
+        }
+
+        guard case .data(let data) = apiResult else {
+            return false
+        }
+
+        let decoder = JSONDecoder()
+        guard let errorResult = try? decoder.decode(ErrorResult.self, from: data) else {
+            return false
+        }
+
+        return self.accessTokenIsRevokedOrExpired(errorResult: errorResult, statusCode: statusCode)
     }
 }
 

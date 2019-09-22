@@ -336,7 +336,7 @@ class GoogleCreds : AccountAPICall, Account {
     let tokenRevokedOrExpired = "accessTokenRevokedOrExpired"
     
     override func apiCall(method:String, baseURL:String? = nil, path:String,
-                 additionalHeaders: [String:String]? = nil,additionalOptions: [ClientRequest.Options] = [], urlParameters:String? = nil,
+                 additionalHeaders: [String:String]? = nil, additionalOptions: [ClientRequest.Options] = [], urlParameters:String? = nil,
                  body:APICallBody? = nil,
                  returnResultWhenNon200Code:Bool = true,
                  expectedSuccessBody:ExpectedResponse? = nil,
@@ -350,7 +350,10 @@ class GoogleCreds : AccountAPICall, Account {
             headers["Authorization"] = "Bearer \(self.accessToken!)"
         }
 
-        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, additionalOptions: additionalOptions, urlParameters: urlParameters, body: body, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody) { (apiCallResult, statusCode, responseHeaders) in
+        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, additionalOptions: additionalOptions, urlParameters: urlParameters, body: body,
+            returnResultWhenNon200Code: returnResultWhenNon200Code,
+            expectedSuccessBody: expectedSuccessBody,
+            expectedFailureBody: expectedFailureBody) { (apiCallResult, statusCode, responseHeaders) in
         
             /* So far, I've seen two results from a Google expired or revoked refresh token:
                 1) an unauthorized http status here followed by [1] in refresh.
@@ -387,7 +390,7 @@ class GoogleCreds : AccountAPICall, Account {
             
             if statusCode == self.expiredAccessTokenHTTPCode && !self.alreadyRefreshed {
                 self.alreadyRefreshed = true
-                Log.info("Attempting to refresh access token...")
+                Log.info("Attempting to refresh Google access token...")
                 
                 self.refresh() { error in
                     if let error = error {
@@ -407,8 +410,8 @@ class GoogleCreds : AccountAPICall, Account {
 
                         // Refresh was successful, update the authorization header and try the operation again.
                         headers["Authorization"] = "Bearer \(self.accessToken!)"
-
-                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, urlParameters: urlParameters, body: body, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody, completion: completion)
+                        
+                        super.apiCall(method: method, baseURL: baseURL, path: path, additionalHeaders: headers, additionalOptions: additionalOptions, urlParameters: urlParameters, body: body, returnResultWhenNon200Code: returnResultWhenNon200Code, expectedSuccessBody: expectedSuccessBody, expectedFailureBody: expectedFailureBody, completion: completion)
                     }
                 }
             }

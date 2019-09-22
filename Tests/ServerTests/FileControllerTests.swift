@@ -206,42 +206,25 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        var checkSum:String!
         var cloudStorageCreds: CloudStorage!
         
-        switch testAccount.scheme.accountName {
-        case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()
-            creds.accessToken = testAccount.token()
-            creds.accountId = testAccount.id()
-            cloudStorageCreds = creds
-
-        case AccountScheme.google.accountName:
-            let creds = GoogleCreds()
-            creds.refreshToken = testAccount.token()
-            let exp = expectation(description: "\(#function)\(#line)")
+        let exp = expectation(description: "\(#function)\(#line)")
+        testAccount.scheme.doHandler(for: .getCredentials, testAccount: testAccount) { creds in
+            // For social accounts, e.g., Facebook, this will result in nil and fail below. That's what we want. Just trying to get cloud storage creds.
+            cloudStorageCreds = creds as? CloudStorage
             
-            creds.refresh { error in
-                XCTAssert(error == nil)
-                XCTAssert(creds.accessToken != nil)
-                exp.fulfill()
-            }
-
-            waitForExpectations(timeout: 10, handler: nil)
-            cloudStorageCreds = creds
-
-        case AccountScheme.facebook.accountName:
-            XCTFail()
-            return
+            exp.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
         
-        default:
+        guard cloudStorageCreds != nil else {
             XCTFail()
             return
         }
         
         let file = TestFile.test2
         
-        checkSum = file.checkSum(type: testAccount.scheme.accountName)
+        let checkSum = file.checkSum(type: testAccount.scheme.accountName)
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uploadResult.request.fileUUID

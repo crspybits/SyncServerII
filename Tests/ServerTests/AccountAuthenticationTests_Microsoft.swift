@@ -18,7 +18,7 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
             return
         }
         
-        let accessToken1 = test.microsoft2RevokedAccessToken.idToken
+        let accessToken1 = test.microsoft1.idToken
         microsoftCreds.accessToken = accessToken1
         
         let exp = expectation(description: "generate")
@@ -37,10 +37,10 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
         }
         
         let microsoftCreds = MicrosoftCreds()
-        microsoftCreds.refreshToken = test.microsoft2RevokedAccessToken.refreshToken
+        microsoftCreds.refreshToken = test.microsoft1.refreshToken
         let exp = expectation(description: "refresh")
         microsoftCreds.refresh() { error in
-            XCTAssert(error == nil)
+            XCTAssert(error == nil, "\(String(describing: error))")
             exp.fulfill()
         }
         waitExpectation(timeout: 10, handler: nil)

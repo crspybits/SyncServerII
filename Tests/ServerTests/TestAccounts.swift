@@ -40,6 +40,8 @@ struct TestAccount {
     static let primaryOwningAccount:TestAccount = .google1
 #elseif PRIMARY_OWNING_DROPBOX1
     static let primaryOwningAccount:TestAccount = .dropbox1
+#elseif PRIMARY_OWNING_MICROSOFT1
+    static let primaryOwningAccount:TestAccount = .microsoft1
 #else
     static let primaryOwningAccount:TestAccount = .google1
 #endif
@@ -100,6 +102,7 @@ struct TestAccount {
     
     static let dropbox1Revoked = TestAccount(tokenKey: \.DropboxAccessTokenRevoked, idKey: \.DropboxId3, scheme: .dropbox)
     
+    // All valid Microsoft TestAccounts are going to have secondTokens that are idTokens
     static let microsoft1 = TestAccount(tokenKey: \.microsoft1.refreshToken, secondTokenKey: \.microsoft1.idToken, idKey: \.microsoft1.id, scheme: .microsoft)
     
     static let microsoft1ExpiredAccessToken = TestAccount(tokenKey: \.microsoft1ExpiredAccessToken.refreshToken, secondTokenKey: \.microsoft1ExpiredAccessToken.accessToken, idKey: \.microsoft1ExpiredAccessToken.id, scheme: .microsoft)
@@ -125,7 +128,7 @@ struct TestAccount {
     static func registerHandlers() {
         // MARK: Google
         AccountScheme.google.registerHandler(type: .getCredentials) { testAccount, callback in
-            GoogleCredsCache.credsFor(googleAccount: testAccount) { creds in
+            CredsCache.credsFor(googleAccount: testAccount) { creds in
                 callback(creds)
             }
         }
@@ -147,6 +150,9 @@ struct TestAccount {
         
         // MARK: Microsoft
         AccountScheme.microsoft.registerHandler(type: .getCredentials) { testAccount, callback in
+            CredsCache.credsFor(microsoftAccount: testAccount) { creds in
+                callback(creds)
+            }
         }
     }
 }
@@ -174,21 +180,30 @@ extension AccountScheme {
             return
         }
         
+        Log.debug("About to call handler: \(type)")
         handler(testAccount, callback)
     }
     
+    // Assumes that the ServerConstants.HTTPOAuth2AccessTokenKey key has been set in the headers.
     func specificHeaderSetup(headers: inout [String: String], testUser: TestAccount) {
         switch accountName {
         case AccountScheme.dropbox.accountName:
             headers[ServerConstants.HTTPAccountIdKey] = testUser.id()
+            
         case AccountScheme.microsoft.accountName:
-            headers[ServerConstants.HTTPMicrosoftAccessToken] = testUser.secondToken()
+            // Microsoft credentials are odd in that the "access token" is not a JWT Oauth2 token-- it's a specific Microsoft token.
+            let msalAccessToken = headers[ServerConstants.HTTPOAuth2AccessTokenKey]
+            headers[ServerConstants.HTTPMicrosoftAccessToken] = msalAccessToken
+
+            // This is the idToken for the Microsoft account-- the realm JWT Oauth2 token.
+            headers[ServerConstants.HTTPOAuth2AccessTokenKey] = testUser.secondToken()
+            
         default:
             break
         }
     }
     
-    func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions, expectation:XCTestExpectation) {
+    func deleteFile(testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions, fileNotFoundOK: Bool = false, expectation:XCTestExpectation) {
 
         switch testAccount.scheme.accountName {
         case AccountScheme.google.accountName:
@@ -247,8 +262,43 @@ extension AccountScheme {
             }
             
         case AccountScheme.microsoft.accountName:
-            break
-            
+            let creds = MicrosoftCreds()
+            creds.refreshToken = testAccount.token()
+            creds.refresh { error in
+                guard error == nil, creds.accessToken != nil else {
+                    print("Error: \(error!)")
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard let cloudStorage = creds.cloudStorage else {
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+                
+                cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+                    switch result {
+                    case .success:
+                        expectation.fulfill()
+                    case .accessTokenRevokedOrExpired:
+                        XCTFail()
+                        expectation.fulfill()
+                    case .failure(let error):
+                        if fileNotFoundOK,
+                            let error = error as? MicrosoftCreds.OneDriveFailure,
+                            case .fileNotFound = error {
+                            expectation.fulfill()
+                        }
+                        else {
+                            XCTFail("Microsoft file deletion: \(error)")
+                            expectation.fulfill()
+                        }
+                    }
+                }
+            }
+
         default:
             assert(false)
         }
@@ -256,14 +306,18 @@ extension AccountScheme {
 }
 
 // 12/20/17; I'm doing this because I suspect that I get test failures that occur simply because I'm asking to generate an access token from a refresh token too frequently in my tests.
-class GoogleCredsCache {
+class CredsCache {
     // The key is the `sub` or id for the particular account.
-    static var cache = [String: GoogleCreds]()
+    static var cache = [String: Account]()
     
     static func credsFor(googleAccount:TestAccount,
                          completion: @escaping (_ creds: GoogleCreds)->()) {
-        
         if let creds = cache[googleAccount.id()] {
+            guard let creds = creds as? GoogleCreds else {
+                assert(false)
+                return
+            }
+            
             completion(creds)
         }
         else {
@@ -276,5 +330,105 @@ class GoogleCredsCache {
                 completion(creds)
             }
         }
+    }
+    
+    static func credsFor(microsoftAccount:TestAccount,
+                         completion: @escaping (_ creds: MicrosoftCreds)->()) {
+        if let creds = cache[microsoftAccount.id()] {
+            guard let creds = creds as? MicrosoftCreds else {
+                assert(false)
+                return
+            }
+            completion(creds)
+        }
+        else {
+            Log.info("Attempting to refresh Microsoft Creds...")
+            let creds = MicrosoftCreds()
+            cache[microsoftAccount.id()] = creds
+            creds.refreshToken = microsoftAccount.token()
+            creds.refresh {[unowned creds] error in
+                XCTAssert(error == nil, "credsFor: Failure on refresh: \(error!)")
+                completion(creds)
+            }
+        }
+    }
+}
+
+extension XCTestCase {
+    @discardableResult
+    func lookupFile(forOwningTestAccount testAccount: TestAccount, cloudFileName: String, options: CloudStorageFileNameOptions) -> Bool? {
+    
+        var lookupResult: Bool?
+        
+        let expectation = self.expectation(description: "expectation")
+    
+        switch testAccount.scheme.accountName {
+        case AccountScheme.google.accountName:
+            let creds = GoogleCreds()
+            creds.refreshToken = testAccount.token()
+            creds.refresh { error in
+                guard error == nil, creds.accessToken != nil else {
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+            
+                creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                    switch result {
+                    case .success (let found):
+                        lookupResult = found
+                    case .failure, .accessTokenRevokedOrExpired:
+                        XCTFail()
+                    }
+                    
+                    expectation.fulfill()
+                }
+            }
+            
+        case AccountScheme.dropbox.accountName:
+            let creds = DropboxCreds()
+            creds.accessToken = testAccount.token()
+            creds.accountId = testAccount.id()
+            
+            creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                switch result {
+                case .success (let found):
+                    lookupResult = found
+                case .failure, .accessTokenRevokedOrExpired:
+                    XCTFail()
+                }
+                
+                expectation.fulfill()
+            }
+            
+        case AccountScheme.microsoft.accountName:
+            let creds = MicrosoftCreds()
+            creds.refreshToken = testAccount.token()
+            creds.refresh { error in
+                guard error == nil, creds.accessToken != nil else {
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+            
+                creds.lookupFile(cloudFileName:cloudFileName, options:options) { result in
+                    switch result {
+                    case .success (let found):
+                        lookupResult = found
+                    case .failure, .accessTokenRevokedOrExpired:
+                        XCTFail()
+                    }
+                    
+                    expectation.fulfill()
+                }
+            }
+            
+        default:
+            assert(false)
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
+        
+        return lookupResult
     }
 }

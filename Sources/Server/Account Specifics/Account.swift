@@ -164,9 +164,6 @@ class AccountAPICall {
         do {
             var body = Data()
             try response.readAllData(into: &body)
-            
-            let string = String(data: body, encoding: .utf8)
-            Log.debug("response string: \(String(describing: string))")
 
             if let expectedBody = expectedBody, expectedBody == .data {
                 result = .data(body)
@@ -280,7 +277,7 @@ class AccountAPICall {
             req.end(data)
         }
         
-        Log.debug("Request URL: \(req.url)")
+        // Log.debug("Request URL: \(req.url)")
     }
 }
 

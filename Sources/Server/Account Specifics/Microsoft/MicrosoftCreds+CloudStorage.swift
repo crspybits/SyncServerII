@@ -26,6 +26,7 @@ extension MicrosoftCreds : CloudStorage {
         case fileNotFound
         case couldNotEncodeBody
         case couldNotCreateUploadState
+        case expiredOrRevokedAccessToken
     }
     
     func basicHeaders(withContentTypeHeader contentType:String = "application/json") -> [String: String] {
@@ -132,11 +133,11 @@ extension MicrosoftCreds {
         return false
     }
     
-    struct ErrorResult: Decodable {
+    struct ErrorResult: Codable {
         // Assuming this response means an expired auth code
         static let invalidAuthToken = "InvalidAuthenticationToken"
         
-        struct TheError: Decodable {
+        struct TheError: Codable {
             let code: String
             let message: String
         }
@@ -340,11 +341,6 @@ extension MicrosoftCreds {
             
             completion(.success(uploadResult.file.hashes.sha1Hash))
         }
-    }
-    
-    func uploadLargeFile(withName fileName: String, mimeType: MimeType, data:Data, completion:@escaping (Result<String>)->()) {
-    
-        // https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_createuploadsession?view=odsp-graph-online
     }
     
     /// Download the file, but don't get the checksum.

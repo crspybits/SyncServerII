@@ -227,6 +227,7 @@ extension MicrosoftCreds {
     }
     
     // String in successful result is checksum.
+    // Large file upload.
     func uploadFileUsingSession(withName fileName: String, mimeType: MimeType, data:Data, completion:@escaping (Result<String>)->()) {
         let blockSize = MicrosoftCreds.UploadState.blockMultipleInBytes * 4
         

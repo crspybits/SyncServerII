@@ -10,6 +10,7 @@ import XCTest
 import LoggerAPI
 import Foundation
 import SyncServerShared
+import HeliumLogger
 
 class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
     
@@ -94,16 +95,22 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = AppMetaData(version: 0, contents: "Test1")
 
+        Log.debug("About to uploadTextFile")
+        
         guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
+        Log.debug("About to sendDoneUploads")
+
         sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
         
         let deviceUUID2 = Foundation.UUID().uuidString
+        
+        Log.debug("About to addNewUser")
 
         let nonOwningAccount:TestAccount = .secondaryOwningAccount
         let sharingGroupUUID2 = UUID().uuidString
@@ -112,6 +119,8 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
+        Log.debug("About to downloadAppMetaDataVersion")
+
         // Using masterVersion 0 here because that's what the nonOwningAccount will have at this point.
         downloadAppMetaDataVersion(testAccount: nonOwningAccount, deviceUUID:deviceUUID2, fileUUID: uploadResult1.request.fileUUID, masterVersionExpectedWithDownload:0, appMetaDataVersion: 0, sharingGroupUUID: sharingGroupUUID2, expectedError: true)
     }
