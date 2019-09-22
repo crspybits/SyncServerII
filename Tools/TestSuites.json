@@ -8,6 +8,7 @@
     "owning_dropbox",
     "owning_microsoft",
     "sharing_create",
+    "sharing_create_microsoft",
     "sharing_info",
     "sharing_redeem",
     "sharing_file",
@@ -347,6 +348,43 @@
       "parameters": [
         "PRIMARY_OWNING_GOOGLE1",
         "PRIMARY_SHARING_DROPBOX2"
+      ]
+    }
+  ],
+  "sharing_create_microsoft": [
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_OWNING_MICROSOFT1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "PRIMARY_OWNING_MICROSOFT2"
       ]
     }
   ],

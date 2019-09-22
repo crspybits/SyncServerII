@@ -68,9 +68,9 @@
         "package": "CredentialsMicrosoft",
         "repositoryURL": "https://github.com/crspybits/CredentialsMicrosoft.git",
         "state": {
-          "branch": "master",
-          "revision": "8bee2c5dac0fa530c0f582cd7f5e77200a9966bc",
-          "version": null
+          "branch": null,
+          "revision": "c4fedb1432ed7948a9cdd613aab0667adade3ed5",
+          "version": "0.1.0"
         }
       },
       {
@@ -224,15 +224,6 @@
           "branch": null,
           "revision": "a50b9a33f08fce638f33ae3121613fe499cc23ec",
           "version": "3.0.7"
-        }
-      },
-      {
-        "package": "SMServerLib",
-        "repositoryURL": "https://github.com/crspybits/SMServerLib.git",
-        "state": {
-          "branch": null,
-          "revision": "d84d6ceacc0c67f8dc0c8e30ecd59469ff9b2775",
-          "version": "1.2.0"
         }
       },
       {

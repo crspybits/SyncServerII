@@ -3,6 +3,7 @@ SyncServer
 Version
 	* Change configuration files to use Codable
 	* Adding Microsoft authentication and OneDrive
+    * Removed SMServerLib-- no longer used.
 
 Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.

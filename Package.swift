@@ -9,18 +9,10 @@ let package = Package(
 
         // 7/2/17; See comment in SwiftMain with the same date.
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
-        
-        // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
-        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", .upToNextMajor(from: "0.4.0")),
-        
-        .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", .branch("master")),
 
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
          .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
         // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMajor(from: "11.0.0")),
-
-        // .package(url: "../../repos/SMServerLib", .branch("master")),
-        .package(url: "https://github.com/crspybits/SMServerLib.git", .upToNextMajor(from: "1.2.0")),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
         // .package(url:"https://github.com/crspybits/Perfect-MySQL.git", from: "3.1.3"),
@@ -34,6 +26,12 @@ let package = Package(
         .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMajor(from: "2.4.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .upToNextMajor(from: "2.3.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", .upToNextMajor(from: "2.3.1")),
+        
+        // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
+        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", .upToNextMajor(from: "0.4.0")),
+        
+        // .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", .branch("master")),
+        .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git",  from: "0.1.0"),
 
         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMajor(from: "1.8.1"))
 	],
@@ -41,7 +39,7 @@ let package = Package(
         .target(name: "Main",
             dependencies: ["Server"]),
         .target(name: "Server",
-            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "SMServerLib", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft"]),
+            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft"]),
         .testTarget(name: "ServerTests",
             dependencies: ["Server", "Main", "CredentialsDropbox"])
     ]

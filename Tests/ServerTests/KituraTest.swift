@@ -25,7 +25,6 @@ import Dispatch
 import Foundation
 @testable import Server
 import CredentialsGoogle
-import SMServerLib
 import SyncServerShared
 
 protocol KituraTest {

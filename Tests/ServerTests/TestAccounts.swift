@@ -7,7 +7,6 @@
 
 import Foundation
 import SyncServerShared
-import SMServerLib
 @testable import Server
 import LoggerAPI
 import HeliumLogger
@@ -51,6 +50,8 @@ struct TestAccount {
     static let secondaryOwningAccount:TestAccount = .google2
 #elseif SECONDARY_OWNING_DROPBOX2
     static let secondaryOwningAccount:TestAccount = .dropbox2
+#elseif SECONDARY_OWNING_MICROSOFT2
+    static let secondaryOwningAccount:TestAccount = .microsoft2
 #else
     static let secondaryOwningAccount:TestAccount = .google2
 #endif
@@ -62,6 +63,8 @@ struct TestAccount {
     static let primarySharingAccount:TestAccount = .facebook1
 #elseif PRIMARY_SHARING_DROPBOX2
     static let primarySharingAccount:TestAccount = .dropbox2
+#elseif PRIMARY_SHARING_MICROSOFT2
+    static let primarySharingAccount:TestAccount = .microsoft2
 #else
     static let primarySharingAccount:TestAccount = .google2
 #endif
@@ -180,7 +183,7 @@ extension AccountScheme {
             return
         }
         
-        Log.debug("About to call handler: \(type)")
+        // Log.debug("About to call handler: \(type)")
         handler(testAccount, callback)
     }
     
@@ -195,7 +198,7 @@ extension AccountScheme {
             let msalAccessToken = headers[ServerConstants.HTTPOAuth2AccessTokenKey]
             headers[ServerConstants.HTTPMicrosoftAccessToken] = msalAccessToken
 
-            // This is the idToken for the Microsoft account-- the realm JWT Oauth2 token.
+            // This is the idToken for the Microsoft account-- the real JWT Oauth2 token.
             headers[ServerConstants.HTTPOAuth2AccessTokenKey] = testUser.secondToken()
             
         default:

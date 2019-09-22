@@ -65,6 +65,9 @@ struct TestConfiguration: Decodable {
     // for chris@cprince.com
     let microsoft1: MicrosoftTokens
     
+    // for crspybits@gmail.com
+    let microsoft2: MicrosoftTokens
+    
     // for chris@cprince.com, but an expired access token
     let microsoft1ExpiredAccessToken: MicrosoftTokens
     
