@@ -122,7 +122,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let fileName = Foundation.UUID().uuidString + ".\(ext)"
         
         let creds = MicrosoftCreds()
-        creds.refreshToken = TestAccount.microsoft1.token()
+        creds.refreshToken = TestAccount.microsoft2.token()
         
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -818,7 +818,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     
     func testUploadWithAPartialBlock() {
         let creds = MicrosoftCreds()
-        creds.refreshToken = TestAccount.microsoft1.token()
+        creds.refreshToken = TestAccount.microsoft2.token()
         let fileName = UUID().uuidString
         
         refresh(creds: creds) { success in
@@ -851,6 +851,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
                     }
                     
                 case .failure, .accessTokenRevokedOrExpired:
+                    XCTFail()
                     exp.fulfill()
                 }
             }
@@ -861,7 +862,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     
     func testUploadWithSingleBlock() {
         let creds = MicrosoftCreds()
-        creds.refreshToken = TestAccount.microsoft1.token()
+        creds.refreshToken = TestAccount.microsoft2.token()
         let fileName = UUID().uuidString
         
         refresh(creds: creds) { success in
@@ -894,6 +895,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
                     }
                     
                 case .failure, .accessTokenRevokedOrExpired:
+                    XCTFail()
                     exp.fulfill()
                 }
             }
@@ -937,6 +939,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
                     }
                     
                 case .failure, .accessTokenRevokedOrExpired:
+                    XCTFail()
                     exp.fulfill()
                 }
             }
@@ -990,7 +993,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     
     func testUploadImageUsingSessionMethod() {
         let creds = MicrosoftCreds()
-        creds.refreshToken = TestAccount.microsoft1.token()
+        creds.refreshToken = TestAccount.microsoft2.token()
         
         let file = TestFile.catJpg
         
@@ -1019,6 +1022,33 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
                 case .failure:
                     XCTFail()
                 case .accessTokenRevokedOrExpired:
+                    XCTFail()
+                }
+                
+                exp.fulfill()
+            }
+            
+            self.waitExpectation(timeout: 10, handler: nil)
+        }
+    }
+    
+    func testCreateAppFolder() {
+        let creds = MicrosoftCreds()
+        creds.refreshToken = TestAccount.microsoft2.token()
+        
+        refresh(creds: creds) { success in
+            guard success else {
+                XCTFail()
+                return
+            }
+            
+            let exp = self.expectation(description: "uploadSession")
+            
+            creds.createAppFolder() { result in
+                switch result {
+                case .success:
+                    break
+                case .failure, .accessTokenRevokedOrExpired:
                     XCTFail()
                 }
                 
@@ -1066,7 +1096,8 @@ extension FileMicrosoftOneDriveTests {
             ("testUploadWithSingleBlock", testUploadWithSingleBlock),
             ("testUploadWithTwoBlocks", testUploadWithTwoBlocks),
             ("testUploadWithTwoBlocksAndAPartial", testUploadWithTwoBlocksAndAPartial),
-            ("testUploadImageUsingSessionMethod", testUploadImageUsingSessionMethod)
+            ("testUploadImageUsingSessionMethod", testUploadImageUsingSessionMethod),
+            ("testCreateAppFolder", testCreateAppFolder)
         ]
     }
     

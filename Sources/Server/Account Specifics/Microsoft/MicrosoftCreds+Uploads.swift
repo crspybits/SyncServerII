@@ -16,6 +16,74 @@ extension MicrosoftCreds {
         let uploadUrl: String
     }
     
+    // Doesn't fail if the folder already exists. If it doesn't exist, it creates the app folder.
+    func createAppFolder(completion:@escaping (Result<()>)->()) {
+        // A call to list the children of the folder implictly creates the app folder.
+        // https://docs.microsoft.com/en-us/onedrive/developer/rest-api/concepts/special-folders-appfolder?view=odsp-graph-online
+
+        let path = "/me/drive/special/approot/children"
+        
+        self.apiCall(method: "GET", baseURL: graphBaseURL, path: path, additionalHeaders: basicHeaders(), expectedSuccessBody: .data, expectedFailureBody: .data) { apiResult, statusCode, responseHeaders in
+        
+            Log.debug("apiResult: \(String(describing: apiResult)); statusCode: \(String(describing: statusCode))")
+            
+            guard let apiResult = apiResult else {
+                completion(.failure(OneDriveFailure.noAPIResult))
+                return
+            }
+            
+            guard case .data(let data) = apiResult else {
+                completion(.failure(OneDriveFailure.noDataInAPIResult))
+                return
+            }
+            
+            let decoder = JSONDecoder()
+
+            guard statusCode == HTTPStatusCode.OK else {
+                guard let errorResult = try? decoder.decode(ErrorResult.self, from: data) else {
+                    completion(.failure(OneDriveFailure.couldNotDecodeError))
+                    return
+                }
+                
+                guard !self.accessTokenIsRevokedOrExpired(errorResult: errorResult, statusCode: statusCode) else {
+                    completion(.accessTokenRevokedOrExpired)
+                    return
+                }
+                
+                completion(.failure(OneDriveFailure.badStatusCode(statusCode, errorResult)))
+                return
+            }
+
+            completion(.success(()))
+        }
+    }
+    
+    func createUploadSession(cloudFileName: String, createFolderFirst: Bool, completion:@escaping (Result<UploadSession>)->()) {
+    
+        if createFolderFirst {
+            createAppFolder() { [weak self] result in
+                guard let self = self else {
+                    completion(.failure(OneDriveFailure.couldNotGetSelf))
+                    return
+                }
+                
+                switch result {
+                case .success:
+                    self.createUploadSession(cloudFileName: cloudFileName, completion: completion)
+                case .failure(let error):
+                    completion(.failure(error))
+                case .accessTokenRevokedOrExpired:
+                    completion(.accessTokenRevokedOrExpired)
+                }
+            }
+        }
+        else {
+            createUploadSession(cloudFileName: cloudFileName, completion: completion)
+        }
+    }
+    
+    // At least as of 6/22/19-- this is not creating the App folder if it doesn't already exist. It is returning HTTP status code forbidden.
+    // See https://github.com/OneDrive/onedrive-api-docs/issues/1150
     func createUploadSession(cloudFileName: String, completion:@escaping (Result<UploadSession>)->()) {
     
         // https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_createuploadsession?view=odsp-graph-online#create-an-upload-session
@@ -24,6 +92,7 @@ extension MicrosoftCreds {
         // Content-Type: application/json
         
         let path = "/me/drive/special/approot:/\(cloudFileName):/createUploadSession"
+        
         guard let encodedPath = encoded(string: path) else {
             Log.error("Failed encoding path.")
             completion(.failure(OneDriveFailure.urlEncoding))
@@ -226,12 +295,41 @@ extension MicrosoftCreds {
         }
     }
     
+    enum CreateFolderFirst {
+        case defaultNo
+        case failedFirstTryYes
+        case failedSecondTryNo
+        
+        var toBool:Bool {
+            switch self {
+            case .defaultNo:
+                return false
+            case .failedFirstTryYes:
+                return true
+            case .failedSecondTryNo:
+                return false
+            }
+        }
+        
+        var nextState: CreateFolderFirst {
+            switch self {
+            case .defaultNo:
+                return .failedFirstTryYes
+            case .failedFirstTryYes:
+                return .failedSecondTryNo
+            case .failedSecondTryNo:
+                return .failedSecondTryNo
+            }
+        }
+    }
+    
     // String in successful result is checksum.
     // Large file upload.
-    func uploadFileUsingSession(withName fileName: String, mimeType: MimeType, data:Data, completion:@escaping (Result<String>)->()) {
+    // createFolderFirst is a workaround for a OneDrive issue. See comments in createUploadSession.
+    func uploadFileUsingSession(withName fileName: String, mimeType: MimeType, data:Data, createFolderFirst: CreateFolderFirst = .defaultNo, completion:@escaping (Result<String>)->()) {
         let blockSize = MicrosoftCreds.UploadState.blockMultipleInBytes * 4
         
-        createUploadSession(cloudFileName: fileName) {[weak self] result in
+        createUploadSession(cloudFileName: fileName, createFolderFirst: createFolderFirst.toBool) {[weak self] result in
             guard let self = self else {
                 completion(.failure(OneDriveFailure.couldNotGetSelf))
                 return
@@ -239,7 +337,14 @@ extension MicrosoftCreds {
             
             switch result {
             case .failure(let error):
-                completion(.failure(error))
+                if case OneDriveFailure.badStatusCode(let statusCode, _) = error,
+                    statusCode == .forbidden,
+                    createFolderFirst.nextState.toBool {
+                    self.uploadFileUsingSession(withName: fileName, mimeType: mimeType, data: data,createFolderFirst: createFolderFirst.nextState, completion: completion)
+                }
+                else {
+                    completion(.failure(error))
+                }
             case .accessTokenRevokedOrExpired:
                 completion(.accessTokenRevokedOrExpired)
                 

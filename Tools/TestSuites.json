@@ -2,6 +2,7 @@
   "all": [
     "basic",
     "google",
+    "facebook",
     "dropbox",
     "microsoft",
     "owning_google",
@@ -10,10 +11,13 @@
     "sharing_create",
     "sharing_create_microsoft",
     "sharing_info",
+    "sharing_info_microsoft",
     "sharing_redeem",
+    "sharing_redeem_microsoft",
     "sharing_file",
+    "sharing_file_microsoft",
     "sharing_groups",
-    "facebook"
+    "sharing_groups_microsoft"
   ],
   "basic": [
     {
@@ -470,6 +474,40 @@
       ]
     }
   ],
+  "sharing_info_microsoft": [
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_MICROSOFT2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_MICROSOFT2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    }
+  ],
   "sharing_redeem": [
     {
       "name": "SharingAccountsController_RedeemSharingInvitation",
@@ -549,6 +587,40 @@
         "PRIMARY_OWNING_DROPBOX1",
         "SECONDARY_OWNING_DROPBOX2",
         "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    }
+  ],
+  "sharing_redeem_microsoft": [
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_MICROSOFT2",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_MICROSOFT2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_MICROSOFT2"
       ]
     }
   ],
@@ -634,6 +706,40 @@
       ]
     }
   ],
+  "sharing_file_microsoft": [
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_MICROSOFT2",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_MICROSOFT2",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_MICROSOFT2"
+      ]
+    }
+  ],
   "sharing_groups": [
     {
       "name": "SharingGroupsControllerTests",
@@ -660,6 +766,36 @@
       "name": "SharingGroupsControllerTests",
       "parameters": [
         "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2"
+      ]
+    }
+  ],
+  "sharing_groups_microsoft": [
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
+        "SECONDARY_OWNING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_MICROSOFT1"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_MICROSOFT2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_MICROSOFT1",
         "SECONDARY_OWNING_DROPBOX2"
       ]
     }
