@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
           "branch": null,
-          "revision": "6e83ae419817e7272f2f80a7a005a26df366dd8e",
-          "version": "1.0.31"
+          "revision": "12d2bf3ec7207ec3cd004b9582f69ef5fae1da3b",
+          "version": "1.0.32"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueECC.git",
         "state": {
           "branch": null,
-          "revision": "73a43a5102eafaf4668dbd6e0163bed21c776b9c",
-          "version": "1.2.4"
+          "revision": "73f362cb0d9c5f1fd0089240d7b293cd2bff18db",
+          "version": "1.2.5"
         }
       },
       {
@@ -29,21 +29,12 @@
         }
       },
       {
-        "package": "Signals",
-        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
-        "state": {
-          "branch": null,
-          "revision": "6d13339441e687695f9980303594304599a03560",
-          "version": "1.0.20"
-        }
-      },
-      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "49cab699e9f151eeb870ab93d14642425e824c19",
-          "version": "1.0.49"
+          "revision": "f82e1401f04f62b2e8ce4670456d104466957810",
+          "version": "1.0.50"
         }
       },
       {
@@ -51,8 +42,17 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
         "state": {
           "branch": null,
-          "revision": "de36b4d078a12fffba982d17f59d2b7ca587bec9",
-          "version": "1.0.49"
+          "revision": "d6616def31a12088034f0a63ed4646772eff5bce",
+          "version": "1.0.50"
+        }
+      },
+      {
+        "package": "CredentialsAppleSignIn",
+        "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
+        "state": {
+          "branch": "master",
+          "revision": "66abe1f2118490e802e1c5a5d5425832ac304b5c",
+          "version": null
         }
       },
       {
@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/KituraContracts.git",
         "state": {
           "branch": null,
-          "revision": "bdd4abf3932e11388ab690ea72a43e17b98dfd78",
-          "version": "1.1.3"
+          "revision": "a30e2fb79e926672776a05ec6b919c239870a221",
+          "version": "1.2.1"
         }
       },
       {
@@ -191,15 +191,6 @@
         }
       },
       {
-        "package": "LinuxBridge",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
-        "state": {
-          "branch": null,
-          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
-          "version": "3.1.0"
-        }
-      },
-      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -210,10 +201,10 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
         "state": {
           "branch": null,
-          "revision": "5401a4713557237baabaef1caea93467cf5af138",
+          "revision": "afec636bfa3302ea155f462f139da46a53fd351a",
           "version": "2.1.0"
         }
       },
@@ -227,12 +218,21 @@
         }
       },
       {
+        "package": "SwiftJWKtoPEM",
+        "repositoryURL": "https://github.com/ibm-cloud-security/Swift-JWK-to-PEM",
+        "state": {
+          "branch": null,
+          "revision": "b18e2af1392bb84f1cde83b1e00847051c9fdda6",
+          "version": "0.4.0"
+        }
+      },
+      {
         "package": "SwiftJWT",
         "repositoryURL": "https://github.com/IBM-Swift/Swift-JWT.git",
         "state": {
           "branch": null,
-          "revision": "a0a89d62b8276635f430dfaf8688051cac6b9342",
-          "version": "3.5.3"
+          "revision": "2241e8371092c12ed2095de2ad06ce27103eba53",
+          "version": "3.6.0"
         }
       },
       {
@@ -266,9 +266,9 @@
         "package": "SyncServerShared",
         "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
         "state": {
-          "branch": "dev",
-          "revision": "20ec81e954e946b23539bf87ea410871bb4552aa",
-          "version": null
+          "branch": null,
+          "revision": "d082e58b4f304d7d94a8e0f30597597b58e22d08",
+          "version": "11.1.0"
         }
       },
       {

@@ -11,8 +11,8 @@ let package = Package(
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
 
         // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-         .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
-        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMajor(from: "11.0.0")),
+        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
+        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMajor(from: "11.1.0")),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
         // .package(url:"https://github.com/crspybits/Perfect-MySQL.git", from: "3.1.3"),
@@ -32,14 +32,17 @@ let package = Package(
         
         // .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", .branch("master")),
         .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git",  from: "0.1.0"),
-
+        
+        .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git", .branch("master")),
+        // .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git",  from: "0.1.0"),
+        
         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMajor(from: "1.8.1"))
 	],
     targets: [
         .target(name: "Main",
             dependencies: ["Server"]),
         .target(name: "Server",
-            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft"]),
+            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn"]),
         .testTarget(name: "ServerTests",
             dependencies: ["Server", "Main", "CredentialsDropbox"])
     ]

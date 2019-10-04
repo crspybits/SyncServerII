@@ -23,6 +23,10 @@ protocol AccountDelegate : class {
     func saveToDatabase(account:Account) -> Bool
 }
 
+/// E.g., tokens stored in the database representing the Account.
+protocol DatabaseCredentials {
+}
+
 protocol Account {
     static var accountScheme:AccountScheme {get}
     var accountScheme:AccountScheme {get}
@@ -40,7 +44,7 @@ protocol Account {
     
     func toJSON() -> String?
     
-    // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access that data by sharing users.
+    // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access to that data by sharing users.
     func needToGenerateTokens(dbCreds:Account?) -> Bool
     
     // Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
