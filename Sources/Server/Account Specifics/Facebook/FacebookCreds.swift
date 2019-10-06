@@ -31,7 +31,7 @@ class FacebookCreds : AccountAPICall,  Account {
     
     var accountCreationUser:AccountCreationUser?
     
-    override init() {
+    override init?() {
         super.init()
         baseURL = "graph.facebook.com"
     }
@@ -113,7 +113,10 @@ class FacebookCreds : AccountAPICall,  Account {
     }
     
     static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        let creds = FacebookCreds()
+        guard let creds = FacebookCreds() else {
+            return nil
+        }
+        
         creds.accountCreationUser = user
         creds.delegate = delegate
         creds.accessToken = properties.properties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
@@ -122,7 +125,10 @@ class FacebookCreds : AccountAPICall,  Account {
     
     static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
         
-        let creds = FacebookCreds()
+        guard let creds = FacebookCreds() else {
+            return nil
+        }
+        
         creds.accountCreationUser = user
         creds.delegate = delegate
         

@@ -41,7 +41,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
 
     func testListFiles() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -60,7 +60,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func searchForFolder(name:String, presentExpected:Bool) {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -84,7 +84,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func searchForFile(name:String, withMimeType mimeType:String, inFolder folderName:String?, presentExpected:Bool) {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -207,7 +207,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
 */
 
     func testCreateAndDeleteFolder() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -230,7 +230,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testDeleteFolderThatDoesNotExistFailure() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -248,7 +248,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func cloudStorageFileDelete(file: TestFile, mimeType: MimeType) {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -290,7 +290,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testCloudStorageFileDeleteWithRevokedRefreshToken() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.googleRevoked.token()
 
         let options = CloudStorageFileNameOptions(cloudFolderName: self.knownPresentFolder, mimeType: "text/plain")
@@ -326,7 +326,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testCreateFolderIfDoesNotExist() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -363,7 +363,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func fullUpload(file: TestFile, mimeType: String, nonStandardFileName: String? = nil) {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -404,7 +404,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadWithRevokedRefreshToken() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.googleRevoked.token()
         
         // Do the upload
@@ -427,7 +427,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func downloadFile(cloudFileName:String, mimeType: MimeType, expectError:Bool = false, expectedFileNotFound: Bool = false) {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -483,7 +483,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     func testDownloadWithRevokedRefreshToken() {
         let cloudFileName = self.knownPresentFile
         
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.googleRevoked.token()
         let exp = expectation(description: "\(#function)\(#line)")
 
@@ -508,7 +508,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testFileDirectDownloadOfNonExistentFileFails() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -537,7 +537,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testThatAccessTokenRefreshOccursWithBadToken() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -563,7 +563,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testThatAccessTokenRefreshFailsWithBadRefreshToken() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = "foobar"
         
         let exp = expectation(description: "\(#function)\(#line)")
@@ -589,7 +589,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testLookupFileWithRevokedRefreshToken() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.googleRevoked.token()
         let exp = expectation(description: "\(#function)\(#line)")
 
@@ -615,7 +615,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     func lookupFile(cloudFileName: String, mimeType: MimeType = .text, expectError:Bool = false) -> Bool? {
         var foundResult: Bool?
         
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.google1.token()
         let exp = expectation(description: "\(#function)\(#line)")
         
@@ -664,7 +664,7 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testRevokedGoogleRefreshToken() {
-        let creds = GoogleCreds()
+        let creds = GoogleCreds()!
         creds.refreshToken = TestAccount.googleRevoked.token()
         let exp = expectation(description: "\(#function)\(#line)")
         

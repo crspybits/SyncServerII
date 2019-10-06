@@ -29,7 +29,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
 
     func testCheckForFileFailsWithFileThatDoesNotExist() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         
         let exp = expectation(description: "\(#function)\(#line)")
@@ -60,7 +60,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testCheckForFileFailsWithExpiredAccessToken() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
 
         let existingFile = self.knownPresentFile
@@ -86,7 +86,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testCheckForFileWorksWithExistingFile() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         
         //let existingFile = "539C70F7-8144-49F1-81C7-003DD5D8833B.14B026F1-6E5F-43E6-A54B-0524BB8F3E9C.0.txt"
@@ -121,7 +121,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let ext = Extension.forMimeType(mimeType: file.mimeType.rawValue)
         let fileName = Foundation.UUID().uuidString + ".\(ext)"
         
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft2.token()
         
         let exp = expectation(description: "\(#function)\(#line)")
@@ -170,7 +170,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let ext = Extension.forMimeType(mimeType: file.mimeType.rawValue)
         let fileName = Foundation.UUID().uuidString + ".\(ext)"
         
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
         
         let exp = expectation(description: "\(#function)\(#line)")
@@ -226,7 +226,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
         
         let file = TestFile.test1
@@ -248,7 +248,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         
         refresh(creds: creds) { success in
@@ -351,7 +351,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testDownloadOfNonExistingFileFails() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         refresh(creds: creds) { success in
             guard success else {
@@ -365,7 +365,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     
     // Download without checksum.
     func testSimpleDownloadWorks() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         refresh(creds: creds) { success in
             guard success else {
@@ -391,7 +391,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     
     // Reason code 80049228
     func testSimpleDownloadWithExpiredAccessTokenFails() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
 
         let exp = self.expectation(description: "download")
@@ -439,7 +439,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
 
         let file = TestFile.test1
@@ -505,7 +505,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     //}
     
     func testDeletionOfNonExistingFileFails() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         
         refresh(creds: creds) { success in
@@ -522,7 +522,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
 
         let uploadRequest = UploadFileRequest()
@@ -553,7 +553,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     func testSimpleDeletionWithExpiredAccessTokenFails() {
         // First need to get item id of the file in the normal way so it doesn't fail.
         
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         
         refresh(creds: creds) { success in
@@ -582,7 +582,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func deleteExpectingExpiredAccessToken(itemId: String, expectation: XCTestExpectation) {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
         
         creds.deleteFile(itemId: itemId) { result in
@@ -608,7 +608,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func lookupFile(cloudFileName: String, expectError:Bool = false) {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         
         refresh(creds: creds) { success in
@@ -653,7 +653,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     // MARK: Large file upload
     
     func testCreateUploadSession() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         let fileName = UUID().uuidString
         
@@ -796,7 +796,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testCreateUploadSessionWithExpiredToken() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.accessToken = TestAccount.microsoft1ExpiredAccessToken.secondToken()
         let fileName = UUID().uuidString
 
@@ -817,7 +817,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadWithAPartialBlock() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft2.token()
         let fileName = UUID().uuidString
         
@@ -861,7 +861,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadWithSingleBlock() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft2.token()
         let fileName = UUID().uuidString
         
@@ -905,7 +905,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadWithTwoBlocks() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         let fileName = UUID().uuidString
         
@@ -949,7 +949,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadWithTwoBlocksAndAPartial() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft1.token()
         let fileName = UUID().uuidString
         
@@ -992,7 +992,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadImageUsingSessionMethod() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft2.token()
         
         let file = TestFile.catJpg
@@ -1033,7 +1033,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func testCreateAppFolder() {
-        let creds = MicrosoftCreds()
+        let creds = MicrosoftCreds()!
         creds.refreshToken = TestAccount.microsoft2.token()
         
         refresh(creds: creds) { success in

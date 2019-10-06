@@ -23,6 +23,8 @@ let package = Package(
 
         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMajor(from: "2.7.0")),
         
+        .package(url: "https://github.com/IBM-Swift/Swift-JWT.git", from: "3.5.3"),
+        
         .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMajor(from: "2.4.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .upToNextMajor(from: "2.3.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", .upToNextMajor(from: "2.3.1")),
@@ -42,7 +44,7 @@ let package = Package(
         .target(name: "Main",
             dependencies: ["Server"]),
         .target(name: "Server",
-            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn"]),
+            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn", "SwiftJWT"]),
         .testTarget(name: "ServerTests",
             dependencies: ["Server", "Main", "CredentialsDropbox"])
     ]

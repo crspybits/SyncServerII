@@ -30,7 +30,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
 
     func testCheckForFileFailsWithFileThatDoesNotExist() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -52,7 +52,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testCheckForFileWorksWithExistingFile() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -74,7 +74,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     func uploadFile(file: TestFile, mimeType: MimeType) {
         let fileName = Foundation.UUID().uuidString
         
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -121,7 +121,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     func testUploadWithRevokedToken() {
         let fileName = Foundation.UUID().uuidString
         
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1Revoked.token()
         creds.accountId = TestAccount.dropbox1Revoked.id()
         let exp = expectation(description: "\(#function)\(#line)")
@@ -156,7 +156,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         
@@ -229,14 +229,14 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testDownloadOfNonExistingFileFails() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         downloadFile(creds: creds, cloudFileName: knownAbsentFile, expectedFileNotFound: true)
     }
     
     func testSimpleDownloadWorks() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         
@@ -244,7 +244,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testDownloadWithRevokedToken() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1Revoked.token()
         creds.accountId = TestAccount.dropbox1Revoked.id()
         
@@ -252,7 +252,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testSimpleDownloadWorks2() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         
@@ -263,7 +263,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
 
@@ -313,7 +313,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testDeletionWithRevokedAccessToken() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1Revoked.token()
         creds.accountId = TestAccount.dropbox1Revoked.id()
         
@@ -341,7 +341,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testDeletionOfNonExistingFileFails() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         deleteFile(creds: creds, cloudFileName: knownAbsentFile, expectedFailure: true)
@@ -351,7 +351,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
 
@@ -382,7 +382,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     func lookupFile(cloudFileName: String, expectError:Bool = false) -> Bool? {
         var foundResult: Bool?
         
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1.token()
         creds.accountId = TestAccount.dropbox1.id()
         
@@ -421,7 +421,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
     }
     
     func testLookupWithRevokedAccessToken() {
-        let creds = DropboxCreds()
+        let creds = DropboxCreds()!
         creds.accessToken = TestAccount.dropbox1Revoked.token()
         creds.accountId = TestAccount.dropbox1Revoked.id()
         

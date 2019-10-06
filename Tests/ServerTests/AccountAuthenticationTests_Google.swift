@@ -64,7 +64,11 @@ class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     }
     
     func testRefreshGoogleAccessTokenWorks() {
-        let creds = GoogleCreds()
+        guard let creds = GoogleCreds() else {
+            XCTFail()
+            return
+        }
+        
         creds.refreshToken = TestAccount.google1.token()
         
         let exp = expectation(description: "\(#function)\(#line)")

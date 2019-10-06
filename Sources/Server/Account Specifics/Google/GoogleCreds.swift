@@ -69,7 +69,7 @@ class GoogleCreds : AccountAPICall, Account {
     // This is to ensure that some error doesn't cause us to attempt to refresh the access token multiple times in a row. I'm assuming that for any one endpoint invocation, we'll at most need to refresh the access token a single time.
     private var alreadyRefreshed = false
     
-    override init() {
+    override init?() {
         super.init()
         baseURL = "www.googleapis.com"
     }
@@ -89,7 +89,10 @@ class GoogleCreds : AccountAPICall, Account {
     }
     
     static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        let creds = GoogleCreds()
+        guard let creds = GoogleCreds() else {
+            return nil
+        }
+        
         creds.accountCreationUser = user
         creds.delegate = delegate
         creds.accessToken =
@@ -105,7 +108,10 @@ class GoogleCreds : AccountAPICall, Account {
             return nil
         }
         
-        let result = GoogleCreds()
+        guard let result = GoogleCreds() else {
+            return nil
+        }
+        
         result.delegate = delegate
         result.accountCreationUser = user
         

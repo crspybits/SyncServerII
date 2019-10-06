@@ -12,7 +12,11 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
 
     // Need to use this test to get an initial refresh token for the TestCredentials. Put an id token in the TestCredentials for .microsoft1 before this.
     func testBootstrapRefreshToken() {
-        let microsoftCreds = MicrosoftCreds()
+        guard let microsoftCreds = MicrosoftCreds() else {
+            XCTFail()
+            return
+        }
+        
         guard let test = Configuration.test else {
             XCTFail()
             return
@@ -36,7 +40,11 @@ class AccountAuthenticationTests_Microsoft: ServerTestCase, LinuxTestable {
             return
         }
         
-        let microsoftCreds = MicrosoftCreds()
+        guard let microsoftCreds = MicrosoftCreds() else {
+            XCTFail()
+            return
+        }
+        
         microsoftCreds.refreshToken = test.microsoft1.refreshToken
         let exp = expectation(description: "refresh")
         microsoftCreds.refresh() { error in

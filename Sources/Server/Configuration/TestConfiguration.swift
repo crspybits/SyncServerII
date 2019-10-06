@@ -78,5 +78,13 @@ struct TestConfiguration: Decodable {
         The access token, at least until it is expired, should be purely a revoked access token.
     */
     let microsoft2RevokedAccessToken: MicrosoftTokens
+    
+    struct AppleSignInTokens: Decodable {
+        let authorizationCode: String
+        let refreshToken: String
+        let idToken: String
+    }
+    
+    let apple1: AppleSignInTokens
 }
 #endif

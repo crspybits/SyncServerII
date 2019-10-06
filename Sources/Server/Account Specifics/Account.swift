@@ -44,10 +44,11 @@ protocol Account {
     
     func toJSON() -> String?
     
-    // Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access to that data by sharing users.
+    /// Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access to that data by sharing users.
+    /// You must call this before `generateTokens`-- the Account scheme may save some state as a result of this call that changes how the `generateTokens` call works.
     func needToGenerateTokens(dbCreds:Account?) -> Bool
     
-    // Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
+    /// Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
     func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->())
     
     func merge(withNewer account:Account)
@@ -154,13 +155,19 @@ enum GenerateTokensError : Swift.Error {
     case badStatusCode(HTTPStatusCode?)
     case couldNotObtainParameterFromJSON
     case nilAPIResult
+    case noDataInAPIResult
+    case couldNotDecodeResult
     case errorSavingCredsToDatabase
+    case couldNotGetSelf
+    case noRefreshToken
 }
 
 // I didn't just use a protocol extension for this because I want to be able to override `apiCall` and call "super" to get the base definition.
 class AccountAPICall {
     // Used by `apiCall` function to make a REST call to an Account service.
     var baseURL:String?
+    
+    init?() {}
     
     private func parseResponse(_ response: ClientResponse, expectedBody: ExpectedResponse?, errorIfParsingFailure: Bool = false) -> APICallResult? {
         var result:APICallResult?

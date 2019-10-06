@@ -34,7 +34,7 @@ class DropboxCreds : AccountAPICall, Account {
     static let accountIdKey = "accountId"
     var accountId: String!
     
-    override init() {
+    override init?() {
         super.init()
         baseURL = "api.dropboxapi.com"
     }
@@ -100,7 +100,10 @@ class DropboxCreds : AccountAPICall, Account {
     }
     
     static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        let creds = DropboxCreds()
+        guard let creds = DropboxCreds() else {
+            return nil
+        }
+        
         creds.accountCreationUser = user
         creds.delegate = delegate
         creds.accessToken =
@@ -116,7 +119,10 @@ class DropboxCreds : AccountAPICall, Account {
             return nil
         }
         
-        let result = DropboxCreds()
+        guard let result = DropboxCreds() else {
+            return nil
+        }
+        
         result.delegate = delegate
         result.accountCreationUser = user
         

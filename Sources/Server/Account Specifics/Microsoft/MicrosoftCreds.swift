@@ -37,7 +37,7 @@ class MicrosoftCreds : AccountAPICall, Account {
 
     private let scopes = "https://graph.microsoft.com/user.read+offline_access"
 
-    override init() {
+    override init?() {
         super.init()
         baseURL = "login.microsoftonline.com/common"
     }
@@ -282,7 +282,10 @@ class MicrosoftCreds : AccountAPICall, Account {
     }
     
     static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        let creds = MicrosoftCreds()
+        guard let creds = MicrosoftCreds() else {
+            return nil
+        }
+        
         creds.accountCreationUser = user
         creds.delegate = delegate
         creds.accessToken =
@@ -305,7 +308,10 @@ class MicrosoftCreds : AccountAPICall, Account {
             return nil
         }
         
-        let result = MicrosoftCreds()
+        guard let result = MicrosoftCreds() else {
+            return nil
+        }
+        
         result.delegate = delegate
         result.accountCreationUser = user
         

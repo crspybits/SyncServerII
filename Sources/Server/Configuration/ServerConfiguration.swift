@@ -45,6 +45,27 @@ struct ServerConfiguration: Decodable {
     // If you are using Microsoft Accounts
     let MicrosoftClientId:String?
     let MicrosoftClientSecret:String?
+    
+    struct AppleSignIn: Decodable {
+        // From creating a Service Id for your app.
+        let redirectURI: String
+        
+        // The reverse DNS style app identifier for your iOS app.
+        let clientId: String
+        
+        // MARK: For generating the client secret; See notes in AppleSignInCreds+ClientSecret.swift
+        
+        let keyId: String
+        
+        let teamId: String
+        
+        // Once generated from the Apple developer's website, the key is converted
+        // to a single line for the JSON using:
+        //      awk 'NF {sub(/\r/, ""); printf "%s\\\\n",$0;}' *.p8
+        // Script from https://docs.vmware.com/en/Unified-Access-Gateway/3.0/com.vmware.access-point-30-deploy-config.doc/GUID-870AF51F-AB37-4D6C-B9F5-4BFEB18F11E9.html
+        let privateKey: String
+    }
+    let appleSignIn: AppleSignIn?
 
     let maxNumberDeviceUUIDPerUser:Int?
     
@@ -53,6 +74,7 @@ struct ServerConfiguration: Decodable {
         let Facebook:Bool?
         let Dropbox:Bool?
         let Microsoft:Bool?
+        let AppleSignIn: Bool?
     }
     let allowedSignInTypes:AllowedSignInTypes
     

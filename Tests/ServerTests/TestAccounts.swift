@@ -110,6 +110,8 @@ struct TestAccount {
     
     static let microsoft2 = TestAccount(tokenKey: \.microsoft2.refreshToken, secondTokenKey: \.microsoft2.idToken, idKey: \.microsoft2.id, scheme: .microsoft)
     
+    static let apple1 = TestAccount(tokenKey: \.apple1.refreshToken, secondTokenKey: \.apple1.authorizationCode, idKey: \.apple1.idToken, scheme: .appleSignIn)
+    
     static let microsoft1ExpiredAccessToken = TestAccount(tokenKey: \.microsoft1ExpiredAccessToken.refreshToken, secondTokenKey: \.microsoft1ExpiredAccessToken.accessToken, idKey: \.microsoft1ExpiredAccessToken.id, scheme: .microsoft)
     
     static let microsoft2RevokedAccessToken = TestAccount(tokenKey: \.microsoft2RevokedAccessToken.refreshToken, secondTokenKey: \.microsoft2RevokedAccessToken.accessToken, idKey: \.microsoft2RevokedAccessToken.id, scheme: .microsoft)
@@ -140,7 +142,7 @@ struct TestAccount {
         
         // MARK: Dropbox
         AccountScheme.dropbox.registerHandler(type: .getCredentials) { testAccount, callback in
-            let creds = DropboxCreds()
+            let creds = DropboxCreds()!
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             callback(creds)
@@ -148,7 +150,7 @@ struct TestAccount {
         
         // MARK: Facebook
         AccountScheme.facebook.registerHandler(type: .getCredentials) { testAccount, callback in
-            let creds = FacebookCreds()
+            let creds = FacebookCreds()!
             creds.accessToken = testAccount.token()
             callback(creds)
         }
@@ -212,7 +214,7 @@ extension AccountScheme {
 
         switch testAccount.scheme.accountName {
         case AccountScheme.google.accountName:
-            let creds = GoogleCreds()
+            let creds = GoogleCreds()!
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
@@ -243,7 +245,7 @@ extension AccountScheme {
             }
             
         case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()
+            let creds = DropboxCreds()!
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             
@@ -267,7 +269,7 @@ extension AccountScheme {
             }
             
         case AccountScheme.microsoft.accountName:
-            let creds = MicrosoftCreds()
+            let creds = MicrosoftCreds()!
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
@@ -327,7 +329,7 @@ class CredsCache {
         }
         else {
             Log.info("Attempting to refresh Google Creds...")
-            let creds = GoogleCreds()
+            let creds = GoogleCreds()!
             cache[googleAccount.id()] = creds
             creds.refreshToken = googleAccount.token()
             creds.refresh {[unowned creds] error in
@@ -348,7 +350,7 @@ class CredsCache {
         }
         else {
             Log.info("Attempting to refresh Microsoft Creds...")
-            let creds = MicrosoftCreds()
+            let creds = MicrosoftCreds()!
             cache[microsoftAccount.id()] = creds
             creds.refreshToken = microsoftAccount.token()
             creds.refresh {[unowned creds] error in
@@ -369,7 +371,7 @@ extension XCTestCase {
     
         switch testAccount.scheme.accountName {
         case AccountScheme.google.accountName:
-            let creds = GoogleCreds()
+            let creds = GoogleCreds()!
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
@@ -391,7 +393,7 @@ extension XCTestCase {
             }
             
         case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()
+            let creds = DropboxCreds()!
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             
@@ -407,7 +409,7 @@ extension XCTestCase {
             }
             
         case AccountScheme.microsoft.accountName:
-            let creds = MicrosoftCreds()
+            let creds = MicrosoftCreds()!
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
