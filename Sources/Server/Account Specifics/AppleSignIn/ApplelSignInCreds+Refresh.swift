@@ -28,7 +28,6 @@ extension AppleSignInCreds {
     }
     
     // https://developer.apple.com/documentation/signinwithapplerestapi/generate_and_validate_tokens
-    // POST https://appleid.apple.com/auth/token
     
     /// This can only be called once for a serverAuthCode.
     func generateRefreshToken(serverAuthCode: String, completion: @escaping (Swift.Error?) -> ()) {
@@ -126,7 +125,7 @@ extension AppleSignInCreds {
             self.accessToken = tokenResult.id_token
             self.refreshToken = tokenResult.refresh_token
 
-            Log.debug("Obtained tokens: accessToken: \(String(describing: self.accessToken))\n refreshToken: \(String(describing: self.refreshToken))")
+            Log.debug("Obtained tokens: idToken: \(String(describing: self.accessToken))\n refreshToken: \(String(describing: self.refreshToken))")
             
             guard let delegate = self.delegate else {
                 Log.warning("No delegate!")
@@ -143,14 +142,10 @@ extension AppleSignInCreds {
         }
     }
     
-    /// Given that the Account has a refreshToken, use it to validate the refresh token.
-    /// This does *not* generate a new id token-- the API returns an updated *access token*, which Apple doesn't define a use for (and we don't save).
+    /// Validate the given refresh token. This does *not* generate a new id token-- the API returns an updated *access token*, which Apple doesn't define a use for (and we don't save).
     /// On success, updates the lastRefreshTokenValidation.
-    func validateRefreshToken(completion: @escaping (Swift.Error?) -> ()) {
-        guard let refreshToken = refreshToken else {
-            completion(GenerateTokensError.noRefreshToken)
-            return
-        }
+    func validateRefreshToken(refreshToken: String, completion: @escaping (Swift.Error?) -> ()) {
+        self.refreshToken = refreshToken
         
         guard let clientSecret = createClientSecret() else {
             completion(AppleSignInCredsError.failedCreatingClientSecret)

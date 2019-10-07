@@ -11,7 +11,7 @@ import SwiftJWT
 // Notes about creating the client secret:
 // https://auth0.com/blog/what-is-sign-in-with-apple-a-new-identity-provider/
 // https://medium.com/identity-beyond-borders/adding-sign-in-with-apple-to-your-app-in-under-5mins-with-zero-code-ce36966b03f0
-/* Looks like this is a JWT. The parameters for this seem to be:
+/* The client secret is a JWT. The parameters for this seem to be:
     1) a private key generated at:
         https://developer.apple.com/account/resources/authkeys/list
         What should you use for a Key Name?

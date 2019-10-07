@@ -159,7 +159,6 @@ enum GenerateTokensError : Swift.Error {
     case couldNotDecodeResult
     case errorSavingCredsToDatabase
     case couldNotGetSelf
-    case noRefreshToken
 }
 
 // I didn't just use a protocol extension for this because I want to be able to override `apiCall` and call "super" to get the base definition.

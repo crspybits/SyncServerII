@@ -42,6 +42,7 @@ class AppleSignInCreds: AccountAPICall, Account {
         let lastRefreshTokenValidation: Date?
     }
     
+    // This is actually an idToken, in Apple's terms.
     var accessToken: String!
     private var serverAuthCode:String?
     
@@ -53,18 +54,18 @@ class AppleSignInCreds: AccountAPICall, Account {
     enum GenerateTokens {
         case noGeneration
         case generateRefreshToken(serverAuthCode: String)
-        case refreshIdTokenUsingRefreshToken(refreshToken: String)
+        case validateRefreshToken(refreshToken: String)
         
-        // Apple says we can't refresh tokens more than once per day.
-        static let minimumRefreshDuration: TimeInterval = 60 * 60 * 24
+        // Apple says we can't validate tokens more than once per day.
+        static let minimumValidationDuration: TimeInterval = 60 * 60 * 24
         
-        static func needToRefreshIdToken(lastRefreshTokenUsage: Date) -> Bool {
-            let timeIntervalSinceLastRefresh = Date().timeIntervalSince(lastRefreshTokenUsage)
-            return timeIntervalSinceLastRefresh >= minimumRefreshDuration
+        static func needToValidateRefreshToken(lastRefreshTokenValidation: Date) -> Bool {
+            let timeIntervalSinceLastValidation = Date().timeIntervalSince(lastRefreshTokenValidation)
+            return timeIntervalSinceLastValidation >= minimumValidationDuration
         }
     }
     
-    private var generateTokens: GenerateTokens?
+    private(set) var generateTokens: GenerateTokens?
     let config: ServerConfiguration.AppleSignIn
     
     override init?() {
@@ -125,8 +126,8 @@ class AppleSignInCreds: AccountAPICall, Account {
         }
         
         if let last = lastRefresh,
-            GenerateTokens.needToRefreshIdToken(lastRefreshTokenUsage: last) {
-            generateTokens = .refreshIdTokenUsingRefreshToken(refreshToken: refreshToken)
+            GenerateTokens.needToValidateRefreshToken(lastRefreshTokenValidation: last) {
+            generateTokens = .validateRefreshToken(refreshToken: refreshToken)
             return true
         }
         
@@ -146,10 +147,16 @@ class AppleSignInCreds: AccountAPICall, Account {
             completion(nil)
             
         case .generateRefreshToken(serverAuthCode: let serverAuthCode):
-            break
+            generateRefreshToken(serverAuthCode: serverAuthCode) { [weak self] error in
+                self?.generateTokens = nil
+                completion(error)
+            }
             
-        case .refreshIdTokenUsingRefreshToken(refreshToken: let refreshToken):
-            break
+        case .validateRefreshToken(refreshToken: let refreshToken):
+            validateRefreshToken(refreshToken: refreshToken) { [weak self] error in
+                self?.generateTokens = nil
+                completion(error)
+            }
         }
     }
     

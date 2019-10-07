@@ -48,7 +48,6 @@ class AccountAuthenticationTests_AppleSignIn: ServerTestCase, LinuxTestable {
         }
         waitForExpectations(timeout: 10, handler: nil)
     }
-#endif
 
     // This also has to be tested by hand-- since a refresh token can only be used at most every 24 hours
     func testValidateRefreshToken() {
@@ -59,11 +58,10 @@ class AccountAuthenticationTests_AppleSignIn: ServerTestCase, LinuxTestable {
         
         let testAccount: TestAccount = .apple1
         let refreshToken = testAccount.token()
-        appleSignInCreds.refreshToken = refreshToken
         
         let exp = expectation(description: "refresh")
         
-        appleSignInCreds.validateRefreshToken() { error in
+        appleSignInCreds.validateRefreshToken(refreshToken: refreshToken) { error in
             XCTAssert(error == nil, "\(String(describing: error))")
 
             XCTAssert(appleSignInCreds.lastRefreshTokenValidation != nil)
@@ -73,12 +71,41 @@ class AccountAuthenticationTests_AppleSignIn: ServerTestCase, LinuxTestable {
 
         waitForExpectations(timeout: 10, handler: nil)
     }
+#endif
+
+    class CredsDelegate: AccountDelegate {
+        func saveToDatabase(account: Account) -> Bool {
+            return false
+        }
+    }
+    
+    // No dbCreds, serverAuthCode, lastRefreshTokenValidation, refreshToken
+    func testNeedToGenerateTokensNoGeneration() {
+        guard let appleSignInCreds = AppleSignInCreds() else {
+            XCTFail()
+            return
+        }
+        
+        let delegate = CredsDelegate()
+        appleSignInCreds.delegate = delegate
+                        
+        let result = appleSignInCreds.needToGenerateTokens(dbCreds: nil)
+        XCTAssert(!result)
+        
+        switch appleSignInCreds.generateTokens {
+        case .some(.noGeneration):
+            break
+        default:
+            XCTFail()
+        }
+    }
 }
 
 extension AccountAuthenticationTests_AppleSignIn {
     static var allTests : [(String, (AccountAuthenticationTests_AppleSignIn) -> () throws -> Void)] {
         let result:[(String, (AccountAuthenticationTests_AppleSignIn) -> () throws -> Void)] = [
-            ("testClientSecretGenerationWorks", testClientSecretGenerationWorks),
+                ("testClientSecretGenerationWorks", testClientSecretGenerationWorks),
+                ("testNeedToGenerateTokensNoGeneration", testNeedToGenerateTokensNoGeneration)
             ]
         
         return result
