@@ -200,15 +200,6 @@
         }
       },
       {
-        "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
-        "state": {
-          "branch": null,
-          "revision": "afec636bfa3302ea155f462f139da46a53fd351a",
-          "version": "2.1.0"
-        }
-      },
-      {
         "package": "PerfectThread",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Thread.git",
         "state": {

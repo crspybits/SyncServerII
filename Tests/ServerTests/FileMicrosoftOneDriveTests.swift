@@ -670,7 +670,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
                 case .success:
                     break
                 case .failure, .accessTokenRevokedOrExpired:
-                    break
+                    XCTFail()
                 }
                 
                 exp.fulfill()

@@ -137,6 +137,8 @@ extension MicrosoftCreds {
                     return
                 }
                 
+                print("responseHeaders: \(String(describing: responseHeaders))")
+                
                 completion(.failure(OneDriveFailure.badStatusCode(statusCode, errorResult)))
                 return
             }
