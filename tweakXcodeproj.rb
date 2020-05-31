@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/ruby
 
 # 12/3/17-- not sure why, but the path `/usr/bin/ruby` isn't working any more. More specifically, require 'xcodeproj' fails. Perhaps because of a High Sierra install?
 

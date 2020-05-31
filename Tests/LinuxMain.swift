@@ -38,5 +38,6 @@ XCTMain([
     testCase(MockStorageTests.allTests),
     testCase(MockStorageLiveTests.allTests),
     testCase(AccountAuthenticationTests_Microsoft.allTests),
-    testCase(FileMicrosoftOneDriveTests.allTests)
+    testCase(FileMicrosoftOneDriveTests.allTests),
+    testCase(SpecificDatabaseTests_UploadRequestLog.allTests)
 ])

@@ -412,6 +412,7 @@ extension Database {
         enum ValueType {
             case null
             case int(Int)
+            case int32(Int32)
             case int64(Int64)
             case string(String)
             case bool(Bool)
@@ -517,6 +518,8 @@ extension Database {
                     self.stmt.bindParam()
                 case .int(let intValue):
                     self.stmt.bindParam(intValue)
+                case .int32(let int32Value):
+                    self.stmt.bindParam(int32Value)
                 case .int64(let int64Value):
                     self.stmt.bindParam(int64Value)
                 case .string(let stringValue):

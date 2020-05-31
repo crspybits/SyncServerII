@@ -54,6 +54,9 @@
       "name": "SpecificDatabaseTests_SharingGroupUsers"
     },
     {
+      "name": "SpecificDatabaseTests_UploadRequestLog"
+    },
+    {
       "name": "MockStorageTests"
     },
     {
