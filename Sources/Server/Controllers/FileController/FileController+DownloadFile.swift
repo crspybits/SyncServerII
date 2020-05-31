@@ -132,21 +132,21 @@ extension FileController {
             
             cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
                 switch result {
-                case .success(let downloadResult):
+                case .success(let data, let checkSum):
                     // I used to check the file size as downloaded against the file size in the file index (last uploaded). And call it an error if they didn't match. But we're being fancier now. Going to let the client see if this is an error. https://github.com/crspybits/SyncServerII/issues/93
                     
-                    Log.debug("CheckSum: \(downloadResult.checkSum)")
+                    Log.debug("CheckSum: \(checkSum)")
 
                     var contentsChanged = false
                     // 11/4/18; This is conditional because for migration purposes, the FileIndex may not contain a lastUploadedCheckSum. i.e., it comes from a FileIndex record before we added the lastUploadedCheckSum field.
                     if let lastUploadedCheckSum = fileIndexObj!.lastUploadedCheckSum {
-                        contentsChanged = downloadResult.checkSum != lastUploadedCheckSum
+                        contentsChanged = checkSum != lastUploadedCheckSum
                     }
                     
                     let response = DownloadFileResponse()
                     response.appMetaData = fileIndexObj!.appMetaData
-                    response.data = downloadResult.data
-                    response.checkSum = downloadResult.checkSum
+                    response.data = data
+                    response.checkSum = checkSum
                     response.cloudStorageType = cloudStorageType
                     response.contentsChanged = contentsChanged
                     params.completion(.success(response))

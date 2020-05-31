@@ -108,8 +108,18 @@ class DropboxCreds : AccountAPICall, Account {
         creds.delegate = delegate
         creds.accessToken =
             properties.properties[ServerConstants.HTTPOAuth2AccessTokenKey] as? String
-        creds.accountId =
-            properties.properties[ServerConstants.HTTPAccountIdKey] as? String
+            
+        // Deal with deprecated ServerConstants.HTTPAccountIdKey
+        if let accountId = properties.properties[ServerConstants.HTTPAccountIdKey] as? String {
+            creds.accountId = accountId
+        }
+        else if let accountId = properties.properties[ServerConstants.HTTPAccountDetailsKey] as? String {
+            creds.accountId = accountId
+        }
+        else {
+            Log.error("Could not get accountId from properties.properties")
+        }
+
         return creds
     }
     

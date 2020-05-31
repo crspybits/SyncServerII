@@ -24,8 +24,17 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueRSA.git",
         "state": {
           "branch": null,
-          "revision": "e906f5e93426bb43ad7ac37cc20008d8fae608d9",
-          "version": "1.0.34"
+          "revision": "8ea901f2582296837d88f882b0fa5a0601759598",
+          "version": "1.0.35"
+        }
+      },
+      {
+        "package": "Signals",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+        "state": {
+          "branch": null,
+          "revision": "b7331c8bef913f5f8b3cffa6ecfcce679f7c2531",
+          "version": "1.0.21"
         }
       },
       {
@@ -33,8 +42,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "f82e1401f04f62b2e8ce4670456d104466957810",
-          "version": "1.0.50"
+          "revision": "c46a3d41f5b2401d18bcb46d0101cdc5cd13e307",
+          "version": "1.0.52"
         }
       },
       {
@@ -42,8 +51,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
         "state": {
           "branch": null,
-          "revision": "d6616def31a12088034f0a63ed4646772eff5bce",
-          "version": "1.0.50"
+          "revision": "ab2c2aa2fe574969f391c80ee87746be431dee0e",
+          "version": "1.0.52"
         }
       },
       {
@@ -51,7 +60,7 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
         "state": {
           "branch": "master",
-          "revision": "2f50a07e902d7e6d91d223f11c6b780b2d3c84b6",
+          "revision": "ebfc64c9ff3f0bd30d1e6483cc8caf8186eebc66",
           "version": null
         }
       },
@@ -87,8 +96,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura.git",
         "state": {
           "branch": null,
-          "revision": "0777165ed5b966ad2e62f9f9101cfa8b283e7684",
-          "version": "2.8.1"
+          "revision": "bbb7462ac3d422cad4480a57ddbd33263c381a7b",
+          "version": "2.9.1"
         }
       },
       {
@@ -96,8 +105,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-Credentials.git",
         "state": {
           "branch": null,
-          "revision": "1daf65e3f89280fb22afbb9d46d15c89d2f7918c",
-          "version": "2.4.1"
+          "revision": "120d65f08e53500c4a87eb6773e7799701594691",
+          "version": "2.5.0"
         }
       },
       {
@@ -123,8 +132,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
         "state": {
           "branch": null,
-          "revision": "5fc06b21e8e615147fa8341c249ae010a1b41fba",
-          "version": "2.3.0"
+          "revision": "00985729329b73f3e20e40ec43071e4c294dfea3",
+          "version": "2.4.0"
         }
       },
       {
@@ -191,12 +200,30 @@
         }
       },
       {
+        "package": "LinuxBridge",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+        "state": {
+          "branch": null,
+          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
+          "version": "3.1.0"
+        }
+      },
+      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
           "branch": null,
-          "revision": "f9af3a9984aa4785fcbe7126eaf0bc39320296ec",
-          "version": "3.4.1"
+          "revision": "fe63085fe4639944657bf2f33b775e8036974eef",
+          "version": "3.5.1"
+        }
+      },
+      {
+        "package": "mysqlclient",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+        "state": {
+          "branch": null,
+          "revision": "5401a4713557237baabaef1caea93467cf5af138",
+          "version": "2.1.0"
         }
       },
       {
@@ -210,7 +237,7 @@
       },
       {
         "package": "SwiftJWKtoPEM",
-        "repositoryURL": "https://github.com/ibm-cloud-security/Swift-JWK-to-PEM",
+        "repositoryURL": "https://github.com/ibm-cloud-security/Swift-JWK-to-PEM.git",
         "state": {
           "branch": null,
           "revision": "b18e2af1392bb84f1cde83b1e00847051c9fdda6",
@@ -222,8 +249,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Swift-JWT.git",
         "state": {
           "branch": null,
-          "revision": "2241e8371092c12ed2095de2ad06ce27103eba53",
-          "version": "3.6.0"
+          "revision": "0d435423d12e61c0d14adb6d04396c08a6a650f1",
+          "version": "3.6.1"
         }
       },
       {
@@ -231,8 +258,8 @@
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
           "branch": null,
-          "revision": "e8aabbe95db22e064ad42f1a4a9f8982664c70ed",
-          "version": "1.1.1"
+          "revision": "74d7b91ceebc85daf387ebb206003f78813f71aa",
+          "version": "1.2.0"
         }
       },
       {
@@ -240,8 +267,8 @@
         "repositoryURL": "https://github.com/crspybits/SwiftAWSSignatureV4.git",
         "state": {
           "branch": null,
-          "revision": "21b9ab8201caeeb4a0f9dbb39ff8021c1ccb53e4",
-          "version": "1.2.0"
+          "revision": "c66f2db1211ad1969e3d11791b9de62361c78f45",
+          "version": "1.2.1"
         }
       },
       {
@@ -249,8 +276,8 @@
         "repositoryURL": "https://github.com/crspybits/SwiftyAWSSNS.git",
         "state": {
           "branch": null,
-          "revision": "38f1d7c598be682ec49c47de8dbbb212d69e5dae",
-          "version": "0.3.0"
+          "revision": "7c34f9370d93c0f9aecad4f54fa367c2b1fb538a",
+          "version": "0.3.1"
         }
       },
       {
