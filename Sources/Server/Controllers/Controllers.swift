@@ -226,12 +226,20 @@ public class Controllers {
         }
     }
     
-    static func getMasterVersion(sharingGroupUUID: String, params:RequestProcessingParameters) -> MasterVersionInt? {
-        var result: MasterVersionInt?
+    enum MasterVersionResult {
+        case success(MasterVersionInt)
+        case error(Error?)
+    }
+    
+    static func getMasterVersion(sharingGroupUUID: String, params:RequestProcessingParameters) -> MasterVersionResult {
+        var result: MasterVersionResult = .error(nil)
         
         getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { error, masterVersion in
-            if error == nil {
-                result = masterVersion
+            if let error = error {
+                result = .error(error)
+            }
+            else if let masterVersion = masterVersion {
+                result = .success(masterVersion)
             }
         }
         
