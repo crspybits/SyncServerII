@@ -10,7 +10,7 @@ import Foundation
 import LoggerAPI
 import Credentials
 import Kitura
-import SyncServerShared
+import ServerShared
 
 protocol ControllerProtocol {
     static func setup() -> Bool

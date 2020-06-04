@@ -10,11 +10,11 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 
 typealias FileIndexId = Int64
 
-class FileIndex : NSObject, Model, Filenaming {
+class FileIndex : NSObject, Model {
     static let fileIndexIdKey = "fileIndexId"
     var fileIndexId: FileIndexId!
     

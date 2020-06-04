@@ -1,5 +1,5 @@
 //
-//  MicrosofttCreds+CloudStorage.swift
+//  MicrosoftCreds+CloudStorage.swift
 //  Server
 //
 //  Created by Christopher G Prince on 9/7/19.
@@ -9,7 +9,7 @@ import Foundation
 import LoggerAPI
 import HeliumLogger
 import KituraNet
-import SyncServerShared
+import ServerShared
 
 extension MicrosoftCreds : CloudStorage {
     enum OneDriveFailure: Swift.Error {

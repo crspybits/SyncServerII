@@ -2,7 +2,7 @@
 // A log of pending upload requests.
 
 import Foundation
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 class UploadRequestLog : NSObject, Model {

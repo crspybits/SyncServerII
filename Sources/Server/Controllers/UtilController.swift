@@ -8,7 +8,7 @@
 
 import LoggerAPI
 import Credentials
-import SyncServerShared
+import ServerShared
 import Foundation
 
 class UtilController : ControllerProtocol {

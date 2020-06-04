@@ -9,7 +9,7 @@
 import Foundation
 import Credentials
 import CredentialsGoogle
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 class User : NSObject, Model {

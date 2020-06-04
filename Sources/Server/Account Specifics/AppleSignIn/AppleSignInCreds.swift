@@ -7,7 +7,7 @@
 
 import Foundation
 import CredentialsAppleSignIn
-import SyncServerShared
+import ServerShared
 import Kitura
 import HeliumLogger
 import LoggerAPI

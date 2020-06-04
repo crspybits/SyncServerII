@@ -263,15 +263,6 @@
         }
       },
       {
-        "package": "SyncServerShared",
-        "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
-        "state": {
-          "branch": null,
-          "revision": "d082e58b4f304d7d94a8e0f30597597b58e22d08",
-          "version": "11.1.0"
-        }
-      },
-      {
         "package": "TypeDecoder",
         "repositoryURL": "https://github.com/IBM-Swift/TypeDecoder.git",
         "state": {

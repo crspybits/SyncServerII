@@ -10,7 +10,7 @@ import Foundation
 import LoggerAPI
 import Credentials
 import CredentialsGoogle
-import SyncServerShared
+import ServerShared
 
 class FileController : ControllerProtocol {
     enum CheckError : Error {
@@ -93,7 +93,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        let clientSharingGroups:[SyncServerShared.SharingGroup] = groups.map { serverGroup in
+        let clientSharingGroups:[ServerShared.SharingGroup] = groups.map { serverGroup in
             return serverGroup.toClient()
         }
         

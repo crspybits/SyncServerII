@@ -8,7 +8,7 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 import Kitura
 
 extension FileController {
@@ -89,21 +89,21 @@ extension FileController {
             }
             
             Log.debug("uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
-            
+           
+/*
 #if DEBUG
             if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion {
                 actuallyDeleteFileFromServer(key:key, uploadDeletionRequest:uploadDeletionRequest, fileIndexObj:fileIndexObj, params:params)
                 return
             }
 #endif
-
+*/
             var errorString:String?
             
             // Create entry in Upload table.
             let upload = Upload()
             upload.fileUUID = uploadDeletionRequest.fileUUID
             upload.deviceUUID = params.deviceUUID
-            upload.fileVersion = uploadDeletionRequest.fileVersion
             upload.state = .toDeleteFromFileIndex
             upload.userId = params.currentSignedInUser!.userId
             upload.sharingGroupUUID = uploadDeletionRequest.sharingGroupUUID
@@ -140,7 +140,8 @@ extension FileController {
             return
         }
     }
-    
+
+/*
 #if DEBUG
     func actuallyDeleteFileFromServer(key:FileIndexRepository.LookupKey, uploadDeletionRequest: Filenaming, fileIndexObj:FileIndex, params:RequestProcessingParameters) {
     
@@ -220,4 +221,5 @@ extension FileController {
         }
     }
 #endif
+*/
 }

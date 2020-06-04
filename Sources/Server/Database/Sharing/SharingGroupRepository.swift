@@ -9,7 +9,7 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 
 class SharingGroup : NSObject, Model {
     static let sharingGroupUUIDKey = "sharingGroupUUID"
@@ -30,7 +30,7 @@ class SharingGroup : NSObject, Model {
     public var permission:Permission?
     
     // Also not part of this table. For doing fetches of sharing group users for the sharing group.
-    public var sharingGroupUsers:[SyncServerShared.SharingGroupUser]!
+    public var sharingGroupUsers:[ServerShared.SharingGroupUser]!
 
     static let accountTypeKey = "accountType"
     var accountType: String!
@@ -91,8 +91,8 @@ class SharingGroup : NSObject, Model {
         }
     }
     
-    func toClient() -> SyncServerShared.SharingGroup  {
-        let clientGroup = SyncServerShared.SharingGroup()
+    func toClient() -> ServerShared.SharingGroup  {
+        let clientGroup = ServerShared.SharingGroup()
         clientGroup.sharingGroupUUID = sharingGroupUUID
         clientGroup.sharingGroupName = sharingGroupName
         clientGroup.deleted = deleted
@@ -225,7 +225,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         select.forEachRow { rowModel in
             let sharingGroup = rowModel as! SharingGroup
             
-            if let sgus:[SyncServerShared.SharingGroupUser] = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupUUID: sharingGroup.sharingGroupUUID) {
+            if let sgus:[ServerShared.SharingGroupUser] = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupUUID: sharingGroup.sharingGroupUUID) {
                 sharingGroup.sharingGroupUsers = sgus
             }
             else {

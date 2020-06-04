@@ -8,7 +8,7 @@
 import Foundation
 import Credentials
 import Kitura
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 class AccountManager {

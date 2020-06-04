@@ -8,7 +8,7 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 import Kitura
 
 extension FileController {
@@ -109,7 +109,8 @@ extension FileController {
                 return
             }
             
-            let cloudFileName = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID, mimeType: fileIndexObj!.mimeType)
+            // DEPRECATED
+            var cloudFileName: String! // = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID, mimeType: fileIndexObj!.mimeType)
 
             // OWNER
             // The cloud storage for the file is the original owning user's storage.

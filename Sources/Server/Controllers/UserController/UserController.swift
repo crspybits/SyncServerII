@@ -9,7 +9,7 @@
 import LoggerAPI
 import Credentials
 import CredentialsGoogle
-import SyncServerShared
+import ServerShared
 
 class UserController : ControllerProtocol {
     // Don't do this setup in init so that database initalizations don't have to be done per endpoint call.

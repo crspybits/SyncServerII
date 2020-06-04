@@ -7,7 +7,7 @@
 
 import LoggerAPI
 import Credentials
-import SyncServerShared
+import ServerShared
 import Foundation
 
 class SharingGroupsController : ControllerProtocol {
@@ -208,7 +208,7 @@ class SharingGroupsController : ControllerProtocol {
         
         // Need to count number of users in sharing group-- if this will be the last user need to "remove" the sharing group because no other people will be able to enter it. ("remove" ==  mark the sharing group as deleted).
         var numberSharingUsers:Int!
-        if let result:[SyncServerShared.SharingGroupUser] = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: request.sharingGroupUUID) {
+        if let result:[ServerShared.SharingGroupUser] = params.repos.sharingGroupUser.sharingGroupUsers(forSharingGroupUUID: request.sharingGroupUUID) {
             numberSharingUsers = result.count
         }
         else {

@@ -9,7 +9,7 @@ import Foundation
 import LoggerAPI
 import HeliumLogger
 import KituraNet
-import SyncServerShared
+import ServerShared
 
 extension MicrosoftCreds {
     struct UploadSession: Decodable {

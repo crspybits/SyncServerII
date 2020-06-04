@@ -7,7 +7,7 @@
 //
 
 import Kitura
-import SyncServerShared
+import ServerShared
 
 // When adding a new controller, you must also add it to the list in Controllers.swift
 public class ServerRoutes {

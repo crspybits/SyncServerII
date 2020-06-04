@@ -10,7 +10,7 @@ import Foundation
 import Credentials
 import CredentialsGoogle
 import KituraNet
-import SyncServerShared
+import ServerShared
 import Kitura
 import LoggerAPI
 

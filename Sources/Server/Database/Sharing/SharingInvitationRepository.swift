@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 class SharingInvitation : NSObject, Model {

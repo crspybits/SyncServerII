@@ -7,7 +7,7 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 
 extension FileController {    
     func uploadAppMetaData(params:RequestProcessingParameters) {

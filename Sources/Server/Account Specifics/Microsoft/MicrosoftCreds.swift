@@ -7,7 +7,7 @@
 
 import Foundation
 import Kitura
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 import HeliumLogger
 import KituraNet

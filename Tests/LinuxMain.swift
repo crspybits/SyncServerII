@@ -1,5 +1,10 @@
 import XCTest
-@testable import ServerTests
+@testable import AccountTests
+@testable import DatabaseTests
+@testable import FileControllerTests
+@testable import SharingTests
+@testable import AccountFileTests
+@testable import OtherTests
 
 XCTMain([
     testCase(HealthCheckTests.allTests),

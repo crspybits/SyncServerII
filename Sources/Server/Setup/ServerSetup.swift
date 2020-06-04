@@ -14,7 +14,7 @@ import CredentialsGoogle
 import CredentialsFacebook
 import CredentialsDropbox
 import CredentialsMicrosoft
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 class ServerSetup {

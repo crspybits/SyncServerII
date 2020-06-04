@@ -10,7 +10,7 @@ import Foundation
 import PerfectThread
 import Dispatch
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 
 extension FileController {
     enum EffectiveOwningUser {
@@ -312,7 +312,9 @@ extension FileController {
         
         // Recursive case.
         let cloudDeletion = cloudDeletions[0]
-        let cloudFileName = cloudDeletion.cloudFileName(deviceUUID: cloudDeletion.deviceUUID!, mimeType: cloudDeletion.mimeType!)
+        
+        // DEPRECATED
+        var cloudFileName: String! //  = cloudDeletion.cloudFileName(deviceUUID: cloudDeletion.deviceUUID!, mimeType: cloudDeletion.mimeType!)
 
         Log.info("Deleting file: \(cloudFileName)")
         

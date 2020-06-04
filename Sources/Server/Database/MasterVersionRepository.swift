@@ -9,7 +9,7 @@
 // This tracks an overall version of the fileIndex per sharingGroupUUID.
 
 import Foundation
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 class MasterVersion : NSObject, Model {

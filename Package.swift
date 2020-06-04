@@ -10,9 +10,9 @@ let package = Package(
         // 7/2/17; See comment in SwiftMain with the same date.
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
 
-        // .package(url: "../../repos/SyncServer-Shared", .branch("dev")),
-        // .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .branch("dev")),
-        .package(url: "https://github.com/crspybits/SyncServer-Shared.git", .upToNextMajor(from: "11.1.0")),
+        .package(path: "../ServerShared"),
+        // .package(url: "../ServerShared", .branch("master")),
+        //.package(url: "https://github.com/SyncServerII/ServerShared.git", .branch("master")),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
         // .package(url:"https://github.com/crspybits/Perfect-MySQL.git", from: "3.1.3"),
@@ -42,10 +42,25 @@ let package = Package(
 	],
     targets: [
         .target(name: "Main",
-            dependencies: ["Server"]),
+            dependencies: ["Server"],
+            swiftSettings: [
+                .define("DEBUG", .when(platforms: nil, configuration: .debug)),
+                .define("SERVER")
+            ]),
         .target(name: "Server",
-            dependencies: ["SyncServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn", "SwiftJWT"]),
-        .testTarget(name: "ServerTests",
-            dependencies: ["Server", "Main", "CredentialsDropbox"])
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn", "SwiftJWT"],
+            swiftSettings: [
+                .define("DEBUG", .when(platforms: nil, configuration: .debug)),
+                .define("SERVER")
+            ]),
+            
+        .testTarget(name: "TestsCommon", dependencies: ["Server", "Main"]),
+        
+        .testTarget(name: "AccountTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "DatabaseTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "FileControllerTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "SharingTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "AccountFileTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "OtherTests", dependencies: ["TestsCommon"])
     ]
 )

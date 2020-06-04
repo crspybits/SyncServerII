@@ -8,7 +8,7 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 import Kitura
 
 extension FileController {
@@ -64,12 +64,6 @@ extension FileController {
             return
         }
         
-        guard uploadRequest.fileVersion != nil else {
-            let message = "File version not given in upload request."
-            finish(.errorMessage(message), params: params)
-            return
-        }
-        
         Log.debug("uploadRequest.sharingGroupUUID: \(String(describing: uploadRequest.sharingGroupUUID))")
         
         let result = Controllers.getMasterVersion(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params)
@@ -84,14 +78,6 @@ extension FileController {
             finish(.errorMessage("Could not get masterVersion"), params: params)
             return
         }
-
-        if masterVersion != uploadRequest.masterVersion {
-            let response = UploadFileResponse()
-            Log.warning("Master version update: \(String(describing: masterVersion))")
-            response.masterVersionUpdate = masterVersion
-            finish(.success(response: response), params: params)
-            return
-        }
         
         // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
         var existingFileInFileIndex:FileIndex?
@@ -99,16 +85,6 @@ extension FileController {
             existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadRequest.sharingGroupUUID, fileUUID:uploadRequest.fileUUID)
         } catch (let error) {
             let message = "Could not lookup file in FileIndex: \(error)"
-            finish(.errorMessage(message), params: params)
-            return
-        }
-    
-        guard UploadRepository.isValidAppMetaDataUpload(
-            currServerAppMetaDataVersion: existingFileInFileIndex?.appMetaDataVersion,
-            currServerAppMetaData:
-                existingFileInFileIndex?.appMetaData,
-            optionalUpload:uploadRequest.appMetaData) else {
-            let message = "App meta data or version is not valid for upload."
             finish(.errorMessage(message), params: params)
             return
         }
@@ -120,6 +96,12 @@ extension FileController {
         
         var newFile = true
         if let existingFileInFileIndex = existingFileInFileIndex {
+            guard uploadRequest.appMetaData == nil else {
+                let message = "App meta data only allowed with v0 of file."
+                finish(.errorMessage(message), params: params)
+                return
+            }
+        
             if existingFileInFileIndex.deleted && (uploadRequest.undeleteServerFile == nil || uploadRequest.undeleteServerFile == false) {
                 let message = "Attempt to upload an existing file, but it has already been deleted."
                 finish(.errorMessage(message), params: params)
@@ -127,11 +109,6 @@ extension FileController {
             }
         
             newFile = false
-            guard existingFileInFileIndex.fileVersion + 1 == uploadRequest.fileVersion else {
-                let message = "File version being uploaded (\(String(describing: uploadRequest.fileVersion))) is not +1 of current version: \(String(describing: existingFileInFileIndex.fileVersion))"
-                finish(.errorMessage(message), params: params)
-                return
-            }
             
             guard existingFileInFileIndex.mimeType == uploadRequest.mimeType else {
                 let message = "File being uploaded(\(String(describing: uploadRequest.mimeType))) doesn't have the same mime type as current version: \(String(describing: existingFileInFileIndex.mimeType))"
@@ -148,12 +125,7 @@ extension FileController {
                 return
             }
             
-            // File isn't yet in the FileIndex-- must be a new file. Thus, must be version 0.
-            guard uploadRequest.fileVersion == 0 else {
-                let message = "File is new, but file version being uploaded (\(String(describing: uploadRequest.fileVersion))) is not 0"
-                finish(.errorMessage(message), params: params)
-                return
-            }
+            Log.info("Uploading first version of file.")
         
             // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
             // https://github.com/crspybits/SyncServerII/issues/4
@@ -210,8 +182,6 @@ extension FileController {
             return
         }
         
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:params.deviceUUID!, mimeType: uploadRequest.mimeType)
-        
         guard let mimeType = uploadRequest.mimeType else {
             let message = "No mimeType given!"
             finish(.errorMessage(message), params: params)
@@ -219,6 +189,8 @@ extension FileController {
         }
         
         if newFile {
+            let cloudFileName = Filename.inCloud(deviceUUID:params.deviceUUID!, fileUUID: uploadRequest.fileUUID, mimeType:uploadRequest.mimeType, fileVersion: 0)
+            
             uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest)
         }
         else {
@@ -242,7 +214,7 @@ extension FileController {
                 
                 /* 6/29/19; Doesn't seem like we need to acquire the lock again. We just need to add an entry into the Upload table. And what will it help to have the lock for that? Plus, I'm running into locking problems if I have the lock here. My hypothesis is: The Upload somehow acquires a lock that is needed by the DoneUploads. While the Upload is "uploading" its file, the DoneUploads acquires the GET_LOCK but is blocked on the other lock that the Upload has. The Upload tries to get the GET_LOCK once it finishes its upload, but can't since the DoneUploads has it. The Upload times out on its GET_LOCK request and fails. The DoneUploads completes, having gotten the lock that the Upload had.
                 */
-                self.addUploadEntry(newFile: true, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest)
+                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest)
                 
             case .accessTokenRevokedOrExpired:
                 // Not going to do any cleanup. The access token has expired/been revoked. Presumably, the file wasn't uploaded.
@@ -258,13 +230,13 @@ extension FileController {
         }
     }
     
-    private func addUploadEntry(newFile: Bool, creationDate: Date, todaysDate: Date, uploadedCheckSum: String, cleanup: Cleanup, params:RequestProcessingParameters, uploadRequest: UploadFileRequest) {
+    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt, creationDate: Date, todaysDate: Date, uploadedCheckSum: String, cleanup: Cleanup, params:RequestProcessingParameters, uploadRequest: UploadFileRequest) {
     
         let upload = Upload()
         upload.deviceUUID = params.deviceUUID
         upload.fileUUID = uploadRequest.fileUUID
-        upload.fileVersion = uploadRequest.fileVersion
         upload.mimeType = uploadRequest.mimeType
+        upload.fileVersion = fileVersion
         upload.sharingGroupUUID = uploadRequest.sharingGroupUUID
         
         // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
@@ -287,8 +259,8 @@ extension FileController {
         upload.lastUploadedCheckSum = uploadedCheckSum
     
         if let fileGroupUUID = uploadRequest.fileGroupUUID {
-            guard uploadRequest.fileVersion == 0 else {
-                let message = "fileGroupUUID was given, but file version being uploaded (\(String(describing: uploadRequest.fileVersion))) is not 0"
+            guard fileVersion == 0 else {
+                let message = "fileGroupUUID was given, but file version being uploaded (\(String(describing: fileVersion))) is not 0"
                 finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
                 return
             }
@@ -307,8 +279,7 @@ extension FileController {
         // We are using the current signed in user's id here (and not the effective user id) because we need a way of indexing or organizing the collection of files uploaded by a particular user.
         upload.userId = params.currentSignedInUser!.userId
     
-        upload.appMetaData = uploadRequest.appMetaData?.contents
-        upload.appMetaDataVersion = uploadRequest.appMetaData?.version
+        upload.appMetaData = uploadRequest.appMetaData
 
         if newFile {
             upload.creationDate = creationDate

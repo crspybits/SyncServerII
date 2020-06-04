@@ -9,7 +9,7 @@
 // Persistent Storage for temporarily storing general meta data for file uploads and file deletions before finally storing that info in the FileIndex. This also represents files that need to be purged from cloud storage-- this will be for losers of FileIndex update races and for upload deletions.
 
 import Foundation
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 enum UploadState : String {
@@ -23,7 +23,7 @@ enum UploadState : String {
     static func maxCharacterLength() -> Int { return 22 }
 }
 
-class Upload : NSObject, Model, Filenaming {
+class Upload : NSObject, Model {
     static let uploadIdKey = "uploadId"
     var uploadId: Int64!
     
@@ -515,6 +515,7 @@ class UploadRepository : Repository, RepositoryLookup {
         return result
     }
 
+    // DEPRECATED
     static func isValidAppMetaDataUpload(currServerAppMetaDataVersion: AppMetaDataVersionInt?, currServerAppMetaData: String?, optionalUpload appMetaData:AppMetaData?) -> Bool {
 
         if appMetaData == nil {
@@ -526,6 +527,7 @@ class UploadRepository : Repository, RepositoryLookup {
         }
     }
     
+    // DEPRECATED
     static func isValidAppMetaDataUpload(currServerAppMetaDataVersion: AppMetaDataVersionInt?, currServerAppMetaData: String?, upload appMetaData:AppMetaData) -> Bool {
 
         if currServerAppMetaDataVersion == nil {

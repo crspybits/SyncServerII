@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SyncServerShared
+import ServerShared
 import SwiftyAWSSNS
 import LoggerAPI
 

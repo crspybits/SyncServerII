@@ -7,7 +7,7 @@
 //
 
 import Credentials
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 import KituraNet
 import Foundation

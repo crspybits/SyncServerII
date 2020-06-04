@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SyncServerShared
+import ServerShared
 import Credentials
 import Kitura
 import LoggerAPI

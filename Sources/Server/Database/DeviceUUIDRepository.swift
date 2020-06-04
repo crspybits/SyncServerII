@@ -10,7 +10,7 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 
 class DeviceUUID : NSObject, Model {
     static let userIdKey = "userId"

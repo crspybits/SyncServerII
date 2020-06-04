@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SyncServerShared
+import ServerShared
 
 enum Result<T> {
     case success(T)
