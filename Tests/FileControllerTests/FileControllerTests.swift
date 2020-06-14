@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class FileControllerTests: ServerTestCase, LinuxTestable {
 
@@ -62,7 +62,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         // No uploads should have been successfully finished, i.e., expectedNumberOfUploads = nil, and the updatedMasterVersion should have been updated to 1.
-        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, updatedMasterVersionExpected:1, sharingGroupUUID: sharingGroupUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
     }
 
     func testIndexWithNoFiles() {
@@ -74,7 +74,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getIndex(expectedFiles: [], masterVersionExpected: 0, sharingGroupUUID: sharingGroupUUID)
+        self.getIndex(expectedFiles: [], sharingGroupUUID: sharingGroupUUID)
     }
     
     func testGetIndexForOnlySharingGroupsWorks() {
@@ -139,7 +139,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, sharingGroupUUID: sharingGroupUUID)
+        self.getIndex(expectedFiles: [uploadResult.request], sharingGroupUUID: sharingGroupUUID)
         
         guard let (files, sharingGroups) = getIndex(sharingGroupUUID: sharingGroupUUID),
             let theFiles = files else {
@@ -184,7 +184,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         // Have to do a DoneUploads to transfer the files into the FileIndex
         self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request],masterVersionExpected: 1, sharingGroupUUID: sharingGroupUUID)
+        self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request], sharingGroupUUID: sharingGroupUUID)
     }
         
     func testDownloadFileTextSucceeds() {
@@ -230,14 +230,13 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uploadResult.request.fileUUID
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = checkSum
     
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
 
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        // DEPRECATED
+        var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
 
         uploadFile(accountType: testAccount.scheme.accountName, creds: cloudStorageCreds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
@@ -268,14 +267,13 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uploadResult.request.fileUUID
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = checkSum
     
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
 
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        // DEPRECATED
+        var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
 
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
@@ -309,7 +307,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testDownloadFileTextWithAppMetaDataSucceeds() {
         downloadTextFile(masterVersionExpectedWithDownload: 1,
-            appMetaData:AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"))
+            appMetaData:"{ \"foo\": \"bar\" }")
     }
     
     func testDownloadFileTextWithDifferentDownloadVersion() {
@@ -328,7 +326,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         
         let invalidSharingGroupUUID = UUID().uuidString
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
     }
     
     func testIndexWithBadSharingGroupUUIDFails() {
@@ -348,7 +346,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: 1, sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
+        self.getIndex(expectedFiles: [uploadResult.request], sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
     }
     
     // TODO: *0*: Make sure we're not trying to download a file that has already been deleted.

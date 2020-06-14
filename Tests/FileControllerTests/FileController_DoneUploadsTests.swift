@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
 
@@ -82,7 +82,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1, sharingGroupUUID: sharingGroupUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testDoneUploadsTwiceDoesNothingSecondTime() {
@@ -95,7 +95,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 0, masterVersion: 1, sharingGroupUUID: sharingGroupUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 0, sharingGroupUUID: sharingGroupUUID)
     }
     
     // If you first upload a file (followed by a DoneUploads), then delete it, and then upload again the last upload fails.
@@ -109,21 +109,16 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         
         self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        var masterVersion:MasterVersionInt = uploadResult1.request.masterVersion + MasterVersionInt(1)
-        
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
-        uploadDeletionRequest.fileVersion = uploadResult1.request.fileVersion
-        uploadDeletionRequest.masterVersion = masterVersion
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
 
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
-        masterVersion += 1
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         // Try upload again. This should fail.
-        uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: 1, masterVersion: masterVersion, errorExpected: true)
+        uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: 1, errorExpected: true)
     }
     
     func testDoneUploadsWithFakeSharingGroupUUIDFails() {

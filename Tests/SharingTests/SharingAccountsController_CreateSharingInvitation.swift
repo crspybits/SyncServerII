@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 // You can run this with primarySharingAccount set to any account that allows sharing.
 class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTestable {

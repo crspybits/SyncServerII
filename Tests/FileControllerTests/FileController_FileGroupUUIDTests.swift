@@ -10,7 +10,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
 
@@ -65,7 +65,7 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: 1, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         guard let (files, _) = getIndex(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID), let fileIndex = files, fileIndex.count == 1 else {
             XCTFail()

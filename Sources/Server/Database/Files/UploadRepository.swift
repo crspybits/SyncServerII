@@ -34,7 +34,7 @@ class Upload : NSObject, Model {
     // The userId of the uploading user. i.e., this is not necessarily the owning user id.
     var userId: UserId!
     
-    // 3/15/18-- Can now be nil-- when we do an upload app meta data. Keeping it as `!` so it abides by the FileNaming protocol.
+    // 6/3/20; This will be nil for UploadRequestLog entries.
     static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
     
@@ -63,6 +63,7 @@ class Upload : NSObject, Model {
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
 
+    // DEPRECATED
     static let appMetaDataVersionKey = "appMetaDataVersion"
     var appMetaDataVersion: AppMetaDataVersionInt?
     

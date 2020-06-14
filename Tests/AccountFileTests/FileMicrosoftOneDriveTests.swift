@@ -12,7 +12,7 @@ import XCTest
 import Foundation
 import LoggerAPI
 import HeliumLogger
-import SyncServerShared
+import ServerShared
 
 class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     // In my OneDrive:
@@ -119,7 +119,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     }
     
     func uploadFile(file: TestFile) {
-        let ext = Extension.forMimeType(mimeType: file.mimeType.rawValue)
+        let ext = file.mimeType.fileNameExtension
         let fileName = Foundation.UUID().uuidString + ".\(ext)"
         
         let creds = MicrosoftCreds()!
@@ -168,7 +168,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
     
     func testSimpleUploadWithExpiredAccessToken() {
         let file = TestFile.test1
-        let ext = Extension.forMimeType(mimeType: file.mimeType.rawValue)
+        let ext = file.mimeType.fileNameExtension
         let fileName = Foundation.UUID().uuidString + ".\(ext)"
         
         let creds = MicrosoftCreds()!
@@ -235,8 +235,6 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = file.mimeType.rawValue
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.sha1Hash
         
@@ -261,8 +259,6 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
             let uploadRequest = UploadFileRequest()
             uploadRequest.fileUUID = fileUUID
             uploadRequest.mimeType = file.mimeType.rawValue
-            uploadRequest.fileVersion = 0
-            uploadRequest.masterVersion = 1
             uploadRequest.sharingGroupUUID = UUID().uuidString
             uploadRequest.checkSum = file.sha1Hash
             
@@ -452,8 +448,6 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = file.mimeType.rawValue
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.sha1Hash
         
@@ -470,7 +464,9 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
                 return
             }
             
-            let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+            // DEPRECATED
+            assert(false)
+            var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
             Log.debug("cloudFileName: \(cloudFileName)")
             self.downloadFile(creds: creds, cloudFileName: cloudFileName, expectedStringFile: file)
         }
@@ -529,8 +525,6 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = file.mimeType.rawValue
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.sha1Hash
         
@@ -997,8 +991,7 @@ class FileMicrosoftOneDriveTests: ServerTestCase, LinuxTestable {
         creds.refreshToken = TestAccount.microsoft2.token()
         
         let file = TestFile.catJpg
-        
-        let ext = Extension.forMimeType(mimeType: file.mimeType.rawValue)
+        let ext = file.mimeType.fileNameExtension
         let fileName = Foundation.UUID().uuidString + ".\(ext)"
     
         guard case .url(let url) = file.contents,

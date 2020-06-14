@@ -14,7 +14,7 @@ import HeliumLogger
 import Credentials
 import CredentialsGoogle
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
 

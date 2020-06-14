@@ -10,7 +10,7 @@ import XCTest
 @testable import Server
 @testable import TestsCommon
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class MessageTests: ServerTestCase, LinuxTestable {
 
@@ -24,14 +24,12 @@ class MessageTests: ServerTestCase, LinuxTestable {
          super.tearDown()
     }
     
-    func testIntConversions() {
+    func testIfUploadFileRequestIsValid() {
         let uuidString1 = Foundation.UUID().uuidString
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uuidString1
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = FileVersionInt(1)
-        uploadRequest.masterVersion = MasterVersionInt(42)
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
         
@@ -39,9 +37,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-        
-        XCTAssert(uploadRequest.fileVersion == 1)        
-        XCTAssert(uploadRequest.masterVersion == 42)
   }
 
     func testURLParameters() {
@@ -51,8 +46,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
         uploadRequest.fileUUID = uuidString1
-        uploadRequest.fileVersion = FileVersionInt(1)
-        uploadRequest.masterVersion = MasterVersionInt(42)
         uploadRequest.mimeType = "text/plain"
         uploadRequest.sharingGroupUUID = sharingGroupUUID
 
@@ -65,23 +58,22 @@ class MessageTests: ServerTestCase, LinuxTestable {
         
         let expectedCheckSum = "checkSum=\(TestFile.test1.dropboxCheckSum)"
         let expectedFileUUID = "fileUUID=\(uuidString1)"
-        let expectedFileVersion = "fileVersion=1"
-        let expectedMasterVersion = "masterVersion=42"
         let expectedMimeType = "mimeType=text%2Fplain"
         let expectedSharingGroupUUID = "sharingGroupUUID=\(sharingGroupUUID)"
 
+        guard resultArray.count == 4 else {
+            XCTFail("result: \(result); resultArray: \(resultArray)")
+            return
+        }
+        
         XCTAssert(resultArray[0] == expectedCheckSum)
         XCTAssert(resultArray[1] == expectedFileUUID)
-        XCTAssert(resultArray[2] == expectedFileVersion)
-        XCTAssert(resultArray[3] == expectedMasterVersion)
-        XCTAssert(resultArray[4] == expectedMimeType)
-        XCTAssert(resultArray[5] == expectedSharingGroupUUID)
+        XCTAssert(resultArray[2] == expectedMimeType)
+        XCTAssert(resultArray[3] == expectedSharingGroupUUID)
 
         let expected =
             expectedCheckSum + "&" +
             expectedFileUUID + "&" +
-            expectedFileVersion + "&" +
-            expectedMasterVersion + "&" +
             expectedMimeType + "&" +
             expectedSharingGroupUUID
 
@@ -117,8 +109,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = "foobar"
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = FileVersionInt(1)
-        uploadRequest.masterVersion = MasterVersionInt(42)
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
         
@@ -132,8 +122,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uuidString1
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = FileVersionInt(1)
-        uploadRequest.masterVersion = MasterVersionInt(42)
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
         
@@ -144,8 +132,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         
         XCTAssert(uploadRequest.fileUUID == uuidString1)
         XCTAssert(uploadRequest.mimeType == "text/plain")
-        XCTAssert(uploadRequest.fileVersion == FileVersionInt(1))
-        XCTAssert(uploadRequest.masterVersion == MasterVersionInt(42))
         XCTAssert(uploadRequest.sharingGroupUUID == sharingGroupUUID)
         XCTAssert(uploadRequest.checkSum == TestFile.test1.dropboxCheckSum)
     }
@@ -194,7 +180,7 @@ class MessageTests: ServerTestCase, LinuxTestable {
 extension MessageTests {
     static var allTests : [(String, (MessageTests) -> () throws -> Void)] {
         return [
-            ("testIntConversions", testIntConversions),
+            ("testIfUploadFileRequestIsValid", testIfUploadFileRequestIsValid),
             ("testURLParameters", testURLParameters),
             ("testURLParametersForUploadDeletion", testURLParametersForUploadDeletion),
             ("testBadUUIDForFileName", testBadUUIDForFileName),

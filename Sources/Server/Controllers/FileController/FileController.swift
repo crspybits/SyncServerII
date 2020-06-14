@@ -114,26 +114,21 @@ class FileController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
-        
-        Controllers.getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
             
-            let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)
+        let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)
 
-            switch fileIndexResult {
-            case .fileIndex(let fileIndex):
-                Log.info("Number of entries in FileIndex: \(fileIndex.count)")
-                let response = IndexResponse()
-                response.fileIndex = fileIndex
-                response.masterVersion = masterVersion
-                response.sharingGroups = clientSharingGroups
-                params.completion(.success(response))
-                
-            case .error(let error):
-                let message = "Error: \(error)"
-                Log.error(message)
-                params.completion(.failure(.message(message)))
-                return
-            }
+        switch fileIndexResult {
+        case .fileIndex(let fileIndex):
+            Log.info("Number of entries in FileIndex: \(fileIndex.count)")
+            let response = IndexResponse()
+            response.fileIndex = fileIndex
+            response.sharingGroups = clientSharingGroups
+            params.completion(.success(response))
+            
+        case .error(let error):
+            let message = "Error: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
         }
     }
     

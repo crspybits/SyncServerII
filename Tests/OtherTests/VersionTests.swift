@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class VersionTests: ServerTestCase, LinuxTestable {
     override func setUp() {
@@ -19,7 +19,7 @@ class VersionTests: ServerTestCase, LinuxTestable {
     }
     
     func testThatVersionGetsReturnedInHeaders() {
-        performServerTest { expectation, creds in
+        performServerTest { expectation in
             // Use healthCheck just because it's a simple endpoint.
             self.performRequest(route: ServerEndpoints.healthCheck) { response, dict in
                 XCTAssert(response!.statusCode == .OK, "Failed on healthcheck request")

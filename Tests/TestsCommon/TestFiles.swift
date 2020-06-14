@@ -8,7 +8,7 @@
 import Foundation
 @testable import Server
 import XCTest
-import SyncServerShared
+import ServerShared
 
 struct TestFile {
     enum FileContents {

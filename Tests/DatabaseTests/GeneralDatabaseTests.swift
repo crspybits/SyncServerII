@@ -12,7 +12,7 @@ import XCTest
 import LoggerAPI
 import HeliumLogger
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class model : Model {
     var c1: String!

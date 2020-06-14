@@ -6,7 +6,7 @@ import KituraNet
 import LoggerAPI
 import CredentialsGoogle
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
     let serverResponseTime:TimeInterval = 10

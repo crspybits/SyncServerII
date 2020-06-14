@@ -10,7 +10,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 import KituraNet
 
 class SharingAccountsController_GetSharingInvitationInfo: ServerTestCase, LinuxTestable {

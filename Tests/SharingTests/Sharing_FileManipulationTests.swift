@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 import Kitura
 
 class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
@@ -90,7 +90,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return nil
         }
         
-        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion + 1, sharingGroupUUID: sharingGroupUUID, failureExpected: failureExpected)
+        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID, failureExpected: failureExpected)
         
         return SharingUploadResult(request: uploadResult.request, checkSum: uploadResult.checkSum,  sharingTestAccount: sharingUser, uploadedDeviceUUID:deviceUUID2, redeemResponse: redeemResponse)
     }
@@ -134,12 +134,10 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
 
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
-        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion
-        uploadDeletionRequest.masterVersion = masterVersion + 1
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(testAccount: sharingUser, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID2, addUser: false, expectError: failureExpected)
-        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion + 1, sharingGroupUUID: sharingGroupUUID, failureExpected:failureExpected)
+        sendDoneUploads(testAccount: sharingUser, expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID, failureExpected:failureExpected)
     }
     
     func downloadFileBySharingUser(withPermission sharingPermission:Permission, sharingUser: TestAccount = .primarySharingAccount, failureExpected:Bool = false) {
@@ -194,12 +192,10 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
-        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion
-        uploadDeletionRequest.masterVersion = uploadResult.request.masterVersion + MasterVersionInt(1)
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID1, addUser: false, expectError: failureExpected)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, masterVersion: uploadResult.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID, failureExpected:failureExpected)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID, failureExpected:failureExpected)
         
         var sharingInvitationUUID:String!
         
@@ -249,7 +245,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     func checkFileOwner(uploadedDeviceUUID: String, owningAccount: TestAccount, ownerUserId: UserId, request: UploadFileRequest) {
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: request.mimeType)
 
-        let fileName = request.cloudFileName(deviceUUID:uploadedDeviceUUID, mimeType: request.mimeType)
+        // DEPRECATED
+        var fileName: String! // = request.cloudFileName(deviceUUID:uploadedDeviceUUID, mimeType: request.mimeType)
         Log.debug("Looking for file: \(fileName)")
         guard let found = lookupFile(forOwningTestAccount: owningAccount, cloudFileName: fileName, options: options), found else {
             XCTFail()
@@ -344,7 +341,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         masterVersion += 1
         
@@ -357,7 +354,6 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest1 = UploadDeletionRequest()
         uploadDeletionRequest1.fileUUID = upload1.request.fileUUID
-        uploadDeletionRequest1.fileVersion = upload1.request.fileVersion
         uploadDeletionRequest1.masterVersion = masterVersion + 1
         uploadDeletionRequest1.sharingGroupUUID = sharingGroupUUID
 
@@ -365,13 +361,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
 
         let uploadDeletionRequest2 = UploadDeletionRequest()
         uploadDeletionRequest2.fileUUID = upload2.request.fileUUID
-        uploadDeletionRequest2.fileVersion = upload2.request.fileVersion
         uploadDeletionRequest2.masterVersion = masterVersion + 1
         uploadDeletionRequest2.sharingGroupUUID = sharingGroupUUID
 
         uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest2, deviceUUID: deviceUUID, addUser: false)
 
-        sendDoneUploads(testAccount: upload2.sharingTestAccount, expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: masterVersion + 1, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(testAccount: upload2.sharingTestAccount, expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     // Upload deletions must go to the account of the original (v0) owning user. To test this: a) upload v0 of a file, b) have a different user upload v1 of the file. Now upload delete. Make sure the deletion works.
@@ -404,7 +399,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         // Original v0 uploader deletes file.
         uploadDeletion(testAccount: .primaryOwningAccount, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
-        sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     // Make sure file actually gets deleted in cloud storage for non-root owning users.
@@ -425,7 +420,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         // Original v0 uploader deletes file.
         uploadDeletion(testAccount: result.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest, deviceUUID: result.uploadedDeviceUUID, addUser: false)
-        sendDoneUploads(testAccount: result.sharingTestAccount, expectedNumberOfUploads: 1, deviceUUID:result.uploadedDeviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(testAccount: result.sharingTestAccount, expectedNumberOfUploads: 1, deviceUUID:result.uploadedDeviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: result.request.mimeType)
         
@@ -439,7 +434,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             owningUser = .primaryOwningAccount
         }
 
-        let fileName = result.request.cloudFileName(deviceUUID:result.uploadedDeviceUUID, mimeType: result.request.mimeType)
+        // DEPRECATED
+        var fileName: String! // = result.request.cloudFileName(deviceUUID:result.uploadedDeviceUUID, mimeType: result.request.mimeType)
         Log.debug("Looking for file: \(fileName)")
         guard let found = lookupFile(forOwningTestAccount: owningUser, cloudFileName: fileName, options: options), !found else {
             XCTFail()
@@ -695,7 +691,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(testAccount: sharingAccount2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: actualSharingGroupUUID)
+        self.sendDoneUploads(testAccount: sharingAccount2, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: actualSharingGroupUUID)
         
         masterVersion += 1
         
@@ -771,7 +767,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(testAccount: sharingAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(testAccount: sharingAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testThatDownloadForSecondSharingGroupWorks() {
@@ -800,7 +796,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(testAccount: sharingAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        sendDoneUploads(testAccount: sharingAccount, expectedNumberOfUploads: 1, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request)
     }

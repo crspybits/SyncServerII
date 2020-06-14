@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class FileController_UploadTests: ServerTestCase, LinuxTestable {
     override func setUp() {
@@ -82,21 +82,21 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         }
         
         // Second upload.
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: uploadResult.request.fileVersion, masterVersion: uploadResult.request.masterVersion, appMetaData: uploadResult.request.appMetaData) else {
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: uploadResult.request.appMetaData) else {
             XCTFail()
             return
         }
     }
 
     func testUploadTextFileWithStringWithSpacesAppMetaData() {
-        guard let _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "A Simple String")) else {
+        guard let _ = uploadTextFile(appMetaData: "A Simple String") else {
             XCTFail()
             return
         }
     }
     
     func testUploadTextFileWithJSONAppMetaData() {
-        guard let _ = uploadTextFile(appMetaData:AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }")) else {
+        guard let _ = uploadTextFile(appMetaData: "{ \"foo\": \"bar\" }") else {
             XCTFail()
             return
         }
@@ -124,8 +124,6 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUIDToSend
         uploadRequest.mimeType = "foobar"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 0
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = file.checkSum(type: testAccount.scheme.accountName)
         
@@ -146,8 +144,6 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUIDToSend
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 0
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         
         XCTAssert(uploadRequest.valid())
@@ -175,8 +171,6 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUIDToSend
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 0
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = "foobar"
         

@@ -10,7 +10,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
     override func setUp() {
@@ -32,7 +32,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()
+        let sharingGroup = ServerShared.SharingGroup()
         sharingGroup.sharingGroupName = "Louisiana Guys"
         let sharingGroupUUID2 = UUID().uuidString
         
@@ -91,7 +91,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()
+        let sharingGroup = ServerShared.SharingGroup()
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
         let sharingGroupUUID2 = Foundation.UUID().uuidString
@@ -154,7 +154,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()
+        let sharingGroup = ServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
@@ -178,7 +178,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()
+        let sharingGroup = ServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
@@ -359,7 +359,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 0, deviceUUID:deviceUUID, masterVersion: masterVersion+1, sharingGroupUUID: sharingGroupUUID, failureExpected: true)
+        self.sendDoneUploads(expectedNumberOfUploads: 0, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, failureExpected: true)
     }
     
     func testRemoveSharingGroupWorks_cannotDeleteFile() {
@@ -383,7 +383,6 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
 
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
-        uploadDeletionRequest.fileVersion = uploadResult.request.fileVersion
         uploadDeletionRequest.masterVersion = masterVersion + 1
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
@@ -416,7 +415,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
     
     func testRemoveSharingGroupWorks_downloadAppMetaDataFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        let appMetaData = AppMetaData(version: 0, contents: "Foo")
+        let appMetaData = "Foo"
         guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, appMetaData: appMetaData), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -434,7 +433,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
 
-        downloadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersionExpectedWithDownload:masterVersion + 1, appMetaDataVersion: 0, sharingGroupUUID: sharingGroupUUID, expectedError: true)
+        downloadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, sharingGroupUUID: sharingGroupUUID, expectedError: true)
     }
     
     func testRemoveSharingGroupWorks_downloadFileFails() {
@@ -499,7 +498,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         
         masterVersion += 1
         
-        let sharingGroup = SyncServerShared.SharingGroup()
+        let sharingGroup = ServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
@@ -712,7 +711,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        let sharingGroup = SyncServerShared.SharingGroup()
+        let sharingGroup = ServerShared.SharingGroup()
         let sharingGroupUUID2 = UUID().uuidString
         
         guard createSharingGroup(sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {

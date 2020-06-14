@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
 
@@ -24,7 +24,8 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
+
+#if false
     // MARK: Upload
 
     func uploadNextFileVersion(uploadRequest: UploadFileRequest, masterVersion: MasterVersionInt, fileVersionToUpload:FileVersionInt, creationDate: Date, mimeType: String, appMetaData: AppMetaData, checkSum:String) {
@@ -419,11 +420,13 @@ class FileController_MultiVersionFiles: ServerTestCase, LinuxTestable {
         let appMetaData = AppMetaData(version: 0, contents: self.appMetaData)
         downloadTextFile(masterVersionExpectedWithDownload: Int(masterVersion), appMetaData: appMetaData, downloadFileVersion: fileVersion+1, uploadFileRequest: uploadRequest, expectedError: true)
     }
+#endif
 }
 
 extension FileController_MultiVersionFiles {
     static var allTests : [(String, (FileController_MultiVersionFiles) -> () throws -> Void)] {
         return [
+            /*
             ("testUploadVersion1AfterVersion0Works", testUploadVersion1AfterVersion0Works),
             ("testUploadVersion1WhenVersion0HasNotBeenCommitted", testUploadVersion1WhenVersion0HasNotBeenCommitted),
             ("testUploadOfSameFileVersionFails", testUploadOfSameFileVersionFails),
@@ -439,6 +442,7 @@ extension FileController_MultiVersionFiles {
             ("testDownloadOfBadVersionFails", testDownloadOfBadVersionFails),
             ("testDownloadOfBadVersionFails", testDownloadOfBadVersionFails),
             ("testUploadDifferentVersionWithDifferentMimeTypeFails", testUploadDifferentVersionWithDifferentMimeTypeFails)
+            */
         ]
     }
     

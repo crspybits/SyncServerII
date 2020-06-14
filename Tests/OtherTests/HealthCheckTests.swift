@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class HealthCheckTests: ServerTestCase, LinuxTestable {
     override func setUp() {

@@ -7,7 +7,7 @@ import LoggerAPI
 import HeliumLogger
 import CredentialsDropbox
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class AccountAuthenticationTests_Dropbox: ServerTestCase, LinuxTestable {
     let serverResponseTime:TimeInterval = 10

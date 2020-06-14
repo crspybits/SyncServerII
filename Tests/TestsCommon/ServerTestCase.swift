@@ -12,7 +12,7 @@ import Foundation
 import XCTest
 @testable import Server
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 import HeliumLogger
 import Kitura
 
@@ -267,7 +267,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, masterVersionExpectedWithDownload:Int64, expectUpdatedMasterUpdate:Bool = false, appMetaDataVersion: AppMetaDataVersionInt? = nil, sharingGroupUUID: String, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
+    func downloadAppMetaDataVersion(testAccount:TestAccount = .primaryOwningAccount, deviceUUID: String, fileUUID: String, sharingGroupUUID: String, expectedError: Bool = false) -> DownloadAppMetaDataResponse? {
 
         var result:DownloadAppMetaDataResponse?
         
@@ -276,8 +276,6 @@ class ServerTestCase : XCTestCase {
 
             let downloadAppMetaDataRequest = DownloadAppMetaDataRequest()
             downloadAppMetaDataRequest.fileUUID = fileUUID
-            downloadAppMetaDataRequest.masterVersion = masterVersionExpectedWithDownload
-            downloadAppMetaDataRequest.appMetaDataVersion = appMetaDataVersion
             downloadAppMetaDataRequest.sharingGroupUUID = sharingGroupUUID
             
             if !downloadAppMetaDataRequest.valid() {
@@ -300,12 +298,6 @@ class ServerTestCase : XCTestCase {
                     if let dict = dict,
                         let downloadAppMetaDataResponse = try? DownloadAppMetaDataResponse.decode(dict) {
                         result = downloadAppMetaDataResponse
-                        if expectUpdatedMasterUpdate {
-                            XCTAssert(downloadAppMetaDataResponse.masterVersionUpdate != nil)
-                        }
-                        else {
-                            XCTAssert(downloadAppMetaDataResponse.masterVersionUpdate == nil)
-                        }
                     }
                     else {
                         XCTFail()
@@ -323,7 +315,7 @@ class ServerTestCase : XCTestCase {
     func healthCheck() -> HealthCheckResponse? {
         var result:HealthCheckResponse?
         
-        performServerTest { expectation, creds in
+        performServerTest { expectation in
             self.performRequest(route: ServerEndpoints.healthCheck) { response, dict in
                 XCTAssert(response!.statusCode == .OK, "Failed on healthcheck request")
 
@@ -408,7 +400,7 @@ class ServerTestCase : XCTestCase {
     
     @discardableResult
     // Returns sharing group UUID
-    func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, sharingGroupUUID:String, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup? = nil, errorExpected: Bool = false) -> Bool {
+    func createSharingGroup(testAccount:TestAccount = .primaryOwningAccount, sharingGroupUUID:String, deviceUUID:String, sharingGroup: ServerShared.SharingGroup? = nil, errorExpected: Bool = false) -> Bool {
         var result: Bool = false
         
         let createRequest = CreateSharingGroupRequest()
@@ -449,7 +441,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: SyncServerShared.SharingGroup, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false, expectFailure: Bool = false) -> Bool {
+    func updateSharingGroup(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, sharingGroup: ServerShared.SharingGroup, masterVersion: MasterVersionInt, expectMasterVersionUpdate: Bool = false, expectFailure: Bool = false) -> Bool {
         var result: Bool = false
         
         let updateRequest = UpdateSharingGroupRequest()
@@ -597,7 +589,7 @@ class ServerTestCase : XCTestCase {
     // statusCodeExpected is only used if an error is expected.
     // owningAccountType will be the same type as testAccount when an owning user is uploading (you can pass nil here), and the type of the "parent" owner when a sharing user is uploading.
     @discardableResult
-    func uploadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         var sharingGroupUUID = UUID().uuidString
         var uploadingUserId: UserId?
@@ -649,8 +641,6 @@ class ServerTestCase : XCTestCase {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUIDToSend
         uploadRequest.mimeType = mimeType.rawValue
-        uploadRequest.fileVersion = fileVersion
-        uploadRequest.masterVersion = masterVersion
         uploadRequest.undeleteServerFile = undelete == 1
         uploadRequest.fileGroupUUID = fileGroupUUID
         uploadRequest.sharingGroupUUID = sharingGroupUUID
@@ -666,7 +656,7 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        guard runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, updatedMasterVersionExpected:updatedMasterVersionExpected, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
+        guard runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
             if !errorExpected {
                 XCTFail()
             }
@@ -684,14 +674,14 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:AppMetaData? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         return uploadServerFile(testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, updatedMasterVersionExpected:updatedMasterVersionExpected, fileVersion:fileVersion, masterVersion:masterVersion, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, fileGroupUUID:fileGroupUUID, statusCodeExpected: statusCodeExpected)
     }
     
     // Returns true iff the file could be uploaded.
     @discardableResult
-    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, updatedMasterVersionExpected:Int64? = nil, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> Bool {
+    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> Bool {
         
         var result: Bool = true
         
@@ -725,16 +715,12 @@ class ServerTestCase : XCTestCase {
                     }
 
                     if let uploadResponse = try? UploadFileResponse.decode(dict!) {
-                        if updatedMasterVersionExpected == nil {
-                            guard uploadResponse.creationDate != nil, uploadResponse.updateDate != nil else {
-                                result = false
-                                expectation.fulfill()
-                                return
-                            }
+                        guard uploadResponse.creationDate != nil, uploadResponse.updateDate != nil else {
+                            result = false
+                            expectation.fulfill()
+                            return
                         }
-                        else {
-                            XCTAssert(uploadResponse.masterVersionUpdate == updatedMasterVersionExpected)
-                        }
+
                     }
                     else {
                         result = false
@@ -749,7 +735,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
     
         var sharingGroupUUID: String!
         var uploadingUserId: UserId?
@@ -783,8 +769,6 @@ class ServerTestCase : XCTestCase {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = mimeType.rawValue
-        uploadRequest.fileVersion = fileVersion
-        uploadRequest.masterVersion = expectedMasterVersion
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = file.checkSum(type: checkSumType)
         
@@ -802,20 +786,19 @@ class ServerTestCase : XCTestCase {
     }
     
     func uploadJPEGFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString,
-        fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:AppMetaData? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+        fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
         
         let jpegFile = TestFile.catJpg
         return uploadFileUsingServer(testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, addUser:addUser, fileVersion:fileVersion, expectedMasterVersion:expectedMasterVersion, appMetaData:appMetaData, errorExpected:errorExpected)
     }
     
     // sharingGroupName enables you to change the sharing group name during the DoneUploads.
-    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, updatedMasterVersionExpected:Int64? = nil, masterVersion:Int64 = 0, sharingGroupUUID: String, sharingGroupName: String? = nil, failureExpected:Bool = false) {
+    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, sharingGroupName: String? = nil, failureExpected:Bool = false) {
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let doneUploadsRequest = DoneUploadsRequest()
-            doneUploadsRequest.masterVersion = masterVersion
             doneUploadsRequest.sharingGroupUUID = sharingGroupUUID
             
             if let sharingGroupName = sharingGroupName {
@@ -833,7 +816,6 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(dict != nil)
                     
                     if let doneUploadsResponse = try? DoneUploadsResponse.decode(dict!) {
-                        XCTAssert(doneUploadsResponse.masterVersionUpdate == updatedMasterVersionExpected)
                         XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads, "doneUploadsResponse.numberUploadsTransferred: \(String(describing: doneUploadsResponse.numberUploadsTransferred)); expectedNumberOfUploads: \(String(describing: expectedNumberOfUploads))")
                         XCTAssert(doneUploadsResponse.numberDeletionErrors == nil)
                     }
@@ -847,7 +829,7 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, masterVersionExpected:Int64? = nil, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
+    func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
         
         let request = IndexRequest()
         request.sharingGroupUUID = sharingGroupUUID
@@ -872,7 +854,6 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(dict != nil)
 
                     if let indexResponse = try? IndexResponse.decode(dict!) {
-                        XCTAssert(indexResponse.masterVersion == masterVersionExpected)
                         if let expectedFiles = expectedFiles {
                             guard let fileIndex = indexResponse.fileIndex else {
                                 XCTFail()
@@ -892,7 +873,6 @@ class ServerTestCase : XCTestCase {
                                 let expectedFile = filterResult[0]
                                 
                                 XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
-                                XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
                                 XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
                                 
                                 if expectedDeletionState == nil {
@@ -916,8 +896,8 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func getIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil) -> ([FileInfo]?, [SyncServerShared.SharingGroup])? {
-        var result:([FileInfo]?, [SyncServerShared.SharingGroup])?
+    func getIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil) -> ([FileInfo]?, [ServerShared.SharingGroup])? {
+        var result:([FileInfo]?, [ServerShared.SharingGroup])?
         
         self.performServerTest(testAccount: testAccount) { expectation, creds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
@@ -1054,7 +1034,6 @@ class ServerTestCase : XCTestCase {
                             let expectedFile = filterResult[0]
                             
                             XCTAssert(expectedFile.fileUUID == fileInfo.fileUUID)
-                            XCTAssert(expectedFile.fileVersion == fileInfo.fileVersion)
                             
                             if matchOptionals {
                                 XCTAssert(expectedFile.mimeType == fileInfo.mimeType)
@@ -1370,10 +1349,9 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func downloadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, file: TestFile = .test1, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:AppMetaData? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadFileResponse? {
+    func downloadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, file: TestFile = .test1, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadFileResponse? {
     
         let deviceUUID = Foundation.UUID().uuidString
-        let masterVersion:Int64 = 0
         
         var actualUploadFileRequest:UploadFileRequest!
         var actualCheckSum:String!
@@ -1384,7 +1362,7 @@ class ServerTestCase : XCTestCase {
         var actualSharingGroupUUID: String!
         
         if uploadFileRequest == nil {
-            guard let uploadResult = uploadServerFile(mimeType: mimeType, deviceUUID:deviceUUID, fileVersion:uploadFileVersion, masterVersion:masterVersion, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData, file: file),
+            guard let uploadResult = uploadServerFile(mimeType: mimeType, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData, file: file),
                 let sharingGroupUUID = uploadResult.sharingGroupUUID else {
                 XCTFail()
                 return nil
@@ -1395,7 +1373,7 @@ class ServerTestCase : XCTestCase {
             fileUUID = uploadResult.request.fileUUID
             actualUploadFileRequest = uploadResult.request
             actualCheckSum = uploadResult.checkSum
-            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
             afterUploadTime = Date()
         }
         else {
@@ -1413,7 +1391,6 @@ class ServerTestCase : XCTestCase {
             downloadFileRequest.fileUUID = actualUploadFileRequest!.fileUUID
             downloadFileRequest.masterVersion = MasterVersionInt(masterVersionExpectedWithDownload)
             downloadFileRequest.fileVersion = downloadFileVersion
-            downloadFileRequest.appMetaDataVersion = appMetaData?.version
             downloadFileRequest.sharingGroupUUID = actualSharingGroupUUID
             
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest.urlParameters()!, body:nil) { response, dict in
@@ -1446,7 +1423,9 @@ class ServerTestCase : XCTestCase {
                                 XCTAssert(downloadFileResponse.checkSum == actualCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(String(describing: actualCheckSum))")
                             }
                             
-                            XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
+                            // DEPRECATED
+                            // XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
+                            
                             guard let _ = downloadFileResponse.cloudStorageType else {
                                 XCTFail()
                                 return
@@ -1471,7 +1450,7 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:AppMetaData? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadFileResponse? {
+    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, masterVersionExpectedWithDownload:Int, expectUpdatedMasterUpdate:Bool = false, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadFileResponse? {
     
         return downloadServerFile(testAccount:testAccount, mimeType: .text, file: .test1, masterVersionExpectedWithDownload:masterVersionExpectedWithDownload, expectUpdatedMasterUpdate:expectUpdatedMasterUpdate, appMetaData:appMetaData, uploadFileVersion:uploadFileVersion, downloadFileVersion:downloadFileVersion, uploadFileRequest:uploadFileRequest, expectedError: expectedError, contentsChangedExpected: contentsChangedExpected)
     }
@@ -1536,7 +1515,8 @@ class ServerTestCase : XCTestCase {
             cloudFileName = nonStandardFileName
         }
         else {
-            cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+            // DEPRECATED
+            cloudFileName = "" // uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         }
         
         let exp = expectation(description: "\(#function)\(#line)")

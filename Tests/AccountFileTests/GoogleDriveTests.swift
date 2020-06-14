@@ -12,7 +12,7 @@ import XCTest
 import Foundation
 import HeliumLogger
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 
 class GoogleDriveTests: ServerTestCase, LinuxTestable {
     // In my Google Drive, at the top-level:
@@ -268,8 +268,6 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = mimeType.rawValue
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.md5CheckSum
 
@@ -277,7 +275,9 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         
         uploadFile(accountType: AccountScheme.google.accountName, creds: creds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
         
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        // DEPRECATED
+        assert(false)
+        var cloudFileName: String!// = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         
         deleteFile(testAccount: TestAccount.google1, cloudFileName: cloudFileName, options: options)
     }
@@ -300,14 +300,13 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = Foundation.UUID().uuidString
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.md5CheckSum
         
         let deviceUUID = Foundation.UUID().uuidString
 
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        // DERECATED
+        var cloudFileName: String!// = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         let exp = expectation(description: "\(#function)\(#line)")
 
         creds.deleteFile(cloudFileName:cloudFileName, options:options) { result in
@@ -383,8 +382,6 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = mimeType
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.md5CheckSum
 
@@ -417,8 +414,6 @@ class GoogleDriveTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.md5CheckSum
 

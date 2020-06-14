@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 @testable import Server
 @testable import TestsCommon

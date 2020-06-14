@@ -40,7 +40,7 @@ OPTION=$2
 ALL_COUNT=`jq -r '.all | length' < ${TEST_JSON}`
 BASIC_SWIFT_TEST_CMD="swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER"
 SWIFT_DEFINE="-Xswiftc -D"
-SYNCSERVER_TEST_MODULE="ServerTests"
+# SYNCSERVER_TEST_MODULE="ServerTests"
 TEST_OUT_DIR=".testing"
 
 # Final stats
@@ -146,7 +146,8 @@ runSpecificSuite () {
         fi
 
         local outputFileName="$TEST_OUT_DIR"/$testCaseName.$fileNameCounter
-        local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName"
+        # local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName"
+        local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $testCaseName"
 
         printf "$outputPrefix$command\n"
 

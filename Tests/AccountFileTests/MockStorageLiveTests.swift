@@ -10,7 +10,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import HeliumLogger
-import SyncServerShared
+import ServerShared
 
 class MockStorageLiveTests: ServerTestCase, LinuxTestable {
     override func setUp() {
@@ -56,13 +56,11 @@ class MockStorageLiveTests: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
-        uploadDeletionRequest.fileVersion = uploadResult1.request.fileVersion
-        uploadDeletionRequest.masterVersion = uploadResult1.request.masterVersion + MasterVersionInt(1)
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testDownloadFile() {

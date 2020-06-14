@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import LoggerAPI
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
 
@@ -25,6 +25,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
+#if false
     // TODO: *1* To test these it would be best to have a debugging endpoint or other service where we can test to see if the file is present in cloud storage.
     
     // TODO: *1* Also useful would be a service that lets us directly delete a file from cloud storage-- to simulate errors in file deletion.
@@ -41,8 +42,6 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
-        uploadDeletionRequest.fileVersion = uploadResult1.request.fileVersion
-        uploadDeletionRequest.masterVersion = uploadResult1.request.masterVersion + MasterVersionInt(1)
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -53,7 +52,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadResult1.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState, sharingGroupUUID:sharingGroupUUID)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, sharingGroupUUID:sharingGroupUUID)
     }
@@ -70,8 +69,6 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
-        uploadDeletionRequest.fileVersion = uploadResult1.request.fileVersion
-        uploadDeletionRequest.masterVersion = uploadResult1.request.masterVersion + MasterVersionInt(1)
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
@@ -82,11 +79,11 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadResult1.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState, sharingGroupUUID:sharingGroupUUID)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
+        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, sharingGroupUUID:sharingGroupUUID)
         
-        self.getIndex(expectedFiles: [uploadResult1.request], masterVersionExpected: uploadResult1.request.masterVersion + MasterVersionInt(2), sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
+        self.getIndex(expectedFiles: [uploadResult1.request], sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
     }
     
     func testThatUploadDeletionTwiceOfSameFileWorks() {
@@ -409,11 +406,13 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
     }
+#endif
 }
 
 extension FileControllerTests_UploadDeletion {
     static var allTests : [(String, (FileControllerTests_UploadDeletion) -> () throws -> Void)] {
         return [
+/*
             ("testThatUploadDeletionTransfersToUploads", testThatUploadDeletionTransfersToUploads),
             ("testThatCombinedUploadDeletionAndFileUploadWork", testThatCombinedUploadDeletionAndFileUploadWork),
             ("testThatUploadDeletionTwiceOfSameFileWorks", testThatUploadDeletionTwiceOfSameFileWorks),
@@ -429,6 +428,7 @@ extension FileControllerTests_UploadDeletion {
                 testThatUploadDeletionWithBadSharingGroupUUIDFails),
             ("testThatUploadDeletionWithFakeSharingGroupUUIDFails",
                 testThatUploadDeletionWithFakeSharingGroupUUIDFails)
+*/
         ]
     }
     

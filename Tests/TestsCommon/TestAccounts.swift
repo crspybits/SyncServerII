@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SyncServerShared
+import ServerShared
 @testable import Server
 import LoggerAPI
 import HeliumLogger

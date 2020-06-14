@@ -12,9 +12,9 @@ import XCTest
 import LoggerAPI
 import HeliumLogger
 import Foundation
-import SyncServerShared
+import ServerShared
 
-class DatabaseModelTests: XCTestCase, LinuxTestable {
+class DatabaseModelTests: ServerTestCase, LinuxTestable {
     override func setUp() {
         super.setUp()
     }

@@ -12,7 +12,7 @@ import LoggerAPI
 import KituraNet
 import XCTest
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class FailureTests: ServerTestCase, LinuxTestable {
     override func setUp() {

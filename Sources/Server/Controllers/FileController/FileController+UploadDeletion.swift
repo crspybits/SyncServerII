@@ -33,112 +33,94 @@ extension FileController {
             params.completion(.failure(.message(message)))
             return
         }
+            
+        // Check whether this fileUUID exists in the FileIndex.
+
+        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, fileUUID: uploadDeletionRequest.fileUUID)
         
-        Controllers.getMasterVersion(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, params: params) { (error, masterVersion) in
-            if error != nil {
-                let message = "Error: \(String(describing: error))"
-                Log.error(message)
-                params.completion(.failure(.message(message)))
-                return
-            }
-
-            if masterVersion != uploadDeletionRequest.masterVersion {
-                let response = UploadDeletionResponse()
-                Log.warning("Master version update: \(String(describing: masterVersion))")
-                response.masterVersionUpdate = masterVersion
-                params.completion(.success(response))
-                return
-            }
-            
-            // Check whether this fileUUID exists in the FileIndex.
-
-            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, fileUUID: uploadDeletionRequest.fileUUID)
-            
-            let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
-            
-            var fileIndexObj:FileIndex!
-            
-            switch lookupResult {
-            case .found(let modelObj):
-                fileIndexObj = modelObj as? FileIndex
-                if fileIndexObj == nil {
-                    let message = "Could not convert model object to FileIndex"
-                    Log.error(message)
-                    params.completion(.failure(.message(message)))
-                    return
-                }
-                
-            case .noObjectFound:
-                let message = "Could not find file to delete in FileIndex"
-                Log.error(message)
-                params.completion(.failure(.message(message)))
-                return
-                
-            case .error(let error):
-                let message = "Error looking up file in FileIndex: \(error)"
+        let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
+        
+        var fileIndexObj:FileIndex!
+        
+        switch lookupResult {
+        case .found(let modelObj):
+            fileIndexObj = modelObj as? FileIndex
+            if fileIndexObj == nil {
+                let message = "Could not convert model object to FileIndex"
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
             }
             
-            if fileIndexObj.fileVersion != uploadDeletionRequest.fileVersion {
-                let message = "File index version is: \(String(describing: fileIndexObj.fileVersion)), but you asked to delete version: \(String(describing: uploadDeletionRequest.fileVersion))"
-                Log.error(message)
-                params.completion(.failure(.message(message)))
-                return
-            }
+        case .noObjectFound:
+            let message = "Could not find file to delete in FileIndex"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
             
-            Log.debug("uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
-           
-/*
-#if DEBUG
-            if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion {
-                actuallyDeleteFileFromServer(key:key, uploadDeletionRequest:uploadDeletionRequest, fileIndexObj:fileIndexObj, params:params)
-                return
-            }
-#endif
-*/
-            var errorString:String?
-            
-            // Create entry in Upload table.
-            let upload = Upload()
-            upload.fileUUID = uploadDeletionRequest.fileUUID
-            upload.deviceUUID = params.deviceUUID
-            upload.state = .toDeleteFromFileIndex
-            upload.userId = params.currentSignedInUser!.userId
-            upload.sharingGroupUUID = uploadDeletionRequest.sharingGroupUUID
-            
-            let uploadAddResult = params.repos.upload.add(upload: upload)
-            
-            switch uploadAddResult {
-            case .success(_):
-                let response = UploadDeletionResponse()
-                params.completion(.success(response))
-                return
-                
-            case .duplicateEntry:
-                Log.info("File was already marked for deletion: Not adding again.")
-                let response = UploadDeletionResponse()
-                params.completion(.success(response))
-                return
-                
-            case .aModelValueWasNil:
-                errorString = "A model value was nil!"
-                
-            case .deadlock:
-                errorString = "Deadlock"
-
-            case .waitTimeout:
-                errorString = "waitTimeout"
-                
-            case .otherError(let error):
-                errorString = error
-            }
-
-            Log.error(errorString!)
-            params.completion(.failure(.message(errorString!)))
+        case .error(let error):
+            let message = "Error looking up file in FileIndex: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
+        
+        if fileIndexObj.fileVersion != uploadDeletionRequest.fileVersion {
+            let message = "File index version is: \(String(describing: fileIndexObj.fileVersion)), but you asked to delete version: \(String(describing: uploadDeletionRequest.fileVersion))"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        Log.debug("uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
+       
+/*
+#if DEBUG
+        if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion {
+            actuallyDeleteFileFromServer(key:key, uploadDeletionRequest:uploadDeletionRequest, fileIndexObj:fileIndexObj, params:params)
+            return
+        }
+#endif
+*/
+        var errorString:String?
+        
+        // Create entry in Upload table.
+        let upload = Upload()
+        upload.fileUUID = uploadDeletionRequest.fileUUID
+        upload.deviceUUID = params.deviceUUID
+        upload.state = .toDeleteFromFileIndex
+        upload.userId = params.currentSignedInUser!.userId
+        upload.sharingGroupUUID = uploadDeletionRequest.sharingGroupUUID
+        
+        let uploadAddResult = params.repos.upload.add(upload: upload)
+        
+        switch uploadAddResult {
+        case .success(_):
+            let response = UploadDeletionResponse()
+            params.completion(.success(response))
+            return
+            
+        case .duplicateEntry:
+            Log.info("File was already marked for deletion: Not adding again.")
+            let response = UploadDeletionResponse()
+            params.completion(.success(response))
+            return
+            
+        case .aModelValueWasNil:
+            errorString = "A model value was nil!"
+            
+        case .deadlock:
+            errorString = "Deadlock"
+
+        case .waitTimeout:
+            errorString = "waitTimeout"
+            
+        case .otherError(let error):
+            errorString = error
+        }
+
+        Log.error(errorString!)
+        params.completion(.failure(.message(errorString!)))
     }
 
 /*

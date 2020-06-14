@@ -22,7 +22,7 @@ extension FileController {
         case success(response:UploadFileResponse)
         case errorMessage(String)
         case errorResponse(RequestProcessingParameters.Response)
-        case errorCleanup(message: String, cleanup: Cleanup)
+        case errorCleanup(message: String, cleanup: Cleanup?)
     }
 
     private func finish(_ info: Info, params:RequestProcessingParameters) {        
@@ -35,10 +35,16 @@ extension FileController {
             params.completion(.failure(.message(message)))
             
         case .errorCleanup(message: let message, cleanup: let cleanup):
-            cleanup.ownerCloudStorage.deleteFile(cloudFileName: cleanup.cloudFileName, options: cleanup.options, completion: {_ in
+            if let cleanup = cleanup {
+                cleanup.ownerCloudStorage.deleteFile(cloudFileName: cleanup.cloudFileName, options: cleanup.options, completion: {_ in
+                    Log.error(message)
+                    params.completion(.failure(.message(message)))
+                })
+            }
+            else {
                 Log.error(message)
                 params.completion(.failure(.message(message)))
-            })
+            }
             
         case .success(response: let response):
             params.completion(.success(response))
@@ -59,25 +65,12 @@ extension FileController {
         }
         
         guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
-            let message = "Unknown mime type passed: \(String(describing: uploadRequest.mimeType)) (see SyncServer-Shared)"
+            let message = "Unknown mime type passed: \(String(describing: uploadRequest.mimeType))"
             finish(.errorMessage(message), params: params)
             return
         }
         
         Log.debug("uploadRequest.sharingGroupUUID: \(String(describing: uploadRequest.sharingGroupUUID))")
-        
-        let result = Controllers.getMasterVersion(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params)
-        
-        guard case .success(let masterVersion) = result else {
-            if case .error(let error) = result {
-                let message = "Error: \(String(describing: error))"
-                finish(.errorMessage(message), params: params)
-                return
-            }
-        
-            finish(.errorMessage("Could not get masterVersion"), params: params)
-            return
-        }
         
         // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
         var existingFileInFileIndex:FileIndex?
@@ -194,8 +187,32 @@ extension FileController {
             uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest)
         }
         else {
-            // Add entry to UploadRequestLog
+            guard let string = String(data: uploadRequest.data, encoding: .utf8) else {
+                finish(.errorResponse(.failure(.message("Could not convert data to string"))), params: params)
+                return
+            }
+            
+            let result = addUploadRequestLogEntry(uploadContents: string, params: params, uploadRequest: uploadRequest)
+            switch result {
+            case .error(let error):
+                finish(.errorResponse(.failure(.message("\(error)"))), params: params)
+            case .success:
+                break
+            }
+            
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: nil, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest)
         }
+    }
+    
+    private func addUploadRequestLogEntry(uploadContents: String, params:RequestProcessingParameters, uploadRequest:UploadFileRequest) -> UploadRequestLogRepository.AddResult {
+        let log = UploadRequestLog()
+        log.userId = params.currentSignedInUser!.userId
+        log.sharingGroupUUID = uploadRequest.sharingGroupUUID
+        log.deviceUUID = params.deviceUUID
+        log.fileUUID = uploadRequest.fileUUID
+        log.uploadContents = uploadContents
+        log.committed = false
+        return params.repos.uploadRequestLog.add(request: log)
     }
     
     private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest) {
@@ -230,7 +247,7 @@ extension FileController {
         }
     }
     
-    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt, creationDate: Date, todaysDate: Date, uploadedCheckSum: String, cleanup: Cleanup, params:RequestProcessingParameters, uploadRequest: UploadFileRequest) {
+    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest) {
     
         let upload = Upload()
         upload.deviceUUID = params.deviceUUID
@@ -250,10 +267,12 @@ extension FileController {
         }
 #endif
 
-        guard uploadedCheckSum.lowercased() == expectedCheckSum else {
-            let message = "Checksum after upload to cloud storage (\(uploadedCheckSum) is not the same as before upload \(String(describing: expectedCheckSum))."
-            finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
-            return
+        if let expectedCheckSum = expectedCheckSum {
+            guard uploadedCheckSum?.lowercased() == expectedCheckSum else {
+                let message = "Checksum after upload to cloud storage (\(String(describing: uploadedCheckSum)) is not the same as before upload \(String(describing: expectedCheckSum))."
+                finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
+                return
+            }
         }
 
         upload.lastUploadedCheckSum = uploadedCheckSum

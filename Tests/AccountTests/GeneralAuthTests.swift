@@ -12,7 +12,7 @@ import LoggerAPI
 import KituraNet
 import XCTest
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class GeneralAuthTests: ServerTestCase, LinuxTestable {
 

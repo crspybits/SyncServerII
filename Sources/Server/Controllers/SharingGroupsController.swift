@@ -86,11 +86,6 @@ class SharingGroupsController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
-        
-        if let errorResponse = Controllers.updateMasterVersion(sharingGroupUUID: sharingGroupUUID, masterVersion: request.masterVersion, params: params, responseType: UpdateSharingGroupResponse.self) {
-            params.completion(errorResponse)
-            return
-        }
 
         let serverSharingGroup = Server.SharingGroup()
         serverSharingGroup.sharingGroupUUID = sharingGroupUUID
@@ -119,11 +114,6 @@ class SharingGroupsController : ControllerProtocol {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
-            return
-        }
-        
-        if let errorResponse = Controllers.updateMasterVersion(sharingGroupUUID: request.sharingGroupUUID, masterVersion: request.masterVersion, params: params, responseType: RemoveSharingGroupResponse.self) {
-            params.completion(errorResponse)
             return
         }
         
@@ -198,11 +188,6 @@ class SharingGroupsController : ControllerProtocol {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
-            return
-        }
-        
-        if let errorResponse = Controllers.updateMasterVersion(sharingGroupUUID: request.sharingGroupUUID, masterVersion: request.masterVersion, params: params, responseType: RemoveSharingGroupResponse.self) {
-            params.completion(errorResponse)
             return
         }
         

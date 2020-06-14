@@ -11,7 +11,7 @@ import XCTest
 @testable import TestsCommon
 import Foundation
 import Dispatch
-import SyncServerShared
+import ServerShared
 
 class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTestable {
 

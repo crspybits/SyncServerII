@@ -416,6 +416,9 @@ extension Database {
             case int64(Int64)
             case string(String)
             case bool(Bool)
+            
+            // I'm not using `data` here because when I retrieve that data it seems to be converted to a string. Thus, just going to directly to string.
+            //case data(Data)
         }
         
         enum Errors : Error {

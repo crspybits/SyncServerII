@@ -11,7 +11,7 @@ import XCTest
 import LoggerAPI
 import HeliumLogger
 import Foundation
-import SyncServerShared
+import ServerShared
 
 class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
 

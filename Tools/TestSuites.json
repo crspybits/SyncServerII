@@ -5,6 +5,7 @@
     "facebook",
     "dropbox",
     "microsoft",
+    "mock",
     "owning_google",
     "owning_dropbox",
     "owning_microsoft",
@@ -21,46 +22,40 @@
   ],
   "basic": [
     {
-      "name": "HealthCheckTests"
+      "name": "OtherTests.HealthCheckTests"
     },
     {
-      "name": "VersionTests"
+      "name": "OtherTests.VersionTests"
     },
     {
-      "name": "DatabaseModelTests"
+      "name": "DatabaseTests.DatabaseModelTests"
     },
     {
-      "name": "GeneralDatabaseTests"
+      "name": "DatabaseTests.GeneralDatabaseTests"
     },
     {
-      "name": "MessageTests"
+      "name": "OtherTests.MessageTests"
     },
     {
-      "name": "SpecificDatabaseTests"
+      "name": "DatabaseTests.SpecificDatabaseTests"
     },
     {
-      "name": "SpecificDatabaseTests_SharingInvitationRepository"
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingInvitationRepository"
     },
     {
-      "name": "SpecificDatabaseTests_Uploads"
+      "name": "DatabaseTests.SpecificDatabaseTests_Uploads"
     },
     {
-      "name": "SpecificDatabaseTests_UserRepository"
+      "name": "DatabaseTests.SpecificDatabaseTests_UserRepository"
     },
     {
-      "name": "SpecificDatabaseTests_SharingGroups"
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroups"
     },
     {
-      "name": "SpecificDatabaseTests_SharingGroupUsers"
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers"
     },
     {
-      "name": "SpecificDatabaseTests_UploadRequestLog"
-    },
-    {
-      "name": "MockStorageTests"
-    },
-    {
-      "name": "MockStorageLiveTests"
+      "name": "DatabaseTests.SpecificDatabaseTests_UploadRequestLog"
     }
   ],
   "google": [
@@ -90,6 +85,14 @@
     },
     {
       "name": "FileMicrosoftOneDriveTests"
+    }
+  ],
+  "mock": [
+    {
+      "name": "AccountFileTests.MockStorageTests"
+    },
+    {
+      "name": "AccountFileTests.MockStorageLiveTests"
     }
   ],
   "owning_google": [

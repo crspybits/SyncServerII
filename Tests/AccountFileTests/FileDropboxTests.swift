@@ -12,7 +12,8 @@ import XCTest
 import Foundation
 import LoggerAPI
 import HeliumLogger
-import SyncServerShared
+import ServerShared
+
 
 class FileDropboxTests: ServerTestCase, LinuxTestable {
     // In my Dropbox:
@@ -164,8 +165,6 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = mimeType.rawValue
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         
@@ -188,20 +187,20 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
 
         creds.downloadFile(cloudFileName: cloudFileName) { result in
             switch result {
-            case .success(let downloadResult):
+            case .success(let data, let checkSum):
                 if let expectedStringFile = expectedStringFile {
                     guard case .string(let expectedContents) = expectedStringFile.contents else {
                         XCTFail()
                         return
                     }
                     
-                    guard let str = String(data: downloadResult.data, encoding: String.Encoding.ascii) else {
+                    guard let str = String(data: data, encoding: String.Encoding.ascii) else {
                         XCTFail()
                         Log.error("Failed on string decoding")
                         return
                     }
                     
-                    XCTAssert(downloadResult.checkSum == expectedStringFile.dropboxCheckSum)
+                    XCTAssert(checkSum == expectedStringFile.dropboxCheckSum)
                     XCTAssert(str == expectedContents)
                 }
                 
@@ -277,14 +276,14 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = "text/plain"
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
 
         uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
         
-        let cloudFileName = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        // DEPRECATED
+        assert(false)
+        var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         Log.debug("cloudFileName: \(cloudFileName)")
         downloadFile(creds: creds, cloudFileName: cloudFileName, expectedStringFile: file)
     }
@@ -359,8 +358,6 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUID
         uploadRequest.mimeType = mimeType.rawValue
-        uploadRequest.fileVersion = 0
-        uploadRequest.masterVersion = 1
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         

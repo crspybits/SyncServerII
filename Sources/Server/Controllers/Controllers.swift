@@ -136,7 +136,9 @@ public class Controllers {
         
         return true
     }
-    
+
+    // DEPRECATED
+/*
     enum UpdateMasterVersionResult : Error, RetryRequest {
         case success
         case error(String)
@@ -198,7 +200,10 @@ public class Controllers {
         
         return result
     }
+    */
     
+    // DEPRECATED
+    /*
     enum GetMasterVersionError : Error {
     case error(String)
     case noObjectFound
@@ -282,6 +287,7 @@ public class Controllers {
             return .failure(.message(message))
         }
     }
+    */
     
     enum EffectiveOwningUserId {
         case found(UserId)

@@ -61,10 +61,6 @@ extension FileController {
         }
 #endif
         
-        if let response = Controllers.updateMasterVersion(sharingGroupUUID: doneUploadsRequest.sharingGroupUUID, masterVersion: doneUploadsRequest.masterVersion, params: params, responseType: DoneUploadsResponse.self) {
-            return .doCompletion(response)
-        }
-        
         // Now, start the heavy lifting. This has to accomodate both file uploads, and upload deletions-- because these both need to alter the masterVersion (i.e., they change the file index).
         
         // 1) See if any of the file uploads are for file versions > 0. Later, we'll have to delete stale versions of the file(s) in cloud storage if so.
@@ -106,7 +102,6 @@ extension FileController {
             Log.error(message)
             return .doCompletion(.failure(.message(message)))
         }
-
 
         // Deferring computation of `effectiveOwningUserId` because: (a) don't always need it in the `transferUploads` below, and (b) it will cause unecessary failures in some cases where a sharing owner user has been removed. effectiveOwningUserId is only needed when v0 of a file is being uploaded.
         var effectiveOwningUserId: UserId?

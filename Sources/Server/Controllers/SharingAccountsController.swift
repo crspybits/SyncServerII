@@ -133,20 +133,6 @@ class SharingAccountsController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
-        
-        // I'm not requiring a master version from the client-- because they don't yet have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
-        
-        guard case .success(let masterVersion) = Controllers.getMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, params: params) else {
-            let message = "Could not get master version for sharing group uuid: \(String(describing: sharingInvitation.sharingGroupUUID))"
-            Log.error(message)
-            completion(.failure(.message(message)))
-            return
-        }
-        
-        if let response = Controllers.updateMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, masterVersion: masterVersion, params: params, responseType: nil) {
-            completion(response)
-            return
-        }
 
         if sharingInvitation.numberAcceptors == 1 {
             let removalResult2 = params.repos.sharing.retry {

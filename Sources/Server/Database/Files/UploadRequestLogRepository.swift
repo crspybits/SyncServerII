@@ -6,19 +6,22 @@ import ServerShared
 import LoggerAPI
 
 class UploadRequestLog : NSObject, Model {
+    static let userIdKey = "userId"
+    var userId: UserId!
+    
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID: String!
+
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
     
     static let fileUUIDKey = "fileUUID"
     var fileUUID: String!
     
-    static let fileVersionKey = "fileVersion"
-    var fileVersion: FileVersionInt!
-    
     // The contents of the upload request.
     static let uploadContentsKey = "uploadContents"
     var uploadContents: String!
-    
+
     // Initially set to false. Set to true when DoneUploads called.
     static let committedKey = "committed"
     var committed: Bool!
@@ -26,14 +29,17 @@ class UploadRequestLog : NSObject, Model {
     subscript(key:String) -> Any? {
         set {
             switch key {
+            case Self.userIdKey:
+                userId = newValue as? UserId
+                
+            case Self.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as? String
+                
             case Self.deviceUUIDKey:
                 deviceUUID = newValue as? String
 
             case Self.fileUUIDKey:
                 fileUUID = newValue as? String
-
-            case Self.fileVersionKey:
-                fileVersion = newValue as? FileVersionInt
 
             case Self.uploadContentsKey:
                 uploadContents = newValue as? String
@@ -82,13 +88,15 @@ class UploadRequestLogRepository : Repository, RepositoryLookup {
     
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
-            "(fileVersion INT NOT NULL, " +
+            "(userId BIGINT NOT NULL, " +
             
-            "fileUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
-                
+            "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
+
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
+
+            "fileUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
-            "uploadContents TEXT NOT NULL, " +
+            "uploadContents BLOB NOT NULL, " +
 
             "committed BOOL NOT NULL, " +
             
@@ -125,7 +133,8 @@ class UploadRequestLogRepository : Repository, RepositoryLookup {
     
     func add(request:UploadRequestLog) -> AddResult {
         guard let fileUUID = request.fileUUID,
-            let fileVersion = request.fileVersion,
+            let userId = request.userId,
+            let sharingGroupUUID = request.sharingGroupUUID,
             let deviceUUID = request.deviceUUID,
             let contents = request.uploadContents else {
             return .error("Null field while attempting to add: \(request)")
@@ -134,7 +143,8 @@ class UploadRequestLogRepository : Repository, RepositoryLookup {
         let insert = Database.PreparedStatement(repo: self, type: .insert)
 
         insert.add(fieldName: UploadRequestLog.fileUUIDKey, value: .string(fileUUID))
-        insert.add(fieldName: UploadRequestLog.fileVersionKey, value: .int32(fileVersion))
+        insert.add(fieldName: UploadRequestLog.userIdKey, value: .int64(userId))
+        insert.add(fieldName: UploadRequestLog.sharingGroupUUIDKey, value: .string(sharingGroupUUID))
         insert.add(fieldName: UploadRequestLog.deviceUUIDKey, value: .string(deviceUUID))
         insert.add(fieldName: UploadRequestLog.uploadContentsKey, value: .string(contents))
         insert.add(fieldName: UploadRequestLog.committedKey, value: .bool(false))

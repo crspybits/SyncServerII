@@ -25,7 +25,7 @@ import Dispatch
 import Foundation
 @testable import Server
 import CredentialsGoogle
-import SyncServerShared
+import ServerShared
 
 protocol KituraTest {
     func expectation(_ index: Int) -> XCTestExpectation
