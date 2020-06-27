@@ -59,7 +59,7 @@ class FacebookCreds : AccountAPICall,  Account {
         case noAppIdOrSecret
     }
     
-    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->())  {
+    func generateTokens(completion:@escaping (Swift.Error?)->()) {
         guard let fbAppId = Configuration.server.FacebookClientId,
             let fbAppSecret = Configuration.server.FacebookClientSecret else {
             completion(GenerateTokensError.noAppIdOrSecret)
@@ -87,7 +87,7 @@ class FacebookCreds : AccountAPICall,  Account {
                         return
                     }
                     
-                    response?.headers[ServerConstants.httpResponseOAuth2AccessTokenKey] = accessToken
+                    self.accessToken = accessToken
                     completion(nil)
                     
                 default:
@@ -104,15 +104,15 @@ class FacebookCreds : AccountAPICall,  Account {
     func merge(withNewer account:Account) {
     }
     
-    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
-        if let accessToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+    static func getProperties(fromHeaders headers:AccountHeaders) -> [String: Any] {
+        if let accessToken = headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
             return [ServerConstants.HTTPOAuth2AccessTokenKey: accessToken]
         } else {
             return [:]
         }
     }
     
-    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         guard let creds = FacebookCreds() else {
             return nil
         }

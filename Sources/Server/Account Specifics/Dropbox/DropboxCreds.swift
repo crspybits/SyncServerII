@@ -57,7 +57,7 @@ class DropboxCreds : AccountAPICall, Account {
     private static let apiAccessTokenKey = "access_token"
     private static let apiTokenTypeKey = "token_type"
     
-    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->()) {
+    func generateTokens(completion:@escaping (Swift.Error?)->()) {
         // Not generating tokens, just saving.
         guard let delegate = delegate else {
             Log.warning("No Dropbox Creds delegate!")
@@ -85,21 +85,21 @@ class DropboxCreds : AccountAPICall, Account {
         accessToken = newerDropboxCreds.accessToken
     }
     
-    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
+    static func getProperties(fromHeaders headers:AccountHeaders) -> [String: Any] {
         var result = [String: Any]()
         
-        if let accountId = request.headers[ServerConstants.HTTPAccountIdKey] {
+        if let accountId = headers[ServerConstants.HTTPAccountIdKey] {
             result[ServerConstants.HTTPAccountIdKey] = accountId
         }
         
-        if let accessToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+        if let accessToken = headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
             result[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
         }
         
         return result
     }
     
-    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         guard let creds = DropboxCreds() else {
             return nil
         }

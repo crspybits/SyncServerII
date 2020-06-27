@@ -74,21 +74,21 @@ class GoogleCreds : AccountAPICall, Account {
         baseURL = "www.googleapis.com"
     }
     
-    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
+    static func getProperties(fromHeaders headers:AccountHeaders) -> [String: Any] {
         var result = [String: Any]()
         
-        if let authCode = request.headers[ServerConstants.HTTPOAuth2AuthorizationCodeKey] {
+        if let authCode = headers[ServerConstants.HTTPOAuth2AuthorizationCodeKey] {
             result[ServerConstants.HTTPOAuth2AuthorizationCodeKey] = authCode
         }
         
-        if let accessToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+        if let accessToken = headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
             result[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
         }
         
         return result
     }
     
-    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         guard let creds = GoogleCreds() else {
             return nil
         }
@@ -176,7 +176,7 @@ class GoogleCreds : AccountAPICall, Account {
     }
     
     // Use the serverAuthCode to generate a refresh and access token if there is one.
-    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->()) {
+    func generateTokens(completion:@escaping (Swift.Error?)->()) {
         if self.serverAuthCode == nil {
             Log.info("No serverAuthCode from client.")
             completion(nil)

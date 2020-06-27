@@ -57,12 +57,6 @@ class AccountManager {
         case noTokenFoundInHeaders
     }
     
-    // Account specific properties obtained from a request.
-    struct AccountProperties {
-        let accountScheme: AccountScheme
-        let properties: [String: Any]
-    }
-    
     // Allow the specific Account's to process headers in their own special way, and get values from the request.
     // 7/14/19; Previously, I was using the UserProfile (from Kitura Credentials) to bridge these properties. However, that ran into crashes during load testing. See https://forums.swift.org/t/kitura-perfect-mysql-server-crash-double-free-or-corruption-prev/26740/10
     // So, I changed to using a thread-safe mechanism (AccountProperties).
@@ -73,7 +67,7 @@ class AccountManager {
         
         for accountType in accountTypes {
             if tokenTypeString == accountType.accountScheme.authTokenType {
-                return AccountProperties(accountScheme: accountType.accountScheme, properties: accountType.getProperties(fromRequest: request))
+                return AccountProperties(accountScheme: accountType.accountScheme, properties: accountType.getProperties(fromHeaders: request.headers))
             }
         }
         
@@ -104,4 +98,7 @@ class AccountManager {
         
         return nil
     }
+}
+
+extension Headers: AccountHeaders {    
 }

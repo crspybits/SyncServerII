@@ -280,7 +280,7 @@ class RequestHandler {
         repositories = Repositories(db: db)
         accountDelegate = AccountDelegateHandler(userRepository: repositories.user)
         
-        var accountProperties: AccountManager.AccountProperties?
+        var accountProperties: AccountProperties?
         
         switch authenticationLevel! {
         case .none:
@@ -422,7 +422,7 @@ class RequestHandler {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountManager.AccountProperties?, sharingGroupUUID: String?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountProperties?, sharingGroupUUID: String?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         

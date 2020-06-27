@@ -106,7 +106,7 @@ class MicrosoftCreds : AccountAPICall, Account {
     }
     
     /// If successful, sets the `refreshToken`. The `accessToken` must be set prior to this call. The access token, when used from the iOS MSAL library, must be the "idToken" and not the iOS MSAL "accessToken". The accessToken from the iOS MSAL library is not a JWT -- when I use it I get: "AADSTS50027: JWT token is invalid or malformed".
-    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->()) {
+    func generateTokens(completion:@escaping (Swift.Error?)->()) {
         guard let accessToken = accessToken else{
             Log.info("No accessToken from client.")
             completion(MicrosoftError.noAccessToken)
@@ -272,17 +272,17 @@ class MicrosoftCreds : AccountAPICall, Account {
         }
     }
     
-    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
+    static func getProperties(fromHeaders headers:AccountHeaders) -> [String: Any] {
         var result = [String: Any]()
         
-        if let accessToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+        if let accessToken = headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
             result[ServerConstants.HTTPOAuth2AccessTokenKey] = accessToken
         }
         
         return result
     }
     
-    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         guard let creds = MicrosoftCreds() else {
             return nil
         }

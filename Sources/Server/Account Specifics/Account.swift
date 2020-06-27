@@ -24,8 +24,14 @@ protocol AccountDelegate : class {
     func saveToDatabase(account:Account) -> Bool
 }
 
-/// E.g., tokens stored in the database representing the Account.
-protocol DatabaseCredentials {
+protocol AccountHeaders {
+    subscript(key: String) -> String? { get }
+}
+
+// Account specific properties obtained from a request.
+struct AccountProperties {
+    let accountScheme: AccountScheme
+    let properties: [String: Any]
 }
 
 protocol Account {
@@ -51,15 +57,15 @@ protocol Account {
     /// You must call this before `generateTokens`-- the Account scheme may save some state as a result of this call that changes how the `generateTokens` call works.
     func needToGenerateTokens(dbCreds:Account?) -> Bool
     
-    /// Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database. Some accounts may use HTTP header in RouterResponse to send back token(s).
-    func generateTokens(response: RouterResponse?, completion:@escaping (Swift.Error?)->())
+    /// Some Account's (e.g., Google) need to generate internal tokens (e.g., a refresh token) in some circumstances (e.g., when having a serverAuthCode). May use delegate, if one is defined, to save creds to database.
+    func generateTokens(completion:@escaping (Swift.Error?)->())
     
     func merge(withNewer account:Account)
 
-    // Gets account specific properties, if any, from the request.
-    static func getProperties(fromRequest request:RouterRequest) -> [String: Any]
+    // Gets account specific properties, if any, from the headers.
+    static func getProperties(fromHeaders headers:AccountHeaders) -> [String: Any]
     
-    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
+    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account?
     static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account?
 }
 
@@ -93,7 +99,7 @@ extension Account {
     func generateTokensIfNeeded(dbCreds:Account?, routerResponse:RouterResponse, success:@escaping ()->(), failure: @escaping ()->()) {
     
         if needToGenerateTokens(dbCreds: dbCreds) {
-            generateTokens(response: routerResponse) { error in
+            generateTokens() { error in
                 if error == nil {
                     success()
                 }

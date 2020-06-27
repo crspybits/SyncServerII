@@ -144,7 +144,7 @@ class AppleSignInCreds: AccountAPICall, Account {
         return false
     }
     
-    func generateTokens(response: RouterResponse?, completion: @escaping (Error?) -> ()) {
+    func generateTokens(completion:@escaping (Swift.Error?)->()) {
         guard let generateTokens = generateTokens else {
             completion(AppleSignInCredsError.noCallToNeedToGenerateTokens)
             return
@@ -172,21 +172,21 @@ class AppleSignInCreds: AccountAPICall, Account {
     func merge(withNewer account: Account) {
     }
     
-    static func getProperties(fromRequest request:RouterRequest) -> [String: Any] {
+    static func getProperties(fromHeaders headers:AccountHeaders) -> [String: Any] {
         var result = [String: Any]()
         
-        if let authCode = request.headers[ServerConstants.HTTPOAuth2AuthorizationCodeKey] {
+        if let authCode = headers[ServerConstants.HTTPOAuth2AuthorizationCodeKey] {
             result[ServerConstants.HTTPOAuth2AuthorizationCodeKey] = authCode
         }
         
-        if let idToken = request.headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
+        if let idToken = headers[ServerConstants.HTTPOAuth2AccessTokenKey] {
             result[ServerConstants.HTTPOAuth2AccessTokenKey] = idToken
         }
         
         return result
     }
     
-    static func fromProperties(_ properties: AccountManager.AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
         guard let creds = AppleSignInCreds() else {
             return nil
         }
