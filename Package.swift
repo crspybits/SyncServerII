@@ -13,6 +13,8 @@ let package = Package(
         .package(path: "../ServerShared"),
         // .package(url: "../ServerShared", .branch("master")),
         //.package(url: "https://github.com/SyncServerII/ServerShared.git", .branch("master")),
+        
+        .package(url: "https://github.com/SyncServerII/ServerAccount.git", .branch("master")),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
         // .package(url:"https://github.com/crspybits/Perfect-MySQL.git", from: "3.1.3"),
@@ -48,7 +50,7 @@ let package = Package(
                 .define("SERVER")
             ]),
         .target(name: "Server",
-            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn", "SwiftJWT"],
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn", "SwiftJWT", "ServerAccount"],
             swiftSettings: [
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")

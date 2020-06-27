@@ -12,6 +12,7 @@ import KituraNet
 import LoggerAPI
 import Kitura
 import HeliumLogger
+import ServerAccount
 
 enum AccountCreationUser {
     case user(User) // use this if we have it.

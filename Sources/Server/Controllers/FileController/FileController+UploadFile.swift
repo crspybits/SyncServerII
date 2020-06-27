@@ -10,6 +10,7 @@ import Foundation
 import LoggerAPI
 import ServerShared
 import Kitura
+import ServerAccount
 
 extension FileController {
     private struct Cleanup {

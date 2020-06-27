@@ -51,7 +51,7 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
         "state": {
           "branch": "master",
-          "revision": "fc581745e3ff24eeeea0f87918822507cc08967f",
+          "revision": "a026ce7f927f3f8bb8be9ed4208fd7b65ef5e524",
           "version": null
         }
       },
@@ -215,6 +215,15 @@
           "branch": null,
           "revision": "a50b9a33f08fce638f33ae3121613fe499cc23ec",
           "version": "3.0.7"
+        }
+      },
+      {
+        "package": "ServerAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
+        "state": {
+          "branch": "master",
+          "revision": "df7a3b2d00d2a4abf0edd976837f7cfe62ff37be",
+          "version": null
         }
       },
       {

@@ -7,6 +7,7 @@
 
 import Foundation
 import LoggerAPI
+import ServerAccount
 
 extension UserController {
     enum CreateInitialFileResponse {

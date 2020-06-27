@@ -9,6 +9,7 @@ import Foundation
 import ServerShared
 import LoggerAPI
 import KituraNet
+import ServerAccount
 
 extension DropboxCreds {
     // Dropbox is using this https://blogs.dropbox.com/developers/2015/04/a-preview-of-the-new-dropbox-api-v2/ "But if a request fails for some call-specific reason, v1 might have returned any of 403, 404, 406, 411, etc. API v2 will always return a 409 status code with a stable and documented error identifier in the body. We chose 409 because, unlike many other error codes, it doesn’t have any specific meaning in the HTTP spec. This ensures that HTTP intermediaries, such as proxies or client libraries, will relay it along untouched."

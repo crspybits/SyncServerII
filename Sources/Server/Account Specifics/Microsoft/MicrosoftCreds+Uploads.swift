@@ -10,6 +10,7 @@ import LoggerAPI
 import HeliumLogger
 import KituraNet
 import ServerShared
+import ServerAccount
 
 extension MicrosoftCreds {
     struct UploadSession: Decodable {
