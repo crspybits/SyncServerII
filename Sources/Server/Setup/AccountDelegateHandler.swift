@@ -7,6 +7,7 @@
 
 import Foundation
 import LoggerAPI
+import ServerAccount
 
 class AccountDelegateHandler: AccountDelegate {
     private let userRepository: UserRepository

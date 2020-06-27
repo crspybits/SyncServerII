@@ -11,8 +11,9 @@ import Credentials
 import CredentialsGoogle
 import ServerShared
 import LoggerAPI
+import ServerAccount
 
-class User : NSObject, Model {
+class User : NSObject, Model, UserData {
     static let userIdKey = "userId"
     var userId: UserId!
     

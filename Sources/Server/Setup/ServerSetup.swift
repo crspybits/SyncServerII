@@ -16,6 +16,7 @@ import CredentialsDropbox
 import CredentialsMicrosoft
 import ServerShared
 import LoggerAPI
+import ServerAccount
 
 class ServerSetup {
     // Just a guess. Don't know what's suitable for length. See https://github.com/IBM-Swift/Kitura/issues/917

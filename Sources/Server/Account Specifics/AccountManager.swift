@@ -10,6 +10,7 @@ import Credentials
 import Kitura
 import ServerShared
 import LoggerAPI
+import ServerAccount
 
 class AccountManager {
     static let session = AccountManager()

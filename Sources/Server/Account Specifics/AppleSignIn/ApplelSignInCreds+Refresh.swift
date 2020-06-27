@@ -9,6 +9,7 @@ import Foundation
 import HeliumLogger
 import LoggerAPI
 import KituraNet
+import ServerAccount
 
 extension AppleSignInCreds {
     struct GenerateRefreshTokenResult: Decodable {

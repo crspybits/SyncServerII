@@ -11,6 +11,7 @@ import Credentials
 import Kitura
 import LoggerAPI
 import KituraNet
+import ServerAccount
 
 class FacebookCreds : AccountAPICall,  Account {
     var accessToken: String!
