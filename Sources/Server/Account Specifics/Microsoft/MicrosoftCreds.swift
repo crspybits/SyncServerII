@@ -11,6 +11,7 @@ import ServerShared
 import LoggerAPI
 import HeliumLogger
 import KituraNet
+import Credentials
 
 // Assumes that the microsft app has been registered as multi-tenant. E.g., see https://docs.microsoft.com/en-us/graph/auth-register-app-v2?context=graph%2Fapi%2F1.0&view=graph-rest-1.0
 // Originally, I thought I had to register two apps (a server and a client)-- E.g., https://paulryan.com.au/2017/oauth-on-behalf-of-flow-adal/ HOWEVER, I have only a client iOS app registered (and using that client id and secret) and thats working.

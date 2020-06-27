@@ -11,6 +11,7 @@ import ServerShared
 import Kitura
 import HeliumLogger
 import LoggerAPI
+import Credentials
 
 // For general strategy used with Apple Sign In-- see
 // https://stackoverflow.com/questions/58178187
@@ -76,6 +77,14 @@ class AppleSignInCreds: AccountAPICall, Account {
         self.config = config
         super.init()
         baseURL = "appleid.apple.com"
+    }
+    
+    func canCreateAccount(with userProfile: UserProfile) -> Bool {
+        guard let expiryDate = userProfile.extendedProperties[CredentialsAppleSignIn.appleSignInTokenExpiryKey] as? Date else {
+            return false
+        }
+        
+        return expiryDate <= Date()
     }
     
     func needToGenerateTokens(dbCreds: Account?) -> Bool {

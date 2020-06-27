@@ -58,12 +58,14 @@ class UserController : ControllerProtocol {
             return
         }
         
-        guard let credsId = params.userProfile?.id else {
-            let message = "Could not get credsId."
+        guard let userProfile = params.userProfile else {
+            let message = "Could not get user profile."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
+        
+        let credsId = userProfile.id
         
         let userExists = UserController.userExists(accountType: accountScheme.accountName, credsId: credsId, userRepository: params.repos.user)
         switch userExists {
@@ -75,15 +77,29 @@ class UserController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
+        
+        guard var profileCreds = params.profileCreds else {
+            let message = "Could not get profile creds!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+
+        guard profileCreds.canCreateAccount(with: userProfile) else {
+            let message = "Could not create account!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
 
         // No database creds because this is a new user-- so use params.profileCreds
         let user = User()
-        user.username = params.userProfile!.displayName
+        user.username = userProfile.displayName
         user.accountType = accountScheme.accountName
-        user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON()
+        user.credsId = userProfile.id
+        user.creds = profileCreds.toJSON()
         
-        if params.profileCreds!.owningAccountsNeedCloudFolderName {
+        if profileCreds.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
                 let message = "owningAccountsNeedCloudFolderName but no cloudFolderName"
                 Log.error(message)
@@ -94,7 +110,7 @@ class UserController : ControllerProtocol {
             user.cloudFolderName = addUserRequest.cloudFolderName
         }
         
-        guard params.profileCreds?.accountScheme.userType == .owning else {
+        guard profileCreds.accountScheme.userType == .owning else {
             let message = "Attempting to add a user with an Account that only allows sharing users!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -136,7 +152,6 @@ class UserController : ControllerProtocol {
         response.userId = userId
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
-        var profileCreds = params.profileCreds!
         profileCreds.accountCreationUser = .userId(userId)
 
         // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.

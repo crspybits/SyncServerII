@@ -286,13 +286,14 @@ class GoogleCreds : AccountAPICall, Account {
 
             // When the refresh token has been revoked
             // ["error": "invalid_grant", "error_description": "Token has been expired or revoked."]
+            // See https://stackoverflow.com/questions/10576386
             
             // [1]
             if statusCode == HTTPStatusCode.badRequest,
                 case .dictionary(let dict)? = apiResult,
                 let error = dict["error"] as? String,
                 error == "invalid_grant" {
-                
+                Log.error("Bad request: invalid_grant: \(dict)")
                 completion(CredentialsError.expiredOrRevokedAccessToken)
                 return
             }

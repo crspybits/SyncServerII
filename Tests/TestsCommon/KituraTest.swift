@@ -65,6 +65,7 @@ extension KituraTest {
         }
         
         testAccount.scheme.doHandler(for: .getCredentials, testAccount: testAccount) { creds in
+            Log.debug("creds: \(creds.accessToken)")
             runTest(usingCreds: creds)
         }
     }

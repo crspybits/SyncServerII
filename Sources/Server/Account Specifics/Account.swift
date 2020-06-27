@@ -42,6 +42,8 @@ protocol Account {
     // Currently assuming all Account's use access tokens.
     var accessToken: String! {get set}
     
+    func canCreateAccount(with userProfile: UserProfile) -> Bool
+    
     func toJSON() -> String?
     
     /// Given existing Account info stored in the database, decide if we need to generate tokens. Token generation can be used for various purposes by the particular Account. E.g., For owning users to allow access to cloud storage data in offline manner. E.g., to allow access to that data by sharing users.
@@ -65,6 +67,10 @@ enum FromJSONError : Swift.Error {
 }
 
 extension Account {
+    func canCreateAccount(with userProfile: UserProfile) -> Bool {
+        return true
+    }
+    
     // Only use this for owning accounts.
     var cloudFolderName: String? {
         guard let accountCreationUser = accountCreationUser,

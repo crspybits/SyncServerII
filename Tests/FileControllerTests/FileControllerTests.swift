@@ -239,7 +239,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
         deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
 
-        uploadFile(accountType: testAccount.scheme.accountName, creds: cloudStorageCreds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, options: options)
+        uploadFile(accountType: testAccount.scheme.accountName, creds: cloudStorageCreds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, fileVersion: 0, options: options)
         
         // Don't want the download to fail just due to a checksum mismatch.
         uploadResult.request.checkSum = checkSum

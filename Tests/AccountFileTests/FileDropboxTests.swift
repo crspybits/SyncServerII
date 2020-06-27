@@ -168,10 +168,10 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         
-        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
+        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest, fileVersion: 0)
         
         // The second time we try it, it should fail with CloudStorageError.alreadyUploaded -- same file.
-        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
+        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest, fileVersion: 0, failureExpected: true, errorExpected: CloudStorageError.alreadyUploaded)
     }
     
     func testFullUploadWorks() {
@@ -279,11 +279,11 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
 
-        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest)
+        let fileVersion: FileVersionInt = 0
         
-        // DEPRECATED
-        assert(false)
-        var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile: file, uploadRequest:uploadRequest, fileVersion: fileVersion)
+        
+        let cloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: uploadRequest.mimeType, fileVersion: fileVersion)
         Log.debug("cloudFileName: \(cloudFileName)")
         downloadFile(creds: creds, cloudFileName: cloudFileName, expectedStringFile: file)
     }
@@ -361,7 +361,7 @@ class FileDropboxTests: ServerTestCase, LinuxTestable {
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = file.dropboxCheckSum
         
-        guard let fileName = uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile:file, uploadRequest:uploadRequest) else {
+        guard let fileName = uploadFile(accountType: AccountScheme.dropbox.accountName, creds: creds, deviceUUID:deviceUUID, testFile:file, uploadRequest:uploadRequest, fileVersion: 0) else {
             XCTFail()
             return
         }

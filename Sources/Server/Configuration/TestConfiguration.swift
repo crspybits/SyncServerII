@@ -11,7 +11,13 @@ import Foundation
 
 #if DEBUG
 struct TestConfiguration: Decodable {
-    // This is from crspybits@gmail.com; I created this and the two other Google refresh tokens below on 8/26/18 using method: 1) boot up testing SyncServer on AWS or locally, 2) sign in using SyncServer Example client, 3) connect into the RDS mySQL or the mySQL db locally, 4) Look at the User table for the refresh token
+    /* This is from crspybits@gmail.com; I created this and the two other Google refresh tokens below on 8/26/18 using method:
+        1) boot up testing SyncServer on AWS or locally,
+        2) sign in using SyncServer Example client,
+        3) connect into the RDS mySQL or the mySQL db locally,
+            * Look at the User table for the refresh token
+        4) OR: Look in the server log for "refreshToken:".
+    */
     let GoogleRefreshToken: String
     let GoogleSub: String
     
@@ -28,6 +34,12 @@ struct TestConfiguration: Decodable {
     let GoogleSub4: String
     
     // Facebook token for Facebook test user tnylzuhesv_1534825389@tfbnw.net; api v3.0",
+    // To refresh these, go to https://developers.facebook.com/apps/ and SyncServerTests,
+    // then Roles > Test Users
+    // Use Edit > "Get an access token for this test user"
+    // Do this for both of the Facebook tokens, and then run
+    //      ./Tools/getLongLivedFacebookToken.sh ServerTests.json
+    // under Mac OS
     let FacebookLongLivedToken1: String
     let FacebookId1: String
   

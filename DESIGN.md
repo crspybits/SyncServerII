@@ -59,11 +59,11 @@ The actual form of serializing changes will need to be in terms of file groups. 
 
 7. Server complication: Enabling download of a specific merge state of a file.
 
-While the ServerUploader is serializing merges to a single file, we also need to handle download requests from clients for that file. It seems at this point that we will have to keep more than a single version of a file present in cloud storage. For example, suppose that client(s) are downloading version N of a file. Suppose also that the ServerUploader is processing new changes to create version N+1 of the file. Version N of the file cannot be removed until all in progress downloads are completed.
+While the ServerUploader is serializing merges to a single file, we also need to handle download requests from clients for that file. It seems at this point that we will have to keep more than a single version of a file present in cloud storage. For example, suppose that client(s) are downloading version N of a file. Suppose also that the ServerUploader is processing new changes to create version N+1 of the file. Version N of the file cannot be removed until all in progress downloads are completed. How does this currently work for upload of next version of a file and concurrent downloading of the file?
 
-# Details
+## Details
 
-## Server complication: Serializing changes to individual files.
+### Server complication: Serializing changes to individual files.
 
 This considers the details of how we're going to serialize changes to individual files. [And is in reference to the discussion started above.](#serializing)
 
@@ -107,6 +107,22 @@ The files used in SyncServer, and their processing, have some resemblance to ver
 
 An issue with such an approach is in a central goal of the system: That of putting a users data in their hands. We're using cloud storage systems to store a users files, and the files need to be in a form the users might be able to make use of should they not use the app working with the data. Some of the files with a version control system are not in a user-suitable format. Another issue is that at least as of now, we don't have any need for access to the full history of changes to files. Versions for files enable support for downloading a prior version of a file while a new version is being written. The full history of changes to files could also impose size issues on a users cloud storage they might not find value in.
 
+# Uploading design
 
+## Uploading v0 of a file
 
+We are going to require that if a file is going to be uploaded, for a file group, it will need to all be be uploaded together with all other v0 files for a file group. For example, if a file group has three files-- then all v0 versions for the file need be uploaded at the same time.
 
+Each of these v0 uploads will get uploaded, directly to the relevant cloud storage. Metadata will, as now, be stored in the Upload table on the server. 
+
+"Done uploads" will now occur in a different manner. To facilitate parallel background uploads from clients, each client upload will provide two new parameters: N of M. M will be the total number of uploads before a Done Uploads, and N will be the current file upload number. Done Uploads thus will be triggered from the upload endpoint when it detects that all uploads have been received.
+
+## Uploading changes.
+
+With our new concept of file conflict management, changes will be uploaded which are dependent on the specifics of particular file types.
+
+These uploads will take place from clients and the contents of the changes will be stored in the Upload table. No upload directly to cloud storage will take place. A new optional column for the uploadContents will be needed in the Upload table. (No separate UploadRequestLog is needed-- this can be handled by the Upload table).
+
+As for v0 uploads, each of these uploads will have N of M parameters. And when "Done Uploads" is triggered, this is when our new ServerUploader mechanism will need to take over. ServerUploader will need to serialize updates to specific file groups.
+
+ServerUploader will decide on file versions-- when a series of changes from the Upload table are applied, the version of any particular file will get updated.
