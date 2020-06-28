@@ -70,7 +70,7 @@ class AppleSignInCreds: AccountAPICall, Account {
     private(set) var generateTokens: GenerateTokens?
     let config: ServerConfiguration.AppleSignIn
     
-    override init?() {
+    required public init?(configuration: Any? = nil) {
         guard let config = Configuration.server.appleSignIn else {
             return nil
         }

@@ -39,7 +39,7 @@ class MicrosoftCreds : AccountAPICall, Account {
 
     private let scopes = "https://graph.microsoft.com/user.read+offline_access"
 
-    override init?() {
+    required public init?(configuration: Any? = nil) {
         super.init()
         baseURL = "login.microsoftonline.com/common"
     }

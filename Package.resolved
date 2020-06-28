@@ -222,7 +222,25 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "86709b67ac3dba511b9429cd82505353c0ca3559",
+          "revision": "e6f8113d910fa1515cec5aa8ab39ccdaae1ddfab",
+          "version": null
+        }
+      },
+      {
+        "package": "ServerDropboxAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerDropboxAccount.git",
+        "state": {
+          "branch": "master",
+          "revision": "26480a7470481bf7e69071db4293eb5425dbcbcb",
+          "version": null
+        }
+      },
+      {
+        "package": "ServerGoogleAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerGoogleAccount.git",
+        "state": {
+          "branch": "master",
+          "revision": "ac6f1d8c598bdbd93f1acff00505b2f3749a5f54",
           "version": null
         }
       },

@@ -32,7 +32,7 @@ class FacebookCreds : AccountAPICall,  Account {
     
     var accountCreationUser:AccountCreationUser?
     
-    override init?() {
+    required public init?(configuration: Any? = nil) {
         super.init()
         baseURL = "graph.facebook.com"
     }
