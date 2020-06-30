@@ -113,8 +113,8 @@ class FacebookCreds : AccountAPICall,  Account {
         }
     }
     
-    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
-        guard let creds = FacebookCreds() else {
+    static func fromProperties(_ properties: AccountProperties, user:AccountCreationUser?, configuration: Any?, delegate:AccountDelegate?) -> Account? {
+        guard let creds = FacebookCreds(configuration: configuration) else {
             return nil
         }
         
@@ -124,9 +124,9 @@ class FacebookCreds : AccountAPICall,  Account {
         return creds
     }
     
-    static func fromJSON(_ json:String, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
+    static func fromJSON(_ json:String, user:AccountCreationUser, configuration: Any?, delegate:AccountDelegate?) throws -> Account? {
         
-        guard let creds = FacebookCreds() else {
+        guard let creds = FacebookCreds(configuration: configuration) else {
             return nil
         }
         

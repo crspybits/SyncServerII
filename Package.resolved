@@ -47,15 +47,6 @@
         }
       },
       {
-        "package": "CredentialsAppleSignIn",
-        "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
-        "state": {
-          "branch": "master",
-          "revision": "a026ce7f927f3f8bb8be9ed4208fd7b65ef5e524",
-          "version": null
-        }
-      },
-      {
         "package": "CredentialsDropbox",
         "repositoryURL": "https://github.com/crspybits/CredentialsDropbox.git",
         "state": {
@@ -164,15 +155,6 @@
         }
       },
       {
-        "package": "OpenSSL",
-        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
-        "state": {
-          "branch": null,
-          "revision": "6c7e2e3610037fbc05c0d846cec981518961d8bf",
-          "version": "2.2.2"
-        }
-      },
-      {
         "package": "PerfectLib",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
         "state": {
@@ -222,7 +204,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "e6f8113d910fa1515cec5aa8ab39ccdaae1ddfab",
+          "revision": "948d18e99b7afa2f2f92c63f3c7eece161db0183",
           "version": null
         }
       },
@@ -231,7 +213,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerDropboxAccount.git",
         "state": {
           "branch": "master",
-          "revision": "26480a7470481bf7e69071db4293eb5425dbcbcb",
+          "revision": "076c0ade1289f95cd7ea5887f151bb88aef75198",
           "version": null
         }
       },
@@ -240,17 +222,17 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerGoogleAccount.git",
         "state": {
           "branch": "master",
-          "revision": "ac6f1d8c598bdbd93f1acff00505b2f3749a5f54",
+          "revision": "6939a65faf31ad464120b9bc6ffd78fdd01291b6",
           "version": null
         }
       },
       {
-        "package": "SwiftJWKtoPEM",
-        "repositoryURL": "https://github.com/ibm-cloud-security/Swift-JWK-to-PEM.git",
+        "package": "ServerMicrosoftAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerMicrosoftAccount.git",
         "state": {
           "branch": null,
-          "revision": "b18e2af1392bb84f1cde83b1e00847051c9fdda6",
-          "version": "0.4.0"
+          "revision": "9888f340ee8100984bc13aa3540dcf014a3941c0",
+          "version": "0.0.1"
         }
       },
       {

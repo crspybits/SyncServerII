@@ -19,6 +19,7 @@ import LoggerAPI
 import ServerAccount
 import ServerDropboxAccount
 import ServerGoogleAccount
+import ServerMicrosoftAccount
 
 class ServerSetup {
     // Just a guess. Don't know what's suitable for length. See https://github.com/IBM-Swift/Kitura/issues/917

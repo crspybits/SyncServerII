@@ -17,6 +17,7 @@ let package = Package(
         .package(url: "https://github.com/SyncServerII/ServerAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerDropboxAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerGoogleAccount.git", .branch("master")),
+        .package(url: "https://github.com/SyncServerII/ServerMicrosoftAccount.git", from: "0.0.1"),
 
         .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMajor(from: "2.4.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .upToNextMajor(from: "2.3.1")),
@@ -28,7 +29,7 @@ let package = Package(
         // .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", .branch("master")),
         .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git",  from: "0.1.0"),
         
-        .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git", .branch("master")),
+        // .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git", .branch("master")),
         // .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git",  from: "0.1.0"),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
@@ -39,9 +40,7 @@ let package = Package(
         .package(url: "https://github.com/PerfectlySoft/Perfect-Thread.git", .upToNextMajor(from: "3.0.6")),
 
         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMajor(from: "2.7.0")),
-        
-        .package(url: "https://github.com/IBM-Swift/Swift-JWT.git", from: "3.5.3"),
-        
+                
         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMajor(from: "1.8.1"))
 	],
     targets: [
@@ -52,7 +51,7 @@ let package = Package(
                 .define("SERVER")
             ]),
         .target(name: "Server",
-            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "CredentialsAppleSignIn", "SwiftJWT", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount"],
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount"],
             swiftSettings: [
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")

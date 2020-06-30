@@ -80,7 +80,7 @@ class AccountManager {
         let currentAccountScheme = properties.accountScheme
         for accountType in accountTypes {
             if accountType.accountScheme == currentAccountScheme {
-                return accountType.fromProperties(properties, user: user, delegate: delegate)
+                return accountType.fromProperties(properties, user: user, configuration: Configuration.server, delegate: delegate)
             }
         }
         
@@ -91,7 +91,7 @@ class AccountManager {
     
         for accountType in accountTypes {
             if accountType.accountScheme.accountName == name {
-                return try accountType.fromJSON(json, user: user, delegate: delegate)
+                return try accountType.fromJSON(json, user: user, configuration: Configuration.server, delegate: delegate)
             }
         }
         

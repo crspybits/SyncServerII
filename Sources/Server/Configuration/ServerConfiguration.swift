@@ -10,10 +10,11 @@ import Foundation
 import PerfectLib
 import LoggerAPI
 import ServerGoogleAccount
+import ServerMicrosoftAccount
 
 // Server startup configuration info, pulled from the Server.json file.
 
-struct ServerConfiguration: Decodable, GoogleCredsConfiguration {
+struct ServerConfiguration: Decodable, GoogleCredsConfiguration, MicrosoftCredsConfiguration {
     /* When adding this .json into your Xcode project make sure to
     a) add it into Copy Files in Build Phases, and 
     b) select Products Directory as a destination.
