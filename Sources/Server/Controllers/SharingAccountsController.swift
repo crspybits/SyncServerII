@@ -11,6 +11,7 @@ import ServerShared
 import LoggerAPI
 import KituraNet
 import Foundation
+import ServerAccount
 
 class SharingAccountsController : ControllerProtocol {
     class func setup() -> Bool {

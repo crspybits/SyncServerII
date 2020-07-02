@@ -9,6 +9,7 @@ import LoggerAPI
 import ServerShared
 import Foundation
 import SwiftyAWSSNS
+import ServerAccount
 
 class PushNotificationsController : ControllerProtocol {
     class func setup() -> Bool {

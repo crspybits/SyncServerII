@@ -20,6 +20,7 @@ import ServerAccount
 import ServerDropboxAccount
 import ServerGoogleAccount
 import ServerMicrosoftAccount
+import ServerAppleSignInAccount
 
 class ServerSetup {
     // Just a guess. Don't know what's suitable for length. See https://github.com/IBM-Swift/Kitura/issues/917
@@ -45,7 +46,7 @@ class ServerSetup {
         return randomString
     }
 
-    static func credentials(_ router:Router) {
+    static func credentials(_ router:Router, proxyRouter:CreateRoutes) {
         let secret = self.randomString(length: secretStringLength)
         router.all(middleware: KituraSession.Session(secret: secret))
         
@@ -77,6 +78,15 @@ class ServerSetup {
             let microsoftCredentials = CredentialsMicrosoftToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: microsoftCredentials)
             AccountManager.session.addAccountType(MicrosoftCreds.self)
+        }
+        
+        if Configuration.server.allowedSignInTypes.AppleSignIn == true {
+            let controller = AppleServerServerNotification()
+            func process(params:RequestProcessingParameters) {
+                //controller.
+            }
+
+            proxyRouter.addRoute(ep: AppleServerServerNotification.endpoint, processRequest: process)
         }
         
         // 8/8/17; There needs to be at least one sign-in type configured for the server to do anything. And at least one of these needs to allow owning users. If there can be no owning users, how do you create anything to share? https://github.com/crspybits/SyncServerII/issues/9

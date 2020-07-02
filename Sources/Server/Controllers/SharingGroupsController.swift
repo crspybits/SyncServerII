@@ -9,6 +9,7 @@ import LoggerAPI
 import Credentials
 import ServerShared
 import Foundation
+import ServerAccount
 
 class SharingGroupsController : ControllerProtocol {
     static func setup() -> Bool {

@@ -71,7 +71,7 @@ class CreateRoutes {
     }
     
     func getRoutes() -> Router {
-        ServerSetup.credentials(self.router)
+        ServerSetup.credentials(self.router, proxyRouter: self)
         ServerRoutes.add(proxyRouter: self)
 
         self.router.error { request, response, _ in
