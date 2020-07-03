@@ -39,12 +39,12 @@ class AccountAuthenticationTests_Facebook: AccountAuthenticationTests {
     }
 
     func testThatFacebookUserHasValidCreds() {
-        createSharingUser(withSharingPermission: .read, sharingUser: .facebook1)
+        createSharingUser(withSharingPermission: .read, sharingUser: testAccount)
         
         let deviceUUID = Foundation.UUID().uuidString
         
-        self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount: testAccount) { expectation, facebookCreds in
+            let headers = self.setupHeaders(testUser: self.testAccount, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
                 XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")

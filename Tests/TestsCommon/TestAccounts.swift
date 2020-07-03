@@ -15,6 +15,7 @@ import ServerAccount
 @testable import ServerDropboxAccount
 @testable import ServerGoogleAccount
 @testable import ServerMicrosoftAccount
+import ServerFacebookAccount
 
 func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
     return lhs.tokenKey == rhs.tokenKey && lhs.idKey == rhs.idKey
@@ -146,7 +147,10 @@ struct TestAccount {
         
         // MARK: Dropbox
         AccountScheme.dropbox.registerHandler(type: .getCredentials) { testAccount, callback in
-            let creds = DropboxCreds()!
+            guard let creds = DropboxCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return
+            }
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             callback(creds)
@@ -154,7 +158,10 @@ struct TestAccount {
         
         // MARK: Facebook
         AccountScheme.facebook.registerHandler(type: .getCredentials) { testAccount, callback in
-            let creds = FacebookCreds()!
+            guard let creds = FacebookCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return
+            }
             creds.accessToken = testAccount.token()
             callback(creds)
         }

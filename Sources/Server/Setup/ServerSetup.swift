@@ -21,6 +21,7 @@ import ServerDropboxAccount
 import ServerGoogleAccount
 import ServerMicrosoftAccount
 import ServerAppleSignInAccount
+import ServerFacebookAccount
 
 class ServerSetup {
     // Just a guess. Don't know what's suitable for length. See https://github.com/IBM-Swift/Kitura/issues/917

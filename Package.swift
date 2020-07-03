@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/SyncServerII/ServerGoogleAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerMicrosoftAccount.git", from: "0.0.1"),
         .package(url: "https://github.com/SyncServerII/ServerAppleSignInAccount.git", .branch("master")),
+        .package(url: "https://github.com/SyncServerII/ServerFacebookAccount.git", .branch("master")),
 
         .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMajor(from: "2.4.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .upToNextMajor(from: "2.3.1")),
@@ -52,7 +53,7 @@ let package = Package(
                 .define("SERVER")
             ]),
         .target(name: "Server",
-            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount"],
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount"],
             swiftSettings: [
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")
