@@ -40,24 +40,6 @@ class AccountAuthenticationTests_Microsoft: AccountAuthenticationTests {
     override func testThatUserHasValidCreds() {
         super.testThatUserHasValidCreds()
     }
-
-#if false
-    func testThatMicrosoftUserHasValidCreds() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        addNewUser(testAccount: .microsoft1, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: nil)
-        
-        self.performServerTest(testAccount: .microsoft1) { expectation, dbCreds in
-            let headers = self.setupHeaders(testUser: .microsoft1, accessToken: dbCreds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
-                expectation.fulfill()
-            }
-        }
-    }
-#endif
 }
 
 
