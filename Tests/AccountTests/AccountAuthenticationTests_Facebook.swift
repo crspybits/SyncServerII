@@ -11,11 +11,10 @@ import LoggerAPI
 @testable import Server
 @testable import TestsCommon
 
-class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
-    
+class AccountAuthenticationTests_Facebook: AccountAuthenticationTests {
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        testAccount = .facebook1
     }
     
     override func tearDown() {
@@ -23,59 +22,22 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func testGoodEndpointWithBadCredsFails() {
-        let deviceUUID = Foundation.UUID().uuidString
-        performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: "foobar", deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode.rawValue)")
-                XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
-                expectation.fulfill()
-            }
-        }
+    override func testGoodEndpointWithBadCredsFails() {
+        super.testGoodEndpointWithBadCredsFails()
     }
-    
-    // Good Facebook creds, not creds that are necessarily on the server.
-    func testGoodEndpointWithGoodCredsWorks() {
-        let deviceUUID = Foundation.UUID().uuidString
-        
-        self.performServerTest(testAccount: .facebook1) { expectation, facebookCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
-                expectation.fulfill()
-            }
-        }
+
+    override func testGoodEndpointWithGoodCredsWorks() {
+        super.testGoodEndpointWithGoodCredsWorks()
     }
-    
-    func testBadPathWithGoodCredsFails() {
-        let badRoute = ServerEndpoint("foobar", method: .post, requestMessageType: AddUserRequest.self)
-        let deviceUUID = Foundation.UUID().uuidString
-        
-        performServerTest(testAccount: .facebook1) { expectation, fbCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: badRoute, headers: headers) { response, dict in
-                XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
-                expectation.fulfill()
-            }
-        }
+
+    override func testBadPathWithGoodCredsFails() {
+        super.testBadPathWithGoodCredsFails()
     }
-    
-    func testGoodPathWithBadMethodWithGoodCredsFails() {
-        let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post, requestMessageType: CheckCredsRequest.self)
-        XCTAssert(ServerEndpoints.checkCreds.method != .post)
-        let deviceUUID = Foundation.UUID().uuidString
-        
-        self.performServerTest(testAccount: .facebook1) { expectation, fbCreds in
-            let headers = self.setupHeaders(testUser: .facebook1, accessToken: fbCreds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: badRoute, headers: headers) { response, dict in
-                XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
-                expectation.fulfill()
-            }
-        }
+
+    override func testGoodPathWithBadMethodWithGoodCredsFails() {
+        super.testGoodPathWithBadMethodWithGoodCredsFails()
     }
-    
+
     func testThatFacebookUserHasValidCreds() {
         createSharingUser(withSharingPermission: .read, sharingUser: .facebook1)
         
@@ -92,20 +54,3 @@ class AccountAuthenticationTests_Facebook: ServerTestCase, LinuxTestable {
     }
 }
 
-extension AccountAuthenticationTests_Facebook {
-    static var allTests : [(String, (AccountAuthenticationTests_Facebook) -> () throws -> Void)] {
-        let result:[(String, (AccountAuthenticationTests_Facebook) -> () throws -> Void)] = [
-            ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
-            ("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks),
-            ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
-            ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
-            ("testThatFacebookUserHasValidCreds", testThatFacebookUserHasValidCreds),
-        ]
-        
-        return result
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Facebook.self)
-    }
-}

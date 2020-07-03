@@ -13,6 +13,7 @@ import LoggerAPI
 import Foundation
 import ServerShared
 import Kitura
+import ServerAccount
 
 class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
 

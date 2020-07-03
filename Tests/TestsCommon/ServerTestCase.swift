@@ -15,6 +15,7 @@ import LoggerAPI
 import ServerShared
 import HeliumLogger
 import Kitura
+import ServerAccount
 
 #if os(Linux)
     import Glibc

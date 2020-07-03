@@ -38,7 +38,11 @@ TEST_JSON="Tools/TestSuites.json"
 COMMAND=$1
 OPTION=$2
 ALL_COUNT=`jq -r '.all | length' < ${TEST_JSON}`
-BASIC_SWIFT_TEST_CMD="swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER"
+
+# See https://oleb.net/2020/swift-test-discovery/
+BASIC_SWIFT_TEST_CMD="swift test --enable-test-discovery -Xswiftc -DDEBUG -Xswiftc -DSERVER"
+# BASIC_SWIFT_TEST_CMD="swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER"
+
 SWIFT_DEFINE="-Xswiftc -D"
 # SYNCSERVER_TEST_MODULE="ServerTests"
 TEST_OUT_DIR=".testing"
@@ -206,7 +210,9 @@ if  [ "${COMMAND}" == "suites" ] || [ "${COMMAND}" == "print-suites" ] ; then
     fi
 elif [ "${COMMAND}" == "filter" ] ; then
     OUTPUT_FILE_NAME="$TEST_OUT_DIR"/filter.txt
+    
     $BASIC_SWIFT_TEST_CMD --filter ${OPTION} > $OUTPUT_FILE_NAME
+    echo "$BASIC_SWIFT_TEST_CMD --filter ${OPTION} > $OUTPUT_FILE_NAME"
 
     # For testing to see if the compiler failed.
     compilerResult=$?

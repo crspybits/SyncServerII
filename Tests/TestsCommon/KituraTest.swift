@@ -26,6 +26,7 @@ import Foundation
 @testable import Server
 import CredentialsGoogle
 import ServerShared
+import ServerAccount
 
 protocol KituraTest {
     func expectation(_ index: Int) -> XCTestExpectation
@@ -65,7 +66,7 @@ extension KituraTest {
         }
         
         testAccount.scheme.doHandler(for: .getCredentials, testAccount: testAccount) { creds in
-            Log.debug("creds: \(creds.accessToken)")
+            Log.debug("creds: \(String(describing: creds.accessToken))")
             runTest(usingCreds: creds)
         }
     }

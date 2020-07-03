@@ -7,100 +7,37 @@ import LoggerAPI
 import CredentialsGoogle
 import Foundation
 import ServerShared
+@testable import ServerGoogleAccount
 
-class AccountAuthenticationTests_Google: ServerTestCase, LinuxTestable {
-    let serverResponseTime:TimeInterval = 10
-
-    func testGoodEndpointWithBadCredsFails() {
-        let deviceUUID = Foundation.UUID().uuidString
-        performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: "foobar", deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode.rawValue)")
-                XCTAssert(response!.statusCode == .unauthorized, "Did not fail on check creds request: \(response!.statusCode)")
-                expectation.fulfill()
-            }
-        }
-    }
-
-    // Good Google creds, not creds that are necessarily on the server.
-    func testGoodEndpointWithGoodCredsWorks() {
-        let deviceUUID = Foundation.UUID().uuidString
-        
-        self.performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: ServerEndpoints.checkPrimaryCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
-                expectation.fulfill()
-            }
-        }
+class AccountAuthenticationTests_Google: AccountAuthenticationTests {
+    override func setUp() {
+        super.setUp()
+        testAccount = .google1
+        cloudFolderName = "Test.Folder"
     }
     
-    func testBadPathWithGoodCredsFails() {
-        let badRoute = ServerEndpoint("foobar", method: .post, requestMessageType: AddUserRequest.self)
-        let deviceUUID = Foundation.UUID().uuidString
-
-        performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: badRoute, headers: headers) { response, dict in
-                XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
-                expectation.fulfill()
-            }
-        }
+    override func tearDown() {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        super.tearDown()
     }
 
-    func testGoodPathWithBadMethodWithGoodCredsFails() {
-        let badRoute = ServerEndpoint(ServerEndpoints.checkCreds.pathName, method: .post, requestMessageType: CheckCredsRequest.self)
-        XCTAssert(ServerEndpoints.checkCreds.method != .post)
-        let deviceUUID = Foundation.UUID().uuidString
-            
-        self.performServerTest(testAccount: .google1) { expectation, googleCreds in
-            let headers = self.setupHeaders(testUser: .google1, accessToken: googleCreds.accessToken, deviceUUID:deviceUUID)
-            self.performRequest(route: badRoute, headers: headers) { response, dict in
-                XCTAssert(response!.statusCode != .OK, "Did not fail on check creds request")
-                expectation.fulfill()
-            }
-        }
+    override func testGoodEndpointWithBadCredsFails() {
+        super.testGoodEndpointWithBadCredsFails()
     }
-    
-    func testRefreshGoogleAccessTokenWorks() {
-        guard let creds = GoogleCreds() else {
-            XCTFail()
-            return
-        }
-        
-        creds.refreshToken = TestAccount.google1.token()
-        
-        let exp = expectation(description: "\(#function)\(#line)")
 
-        creds.refresh { error in
-            XCTAssert(error == nil)
-            XCTAssert(creds.accessToken != nil)
-            exp.fulfill()
-        }
-
-        waitForExpectations(timeout: 10, handler: nil)
+    override func testGoodEndpointWithGoodCredsWorks() {
+        super.testGoodEndpointWithGoodCredsWorks()
     }
-}
 
-extension AccountAuthenticationTests_Google {
-    static var allTests : [(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] {
-        var result:[(String, (AccountAuthenticationTests_Google) -> () throws -> Void)] = [
-            ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
-            ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
-            ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
-            ("testRefreshGoogleAccessTokenWorks", testRefreshGoogleAccessTokenWorks)
-        ]
-        
-#if DEBUG
-        result += [("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks)]
-#endif
-
-        return result
+    override func testBadPathWithGoodCredsFails() {
+        super.testBadPathWithGoodCredsFails()
     }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests_Google.self)
+
+    override func testGoodPathWithBadMethodWithGoodCredsFails() {
+        super.testGoodPathWithBadMethodWithGoodCredsFails()
+    }
+
+    override func testThatUserHasValidCreds() {
+        super.testThatUserHasValidCreds()
     }
 }

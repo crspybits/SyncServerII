@@ -12,6 +12,7 @@ import XCTest
 import LoggerAPI
 import Foundation
 import ServerShared
+import ServerAccount
 
 class UserControllerTests: ServerTestCase, LinuxTestable {
 

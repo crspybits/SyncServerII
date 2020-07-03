@@ -21,8 +21,6 @@ XCTMain([
     testCase(FileController_MultiVersionFiles.allTests),
     testCase(GeneralAuthTests.allTests),
     testCase(GeneralDatabaseTests.allTests),
-    testCase(GoogleDriveTests.allTests),
-    testCase(FileDropboxTests.allTests),
     testCase(MessageTests.allTests),
     testCase(Sharing_FileManipulationTests.allTests),
     testCase(SharingAccountsController_CreateSharingInvitation.allTests),
@@ -43,6 +41,6 @@ XCTMain([
     testCase(MockStorageTests.allTests),
     testCase(MockStorageLiveTests.allTests),
     testCase(AccountAuthenticationTests_Microsoft.allTests),
-    testCase(FileMicrosoftOneDriveTests.allTests),
     testCase(SpecificDatabaseTests_UploadRequestLog.allTests)
+    
 ])

@@ -11,6 +11,10 @@ import ServerShared
 import LoggerAPI
 import HeliumLogger
 import XCTest
+import ServerAccount
+@testable import ServerDropboxAccount
+@testable import ServerGoogleAccount
+@testable import ServerMicrosoftAccount
 
 func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
     return lhs.tokenKey == rhs.tokenKey && lhs.idKey == rhs.idKey
@@ -214,7 +218,11 @@ extension AccountScheme {
 
         switch testAccount.scheme.accountName {
         case AccountScheme.google.accountName:
-            let creds = GoogleCreds()!
+            guard let creds = GoogleCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return
+            }
+            
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
@@ -245,7 +253,10 @@ extension AccountScheme {
             }
             
         case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()!
+            guard let creds = DropboxCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return
+            }
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             
@@ -269,7 +280,10 @@ extension AccountScheme {
             }
             
         case AccountScheme.microsoft.accountName:
-            let creds = MicrosoftCreds()!
+            guard let creds = MicrosoftCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return
+            }
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
@@ -329,7 +343,10 @@ class CredsCache {
         }
         else {
             Log.info("Attempting to refresh Google Creds...")
-            let creds = GoogleCreds()!
+            guard let creds = GoogleCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return
+            }
             cache[googleAccount.id()] = creds
             creds.refreshToken = googleAccount.token()
             creds.refresh {[unowned creds] error in
@@ -350,7 +367,10 @@ class CredsCache {
         }
         else {
             Log.info("Attempting to refresh Microsoft Creds...")
-            let creds = MicrosoftCreds()!
+            guard let creds = MicrosoftCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return
+            }
             cache[microsoftAccount.id()] = creds
             creds.refreshToken = microsoftAccount.token()
             creds.refresh {[unowned creds] error in
@@ -371,7 +391,10 @@ extension XCTestCase {
     
         switch testAccount.scheme.accountName {
         case AccountScheme.google.accountName:
-            let creds = GoogleCreds()!
+            guard let creds = GoogleCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return nil
+            }
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {
@@ -393,7 +416,10 @@ extension XCTestCase {
             }
             
         case AccountScheme.dropbox.accountName:
-            let creds = DropboxCreds()!
+            guard let creds = DropboxCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return nil
+            }
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             
@@ -409,7 +435,10 @@ extension XCTestCase {
             }
             
         case AccountScheme.microsoft.accountName:
-            let creds = MicrosoftCreds()!
+            guard let creds = MicrosoftCreds(configuration: Configuration.server) else {
+                XCTFail()
+                return nil
+            }
             creds.refreshToken = testAccount.token()
             creds.refresh { error in
                 guard error == nil, creds.accessToken != nil else {

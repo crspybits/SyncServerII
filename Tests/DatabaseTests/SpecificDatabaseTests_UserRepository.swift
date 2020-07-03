@@ -15,6 +15,7 @@ import Credentials
 import CredentialsGoogle
 import Foundation
 import ServerShared
+import ServerGoogleAccount
 
 class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
 
