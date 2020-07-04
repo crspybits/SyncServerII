@@ -147,7 +147,7 @@ struct TestAccount {
         
         // MARK: Dropbox
         AccountScheme.dropbox.registerHandler(type: .getCredentials) { testAccount, callback in
-            guard let creds = DropboxCreds(configuration: Configuration.server) else {
+            guard let creds = DropboxCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return
             }
@@ -158,7 +158,7 @@ struct TestAccount {
         
         // MARK: Facebook
         AccountScheme.facebook.registerHandler(type: .getCredentials) { testAccount, callback in
-            guard let creds = FacebookCreds(configuration: Configuration.server) else {
+            guard let creds = FacebookCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return
             }
@@ -225,7 +225,7 @@ extension AccountScheme {
 
         switch testAccount.scheme.accountName {
         case AccountScheme.google.accountName:
-            guard let creds = GoogleCreds(configuration: Configuration.server) else {
+            guard let creds = GoogleCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return
             }
@@ -260,7 +260,7 @@ extension AccountScheme {
             }
             
         case AccountScheme.dropbox.accountName:
-            guard let creds = DropboxCreds(configuration: Configuration.server) else {
+            guard let creds = DropboxCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return
             }
@@ -287,7 +287,7 @@ extension AccountScheme {
             }
             
         case AccountScheme.microsoft.accountName:
-            guard let creds = MicrosoftCreds(configuration: Configuration.server) else {
+            guard let creds = MicrosoftCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return
             }
@@ -350,7 +350,7 @@ class CredsCache {
         }
         else {
             Log.info("Attempting to refresh Google Creds...")
-            guard let creds = GoogleCreds(configuration: Configuration.server) else {
+            guard let creds = GoogleCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return
             }
@@ -374,7 +374,7 @@ class CredsCache {
         }
         else {
             Log.info("Attempting to refresh Microsoft Creds...")
-            guard let creds = MicrosoftCreds(configuration: Configuration.server) else {
+            guard let creds = MicrosoftCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return
             }
@@ -398,7 +398,7 @@ extension XCTestCase {
     
         switch testAccount.scheme.accountName {
         case AccountScheme.google.accountName:
-            guard let creds = GoogleCreds(configuration: Configuration.server) else {
+            guard let creds = GoogleCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return nil
             }
@@ -423,7 +423,7 @@ extension XCTestCase {
             }
             
         case AccountScheme.dropbox.accountName:
-            guard let creds = DropboxCreds(configuration: Configuration.server) else {
+            guard let creds = DropboxCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return nil
             }
@@ -442,7 +442,7 @@ extension XCTestCase {
             }
             
         case AccountScheme.microsoft.accountName:
-            guard let creds = MicrosoftCreds(configuration: Configuration.server) else {
+            guard let creds = MicrosoftCreds(configuration: Configuration.server, delegate: nil) else {
                 XCTFail()
                 return nil
             }
