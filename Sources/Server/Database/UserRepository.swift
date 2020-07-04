@@ -70,18 +70,6 @@ class User : NSObject, Model, UserData {
             return getValue(forKey: key)
         }
     }
-    
-    // Converts from the current creds JSON and accountType. Returns a new `Creds` object with each call.
-    var credsObject:Account? {
-        do {
-            let credsObj = try AccountManager.session.accountFromJSON(creds, accountName: accountType, user: .user(self), delegate: nil)
-            return credsObj
-        }
-        catch (let error) {
-            Log.error("\(error)")
-            return nil
-        }
-    }
 }
 
 class UserRepository : Repository, RepositoryLookup {
@@ -175,7 +163,7 @@ class UserRepository : Repository, RepositoryLookup {
     
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
     // 6/12/19; Added `validateJSON`-- this is only for testing and normally should be left with the true default value.
-    func add(user:User, validateJSON: Bool = true) -> Int64? {
+    func add(user:User, accountManager: AccountManager, validateJSON: Bool = true) -> Int64? {
         if user.username == nil || user.accountType == nil || user.credsId == nil {
             Log.error("One of the model values was nil!")
             return nil
@@ -183,7 +171,7 @@ class UserRepository : Repository, RepositoryLookup {
         
         if validateJSON {
             // Validate the JSON before we insert it.
-            guard let _ = try? AccountManager.session.accountFromJSON(user.creds, accountName: user.accountType, user: .user(user), delegate: nil) else {
+            guard let _ = try? accountManager.accountFromJSON(user.creds, accountName: user.accountType, user: .user(user)) else {
                 Log.error("Invalid creds JSON: \(String(describing: user.creds)) for accountType: \(String(describing: user.accountType))")
                 return nil
             }
@@ -204,18 +192,21 @@ class UserRepository : Repository, RepositoryLookup {
         }
     }
     
-    func updateCreds(creds newCreds:Account, forUser updateCredsUser:AccountCreationUser) -> Bool {
+    func updateCreds(creds newCreds:Account, forUser updateCredsUser:AccountCreationUser, accountManager: AccountManager) -> Bool {
         var credsJSONString:String
         var userId:UserId
         
         switch updateCredsUser {
-        case .user(let user):
+        case .user(let oldCredsUser):
             // First need to merge creds-- otherwise, we might override part of the creds with our update.
-            // This looks like it is leaving the `user` object with changed values, but it's actually not (.credsObject generates a new `Creds` object each time it's called).
-            let oldCreds = user.credsObject!
+            
+            guard let oldCreds = try? accountManager.accountFromJSON(oldCredsUser.creds, accountName: oldCredsUser.accountType, user: .user(oldCredsUser)) else {
+                return false
+            }
+            
             oldCreds.merge(withNewer: newCreds)
             credsJSONString = oldCreds.toJSON()!
-            userId = user.userId
+            userId = oldCredsUser.userId
             
         case .userId(let id):
             credsJSONString = newCreds.toJSON()!

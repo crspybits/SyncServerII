@@ -312,10 +312,10 @@ extension FileController {
         // DEPRECATED
         var cloudFileName: String! //  = cloudDeletion.cloudFileName(deviceUUID: cloudDeletion.deviceUUID!, mimeType: cloudDeletion.mimeType!)
 
-        Log.info("Deleting file: \(cloudFileName)")
+        Log.info("Deleting file: \(String(describing: cloudFileName))")
         
         // OWNER
-        guard let owningUserCreds = FileController.getCreds(forUserId: cloudDeletion.owningUserId, from: params.db, delegate: params.accountDelegate) else {
+        guard let owningUserCreds = FileController.getCreds(forUserId: cloudDeletion.owningUserId, from: params.db, accountManager: params.accountManager) else {
             let message = "Could not obtain owning users creds"
             Log.error(message)
             params.completion(.failure(.message(message)))

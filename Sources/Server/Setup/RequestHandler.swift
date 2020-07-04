@@ -32,9 +32,12 @@ class RequestHandler {
     private var currentSignedInUser:User?
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
-    private var accountDelegate: AccountDelegateHandler!
+    private let accountManager: AccountManager
+    private let db: Database
     
-    init(request:RouterRequest, response:RouterResponse, endpoint:ServerEndpoint? = nil) {
+    init(request:RouterRequest, response:RouterResponse, accountManager: AccountManager, db: Database, endpoint:ServerEndpoint? = nil) {
+        self.accountManager = accountManager
+        self.db = db
         self.request = request
         self.response = response
         if endpoint == nil {
@@ -277,9 +280,7 @@ class RequestHandler {
         }
 #endif
 
-        let db = Database()
         repositories = Repositories(db: db)
-        accountDelegate = AccountDelegateHandler(userRepository: repositories.user)
         
         var accountProperties: AccountProperties?
         
@@ -290,7 +291,7 @@ class RequestHandler {
         case .primary, .secondary:
             // Only do this if we are requiring primary or secondary authorization-- this gets account specific properties from the request, assuming we are using authorization.
             do {
-                accountProperties = try AccountManager.session.getProperties(fromRequest: request)
+                accountProperties = try accountManager.getProperties(fromRequest: request)
             } catch (let error) {
                 let message = "YIKES: could not get account properties from request: \(error)"
                 Log.error(message)
@@ -325,7 +326,7 @@ class RequestHandler {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: accountDelegate)
+                    dbCreds = try accountManager.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!))
                 } catch (let error) {
                     errorString = "\(error)"  
                 }
@@ -391,7 +392,7 @@ class RequestHandler {
                 return
             }
             
-            if let profileCreds = AccountManager.session.accountFromProperties(properties: accountProperties, user: credsUser, delegate: accountDelegate) {
+            if let profileCreds = accountManager.accountFromProperties(properties: accountProperties, user: credsUser) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
                     doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
@@ -444,14 +445,13 @@ class RequestHandler {
                     return
                 }
                 
-                effectiveOwningUserCreds = effectiveOwningUser.credsObject
+                effectiveOwningUserCreds = try? accountManager.accountFromJSON(effectiveOwningUser.creds, accountName: effectiveOwningUser.accountType, user: .user(effectiveOwningUser))
+                
                 guard effectiveOwningUserCreds != nil else {
                     handleResult(.failure(.message("Could not get effective owning user creds.")))
                     return
                 }
                 
-                effectiveOwningUserCreds!.delegate = accountDelegate
-
             case .noObjectFound:
                 // Not treating this as an error. Downstream from this, where needed, we check to see if effectiveOwningUserCreds is nil. See also [1] in Controllers.swift.
                 Log.warning("No object found when trying to populate effectiveOwningUserCreds")
@@ -462,7 +462,7 @@ class RequestHandler {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountDelegate: accountDelegate) { response in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountManager: accountManager) { response in
         
             var message:ResponseMessage!
             

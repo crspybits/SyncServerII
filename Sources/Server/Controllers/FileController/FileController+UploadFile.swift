@@ -137,7 +137,7 @@ extension FileController {
         else {
             // OWNER
             // Need to get creds for the user that uploaded the v0 file.
-            ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db, delegate: params.accountDelegate)
+            ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db, accountManager: params.accountManager)
         }
         
         ownerCloudStorage = ownerAccount?.cloudStorage

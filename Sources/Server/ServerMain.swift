@@ -69,7 +69,9 @@ public class ServerMain {
             exit(1)
         }
 
-        let serverRoutes = CreateRoutes()
+        let db = Database()
+        let accountManager = AccountManager(userRepository: UserRepository(db))
+        let serverRoutes = CreateRoutes(accountManager: accountManager, db: db)
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
         
         switch type {

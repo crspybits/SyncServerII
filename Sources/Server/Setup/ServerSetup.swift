@@ -47,7 +47,7 @@ class ServerSetup {
         return randomString
     }
 
-    static func credentials(_ router:Router, proxyRouter:CreateRoutes) {
+    static func credentials(_ router:Router, proxyRouter:CreateRoutes, accountManager: AccountManager) {
         let secret = self.randomString(length: secretStringLength)
         router.all(middleware: KituraSession.Session(secret: secret))
         
@@ -55,30 +55,30 @@ class ServerSetup {
         let credentials = Credentials()
         
         // Needed for testing.
-        AccountManager.session.reset()
+        accountManager.reset()
         
         if Configuration.server.allowedSignInTypes.Google == true {
             let googleCredentials = CredentialsGoogleToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: googleCredentials)
-            AccountManager.session.addAccountType(GoogleCreds.self)
+            accountManager.addAccountType(GoogleCreds.self)
         }
         
         if Configuration.server.allowedSignInTypes.Facebook == true {
             let facebookCredentials = CredentialsFacebookToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: facebookCredentials)
-            AccountManager.session.addAccountType(FacebookCreds.self)
+            accountManager.addAccountType(FacebookCreds.self)
         }
 
         if Configuration.server.allowedSignInTypes.Dropbox == true {
             let dropboxCredentials = CredentialsDropboxToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: dropboxCredentials)
-            AccountManager.session.addAccountType(DropboxCreds.self)
+            accountManager.addAccountType(DropboxCreds.self)
         }
         
         if Configuration.server.allowedSignInTypes.Microsoft == true {
             let microsoftCredentials = CredentialsMicrosoftToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
             credentials.register(plugin: microsoftCredentials)
-            AccountManager.session.addAccountType(MicrosoftCreds.self)
+            accountManager.addAccountType(MicrosoftCreds.self)
         }
         
         if Configuration.server.allowedSignInTypes.AppleSignIn == true {
@@ -91,12 +91,12 @@ class ServerSetup {
         }
         
         // 8/8/17; There needs to be at least one sign-in type configured for the server to do anything. And at least one of these needs to allow owning users. If there can be no owning users, how do you create anything to share? https://github.com/crspybits/SyncServerII/issues/9
-        if AccountManager.session.numberAccountTypes == 0 {
+        if accountManager.numberAccountTypes == 0 {
             Log.error("There are no sign-in types configured!")
             exit(1)
         }
         
-        if AccountManager.session.numberOfOwningAccountTypes == 0 {
+        if accountManager.numberOfOwningAccountTypes == 0 {
             Log.error("There are no owning sign-in types configured!")
             exit(1)
         }

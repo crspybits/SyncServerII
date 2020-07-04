@@ -17,7 +17,7 @@ let package = Package(
         .package(url: "https://github.com/SyncServerII/ServerAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerDropboxAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerGoogleAccount.git", .branch("master")),
-        .package(url: "https://github.com/SyncServerII/ServerMicrosoftAccount.git", from: "0.0.1"),
+        .package(url: "https://github.com/SyncServerII/ServerMicrosoftAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerAppleSignInAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerFacebookAccount.git", .branch("master")),
 

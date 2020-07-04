@@ -222,7 +222,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "c700d965204a296c295b2844638033261dcf8bb0",
+          "revision": "7c8fd52c748244583d95ec814bbe7474f6366e77",
           "version": null
         }
       },
@@ -231,7 +231,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
         "state": {
           "branch": "master",
-          "revision": "965c8436cb1f53c354b4bf71eff0a202941b6147",
+          "revision": "55bb1babbd41d3fb938cbdf4b37b9f6dbd84065a",
           "version": null
         }
       },
@@ -240,7 +240,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerDropboxAccount.git",
         "state": {
           "branch": "master",
-          "revision": "076c0ade1289f95cd7ea5887f151bb88aef75198",
+          "revision": "c35c9d5e589e7386810a012267d077a8129a9761",
           "version": null
         }
       },
@@ -249,7 +249,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerFacebookAccount.git",
         "state": {
           "branch": "master",
-          "revision": "2f1ec18edadc53770337d919e9ef7431f1f8d01f",
+          "revision": "4f60a91335bafe42a2b7fbe7e210892e01aa657e",
           "version": null
         }
       },
@@ -258,7 +258,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerGoogleAccount.git",
         "state": {
           "branch": "master",
-          "revision": "6939a65faf31ad464120b9bc6ffd78fdd01291b6",
+          "revision": "527a314cdc1598c407d2ccf833e49947f1c09ab5",
           "version": null
         }
       },
@@ -266,9 +266,9 @@
         "package": "ServerMicrosoftAccount",
         "repositoryURL": "https://github.com/SyncServerII/ServerMicrosoftAccount.git",
         "state": {
-          "branch": null,
-          "revision": "9888f340ee8100984bc13aa3540dcf014a3941c0",
-          "version": "0.0.1"
+          "branch": "master",
+          "revision": "683e4c93c75d85cb3cb681be005f736e33f34f88",
+          "version": null
         }
       },
       {
