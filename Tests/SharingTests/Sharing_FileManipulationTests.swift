@@ -16,10 +16,11 @@ import Kitura
 import ServerAccount
 
 class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
-
+    var accountManager: AccountManager!
+    
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        accountManager = AccountManager(userRepository: UserRepository(db))
     }
     
     override func tearDown() {
@@ -537,10 +538,8 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
                 return
             }
             
-            let accountDelegate = AccountDelegateHandler(userRepository: UserRepository(db))
-            
             // Reconstruct the creds of the sharing user and attempt to access their cloud storage.
-            guard let cloudStorageCreds = FileController.getCreds(forUserId: sharingUserId, from: db, delegate: accountDelegate) as? CloudStorage else {
+            guard let cloudStorageCreds = FileController.getCreds(forUserId: sharingUserId, from: db, accountManager: accountManager) as? CloudStorage else {
                 XCTFail()
                 return
             }

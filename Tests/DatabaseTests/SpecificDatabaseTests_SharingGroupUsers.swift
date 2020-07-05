@@ -14,10 +14,13 @@ import Foundation
 import ServerShared
 
 class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
-
+    var accountManager: AccountManager!
+    var userRepo: UserRepository!
+    
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        userRepo = UserRepository(db)
+        accountManager = AccountManager(userRepository: userRepo)
     }
     
     override func tearDown() {
@@ -61,7 +64,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId: UserId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -85,7 +88,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId1: UserId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId1: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -101,7 +104,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user2.credsId = "101"
         
-        guard let userId2: UserId = UserRepository(db).add(user: user2, validateJSON: false) else {
+        guard let userId2: UserId = userRepo.add(user: user2, accountManager: accountManager, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -127,7 +130,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId1: UserId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId1: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -158,7 +161,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId: UserId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -224,7 +227,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId: UserId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail()
             return
         }

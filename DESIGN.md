@@ -121,7 +121,7 @@ Each of these v0 uploads will get uploaded, directly to the relevant cloud stora
 
 With our new concept of file conflict management, changes will be uploaded which are dependent on the specifics of particular file types.
 
-These uploads will take place from clients and the contents of the changes will be stored in the Upload table. No upload directly to cloud storage will take place. A new optional column for the uploadContents will be needed in the Upload table. (No separate UploadRequestLog is needed-- this can be handled by the Upload table).
+These uploads will take place from clients and the contents of the changes will be stored in the Upload table. No upload directly to cloud storage will take place. A new optional column for the uploadContents will be needed in the Upload table. (No separate database table, such as UploadRequestLog, is needed-- this can be handled by the Upload table).
 
 As for v0 uploads, each of these uploads will have N of M parameters. And when "Done Uploads" is triggered, this is when our new ServerUploader mechanism will need to take over. ServerUploader will need to serialize updates to specific file groups.
 

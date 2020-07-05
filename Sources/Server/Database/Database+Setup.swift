@@ -17,8 +17,7 @@ extension Database {
         FileIndexRepository.self,
         SharingInvitationRepository.self,
         SharingGroupUserRepository.self,
-        MasterVersionRepository.self,
-        UploadRequestLogRepository.self
+        MasterVersionRepository.self
     ]
     
     static func setup() -> Bool {

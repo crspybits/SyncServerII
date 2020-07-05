@@ -17,10 +17,11 @@ import Foundation
 import ServerShared
 
 class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
-
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        if case .failure = UploadRepository(db).upcreate() {
+            XCTFail()
+        }
     }
     
     override func tearDown() {
@@ -28,7 +29,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -37,7 +38,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         
         upload.lastUploadedCheckSum = checkSum
         upload.fileUUID = Foundation.UUID().uuidString
-        upload.fileVersion = 1
+        upload.fileVersion = 13
         upload.mimeType = mimeType
         upload.state = .uploadingFile
         upload.userId = userId
@@ -46,6 +47,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.creationDate = Date()
         upload.updateDate = Date()
         upload.sharingGroupUUID = sharingGroupUUID
+        upload.uploadContents = uploadContents
         
         let result = UploadRepository(db).add(upload: upload)
         
@@ -225,7 +227,8 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             return
         }
         
-        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID)
+        let testContents = "Test contents"
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, uploadContents: testContents)
         
         let result = UploadRepository(db).lookup(key: .uploadId(1), modelInit: Upload.init)
         switch result {
@@ -242,20 +245,23 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             XCTAssert(upload1.state != nil && upload1.state == upload2.state)
             XCTAssert(upload1.userId != nil && upload1.userId == upload2.userId)
             XCTAssert(upload1.appMetaData != nil && upload1.appMetaData == upload2.appMetaData)
-
+            XCTAssertEqual(testContents, upload2.uploadContents)
+            
         case .noObjectFound:
             XCTFail("No Upload Found")
         }
     }
     
     func testGetUploadsWithNoFiles() {
+        let userRepo = UserRepository(db)
+        let accountManager = AccountManager(userRepository: userRepo)
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let result1 = UserRepository(db).add(user: user1, validateJSON: false)
+        let result1 = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
         XCTAssert(result1 == 1, "Bad credentialsId!")
         
         let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, sharingGroupUUID: UUID().uuidString, deviceUUID: Foundation.UUID().uuidString)
@@ -268,6 +274,8 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
     }
 
     func testUploadedIndexWithOneFile() {
+        let userRepo = UserRepository(db)
+        let accountManager = AccountManager(userRepository: userRepo)
         let sharingGroupUUID = UUID().uuidString
         let user1 = User()
         user1.username = "Chris"
@@ -275,7 +283,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = UserRepository(db).add(user: user1, validateJSON: false)
+        let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
@@ -303,14 +311,16 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
     func testUploadedIndexWithInterleavedSharingGroupFiles() {
         let sharingGroupUUID1 = UUID().uuidString
         let sharingGroupUUID2 = UUID().uuidString
-
+        let userRepo = UserRepository(db)
+        let accountManager = AccountManager(userRepository: userRepo)
+        
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = UserRepository(db).add(user: user1, validateJSON: false)
+        let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID1) else {

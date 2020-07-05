@@ -17,6 +17,7 @@ import ServerShared
 class DatabaseModelTests: ServerTestCase, LinuxTestable {
     override func setUp() {
         super.setUp()
+        HeliumLogger.use(.debug)
     }
     
     override func tearDown() {
@@ -208,6 +209,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         let mimeType = "text/plain"
         let creationDate = Date()
         let updateDate = Date()
+        let contents = "Foobar bloobly"
         
         upload[Upload.uploadIdKey] = uploadId
         upload[Upload.fileUUIDKey] = fileUUID
@@ -220,6 +222,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         upload[Upload.mimeTypeKey] = mimeType
         upload[Upload.creationDateKey] = creationDate
         upload[Upload.updateDateKey] = updateDate
+        upload[Upload.uploadContentsKey] = contents
         
         XCTAssert(upload.uploadId == uploadId)
         XCTAssert(upload.fileUUID == fileUUID)
@@ -232,6 +235,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.mimeType == mimeType)
         XCTAssert(upload.creationDate == creationDate)
         XCTAssert(upload.updateDate == updateDate)
+        XCTAssert(upload.uploadContents == contents)
         
         upload[Upload.uploadIdKey] = nil
         upload[Upload.fileUUIDKey] = nil
@@ -244,6 +248,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         upload[Upload.mimeTypeKey] = nil
         upload[Upload.creationDateKey] = nil
         upload[Upload.updateDateKey] = nil
+        upload[Upload.uploadContentsKey] = nil
         
         XCTAssert(upload.uploadId == nil)
         XCTAssert(upload.fileUUID == nil)
@@ -256,6 +261,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.mimeType == nil)
         XCTAssert(upload.creationDate == nil)
         XCTAssert(upload.updateDate == nil)
+        XCTAssert(upload.uploadContents == nil)
     }
     
     // SharingGroup

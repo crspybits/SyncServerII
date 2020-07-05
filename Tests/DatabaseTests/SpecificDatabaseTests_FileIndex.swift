@@ -16,92 +16,18 @@ import CredentialsGoogle
 import Foundation
 import ServerShared
 
-class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
-
+class SpecificDatabaseTests_FileIndex: ServerTestCase {
+    var accountManager: AccountManager!
+    var userRepo: UserRepository!
+    
     override func setUp() {
         super.setUp()
+        userRepo = UserRepository(db)
+        accountManager = AccountManager(userRepository: userRepo)
     }
     
     override func tearDown() {
         super.tearDown()
-    }
-            
-    func checkMasterVersion(sharingGroupUUID:String, version:Int64) {
-        let result = MasterVersionRepository(db).lookup(key: .sharingGroupUUID(sharingGroupUUID), modelInit: MasterVersion.init)
-        switch result {
-        case .error(let error):
-            XCTFail("\(error)")
-            
-        case .found(let object):
-            let masterVersion = object as! MasterVersion
-            XCTAssert(masterVersion.masterVersion == version && masterVersion.sharingGroupUUID == sharingGroupUUID)
-
-        case .noObjectFound:
-            XCTFail("No MasterVersion Found")
-        }
-    }
-
-    func doUpdateToNextMasterVersion(currentMasterVersion:MasterVersionInt, sharingGroupUUID: String, expectedError: Bool = false) {
-        
-        let current = MasterVersion()
-        current.sharingGroupUUID = sharingGroupUUID
-        current.masterVersion = currentMasterVersion
-        
-        let result = MasterVersionRepository(db).updateToNext(current: current)
-        
-        if case .success = result {
-            if expectedError {
-                XCTFail()
-            }
-            else {
-                XCTAssert(true)
-            }
-        }
-        else {
-            if expectedError {
-                XCTAssert(true)
-            }
-            else {
-                XCTFail()
-            }
-        }
-    }
-    
-    func testUpdateToNextMasterVersion() {
-        let sharingGroupUUID = UUID().uuidString
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID))
-        doUpdateToNextMasterVersion(currentMasterVersion: 0, sharingGroupUUID: sharingGroupUUID)
-        checkMasterVersion(sharingGroupUUID: sharingGroupUUID, version: 1)
-    }
-
-    func testUpdateToNextTwiceMasterVersion() {
-        let sharingGroupUUID = UUID().uuidString
-
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID))
-        doUpdateToNextMasterVersion(currentMasterVersion: 0, sharingGroupUUID: sharingGroupUUID)
-        doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupUUID: sharingGroupUUID)
-        checkMasterVersion(sharingGroupUUID: sharingGroupUUID, version: 2)
-    }
-    
-    func testUpdateToNextFailsWithWrongExpectedMasterVersion() {
-        let sharingGroupUUID = UUID().uuidString
-        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        XCTAssert(MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID))
-        doUpdateToNextMasterVersion(currentMasterVersion: 1, sharingGroupUUID: sharingGroupUUID, expectedError: true)
     }
     
     func doAddFileIndex(userId:UserId = 1, sharingGroupUUID:String, createSharingGroup: Bool) -> FileIndex? {
@@ -149,7 +75,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -168,7 +94,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -190,8 +116,8 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        // 6/12/19; Just added the JSON validation paramter. I have *no* idea how this was working before this. It ought to have required the server to be running for it to work.
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        // 6/12/19; Just added the JSON validation parameter. I have *no* idea how this was working before this. It ought to have required the server to be running for it to work.
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -213,7 +139,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -234,7 +160,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -256,7 +182,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -297,7 +223,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -329,7 +255,7 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = UserRepository(db).add(user: user1, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -367,90 +293,30 @@ class SpecificDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail()
         }
     }
-    
-    func doAddDeviceUUID(userId:UserId = 1, repo:DeviceUUIDRepository) -> DeviceUUID? {
-        let du = DeviceUUID(userId: userId, deviceUUID: Foundation.UUID().uuidString)
-        let result = repo.add(deviceUUID: du)
-        
-        switch result {
-        case .error(_), .exceededMaximumUUIDsPerUser:
-            return nil
-        case .success:
-            return du
-        }
-    }
-    
-    func testAddDeviceUUID() {
-        XCTAssert(doAddDeviceUUID(repo:DeviceUUIDRepository(db)) != nil)
-    }
-    
-    func testAddDeviceUUIDFailsAfterMax() {
-        let repo = DeviceUUIDRepository(db)
-        if let maxNumber = repo.maximumNumberOfDeviceUUIDsPerUser {
-            let number = maxNumber + 1
-            for curr in 1...number {
-                if curr < number {
-                    XCTAssert(doAddDeviceUUID(repo: repo) != nil)
-                }
-                else {
-                    XCTAssert(doAddDeviceUUID(repo: repo) == nil)
-                }
-            }
-        }
-    }
-
-    func testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax() {
-        let repo = DeviceUUIDRepository(db)
-        if let maxNumber = repo.maximumNumberOfDeviceUUIDsPerUser {
-            let number = maxNumber + 1
-            repo.maximumNumberOfDeviceUUIDsPerUser = nil
-            
-            for _ in 1...number {
-                XCTAssert(doAddDeviceUUID(repo: repo) != nil)
-            }
-        }
-    }
-    
-    func testLookupFromDeviceUUID() {
-        let repo = DeviceUUIDRepository(db)
-        let result = doAddDeviceUUID(repo:repo)
-        XCTAssert(result != nil)
-        let key = DeviceUUIDRepository.LookupKey.deviceUUID(result!.deviceUUID)
-        let lookupResult = repo.lookup(key: key, modelInit: DeviceUUID.init)
-        
-        if case .found(let model) = lookupResult,
-            let du = model as? DeviceUUID {
-            XCTAssert(du.deviceUUID == result!.deviceUUID)
-            XCTAssert(du.userId == result!.userId)
-        }
-        else {
-            XCTFail()
-        }
-    }
 }
 
-extension SpecificDatabaseTests {
-    static var allTests : [(String, (SpecificDatabaseTests) -> () throws -> Void)] {
-        return [
-            ("testUpdateToNextMasterVersion", testUpdateToNextMasterVersion),
-            ("testUpdateToNextTwiceMasterVersion", testUpdateToNextTwiceMasterVersion),
-            ("testUpdateToNextFailsWithWrongExpectedMasterVersion", testUpdateToNextFailsWithWrongExpectedMasterVersion),
-            ("testAddFileIndex", testAddFileIndex),
-            ("testUpdateFileIndexWithNoChanges", testUpdateFileIndexWithNoChanges),
-            ("testUpdateFileIndexWithAChange", testUpdateFileIndexWithAChange),
-            ("testUpdateFileIndexFailsWithoutFileIndexId", testUpdateFileIndexFailsWithoutFileIndexId),
-            ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
-            ("testLookupFromFileIndex", testLookupFromFileIndex),
-            ("testFileIndexWithNoFiles", testFileIndexWithNoFiles),
-            ("testFileIndexWithOneFile", testFileIndexWithOneFile),
-            ("testAddDeviceUUID", testAddDeviceUUID),
-            ("testAddDeviceUUIDFailsAfterMax", testAddDeviceUUIDFailsAfterMax),
-            ("testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax", testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax),
-            ("testLookupFromDeviceUUID", testLookupFromDeviceUUID)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests.self)
-    }
-}
+//extension SpecificDatabaseTests {
+//    static var allTests : [(String, (SpecificDatabaseTests) -> () throws -> Void)] {
+//        return [
+//            ("testUpdateToNextMasterVersion", testUpdateToNextMasterVersion),
+//            ("testUpdateToNextTwiceMasterVersion", testUpdateToNextTwiceMasterVersion),
+//            ("testUpdateToNextFailsWithWrongExpectedMasterVersion", testUpdateToNextFailsWithWrongExpectedMasterVersion),
+//            ("testAddFileIndex", testAddFileIndex),
+//            ("testUpdateFileIndexWithNoChanges", testUpdateFileIndexWithNoChanges),
+//            ("testUpdateFileIndexWithAChange", testUpdateFileIndexWithAChange),
+//            ("testUpdateFileIndexFailsWithoutFileIndexId", testUpdateFileIndexFailsWithoutFileIndexId),
+//            ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
+//            ("testLookupFromFileIndex", testLookupFromFileIndex),
+//            ("testFileIndexWithNoFiles", testFileIndexWithNoFiles),
+//            ("testFileIndexWithOneFile", testFileIndexWithOneFile),
+//            ("testAddDeviceUUID", testAddDeviceUUID),
+//            ("testAddDeviceUUIDFailsAfterMax", testAddDeviceUUIDFailsAfterMax),
+//            ("testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax", testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax),
+//            ("testLookupFromDeviceUUID", testLookupFromDeviceUUID)
+//        ]
+//    }
+//
+//    func testLinuxTestSuiteIncludesAllTests() {
+//        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests.self)
+//    }
+//}

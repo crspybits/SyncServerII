@@ -1,10 +1,7 @@
 {
   "all": [
     "basic",
-    "google",
-    "facebook",
-    "dropbox",
-    "microsoft",
+    "AccountAuthenticationTests",
     "mock",
     "owning_google",
     "owning_dropbox",
@@ -53,38 +50,20 @@
     },
     {
       "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_UploadRequestLog"
     }
   ],
-  "google": [
+  "AccountAuthenticationTests": [
     {
-      "name": "AccountAuthenticationTests_Google"
+      "name": "AccountTests.AccountAuthenticationTests_Google"
     },
     {
-      "name": "GoogleDriveTests"
-    }
-  ],
-  "facebook": [
-    {
-      "name": "AccountAuthenticationTests_Facebook"
-    }
-  ],
-  "dropbox": [
-    {
-      "name": "AccountAuthenticationTests_Dropbox"
+      "name": "AccountTests.AccountAuthenticationTests_Facebook"
     },
     {
-      "name": "FileDropboxTests"
-    }
-  ],
-  "microsoft": [
-    {
-      "name": "AccountAuthenticationTests_Microsoft"
+      "name": "AccountTests.AccountAuthenticationTests_Dropbox"
     },
     {
-      "name": "FileMicrosoftOneDriveTests"
+      "name": "AccountTests.AccountAuthenticationTests_Microsoft"
     }
   ],
   "mock": [

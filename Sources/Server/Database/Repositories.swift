@@ -19,7 +19,6 @@ struct Repositories {
     lazy var sharing = SharingInvitationRepository(db)
     lazy var sharingGroup = SharingGroupRepository(db)
     lazy var sharingGroupUser = SharingGroupUserRepository(db)
-    lazy var uploadRequestLog = UploadRequestLogRepository(db)
 
     init(db: Database) {
         self.db = db

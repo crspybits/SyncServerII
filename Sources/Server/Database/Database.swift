@@ -409,13 +409,24 @@ class Select {
 extension Database {
     // This intended for a one-off insert of a row, or row updates.
     class PreparedStatement {
+        // When inserting with the optional ValueTypes, if the specific value is nil, it is not inserted.
         enum ValueType {
             case null
+            
             case int(Int)
+            case intOptional(Int?)
+            
             case int32(Int32)
+            case int32Optional(Int32?)
+            
             case int64(Int64)
+            case int64Optional(Int64?)
+            
             case string(String)
+            case stringOptional(String?)
+            
             case bool(Bool)
+            case boolOptional(Bool?)
             
             // I'm not using `data` here because when I retrieve that data it seems to be converted to a string. Thus, just going to directly to string.
             //case data(Data)
@@ -516,20 +527,66 @@ extension Database {
             }
             
             for valueType in valueTypes + whereValueTypes {
+                var haveValue = true
+                
                 switch valueType {
                 case .null:
                     self.stmt.bindParam()
+                    
                 case .int(let intValue):
                     self.stmt.bindParam(intValue)
+                case .intOptional(let intValue):
+                    if let intValue = intValue {
+                        self.stmt.bindParam(intValue)
+                    }
+                    else {
+                        haveValue = false
+                    }
+                    
                 case .int32(let int32Value):
                     self.stmt.bindParam(int32Value)
+                case .int32Optional(let int32Value):
+                    if let int32Value = int32Value {
+                        self.stmt.bindParam(int32Value)
+                    }
+                    else {
+                        haveValue = false
+                    }
+                    
                 case .int64(let int64Value):
                     self.stmt.bindParam(int64Value)
+                case .int64Optional(let int64Value):
+                    if let int64Value = int64Value {
+                        self.stmt.bindParam(int64Value)
+                    }
+                    else {
+                        haveValue = false
+                    }
+                    
                 case .string(let stringValue):
                     self.stmt.bindParam(stringValue)
+                case .stringOptional(let stringValue):
+                    if let stringValue = stringValue {
+                        self.stmt.bindParam(stringValue)
+                    }
+                    else {
+                        haveValue = false
+                    }
+                    
                 case .bool(let boolValue):
                     // Bool is TINYINT(1), which is Int8; https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html
                     self.stmt.bindParam(Int8(boolValue ? 1 : 0))
+                case .boolOptional(let boolValue):
+                    if let boolValue = boolValue {
+                        self.stmt.bindParam(Int8(boolValue ? 1 : 0))
+                    }
+                    else {
+                        haveValue = false
+                    }
+                }
+                
+                if !haveValue {
+                    self.stmt.bindParam()
                 }
             }
             

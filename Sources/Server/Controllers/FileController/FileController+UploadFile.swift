@@ -183,37 +183,20 @@ extension FileController {
         }
         
         if newFile {
+            // Need to upload complete file.
             let cloudFileName = Filename.inCloud(deviceUUID:params.deviceUUID!, fileUUID: uploadRequest.fileUUID, mimeType:uploadRequest.mimeType, fileVersion: 0)
             
             uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest)
         }
         else {
+            // Need to add the upload data to the UploadRepository only.
             guard let string = String(data: uploadRequest.data, encoding: .utf8) else {
                 finish(.errorResponse(.failure(.message("Could not convert data to string"))), params: params)
                 return
             }
             
-            let result = addUploadRequestLogEntry(uploadContents: string, params: params, uploadRequest: uploadRequest)
-            switch result {
-            case .error(let error):
-                finish(.errorResponse(.failure(.message("\(error)"))), params: params)
-            case .success:
-                break
-            }
-            
             addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: nil, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest)
         }
-    }
-    
-    private func addUploadRequestLogEntry(uploadContents: String, params:RequestProcessingParameters, uploadRequest:UploadFileRequest) -> UploadRequestLogRepository.AddResult {
-        let log = UploadRequestLog()
-        log.userId = params.currentSignedInUser!.userId
-        log.sharingGroupUUID = uploadRequest.sharingGroupUUID
-        log.deviceUUID = params.deviceUUID
-        log.fileUUID = uploadRequest.fileUUID
-        log.uploadContents = uploadContents
-        log.committed = false
-        return params.repos.uploadRequestLog.add(request: log)
     }
     
     private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest) {

@@ -34,7 +34,7 @@ class Upload : NSObject, Model {
     // The userId of the uploading user. i.e., this is not necessarily the owning user id.
     var userId: UserId!
     
-    // 6/3/20; This will be nil for UploadRequestLog entries.
+    // 7/4/20; I think this can be removed and replaced with a flag indicating: "Is this v0 of the file or not?" With > v0 of a file, I'm not sure if we'll be able to make a decision about the version number of a file when we make an entry to the Upload table. 
     static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
     
@@ -62,6 +62,10 @@ class Upload : NSObject, Model {
     
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
+    
+    // The contents of the upload for file versions > 0.
+    static let uploadContentsKey = "uploadContents"
+    var uploadContents: String?
 
     // DEPRECATED
     static let appMetaDataVersionKey = "appMetaDataVersion"
@@ -119,6 +123,9 @@ class Upload : NSObject, Model {
                 
             case Upload.lastUploadedCheckSumKey:
                 lastUploadedCheckSum = newValue as! String?
+                
+            case Upload.uploadContentsKey:
+                uploadContents = newValue as? String
 
             default:
                 Log.error("key: \(key)")
@@ -206,6 +213,9 @@ class UploadRepository : Repository, RepositoryLookup {
             // Making this optional because appMetaData is optional. If there is app meta data, this must not be null.
             "appMetaDataVersion INT, " +
             
+            // Nullable because v0 uploads will not have this.
+            "uploadContents BLOB, " +
+            
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
             // Can be null if we create the Upload entry before actually uploading the file.
@@ -256,6 +266,12 @@ class UploadRepository : Repository, RepositoryLookup {
                 }
             }
             
+            // 7/4/20; Evolution 4: Add the uploadContents column.
+            if db.columnExists(Upload.uploadContentsKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.uploadContentsKey) BLOB", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
         default:
             break
         }
@@ -333,54 +349,58 @@ class UploadRepository : Repository, RepositoryLookup {
             Log.error("One of the model values was nil!")
             return .aModelValueWasNil
         }
-    
-        // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-        let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaData, fieldName: Upload.appMetaDataKey)
+        
+        let insert = Database.PreparedStatement(repo: self, type: .insert)
+        
+        insert.add(fieldName: Upload.fileUUIDKey, value: .stringOptional(upload.fileUUID))
+        insert.add(fieldName: Upload.userIdKey, value: .int64Optional(upload.userId))
+        insert.add(fieldName: Upload.deviceUUIDKey, value: .stringOptional(upload.deviceUUID))
+        insert.add(fieldName: Upload.stateKey, value: .stringOptional(upload.state?.rawValue))
+        insert.add(fieldName: Upload.sharingGroupUUIDKey, value: .stringOptional(upload.sharingGroupUUID))
 
-        let (appMetaDataVersionFieldValue, appMetaDataVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.appMetaDataVersion, fieldName: Upload.appMetaDataVersionKey, fieldIsString:false)
-        
-        let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileGroupUUID, fieldName: Upload.fileGroupUUIDKey)
-        
-        let (lastUploadedCheckSumFieldValue, lastUploadedCheckSumFieldName) = getInsertFieldValueAndName(fieldValue: upload.lastUploadedCheckSum, fieldName: Upload.lastUploadedCheckSumKey)
- 
-        let (mimeTypeFieldValue, mimeTypeFieldName) = getInsertFieldValueAndName(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
-        
-        var creationDateValue:String?
-        var updateDateValue:String?
-        
-        if upload.creationDate != nil {
-            creationDateValue = DateExtras.date(upload.creationDate!, toFormat: .DATETIME)
+        insert.add(fieldName: Upload.appMetaDataKey, value: .stringOptional(upload.appMetaData))
+        insert.add(fieldName: Upload.appMetaDataVersionKey, value: .int32Optional(upload.appMetaDataVersion))
+        insert.add(fieldName: Upload.fileGroupUUIDKey, value: .stringOptional(upload.fileGroupUUID))
+        insert.add(fieldName: Upload.lastUploadedCheckSumKey, value: .stringOptional(upload.lastUploadedCheckSum))
+        insert.add(fieldName: Upload.mimeTypeKey, value: .stringOptional(upload.mimeType))
+
+        if let date = upload.creationDate {
+            let creationDateValue = DateExtras.date(date, toFormat: .DATETIME)
+            insert.add(fieldName: Upload.creationDateKey, value: .string(creationDateValue))
         }
-        
-        if upload.updateDate != nil {
-            updateDateValue = DateExtras.date(upload.updateDate!, toFormat: .DATETIME)
+
+        if let date = upload.updateDate {
+            let updateDateValue = DateExtras.date(date, toFormat: .DATETIME)
+            Log.debug("upload.updateDate: \(upload.updateDate)")
+            Log.debug("updateDateValue: \(updateDateValue)")
+            insert.add(fieldName: Upload.updateDateKey, value: .string(updateDateValue))
         }
-        
-        let (creationDateFieldValue, creationDateFieldName) = getInsertFieldValueAndName(fieldValue: creationDateValue, fieldName: Upload.creationDateKey)
-        
-        let (updateDateFieldValue, updateDateFieldName) = getInsertFieldValueAndName(fieldValue: updateDateValue, fieldName: Upload.updateDateKey)
-        
-        let (fileVersionFieldValue, fileVersionFieldName) = getInsertFieldValueAndName(fieldValue: upload.fileVersion, fieldName: Upload.fileVersionKey, fieldIsString:false)
-        
-        let query = "INSERT INTO \(tableName) (\(Upload.fileUUIDKey), \(Upload.userIdKey), \(Upload.deviceUUIDKey), \(Upload.stateKey), \(Upload.sharingGroupUUIDKey) \(creationDateFieldName) \(updateDateFieldName) \(lastUploadedCheckSumFieldName) \(mimeTypeFieldName) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileVersionFieldName) \(fileGroupUUIDFieldName)) VALUES('\(upload.fileUUID!)', \(upload.userId!), '\(upload.deviceUUID!)', '\(upload.state!.rawValue)', '\(upload.sharingGroupUUID!)' \(creationDateFieldValue) \(updateDateFieldValue) \(lastUploadedCheckSumFieldValue) \(mimeTypeFieldValue) \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileVersionFieldValue) \(fileGroupUUIDFieldValue));"
-        
-        if db.query(statement: query) {
+
+        insert.add(fieldName: Upload.fileVersionKey, value: .int32Optional(upload.fileVersion))
+        insert.add(fieldName: Upload.uploadContentsKey, value: .stringOptional(upload.uploadContents))
+
+        do {
+            try insert.run()
+            Log.info("Sucessfully created Upload row")
             return .success(uploadId: db.lastInsertId())
         }
-        else if db.errorCode() == Database.deadlockError {
-            return .deadlock
-        }
-        else if db.errorCode() == Database.lockWaitTimeout {
-            return .waitTimeout
-        }
-        else if db.errorCode() == Database.duplicateEntryForKey {
-            return .duplicateEntry
-        }
-        else {
-            let error = db.error
-            let message = "Could not insert into \(tableName): \(error)"
-            Log.error(message)
-            return .otherError(message)
+        catch (let error) {
+            Log.info("Failed inserting Upload row: \(db.errorCode()); \(db.errorMessage())")
+            
+            if db.errorCode() == Database.deadlockError {
+                return .deadlock
+            }
+            else if db.errorCode() == Database.lockWaitTimeout {
+                return .waitTimeout
+            }
+            else if db.errorCode() == Database.duplicateEntryForKey {
+                return .duplicateEntry
+            }
+            else {
+                let message = "Could not insert into \(tableName): \(error)"
+                Log.error(message)
+                return .otherError(message)
+            }
         }
     }
     

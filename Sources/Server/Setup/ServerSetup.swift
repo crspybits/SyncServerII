@@ -82,12 +82,12 @@ class ServerSetup {
         }
         
         if Configuration.server.allowedSignInTypes.AppleSignIn == true {
-            let controller = AppleServerServerNotification()
-            func process(params:RequestProcessingParameters) {
-                //controller.
-            }
-
-            proxyRouter.addRoute(ep: AppleServerServerNotification.endpoint, processRequest: process)
+//            let controller = AppleServerServerNotification()
+//            func process(params:RequestProcessingParameters) {
+//                //controller.
+//            }
+//
+//            proxyRouter.addRoute(ep: AppleServerServerNotification.endpoint, processRequest: process)
         }
         
         // 8/8/17; There needs to be at least one sign-in type configured for the server to do anything. And at least one of these needs to allow owning users. If there can be no owning users, how do you create anything to share? https://github.com/crspybits/SyncServerII/issues/9
