@@ -211,8 +211,9 @@ if  [ "${COMMAND}" == "suites" ] || [ "${COMMAND}" == "print-suites" ] ; then
 elif [ "${COMMAND}" == "filter" ] ; then
     OUTPUT_FILE_NAME="$TEST_OUT_DIR"/filter.txt
     
-    $BASIC_SWIFT_TEST_CMD --filter ${OPTION} > $OUTPUT_FILE_NAME
-    echo "$BASIC_SWIFT_TEST_CMD --filter ${OPTION} > $OUTPUT_FILE_NAME"
+    command="$BASIC_SWIFT_TEST_CMD --filter ${OPTION}"
+    printf "$command\n"
+    $command > $OUTPUT_FILE_NAME
 
     # For testing to see if the compiler failed.
     compilerResult=$?

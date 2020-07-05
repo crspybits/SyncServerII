@@ -192,8 +192,12 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
     var c17String:String!
     var c18String:String!
     
-    let testTableName = "TestTable12345"
-    let testTableName2 = "TestTable6789"
+    static let testTableName = "TestTable12345"
+    let testTableName = GeneralDatabaseTests.testTableName
+    
+    static let testTableName2 = "TestTable6789"
+    let testTableName2 = GeneralDatabaseTests.testTableName2
+
     static let testTableName3 = "TestTableABC"
 
     let c2Table2Value = Date()
@@ -264,10 +268,16 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    class Table : RepositoryBasics {
+        var db: Database!
+        let tableName = GeneralDatabaseTests.testTableName
+        static var tableName = GeneralDatabaseTests.testTableName
+    }
+    
     class Table3 : RepositoryBasics {
         var db: Database!
-        let tableName = GeneralDatabaseTests.testTableName3
-        static var tableName = GeneralDatabaseTests.testTableName3
+        let tableName = testTableName3
+        static var tableName = testTableName3
     }
     
     func createTable3() -> Bool {
@@ -459,6 +469,38 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail("\(error)")
         }
     }
+    
+    func testDatabaseInsertOptionalStringValueIntoStringColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        let string: String? = "Example"
+        insert.add(fieldName: "c1", value: .stringOptional(string))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNilOptionalStringValueIntoStringColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        let string: String? = nil
+        insert.add(fieldName: "c1", value: .stringOptional(string))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
 
     func testDatabaseInsertIntValueIntoIntColumnWorks() {
         let repo = Table3()
@@ -473,12 +515,171 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail("\(error)")
         }
     }
+    
+    func testDatabaseInsertOptionalIntValueIntoIntColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        
+        let int: Int? = 56
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c2", value: .intOptional(int))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNilOptionalIntValueIntoIntColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        
+        let int: Int? = nil
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c2", value: .intOptional(int))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertInt32ValueIntoIntColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c9", value: .int32(56))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            Log.info("Failed inserting row: \(db.errorCode()); \(db.errorMessage())")
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertOptionalInt32ValueIntoIntColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        
+        let int: Int32? = 56
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c9", value: .int32Optional(int))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            Log.info("Failed inserting row: \(db.errorCode()); \(db.errorMessage())")
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNilOptionalInt32ValueIntoIntColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        
+        let int: Int32? = nil
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c9", value: .int32Optional(int))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            Log.info("Failed inserting row: \(db.errorCode()); \(db.errorMessage())")
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertInt64ValueIntoIntColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c11", value: .int64(56))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertOptionalInt64ValueIntoIntColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        
+        let int: Int64? = 56
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c11", value: .int64Optional(int))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNilOptionalInt64ValueIntoIntColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        
+        let int: Int64? = nil
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c11", value: .int64Optional(int))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
 
     func testDatabaseInsertBoolValueIntoBoolColumnWorks() {
         let repo = Table3()
         repo.db = db
         let insert = Database.PreparedStatement(repo: repo, type: .insert)
         insert.add(fieldName: "c4", value: .bool(true))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertOptionalBoolValueIntoBoolColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        
+        let bool: Bool? = true
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c4", value: .boolOptional(bool))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNilOptionalBoolValueIntoBoolColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        
+        let bool: Bool? = nil
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c4", value: .boolOptional(bool))
         
         do {
             try insert.run()
