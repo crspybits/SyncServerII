@@ -210,6 +210,8 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         let creationDate = Date()
         let updateDate = Date()
         let contents = "Foobar bloobly"
+        let uploadCount = 1
+        let uploadIndex = 2
         
         upload[Upload.uploadIdKey] = uploadId
         upload[Upload.fileUUIDKey] = fileUUID
@@ -223,6 +225,9 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         upload[Upload.creationDateKey] = creationDate
         upload[Upload.updateDateKey] = updateDate
         upload[Upload.uploadContentsKey] = contents
+        upload[Upload.uploadIndexKey] = uploadIndex
+        upload[Upload.uploadCountKey] = uploadCount
+
         
         XCTAssert(upload.uploadId == uploadId)
         XCTAssert(upload.fileUUID == fileUUID)
@@ -236,6 +241,8 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.creationDate == creationDate)
         XCTAssert(upload.updateDate == updateDate)
         XCTAssert(upload.uploadContents == contents)
+        XCTAssert(upload.uploadIndex == uploadIndex)
+        XCTAssert(upload.uploadCount == uploadCount)
         
         upload[Upload.uploadIdKey] = nil
         upload[Upload.fileUUIDKey] = nil
@@ -249,6 +256,8 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         upload[Upload.creationDateKey] = nil
         upload[Upload.updateDateKey] = nil
         upload[Upload.uploadContentsKey] = nil
+        upload[Upload.uploadIndexKey] = nil
+        upload[Upload.uploadCountKey] = nil
         
         XCTAssert(upload.uploadId == nil)
         XCTAssert(upload.fileUUID == nil)
@@ -262,6 +271,8 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.creationDate == nil)
         XCTAssert(upload.updateDate == nil)
         XCTAssert(upload.uploadContents == nil)
+        XCTAssert(upload.uploadIndex == nil)
+        XCTAssert(upload.uploadCount == nil)
     }
     
     // SharingGroup

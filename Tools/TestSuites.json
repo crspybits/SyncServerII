@@ -1,7 +1,8 @@
 {
   "all": [
-    "basic",
+    "other",
     "AccountAuthenticationTests",
+    "DatabaseTests",
     "mock",
     "owning_google",
     "owning_dropbox",
@@ -17,7 +18,7 @@
     "sharing_groups",
     "sharing_groups_microsoft"
   ],
-  "basic": [
+  "other": [
     {
       "name": "OtherTests.HealthCheckTests"
     },
@@ -25,16 +26,21 @@
       "name": "OtherTests.VersionTests"
     },
     {
+      "name": "OtherTests.MessageTests"
+    }
+  ],
+  "DatabaseTests": [
+    {
       "name": "DatabaseTests.DatabaseModelTests"
     },
     {
       "name": "DatabaseTests.GeneralDatabaseTests"
     },
     {
-      "name": "OtherTests.MessageTests"
+      "name": "DatabaseTests.SpecificDatabaseTests_DeviceUUID"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests"
+      "name": "DatabaseTests.SpecificDatabaseTests_FileIndex"
     },
     {
       "name": "DatabaseTests.SpecificDatabaseTests_SharingInvitationRepository"

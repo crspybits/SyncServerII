@@ -79,6 +79,12 @@ class Upload : NSObject, Model {
     static let lastUploadedCheckSumKey = "lastUploadedCheckSum"
     var lastUploadedCheckSum: String?
     
+    // These two values are a replacement for the prior DoneUploads explicit endpoint. Think of them as marking an upload with "uploadIndex of uploadCount". E.g., suppose there are three uploads in a batch. Then three entries in the Upload table (1 of 3, 2 of 3, and 3 of 3) will mark the trigger for DoneUploads.
+    static let uploadIndexKey = "uploadIndex"
+    var uploadIndex: Int!
+    static let uploadCountKey = "uploadCount"
+    var uploadCount: Int!
+    
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -126,6 +132,12 @@ class Upload : NSObject, Model {
                 
             case Upload.uploadContentsKey:
                 uploadContents = newValue as? String
+                
+            case Upload.uploadIndexKey:
+                uploadIndex = newValue as? Int
+                
+            case Upload.uploadCountKey:
+                uploadCount = newValue as? Int
 
             default:
                 Log.error("key: \(key)")
@@ -216,6 +228,10 @@ class UploadRepository : Repository, RepositoryLookup {
             // Nullable because v0 uploads will not have this.
             "uploadContents BLOB, " +
             
+            "uploadIndex INT NOT NULL, " +
+            
+            "uploadCount INT NOT NULL, " +
+
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
             // Can be null if we create the Upload entry before actually uploading the file.
@@ -266,9 +282,21 @@ class UploadRepository : Repository, RepositoryLookup {
                 }
             }
             
-            // 7/4/20; Evolution 4: Add the uploadContents column.
+            // 7/4/20; Evolution 4: Add the uploadContents, uploadCount, and uploadIndex columns.
             if db.columnExists(Upload.uploadContentsKey, in: tableName) == false {
                 if !db.addColumn("\(Upload.uploadContentsKey) BLOB", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
+            if db.columnExists(Upload.uploadIndexKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.uploadIndexKey) INT NOT NULL", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
+            if db.columnExists(Upload.uploadCountKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.uploadCountKey) INT NOT NULL", to: tableName) {
                     return .failure(.columnCreation)
                 }
             }
@@ -281,7 +309,8 @@ class UploadRepository : Repository, RepositoryLookup {
     
     private func haveNilField(upload:Upload, fileInFileIndex: Bool) -> Bool {
         // Basic criteria-- applies across uploads and upload deletion.
-        if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.state == nil || upload.sharingGroupUUID == nil {
+        if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.state == nil || upload.sharingGroupUUID == nil ||
+            upload.uploadCount == nil || upload.uploadIndex == nil {
             return true
         }
         
@@ -371,13 +400,15 @@ class UploadRepository : Repository, RepositoryLookup {
 
         if let date = upload.updateDate {
             let updateDateValue = DateExtras.date(date, toFormat: .DATETIME)
-            Log.debug("upload.updateDate: \(upload.updateDate)")
+            Log.debug("upload.updateDate: \(String(describing: upload.updateDate))")
             Log.debug("updateDateValue: \(updateDateValue)")
             insert.add(fieldName: Upload.updateDateKey, value: .string(updateDateValue))
         }
 
         insert.add(fieldName: Upload.fileVersionKey, value: .int32Optional(upload.fileVersion))
         insert.add(fieldName: Upload.uploadContentsKey, value: .stringOptional(upload.uploadContents))
+        insert.add(fieldName: Upload.uploadIndexKey, value: .intOptional(upload.uploadIndex))
+        insert.add(fieldName: Upload.uploadCountKey, value: .intOptional(upload.uploadCount))
 
         do {
             try insert.run()

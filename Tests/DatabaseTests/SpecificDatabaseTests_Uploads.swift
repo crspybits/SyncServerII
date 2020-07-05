@@ -29,7 +29,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, uploadIndex: Int = 1, uploadCount: Int = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -48,6 +48,8 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.updateDate = Date()
         upload.sharingGroupUUID = sharingGroupUUID
         upload.uploadContents = uploadContents
+        upload.uploadCount = uploadCount
+        upload.uploadIndex = uploadIndex
         
         let result = UploadRepository(db).add(upload: upload)
         
@@ -97,7 +99,9 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.fileVersion = 1
         upload.state = .toDeleteFromFileIndex
         upload.sharingGroupUUID = sharingGroupUUID
-
+        upload.uploadIndex = 1
+        upload.uploadCount = 1
+        
         if !missingField {
             upload.userId = userId
         }

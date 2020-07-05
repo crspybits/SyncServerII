@@ -117,6 +117,8 @@ Each of these v0 uploads will get uploaded, directly to the relevant cloud stora
 
 "Done uploads" will now occur in a different manner. To facilitate parallel background uploads from clients, each client upload will provide two new parameters: N of M. M will be the total number of uploads before a Done Uploads, and N will be the current file upload number. Done Uploads thus will be triggered from the upload endpoint when it detects that all uploads have been received.
 
+Aligned with the above change, the explicit DoneUploads endpoint will be removed from the server.
+
 ## Uploading changes.
 
 With our new concept of file conflict management, changes will be uploaded which are dependent on the specifics of particular file types.
