@@ -426,7 +426,7 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         XCTAssert(select.forEachRowStatus == nil, "forEachRowStatus \(String(describing: select.forEachRowStatus))")
         XCTAssert(rows == 1, "Didn't find expected number of rows")
     }
-    /*
+
     func testColumnExists() {
         XCTAssert(db.columnExists("c1", in: testTableName) == true)
         XCTAssert(db.columnExists("c3", in: testTableName2) == false)
@@ -591,7 +591,6 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail("\(error)")
         }
     }
-    */
 }
 
 extension GeneralDatabaseTests {

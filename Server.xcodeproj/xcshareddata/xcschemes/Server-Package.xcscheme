@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::Main"
-               BuildableName = "Main"
-               BlueprintName = "Main"
+               BlueprintIdentifier = "Server::Server"
+               BuildableName = "Server.framework"
+               BlueprintName = "Server"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::Server"
-               BuildableName = "Server.framework"
-               BlueprintName = "Server"
+               BlueprintIdentifier = "Server::Main"
+               BuildableName = "Main"
+               BlueprintName = "Main"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -42,36 +42,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::TestsCommon"
-               BuildableName = "TestsCommon.xctest"
-               BlueprintName = "TestsCommon"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::AccountFileTests"
-               BuildableName = "AccountFileTests.xctest"
-               BlueprintName = "AccountFileTests"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::DatabaseTests"
-               BuildableName = "DatabaseTests.xctest"
-               BlueprintName = "DatabaseTests"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
          <TestableReference
             skipped = "NO">
             <BuildableReference
@@ -96,9 +66,19 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::OtherTests"
-               BuildableName = "OtherTests.xctest"
-               BlueprintName = "OtherTests"
+               BlueprintIdentifier = "Server::AccountFileTests"
+               BuildableName = "AccountFileTests.xctest"
+               BlueprintName = "AccountFileTests"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::TestsCommon"
+               BuildableName = "TestsCommon.xctest"
+               BlueprintName = "TestsCommon"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -109,6 +89,26 @@
                BlueprintIdentifier = "Server::FileControllerTests"
                BuildableName = "FileControllerTests.xctest"
                BlueprintName = "FileControllerTests"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::DatabaseTests"
+               BuildableName = "DatabaseTests.xctest"
+               BlueprintName = "DatabaseTests"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::OtherTests"
+               BuildableName = "OtherTests.xctest"
+               BlueprintName = "OtherTests"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>
