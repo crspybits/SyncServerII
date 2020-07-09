@@ -178,7 +178,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func testThatDeletionOfUnknownFileUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -200,7 +200,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func testThatDeletionFailsWhenMasterVersionDoesNotMatch() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -220,7 +220,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
     func testThatDebugDeletionFromServerWorks() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -298,7 +298,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         let deviceUUID = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return

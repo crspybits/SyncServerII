@@ -85,6 +85,7 @@ class RequestHandler {
             ]
             
         case .goneWithReason(message: let message, let goneReason):
+            Log.warning("Gone: \(goneReason); message: \(message)")
             code = .gone
             result = [
                 errorKey: message,
@@ -211,8 +212,16 @@ class RequestHandler {
             case .noObjectFound:
                 // One reason that the sharing group user might not be found is that the SharingGroupUser was removed from the system-- e.g., if an owning user is deleted, SharingGroupUser rows that have it as their owningUserId will be removed.
                 // If a client fails with this error, it seems like some kind of client error or edge case where the client should have been updated already (i.e., from an Index endpoint call) so that it doesn't make such a request. Therefore, I'm not going to code a special case on the client to deal with this.
-                self.failWithError(failureResult:
+                // 7/8/20; Actually, this occurs simply when an incorrect sharingGroupUUID is used when uploading a file. Let's test to see if the sharingGroupUUID exists.
+                if let exists = sharingGroupExists(sharingGroupUUID: sharingGroupUUID), exists {
+                    self.failWithError(failureResult:
                         .goneWithReason(message: "SharingGroupUser object not found!", .userRemoved))
+                }
+                else {
+                    self.failWithError(failureResult:
+                        .message("sharingGroupUUID not found!"))
+                }
+                        
                 return .failure
             case .error(let error):
                 self.failWithError(message: error)
@@ -223,6 +232,20 @@ class RequestHandler {
         }
         
         return .success(sharingGroupUUID: nil)
+    }
+    
+    private func sharingGroupExists(sharingGroupUUID: String) -> Bool? {
+        let key = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
+        let result = SharingGroupRepository(db).lookup(key: key, modelInit: SharingGroup.init)
+        switch result {
+        case .found:
+            return true
+        case .noObjectFound:
+            return false
+        case .error(let error):
+            Log.error("sharingGroupExists: \(error)")
+            return nil
+        }
     }
     
     // Starts a transaction, and calls the `dbOperations` closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.

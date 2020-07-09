@@ -29,7 +29,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, uploadIndex: Int = 1, uploadCount: Int = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -296,17 +296,26 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         }
         
         let deviceUUID = Foundation.UUID().uuidString
-        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, userId:userId!, deviceUUID:deviceUUID)
+        let index: Int32 = 1
+        let count: Int32 = 1
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, uploadIndex: index, uploadCount: count, userId:userId!, deviceUUID:deviceUUID)
 
         let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: userId!, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID)
         switch uploadedFilesResult {
         case .uploads(let uploads):
-            XCTAssert(uploads.count == 1)
+            guard uploads.count == 1 else {
+                XCTFail()
+                return
+            }
+            
             XCTAssert(upload1.appMetaData == uploads[0].appMetaData)
             XCTAssert(upload1.fileUUID == uploads[0].fileUUID)
             XCTAssert(upload1.fileVersion == uploads[0].fileVersion)
             XCTAssert(upload1.mimeType == uploads[0].mimeType)
             XCTAssert(upload1.lastUploadedCheckSum == uploads[0].lastUploadedCheckSum)
+            XCTAssert(uploads[0].uploadIndex == index)
+            XCTAssert(uploads[0].uploadCount == count)
+
         case .error(_):
             XCTFail()
         }

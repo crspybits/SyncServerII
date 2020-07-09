@@ -13,7 +13,7 @@ import LoggerAPI
 import Foundation
 import ServerShared
 
-class FileController_UploadTests: ServerTestCase, LinuxTestable {
+class FileController_UploadTests: ServerTestCase {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -24,79 +24,247 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
     
-    func testUploadTextFile() {
+//    private func lookupUpload(key: UploadRepository.LookupKey) -> Upload? {
+//        let lookupResult = UploadRepository(db).lookup(key: lookupKey, modelInit: Upload.init)
+//        switch lookupResult {
+//        case .error, .noObjectFound:
+//            return nil
+//        case .found(let model):
+//            guard let upload = model as? Upload else {
+//                return nil
+//            }
+//
+//            return upload
+//        }
+//    }
+    
+    /*
+    Testing parameters:
+        1) Type of file (e.g., JPEG, text, URL)
+        2) Number of uploads in batch: 1, 2, ...
+            Done uploads triggered?
+        3) V0 versus later versions.
+     */
+     
+    // MARK: file upload, v0, 1 of 1 files.
+
+    func uploadSingleV0File(uploadSingleFile:(_ deviceUUID: String, _ fileUUID: String)->(ServerTestCase.UploadFileResult?)) {
+        let fileIndex = FileIndexRepository(db)
+        let upload = UploadRepository(db)
+        
+        guard let fileIndexCount1 = fileIndex.count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount1 = upload.count() else {
+            XCTFail()
+            return
+        }
+        
         let deviceUUID = Foundation.UUID().uuidString
-        guard let result = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupUUID = result.sharingGroupUUID else {
+        let fileUUID = Foundation.UUID().uuidString
+        
+        guard let result = uploadSingleFile(deviceUUID, fileUUID) else {
+            XCTFail()
+            return
+        }
+
+        XCTAssert(result.response?.allUploadsFinished == true)
+                
+        guard let fileIndexCount2 = fileIndex.count() else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
-        let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
-        switch fileIndexResult {
-        case .fileIndex(let fileIndex):
-            guard fileIndex.count == 1 else {
-                XCTFail("fileIndex.count: \(fileIndex.count)")
-                return
-            }
-            
-            XCTAssert(fileIndex[0].fileUUID == result.request.fileUUID)
-        case .error(_):
-            XCTFail()
-        }
-    }
-    
-    func testUploadJPEGFile() {
-        guard let _ = uploadJPEGFile() else {
-            XCTFail()
-            return
-        }
-    }
-    
-    func testUploadURLFile() {
-        _ = uploadFileUsingServer(mimeType: .url, file: .testUrlFile)
-    }
-    
-    func testUploadTextAndJPEGFile() {
-        let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+        guard let uploadCount2 = upload.count() else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
-            XCTFail()
-            return
+        // Make sure the file index has another row.
+        XCTAssert(fileIndexCount1 + 1 == fileIndexCount2)
+        
+        // And the upload table has no more rows after.
+        XCTAssert(uploadCount1 == uploadCount2)
+    }
+    
+    func testUploadSingleV0TextFile() {
+        uploadSingleV0File { deviceUUID, fileUUID in
+            return uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID)
         }
     }
     
-    func testUploadingSameFileTwiceWorks() {
-        let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
-            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
-            XCTFail()
-            return
-        }
-        
-        // Second upload.
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: uploadResult.request.appMetaData) else {
-            XCTFail()
-            return
+    func testUploadSingleV0JPEGFile() {
+        uploadSingleV0File { deviceUUID, fileUUID in
+            return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID)
         }
     }
 
+    func testUploadSingleV0URLFile() {
+        uploadSingleV0File { deviceUUID, fileUUID in
+            return uploadFileUsingServer(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile)
+        }
+    }
+    
+    // MARK: file upload, v0, 1 of 2 files, and then 2 of 2 files.
+
+    func uploadTwoV0Files(fileUUIDs: [String], uploadSingleFile:(_ addUser:AddUser, _ deviceUUID: String, _ fileUUID: String, _ uploadIndex: Int32, _ uploadCount: Int32)->(ServerTestCase.UploadFileResult?)) {
+        let fileIndex = FileIndexRepository(db)
+        let upload = UploadRepository(db)
+        
+        guard let fileIndexCount1 = fileIndex.count(),
+            let uploadCount1 = upload.count()  else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        var uploadIndex: Int32 = 1
+        let uploadCount: Int32 = Int32(fileUUIDs.count)
+        var addUser:AddUser = .yes
+
+        guard let result1 = uploadSingleFile(addUser, deviceUUID, fileUUIDs[Int(uploadIndex)-1], uploadIndex, uploadCount),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        addUser = .no(sharingGroupUUID: sharingGroupUUID)
+
+        XCTAssert(result1.response?.allUploadsFinished == false)
+                
+        guard let fileIndexCount2 = fileIndex.count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount2 = upload.count() else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(fileIndexCount1 == fileIndexCount2)
+        XCTAssert(uploadCount1 + 1 == uploadCount2)
+        
+        uploadIndex += 1
+        guard let result2 = uploadSingleFile(addUser, deviceUUID, fileUUIDs[Int(uploadIndex)-1], uploadIndex, uploadCount) else {
+            XCTFail()
+            return
+        }
+
+        XCTAssert(result2.response?.allUploadsFinished == true)
+                
+        guard let fileIndexCount3 = fileIndex.count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount3 = upload.count() else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(fileIndexCount1 + 2 == fileIndexCount3)
+        XCTAssert(uploadCount3 == uploadCount1)
+    }
+    
+    func testUploadTwoV0TextFiles() {
+        let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
+            return uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser)
+        }
+    }
+    
+    func testUploadTwoV0JPEGFiles() {
+        let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
+            return uploadJPEGFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser)
+        }
+    }
+    
+    func testUploadTwoV0URLFiles() {
+        let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
+            return uploadFileUsingServer(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile, addUser: addUser)
+        }
+    }
+    
+   func testUploadTwoV0FilesWithDifferentSharingGroupUUIDsFails() {
+        let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        var uploadIndex: Int32 = 1
+        let uploadCount: Int32 = Int32(fileUUIDs.count)
+        var addUser:AddUser = .yes
+
+        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser) else {
+            XCTFail()
+            return
+        }
+
+        addUser = .no(sharingGroupUUID: Foundation.UUID().uuidString)
+
+        XCTAssert(result1.response?.allUploadsFinished == false)
+
+        uploadIndex += 1
+        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: true)
+        
+        XCTAssert(result2 == nil)
+    }
+    
+    // TODO: > 1 file in batch, and they both have nil sharingGroupUUID
+
+/*
+    func testUploadTextAndJPEGFile() {
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(uploadResult1.response?.allUploadsFinished == true)
+        
+        guard let uploadResult2 = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(uploadResult2.response?.allUploadsFinished == true)
+    }
+    
+    func testUploadingSameFileTwiceWorks() {
+        // index 1, count 2 so that the first upload doesn't cause a DoneUploads.
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 2, deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        XCTAssert(uploadResult1.response?.allUploadsFinished == false)
+        
+        // Second upload.
+        guard let uploadResult2 = uploadTextFile(uploadIndex: 1, uploadCount: 2, deviceUUID: deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: uploadResult1.request.appMetaData) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(uploadResult2.response?.allUploadsFinished == false)
+    }
+
     func testUploadTextFileWithStringWithSpacesAppMetaData() {
-        guard let _ = uploadTextFile(appMetaData: "A Simple String") else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, appMetaData: "A Simple String") else {
             XCTFail()
             return
         }
     }
     
     func testUploadTextFileWithJSONAppMetaData() {
-        guard let _ = uploadTextFile(appMetaData: "{ \"foo\": \"bar\" }") else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, appMetaData: "{ \"foo\": \"bar\" }") else {
             XCTFail()
             return
         }
@@ -178,17 +346,17 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
     }
     
     func testUploadWithInvalidSharingGroupUUIDFails() {
-        guard let _ = uploadTextFile() else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1) else {
             XCTFail()
             return
         }
         
         let invalidSharingGroupUUID = UUID().uuidString
-        uploadTextFile(addUser: .no(sharingGroupUUID: invalidSharingGroupUUID), errorExpected: true)
+        uploadTextFile(uploadIndex: 1, uploadCount: 1, addUser: .no(sharingGroupUUID: invalidSharingGroupUUID), errorExpected: true)
     }
 
     func testUploadWithBadSharingGroupUUIDFails() {
-        guard let _ = uploadTextFile() else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1) else {
             XCTFail()
             return
         }
@@ -199,27 +367,28 @@ class FileController_UploadTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        uploadTextFile(addUser: .no(sharingGroupUUID: workingButBadSharingGroupUUID), errorExpected: true)
+        uploadTextFile(uploadIndex: 1, uploadCount: 1, addUser: .no(sharingGroupUUID: workingButBadSharingGroupUUID), errorExpected: true)
     }
+*/
 }
 
-extension FileController_UploadTests {
-    static var allTests : [(String, (FileController_UploadTests) -> () throws -> Void)] {
-        return [
-            ("testUploadTextFile", testUploadTextFile),
-            ("testUploadJPEGFile", testUploadJPEGFile),
-            ("testUploadURLFile", testUploadURLFile),
-            ("testUploadTextAndJPEGFile", testUploadTextAndJPEGFile),
-            ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
-            ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
-            ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
-            ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails),
-            ("testUploadWithInvalidSharingGroupUUIDFails", testUploadWithInvalidSharingGroupUUIDFails),
-            ("testUploadWithBadSharingGroupUUIDFails", testUploadWithBadSharingGroupUUIDFails)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:FileController_UploadTests.self)
-    }
-}
+//extension FileController_UploadTests {
+//    static var allTests : [(String, (FileController_UploadTests) -> () throws -> Void)] {
+//        return [
+//            ("testUploadTextFile", testUploadTextFile),
+//            ("testUploadJPEGFile", testUploadJPEGFile),
+//            ("testUploadURLFile", testUploadURLFile),
+//            ("testUploadTextAndJPEGFile", testUploadTextAndJPEGFile),
+//            ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
+//            ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
+//            ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
+//            ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails),
+//            ("testUploadWithInvalidSharingGroupUUIDFails", testUploadWithInvalidSharingGroupUUIDFails),
+//            ("testUploadWithBadSharingGroupUUIDFails", testUploadWithBadSharingGroupUUIDFails)
+//        ]
+//    }
+//
+//    func testLinuxTestSuiteIncludesAllTests() {
+//        linuxTestSuiteIncludesAllTests(testType:FileController_UploadTests.self)
+//    }
+//}

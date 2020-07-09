@@ -249,7 +249,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
         "state": {
           "branch": "master",
-          "revision": "55bb1babbd41d3fb938cbdf4b37b9f6dbd84065a",
+          "revision": "b8c817d861cc4973c6f4fb47f4bf46b88d4d3ee7",
           "version": null
         }
       },
@@ -285,7 +285,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerMicrosoftAccount.git",
         "state": {
           "branch": "master",
-          "revision": "683e4c93c75d85cb3cb681be005f736e33f34f88",
+          "revision": "5e013639ac6f66b4e675d95097846cdaa6ed0560",
           "version": null
         }
       },

@@ -580,6 +580,7 @@ class ServerTestCase : XCTestCase {
         
         // The checksum sent along with the upload.
         let checkSum: String
+        let response: UploadFileResponse?
     }
     
     enum AddUser {
@@ -590,7 +591,7 @@ class ServerTestCase : XCTestCase {
     // statusCodeExpected is only used if an error is expected.
     // owningAccountType will be the same type as testAccount when an owning user is uploading (you can pass nil here), and the type of the "parent" owner when a sharing user is uploading.
     @discardableResult
-    func uploadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         var sharingGroupUUID = UUID().uuidString
         var uploadingUserId: UserId?
@@ -646,7 +647,8 @@ class ServerTestCase : XCTestCase {
         uploadRequest.fileGroupUUID = fileGroupUUID
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = requestCheckSum
-        
+        uploadRequest.uploadIndex = uploadIndex
+        uploadRequest.uploadCount = uploadCount
         uploadRequest.appMetaData = appMetaData
         
         Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toDictionary))")
@@ -657,7 +659,7 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        guard runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
+        guard let response = runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: errorExpected, statusCodeExpected: statusCodeExpected) else {
             if !errorExpected {
                 XCTFail()
             }
@@ -671,20 +673,21 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId, data: data, checkSum: checkSum)
+        return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId, data: data, checkSum: checkSum, response: response)
     }
     
+    // TODO: Get rid of masterVersion, updatedMasterVersionExpected
     @discardableResult
-    func uploadTextFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, fileGroupUUID:String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
-        return uploadServerFile(testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, updatedMasterVersionExpected:updatedMasterVersionExpected, fileVersion:fileVersion, masterVersion:masterVersion, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, fileGroupUUID:fileGroupUUID, statusCodeExpected: statusCodeExpected)
+        return uploadServerFile(uploadIndex: uploadIndex, uploadCount: uploadCount, testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, updatedMasterVersionExpected:updatedMasterVersionExpected, fileVersion:fileVersion, masterVersion:masterVersion, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, fileGroupUUID:fileGroupUUID, statusCodeExpected: statusCodeExpected)
     }
     
     // Returns true iff the file could be uploaded.
     @discardableResult
-    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> Bool {
+    func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, deviceUUID:String, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResponse? {
         
-        var result: Bool = true
+        var result: UploadFileResponse?
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -699,7 +702,6 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
 
                 if errorExpected {
-                    result = false
                     if let statusCodeExpected = statusCodeExpected {
                         XCTAssert(response!.statusCode == statusCodeExpected)
                     }
@@ -710,21 +712,18 @@ class ServerTestCase : XCTestCase {
                 else {
                     guard response!.statusCode == .OK, dict != nil else {
                         XCTFail("Did not work on uploadFile request: \(response!.statusCode)")
-                        result = false
                         expectation.fulfill()
                         return
                     }
 
                     if let uploadResponse = try? UploadFileResponse.decode(dict!) {
                         guard uploadResponse.creationDate != nil, uploadResponse.updateDate != nil else {
-                            result = false
                             expectation.fulfill()
                             return
                         }
-
+                        result = uploadResponse
                     }
                     else {
-                        result = false
                         XCTFail()
                     }
                 }
@@ -736,7 +735,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
     
         var sharingGroupUUID: String!
         var uploadingUserId: UserId?
@@ -772,6 +771,8 @@ class ServerTestCase : XCTestCase {
         uploadRequest.mimeType = mimeType.rawValue
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = file.checkSum(type: checkSumType)
+        uploadRequest.uploadCount = uploadCount
+        uploadRequest.uploadIndex = uploadIndex
         
         guard uploadRequest.valid() else {
             XCTFail()
@@ -781,20 +782,23 @@ class ServerTestCase : XCTestCase {
         uploadRequest.appMetaData = appMetaData
         
         Log.info("Starting runUploadTest: uploadJPEGFile")
-        runUploadTest(testAccount: testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: errorExpected)
+        let uploadResponse = runUploadTest(testAccount: testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: errorExpected)
         Log.info("Completed runUploadTest: uploadJPEGFile")
-        return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId:uploadingUserId, data: data, checkSum: file.checkSum(type: checkSumType))
+        return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId:uploadingUserId, data: data, checkSum: file.checkSum(type: checkSumType), response: uploadResponse)
     }
     
-    func uploadJPEGFile(testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString,
+    func uploadJPEGFile(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString,
         fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
         
         let jpegFile = TestFile.catJpg
-        return uploadFileUsingServer(testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, addUser:addUser, fileVersion:fileVersion, expectedMasterVersion:expectedMasterVersion, appMetaData:appMetaData, errorExpected:errorExpected)
+        return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, addUser:addUser, fileVersion:fileVersion, expectedMasterVersion:expectedMasterVersion, appMetaData:appMetaData, errorExpected:errorExpected)
     }
     
     // sharingGroupName enables you to change the sharing group name during the DoneUploads.
+    // DEPRECATED
     func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, sharingGroupName: String? = nil, failureExpected:Bool = false) {
+        
+        assert(false)
         
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -1363,7 +1367,7 @@ class ServerTestCase : XCTestCase {
         var actualSharingGroupUUID: String!
         
         if uploadFileRequest == nil {
-            guard let uploadResult = uploadServerFile(mimeType: mimeType, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData, file: file),
+            guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, mimeType: mimeType, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData, file: file),
                 let sharingGroupUUID = uploadResult.sharingGroupUUID else {
                 XCTFail()
                 return nil

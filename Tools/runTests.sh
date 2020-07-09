@@ -38,10 +38,11 @@ TEST_JSON="Tools/TestSuites.json"
 COMMAND=$1
 OPTION=$2
 ALL_COUNT=`jq -r '.all | length' < ${TEST_JSON}`
+BUILD_PATH=".build.linux"
 
 # See https://oleb.net/2020/swift-test-discovery/
-BASIC_SWIFT_TEST_CMD="swift test --enable-test-discovery -Xswiftc -DDEBUG -Xswiftc -DSERVER"
-# BASIC_SWIFT_TEST_CMD="swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER"
+# For --build-path, see https://stackoverflow.com/questions/62805684/server-side-swift-development-on-macos-with-xcode-testing-on-docker-ubuntu-how
+BASIC_SWIFT_TEST_CMD="swift test --build-path ${BUILD_PATH} --enable-test-discovery -Xswiftc -DDEBUG -Xswiftc -DSERVER"
 
 SWIFT_DEFINE="-Xswiftc -D"
 # SYNCSERVER_TEST_MODULE="ServerTests"
@@ -143,7 +144,7 @@ runSpecificSuite () {
                 outputPrefix="\t\t"
             
                 # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
-                swift package clean
+                swift package --build-path ${BUILD_PATH} clean
             fi
         else
             outputPrefix="\t"

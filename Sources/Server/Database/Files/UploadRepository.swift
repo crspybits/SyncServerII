@@ -81,9 +81,9 @@ class Upload : NSObject, Model {
     
     // These two values are a replacement for the prior DoneUploads explicit endpoint. Think of them as marking an upload with "uploadIndex of uploadCount". E.g., suppose there are three uploads in a batch. Then three entries in the Upload table (1 of 3, 2 of 3, and 3 of 3) will mark the trigger for DoneUploads.
     static let uploadIndexKey = "uploadIndex"
-    var uploadIndex: Int!
+    var uploadIndex: Int32!
     static let uploadCountKey = "uploadCount"
-    var uploadCount: Int!
+    var uploadCount: Int32!
     
     subscript(key:String) -> Any? {
         set {
@@ -134,10 +134,10 @@ class Upload : NSObject, Model {
                 uploadContents = newValue as? String
                 
             case Upload.uploadIndexKey:
-                uploadIndex = newValue as? Int
+                uploadIndex = newValue as? Int32
                 
             case Upload.uploadCountKey:
-                uploadCount = newValue as? Int
+                uploadCount = newValue as? Int32
 
             default:
                 Log.error("key: \(key)")
@@ -407,8 +407,8 @@ class UploadRepository : Repository, RepositoryLookup {
 
         insert.add(fieldName: Upload.fileVersionKey, value: .int32Optional(upload.fileVersion))
         insert.add(fieldName: Upload.uploadContentsKey, value: .stringOptional(upload.uploadContents))
-        insert.add(fieldName: Upload.uploadIndexKey, value: .intOptional(upload.uploadIndex))
-        insert.add(fieldName: Upload.uploadCountKey, value: .intOptional(upload.uploadCount))
+        insert.add(fieldName: Upload.uploadIndexKey, value: .int32Optional(upload.uploadIndex))
+        insert.add(fieldName: Upload.uploadCountKey, value: .int32Optional(upload.uploadCount))
 
         do {
             try insert.run()
@@ -520,11 +520,12 @@ class UploadRepository : Repository, RepositoryLookup {
     }
     
     enum UploadedFilesResult {
-    case uploads([Upload])
-    case error(Swift.Error?)
+        case uploads([Upload])
+        case error(Swift.Error?)
     }
     
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
+    // Uploads are identified by userId, not effectiveOwningUserId: We want to organize uploads by specific user.
     func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
         
         guard let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, andState: state) else {
@@ -560,7 +561,7 @@ class UploadRepository : Repository, RepositoryLookup {
             fileInfo.updateDate = upload.updateDate
             fileInfo.fileGroupUUID = upload.fileGroupUUID
             fileInfo.sharingGroupUUID = upload.sharingGroupUUID
-                        
+
             result += [fileInfo]
         }
         

@@ -191,3 +191,42 @@ extension Repository {
         return result
     }
 }
+
+private class Count: Model {
+    var count: Int64?
+    subscript(key:String) -> Any? {
+        set {
+            Log.debug("newValue: \(newValue)")
+            count = newValue as? Int64
+        }
+        
+        get {
+            return getValue(forKey: key)
+        }
+    }
+}
+
+extension RepositoryBasics {
+    // Number of rows in table.
+    func count() -> Int64? {
+        var result:Int64?
+        
+        let query = "SELECT COUNT(*) FROM \(tableName)"
+        guard let select = Select(db: db, query: query, modelInit: Count.init) else {
+            return nil
+        }
+        
+        select.forEachRow { rowModel in
+            result = (rowModel as? Count)?.count
+            return
+        }
+        
+        if select.forEachRowStatus == nil {
+            Log.exit("Error counting: \(db.errorMessage())")
+            return result
+        }
+        else {
+            return nil
+        }
+    }
+}

@@ -317,7 +317,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testIndexWithFakeSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
@@ -332,7 +332,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     
     func testIndexWithBadSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return

@@ -792,6 +792,34 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
             XCTFail("\(error)")
         }
     }
+    
+    func testCount() {
+        let repo = Table3()
+        repo.db = db
+        
+        guard let count1 = repo.count() else {
+            XCTFail()
+            return
+        }
+        
+        let bool: Bool? = true
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        insert.add(fieldName: "c4", value: .boolOptional(bool))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+        
+        guard let count2 = repo.count() else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(count1 + 1 == count2)
+    }
 }
 
 extension GeneralDatabaseTests {

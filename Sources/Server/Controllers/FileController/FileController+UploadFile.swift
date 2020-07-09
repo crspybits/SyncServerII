@@ -60,20 +60,33 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params) else {
-            finish(.errorMessage("Failed in sharing group security check."), params: params)
+        guard uploadRequest.uploadCount >= 1, uploadRequest.uploadIndex >= 1, uploadRequest.uploadIndex <= uploadRequest.uploadCount else {
+            let message = "uploadCount \(String(describing: uploadRequest.uploadCount)) and/or uploadIndex \(String(describing: uploadRequest.uploadIndex)) are invalid."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
+        guard let deviceUUID = params.deviceUUID else {
+            let message = "Did not have deviceUUID"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+                
+        guard sharingGroupSecurityCheck(sharingGroupUUID: uploadRequest.sharingGroupUUID, params: params) else {
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            finish(.errorMessage(message), params: params)
+            return
+        }
+
         guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
             let message = "Unknown mime type passed: \(String(describing: uploadRequest.mimeType))"
             finish(.errorMessage(message), params: params)
             return
         }
         
-        Log.debug("uploadRequest.sharingGroupUUID: \(String(describing: uploadRequest.sharingGroupUUID))")
-        
-        // Check to see if (a) this file is already present in the FileIndex, and if so then (b) is the version being uploaded +1 from that in the FileIndex.
         var existingFileInFileIndex:FileIndex?
         do {
             existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadRequest.sharingGroupUUID, fileUUID:uploadRequest.fileUUID)
@@ -152,7 +165,7 @@ extension FileController {
         // There is an unlikely race condition here -- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. I'm going to assume that this will not happen: That a single app/cilent will only upload the same file once at one time. (I used to create the Upload table entry first to avoid this race condition, but it's unlikely and leads to some locking issues-- see [1]).
         
         // Check to see if the file is present already-- i.e., if has been uploaded already.
-        let key = UploadRepository.LookupKey.primaryKey(fileUUID: uploadRequest.fileUUID, userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!)
+        let key = UploadRepository.LookupKey.primaryKey(fileUUID: uploadRequest.fileUUID, userId: params.currentSignedInUser!.userId, deviceUUID: deviceUUID)
         let lookupResult = params.repos.upload.lookup(key: key, modelInit: Upload.init)
                 
         switch lookupResult {
@@ -160,7 +173,8 @@ extension FileController {
             Log.info("File was already present: Not uploading again.")
             let upload = model as! Upload
             let response = UploadFileResponse()
-
+            response.allUploadsFinished = false
+            
             // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
             response.creationDate = creationDate
             response.updateDate = upload.updateDate
@@ -184,9 +198,10 @@ extension FileController {
         
         if newFile {
             // Need to upload complete file.
-            let cloudFileName = Filename.inCloud(deviceUUID:params.deviceUUID!, fileUUID: uploadRequest.fileUUID, mimeType:uploadRequest.mimeType, fileVersion: 0)
+            let cloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType:uploadRequest.mimeType, fileVersion: 0)
             
-            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest)
+            // This also does addUploadEntry.
+            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
         }
         else {
             // Need to add the upload data to the UploadRepository only.
@@ -195,11 +210,11 @@ extension FileController {
                 return
             }
             
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: nil, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest)
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: nil, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
         }
     }
     
-    private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest) {
+    private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, deviceUUID: String) {
         // Lock will be held for the duration of the upload. Not the best, but don't have a better mechanism yet.
         
         Log.info("File being sent to cloud storage: \(cloudFileName)")
@@ -213,10 +228,8 @@ extension FileController {
             case .success(let checkSum):
                 Log.debug("File with checkSum \(checkSum) successfully uploaded!")
                 
-                /* 6/29/19; Doesn't seem like we need to acquire the lock again. We just need to add an entry into the Upload table. And what will it help to have the lock for that? Plus, I'm running into locking problems if I have the lock here. My hypothesis is: The Upload somehow acquires a lock that is needed by the DoneUploads. While the Upload is "uploading" its file, the DoneUploads acquires the GET_LOCK but is blocked on the other lock that the Upload has. The Upload tries to get the GET_LOCK once it finishes its upload, but can't since the DoneUploads has it. The Upload times out on its GET_LOCK request and fails. The DoneUploads completes, having gotten the lock that the Upload had.
-                */
-                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest)
-                
+                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
+
             case .accessTokenRevokedOrExpired:
                 // Not going to do any cleanup. The access token has expired/been revoked. Presumably, the file wasn't uploaded.
                 let message = "Access token revoked or expired."
@@ -231,15 +244,18 @@ extension FileController {
         }
     }
     
-    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest) {
-    
+    // This also calls finishUploads
+    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, deviceUUID: String) {
+        
         let upload = Upload()
-        upload.deviceUUID = params.deviceUUID
+        upload.deviceUUID = deviceUUID
         upload.fileUUID = uploadRequest.fileUUID
         upload.mimeType = uploadRequest.mimeType
         upload.fileVersion = fileVersion
         upload.sharingGroupUUID = uploadRequest.sharingGroupUUID
-        
+        upload.uploadCount = uploadRequest.uploadCount
+        upload.uploadIndex = uploadRequest.uploadIndex
+
         // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
         var expectedCheckSum: String?
         expectedCheckSum = uploadRequest.checkSum?.lowercased()
@@ -293,14 +309,34 @@ extension FileController {
         let addUploadResult = params.repos.upload.retry {
             return params.repos.upload.add(upload: upload, fileInFileIndex: !newFile)
         }
-        
+
         switch addUploadResult {
         case .success:
             let response = UploadFileResponse()
-
+            var allUploadsFinished = false
+            
+            guard let finishUploads = FinishUploads(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, sharingGroupName: nil, params: params) else {
+                finish(.errorCleanup(message: "Could not FinishUploads", cleanup: cleanup), params: params)
+                return
+            }
+            
+            let transferResponse = finishUploads.transfer()
+            switch transferResponse {
+            case .success:
+                allUploadsFinished = true
+                
+            case .allUploadsNotYetReceived:
+                break
+                
+            case .error(let response):
+                params.completion(response)
+                return
+            }
+            
             // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
             response.creationDate = creationDate
             response.updateDate = upload.updateDate
+            response.allUploadsFinished = allUploadsFinished
             finish(.success(response: response), params: params)
             
         case .duplicateEntry:

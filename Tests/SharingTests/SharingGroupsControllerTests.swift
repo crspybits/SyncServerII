@@ -226,7 +226,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
     func testRemoveSharingGroupWorks_filesMarkedAsDeleted() {
         let deviceUUID = Foundation.UUID().uuidString
 
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return

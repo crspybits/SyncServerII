@@ -1,5 +1,6 @@
 xcuserdata/
 .build/
+.build.linux/
 .DS_Store
 .testing
 .DS_Store

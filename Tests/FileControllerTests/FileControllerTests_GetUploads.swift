@@ -39,7 +39,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     
     func testForOneUpload() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -54,7 +54,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
 
     func testForOneUploadButDoneTwice() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -76,7 +76,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     func testForOneUploadButFromWrongDeviceUUID() {
         let deviceUUID = Foundation.UUID().uuidString
         
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -88,7 +88,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     
     func testForTwoUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -109,7 +109,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     
     func testForNoUploadsAfterDoneUploads() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -121,7 +121,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     
     func testFakeSharingGroupWithGetUploadsFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -135,7 +135,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
     
     func testBadSharingGroupWithGetUploadsFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return

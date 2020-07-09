@@ -6,6 +6,8 @@
 //
 //
 
+// This entire file is DEPRECATED. I need to move some/all of its functionality to a non-endpoint version in FileController+FinishUploads.swift.
+
 import Foundation
 import PerfectThread
 import Dispatch
