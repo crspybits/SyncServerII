@@ -174,22 +174,25 @@ class FileController_UploadTests: ServerTestCase {
     
     func testUploadTwoV0TextFiles() {
         let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        let fileGroupUUID = Foundation.UUID().uuidString
         uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
-            return uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser)
+            return uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
         }
     }
     
     func testUploadTwoV0JPEGFiles() {
         let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        let fileGroupUUID = Foundation.UUID().uuidString
         uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
-            return uploadJPEGFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser)
+            return uploadJPEGFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
         }
     }
     
     func testUploadTwoV0URLFiles() {
         let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        let fileGroupUUID = Foundation.UUID().uuidString
         uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
-            return uploadFileUsingServer(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile, addUser: addUser)
+            return uploadFileUsingServer(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile, addUser: addUser, fileGroupUUID: fileGroupUUID)
         }
     }
     
@@ -324,6 +327,8 @@ class FileController_UploadTests: ServerTestCase {
     func testUploadTwoV0FilesOneNilFileGroupUUIDsFails() {
         uploadTwoV0FilesWith(oneFileHasNilGroupUUID: true)
     }
+    
+    // TODO: Check FileIndex row specifics after each test.
 
 /*
     func testUploadTextAndJPEGFile() {

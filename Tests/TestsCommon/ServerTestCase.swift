@@ -735,7 +735,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, fileGroupUUID: String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
     
         var sharingGroupUUID: String!
         var uploadingUserId: UserId?
@@ -773,6 +773,7 @@ class ServerTestCase : XCTestCase {
         uploadRequest.checkSum = file.checkSum(type: checkSumType)
         uploadRequest.uploadCount = uploadCount
         uploadRequest.uploadIndex = uploadIndex
+        uploadRequest.fileGroupUUID = fileGroupUUID
         
         guard uploadRequest.valid() else {
             XCTFail()
@@ -788,10 +789,10 @@ class ServerTestCase : XCTestCase {
     }
     
     func uploadJPEGFile(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString,
-        fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+        fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, expectedMasterVersion:MasterVersionInt = 0, appMetaData:String? = nil, fileGroupUUID: String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
         
         let jpegFile = TestFile.catJpg
-        return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, addUser:addUser, fileVersion:fileVersion, expectedMasterVersion:expectedMasterVersion, appMetaData:appMetaData, errorExpected:errorExpected)
+        return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, addUser:addUser, fileVersion:fileVersion, expectedMasterVersion:expectedMasterVersion, appMetaData:appMetaData, fileGroupUUID: fileGroupUUID, errorExpected:errorExpected)
     }
     
     // sharingGroupName enables you to change the sharing group name during the DoneUploads.

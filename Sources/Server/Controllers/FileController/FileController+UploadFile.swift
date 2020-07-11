@@ -251,7 +251,7 @@ extension FileController {
         upload.deviceUUID = deviceUUID
         upload.fileUUID = uploadRequest.fileUUID
         upload.mimeType = uploadRequest.mimeType
-        upload.fileVersion = fileVersion
+        upload.v0UploadFileVersion = newFile
         upload.sharingGroupUUID = uploadRequest.sharingGroupUUID
         upload.uploadCount = uploadRequest.uploadCount
         upload.uploadIndex = uploadRequest.uploadIndex
@@ -326,6 +326,10 @@ extension FileController {
                 allUploadsFinished = true
                 
             case .allUploadsNotYetReceived:
+                break
+                
+            case .deferredTransfer:
+                assert(false)
                 break
                 
             case .error(let response):

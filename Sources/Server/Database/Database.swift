@@ -178,6 +178,7 @@ class Database {
         return true
     }
     
+    // columnName is just the column name, no column type.
     func removeColumn(_ columnName:String, from tableName:String) -> Bool {
         let alterTable = "ALTER TABLE \(tableName) DROP \(columnName)"
         

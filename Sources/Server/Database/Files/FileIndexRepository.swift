@@ -481,10 +481,9 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileIndex.appMetaDataVersion = upload.appMetaDataVersion
             fileIndex.fileGroupUUID = upload.fileGroupUUID
             
-            if let uploadFileVersion = upload.fileVersion {
-                fileIndex.fileVersion = uploadFileVersion
-
-                if uploadFileVersion == 0 {
+            if let v0UploadFileVersion = upload.v0UploadFileVersion {
+                if v0UploadFileVersion {
+                    fileIndex.fileVersion = 0
                     fileIndex.creationDate = upload.creationDate
                     
                     // OWNER
@@ -500,6 +499,15 @@ class FileIndexRepository : Repository, RepositoryLookup {
 
                     // Similarly, the sharing group id doesn't change over time.
                     fileIndex.sharingGroupUUID = upload.sharingGroupUUID
+                }
+                else {
+                    guard let fileVersion = upload.fileVersion else {
+                        Log.error("No file version, and v0UploadFileVersion")
+                        error = true
+                        return
+                    }
+                    
+                    fileIndex.fileVersion = fileVersion
                 }
                 
                 fileIndex.updateDate = upload.updateDate
@@ -564,7 +572,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
                     return
                 }
                 else {
-                    guard upload.fileVersion == 0 else {
+                    guard let v0UploadFileVersion = upload.v0UploadFileVersion, v0UploadFileVersion else {
                         Log.error("Did not have version 0 of file!")
                         error = true
                         return

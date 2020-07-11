@@ -53,6 +53,8 @@ class FinishUploads {
         
         case success(numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)
         
+        case deferredTransfer
+        
         case error(RequestProcessingParameters.Response)
     }
 
@@ -109,6 +111,31 @@ class FinishUploads {
             return .allUploadsNotYetReceived
         }
         
+        // All of the uploads must have v0UploadFileVersion non-nil
+        guard currentUploads.filter({$0.v0UploadFileVersion == nil}).count == 0 else {
+            let message = "Some of the v0UploadFileVersion's were nil"
+            Log.error(message)
+            return .error(.failure(.message(message)))
+        }
+        
+        // All uploads must be the same (either v0 or vN, N > 1)
+        guard currentUploads.filter({$0.v0UploadFileVersion == currentUploads[0].v0UploadFileVersion}).count == currentUploads.count else {
+            let message = "All uploads must be either v0 or vN, N > 1"
+            Log.error(message)
+            return .error(.failure(.message(message)))
+        }
+        
+        let vNUploads = currentUploads.filter({$0.v0UploadFileVersion == false}).count > 0
+        
+        if vNUploads {            
+            let message = "TODO: Need to deferred transfer"
+            Log.error(message)
+            return .error(.failure(.message(message)))
+            
+            // I want to mark the uploads to indicate they are ready for deferred transfer.
+        }
+        // Else: v0 uploads
+        
         return transfer(currentUploads: currentUploads)
     }
     
@@ -120,8 +147,8 @@ class FinishUploads {
         
         // 1) Filter out uploaded files with versions > 0 -- for the stale file versions. Note that we're not including files with status `uploadedUndelete`-- we don't need to delete any stale versions for these.
         let staleVersionsFromUploads = currentUploads.filter({
-            // The left to right order of these checks is important-- check the state first. If the state is uploadingAppMetaData, there will be a nil fileVersion and don't want to check that.
-            $0.state == .uploadedFile && $0.fileVersion > 0
+            // The left to right order of these checks is important-- check the state first. If the state is uploadingAppMetaData, there will be a nil fileVersion and don't want to check that.            
+            $0.state == .uploadedFile && $0.v0UploadFileVersion == false
         })
         
         // 2) Filter out upload deletions

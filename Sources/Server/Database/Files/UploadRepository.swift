@@ -34,9 +34,12 @@ class Upload : NSObject, Model {
     // The userId of the uploading user. i.e., this is not necessarily the owning user id.
     var userId: UserId!
     
-    // 7/4/20; I think this can be removed and replaced with a flag indicating: "Is this v0 of the file or not?" With > v0 of a file, I'm not sure if we'll be able to make a decision about the version number of a file when we make an entry to the Upload table. 
+    // On initial client request, this is for upload deletion. For file uploads, this is used when file versions > v0 after the initial client request.
     static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
+
+    static let v0UploadFileVersionKey = "v0UploadFileVersion"
+    var v0UploadFileVersion:Bool?
     
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
@@ -103,9 +106,6 @@ class Upload : NSObject, Model {
             case Upload.userIdKey:
                 userId = newValue as! UserId?
                 
-            case Upload.fileVersionKey:
-                fileVersion = newValue as! FileVersionInt?
-                
             case Upload.deviceUUIDKey:
                 deviceUUID = newValue as! String?
                 
@@ -138,6 +138,12 @@ class Upload : NSObject, Model {
                 
             case Upload.uploadCountKey:
                 uploadCount = newValue as? Int32
+                
+            case Upload.fileVersionKey:
+                fileVersion = newValue as? FileVersionInt
+                
+            case Upload.v0UploadFileVersionKey:
+                v0UploadFileVersion = newValue as? Bool
 
             default:
                 Log.error("key: \(key)")
@@ -165,6 +171,11 @@ class Upload : NSObject, Model {
             case Upload.updateDateKey:
                 return {(x:Any) -> Any? in
                     return DateExtras.date(x as! String, fromFormat: .DATETIME)
+                }
+                
+            case Upload.v0UploadFileVersionKey:
+                return {(x:Any) -> Any? in
+                    return (x as! Int8) == 1
                 }
             
             default:
@@ -220,6 +231,7 @@ class UploadRepository : Repository, RepositoryLookup {
             "appMetaData TEXT, " +
             
             // 3/25/18; This used to be `NOT NULL` but now allowing it to be NULL because when we upload an app meta data change, it will be null.
+            // 7/10/20: And will be nil for file uploads too.
             "fileVersion INT, " +
             
             // Making this optional because appMetaData is optional. If there is app meta data, this must not be null.
@@ -231,6 +243,10 @@ class UploadRepository : Repository, RepositoryLookup {
             "uploadIndex INT NOT NULL, " +
             
             "uploadCount INT NOT NULL, " +
+            
+            // true if file upload is version v0, false if upload is vN, N > 0.
+            // nil if this is an upload deletion.
+            "v0UploadFileVersion BOOL, " +
 
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
@@ -300,6 +316,13 @@ class UploadRepository : Repository, RepositoryLookup {
                     return .failure(.columnCreation)
                 }
             }
+            
+            if db.columnExists(Upload.v0UploadFileVersionKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.v0UploadFileVersionKey) BOOL", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+
         default:
             break
         }
@@ -314,7 +337,8 @@ class UploadRepository : Repository, RepositoryLookup {
             return true
         }
         
-        if upload.fileVersion == nil && upload.state != .uploadingAppMetaData  {
+        if upload.v0UploadFileVersion == nil && upload.fileVersion == nil
+            && upload.state != .uploadingAppMetaData  {
             return true
         }
         
@@ -406,6 +430,7 @@ class UploadRepository : Repository, RepositoryLookup {
         }
 
         insert.add(fieldName: Upload.fileVersionKey, value: .int32Optional(upload.fileVersion))
+        insert.add(fieldName: Upload.v0UploadFileVersionKey, value: .boolOptional(upload.v0UploadFileVersion))
         insert.add(fieldName: Upload.uploadContentsKey, value: .stringOptional(upload.uploadContents))
         insert.add(fieldName: Upload.uploadIndexKey, value: .int32Optional(upload.uploadIndex))
         insert.add(fieldName: Upload.uploadCountKey, value: .int32Optional(upload.uploadCount))
@@ -555,6 +580,7 @@ class UploadRepository : Repository, RepositoryLookup {
             
             fileInfo.fileUUID = upload.fileUUID
             fileInfo.fileVersion = upload.fileVersion
+            fileInfo.v0UploadFileVersion = upload.v0UploadFileVersion
             fileInfo.deleted = upload.state == .toDeleteFromFileIndex
             fileInfo.mimeType = upload.mimeType
             fileInfo.creationDate = upload.creationDate
