@@ -55,7 +55,7 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
             return
         }
         
-        let newStatus = DeferredUpload.Status.success
+        let newStatus = DeferredUpload.Status.completed
         deferredUpload.status = newStatus
         
         guard repo.update(deferredUpload) else {
@@ -160,7 +160,7 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
             return
         }
         
-        guard let _ = doAddDeferredUpload(status: .success) else {
+        guard let _ = doAddDeferredUpload(status: .completed) else {
             XCTFail()
             return
         }

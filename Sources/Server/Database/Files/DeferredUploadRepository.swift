@@ -11,7 +11,7 @@ import LoggerAPI
 class DeferredUpload : NSObject, Model {
     enum Status: String {
         case pending
-        case success
+        case completed
         case error
         
         static var maxCharacterLength: Int {
