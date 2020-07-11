@@ -29,7 +29,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, deferredUploadId: Int64? = nil, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -50,6 +50,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         upload.uploadContents = uploadContents
         upload.uploadCount = uploadCount
         upload.uploadIndex = uploadIndex
+        upload.deferredUploadId = deferredUploadId
         
         let result = UploadRepository(db).add(upload: upload)
         
@@ -185,6 +186,18 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let upload = doAddUpload(sharingGroupUUID:sharingGroupUUID)
         XCTAssert(UploadRepository(db).update(upload: upload))
     }
+
+    func testUpdateUploadWithDeferredUploadId() {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let upload = doAddUpload(sharingGroupUUID:sharingGroupUUID)
+        upload.deferredUploadId = 101
+        XCTAssert(UploadRepository(db).update(upload: upload))
+    }
     
     func testUpdateUploadFailsWithoutUploadId() {
         let sharingGroupUUID = UUID().uuidString
@@ -232,7 +245,8 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         }
         
         let testContents = "Test contents"
-        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, uploadContents: testContents)
+        let deferredUploadId: Int64 = 201
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, uploadContents: testContents, deferredUploadId: deferredUploadId)
         
         let result = UploadRepository(db).lookup(key: .uploadId(1), modelInit: Upload.init)
         switch result {
@@ -250,6 +264,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             XCTAssert(upload1.userId != nil && upload1.userId == upload2.userId)
             XCTAssert(upload1.appMetaData != nil && upload1.appMetaData == upload2.appMetaData)
             XCTAssertEqual(testContents, upload2.uploadContents)
+            XCTAssertEqual(deferredUploadId, upload2.deferredUploadId)
             
         case .noObjectFound:
             XCTFail("No Upload Found")

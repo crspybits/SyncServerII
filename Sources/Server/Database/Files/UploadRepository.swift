@@ -34,12 +34,16 @@ class Upload : NSObject, Model {
     // The userId of the uploading user. i.e., this is not necessarily the owning user id.
     var userId: UserId!
     
-    // On initial client request, this is for upload deletion. For file uploads, this is used when file versions > v0 after the initial client request.
+    // On initial client request, this is for upload deletion. For file uploads, this is used when file versions > v0 but only *after* the initial client request.
     static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
 
     static let v0UploadFileVersionKey = "v0UploadFileVersion"
     var v0UploadFileVersion:Bool?
+    
+    static let deferredUploadIdKey = "deferredUploadId"
+    // Reference to the DeferredUpload table for vN uploads.
+    var deferredUploadId: Int64?
     
     static let deviceUUIDKey = "deviceUUID"
     var deviceUUID: String!
@@ -144,6 +148,9 @@ class Upload : NSObject, Model {
                 
             case Upload.v0UploadFileVersionKey:
                 v0UploadFileVersion = newValue as? Bool
+                
+            case Upload.deferredUploadIdKey:
+                deferredUploadId = newValue as? Int64
 
             default:
                 Log.error("key: \(key)")
@@ -247,6 +254,9 @@ class UploadRepository : Repository, RepositoryLookup {
             // true if file upload is version v0, false if upload is vN, N > 0.
             // nil if this is an upload deletion.
             "v0UploadFileVersion BOOL, " +
+            
+            // Non-nil for vN file uploads when they have been sent for deferred uploading.
+            "deferredUploadId BIGINT, " +
 
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
@@ -298,7 +308,8 @@ class UploadRepository : Repository, RepositoryLookup {
                 }
             }
             
-            // 7/4/20; Evolution 4: Add the uploadContents, uploadCount, and uploadIndex columns.
+            // 7/4/20; Evolution 4
+            
             if db.columnExists(Upload.uploadContentsKey, in: tableName) == false {
                 if !db.addColumn("\(Upload.uploadContentsKey) BLOB", to: tableName) {
                     return .failure(.columnCreation)
@@ -319,6 +330,12 @@ class UploadRepository : Repository, RepositoryLookup {
             
             if db.columnExists(Upload.v0UploadFileVersionKey, in: tableName) == false {
                 if !db.addColumn("\(Upload.v0UploadFileVersionKey) BOOL", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
+            if db.columnExists(Upload.deferredUploadIdKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.deferredUploadIdKey) BIGINT", to: tableName) {
                     return .failure(.columnCreation)
                 }
             }
@@ -434,6 +451,8 @@ class UploadRepository : Repository, RepositoryLookup {
         insert.add(fieldName: Upload.uploadContentsKey, value: .stringOptional(upload.uploadContents))
         insert.add(fieldName: Upload.uploadIndexKey, value: .int32Optional(upload.uploadIndex))
         insert.add(fieldName: Upload.uploadCountKey, value: .int32Optional(upload.uploadCount))
+        
+        insert.add(fieldName: Upload.deferredUploadIdKey, value: .int64Optional(upload.deferredUploadId))
 
         do {
             try insert.run()
@@ -476,7 +495,9 @@ class UploadRepository : Repository, RepositoryLookup {
         
         let fileGroupUUIDField = getUpdateFieldSetter(fieldValue: upload.fileGroupUUID, fieldName: Upload.fileGroupUUIDKey)
         
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) WHERE uploadId=\(upload.uploadId!)"
+        let deferredUploadIdField = getUpdateFieldSetter(fieldValue: upload.deferredUploadId, fieldName: Upload.deferredUploadIdKey, fieldIsString: false)
+        
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) \(deferredUploadIdField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
