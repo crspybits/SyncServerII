@@ -51,6 +51,7 @@ class FinishUploads {
         // Given the uploadIndex's and uploadCount's in the Upload table, it's not yet time to do a FinishUploads.
         case allUploadsNotYetReceived
         
+        // TODO: v0 transfer
         case success(numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)
         
         case deferredTransfer

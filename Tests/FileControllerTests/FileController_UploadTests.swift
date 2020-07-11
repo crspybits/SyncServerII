@@ -70,7 +70,7 @@ class FileController_UploadTests: ServerTestCase {
             return
         }
 
-        XCTAssert(result.response?.allUploadsFinished == true)
+        XCTAssert(result.response?.allUploadsFinished == .v0UploadsFinished)
                 
         guard let fileIndexCount2 = fileIndex.count() else {
             XCTFail()
@@ -135,7 +135,7 @@ class FileController_UploadTests: ServerTestCase {
         
         addUser = .no(sharingGroupUUID: sharingGroupUUID)
 
-        XCTAssert(result1.response?.allUploadsFinished == false)
+        XCTAssert(result1.response?.allUploadsFinished == .uploadsNotFinished)
                 
         guard let fileIndexCount2 = fileIndex.count() else {
             XCTFail()
@@ -156,7 +156,7 @@ class FileController_UploadTests: ServerTestCase {
             return
         }
 
-        XCTAssert(result2.response?.allUploadsFinished == true)
+        XCTAssert(result2.response?.allUploadsFinished == .v0UploadsFinished)
                 
         guard let fileIndexCount3 = fileIndex.count() else {
             XCTFail()
@@ -213,7 +213,7 @@ class FileController_UploadTests: ServerTestCase {
 
         addUser = .no(sharingGroupUUID: sharingGroupUUID)
 
-        XCTAssert(result1.response?.allUploadsFinished == false)
+        XCTAssert(result1.response?.allUploadsFinished == .uploadsNotFinished)
 
         let fileGroupUUID2: String
         if differentFileGroupUUIDs {
@@ -231,7 +231,7 @@ class FileController_UploadTests: ServerTestCase {
             XCTAssert(result2 == nil)
         }
         else {
-            XCTAssert(result2 != nil)
+            XCTAssert(result2?.response?.allUploadsFinished == .v0UploadsFinished)
         }
     }
     
@@ -264,7 +264,7 @@ class FileController_UploadTests: ServerTestCase {
 
         addUser = .no(sharingGroupUUID: sharingGroupUUID)
 
-        XCTAssert(result1.response?.allUploadsFinished == false)
+        XCTAssert(result1.response?.allUploadsFinished == .uploadsNotFinished)
         
         uploadIndex += 1
         
@@ -274,7 +274,7 @@ class FileController_UploadTests: ServerTestCase {
             XCTAssert(result2 == nil)
         }
         else {
-            XCTAssert(result2 != nil)
+            XCTAssert(result2?.response?.allUploadsFinished == .v0UploadsFinished)
         }
     }
     
@@ -303,7 +303,7 @@ class FileController_UploadTests: ServerTestCase {
 
         addUser = .no(sharingGroupUUID: sharingGroupUUID)
 
-        XCTAssert(result1.response?.allUploadsFinished == false)
+        XCTAssert(result1.response?.allUploadsFinished == .uploadsNotFinished)
         
         uploadIndex += 1
         if oneFileHasNilGroupUUID {
@@ -316,7 +316,7 @@ class FileController_UploadTests: ServerTestCase {
             XCTAssert(result2 == nil)
         }
         else {
-            XCTAssert(result2 != nil)
+            XCTAssert(result2?.response?.allUploadsFinished == .v0UploadsFinished)
         }
     }
     

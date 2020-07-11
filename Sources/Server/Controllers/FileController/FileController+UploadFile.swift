@@ -173,7 +173,9 @@ extension FileController {
             Log.info("File was already present: Not uploading again.")
             let upload = model as! Upload
             let response = UploadFileResponse()
-            response.allUploadsFinished = false
+            
+            // Given that the file is still in the Upload table, there must be more files in the batch needing upload.
+            response.allUploadsFinished = .uploadsNotFinished
             
             // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
             response.creationDate = creationDate
@@ -312,25 +314,23 @@ extension FileController {
 
         switch addUploadResult {
         case .success:
-            let response = UploadFileResponse()
-            var allUploadsFinished = false
-            
             guard let finishUploads = FinishUploads(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, sharingGroupName: nil, params: params) else {
                 finish(.errorCleanup(message: "Could not FinishUploads", cleanup: cleanup), params: params)
                 return
             }
             
             let transferResponse = finishUploads.transfer()
+            let response = UploadFileResponse()
+
             switch transferResponse {
             case .success:
-                allUploadsFinished = true
+                response.allUploadsFinished = .v0UploadsFinished
                 
             case .allUploadsNotYetReceived:
-                break
+                response.allUploadsFinished = .uploadsNotFinished
                 
             case .deferredTransfer:
-                assert(false)
-                break
+                response.allUploadsFinished = .vNUploadsTransferPending
                 
             case .error(let response):
                 params.completion(response)
@@ -340,7 +340,6 @@ extension FileController {
             // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
             response.creationDate = creationDate
             response.updateDate = upload.updateDate
-            response.allUploadsFinished = allUploadsFinished
             finish(.success(response: response), params: params)
             
         case .duplicateEntry:
