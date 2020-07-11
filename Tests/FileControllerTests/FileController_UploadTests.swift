@@ -107,6 +107,8 @@ class FileController_UploadTests: ServerTestCase {
         }
     }
     
+    // TODO: Upload a single file, with a non-nil fileGroupUUID
+    
     // MARK: file upload, v0, 1 of 2 files, and then 2 of 2 files.
 
     func uploadTwoV0Files(fileUUIDs: [String], uploadSingleFile:(_ addUser:AddUser, _ deviceUUID: String, _ fileUUID: String, _ uploadIndex: Int32, _ uploadCount: Int32)->(ServerTestCase.UploadFileResult?)) {
@@ -191,30 +193,137 @@ class FileController_UploadTests: ServerTestCase {
         }
     }
     
-   func testUploadTwoV0FilesWithDifferentSharingGroupUUIDsFails() {
+   func uploadTwoV0FilesWith(differentFileGroupUUIDs: Bool) {
         let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
         let deviceUUID = Foundation.UUID().uuidString
         
         var uploadIndex: Int32 = 1
         let uploadCount: Int32 = Int32(fileUUIDs.count)
         var addUser:AddUser = .yes
-
-        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser) else {
+        let fileGroupUUID1 = Foundation.UUID().uuidString
+        
+        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroupUUID: fileGroupUUID1),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
         }
 
-        addUser = .no(sharingGroupUUID: Foundation.UUID().uuidString)
+        addUser = .no(sharingGroupUUID: sharingGroupUUID)
 
         XCTAssert(result1.response?.allUploadsFinished == false)
 
-        uploadIndex += 1
-        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: true)
+        let fileGroupUUID2: String
+        if differentFileGroupUUIDs {
+            fileGroupUUID2 = Foundation.UUID().uuidString
+        }
+        else {
+            fileGroupUUID2 = fileGroupUUID1
+        }
         
-        XCTAssert(result2 == nil)
+        uploadIndex += 1
+        
+        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: differentFileGroupUUIDs, fileGroupUUID:fileGroupUUID2)
+        
+        if differentFileGroupUUIDs {
+            XCTAssert(result2 == nil)
+        }
+        else {
+            XCTAssert(result2 != nil)
+        }
     }
     
-    // TODO: > 1 file in batch, and they both have nil sharingGroupUUID
+    func testUploadTwoV0FilesWithSameFileGroupUUIDsWorks() {
+        uploadTwoV0FilesWith(differentFileGroupUUIDs: false)
+    }
+    
+    func testUploadTwoV0FilesWithDifferentFileGroupUUIDsFails() {
+        uploadTwoV0FilesWith(differentFileGroupUUIDs: true)
+    }
+    
+   func uploadTwoV0FilesWith(nilFileGroupUUIDs: Bool) {
+        let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        var uploadIndex: Int32 = 1
+        let uploadCount: Int32 = Int32(fileUUIDs.count)
+        var addUser:AddUser = .yes
+        var fileGroupUUID: String?
+        
+        if !nilFileGroupUUIDs {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
+        
+        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroupUUID: fileGroupUUID),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        addUser = .no(sharingGroupUUID: sharingGroupUUID)
+
+        XCTAssert(result1.response?.allUploadsFinished == false)
+        
+        uploadIndex += 1
+        
+        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: nilFileGroupUUIDs, fileGroupUUID:fileGroupUUID)
+        
+        if nilFileGroupUUIDs {
+            XCTAssert(result2 == nil)
+        }
+        else {
+            XCTAssert(result2 != nil)
+        }
+    }
+    
+    func testUploadTwoV0FilesWithNonNilFileGroupUUIDsWorks() {
+        uploadTwoV0FilesWith(nilFileGroupUUIDs: false)
+    }
+    
+    func testUploadTwoV0FilesWithNilFileGroupUUIDsFails() {
+        uploadTwoV0FilesWith(nilFileGroupUUIDs: true)
+    }
+    
+   func uploadTwoV0FilesWith(oneFileHasNilGroupUUID: Bool) {
+        let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        var uploadIndex: Int32 = 1
+        let uploadCount: Int32 = Int32(fileUUIDs.count)
+        var addUser:AddUser = .yes
+        var fileGroupUUID: String? = Foundation.UUID().uuidString
+        
+        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroupUUID: fileGroupUUID),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        addUser = .no(sharingGroupUUID: sharingGroupUUID)
+
+        XCTAssert(result1.response?.allUploadsFinished == false)
+        
+        uploadIndex += 1
+        if oneFileHasNilGroupUUID {
+            fileGroupUUID = nil
+        }
+        
+        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: oneFileHasNilGroupUUID, fileGroupUUID:fileGroupUUID)
+        
+        if oneFileHasNilGroupUUID {
+            XCTAssert(result2 == nil)
+        }
+        else {
+            XCTAssert(result2 != nil)
+        }
+    }
+    
+    func testUploadTwoV0FilesBothNonNilFileGroupUUIDsWorks() {
+        uploadTwoV0FilesWith(oneFileHasNilGroupUUID: false)
+    }
+    
+    func testUploadTwoV0FilesOneNilFileGroupUUIDsFails() {
+        uploadTwoV0FilesWith(oneFileHasNilGroupUUID: true)
+    }
 
 /*
     func testUploadTextAndJPEGFile() {

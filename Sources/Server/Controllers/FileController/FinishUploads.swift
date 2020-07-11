@@ -28,8 +28,8 @@ class FinishUploads {
      * 2) vN file uploads, N > 0.
      *
      * Errors:
-     *  a) More than one file in batch, but both have nil sharingGroupUUID.
-     *  b) More than one file in batch, but they have different sharingGroupUUID.
+     *  a) More than one file in batch, but both have nil fileGroupUUID.
+     *  b) More than one file in batch, but they have different fileGroupUUID's.
      */
     init?(sharingGroupUUID: String, deviceUUID: String, sharingGroupName: String?, params:RequestProcessingParameters) {
         self.sharingGroupUUID = sharingGroupUUID
