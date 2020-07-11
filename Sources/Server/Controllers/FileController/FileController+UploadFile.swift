@@ -11,6 +11,7 @@ import LoggerAPI
 import ServerShared
 import Kitura
 import ServerAccount
+import ServerUploader
 
 extension FileController {
     private struct Cleanup {

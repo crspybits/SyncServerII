@@ -52,8 +52,10 @@ let package = Package(
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")
             ]),
+        .target(name: "ServerUploader",
+            dependencies: ["Server"]),
         .target(name: "Server",
-            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount"],
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount", "ServerUploader"],
             swiftSettings: [
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")
