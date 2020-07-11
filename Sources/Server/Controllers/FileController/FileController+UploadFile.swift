@@ -11,7 +11,6 @@ import LoggerAPI
 import ServerShared
 import Kitura
 import ServerAccount
-import ServerUploader
 
 extension FileController {
     private struct Cleanup {
@@ -315,7 +314,7 @@ extension FileController {
 
         switch addUploadResult {
         case .success:
-            guard let finishUploads = FinishUploads(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, sharingGroupName: nil, params: params) else {
+            guard let finishUploads = FinishUploads(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, sharingGroupName: nil, params: params, uploader: uploader) else {
                 finish(.errorCleanup(message: "Could not FinishUploads", cleanup: cleanup), params: params)
                 return
             }

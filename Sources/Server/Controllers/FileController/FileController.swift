@@ -14,6 +14,8 @@ import ServerShared
 import ServerAccount
 
 class FileController : ControllerProtocol {
+    let uploader = Uploader()
+    
     enum CheckError : Error {
         case couldNotConvertModelObject
         case errorLookingUpInFileIndex

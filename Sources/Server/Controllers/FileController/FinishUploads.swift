@@ -17,7 +17,8 @@ class FinishUploads {
     private let params:RequestProcessingParameters
     private let userId: UserId
     private let sharingGroupName: String?
-        
+    private let uploader: Uploader
+    
     /** This is for both file uploads, and upload deletions.
      * Specific Use cases:
      * 1) v0 file uploads
@@ -31,11 +32,12 @@ class FinishUploads {
      *  a) More than one file in batch, but both have nil fileGroupUUID.
      *  b) More than one file in batch, but they have different fileGroupUUID's.
      */
-    init?(sharingGroupUUID: String, deviceUUID: String, sharingGroupName: String?, params:RequestProcessingParameters) {
+    init?(sharingGroupUUID: String, deviceUUID: String, sharingGroupName: String?, params:RequestProcessingParameters, uploader: Uploader) {
         self.sharingGroupUUID = sharingGroupUUID
         self.deviceUUID = deviceUUID
         self.params = params
         self.sharingGroupName = sharingGroupName
+        self.uploader = uploader
         
         // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
         guard let userId = params.currentSignedInUser?.userId else {
@@ -128,12 +130,11 @@ class FinishUploads {
         
         let vNUploads = currentUploads.filter({$0.v0UploadFileVersion == false}).count > 0
         
-        if vNUploads {            
-            let message = "TODO: Need to deferred transfer"
-            Log.error(message)
-            return .error(.failure(.message(message)))
-            
+        if vNUploads {
             // I want to mark the uploads to indicate they are ready for deferred transfer.
+
+            uploader.run()
+            return .deferredTransfer
         }
         // Else: v0 uploads
         
