@@ -335,6 +335,81 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             XCTFail()
         }
     }
+
+    func testUploadedIndexWithNonNilDeferredUploadId() {
+        let userRepo = UserRepository(db)
+        let accountManager = AccountManager(userRepository: userRepo)
+        let sharingGroupUUID = UUID().uuidString
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = AccountScheme.google.accountName
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = "100"
+        
+        let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
+        XCTAssert(userId == 1, "Bad credentialsId!")
+        
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        let index: Int32 = 1
+        let count: Int32 = 1
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, uploadIndex: index, uploadCount: count, userId:userId!, deviceUUID:deviceUUID)
+        
+        let uploadedFilesResult1 = UploadRepository(db).uploadedFiles(forUserId: userId!, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID)
+        switch uploadedFilesResult1 {
+        case .uploads(let uploads):
+            guard uploads.count == 1 else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(upload1.appMetaData == uploads[0].appMetaData)
+            XCTAssert(upload1.fileUUID == uploads[0].fileUUID)
+            XCTAssert(upload1.fileVersion == uploads[0].fileVersion)
+            XCTAssert(upload1.mimeType == uploads[0].mimeType)
+            XCTAssert(upload1.lastUploadedCheckSum == uploads[0].lastUploadedCheckSum)
+            XCTAssert(uploads[0].uploadIndex == index)
+            XCTAssert(uploads[0].uploadCount == count)
+
+        case .error(_):
+            XCTFail()
+        }
+        
+        let deferredUploadId:Int64 = 87
+        upload1.deferredUploadId = deferredUploadId
+        guard UploadRepository(db).update(upload: upload1) else {
+            XCTFail()
+            return
+        }
+
+        let uploadedFilesResult2 = UploadRepository(db).uploadedFiles(forUserId: userId!, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true)
+        switch uploadedFilesResult2 {
+        case .uploads(let uploads):
+            guard uploads.count == 0 else {
+                XCTFail()
+                return
+            }
+
+        case .error(_):
+            XCTFail()
+        }
+        
+        let uploadedFilesResult3 = UploadRepository(db).uploadedFiles(forUserId: userId!, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: false)
+        switch uploadedFilesResult3 {
+        case .uploads(let uploads):
+            guard uploads.count == 1 else {
+                XCTFail()
+                return
+            }
+
+        case .error(_):
+            XCTFail()
+        }
+    }
     
     func testUploadedIndexWithInterleavedSharingGroupFiles() {
         let sharingGroupUUID1 = UUID().uuidString

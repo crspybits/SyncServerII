@@ -63,7 +63,10 @@ class FinishUploads {
 
     func transfer() -> TransferResponse {
         let currentUploads: [Upload]
-        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID)
+        
+        // deferredUploadIdNull true because once these rows have a non-null  deferredUploadId they are pending deferred transfer and we should not deal with them here.
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true)
+        
         switch fileUploadsResult {
         case .uploads(let uploads):
             currentUploads = uploads
@@ -131,13 +134,20 @@ class FinishUploads {
         let vNUploads = currentUploads.filter({$0.v0UploadFileVersion == false}).count > 0
         
         if vNUploads {
-            // I want to mark the uploads to indicate they are ready for deferred transfer.
-
+            // Mark the uploads to indicate they are ready for deferred transfer.
+            guard markUploadsAsDeferred(uploads: currentUploads) else {
+                let message = "Failed markUploadsAsDeferred"
+                Log.error(message)
+                return .error(.failure(.message(message)))
+            }
+            
+            // Kick of the uploader
             uploader.run()
+            
             return .deferredTransfer
         }
-        // Else: v0 uploads
         
+        // Else: v0 uploads-- files have already been uploaded. Just need to do the transfer to the FileIndex.
         return transfer(currentUploads: currentUploads)
     }
     
@@ -259,6 +269,36 @@ class FinishUploads {
         }
         
         return .success(numberTransferred:numberTransferred!, uploadDeletions:fileIndexDeletions, staleVersionsToDelete:staleVersionsToDelete)
+    }
+    
+    // This is called only for vN files. These files will already be in the FileIndex.
+    private func markUploadsAsDeferred(uploads: [Upload]) -> Bool {
+        let deferredUpload = DeferredUpload()
+        deferredUpload.status = .pending
+        
+        let result = params.repos.deferredUpload.retry {[unowned self] in
+            return self.params.repos.deferredUpload.add(deferredUpload)
+        }
+        
+        let deferredUploadId: Int64
+        
+        switch result {
+        case .success(deferredUploadId: let id):
+            deferredUploadId = id
+        
+        default:
+            Log.error("Failed inserting DeferredUpload: \(result)")
+            return false
+        }
+        
+        for upload in uploads {
+            upload.deferredUploadId = deferredUploadId
+            guard params.repos.upload.update(upload: upload, fileInFileIndex: true) else {
+                return false
+            }
+        }
+        
+        return true
     }
 }
 

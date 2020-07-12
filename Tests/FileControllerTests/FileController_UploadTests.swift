@@ -10,13 +10,14 @@ import XCTest
 @testable import Server
 @testable import TestsCommon
 import LoggerAPI
+import HeliumLogger
 import Foundation
 import ServerShared
 
 class FileController_UploadTests: ServerTestCase {
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        HeliumLogger.use(.debug)
     }
     
     override func tearDown() {
@@ -47,19 +48,25 @@ class FileController_UploadTests: ServerTestCase {
      */
      
     // MARK: file upload, v0, 1 of 1 files.
-
-    func uploadSingleV0File(uploadSingleFile:(_ deviceUUID: String, _ fileUUID: String)->(ServerTestCase.UploadFileResult?)) {
+    struct UploadResult {
+        let deviceUUID: String
+        let fileUUID: String
+        let sharingGroupUUID: String?
+    }
+    
+    @discardableResult
+    func uploadSingleV0File(uploadSingleFile:(_ deviceUUID: String, _ fileUUID: String)->(ServerTestCase.UploadFileResult?)) -> UploadResult? {
         let fileIndex = FileIndexRepository(db)
         let upload = UploadRepository(db)
         
         guard let fileIndexCount1 = fileIndex.count() else {
             XCTFail()
-            return
+            return nil
         }
         
         guard let uploadCount1 = upload.count() else {
             XCTFail()
-            return
+            return nil
         }
         
         let deviceUUID = Foundation.UUID().uuidString
@@ -67,19 +74,19 @@ class FileController_UploadTests: ServerTestCase {
         
         guard let result = uploadSingleFile(deviceUUID, fileUUID) else {
             XCTFail()
-            return
+            return nil
         }
 
         XCTAssert(result.response?.allUploadsFinished == .v0UploadsFinished)
                 
         guard let fileIndexCount2 = fileIndex.count() else {
             XCTFail()
-            return
+            return nil
         }
         
         guard let uploadCount2 = upload.count() else {
             XCTFail()
-            return
+            return nil
         }
         
         // Make sure the file index has another row.
@@ -87,6 +94,8 @@ class FileController_UploadTests: ServerTestCase {
         
         // And the upload table has no more rows after.
         XCTAssert(uploadCount1 == uploadCount2)
+        
+        return UploadResult(deviceUUID: deviceUUID, fileUUID: fileUUID, sharingGroupUUID: result.sharingGroupUUID)
     }
     
     func testUploadSingleV0TextFile() {
@@ -326,6 +335,77 @@ class FileController_UploadTests: ServerTestCase {
     
     func testUploadTwoV0FilesOneNilFileGroupUUIDsFails() {
         uploadTwoV0FilesWith(oneFileHasNilGroupUUID: true)
+    }
+    
+    // MARK: file upload, vN, 1 of 1 files.
+
+    func uploadSingleVNFile(uploadSingleFile:(_ addUser:AddUser, _ deviceUUID: String, _ fileUUID: String, _ fileGroupUUID: String?)->(ServerTestCase.UploadFileResult?)) {
+    
+        // First upload the v0 file.
+        
+        var addUser:AddUser = .yes
+        let fileGroupUUID = Foundation.UUID().uuidString
+
+        let uploadResult:UploadResult! = uploadSingleV0File { deviceUUID, fileUUID in
+            return uploadSingleFile(addUser, deviceUUID, fileUUID, fileGroupUUID)
+        }
+        
+        guard uploadResult != nil,
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        // Next, upload v1 of the file.
+        
+        let fileIndex = FileIndexRepository(db)
+        let upload = UploadRepository(db)
+        
+        guard let fileIndexCount1 = fileIndex.count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount1 = upload.count() else {
+            XCTFail()
+            return
+        }
+        
+        addUser = .no(sharingGroupUUID: sharingGroupUUID)
+        
+        guard let result = uploadSingleFile(addUser, uploadResult.deviceUUID, uploadResult.fileUUID, nil) else {
+            XCTFail()
+            return
+        }
+
+        XCTAssert(result.response?.allUploadsFinished == .vNUploadsTransferPending)
+                
+        guard let fileIndexCount2 = fileIndex.count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount2 = upload.count() else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(fileIndexCount1 == fileIndexCount2)
+        XCTAssert(uploadCount1 + 1 == uploadCount2)
+        
+        // TODO: Check for additional entry in the DeferredUpload table.
+    }
+    
+    func testUploadOneV2TextFileWorks() {
+        uploadSingleVNFile { addUser, deviceUUID, fileUUID, fileGroupUUID in
+            return uploadTextFile(deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
+        }
+    }
+    
+    func testUploadOneV2JPEGFileWorks() {
+        uploadSingleVNFile { addUser, deviceUUID, fileUUID, fileGroupUUID in
+            return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
+        }
     }
     
     // TODO: Check FileIndex row specifics after each test.

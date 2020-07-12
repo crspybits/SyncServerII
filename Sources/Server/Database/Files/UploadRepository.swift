@@ -351,24 +351,29 @@ class UploadRepository : Repository, RepositoryLookup {
         // Basic criteria-- applies across uploads and upload deletion.
         if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.state == nil || upload.sharingGroupUUID == nil ||
             upload.uploadCount == nil || upload.uploadIndex == nil {
+            Log.error("deviceUUID group nil")
             return true
         }
         
         if upload.v0UploadFileVersion == nil && upload.fileVersion == nil
             && upload.state != .uploadingAppMetaData  {
+            Log.error("v0UploadFileVersion group nil")
             return true
         }
         
         if upload.state == .toDeleteFromFileIndex {
+            Log.error("toDeleteFromFileIndex group nil")
             return false
         }
         
         if upload.state == .uploadingAppMetaData {
+            Log.error("upload.state1 group nil")
             return upload.appMetaData == nil || upload.appMetaDataVersion == nil
         }
         
         // We're uploading a file if we get to here. Criteria only for file uploads:
         if upload.mimeType == nil || upload.updateDate == nil {
+            Log.error("upload.mimeType group nil: upload.mimeType: \(String(describing: upload.mimeType)); upload.updateDate: \(String(describing: upload.updateDate))")
             return true
         }
         
@@ -376,19 +381,26 @@ class UploadRepository : Repository, RepositoryLookup {
         let metaDataNil = upload.appMetaData == nil
         let metaDataVersionNil = upload.appMetaDataVersion == nil
         if metaDataNil != metaDataVersionNil {
+            Log.error("upload.metaDataNil group nil")
             return true
         }
         
         if !fileInFileIndex && upload.creationDate == nil {
+            Log.error("fileInFileIndex group nil")
             return true
         }
         
         if upload.state == .uploadingFile || upload.state == .uploadingUndelete {
+            Log.error("upload.state2 group nil")
             return false
         }
         
-        // Have to have lastUploadedCheckSum when we're in the uploaded state.
-        return upload.lastUploadedCheckSum == nil
+        // Have to have lastUploadedCheckSum when we're in the uploaded state, and we have v0.
+        if upload.lastUploadedCheckSum == nil && upload.v0UploadFileVersion == true {
+            return true
+        }
+        
+        return false
     }
     
     enum AddResult: RetryRequest {
@@ -497,7 +509,9 @@ class UploadRepository : Repository, RepositoryLookup {
         
         let deferredUploadIdField = getUpdateFieldSetter(fieldValue: upload.deferredUploadId, fieldName: Upload.deferredUploadIdKey, fieldIsString: false)
         
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), fileVersion=\(upload.fileVersion!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) \(deferredUploadIdField) WHERE uploadId=\(upload.uploadId!)"
+        let fileVersionField = getUpdateFieldSetter(fieldValue: upload.fileVersion, fieldName: Upload.fileVersionKey, fieldIsString: false)
+        
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) \(deferredUploadIdField) \(fileVersionField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -554,12 +568,16 @@ class UploadRepository : Repository, RepositoryLookup {
         }
     }
     
-    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, andState state:UploadState? = nil) -> Select? {
+    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, deferredUploadIdNull: Bool = false, andState state:UploadState? = nil) -> Select? {
     
         var query = "select * from \(tableName) where userId=\(userId) and sharingGroupUUID = '\(sharingGroupUUID)' and deviceUUID='\(deviceUUID)'"
         
         if state != nil {
             query += " and state='\(state!.rawValue)'"
+        }
+        
+        if deferredUploadIdNull {
+            query += " and deferredUploadId IS NULL"
         }
         
         return Select(db:db, query: query, modelInit: Upload.init, ignoreErrors:false)
@@ -572,9 +590,10 @@ class UploadRepository : Repository, RepositoryLookup {
     
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
     // Uploads are identified by userId, not effectiveOwningUserId: We want to organize uploads by specific user.
-    func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, andState state:UploadState? = nil) -> UploadedFilesResult {
+    // Set deferredUploadIdNil to true if you only want records where deferredUploadIdNil is non-nil.
+    func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, deferredUploadIdNull: Bool = false, andState state:UploadState? = nil) -> UploadedFilesResult {
         
-        guard let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, andState: state) else {
+        guard let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: deferredUploadIdNull, andState: state) else {
             return .error(nil)
         }
 

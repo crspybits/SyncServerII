@@ -717,14 +717,15 @@ class ServerTestCase : XCTestCase {
                     }
 
                     if let uploadResponse = try? UploadFileResponse.decode(dict!) {
-                        guard uploadResponse.creationDate != nil, uploadResponse.updateDate != nil else {
+                        guard uploadResponse.updateDate != nil else {
+                            XCTFail("A date was nil: uploadResponse.updateDate: \(String(describing: uploadResponse.updateDate))")
                             expectation.fulfill()
                             return
                         }
                         result = uploadResponse
                     }
                     else {
-                        XCTFail()
+                        XCTFail("Could not decode UploadFileResponse")
                     }
                 }
 

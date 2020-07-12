@@ -206,13 +206,13 @@ extension FileController {
             uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
         }
         else {
-            // Need to add the upload data to the UploadRepository only.
-            guard let string = String(data: uploadRequest.data, encoding: .utf8) else {
+            // Need to add the upload data to the UploadRepository.
+            guard let uploadContents = String(data: uploadRequest.data, encoding: .utf8) else {
                 finish(.errorResponse(.failure(.message("Could not convert data to string"))), params: params)
                 return
             }
             
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: nil, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: Date(), uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID, uploadContents: uploadContents)
         }
     }
     
@@ -247,7 +247,13 @@ extension FileController {
     }
     
     // This also calls finishUploads
-    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, deviceUUID: String) {
+    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, deviceUUID: String, uploadContents: String? = nil) {
+    
+        if !newFile && uploadContents == nil {
+            let message = "vN file and uploadContents were nil"
+            finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
+            return
+        }
         
         let upload = Upload()
         upload.deviceUUID = deviceUUID
@@ -257,6 +263,7 @@ extension FileController {
         upload.sharingGroupUUID = uploadRequest.sharingGroupUUID
         upload.uploadCount = uploadRequest.uploadCount
         upload.uploadIndex = uploadRequest.uploadIndex
+        upload.uploadContents = uploadContents
 
         // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
         var expectedCheckSum: String?
@@ -269,9 +276,9 @@ extension FileController {
         }
 #endif
 
-        if let expectedCheckSum = expectedCheckSum {
+        if newFile, let expectedCheckSum = expectedCheckSum {
             guard uploadedCheckSum?.lowercased() == expectedCheckSum else {
-                let message = "Checksum after upload to cloud storage (\(String(describing: uploadedCheckSum)) is not the same as before upload \(String(describing: expectedCheckSum))."
+                let message = "Checksum after upload to cloud storage \(String(describing: uploadedCheckSum)) is not the same as before upload \(String(describing: expectedCheckSum))."
                 finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
                 return
             }
