@@ -330,25 +330,9 @@ class Select {
                     return
                 }
                 
-				switch fieldType {
-				case "integer", "double", "string", "date":
-                    break
-                case "bytes":
-                    if let bytes = rowFieldValue as? Array<UInt8> {
-                        // Assume this is actually a String. Some Text fields come back this way.
-                        if let str = String(bytes: bytes, encoding: String.Encoding.utf8) {
-                            rowFieldValue = str
-                        }
-                    }
-                default:
-                    Log.error("Unknown field type: \(String(describing: self.fieldTypes[fieldNumber])); fieldNumber: \(fieldNumber)")
-                    if !ignoreErrors {
-                        self.forEachRowStatus = .unknownFieldType
-                        failure = true
-                        return
-                    }
-				}
-                
+                Log.debug("fieldType: \(fieldType)")
+
+                // Give first priority to `typeConvertersToModel` -- so it can override the fieldType if needed.
                 if let converter = rowModel.typeConvertersToModel(propertyName: fieldName) {
                     let value = converter(rowFieldValue)
                     
@@ -366,6 +350,26 @@ class Select {
                     }
                     else {
                         rowFieldValue = value!
+                    }
+                }
+                else {
+                    switch fieldType {
+                    case "integer", "double", "string", "date":
+                        break
+                    case "bytes":
+                        if let bytes = rowFieldValue as? Array<UInt8> {
+                            // Assume this is actually a String. Some Text fields come back this way.
+                            if let str = String(bytes: bytes, encoding: String.Encoding.utf8) {
+                                rowFieldValue = str
+                            }
+                        }
+                    default:
+                        Log.error("Unknown field type: \(String(describing: self.fieldTypes[fieldNumber])); fieldNumber: \(fieldNumber)")
+                        if !ignoreErrors {
+                            self.forEachRowStatus = .unknownFieldType
+                            failure = true
+                            return
+                        }
                     }
                 }
                 
@@ -429,8 +433,8 @@ extension Database {
             case bool(Bool)
             case boolOptional(Bool?)
             
-            // I'm not using `data` here because when I retrieve that data it seems to be converted to a string. Thus, just going to directly to string.
-            //case data(Data)
+            case data(Data)
+            case dataOptional(Data?)
         }
         
         enum Errors : Error {
@@ -580,6 +584,18 @@ extension Database {
                 case .boolOptional(let boolValue):
                     if let boolValue = boolValue {
                         self.stmt.bindParam(Int8(boolValue ? 1 : 0))
+                    }
+                    else {
+                        haveValue = false
+                    }
+                    
+                case .data(let dataValue):
+                    let uint8Array = [UInt8](dataValue)
+                    self.stmt.bindParam(uint8Array)
+                case .dataOptional(let dataValue):
+                    if let dataValue = dataValue {
+                        let uint8Array = [UInt8](dataValue)
+                        self.stmt.bindParam(uint8Array)
                     }
                     else {
                         haveValue = false

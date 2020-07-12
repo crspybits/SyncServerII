@@ -72,7 +72,7 @@ class Upload : NSObject, Model {
     
     // The contents of the upload for file versions > 0.
     static let uploadContentsKey = "uploadContents"
-    var uploadContents: String?
+    var uploadContents: Data?
 
     // DEPRECATED
     static let appMetaDataVersionKey = "appMetaDataVersion"
@@ -135,7 +135,7 @@ class Upload : NSObject, Model {
                 lastUploadedCheckSum = newValue as! String?
                 
             case Upload.uploadContentsKey:
-                uploadContents = newValue as? String
+                uploadContents = newValue as? Data
                 
             case Upload.uploadIndexKey:
                 uploadIndex = newValue as? Int32
@@ -183,6 +183,14 @@ class Upload : NSObject, Model {
             case Upload.v0UploadFileVersionKey:
                 return {(x:Any) -> Any? in
                     return (x as! Int8) == 1
+                }
+                
+            case Upload.uploadContentsKey:
+                return {(x:Any) -> Any? in
+                    guard let x = x as? Array<UInt8> else {
+                        return nil
+                    }
+                    return Data(x)
                 }
             
             default:
@@ -245,7 +253,8 @@ class UploadRepository : Repository, RepositoryLookup {
             "appMetaDataVersion INT, " +
             
             // Nullable because v0 uploads will not have this.
-            "uploadContents BLOB, " +
+            // 16MB limit on size. See https://stackoverflow.com/questions/5775571 and
+            "uploadContents MEDIUMBLOB, " +
             
             "uploadIndex INT NOT NULL, " +
             
@@ -311,7 +320,7 @@ class UploadRepository : Repository, RepositoryLookup {
             // 7/4/20; Evolution 4
             
             if db.columnExists(Upload.uploadContentsKey, in: tableName) == false {
-                if !db.addColumn("\(Upload.uploadContentsKey) BLOB", to: tableName) {
+                if !db.addColumn("\(Upload.uploadContentsKey) MEDIUMBLOB", to: tableName) {
                     return .failure(.columnCreation)
                 }
             }
@@ -460,7 +469,7 @@ class UploadRepository : Repository, RepositoryLookup {
 
         insert.add(fieldName: Upload.fileVersionKey, value: .int32Optional(upload.fileVersion))
         insert.add(fieldName: Upload.v0UploadFileVersionKey, value: .boolOptional(upload.v0UploadFileVersion))
-        insert.add(fieldName: Upload.uploadContentsKey, value: .stringOptional(upload.uploadContents))
+        insert.add(fieldName: Upload.uploadContentsKey, value: .dataOptional(upload.uploadContents))
         insert.add(fieldName: Upload.uploadIndexKey, value: .int32Optional(upload.uploadIndex))
         insert.add(fieldName: Upload.uploadCountKey, value: .int32Optional(upload.uploadCount))
         

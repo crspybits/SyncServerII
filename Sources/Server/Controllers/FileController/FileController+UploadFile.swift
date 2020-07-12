@@ -207,12 +207,12 @@ extension FileController {
         }
         else {
             // Need to add the upload data to the UploadRepository.
-            guard let uploadContents = String(data: uploadRequest.data, encoding: .utf8) else {
-                finish(.errorResponse(.failure(.message("Could not convert data to string"))), params: params)
+            guard let data = uploadRequest.data else {
+                finish(.errorResponse(.failure(.message("Could not get data from request"))), params: params)
                 return
             }
             
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: Date(), uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID, uploadContents: uploadContents)
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: Date(), uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID, uploadContents: data)
         }
     }
     
@@ -247,7 +247,7 @@ extension FileController {
     }
     
     // This also calls finishUploads
-    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, deviceUUID: String, uploadContents: String? = nil) {
+    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, deviceUUID: String, uploadContents: Data? = nil) {
     
         if !newFile && uploadContents == nil {
             let message = "vN file and uploadContents were nil"

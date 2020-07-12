@@ -209,9 +209,12 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         let mimeType = "text/plain"
         let creationDate = Date()
         let updateDate = Date()
-        let contents = "Foobar bloobly"
-        let uploadCount = 1
-        let uploadIndex = 2
+        guard let contents = "Foobar bloobly".data(using: .utf8) else {
+            XCTFail()
+            return
+        }
+        let uploadCount:Int32 = 1
+        let uploadIndex:Int32 = 2
         
         upload[Upload.uploadIdKey] = uploadId
         upload[Upload.fileUUIDKey] = fileUUID
@@ -228,7 +231,6 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         upload[Upload.uploadIndexKey] = uploadIndex
         upload[Upload.uploadCountKey] = uploadCount
 
-        
         XCTAssert(upload.uploadId == uploadId)
         XCTAssert(upload.fileUUID == fileUUID)
         XCTAssert(upload.userId == userId)
@@ -240,9 +242,16 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.mimeType == mimeType)
         XCTAssert(upload.creationDate == creationDate)
         XCTAssert(upload.updateDate == updateDate)
+        
         XCTAssert(upload.uploadContents == contents)
+        
         XCTAssert(upload.uploadIndex == uploadIndex)
-        XCTAssert(upload.uploadCount == uploadCount)
+        
+        guard let count = upload.uploadCount else {
+            XCTFail()
+            return
+        }
+        XCTAssert(count == uploadCount)
         
         upload[Upload.uploadIdKey] = nil
         upload[Upload.fileUUIDKey] = nil

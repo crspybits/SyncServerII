@@ -16,7 +16,7 @@ import CredentialsGoogle
 import Foundation
 import ServerShared
 
-class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
+class SpecificDatabaseTests_Uploads: ServerTestCase {
     override func setUp() {
         super.setUp()
         if case .failure = UploadRepository(db).upcreate() {
@@ -29,7 +29,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: String? = nil, uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, deferredUploadId: Int64? = nil, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: Data? = nil, uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, deferredUploadId: Int64? = nil, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -211,7 +211,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
-    func testUpdateUploadToUploadedFailsWithoutCheckSum() {
+    func testUpdateUploadToUploadedWithv0UploadFileVersionFailsWithoutCheckSum() {
         let sharingGroupUUID = UUID().uuidString
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -221,6 +221,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         let upload = doAddUpload(sharingGroupUUID:sharingGroupUUID)
         upload.lastUploadedCheckSum = nil
         upload.state = .uploadedFile
+        upload.v0UploadFileVersion = true
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
@@ -244,7 +245,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
             return
         }
         
-        let testContents = "Test contents"
+        let testContents = "Test contents".data(using: .utf8)
         let deferredUploadId: Int64 = 201
         let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, uploadContents: testContents, deferredUploadId: deferredUploadId)
         
@@ -455,30 +456,5 @@ class SpecificDatabaseTests_Uploads: ServerTestCase, LinuxTestable {
         case .error(_):
             XCTFail()
         }
-    }
-}
-
-extension SpecificDatabaseTests_Uploads {
-    static var allTests : [(String, (SpecificDatabaseTests_Uploads) -> () throws -> Void)] {
-        return [
-            ("testAddUpload", testAddUpload),
-            ("testAddUploadWithMissingField", testAddUploadWithMissingField),
-            ("testAddUploadDeletion", testAddUploadDeletion),
-            ("testAddUploadDeletionWithMissingField", testAddUploadDeletionWithMissingField),
-            ("testAddUploadSucceedsWithNilAppMetaData", testAddUploadSucceedsWithNilAppMetaData),
-            ("testAddUploadSucceedsWithNilCheckSum", testAddUploadSucceedsWithNilCheckSum),
-            ("testUpdateUpload", testUpdateUpload),
-            ("testUpdateUploadFailsWithoutUploadId", testUpdateUploadFailsWithoutUploadId),
-            ("testUpdateUploadToUploadedFailsWithoutCheckSum", testUpdateUploadToUploadedFailsWithoutCheckSum),
-            ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
-            ("testLookupFromUpload", testLookupFromUpload),
-            ("testGetUploadsWithNoFiles", testGetUploadsWithNoFiles),
-            ("testUploadedIndexWithOneFile", testUploadedIndexWithOneFile),
-            ("testUploadedIndexWithInterleavedSharingGroupFiles", testUploadedIndexWithInterleavedSharingGroupFiles)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests_Uploads.self)
     }
 }

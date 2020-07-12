@@ -280,12 +280,69 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         static var tableName = testTableName3
     }
     
+    class Table3Model : Model {
+        var c1: String!
+        var c2: Int32!
+        var c3: Int32!
+        var c4: Bool!
+        var c5: Data!
+
+        subscript(key:String) -> Any? {
+            set {
+                switch key {
+                case "c1":
+                    c1 = newValue as! String?
+                    
+                case "c2":
+                    c2 = newValue as? Int32
+
+                case "c3":
+                    c3 = newValue as? Int32
+                    
+                case "c4":
+                    c4 = newValue as? Bool
+                    
+                case "c5":
+                    c5 = newValue as? Data
+                    
+                default:
+                    assert(false)
+                }
+            }
+            
+            get {
+                return getValue(forKey:key)
+            }
+        }
+        
+        func typeConvertersToModel(propertyName:String) -> ((_ propertyValue:Any) -> Any?)? {
+            switch propertyName {
+                case "c4":
+                    return {(x:Any) -> Any? in
+                        return (x as! Int8) == 1
+                    }
+                    
+                case "c5":
+                    return {(x:Any) -> Any? in
+                        guard let x = x as? Array<UInt8> else {
+                            return nil
+                        }
+                        return Data(x)
+                    }
+                    
+                default:
+                    return nil
+            }
+        }
+    }
+    
     func createTable3() -> Bool {
         let createColumns =
             "(c1 VARCHAR(100), " +
             "c2 INT(3), " +
             "c3 INT(2), " +
-            "c4 BOOL)"
+            "c4 BOOL, " +
+            "c5 MEDIUMBLOB)"
 
         if case .success(.created) = db.createTableIfNeeded(tableName: GeneralDatabaseTests.testTableName3, columnCreateQuery: createColumns) {
             return true
@@ -734,6 +791,77 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         catch (let error) {
             XCTFail("\(error)")
         }
+    }
+    
+    func testDatabaseInsertDataValuesIntoBlobColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        
+        var data = Data()
+        data.append(0)
+        data.append(1)
+        data.append(0)
+        data.append(1)
+        
+        insert.add(fieldName: "c5", value: .data(data))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseSelectDataValuesFromBlobColumnWorks() {
+        let repo = Table3()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+        
+        var data = Data()
+        data.append(0)
+        data.append(1)
+        data.append(0)
+        data.append(1)
+        
+        insert.add(fieldName: "c5", value: .data(data))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+        
+        guard let select = Select(db: db, query: "SELECT * from \(Table3.tableName)", modelInit: Table3Model.init, ignoreErrors: false) else {
+            XCTFail()
+            return
+        }
+        
+        var rowCount = 0
+        
+        select.forEachRow { model in
+            guard let model = model as? Table3Model else {
+                XCTFail()
+                return
+            }
+            
+            Log.debug("model.c5.count: \(String(describing: model.c5?.count))")
+            
+            guard let resultData = model.c5,
+                resultData.count == data.count else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssert(resultData == data)
+            
+            rowCount += 1
+        }
+        
+        XCTAssert(select.forEachRowStatus == nil)
+        XCTAssert(rowCount == 1)
     }
     
     func testDatabaseUpdateWorks() {
