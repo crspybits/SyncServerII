@@ -56,10 +56,10 @@ class ServerTestCase : XCTestCase {
         try! Configuration.setup(configFileFullPath: "/tmp/ServerTests.json", testConfigFileFullPath: "/tmp/ServerTests.json")
 #endif
 
-        Database.remove()
-        _ = Database.setup()
-        
         self.db = Database()
+        
+        Database.remove(db: db)
+        _ = Database.setup(db: db)
         
         Log.logger = HeliumLogger()
         HeliumLogger.use(.debug)

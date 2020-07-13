@@ -10,18 +10,8 @@ import Foundation
 import Kitura
 import KituraSession
 import Credentials
-import CredentialsGoogle
-import CredentialsFacebook
-import CredentialsDropbox
-import CredentialsMicrosoft
 import ServerShared
 import LoggerAPI
-import ServerAccount
-import ServerDropboxAccount
-import ServerGoogleAccount
-import ServerMicrosoftAccount
-import ServerAppleSignInAccount
-import ServerFacebookAccount
 
 class ServerSetup {
     // Just a guess. Don't know what's suitable for length. See https://github.com/IBM-Swift/Kitura/issues/917
@@ -57,49 +47,7 @@ class ServerSetup {
         // Needed for testing.
         accountManager.reset()
         
-        if Configuration.server.allowedSignInTypes.Google == true {
-            let googleCredentials = CredentialsGoogleToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
-            credentials.register(plugin: googleCredentials)
-            accountManager.addAccountType(GoogleCreds.self)
-        }
-        
-        if Configuration.server.allowedSignInTypes.Facebook == true {
-            let facebookCredentials = CredentialsFacebookToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
-            credentials.register(plugin: facebookCredentials)
-            accountManager.addAccountType(FacebookCreds.self)
-        }
-
-        if Configuration.server.allowedSignInTypes.Dropbox == true {
-            let dropboxCredentials = CredentialsDropboxToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
-            credentials.register(plugin: dropboxCredentials)
-            accountManager.addAccountType(DropboxCreds.self)
-        }
-        
-        if Configuration.server.allowedSignInTypes.Microsoft == true {
-            let microsoftCredentials = CredentialsMicrosoftToken(tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
-            credentials.register(plugin: microsoftCredentials)
-            accountManager.addAccountType(MicrosoftCreds.self)
-        }
-        
-        if Configuration.server.allowedSignInTypes.AppleSignIn == true {
-//            let controller = AppleServerServerNotification()
-//            func process(params:RequestProcessingParameters) {
-//                //controller.
-//            }
-//
-//            proxyRouter.addRoute(ep: AppleServerServerNotification.endpoint, processRequest: process)
-        }
-        
-        // 8/8/17; There needs to be at least one sign-in type configured for the server to do anything. And at least one of these needs to allow owning users. If there can be no owning users, how do you create anything to share? https://github.com/crspybits/SyncServerII/issues/9
-        if accountManager.numberAccountTypes == 0 {
-            Log.error("There are no sign-in types configured!")
-            exit(1)
-        }
-        
-        if accountManager.numberOfOwningAccountTypes == 0 {
-            Log.error("There are no owning sign-in types configured!")
-            exit(1)
-        }
+        accountManager.setupAccounts(credentials: credentials)
         
         router.all { (request, response, next) in
             Log.info("REQUEST RECEIVED: \(request.urlURL.path)")

@@ -13,9 +13,7 @@ import CredentialsGoogle
 import ServerShared
 import ServerAccount
 
-class FileController : ControllerProtocol {
-    let uploader = Uploader()
-    
+class FileController : ControllerProtocol {    
     enum CheckError : Error {
         case couldNotConvertModelObject
         case errorLookingUpInFileIndex

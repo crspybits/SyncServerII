@@ -14,6 +14,8 @@ let package = Package(
         // .package(url: "../ServerShared", .branch("master")),
         //.package(url: "https://github.com/SyncServerII/ServerShared.git", .branch("master")),
         
+        .package(url: "https://github.com/SyncServerII/ChangeResolvers.git", .branch("master")),
+        
         .package(url: "https://github.com/SyncServerII/ServerAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerDropboxAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerGoogleAccount.git", .branch("master")),
@@ -54,7 +56,7 @@ let package = Package(
             ]),
 
         .target(name: "Server",
-            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount"],
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount", "ChangeResolvers"],
             swiftSettings: [
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")

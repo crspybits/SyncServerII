@@ -21,9 +21,7 @@ extension Database {
         DeferredUploadRepository.self
     ]
     
-    static func setup() -> Bool {
-        let db = Database(showStartupInfo: true)
-
+    static func setup(db: Database) -> Bool {
         // The ordering of these table creations is important because of foreign key constraints.
 
         for repoType in repoTypes {
@@ -37,12 +35,10 @@ extension Database {
     }
     
 #if DEBUG
-    static func remove() {
+    static func remove(db: Database) {
         // Reversing the order on removal to deal with foreign key constraints.
         let reversedRepoTypes = repoTypes.reversed()
         
-        let db = Database(showStartupInfo: false)
-
         for repoType in reversedRepoTypes {
             let repo = repoType.init(db)
             _ = repo.remove()

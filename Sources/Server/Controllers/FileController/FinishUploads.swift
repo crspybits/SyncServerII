@@ -17,7 +17,6 @@ class FinishUploads {
     private let params:RequestProcessingParameters
     private let userId: UserId
     private let sharingGroupName: String?
-    private let uploader: Uploader
     
     /** This is for both file uploads, and upload deletions.
      * Specific Use cases:
@@ -32,12 +31,11 @@ class FinishUploads {
      *  a) More than one file in batch, but both have nil fileGroupUUID.
      *  b) More than one file in batch, but they have different fileGroupUUID's.
      */
-    init?(sharingGroupUUID: String, deviceUUID: String, sharingGroupName: String?, params:RequestProcessingParameters, uploader: Uploader) {
+    init?(sharingGroupUUID: String, deviceUUID: String, sharingGroupName: String?, params:RequestProcessingParameters) {
         self.sharingGroupUUID = sharingGroupUUID
         self.deviceUUID = deviceUUID
         self.params = params
         self.sharingGroupName = sharingGroupName
-        self.uploader = uploader
         
         // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
         guard let userId = params.currentSignedInUser?.userId else {
@@ -141,8 +139,7 @@ class FinishUploads {
                 return .error(.failure(.message(message)))
             }
             
-            // Kick of the uploader
-            uploader.run()
+            Uploader.run()
             
             return .deferredTransfer
         }

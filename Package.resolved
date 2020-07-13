@@ -56,6 +56,15 @@
         }
       },
       {
+        "package": "ChangeResolvers",
+        "repositoryURL": "https://github.com/SyncServerII/ChangeResolvers.git",
+        "state": {
+          "branch": "master",
+          "revision": "0112a68ac488a12b78ffb9f862b0700dbad5e362",
+          "version": null
+        }
+      },
+      {
         "package": "CredentialsAppleSignIn",
         "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
         "state": {

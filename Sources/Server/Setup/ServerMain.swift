@@ -11,19 +11,12 @@ import HeliumLogger
 import LoggerAPI
 import Kitura
 
-// 7/2/17; SwiftMetrics, perhaps because it was mis-installed, was causing several of my higher-performing test cases to fail. E.g., 10 consecutive uploads and downloads of a 1MB file. Thus, I've commented it out for now.
-
-// import SwiftMetrics
-// import SwiftMetricsDash
-
 // If given, the single command line argument to the server is expected to be a full path to the server config file.
 
 public class ServerMain {
     // If server fails to start, try looking for a process using the server's port:
     //      sudo lsof -i -n -P | grep TCP | grep 8080
-    
-    // static var smd:SwiftMetricsDash?
-    
+        
     public enum ServerStartup {
         case blocking // doesn't return from startup (normal case)
         case nonBlocking // returns from startup (for XCTests)
@@ -34,13 +27,6 @@ public class ServerMain {
         HeliumLogger.use(.debug)
         
         Log.info("Launching server in \(type) mode with \(CommandLine.arguments.count) command line arguments.")
-        
-        // http://www.kitura.io/en/resources/tutorials/swiftmetrics.html
-        // https://developer.ibm.com/swift/2017/03/21/using-swiftmetrics-secure-kitura-server/
-        // Enable SwiftMetrics Monitoring
-        //let sm = try! SwiftMetrics()
-        // Pass SwiftMetrics to the dashboard for visualising
-        //smd = try? SwiftMetricsDash(swiftMetricsInstance : sm)
         
         if type == .blocking {
             do {
@@ -54,22 +40,26 @@ public class ServerMain {
                     try Configuration.setup(configFileFullPath: configFile)
                 }
             } catch (let error) {
-                Log.error("Failed during startup: Could not load config file: \(error)")
-                exit(1)
+                Startup.halt("Failed during startup: Could not load config file: \(error)")
+                return
             }
         }
         
         if !Controllers.setup() {
-            Log.error("Failed during startup: Could not setup controller(s).")
-            exit(1)
+            Startup.halt("Failed during startup: Could not setup controller(s).")
+            return
         }
         
-        if !Database.setup() {
-            Log.error("Failed during startup: Could not setup database tables(s).")
-            exit(1)
+        guard let db = Database(showStartupInfo: true) else {
+            Startup.halt("Failed during startup: Could not setup database tables(s).")
+            return
+        }
+        
+        if !Database.setup(db: db) {
+            Startup.halt("Failed during startup: Could not setup database tables(s).")
+            return
         }
 
-        let db = Database()
         let accountManager = AccountManager(userRepository: UserRepository(db))
         let serverRoutes = CreateRoutes(accountManager: accountManager, db: db)
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())

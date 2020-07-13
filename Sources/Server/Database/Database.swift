@@ -37,14 +37,14 @@ class Database {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
     }
     
-    init(showStartupInfo:Bool = false) {
+    init?(showStartupInfo:Bool = false) {
         self.connection = MySQL()
         if showStartupInfo {
             Log.info("Connecting to database with host: \(Configuration.server.db.host)...")
         }
         guard self.connection.connect(host: Configuration.server.db.host, user: Configuration.server.db.user, password: Configuration.server.db.password ) else {
             Log.error("Failure connecting to mySQL server \(Configuration.server.db.host): \(self.error)")
-            return
+            return nil
         }
         
         ServerStatsKeeper.session.increment(stat: .dbConnectionsOpened)
@@ -57,7 +57,7 @@ class Database {
 
         guard self.connection.selectDatabase(named: Configuration.server.db.database) else {
             Log.error("Failure: \(self.error)")
-            return
+            return nil
         }
     }
     

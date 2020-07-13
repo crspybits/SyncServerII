@@ -396,17 +396,21 @@ class FileController_UploadTests: ServerTestCase {
         // TODO: Check for additional entry in the DeferredUpload table.
     }
     
-    func testUploadOneV2TextFileWorks() {
+    func testUploadOneV1TextFileWorks() {
         uploadSingleVNFile { addUser, deviceUUID, fileUUID, fileGroupUUID in
             return uploadTextFile(deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
         }
     }
     
-    func testUploadOneV2JPEGFileWorks() {
+    func testUploadOneV1JPEGFileWorks() {
         uploadSingleVNFile { addUser, deviceUUID, fileUUID, fileGroupUUID in
             return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
         }
     }
+    
+    // TODO: And this really is a separate set of tests than the present-- Need to work further on the plugins that are going to allow processing of the vN upload request data. They are going to take a collection of Upload rows targetting the same file, and merge the requests and update the file in cloud storage.
+    
+    // TODO: After that work is done, can come back here to test the results. 
     
     // TODO: Check FileIndex row specifics after each test.
 
