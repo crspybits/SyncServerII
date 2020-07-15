@@ -63,12 +63,12 @@ let package = Package(
             ]),
             
         .testTarget(name: "TestsCommon", dependencies: ["Server", "Main"]),
-        
         .testTarget(name: "AccountTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "DatabaseTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "SharingTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "AccountFileTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "ChangeResolverTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "OtherTests", dependencies: ["TestsCommon"])
     ]
 )

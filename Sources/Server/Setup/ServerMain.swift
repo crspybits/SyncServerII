@@ -59,7 +59,16 @@ public class ServerMain {
             Startup.halt("Failed during startup: Could not setup database tables(s).")
             return
         }
-
+        
+        let resolverManager = ChangeResolverManager()
+        do {
+            try resolverManager.setupResolvers()
+            try Uploader.setup(manager: resolverManager)
+        } catch let error {
+            Startup.halt("Failed setting up Uploader: \(error)")
+            return
+        }
+        
         let accountManager = AccountManager(userRepository: UserRepository(db))
         let serverRoutes = CreateRoutes(accountManager: accountManager, db: db)
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
