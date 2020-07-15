@@ -42,6 +42,8 @@
 		83EB168524BC08A3008C3A05 /* Database+Lock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EB168424BC08A3008C3A05 /* Database+Lock.swift */; };
 		83EB168724BC0BCC008C3A05 /* DatabaseLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EB168624BC0BCC008C3A05 /* DatabaseLockTests.swift */; };
 		83EB168924BC1628008C3A05 /* Database+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EB168824BC1628008C3A05 /* Database+Extras.swift */; };
+		83EB168B24BE96A6008C3A05 /* UploaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EB168A24BE96A6008C3A05 /* UploaderTests.swift */; };
+		83EB168C24BE96A6008C3A05 /* UploaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EB168A24BE96A6008C3A05 /* UploaderTests.swift */; };
 		E524963ABAC77E2AFD235B2D /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5314D9D048AF75E6A386F43E /* Server.json */; };
 		OBJ_1008 /* AccountDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_214 /* AccountDetails.swift */; };
 		OBJ_1009 /* ApplePublicKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_215 /* ApplePublicKey.swift */; };
@@ -5747,6 +5749,7 @@
 		83EB168424BC08A3008C3A05 /* Database+Lock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Lock.swift"; sourceTree = "<group>"; };
 		83EB168624BC0BCC008C3A05 /* DatabaseLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseLockTests.swift; sourceTree = "<group>"; };
 		83EB168824BC1628008C3A05 /* Database+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Extras.swift"; sourceTree = "<group>"; };
+		83EB168A24BE96A6008C3A05 /* UploaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploaderTests.swift; sourceTree = "<group>"; };
 		"ChangeResolvers::ChangeResolvers::Product" /* ChangeResolvers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"CredentialsAppleSignIn::CredentialsAppleSignIn::Product" /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"CredentialsDropbox::CredentialsDropbox::Product" /* CredentialsDropbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -8693,6 +8696,7 @@
 		OBJ_82 /* ChangeResolverTests */ = {
 			isa = PBXGroup;
 			children = (
+				83EB168A24BE96A6008C3A05 /* UploaderTests.swift */,
 				OBJ_83 /* ChangeResolverManagerTests.swift */,
 			);
 			name = ChangeResolverTests;
@@ -10950,6 +10954,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_1291 /* DatabaseModelTests.swift in Sources */,
+				83EB168C24BE96A6008C3A05 /* UploaderTests.swift in Sources */,
 				OBJ_1292 /* GeneralDatabaseTests.swift in Sources */,
 				OBJ_1293 /* SpecificDatabaseTests_DeferredUploadRepository.swift in Sources */,
 				OBJ_1294 /* SpecificDatabaseTests_DeviceUUID.swift in Sources */,
@@ -11788,6 +11793,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_872 /* ChangeResolverManagerTests.swift in Sources */,
+				83EB168B24BE96A6008C3A05 /* UploaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

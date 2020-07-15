@@ -21,10 +21,11 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
         repo = DeferredUploadRepository(db)
     }
     
-    func doAddDeferredUpload(status: DeferredUpload.Status) -> DeferredUpload? {
+    func doAddDeferredUpload(status: DeferredUpload.Status, fileGroupUUID: String? = nil) -> DeferredUpload? {
         let deferredUpload = DeferredUpload()
 
         deferredUpload.status = status
+        deferredUpload.fileGroupUUID = fileGroupUUID
         
         let result = repo.add(deferredUpload)
         
@@ -50,11 +51,13 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
     }
     
     func testUpdateDeferredUploadWithValidFieldsWorks() {
-        guard let deferredUpload = doAddDeferredUpload(status: .pending) else {
+        let fileGroupUUID = Foundation.UUID().uuidString
+
+        guard let deferredUpload = doAddDeferredUpload(status: .pending, fileGroupUUID: fileGroupUUID) else {
             XCTFail()
             return
         }
-        
+                
         let newStatus = DeferredUpload.Status.completed
         deferredUpload.status = newStatus
         
@@ -79,6 +82,7 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
             
             XCTAssert(model.deferredUploadId == id)
             XCTAssert(model.status == newStatus)
+            XCTAssert(model.fileGroupUUID == fileGroupUUID)
         default:
             XCTFail()
         }

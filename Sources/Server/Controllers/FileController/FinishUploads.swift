@@ -139,7 +139,13 @@ class FinishUploads {
                 return .error(.failure(.message(message)))
             }
             
-            Uploader.run()
+            do {
+                try Uploader.run()
+            } catch let error {
+                let message = "Failed Uploader.run: \(error)"
+                Log.error(message)
+                return .error(.failure(.message(message)))
+            }
             
             return .deferredTransfer
         }

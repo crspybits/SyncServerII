@@ -48,6 +48,7 @@ extension Database {
         throw DatabaseLockError.failedGetLock("\(errorMessage()); \(errorCode())")
     }
     
+    @discardableResult
     func releaseLock(lockName: String) throws -> Bool {
         let query = "SELECT RELEASE_LOCK('\(lockName)')"
 

@@ -22,6 +22,10 @@ class DeferredUpload : NSObject, Model {
     static let deferredUploadIdKey = "deferredUploadId"
     var deferredUploadId:Int64!
     
+    static let fileGroupUUIDKey = "fileGroupUUID"
+    // Not all files have to be associated with a file group.
+    var fileGroupUUID:String?
+    
     static let statusKey = "status"
     var status:Status!
     
@@ -30,7 +34,10 @@ class DeferredUpload : NSObject, Model {
             switch key {
             case DeferredUpload.deferredUploadIdKey:
                 deferredUploadId = newValue as? Int64
-                
+
+            case DeferredUpload.fileGroupUUIDKey:
+                fileGroupUUID = newValue as? String
+
             case DeferredUpload.statusKey:
                 status = newValue as? Status
                 
@@ -78,6 +85,8 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(deferredUploadId BIGINT NOT NULL AUTO_INCREMENT, " +
+            
+            "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
 
             "status VARCHAR(\(DeferredUpload.Status.maxCharacterLength)) NOT NULL, " +
             
@@ -87,7 +96,11 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
         
         switch result {
         case .success(.alreadyPresent):
-            break
+            if db.columnExists(DeferredUpload.fileGroupUUIDKey, in: tableName) == false {
+                if !db.addColumn("\(DeferredUpload.fileGroupUUIDKey) VARCHAR(\(Database.uuidLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
             
         default:
             break
@@ -138,6 +151,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     func add(_ deferredUpload:DeferredUpload) -> AddResult {
         let insert = Database.PreparedStatement(repo: self, type: .insert)
         
+        insert.add(fieldName: DeferredUpload.fileGroupUUIDKey, value: .stringOptional(deferredUpload.fileGroupUUID))
         insert.add(fieldName: DeferredUpload.statusKey, value: .stringOptional(deferredUpload.status?.rawValue))
 
         do {
