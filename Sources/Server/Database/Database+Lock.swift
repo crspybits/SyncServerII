@@ -16,11 +16,22 @@ extension Database {
         case failedReleaseLock(String)
     }
     
-    // A nil timeout means no timeout; otherwise, gives timeout in seconds.
-    func getLock(lockName: String, timeout: UInt? = nil) throws -> Bool {
-        var actualTimeout = -1
-        if let timeout = timeout {
-            actualTimeout = Int(timeout)
+    // Gives the amount of time to wait for the lock if another connection has the lock.
+    enum LockTimeout {
+        case doNotWait
+        case waitForDuration(seconds: UInt)
+        case infinite
+    }
+    
+    func getLock(lockName: String, timeout: LockTimeout = .doNotWait) throws -> Bool {
+        let actualTimeout: Int
+        switch timeout {
+        case .doNotWait:
+            actualTimeout = 0
+        case .waitForDuration(seconds: let seconds):
+            actualTimeout = Int(seconds)
+        case .infinite:
+            actualTimeout = -1
         }
         
         let query = "SELECT GET_LOCK('\(lockName)', \(actualTimeout))"
