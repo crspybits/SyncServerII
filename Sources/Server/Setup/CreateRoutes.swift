@@ -14,17 +14,19 @@ import LoggerAPI
 class CreateRoutes {
     private var router = Router()
     let accountManager: AccountManager
+    let changeResolverManager: ChangeResolverManager
     let db: Database
     
-    init(accountManager: AccountManager, db: Database) {
+    init(accountManager: AccountManager, changeResolverManager: ChangeResolverManager, db: Database) {
         self.accountManager = accountManager
+        self.changeResolverManager = changeResolverManager
         self.db = db
     }
     
     func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest) {
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info("parsedURL: \(routerRequest.parsedURL)")
-            let handler = RequestHandler(request: routerRequest, response: routerResponse, accountManager: accountManager, db: db, endpoint:ep)
+            let handler = RequestHandler(request: routerRequest, response: routerResponse, accountManager: accountManager, changeResolverManager: changeResolverManager, db: db, endpoint:ep)
             
             func create(routerRequest: RouterRequest) -> RequestMessage? {
                 let queryDict = routerRequest.queryParameters
@@ -79,7 +81,7 @@ class CreateRoutes {
         ServerRoutes.add(proxyRouter: self)
 
         self.router.error {[unowned self] request, response, _ in
-            let handler = RequestHandler(request: request, response: response, accountManager: self.accountManager, db: self.db)
+            let handler = RequestHandler(request: request, response: response, accountManager: self.accountManager, changeResolverManager: self.changeResolverManager, db: self.db)
             
             let errorDescription: String
             if let error = response.error {
@@ -93,7 +95,7 @@ class CreateRoutes {
         }
 
         self.router.all { request, response, _ in
-            let handler = RequestHandler(request: request, response: response, accountManager: self.accountManager, db: self.db)
+            let handler = RequestHandler(request: request, response: response, accountManager: self.accountManager, changeResolverManager: self.changeResolverManager, db: self.db)
             let message = "Route not found in server: \(request.originalURL)"
             response.statusCode = .notFound
             handler.failWithError(message: message)

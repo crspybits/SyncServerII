@@ -11,6 +11,7 @@
 import Foundation
 import ServerShared
 import LoggerAPI
+import ChangeResolvers
 
 enum UploadState : String {
     case uploadingFile
@@ -69,6 +70,10 @@ class Upload : NSObject, Model {
     
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
+    
+    // Can be non-nil for v0 files only. Leave nil if files are static and changes cannot be applied.
+    static let changeResolverNameKey = "changeResolverName"
+    var changeResolverName: String?
     
     // The contents of the upload for file versions > 0.
     static let uploadContentsKey = "uploadContents"
@@ -136,6 +141,9 @@ class Upload : NSObject, Model {
                 
             case Upload.uploadContentsKey:
                 uploadContents = newValue as? Data
+                
+            case Upload.changeResolverNameKey:
+                changeResolverName = newValue as? String
                 
             case Upload.uploadIndexKey:
                 uploadIndex = newValue as? Int32
@@ -266,6 +274,8 @@ class UploadRepository : Repository, RepositoryLookup {
             
             // Non-nil for vN file uploads when they have been sent for deferred uploading.
             "deferredUploadId BIGINT, " +
+            
+            "changeResolverName VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength)), " +
 
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
 
@@ -348,6 +358,12 @@ class UploadRepository : Repository, RepositoryLookup {
                     return .failure(.columnCreation)
                 }
             }
+            
+            if db.columnExists(Upload.changeResolverNameKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.changeResolverNameKey) VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
 
         default:
             break
@@ -356,11 +372,17 @@ class UploadRepository : Repository, RepositoryLookup {
         return result
     }
     
-    private func haveNilField(upload:Upload, fileInFileIndex: Bool) -> Bool {
+    private func basicFieldCheck(upload:Upload, fileInFileIndex: Bool) -> Bool {
         // Basic criteria-- applies across uploads and upload deletion.
         if upload.deviceUUID == nil || upload.fileUUID == nil || upload.userId == nil || upload.state == nil || upload.sharingGroupUUID == nil ||
             upload.uploadCount == nil || upload.uploadIndex == nil {
             Log.error("deviceUUID group nil")
+            return true
+        }
+        
+        // changeResolverName can only be non-nil with a v0 upload.
+        if upload.changeResolverName != nil && upload.v0UploadFileVersion == false {
+            Log.error("changeResolverName group")
             return true
         }
         
@@ -436,7 +458,7 @@ class UploadRepository : Repository, RepositoryLookup {
     
     // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
     func add(upload:Upload, fileInFileIndex:Bool=false) -> AddResult {
-        if haveNilField(upload: upload, fileInFileIndex:fileInFileIndex) {
+        if basicFieldCheck(upload: upload, fileInFileIndex:fileInFileIndex) {
             Log.error("One of the model values was nil!")
             return .aModelValueWasNil
         }
@@ -472,6 +494,7 @@ class UploadRepository : Repository, RepositoryLookup {
         insert.add(fieldName: Upload.uploadContentsKey, value: .dataOptional(upload.uploadContents))
         insert.add(fieldName: Upload.uploadIndexKey, value: .int32Optional(upload.uploadIndex))
         insert.add(fieldName: Upload.uploadCountKey, value: .int32Optional(upload.uploadCount))
+        insert.add(fieldName: Upload.changeResolverNameKey, value: .stringOptional(upload.changeResolverName))
         
         insert.add(fieldName: Upload.deferredUploadIdKey, value: .int64Optional(upload.deferredUploadId))
 
@@ -502,7 +525,7 @@ class UploadRepository : Repository, RepositoryLookup {
     
     // The Upload model *must* have an uploadId
     func update(upload:Upload, fileInFileIndex:Bool=false) -> Bool {
-        if upload.uploadId == nil || haveNilField(upload: upload, fileInFileIndex:fileInFileIndex) {
+        if upload.uploadId == nil || basicFieldCheck(upload: upload, fileInFileIndex:fileInFileIndex) {
             Log.error("One of the model values was nil!")
             return false
         }

@@ -30,7 +30,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         super.tearDown()
     }
     
-    func doAddFileIndex(userId:UserId = 1, sharingGroupUUID:String, createSharingGroup: Bool) -> FileIndex? {
+    func doAddFileIndex(userId:UserId = 1, sharingGroupUUID:String, createSharingGroup: Bool, changeResolverName: String? = nil) -> FileIndex? {
 
         if createSharingGroup {
             guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
@@ -56,6 +56,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         fileIndex.creationDate = Date()
         fileIndex.updateDate = Date()
         fileIndex.sharingGroupUUID = sharingGroupUUID
+        fileIndex.changeResolverName = changeResolverName
         
         let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
         guard case .success(let uploadId) = result1 else {
@@ -82,6 +83,25 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         
         let sharingGroupUUID = UUID().uuidString
         guard let _ = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func testAddFileIndexWithChangeResolver() {
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = AccountScheme.google.accountName
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = "100"
+        
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+            XCTFail("Bad credentialsId!")
+            return
+        }
+        
+        let sharingGroupUUID = UUID().uuidString
+        guard let _ = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true, changeResolverName: "Foobar") else {
             XCTFail()
             return
         }
@@ -181,13 +201,14 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
-
+        let changeResolverName = "Foobar"
+        
         guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
         
-        guard let fileIndex1 = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
+        guard let fileIndex1 = doAddFileIndex(userId:userId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
@@ -209,6 +230,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
             XCTAssert(fileIndex1.userId != nil && fileIndex1.userId == fileIndex2.userId)
             XCTAssert(fileIndex1.appMetaData != nil && fileIndex1.appMetaData == fileIndex2.appMetaData)
             XCTAssert(fileIndex1.sharingGroupUUID != nil && fileIndex1.sharingGroupUUID == fileIndex2.sharingGroupUUID)
+            XCTAssert(fileIndex2.changeResolverName == changeResolverName)
 
         case .noObjectFound:
             XCTFail("No Upload Found")

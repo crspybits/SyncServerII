@@ -29,7 +29,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: Data? = nil, uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, deferredUploadId: Int64? = nil, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: Data? = nil, changeResolverName: String = "ExampleChangeResolver", uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, deferredUploadId: Int64? = nil, missingField:Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -51,6 +51,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         upload.uploadCount = uploadCount
         upload.uploadIndex = uploadIndex
         upload.deferredUploadId = deferredUploadId
+        upload.changeResolverName = changeResolverName
         
         let result = UploadRepository(db).add(upload: upload)
         
@@ -358,7 +359,8 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         let index: Int32 = 1
         let count: Int32 = 1
-        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, uploadIndex: index, uploadCount: count, userId:userId!, deviceUUID:deviceUUID)
+        let changeResolverName = "ExampleChangeResolverName"
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, changeResolverName:changeResolverName, uploadIndex: index, uploadCount: count, userId:userId!, deviceUUID:deviceUUID)
         
         let uploadedFilesResult1 = UploadRepository(db).uploadedFiles(forUserId: userId!, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID)
         switch uploadedFilesResult1 {
@@ -375,6 +377,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             XCTAssert(upload1.lastUploadedCheckSum == uploads[0].lastUploadedCheckSum)
             XCTAssert(uploads[0].uploadIndex == index)
             XCTAssert(uploads[0].uploadCount == count)
+            XCTAssert(uploads[0].changeResolverName == changeResolverName)
 
         case .error(_):
             XCTFail()

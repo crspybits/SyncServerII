@@ -11,6 +11,7 @@
 import Foundation
 import LoggerAPI
 import ServerShared
+import ChangeResolvers
 
 typealias FileIndexId = Int64
 
@@ -47,6 +48,10 @@ class FileIndex : NSObject, Model {
     
     static let mimeTypeKey = "mimeType"
     var mimeType: String!
+    
+    // Nil only if files are static and changes cannot be applied.
+    static let changeResolverNameKey = "changeResolverName"
+    var changeResolverName: String?
     
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
@@ -111,6 +116,9 @@ class FileIndex : NSObject, Model {
                 
             case FileIndex.lastUploadedCheckSumKey:
                 lastUploadedCheckSum = newValue as! String?
+                
+            case FileIndex.changeResolverNameKey:
+                changeResolverName = newValue as? String
                 
             case User.accountTypeKey:
                 accountType = newValue as! String?
@@ -214,6 +222,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             "lastUploadedCheckSum TEXT, " +
 
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
+            
+            "changeResolverName VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength)), " +
 
             "UNIQUE (fileUUID, sharingGroupUUID), " +
             "UNIQUE (fileIndexId))"
@@ -256,6 +266,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 }
             }
             
+            // 7/15/20; Evolution 5
+            if db.columnExists(FileIndex.changeResolverNameKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.changeResolverNameKey) VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
         default:
             break
         }
@@ -289,30 +306,49 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return .error
         }
         
-        let deletedValue = fileIndex.deleted == true ? 1 : 0
-        
-        let creationDateValue = DateExtras.date(fileIndex.creationDate!, toFormat: .DATETIME)
-        let updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
-        
-        // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-        let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.appMetaData, fieldName: Upload.appMetaDataKey)
+        let insert = Database.PreparedStatement(repo: self, type: .insert)
 
-        let (appMetaDataVersionFieldValue, appMetaDataVersionFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.appMetaDataVersion, fieldName: Upload.appMetaDataVersionKey, fieldIsString:false)
+        insert.add(fieldName: FileIndex.fileVersionKey, value: .int32Optional(fileIndex.fileVersion))
+        insert.add(fieldName: FileIndex.userIdKey, value: .int64Optional(fileIndex.userId))
+        insert.add(fieldName: FileIndex.appMetaDataVersionKey, value: .int32Optional(fileIndex.appMetaDataVersion))
         
-        let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
+        insert.add(fieldName: FileIndex.deletedKey, value: .boolOptional(fileIndex.deleted))
+
+        insert.add(fieldName: FileIndex.fileGroupUUIDKey, value: .stringOptional(fileIndex.fileGroupUUID))
+        insert.add(fieldName: FileIndex.appMetaDataKey, value: .stringOptional(fileIndex.appMetaData))
+        insert.add(fieldName: FileIndex.fileUUIDKey, value: .stringOptional(fileIndex.fileUUID))
+        insert.add(fieldName: FileIndex.deviceUUIDKey, value: .stringOptional(fileIndex.deviceUUID))
+        insert.add(fieldName: FileIndex.mimeTypeKey, value: .stringOptional(fileIndex.mimeType))
+        insert.add(fieldName: FileIndex.lastUploadedCheckSumKey, value: .stringOptional(fileIndex.lastUploadedCheckSum))
+        insert.add(fieldName: FileIndex.sharingGroupUUIDKey, value: .stringOptional(fileIndex.sharingGroupUUID))
+        insert.add(fieldName: FileIndex.changeResolverNameKey, value: .stringOptional(fileIndex.changeResolverName))
+
+        if let creationDate = fileIndex.creationDate {
+            let creationDateValue = DateExtras.date(creationDate, toFormat: .DATETIME)
+            insert.add(fieldName: FileIndex.creationDateKey, value: .string(creationDateValue))
+        }
         
-        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.lastUploadedCheckSumKey), \(FileIndex.sharingGroupUUIDKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), '\(fileIndex.lastUploadedCheckSum!)', '\(fileIndex.sharingGroupUUID!)' \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
+        if let updateDate = fileIndex.updateDate {
+            let updateDateValue = DateExtras.date(updateDate, toFormat: .DATETIME)
+            insert.add(fieldName: FileIndex.updateDateKey, value: .string(updateDateValue))
+        }
         
-        if db.query(statement: query) {
+        do {
+            try insert.run()
+            Log.info("Sucessfully created FileIndex row")
             return .success(uploadId: db.lastInsertId())
         }
-        else if db.errorCode() == Database.deadlockError {
-            return .deadlock
-        }
-        else {
-            let error = db.error
-            Log.error("Could not insert row into \(tableName): \(error)")
-            return .error
+        catch (let error) {
+            Log.info("Failed inserting Upload row: \(db.errorCode()); \(db.errorMessage())")
+            
+            if db.errorCode() == Database.deadlockError {
+                return .deadlock
+            }
+            else {
+                let message = "Could not insert into \(tableName): \(error)"
+                Log.error(message)
+                return .error
+            }
         }
     }
     
@@ -485,6 +521,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 if v0UploadFileVersion {
                     fileIndex.fileVersion = 0
                     fileIndex.creationDate = upload.creationDate
+                    fileIndex.changeResolverName = upload.changeResolverName
                     
                     // OWNER
                     // version 0 of a file establishes the owning user. The owning user doesn't change if new versions are uploaded.

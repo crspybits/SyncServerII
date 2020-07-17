@@ -60,6 +60,10 @@ public class ServerMain {
             return
         }
         
+#if DEBUG
+        Uploader.reset()
+#endif
+        
         let resolverManager = ChangeResolverManager()
         do {
             try resolverManager.setupResolvers()
@@ -70,7 +74,7 @@ public class ServerMain {
         }
         
         let accountManager = AccountManager(userRepository: UserRepository(db))
-        let serverRoutes = CreateRoutes(accountManager: accountManager, db: db)
+        let serverRoutes = CreateRoutes(accountManager: accountManager, changeResolverManager: resolverManager, db: db)
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
         
         switch type {

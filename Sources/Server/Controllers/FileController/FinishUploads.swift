@@ -131,7 +131,7 @@ class FinishUploads {
         
         let vNUploads = currentUploads.filter({$0.v0UploadFileVersion == false}).count > 0
         
-        if vNUploads {
+        if vNUploads {            
             // Mark the uploads to indicate they are ready for deferred transfer.
             guard markUploadsAsDeferred(uploads: currentUploads) else {
                 let message = "Failed markUploadsAsDeferred"
@@ -154,6 +154,7 @@ class FinishUploads {
         return transfer(currentUploads: currentUploads)
     }
     
+    // QUESTION: Is this only used for v0 uploads?
     private func transfer(currentUploads: [Upload]) -> TransferResponse {
         // 1) See if any of the file uploads are for file versions > 0. Later, we'll have to delete stale versions of the file(s) in cloud storage if so.
         // 2) Get the upload deletions, if any.

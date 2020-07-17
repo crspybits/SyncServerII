@@ -330,8 +330,6 @@ class Select {
                     return
                 }
                 
-                Log.debug("fieldType: \(fieldType)")
-
                 // Give first priority to `typeConvertersToModel` -- so it can override the fieldType if needed.
                 if let converter = rowModel.typeConvertersToModel(propertyName: fieldName) {
                     let value = converter(rowFieldValue)

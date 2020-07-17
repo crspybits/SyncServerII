@@ -13,6 +13,7 @@ import LoggerAPI
 import HeliumLogger
 import Foundation
 import ServerShared
+import ChangeResolvers
 
 class FileController_UploadTests: ServerTestCase {
     override func setUp() {
@@ -55,7 +56,7 @@ class FileController_UploadTests: ServerTestCase {
     }
     
     @discardableResult
-    func uploadSingleV0File(uploadSingleFile:(_ deviceUUID: String, _ fileUUID: String)->(ServerTestCase.UploadFileResult?)) -> UploadResult? {
+    func uploadSingleV0File(changeResolverName: String? = nil, uploadSingleFile:(_ deviceUUID: String, _ fileUUID: String, _ changeResolverName: String?)->(ServerTestCase.UploadFileResult?)) -> UploadResult? {
         let fileIndex = FileIndexRepository(db)
         let upload = UploadRepository(db)
         
@@ -72,7 +73,7 @@ class FileController_UploadTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        guard let result = uploadSingleFile(deviceUUID, fileUUID) else {
+        guard let result = uploadSingleFile(deviceUUID, fileUUID, changeResolverName) else {
             XCTFail()
             return nil
         }
@@ -99,27 +100,48 @@ class FileController_UploadTests: ServerTestCase {
     }
     
     func testUploadSingleV0TextFile() {
-        uploadSingleV0File { deviceUUID, fileUUID in
+        uploadSingleV0File { deviceUUID, fileUUID, changeResolverName in
             return uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID)
         }
     }
     
     func testUploadSingleV0JPEGFile() {
-        uploadSingleV0File { deviceUUID, fileUUID in
+        uploadSingleV0File { deviceUUID, fileUUID, changeResolverName in
             return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID)
         }
     }
 
     func testUploadSingleV0URLFile() {
-        uploadSingleV0File { deviceUUID, fileUUID in
+        uploadSingleV0File { deviceUUID, fileUUID, changeResolverName in
             return uploadFileUsingServer(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile)
+        }
+    }
+    
+    // With non-nil changeResolverName
+    let changeResolverName = CommentFile.changeResolverName
+    
+    func testUploadSingleV0TextFileWithChangeResolverName() {
+        uploadSingleV0File(changeResolverName: changeResolverName) { deviceUUID, fileUUID, changeResolverName in
+            return uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, changeResolverName: changeResolverName)
+        }
+    }
+    
+    func testUploadSingleV0JPEGFileWithChangeResolverName() {
+        uploadSingleV0File(changeResolverName: changeResolverName) { deviceUUID, fileUUID, changeResolverName in
+            return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID, changeResolverName: changeResolverName)
+        }
+    }
+
+    func testUploadSingleV0URLFileWithChangeResolverName() {
+        uploadSingleV0File(changeResolverName: changeResolverName) { deviceUUID, fileUUID, changeResolverName in
+            return uploadFileUsingServer(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile, changeResolverName: changeResolverName)
         }
     }
     
     // TODO: Upload a single file, with a non-nil fileGroupUUID
     
     // MARK: file upload, v0, 1 of 2 files, and then 2 of 2 files.
-
+    
     func uploadTwoV0Files(fileUUIDs: [String], uploadSingleFile:(_ addUser:AddUser, _ deviceUUID: String, _ fileUUID: String, _ uploadIndex: Int32, _ uploadCount: Int32)->(ServerTestCase.UploadFileResult?)) {
         let fileIndex = FileIndexRepository(db)
         let upload = UploadRepository(db)
@@ -338,16 +360,20 @@ class FileController_UploadTests: ServerTestCase {
     }
     
     // MARK: file upload, vN, 1 of 1 files.
-
-    func uploadSingleVNFile(uploadSingleFile:(_ addUser:AddUser, _ deviceUUID: String, _ fileUUID: String, _ fileGroupUUID: String?)->(ServerTestCase.UploadFileResult?)) {
+    
+    // TODO: Try a vN upload with a change resolver. Make sure that fails.
+    
+    // TODO: Try a v0 upload with a bad change resolver name. Make sure it fails.
+    
+    func uploadSingleVNFile(changeResolverName: String? = nil, uploadSingleFile:(_ addUser:AddUser, _ deviceUUID: String, _ fileUUID: String, _ fileGroupUUID: String?, _ changeResolverName: String?)->(ServerTestCase.UploadFileResult?)) {
     
         // First upload the v0 file.
         
         var addUser:AddUser = .yes
         let fileGroupUUID = Foundation.UUID().uuidString
 
-        let uploadResult:UploadResult! = uploadSingleV0File { deviceUUID, fileUUID in
-            return uploadSingleFile(addUser, deviceUUID, fileUUID, fileGroupUUID)
+        let uploadResult:UploadResult! = uploadSingleV0File(changeResolverName: changeResolverName) { deviceUUID, fileUUID, changeResolverName in
+            return uploadSingleFile(addUser, deviceUUID, fileUUID, fileGroupUUID, changeResolverName)
         }
         
         guard uploadResult != nil,
@@ -373,7 +399,7 @@ class FileController_UploadTests: ServerTestCase {
         
         addUser = .no(sharingGroupUUID: sharingGroupUUID)
         
-        guard let result = uploadSingleFile(addUser, uploadResult.deviceUUID, uploadResult.fileUUID, nil) else {
+        guard let result = uploadSingleFile(addUser, uploadResult.deviceUUID, uploadResult.fileUUID, nil, nil) else {
             XCTFail()
             return
         }
@@ -397,14 +423,14 @@ class FileController_UploadTests: ServerTestCase {
     }
     
     func testUploadOneV1TextFileWorks() {
-        uploadSingleVNFile { addUser, deviceUUID, fileUUID, fileGroupUUID in
-            return uploadTextFile(deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
+        uploadSingleVNFile(changeResolverName: changeResolverName) { addUser, deviceUUID, fileUUID, fileGroupUUID, changeResolverName in
+            return uploadTextFile(deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName)
         }
     }
     
     func testUploadOneV1JPEGFileWorks() {
-        uploadSingleVNFile { addUser, deviceUUID, fileUUID, fileGroupUUID in
-            return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
+        uploadSingleVNFile(changeResolverName: changeResolverName) { addUser, deviceUUID, fileUUID, fileGroupUUID, changeResolverName in
+            return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName)
         }
     }
     
@@ -417,7 +443,14 @@ class FileController_UploadTests: ServerTestCase {
     // TODO: After that work is done, can come back here to test the results. 
     
     // TODO: Check FileIndex row specifics after each test.
-
+    //  For change resolvers-- check for specific change resolver.
+    
+    // TODO: VN upload with a change resolver in vN upload.
+    
+    // TODO: VN upload without a change resolver in v0 upload.
+    
+    // TODO: VN upload with a bad change resolver name in v0 upload.
+    
 /*
     func testUploadTextAndJPEGFile() {
         let deviceUUID = Foundation.UUID().uuidString

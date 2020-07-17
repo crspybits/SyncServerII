@@ -199,6 +199,15 @@ extension FileController {
         }
         
         if newFile {
+            // Only new files can have change resolvers.
+            if let resolverName = uploadRequest.changeResolverName {
+                guard params.changeResolverManager.validResolver(resolverName) else {
+                    let message = "Bad change resolver: \(resolverName)"
+                    finish(.errorMessage(message), params: params)
+                    return
+                }
+            }
+        
             // Need to upload complete file.
             let cloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType:uploadRequest.mimeType, fileVersion: 0)
             
@@ -206,6 +215,12 @@ extension FileController {
             uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
         }
         else {
+            guard uploadRequest.changeResolverName == nil else {
+                let message = "vN upload and there was a change resolver: \(String(describing: uploadRequest.changeResolverName))"
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
             // Need to add the upload data to the UploadRepository.
             guard let data = uploadRequest.data else {
                 finish(.errorResponse(.failure(.message("Could not get data from request"))), params: params)

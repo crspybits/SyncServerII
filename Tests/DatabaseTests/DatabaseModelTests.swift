@@ -145,6 +145,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         let newCheckSum = "abcdef"
         let creationDate = Date()
         let updateDate = Date()
+        let changeResolverName = "SomeChangeResolver"
         
         fileIndex[FileIndex.fileIndexIdKey] = newFileIndexId
         fileIndex[FileIndex.fileUUIDKey] = newFileUUID
@@ -157,6 +158,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         fileIndex[FileIndex.lastUploadedCheckSumKey] = newCheckSum
         fileIndex[FileIndex.creationDateKey] = creationDate
         fileIndex[FileIndex.updateDateKey] = updateDate
+        fileIndex[FileIndex.changeResolverNameKey] = changeResolverName
         
         XCTAssert(fileIndex.fileIndexId == newFileIndexId)
         XCTAssert(fileIndex.fileUUID == newFileUUID)
@@ -169,6 +171,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(fileIndex.lastUploadedCheckSum == newCheckSum)
         XCTAssert(fileIndex.creationDate == creationDate)
         XCTAssert(fileIndex.updateDate == updateDate)
+        XCTAssert(fileIndex.changeResolverName == changeResolverName)
 
         fileIndex[FileIndex.fileIndexIdKey] = nil
         fileIndex[FileIndex.fileUUIDKey] = nil
@@ -181,6 +184,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         fileIndex[FileIndex.lastUploadedCheckSumKey] = nil
         fileIndex[FileIndex.creationDateKey] = nil
         fileIndex[FileIndex.updateDateKey] = nil
+        fileIndex[FileIndex.changeResolverNameKey] = nil
 
         XCTAssert(fileIndex.fileIndexId == nil)
         XCTAssert(fileIndex.fileUUID == nil)
@@ -193,6 +197,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(fileIndex.lastUploadedCheckSum == nil)
         XCTAssert(fileIndex.creationDate == nil)
         XCTAssert(fileIndex.updateDate == nil)
+        XCTAssert(fileIndex.changeResolverName == nil)
     }
     
     func testUpload() {
@@ -209,6 +214,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         let mimeType = "text/plain"
         let creationDate = Date()
         let updateDate = Date()
+        let changeResolverName = "SomeChangeResolver"
         guard let contents = "Foobar bloobly".data(using: .utf8) else {
             XCTFail()
             return
@@ -230,6 +236,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         upload[Upload.uploadContentsKey] = contents
         upload[Upload.uploadIndexKey] = uploadIndex
         upload[Upload.uploadCountKey] = uploadCount
+        upload[Upload.changeResolverNameKey] = changeResolverName
 
         XCTAssert(upload.uploadId == uploadId)
         XCTAssert(upload.fileUUID == fileUUID)
@@ -242,10 +249,9 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.mimeType == mimeType)
         XCTAssert(upload.creationDate == creationDate)
         XCTAssert(upload.updateDate == updateDate)
-        
         XCTAssert(upload.uploadContents == contents)
-        
         XCTAssert(upload.uploadIndex == uploadIndex)
+        XCTAssert(upload.changeResolverName == changeResolverName)
         
         guard let count = upload.uploadCount else {
             XCTFail()
@@ -267,6 +273,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         upload[Upload.uploadContentsKey] = nil
         upload[Upload.uploadIndexKey] = nil
         upload[Upload.uploadCountKey] = nil
+        upload[Upload.changeResolverNameKey] = nil
         
         XCTAssert(upload.uploadId == nil)
         XCTAssert(upload.fileUUID == nil)
@@ -282,6 +289,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.uploadContents == nil)
         XCTAssert(upload.uploadIndex == nil)
         XCTAssert(upload.uploadCount == nil)
+        XCTAssert(upload.changeResolverName == nil)
     }
     
     // SharingGroup
