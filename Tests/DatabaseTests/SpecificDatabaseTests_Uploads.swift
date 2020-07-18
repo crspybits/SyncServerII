@@ -460,4 +460,139 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             XCTFail()
         }
     }
+    
+    // MARK: select(forDeferredUploadIds
+    
+    func doAddDeferredUpload(status: DeferredUpload.Status, fileGroupUUID: String? = nil) -> DeferredUpload? {
+        let repo = DeferredUploadRepository(db)
+
+        let deferredUpload = DeferredUpload()
+
+        deferredUpload.status = status
+        deferredUpload.fileGroupUUID = fileGroupUUID
+        
+        let result = repo.add(deferredUpload)
+        
+        var deferredUploadId:Int64?
+        switch result {
+        case .success(deferredUploadId: let id):
+            deferredUploadId = id
+        
+        default:
+            return nil
+        }
+        
+        deferredUpload.deferredUploadId = deferredUploadId
+        
+        return deferredUpload
+    }
+    
+    func testSelectForDeferredUploadIdsWithSingleUpload() {
+        let uploadRepo = UploadRepository(db)
+        
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        guard let deferredUpload = doAddDeferredUpload(status: .pending),
+            let deferredUploadId = deferredUpload.deferredUploadId else {
+            XCTFail()
+            return
+        }
+        
+        let upload = doAddUpload(sharingGroupUUID:sharingGroupUUID, deferredUploadId: deferredUploadId)
+        
+        guard let uploadId = upload.uploadId else {
+            XCTFail()
+            return
+        }
+        
+        guard let result = uploadRepo.select(forDeferredUploadIds: [deferredUploadId]),
+            result.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(result[0].uploadId == uploadId)
+    }
+    
+    func testSelectForDeferredUploadIdsWithTwoUploadsAndOneDeferredUpload() {
+        let uploadRepo = UploadRepository(db)
+        
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        guard let deferredUpload = doAddDeferredUpload(status: .pending),
+            let deferredUploadId = deferredUpload.deferredUploadId else {
+            XCTFail()
+            return
+        }
+        
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, deferredUploadId: deferredUploadId)
+        let upload2 = doAddUpload(sharingGroupUUID:sharingGroupUUID, deferredUploadId: deferredUploadId)
+        
+        guard let uploadId1 = upload1.uploadId,
+            let uploadId2 = upload2.uploadId else {
+            XCTFail()
+            return
+        }
+        
+        guard let result = uploadRepo.select(forDeferredUploadIds: [deferredUploadId]),
+            result.count == 2 else {
+            XCTFail()
+            return
+        }
+        
+        let expectation = Set<Int64>([uploadId1, uploadId2])
+        let actual = Set<Int64>(result.compactMap{$0.uploadId})
+
+        XCTAssert(expectation == actual)
+    }
+    
+    func testSelectForDeferredUploadIdsWithTwoUploadsAndTwoDeferredUploads() {
+        let uploadRepo = UploadRepository(db)
+        
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        guard let deferredUpload1 = doAddDeferredUpload(status: .pending),
+            let deferredUploadId1 = deferredUpload1.deferredUploadId else {
+            XCTFail()
+            return
+        }
+        
+        guard let deferredUpload2 = doAddDeferredUpload(status: .pending),
+            let deferredUploadId2 = deferredUpload2.deferredUploadId else {
+            XCTFail()
+            return
+        }
+        
+        let upload1 = doAddUpload(sharingGroupUUID:sharingGroupUUID, deferredUploadId: deferredUploadId1)
+        let upload2 = doAddUpload(sharingGroupUUID:sharingGroupUUID, deferredUploadId: deferredUploadId2)
+        
+        guard let uploadId1 = upload1.uploadId,
+            let uploadId2 = upload2.uploadId else {
+            XCTFail()
+            return
+        }
+        
+        guard let result = uploadRepo.select(forDeferredUploadIds: [deferredUploadId1, deferredUploadId2]),
+            result.count == 2 else {
+            XCTFail()
+            return
+        }
+        
+        let expectation = Set<Int64>([uploadId1, uploadId2])
+        let actual = Set<Int64>(result.compactMap{$0.uploadId})
+
+        XCTAssert(expectation == actual)
+    }
 }

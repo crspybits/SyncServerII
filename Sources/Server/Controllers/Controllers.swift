@@ -90,6 +90,7 @@ public class RequestProcessingParameters {
     let deviceUUID:String?
     let accountManager: AccountManager
     let changeResolverManager: ChangeResolverManager
+    let uploader:Uploader
     
     enum Response {
         case success(ResponseMessage)
@@ -100,7 +101,7 @@ public class RequestProcessingParameters {
     
     let completion: (Response)->()
     
-    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, completion: @escaping (Response)->()) {
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, uploader:Uploader, completion: @escaping (Response)->()) {
     
         self.request = request
         self.ep = ep
@@ -117,6 +118,7 @@ public class RequestProcessingParameters {
         self.completion = completion
         self.accountManager = accountManager
         self.changeResolverManager = changeResolverManager
+        self.uploader = uploader
     }
     
     func fail(_ message: String) {

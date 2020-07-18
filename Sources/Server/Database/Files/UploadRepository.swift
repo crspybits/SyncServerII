@@ -690,4 +690,36 @@ class UploadRepository : Repository, RepositoryLookup {
             return appMetaData.version == currServerAppMetaDataVersion! + 1
         }
     }
+    
+    // Return nil on an error. If somehow, no ids match, an empty array is returned.
+    func select(forDeferredUploadIds deferredUploadIds: [Int64]) -> [Upload]? {
+        guard deferredUploadIds.count > 0 else {
+            return nil
+        }
+        
+        let quotedIdsString = deferredUploadIds.map {String($0)}.map {"'\($0)'"}.joined(separator: ",")
+    
+        let query = "SELECT * FROM \(tableName) WHERE deferredUploadId IN (\(quotedIdsString))"
+        
+        guard let select = Select(db:db, query: query, modelInit: Upload.init, ignoreErrors:false) else {
+            return nil
+        }
+        
+        var result = [Upload]()
+        var error = false
+        select.forEachRow { model in
+            guard !error, let model = model as? Upload else {
+                error = true
+                return
+            }
+            
+            result += [model]
+        }
+        
+        guard !error, select.forEachRowStatus == nil else {
+            return nil
+        }
+        
+        return result
+    }
 }

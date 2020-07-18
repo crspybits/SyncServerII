@@ -35,10 +35,12 @@ class RequestHandler {
     private let accountManager: AccountManager
     private let changeResolverManager: ChangeResolverManager
     private let db: Database
+    private let uploader:Uploader
     
-    init(request:RouterRequest, response:RouterResponse, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, db: Database, endpoint:ServerEndpoint? = nil) {
+    init(request:RouterRequest, response:RouterResponse, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, uploader:Uploader, db: Database, endpoint:ServerEndpoint? = nil) {
         self.accountManager = accountManager
         self.changeResolverManager = changeResolverManager
+        self.uploader = uploader
         self.db = db
         self.request = request
         self.response = response
@@ -487,7 +489,7 @@ class RequestHandler {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountManager: accountManager, changeResolverManager: changeResolverManager) { response in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountManager: accountManager, changeResolverManager: changeResolverManager, uploader: uploader) { response in
         
             var message:ResponseMessage!
             

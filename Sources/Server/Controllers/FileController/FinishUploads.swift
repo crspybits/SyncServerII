@@ -131,7 +131,7 @@ class FinishUploads {
         
         let vNUploads = currentUploads.filter({$0.v0UploadFileVersion == false}).count > 0
         
-        if vNUploads {            
+        if vNUploads {
             // Mark the uploads to indicate they are ready for deferred transfer.
             guard markUploadsAsDeferred(uploads: currentUploads) else {
                 let message = "Failed markUploadsAsDeferred"
@@ -140,7 +140,7 @@ class FinishUploads {
             }
             
             do {
-                try Uploader.run()
+                try params.uploader.run(sharingGroupUUID: sharingGroupUUID)
             } catch let error {
                 let message = "Failed Uploader.run: \(error)"
                 Log.error(message)

@@ -51,7 +51,7 @@ public class ServerMain {
         }
         
         guard let db = Database(showStartupInfo: true) else {
-            Startup.halt("Failed during startup: Could not setup database tables(s).")
+            Startup.halt("Failed during startup: Could not connect to database.")
             return
         }
         
@@ -59,22 +59,28 @@ public class ServerMain {
             Startup.halt("Failed during startup: Could not setup database tables(s).")
             return
         }
-        
-#if DEBUG
-        Uploader.reset()
-#endif
-        
+
+        let accountManager = AccountManager(userRepository: UserRepository(db))
         let resolverManager = ChangeResolverManager()
+        
         do {
             try resolverManager.setupResolvers()
-            try Uploader.setup(manager: resolverManager)
+        } catch let error {
+            Startup.halt("Failed setting up Resolvers: \(error)")
+            return
+        }
+        
+        let uploader:Uploader
+
+        do {
+            uploader = try Uploader(manager: resolverManager)
         } catch let error {
             Startup.halt("Failed setting up Uploader: \(error)")
             return
         }
         
-        let accountManager = AccountManager(userRepository: UserRepository(db))
-        let serverRoutes = CreateRoutes(accountManager: accountManager, changeResolverManager: resolverManager, db: db)
+        let serverRoutes = CreateRoutes(accountManager: accountManager, changeResolverManager: resolverManager, uploader: uploader, db: db)
+        
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
         
         switch type {
