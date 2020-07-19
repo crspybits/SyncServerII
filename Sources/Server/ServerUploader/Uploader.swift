@@ -1,41 +1,63 @@
 import Foundation
 import LoggerAPI
 import ChangeResolvers
+import ServerAccount
+import ServerShared
 
 // Processes all entries in DeferredUpload as a unit.
 
-class Uploader {
-    enum UploaderError: Error {
-        case failedInit
-        case failedConnectingDatabase
-        case failedToGetDeferredUploads
-        case noFileGroupUUID
-        case hasFileGroupUUID
-        case notAllInGroupHaveSameFileGroupUUID
-        case failedStartingTransaction
-        case deferredUploadIds
-        case couldNotGetAllUploads
-        case couldNotGetFileUUIDs
-        case couldNotLookupFileUUID
-        case couldNotLookupResolver
-    }
+enum UploaderError: Error {
+    case failedInit
+    case failedConnectingDatabase
+    case failedToGetDeferredUploads
+    case noFileGroupUUID
+    case hasFileGroupUUID
+    case notAllInGroupHaveSameFileGroupUUID
+    case failedStartingTransaction
+    case deferredUploadIds
+    case couldNotGetAllUploads
+    case couldNotGetFileUUIDs
+    case couldNotLookupFileUUID
+    case couldNotLookupResolver
+    case couldNotLookupResolverName
+    case couldNotGetOwningUserCreds
+    case couldNotConvertToCloudStorage
+    case couldNotGetDeviceUUID
+    case downloadError(DownloadResult)
+    case noContentsForUpload
+    case failedSetupForApplyChangesToSingleFile(String)
+    case unknownResolverType
+    case failedInitializingWholeFileReplacer
+    case failedAddingChange(Swift.Error)
+    case failedGettingReplacerData
+    case failedUploadingNewFileVersion
+    case failedApplyDeferredUploads
+    case failedUpdatingFileIndex
+    case failedRemovingUploadRow
+    case failedRemovingDeferredUpload
+    case couldNotCommit
+}
     
+class Uploader {
     private let db: Database
-    private let manager: ChangeResolverManager
+    private let resolverManager: ChangeResolverManager
     private let lockName = "Uploader"
     private let uploadRepo:UploadRepository
     private let fileIndexRepo:FileIndexRepository
-
-    init(manager: ChangeResolverManager) throws {
-        // Need a separate database connection-- to have a separate transaction to acquire lock.
+    private let accountManager: AccountManager
+    private var applier: ApplyDeferredUploads?
+    
+    init(resolverManager: ChangeResolverManager, accountManager: AccountManager) throws {
+        // Need a separate database connection-- to have a separate transaction and to acquire lock.
         guard let db = Database() else {
             throw UploaderError.failedInit
         }
         
         self.db = db
-        self.manager = manager
+        self.resolverManager = resolverManager
         self.uploadRepo = UploadRepository(db)
         self.fileIndexRepo = FileIndexRepository(db)
+        self.accountManager = accountManager
     }
     
     private func release() throws {
@@ -43,6 +65,7 @@ class Uploader {
     }
     
     // Check if there is uploading to do. Uses a lock so it is safe *across* instances of the server. i.e., there will be at most one instance of this running across server instances. Runs asynchronously if it can get the lock.
+    // This has no completion handler because we want this to run asynchronously of  requests.
     func run(sharingGroupUUID: String) throws {
         // Holding a lock here so that, across server instances, at most one Uploader can be running at one time.
         // TODO: Need to also start a transaction.
@@ -64,15 +87,21 @@ class Uploader {
         
         // Sometimes multiple rows in DeferredUpload may refer to the same fileGroupUUID-- so need to process those together. (Except for those with a nil fileGroupUUID-- which are processed independently).
         DispatchQueue.global(qos: .default).async {
-            do {
-                try self.process(sharingGroupUUID: sharingGroupUUID, deferredUploads: deferredUploads)
-            } catch let error {
-                Log.error("\(error)")
+            self.process(sharingGroupUUID: sharingGroupUUID, deferredUploads: deferredUploads) { error in
+                try? self.release()
+                
+                if let error = error {
+                    // TODO: How to record this failure?
+                    Log.error("Failed: \(error)")
+                }
+                else {
+                    Log.info("Succeeded!")
+                }
             }
         }
     }
     
-    func process(sharingGroupUUID: String, deferredUploads: [DeferredUpload]) throws {
+    func process(sharingGroupUUID: String, deferredUploads: [DeferredUpload], completion: @escaping (Error?)->()) {
         var noFileGroupUUIDs = [DeferredUpload]()
         var withFileGroupUUIDs = [DeferredUpload]()
         for deferredUpload in deferredUploads {
@@ -84,107 +113,71 @@ class Uploader {
             }
         }
         
+        // TODO: Fix
+        assert(noFileGroupUUIDs.count == 0)
+        
         let aggregatedGroups = Self.aggregateDeferredUploads(withFileGroupUUIDs: withFileGroupUUIDs)
-        for aggregatedGroup in aggregatedGroups {
-            guard let fileGroupUUID = aggregatedGroup[0].fileGroupUUID else {
-                throw UploaderError.noFileGroupUUID
+        
+        applyDeferredUploads(sharingGroupUUID: sharingGroupUUID, aggregatedGroups: aggregatedGroups) { error in
+            guard error == nil else {
+                completion(error)
+                return
             }
             
-            try applyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup)
-        }
-
-        for noFileGroupUUID in noFileGroupUUIDs {
-            try Self.applyWithNoFileGroupUUID(deferredUpload: noFileGroupUUID)
+            completion(nil)
+            
+            // TODO: Apply to files without fileGroupUUID's.
+//            for noFileGroupUUID in noFileGroupUUIDs {
+//                // try Self.applyWithNoFileGroupUUID(deferredUpload: noFileGroupUUID)
+//            }
         }
     }
     
     // Process a deferred upload with no fileGroupUUID
-    static func applyWithNoFileGroupUUID(deferredUpload: DeferredUpload) throws {
-        guard deferredUpload.fileGroupUUID == nil else {
-            throw UploaderError.hasFileGroupUUID
-        }
-        
-    }
+//    static func applyWithNoFileGroupUUID(deferredUpload: DeferredUpload) throws {
+//        guard deferredUpload.fileGroupUUID == nil else {
+//            throw UploaderError.hasFileGroupUUID
+//        }
+//    }
     
     // Process a group of deferred uploads, all with the same fileGroupUUID
     // All DeferredUploads given must be in the fileGroupUUID given.
-    func applyDeferredUploads(sharingGroupUUID: String, fileGroupUUID: String, deferredUploads: [DeferredUpload]) throws {
-        guard deferredUploads.count > 0 else {
+    func applyDeferredUploads(currentDeferredUpload: Int = 0, sharingGroupUUID: String, aggregatedGroups: [[DeferredUpload]], completion: @escaping (Error?)->()) {
+
+        guard currentDeferredUpload < aggregatedGroups.count else {
+            // Do final cleanup. Remove the DeferredUpload's. Remove the original file versions.
+            
+            completion(nil)
             return
         }
         
-        guard (deferredUploads.filter {$0.fileGroupUUID == fileGroupUUID}).count == deferredUploads.count else {
-            throw UploaderError.notAllInGroupHaveSameFileGroupUUID
+        let aggregatedGroup = aggregatedGroups[currentDeferredUpload]
+        
+        guard let fileGroupUUID = aggregatedGroup[0].fileGroupUUID else {
+            completion(UploaderError.noFileGroupUUID)
+            return
         }
         
-        // Each DeferredUpload corresponds to one or more Upload record.
-        /* Here's the algorithm:
-            0) Open the database transaction.
-            1) Need to get the Account for the owner for this fileGroupUUID.
-            2) let allUploads = all of the Upload records corresponding to these DeferredUpload's.
-            3) let fileUUIDs = the set of unique fileUUID's within allUploads.
-            4) let uploads(fileUUID) be the set of Upload's for a given fileUUID within fileUUIDs, i.e., within allUploads.
-            5) for fileUUID in fileUUIDs {
-                 let uploadsForFileUUID = uploads(fileUUID)
-                 Get the change resolver for this fileUUID from the FileIndex
-                 Read the file indicated by fileUUID from cloud storage.
-                 for upload in uploadsForFileUUID {
-                   Apply the change in upload to the file data using the change resolver.
-                 }
-                 Write the file data for the updated file back to cloud storage.
-               }
-            6) Do the update of the FileIndex based on these DeferredUpload records.
-            7) Remove these DeferredUpload from the database.
-            8) End the database transaction.
-         */
-         
-        guard db.startTransaction() else {
-            throw UploaderError.failedStartingTransaction
+        guard let applier = try? ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup, accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+            completion(UploaderError.failedApplyDeferredUploads)
+            return
         }
         
-        let deferredUploadIds = deferredUploads.compactMap{$0.deferredUploadId}
-        guard deferredUploads.count == deferredUploadIds.count else {
-            throw UploaderError.deferredUploadIds
-        }
+        // `run` executes asynchronously. Need to retain the applier.
+        self.applier = applier
         
-        guard let allUploads = UploadRepository(db).select(forDeferredUploadIds: deferredUploadIds) else {
-            throw UploaderError.couldNotGetAllUploads
-        }
-        
-        let fileUUIDs = allUploads.compactMap{$0.fileUUID}
-        guard fileUUIDs.count == allUploads.count else {
-            throw UploaderError.couldNotGetFileUUIDs
-        }
-        
-        func uploads(fileUUID: String) -> [Upload] {
-            allUploads.filter{$0.fileUUID == fileUUID}
-        }
-        
-        // let result = FileController.getOwningAccountFor(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID, from: fileIndexRepo, db: db, accountManager: accountManager)
-        
-        func changeResolver(forFileUUID fileUUID: String) throws -> ChangeResolver.Type {
-            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
-            let result = fileIndexRepo.lookup(key: key, modelInit: FileIndex.init)
-            guard case .found(let model) = result,
-                let fileIndex = model as? FileIndex,
-                let changeResolverName = fileIndex.changeResolverName else {
-                throw UploaderError.couldNotLookupFileUUID
+        applier.run {[unowned self] error in
+            guard error == nil else {
+                completion(error)
+                return
             }
             
-            guard let resolverType = manager.getResolverType(changeResolverName) else {
-                throw UploaderError.couldNotLookupResolver
+            DispatchQueue.global(qos: .default).async {
+                self.applyDeferredUploads(currentDeferredUpload: currentDeferredUpload + 1, sharingGroupUUID: sharingGroupUUID, aggregatedGroups: aggregatedGroups, completion: completion)
             }
-            
-            return resolverType
-        }
-        
-        for fileUUID in fileUUIDs {
-            let uploadsForFileUUID = uploads(fileUUID: fileUUID)
-            let resolver = try changeResolver(forFileUUID: fileUUID)
-            
         }
     }
-    
+
     // Each DeferredUpload *must* have a non-nil fileGroupUUID. The ordering of the groups in the result is not well defined.
     static func aggregateDeferredUploads(withFileGroupUUIDs: [DeferredUpload]) ->  [[DeferredUpload]] {
     

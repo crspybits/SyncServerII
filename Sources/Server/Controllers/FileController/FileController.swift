@@ -52,6 +52,7 @@ class FileController : ControllerProtocol {
     }
     
     // OWNER
+    // userId is the owning user Id-- e.g., obtained from the userId field of FileIndex.
     static func getCreds(forUserId userId: UserId, from db: Database, accountManager: AccountManager) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
         let userResults = UserRepository(db).lookup(key: userKey, modelInit: User.init)

@@ -405,9 +405,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
         }
         let updateDateField = getUpdateFieldSetter(fieldValue: updateDateValue, fieldName: FileIndex.updateDateKey)
         
+        let changeResolverNameField = getUpdateFieldSetter(fieldValue: fileIndex.changeResolverName, fieldName: FileIndex.changeResolverNameKey)
+        
         let deletedValue = fileIndex.deleted == true ? 1 : 0
+        
+        Log.debug("changeResolverNameField: \(changeResolverNameField)")
 
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) \(changeResolverNameField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html

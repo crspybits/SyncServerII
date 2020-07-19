@@ -66,16 +66,16 @@ public class ServerMain {
         do {
             try resolverManager.setupResolvers()
         } catch let error {
-            Startup.halt("Failed setting up Resolvers: \(error)")
+            Startup.halt("Failed during startup: Failed setting up Resolvers: \(error)")
             return
         }
         
         let uploader:Uploader
 
         do {
-            uploader = try Uploader(manager: resolverManager)
+            uploader = try Uploader(resolverManager: resolverManager, accountManager: accountManager)
         } catch let error {
-            Startup.halt("Failed setting up Uploader: \(error)")
+            Startup.halt("Failed during startup: Failed setting up Uploader: \(error)")
             return
         }
         

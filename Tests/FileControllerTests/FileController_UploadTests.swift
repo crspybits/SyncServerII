@@ -451,6 +451,8 @@ class FileController_UploadTests: ServerTestCase {
     
     // TODO: VN upload with a bad change resolver name in v0 upload.
     
+    // TODO: Don't allow uploading the same file twice in the same batch. This applies for v0 and vN uploads.
+    
 /*
     func testUploadTextAndJPEGFile() {
         let deviceUUID = Foundation.UUID().uuidString

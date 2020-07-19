@@ -7,6 +7,7 @@
 //
 
 // Persistent Storage for temporarily storing general meta data for file uploads and file deletions before finally storing that info in the FileIndex. This also represents files that need to be purged from cloud storage-- this will be for losers of FileIndex update races and for upload deletions.
+// 7/19/20; This now represents three kinds of events: 1) entire v0 file uploads, 2) vN file change uploads, and 3) file deletions. Because of the addition of change uploads, the prior index: "UNIQUE (fileUUID, userId, deviceUUID)" has to be removed. This is because the same user/device may upload multiple changes to the same file before they are applied to the file-- which is is done asynchronously to client requests. (I'm going to removing upload undeletion, and app meta data upload for all but v0 file uploads).
 
 import Foundation
 import ServerShared
@@ -283,10 +284,6 @@ class UploadRepository : Repository, RepositoryLookup {
             "lastUploadedCheckSum TEXT, " +
             
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
-
-            // Not including fileVersion in the key because I don't want to allow the possiblity of uploading vN of a file and vM of a file at the same time.
-            // This allows for the possibility of a client interleaving uploads to different sharing group UUID's (without interveneing DoneUploads) -- because the same fileUUID cannot appear in different sharing groups.
-            "UNIQUE (fileUUID, userId, deviceUUID), " +
             
             "UNIQUE (uploadId))"
         
@@ -543,7 +540,9 @@ class UploadRepository : Repository, RepositoryLookup {
         
         let fileVersionField = getUpdateFieldSetter(fieldValue: upload.fileVersion, fieldName: Upload.fileVersionKey, fieldIsString: false)
         
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) \(deferredUploadIdField) \(fileVersionField) WHERE uploadId=\(upload.uploadId!)"
+        let changeResolverNameField = getUpdateFieldSetter(fieldValue: upload.changeResolverName, fieldName: Upload.changeResolverNameKey)
+        
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) \(deferredUploadIdField) \(fileVersionField) \(changeResolverNameField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html

@@ -34,6 +34,7 @@ class ChangeResolverManager {
     func getResolverType(_ resolverName: String) -> ChangeResolver.Type? {
         let filter = resolverTypes.filter({$0.changeResolverName == resolverName})
         guard filter.count == 1 else {
+            Log.error("Failed to find resolver name: \(resolverName)")
             return nil
         }
         return filter[0]

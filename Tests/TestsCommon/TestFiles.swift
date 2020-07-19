@@ -40,6 +40,16 @@ struct TestFile {
         }
     }
     
+    // The specific md5 and dropbox hash values are obtained from bootstraps in the iOS client test cases.
+    // SHA1 hashes generated online-- https://passwordsgenerator.net/sha1-hash-generator/
+    
+    static let commentFile = TestFile(
+        dropboxCheckSum: "3ffce28e9fc6181b1e52226cba61dbdbd13fc1b75decb770f075541b25010575",
+        md5CheckSum: "d1139c432dadc28a5fb06c4c68d51790",
+        sha1Hash: "BDCCBF12CDFB5CAA9EB56B86F90BAD4141913DE9",
+        contents: .string("{\"elements\":[]}"),
+        mimeType: .text)
+        
     static let test1 = TestFile(
         dropboxCheckSum: "42a873ac3abd02122d27e80486c6fa1ef78694e8505fcec9cbcc8a7728ba8949",
         md5CheckSum: "b10a8db164e0754105b7a99be72e3fe5",
@@ -73,7 +83,6 @@ struct TestFile {
         private static let urlFile = URL(fileURLWithPath: "./Resources/example.url")
 #endif
 
-    // The specific hash values are obtained from bootstraps in the iOS client test cases.
     static let testUrlFile = TestFile(
         dropboxCheckSum: "842520e78cc66fad4ea3c5f24ad11734075d97d686ca10b799e726950ad065e7",
         md5CheckSum: "958c458be74acfcf327619387a8a82c4",

@@ -8,7 +8,7 @@ import Foundation
 import ServerShared
 import ChangeResolvers
 
-class UploaderTests: ServerTestCase {
+class UploaderSynchronousTests: ServerTestCase {
     func testAggregateDeferredUploadsWithSingleValue() {
         let du1 = DeferredUpload()
         du1.fileGroupUUID = Foundation.UUID().uuidString

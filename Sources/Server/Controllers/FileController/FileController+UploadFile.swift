@@ -199,6 +199,8 @@ extension FileController {
         }
         
         if newFile {
+            Log.debug("uploadRequest.changeResolverName: \(String(describing: uploadRequest.changeResolverName))")
+            
             // Only new files can have change resolvers.
             if let resolverName = uploadRequest.changeResolverName {
                 guard params.changeResolverManager.validResolver(resolverName) else {
@@ -279,6 +281,7 @@ extension FileController {
         upload.uploadCount = uploadRequest.uploadCount
         upload.uploadIndex = uploadRequest.uploadIndex
         upload.uploadContents = uploadContents
+        upload.changeResolverName = uploadRequest.changeResolverName
 
         // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
         var expectedCheckSum: String?

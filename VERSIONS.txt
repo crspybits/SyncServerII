@@ -4,6 +4,16 @@ Version
 	* Change configuration files to use Codable
 	* Adding Microsoft authentication and OneDrive
     * Removed SMServerLib-- no longer used.
+    * Now using ChangeResolvers on server.
+    	- This implies a change also for clients because they are no longer dealing with conflict resolution
+    * Removing DoneUploads endpoint-- now using an N of M pair of parameters in upload requests.
+    	- Also implies changes for clients.
+    * Database format changes.
+    	- Various columns added.
+    	- Index removed from Upload table: "UNIQUE (fileUUID, userId, deviceUUID)"
+    		Did this by: 
+    			SHOW INDEX FROM Upload
+    			DROP INDEX fileUUID ON Upload 
 
 Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.
