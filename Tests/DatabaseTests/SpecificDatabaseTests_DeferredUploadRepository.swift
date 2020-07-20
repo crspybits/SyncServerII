@@ -21,11 +21,12 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
         repo = DeferredUploadRepository(db)
     }
     
-    func doAddDeferredUpload(status: DeferredUpload.Status, fileGroupUUID: String? = nil) -> DeferredUpload? {
+    func doAddDeferredUpload(status: DeferredUpload.Status, sharingGroupUUID: String, fileGroupUUID: String? = nil) -> DeferredUpload? {
         let deferredUpload = DeferredUpload()
 
         deferredUpload.status = status
         deferredUpload.fileGroupUUID = fileGroupUUID
+        deferredUpload.sharingGroupUUID = sharingGroupUUID
         
         let result = repo.add(deferredUpload)
         
@@ -44,7 +45,7 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
     }
     
     func testAddDeferredUploadWorks() {
-        guard let _ = doAddDeferredUpload(status: .pending) else {
+        guard let _ = doAddDeferredUpload(status: .pending, sharingGroupUUID: Foundation.UUID().uuidString) else {
             XCTFail()
             return
         }
@@ -52,8 +53,9 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
     
     func testUpdateDeferredUploadWithValidFieldsWorks() {
         let fileGroupUUID = Foundation.UUID().uuidString
-
-        guard let deferredUpload = doAddDeferredUpload(status: .pending, fileGroupUUID: fileGroupUUID) else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+        
+        guard let deferredUpload = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID) else {
             XCTFail()
             return
         }
@@ -83,13 +85,15 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
             XCTAssert(model.deferredUploadId == id)
             XCTAssert(model.status == newStatus)
             XCTAssert(model.fileGroupUUID == fileGroupUUID)
+            XCTAssert(model.sharingGroupUUID == sharingGroupUUID)
         default:
             XCTFail()
         }
     }
 
     func testUpdateDeferredUploadWithNilStatusFails() {
-        guard let deferredUpload = doAddDeferredUpload(status: .pending) else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+        guard let deferredUpload = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -103,7 +107,8 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
     }
     
     func testUpdateDeferredUploadWithNilIdFails() {
-        guard let deferredUpload = doAddDeferredUpload(status: .pending) else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+        guard let deferredUpload = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -126,7 +131,8 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
     }
     
     func testSelectWithOneRowWorks() {
-        guard let _ = doAddDeferredUpload(status: .pending) else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+        guard let _ = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -140,12 +146,13 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
     }
     
     func testSelectWithTwoRowsWorks() {
-        guard let _ = doAddDeferredUpload(status: .pending) else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+        guard let _ = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        guard let _ = doAddDeferredUpload(status: .pending) else {
+        guard let _ = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -159,12 +166,13 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
     }
     
     func testSelectWithTwoRowsButOnlyOnePendingWorks() {
-        guard let _ = doAddDeferredUpload(status: .pending) else {
+        let sharingGroupUUID = Foundation.UUID().uuidString
+        guard let _ = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        guard let _ = doAddDeferredUpload(status: .completed) else {
+        guard let _ = doAddDeferredUpload(status: .completed, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }

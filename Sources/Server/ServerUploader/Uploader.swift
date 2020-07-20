@@ -5,59 +5,34 @@ import ServerAccount
 import ServerShared
 
 // Processes all entries in DeferredUpload as a unit.
-
-enum UploaderError: Error {
-    case failedInit
-    case failedConnectingDatabase
-    case failedToGetDeferredUploads
-    case noFileGroupUUID
-    case hasFileGroupUUID
-    case notAllInGroupHaveSameFileGroupUUID
-    case failedStartingTransaction
-    case deferredUploadIds
-    case couldNotGetAllUploads
-    case couldNotGetFileUUIDs
-    case couldNotLookupFileUUID
-    case couldNotLookupResolver
-    case couldNotLookupResolverName
-    case couldNotGetOwningUserCreds
-    case couldNotConvertToCloudStorage
-    case couldNotGetDeviceUUID
-    case downloadError(DownloadResult)
-    case noContentsForUpload
-    case failedSetupForApplyChangesToSingleFile(String)
-    case unknownResolverType
-    case failedInitializingWholeFileReplacer
-    case failedAddingChange(Swift.Error)
-    case failedGettingReplacerData
-    case failedUploadingNewFileVersion
-    case failedApplyDeferredUploads
-    case failedUpdatingFileIndex
-    case failedRemovingUploadRow
-    case failedRemovingDeferredUpload
-    case couldNotCommit
-}
     
 class Uploader {
+    enum Errors: Error {
+        case failedInit
+        case failedConnectingDatabase
+        case failedToGetDeferredUploads
+        case noFileGroupUUID
+        case hasFileGroupUUID
+        case failedApplyDeferredUploads
+    }
+    
     private let db: Database
     private let resolverManager: ChangeResolverManager
-    private let lockName = "Uploader"
-    private let uploadRepo:UploadRepository
-    private let fileIndexRepo:FileIndexRepository
     private let accountManager: AccountManager
+    private let lockName = "Uploader"
     private var applier: ApplyDeferredUploads?
+    private let deferredUploadRepo:DeferredUploadRepository
     
     init(resolverManager: ChangeResolverManager, accountManager: AccountManager) throws {
         // Need a separate database connection-- to have a separate transaction and to acquire lock.
         guard let db = Database() else {
-            throw UploaderError.failedInit
+            throw Errors.failedConnectingDatabase
         }
         
         self.db = db
         self.resolverManager = resolverManager
-        self.uploadRepo = UploadRepository(db)
-        self.fileIndexRepo = FileIndexRepository(db)
         self.accountManager = accountManager
+        self.deferredUploadRepo = DeferredUploadRepository(db)
     }
     
     private func release() throws {
@@ -65,18 +40,16 @@ class Uploader {
     }
     
     // Check if there is uploading to do. Uses a lock so it is safe *across* instances of the server. i.e., there will be at most one instance of this running across server instances. Runs asynchronously if it can get the lock.
-    // This has no completion handler because we want this to run asynchronously of  requests.
+    // This has no completion handler because we want this to run asynchronously of requests.
     func run(sharingGroupUUID: String) throws {
         // Holding a lock here so that, across server instances, at most one Uploader can be running at one time.
-        // TODO: Need to also start a transaction.
         guard try db.getLock(lockName: lockName) else {
             return
         }
         
-        let deferredUploadRepo = DeferredUploadRepository(db)
         guard let deferredUploads = deferredUploadRepo.select(rowsWithStatus: .pending) else {
             try release()
-            throw UploaderError.failedToGetDeferredUploads
+            throw Errors.failedToGetDeferredUploads
         }
         
         guard deferredUploads.count > 0 else {
@@ -118,6 +91,11 @@ class Uploader {
         
         let aggregatedGroups = Self.aggregateDeferredUploads(withFileGroupUUIDs: withFileGroupUUIDs)
         
+        guard aggregatedGroups.count > 0 else {
+            completion(nil)
+            return
+        }
+        
         applyDeferredUploads(sharingGroupUUID: sharingGroupUUID, aggregatedGroups: aggregatedGroups) { error in
             guard error == nil else {
                 completion(error)
@@ -136,7 +114,7 @@ class Uploader {
     // Process a deferred upload with no fileGroupUUID
 //    static func applyWithNoFileGroupUUID(deferredUpload: DeferredUpload) throws {
 //        guard deferredUpload.fileGroupUUID == nil else {
-//            throw UploaderError.hasFileGroupUUID
+//            throw Errors.hasFileGroupUUID
 //        }
 //    }
     
@@ -145,21 +123,19 @@ class Uploader {
     func applyDeferredUploads(currentDeferredUpload: Int = 0, sharingGroupUUID: String, aggregatedGroups: [[DeferredUpload]], completion: @escaping (Error?)->()) {
 
         guard currentDeferredUpload < aggregatedGroups.count else {
-            // Do final cleanup. Remove the DeferredUpload's. Remove the original file versions.
-            
             completion(nil)
             return
         }
         
         let aggregatedGroup = aggregatedGroups[currentDeferredUpload]
-        
+
         guard let fileGroupUUID = aggregatedGroup[0].fileGroupUUID else {
-            completion(UploaderError.noFileGroupUUID)
+            completion(Errors.noFileGroupUUID)
             return
         }
-        
+
         guard let applier = try? ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup, accountManager: accountManager, resolverManager: resolverManager, db: db) else {
-            completion(UploaderError.failedApplyDeferredUploads)
+            completion(Errors.failedApplyDeferredUploads)
             return
         }
         

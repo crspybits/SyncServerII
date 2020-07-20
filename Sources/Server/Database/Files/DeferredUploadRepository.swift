@@ -22,6 +22,9 @@ class DeferredUpload : NSObject, Model {
     static let deferredUploadIdKey = "deferredUploadId"
     var deferredUploadId:Int64!
     
+    static let sharingGroupUUIDKey = "sharingGroupUUID"
+    var sharingGroupUUID:String?
+    
     static let fileGroupUUIDKey = "fileGroupUUID"
     // Not all files have to be associated with a file group.
     var fileGroupUUID:String?
@@ -35,6 +38,9 @@ class DeferredUpload : NSObject, Model {
             case DeferredUpload.deferredUploadIdKey:
                 deferredUploadId = newValue as? Int64
 
+            case DeferredUpload.sharingGroupUUIDKey:
+                sharingGroupUUID = newValue as? String
+                
             case DeferredUpload.fileGroupUUIDKey:
                 fileGroupUUID = newValue as? String
 
@@ -86,6 +92,8 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
         let createColumns =
             "(deferredUploadId BIGINT NOT NULL AUTO_INCREMENT, " +
             
+            "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
+
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
 
             "status VARCHAR(\(DeferredUpload.Status.maxCharacterLength)) NOT NULL, " +
@@ -96,11 +104,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
         
         switch result {
         case .success(.alreadyPresent):
-            if db.columnExists(DeferredUpload.fileGroupUUIDKey, in: tableName) == false {
-                if !db.addColumn("\(DeferredUpload.fileGroupUUIDKey) VARCHAR(\(Database.uuidLength))", to: tableName) {
-                    return .failure(.columnCreation)
-                }
-            }
+            break
             
         default:
             break
@@ -151,6 +155,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     func add(_ deferredUpload:DeferredUpload) -> AddResult {
         let insert = Database.PreparedStatement(repo: self, type: .insert)
         
+        insert.add(fieldName: DeferredUpload.sharingGroupUUIDKey, value: .stringOptional(deferredUpload.sharingGroupUUID))
         insert.add(fieldName: DeferredUpload.fileGroupUUIDKey, value: .stringOptional(deferredUpload.fileGroupUUID))
         insert.add(fieldName: DeferredUpload.statusKey, value: .stringOptional(deferredUpload.status?.rawValue))
 

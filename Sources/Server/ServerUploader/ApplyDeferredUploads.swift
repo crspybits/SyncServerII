@@ -34,9 +34,35 @@ import LoggerAPI
 
 // Process a group of deferred uploads, for a single fileGroupUUID.
 // All DeferredUploads given must have the fileGroupUUID given.
-// Call the `run` method to kick this off. Once this succeeds, caller should remove the DeferredUpload records. Caller needs to take care of surrounding this with a database transaction. The concept is that, for consistency purposes, all changes for a single file group, need to be applied, or none need to be applied.
+// Call the `run` method to kick this off. Once this succeeds, it removes the DeferredUpload's. It does the datatabase operations within a transaction.
 // NOTE: Currently this statement of consistency applies at the database level, but not at the file level. If this fails mid-way through processing, new file versions may be present. We need to put in some code to deal with a restart which itself doesn't fail if the a new file version is present. Perhaps overwrite it?
 class ApplyDeferredUploads {
+    enum Errors: Error {
+        case notAllInGroupHaveSameFileGroupUUID
+        case deferredUploadIds
+        case couldNotGetAllUploads
+        case couldNotGetFileUUIDs
+        case failedRemovingDeferredUpload
+        case couldNotLookupFileUUID
+        case couldNotGetOwningUserCreds
+        case couldNotConvertToCloudStorage
+        case couldNotLookupResolverName
+        case couldNotLookupResolver
+        case failedStartingTransaction
+        case couldNotCommit
+        case failedSetupForApplyChangesToSingleFile(String)
+        case unknownResolverType
+        case couldNotGetDeviceUUID
+        case downloadError(DownloadResult)
+        case failedInitializingWholeFileReplacer
+        case noContentsForUpload
+        case failedAddingChange(Error)
+        case failedGettingReplacerData
+        case failedUploadingNewFileVersion
+        case failedUpdatingFileIndex
+        case failedRemovingUploadRow
+    }
+    
     let sharingGroupUUID: String
     let fileGroupUUID: String
     let deferredUploads: [DeferredUpload]
@@ -66,22 +92,22 @@ class ApplyDeferredUploads {
         }
         
         guard (deferredUploads.filter {$0.fileGroupUUID == fileGroupUUID}).count == deferredUploads.count else {
-            throw UploaderError.notAllInGroupHaveSameFileGroupUUID
+            throw Errors.notAllInGroupHaveSameFileGroupUUID
         }
         
         let deferredUploadIds = deferredUploads.compactMap{$0.deferredUploadId}
         guard deferredUploads.count == deferredUploadIds.count else {
-            throw UploaderError.deferredUploadIds
+            throw Errors.deferredUploadIds
         }
         
         guard let allUploads = UploadRepository(db).select(forDeferredUploadIds: deferredUploadIds) else {
-            throw UploaderError.couldNotGetAllUploads
+            throw Errors.couldNotGetAllUploads
         }
         self.allUploads = allUploads
         
         let fileUUIDs = allUploads.compactMap{$0.fileUUID}
         guard fileUUIDs.count == allUploads.count else {
-            throw UploaderError.couldNotGetFileUUIDs
+            throw Errors.couldNotGetFileUUIDs
         }
         
         // Now that we have the fileUUIDs, we need to make sure they are unique.
@@ -96,7 +122,7 @@ class ApplyDeferredUploads {
             }
             guard case .removed(numberRows: let numberRows) = result,
                 numberRows == 1 else {
-                completion(UploaderError.failedRemovingDeferredUpload)
+                completion(Errors.failedRemovingDeferredUpload)
                 return
             }
         }
@@ -115,7 +141,7 @@ class ApplyDeferredUploads {
         let result = fileIndexRepo.lookup(key: key, modelInit: FileIndex.init)
         guard case .found(let model) = result,
             let fileIndex = model as? FileIndex else {
-            throw UploaderError.couldNotLookupFileUUID
+            throw Errors.couldNotLookupFileUUID
         }
         
         return fileIndex
@@ -123,11 +149,11 @@ class ApplyDeferredUploads {
     
     func getCloudStorage(forFileUUID fileUUID: String, usingFileIndex fileIndex: FileIndex) throws -> (Account, CloudStorage) {
         guard let owningUserCreds = FileController.getCreds(forUserId: fileIndex.userId, from: db, accountManager: accountManager) else {
-            throw UploaderError.couldNotGetOwningUserCreds
+            throw Errors.couldNotGetOwningUserCreds
         }
         
         guard let cloudStorage = owningUserCreds as? CloudStorage else {
-            throw UploaderError.couldNotConvertToCloudStorage
+            throw Errors.couldNotConvertToCloudStorage
         }
         
         return (owningUserCreds, cloudStorage)
@@ -136,12 +162,12 @@ class ApplyDeferredUploads {
     func changeResolver(forFileUUID fileUUID: String, usingFileIndex fileIndex: FileIndex) throws -> ChangeResolver.Type {
         guard let changeResolverName = fileIndex.changeResolverName else {
             Log.error("couldNotLookupResolverName")
-            throw UploaderError.couldNotLookupResolverName
+            throw Errors.couldNotLookupResolverName
         }
         
         guard let resolverType = resolverManager.getResolverType(changeResolverName) else {
             Log.error("couldNotLookupResolver")
-            throw UploaderError.couldNotLookupResolver
+            throw Errors.couldNotLookupResolver
         }
         
         return resolverType
@@ -151,7 +177,7 @@ class ApplyDeferredUploads {
     // This deals with database transactions.
     func run(completion: @escaping (Error?)->()) {
         guard db.startTransaction() else {
-            completion(UploaderError.failedStartingTransaction)
+            completion(Errors.failedStartingTransaction)
             return
         }
         
@@ -163,7 +189,7 @@ class ApplyDeferredUploads {
             }
             
             guard self.db.commit() else {
-                completion(UploaderError.couldNotCommit)
+                completion(Errors.couldNotCommit)
                 return
             }
             
@@ -206,23 +232,23 @@ class ApplyDeferredUploads {
         let uploadsForFileUUID = uploads(fileUUID: fileUUID)
         
         guard let fileIndex = try? getFileIndex(forFileUUID: fileUUID) else {
-            completion(UploaderError.failedSetupForApplyChangesToSingleFile("FileIndex"))
+            completion(Errors.failedSetupForApplyChangesToSingleFile("FileIndex"))
             return
         }
         
         guard let resolver = try? changeResolver(forFileUUID: fileUUID, usingFileIndex: fileIndex) else {
-            completion(UploaderError.failedSetupForApplyChangesToSingleFile("Resolver"))
+            completion(Errors.failedSetupForApplyChangesToSingleFile("Resolver"))
             return
         }
         
         guard let (owningCreds, cloudStorage) = try? getCloudStorage(forFileUUID: fileUUID, usingFileIndex: fileIndex) else {
-            completion(UploaderError.failedSetupForApplyChangesToSingleFile("getCloudStorage"))
+            completion(Errors.failedSetupForApplyChangesToSingleFile("getCloudStorage"))
             return
         }
         
         // Only a single type of change resolver protocol so far. Need changes here when we add another.
         guard let wholeFileReplacer = resolver as? WholeFileReplacer.Type else {
-            completion(UploaderError.unknownResolverType)
+            completion(Errors.unknownResolverType)
             return
         }
         
@@ -230,7 +256,7 @@ class ApplyDeferredUploads {
         let nextVersion = fileIndex.fileVersion + 1
         
         guard let deviceUUID = fileIndex.deviceUUID else {
-            completion(UploaderError.couldNotGetDeviceUUID)
+            completion(Errors.couldNotGetDeviceUUID)
             return
         }
         
@@ -239,31 +265,31 @@ class ApplyDeferredUploads {
         
         cloudStorage.downloadFile(cloudFileName: currentCloudFileName, options: options) { downloadResult in
             guard case .success(data: let fileContents, checkSum: _) = downloadResult else {
-                completion(UploaderError.downloadError(downloadResult))
+                completion(Errors.downloadError(downloadResult))
                 return
             }
             
             guard var replacer = try? wholeFileReplacer.init(with: fileContents) else {
-                completion(UploaderError.failedInitializingWholeFileReplacer)
+                completion(Errors.failedInitializingWholeFileReplacer)
                 return
             }
             
             for upload in uploadsForFileUUID {
                 guard let changeData = upload.uploadContents else {
-                    completion(UploaderError.noContentsForUpload)
+                    completion(Errors.noContentsForUpload)
                     return
                 }
                 
                 do {
                     try replacer.add(newRecord: changeData)
                 } catch let error {
-                    completion(UploaderError.failedAddingChange(error))
+                    completion(Errors.failedAddingChange(error))
                     return
                 }
             }
             
             guard let replacementFileContents = try? replacer.getData() else {
-                completion(UploaderError.failedGettingReplacerData)
+                completion(Errors.failedGettingReplacerData)
                 return
             }
             
@@ -271,7 +297,7 @@ class ApplyDeferredUploads {
             
             cloudStorage.uploadFile(cloudFileName: nextCloudFileName, data: replacementFileContents, options: options) {[unowned self] uploadResult in
                 guard case .success(let checkSum) = uploadResult else {
-                    completion(UploaderError.failedUploadingNewFileVersion)
+                    completion(Errors.failedUploadingNewFileVersion)
                     return
                 }
                 
@@ -280,7 +306,7 @@ class ApplyDeferredUploads {
                 fileIndex.updateDate = Date()
                 
                 guard self.fileIndexRepo.update(fileIndex: fileIndex) else {
-                    completion(UploaderError.failedUpdatingFileIndex)
+                    completion(Errors.failedUpdatingFileIndex)
                     return
                 }
                 
@@ -293,7 +319,7 @@ class ApplyDeferredUploads {
                     
                     guard case .removed(numberRows: let numberRows) = result,
                         numberRows == 1 else {
-                        completion(UploaderError.failedRemovingUploadRow)
+                        completion(Errors.failedRemovingUploadRow)
                         return
                     }
                 }
