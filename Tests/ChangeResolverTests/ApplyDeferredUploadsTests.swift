@@ -644,4 +644,180 @@ class ApplyDeferredUploadsTests: ServerTestCase {
     
     // MARK: ApplyDeferredUploads tests with two file groups
 
+    func testApplyDeferredUploadsWithTwoFileGroupsAndTwoFiles() throws {
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID1 = Foundation.UUID().uuidString
+        let fileUUID2 = Foundation.UUID().uuidString
+        let fileGroupUUID1 = Foundation.UUID().uuidString
+        let fileGroupUUID2 = Foundation.UUID().uuidString
+
+        let changeResolverName = CommentFile.changeResolverName
+
+        // Do the v0 uploads.
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID1, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroupUUID: fileGroupUUID2, changeResolverName: changeResolverName) else {
+            XCTFail()
+            return
+        }
+        
+        let messageString1 = "Example"
+        let id1 = Foundation.UUID().uuidString
+        var record1 = CommentFile.FixedObject()
+        record1[CommentFile.idKey] = id1
+        record1["messageString"] = messageString1
+        let updateContents1 = try JSONSerialization.data(withJSONObject: record1)
+        
+        let messageString2 = "Another message"
+        let id2 = Foundation.UUID().uuidString
+        var record2 = CommentFile.FixedObject()
+        record2[CommentFile.idKey] = id2
+        record2["messageString"] = messageString2
+        let updateContents2 = try JSONSerialization.data(withJSONObject: record2)
+        
+        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID1)
+        let lookupResult = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
+        
+        guard case .found(let model) = lookupResult,
+            let fileIndex = model as? FileIndex else {
+            XCTFail()
+            return
+        }
+        
+        let deferredUpload1 = DeferredUpload()
+        deferredUpload1.fileGroupUUID = fileGroupUUID1
+        deferredUpload1.status = .pending
+        let addResult1 = DeferredUploadRepository(db).add(deferredUpload1)
+        guard case .success(deferredUploadId: let deferredUploadId1) = addResult1 else {
+            XCTFail()
+            return
+        }
+        deferredUpload1.deferredUploadId = deferredUploadId1
+        
+        let deferredUpload2 = DeferredUpload()
+        deferredUpload2.fileGroupUUID = fileGroupUUID2
+        deferredUpload2.status = .pending
+        let addResult2 = DeferredUploadRepository(db).add(deferredUpload2)
+        guard case .success(deferredUploadId: let deferredUploadId2) = addResult2 else {
+            XCTFail()
+            return
+        }
+        deferredUpload2.deferredUploadId = deferredUploadId2
+        
+        let upload1 = Upload()
+        upload1.deviceUUID = deviceUUID
+        upload1.fileUUID = fileUUID1
+        upload1.mimeType = "text/plain"
+        upload1.state = .uploadingFile
+        upload1.userId = fileIndex.userId
+        upload1.updateDate = Date()
+        upload1.sharingGroupUUID = sharingGroupUUID
+        upload1.uploadContents = updateContents1
+        upload1.uploadCount = 1
+        upload1.uploadIndex = 1
+        upload1.deferredUploadId = deferredUploadId1
+        upload1.v0UploadFileVersion = false
+        
+        let addUploadResult = UploadRepository(db).add(upload: upload1, fileInFileIndex: true)
+        guard case .success = addUploadResult else {
+            XCTFail()
+            return
+        }
+        
+        let upload2 = Upload()
+        upload2.deviceUUID = deviceUUID
+        upload2.fileUUID = fileUUID2
+        upload2.mimeType = "text/plain"
+        upload2.state = .uploadingFile
+        upload2.userId = fileIndex.userId
+        upload2.updateDate = Date()
+        upload2.sharingGroupUUID = sharingGroupUUID
+        upload2.uploadContents = updateContents2
+        upload2.uploadCount = 1
+        upload2.uploadIndex = 1
+        upload2.deferredUploadId = deferredUploadId2
+        upload2.v0UploadFileVersion = false
+
+        let addUploadResult2 = UploadRepository(db).add(upload: upload2, fileInFileIndex: true)
+        guard case .success = addUploadResult2 else {
+            XCTFail()
+            return
+        }
+        
+        guard let applyDeferredUploads1 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID1, deferredUploads: [deferredUpload1], accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+            XCTFail()
+            return
+        }
+        
+        // Apply deferred uploads for first file group
+        
+        let exp1 = expectation(description: "apply1")
+        
+        applyDeferredUploads1.run { error in
+            XCTAssert(error == nil, "\(String(describing: error))")
+            exp1.fulfill()
+        }
+        
+        waitExpectation(timeout: 10, handler: nil)
+        
+        guard let applyDeferredUploads2 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID2, deferredUploads: [deferredUpload2], accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+            XCTFail()
+            return
+        }
+        
+        // Apply deferred uploads for second file group
+
+        let exp2 = expectation(description: "apply2")
+        
+        applyDeferredUploads2.run { error in
+            XCTAssert(error == nil, "\(String(describing: error))")
+            exp2.fulfill()
+        }
+        
+        waitExpectation(timeout: 10, handler: nil)
+        
+        let fileName1 = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: fileUUID1, mimeType: "text/plain", fileVersion: 1)
+        
+        guard let commentFile1 = downloadCommentFile(fileName: fileName1, userId: fileIndex.userId) else {
+            XCTFail()
+            return
+        }
+        
+        guard commentFile1.count == 1 else {
+            XCTFail()
+            return
+        }
+
+        guard let outputRecord1 = commentFile1[0] else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(outputRecord1[CommentFile.idKey] as? String == id1)
+        XCTAssert(outputRecord1["messageString"] as? String == messageString1)
+        
+        let fileName2 = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: fileUUID2, mimeType: "text/plain", fileVersion: 1)
+
+        guard let commentFile2 = downloadCommentFile(fileName: fileName2, userId: fileIndex.userId) else {
+            XCTFail()
+            return
+        }
+        
+        guard commentFile2.count == 1 else {
+            XCTFail()
+            return
+        }
+
+        guard let outputRecord2 = commentFile2[0] else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(outputRecord2[CommentFile.idKey] as? String == id2)
+        XCTAssert(outputRecord2["messageString"] as? String == messageString2)
+    }
 }
