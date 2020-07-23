@@ -75,7 +75,26 @@ class ServerTestCase : XCTestCase {
         self.db.close()
         Log.info("Closed")
     }
+
+    // When I added UploaderCommon I started getting complaints from the compiler. Oddly, the following fixes it.
+#if os(Linux)
+    func expectation(description: String) -> XCTestExpectation {
+        super.expectation(description: description)
+    }
     
+    func waitForExpectations(timeout: TimeInterval, handler: XCWaitCompletionHandler?) {
+        super.waitForExpectations(timeout: timeout, handler: handler)
+    }
+#else
+    override func expectation(description: String) -> XCTestExpectation {
+        super.expectation(description: description)
+    }
+    
+    override func waitForExpectations(timeout: TimeInterval, handler: XCWaitCompletionHandler?) {
+        super.waitForExpectations(timeout: timeout, handler: handler)
+    }
+#endif
+
     @discardableResult
     func checkOwingUserForSharingGroupUser(sharingGroupUUID: String, sharingUserId: UserId, sharingUser:TestAccount, owningUser: TestAccount) -> Bool {
         

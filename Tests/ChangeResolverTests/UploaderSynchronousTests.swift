@@ -8,12 +8,12 @@ import Foundation
 import ServerShared
 import ChangeResolvers
 
-class UploaderSynchronousTests: ServerTestCase {
-    func testAggregateDeferredUploadsWithSingleValue() {
-        let du1 = DeferredUpload()
-        du1.fileGroupUUID = Foundation.UUID().uuidString
+class UploaderUtilityTests: ServerTestCase {
+    func runTestAggregateDeferredUploadsWithSingleValue(keyPath: WritableKeyPath<DeferredUpload, String?>) {
+        var du1 = DeferredUpload()
+        du1[keyPath: keyPath] = Foundation.UUID().uuidString
         
-        let result = Uploader.aggregateDeferredUploads(withFileGroupUUIDs: [du1])
+        let result = Uploader.aggregate(deferredUploads: [du1], using: keyPath)
         
         guard result.count == 1 else {
             XCTFail()
@@ -26,16 +26,24 @@ class UploaderSynchronousTests: ServerTestCase {
             return
         }
         
-        XCTAssert(firstGroup[0].fileGroupUUID == du1.fileGroupUUID)
+        XCTAssert(firstGroup[0][keyPath: keyPath] == du1[keyPath: keyPath])
     }
     
-    func testAggregateDeferredUploadsWithTwoValuesWithTheSameFileGroupUUID() {
-        let du1 = DeferredUpload()
-        du1.fileGroupUUID = Foundation.UUID().uuidString
-        let du2 = DeferredUpload()
-        du2.fileGroupUUID = du1.fileGroupUUID
+    func testAggregateFileGroupDeferredUploadsWithSingleValue() {
+        runTestAggregateDeferredUploadsWithSingleValue(keyPath: \.fileGroupUUID)
+    }
+    
+    func testAggregateSharingGroupDeferredUploadsWithSingleValue() {
+        runTestAggregateDeferredUploadsWithSingleValue(keyPath: \.sharingGroupUUID)
+    }
+    
+    func runTestAggregateDeferredUploadsWithTwoValuesTheSame(keyPath: WritableKeyPath<DeferredUpload, String?>) {
+        var du1 = DeferredUpload()
+        du1[keyPath: keyPath]  = Foundation.UUID().uuidString
+        var du2 = DeferredUpload()
+        du2[keyPath: keyPath]  = du1[keyPath: keyPath]
 
-        let result = Uploader.aggregateDeferredUploads(withFileGroupUUIDs: [du1, du2])
+        let result = Uploader.aggregate(deferredUploads: [du1, du2], using: keyPath)
 
         guard result.count == 1 else {
             XCTFail()
@@ -48,18 +56,26 @@ class UploaderSynchronousTests: ServerTestCase {
             return
         }
         
-        XCTAssert(firstGroup[0].fileGroupUUID == du1.fileGroupUUID)
-        XCTAssert(firstGroup[1].fileGroupUUID == du1.fileGroupUUID)
+        XCTAssert(firstGroup[0][keyPath: keyPath] == du1[keyPath: keyPath])
+        XCTAssert(firstGroup[1][keyPath: keyPath] == du1[keyPath: keyPath])
     }
     
-    func testAggregateDeferredUploadsWithTwoValuesWithDifferentFileGroupUUIDs() {
-        let du1 = DeferredUpload()
-        du1.fileGroupUUID = Foundation.UUID().uuidString
-        let du2 = DeferredUpload()
-        du2.fileGroupUUID = Foundation.UUID().uuidString
-        XCTAssert(du1.fileGroupUUID != du2.fileGroupUUID)
+    func testRunTestAggregateFileGroupDeferredUploadsWithTwoValuesTheSame() {
+        runTestAggregateDeferredUploadsWithTwoValuesTheSame(keyPath: \.fileGroupUUID)
+    }
+    
+    func testRunTestAggregateSharingGroupDeferredUploadsWithTwoValuesTheSame() {
+        runTestAggregateDeferredUploadsWithTwoValuesTheSame(keyPath: \.sharingGroupUUID)
+    }
+    
+    func runTestAggregateDeferredUploadsWithTwoValuesWithDifferentValues(keyPath: WritableKeyPath<DeferredUpload, String?>) {
+        var du1 = DeferredUpload()
+        du1[keyPath: keyPath] = Foundation.UUID().uuidString
+        var du2 = DeferredUpload()
+        du2[keyPath: keyPath] = Foundation.UUID().uuidString
+        XCTAssert(du1[keyPath: keyPath] != du2[keyPath: keyPath])
         
-        let result = Uploader.aggregateDeferredUploads(withFileGroupUUIDs: [du1, du2])
+        let result = Uploader.aggregate(deferredUploads: [du1, du2], using: keyPath)
 
         guard result.count == 2 else {
             XCTFail()
@@ -80,20 +96,28 @@ class UploaderSynchronousTests: ServerTestCase {
         }
         
         // Since the order of the result is not well defined, use sets to compare.
-        let set1 = Set<String>([firstGroup[0].fileGroupUUID!, secondGroup[0].fileGroupUUID!])
-        let set2 = Set<String>([du1.fileGroupUUID!, du2.fileGroupUUID!])
+        let set1 = Set<String>([firstGroup[0][keyPath: keyPath]!, secondGroup[0][keyPath: keyPath]!])
+        let set2 = Set<String>([du1[keyPath: keyPath]!, du2[keyPath: keyPath]!])
         XCTAssert(set1 == set2)
     }
     
-    func testAggregateDeferredUploadsWithThreeValuesWithVariousFileGroupUUIDs() {
-        let du1 = DeferredUpload()
-        du1.fileGroupUUID = Foundation.UUID().uuidString
-        let du2 = DeferredUpload()
-        du2.fileGroupUUID = Foundation.UUID().uuidString
-        let du3 = DeferredUpload()
-        du3.fileGroupUUID = du2.fileGroupUUID
+    func testAggregateFileGroupDeferredUploadsWithTwoValuesWithDifferentValues() {
+        runTestAggregateDeferredUploadsWithTwoValuesWithDifferentValues(keyPath: \.fileGroupUUID)
+    }
+    
+    func testAggregateSharingGroupDeferredUploadsWithTwoValuesWithDifferentValues() {
+        runTestAggregateDeferredUploadsWithTwoValuesWithDifferentValues(keyPath: \.sharingGroupUUID)
+    }
+    
+    func runTestAggregateDeferredUploadsWithThreeValuesWithVariousValues(keyPath: WritableKeyPath<DeferredUpload, String?>) {
+        var du1 = DeferredUpload()
+        du1[keyPath: keyPath] = Foundation.UUID().uuidString
+        var du2 = DeferredUpload()
+        du2[keyPath: keyPath] = Foundation.UUID().uuidString
+        var du3 = DeferredUpload()
+        du3[keyPath: keyPath] = du2[keyPath: keyPath]
         
-        let result = Uploader.aggregateDeferredUploads(withFileGroupUUIDs: [du3, du1, du2])
+        let result = Uploader.aggregate(deferredUploads: [du3, du1, du2], using: keyPath)
 
         guard result.count == 2 else {
             XCTFail()
@@ -105,7 +129,6 @@ class UploaderSynchronousTests: ServerTestCase {
         groupWithOne = result[0].count == 1 ? result[0] : result[1]
         groupWithTwo = result[0].count == 2 ? result[0] : result[1]
 
-
         guard groupWithOne.count == 1 else {
             XCTFail()
             return
@@ -116,8 +139,16 @@ class UploaderSynchronousTests: ServerTestCase {
             return
         }
         
-        XCTAssert(groupWithOne[0].fileGroupUUID == du1.fileGroupUUID)
-        XCTAssert(groupWithTwo[0].fileGroupUUID == du2.fileGroupUUID)
-        XCTAssert(groupWithTwo[1].fileGroupUUID == du2.fileGroupUUID)
+        XCTAssert(groupWithOne[0][keyPath: keyPath] == du1[keyPath: keyPath])
+        XCTAssert(groupWithTwo[0][keyPath: keyPath] == du2[keyPath: keyPath])
+        XCTAssert(groupWithTwo[1][keyPath: keyPath] == du2[keyPath: keyPath])
+    }
+    
+    func testRunTestAggregateFileGroupDeferredUploadsWithThreeValuesWithVariousValues() {
+        runTestAggregateDeferredUploadsWithThreeValuesWithVariousValues(keyPath: \.fileGroupUUID)
+    }
+    
+    func testRunTestAggregateSharingGroupDeferredUploadsWithThreeValuesWithVariousValues() {
+        runTestAggregateDeferredUploadsWithThreeValuesWithVariousValues(keyPath: \.sharingGroupUUID)
     }
 }

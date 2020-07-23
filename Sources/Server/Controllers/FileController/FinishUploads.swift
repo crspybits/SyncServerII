@@ -140,7 +140,7 @@ class FinishUploads {
             }
             
             do {
-                try params.uploader.run(sharingGroupUUID: sharingGroupUUID)
+                try params.uploader.run()
             } catch let error {
                 let message = "Failed Uploader.run: \(error)"
                 Log.error(message)

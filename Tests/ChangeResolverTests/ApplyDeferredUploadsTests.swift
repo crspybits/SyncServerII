@@ -10,7 +10,7 @@ import ChangeResolvers
 import Credentials
 import ServerAccount
 
-class ApplyDeferredUploadsTests: ServerTestCase {
+class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
     var accountManager:AccountManager!
     var resolverManager:ChangeResolverManager!
     
@@ -44,211 +44,12 @@ class ApplyDeferredUploadsTests: ServerTestCase {
     }
     */
     
-    // Returns the cloud file name
-    func uploadFile(file: TestFile, cloudStorage: CloudStorage, newFileUUID fileUUID: String, sharingGroupUUID: String, deviceUUID: String, testAccount: TestAccount) -> String? {
-        let checkSum = file.checkSum(type: testAccount.scheme.accountName)
-
-        let uploadRequest = UploadFileRequest()
-        uploadRequest.fileUUID = fileUUID
-        uploadRequest.mimeType = "text/plain"
-        uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = checkSum
-    
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: file.mimeType.rawValue)
-
-        return uploadFile(accountType: testAccount.scheme.accountName, creds: cloudStorage, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, fileVersion: 0, options: options)
-    }
-    
-    func testFileDeletionWithOneFile() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let fileUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let addUserResponse = self.addNewUser(testAccount:.primaryOwningAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
-            XCTFail()
-            return
-        }
-        
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, from: db, accountManager: accountManager) as? CloudStorage else {
-            XCTFail()
-            return
-        }
-        
-        let file: TestFile = .test1
-        guard let fileName = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
-            XCTFail()
-            return
-        }
-        
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: file.mimeType.rawValue)
-                    
-        let fileDeletion = FileDeletion(cloudStorage: cloudStorage, cloudFileName: fileName, options: options)
-
-        let exp1 = expectation(description: "apply")
-        FileDeletion.apply(deletions: [fileDeletion]) { error in
-            XCTAssert(error == nil)
-            exp1.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-        
-        let exp2 = expectation(description: "apply")
-        cloudStorage.lookupFile(cloudFileName: fileName, options: options) { result in
-            switch result {
-            case .success(let found):
-                XCTAssert(!found)
-            default:
-                XCTFail()
-            }
-            exp2.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-    }
-
-    func testFileDeletionWithTwoFiles() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let fileUUID1 = Foundation.UUID().uuidString
-        let fileUUID2 = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let addUserResponse = self.addNewUser(testAccount:.primaryOwningAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
-            XCTFail()
-            return
-        }
-        
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, from: db, accountManager: accountManager) as? CloudStorage else {
-            XCTFail()
-            return
-        }
-        
-        let file: TestFile = .test1
-        guard let fileName1 = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
-            XCTFail()
-            return
-        }
-        
-        guard let fileName2 = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
-            XCTFail()
-            return
-        }
-        
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: file.mimeType.rawValue)
-                    
-        let fileDeletion1 = FileDeletion(cloudStorage: cloudStorage, cloudFileName: fileName1, options: options)
-        let fileDeletion2 = FileDeletion(cloudStorage: cloudStorage, cloudFileName: fileName2, options: options)
-
-        let exp1 = expectation(description: "apply")
-        FileDeletion.apply(deletions: [fileDeletion1, fileDeletion2]) { error in
-            XCTAssert(error == nil)
-            exp1.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-        
-        let exp2 = expectation(description: "apply")
-        cloudStorage.lookupFile(cloudFileName: fileName1, options: options) { result in
-            switch result {
-            case .success(let found):
-                XCTAssert(!found)
-            default:
-                XCTFail()
-            }
-            exp2.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-        
-        let exp3 = expectation(description: "apply")
-        cloudStorage.lookupFile(cloudFileName: fileName2, options: options) { result in
-            switch result {
-            case .success(let found):
-                XCTAssert(!found)
-            default:
-                XCTFail()
-            }
-            exp3.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-    }
-        
-    func testFileDeletionWithOneFileAndOneFailure() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let fileUUID1 = Foundation.UUID().uuidString
-        let fileUUID2 = Foundation.UUID().uuidString // not uploaded
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let addUserResponse = self.addNewUser(testAccount:.primaryOwningAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
-            XCTFail()
-            return
-        }
-        
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, from: db, accountManager: accountManager) as? CloudStorage else {
-            XCTFail()
-            return
-        }
-        
-        let file: TestFile = .test1
-        guard let fileName1 = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
-            XCTFail()
-            return
-        }
-        
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: file.mimeType.rawValue)
-                    
-        let fileDeletion1 = FileDeletion(cloudStorage: cloudStorage, cloudFileName: fileName1, options: options)
-        let fileDeletion2 = FileDeletion(cloudStorage: cloudStorage, cloudFileName: fileUUID2, options: options)
-
-        let exp1 = expectation(description: "apply")
-        
-        // Put the bad file deletion first-- so we can show that the deletion continues on a failure.
-        FileDeletion.apply(deletions: [fileDeletion2, fileDeletion1]) { error in
-            XCTAssert(error != nil)
-            exp1.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-        
-        let exp2 = expectation(description: "apply")
-        cloudStorage.lookupFile(cloudFileName: fileName1, options: options) { result in
-            switch result {
-            case .success(let found):
-                XCTAssert(!found)
-            default:
-                XCTFail()
-            }
-            exp2.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-    }
-    
     // MARK: ApplyDeferredUploads tests with a single file group
-
-    func downloadCommentFile(fileName: String, userId: UserId) -> CommentFile? {
-        guard let cloudStorage = FileController.getCreds(forUserId: userId, from: db, accountManager: accountManager) as? CloudStorage else {
-            XCTFail()
-            return nil
-        }
-        
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
-
-        var commentFile: CommentFile?
-        
-        let exp2 = expectation(description: "apply")
-        cloudStorage.downloadFile(cloudFileName: fileName, options: options) { result in
-            switch result {
-            case .success(data: let data, checkSum: _):
-                commentFile = try? CommentFile(with: data)
-            default:
-                XCTFail()
-            }
-            exp2.fulfill()
-        }
-        waitExpectation(timeout: 10, handler: nil)
-        
-        return commentFile
-    }
     
     func testApplyDeferredUploadsWithASingleFileAndOneChange() throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         let fileGroupUUID = Foundation.UUID().uuidString
-
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 upload.
@@ -258,49 +59,20 @@ class ApplyDeferredUploadsTests: ServerTestCase {
             return
         }
         
-        let messageString = "Example"
-        let id = Foundation.UUID().uuidString
-        var record = CommentFile.FixedObject()
-        record[CommentFile.idKey] = id
-        record["messageString"] = messageString
-        let updateContents = try JSONSerialization.data(withJSONObject: record)
+        let comment = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
         
-        
-        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
-        let lookupResult = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
-        
-        guard case .found(let model) = lookupResult,
-            let fileIndex = model as? FileIndex else {
+        guard let fileIndex = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
             XCTFail()
             return
         }
         
-        let deferredUpload = DeferredUpload()
-        deferredUpload.fileGroupUUID = fileGroupUUID
-        deferredUpload.status = .pending
-        let addResult = DeferredUploadRepository(db).add(deferredUpload)
-        guard case .success(deferredUploadId: let deferredUploadId) = addResult else {
+        guard let deferredUpload = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID),
+            let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
         }
-        deferredUpload.deferredUploadId = deferredUploadId
         
-        let upload = Upload()
-        upload.deviceUUID = deviceUUID
-        upload.fileUUID = fileUUID
-        upload.mimeType = "text/plain"
-        upload.state = .uploadingFile
-        upload.userId = fileIndex.userId
-        upload.updateDate = Date()
-        upload.sharingGroupUUID = sharingGroupUUID
-        upload.uploadContents = updateContents
-        upload.uploadCount = 1
-        upload.uploadIndex = 1
-        upload.deferredUploadId = deferredUploadId
-        upload.v0UploadFileVersion = false
-        
-        let addUploadResult = UploadRepository(db).add(upload: upload, fileInFileIndex: true)
-        guard case .success = addUploadResult else {
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID, userId: fileIndex.userId, deferredUploadId: deferredUploadId, updateContents: comment.updateContents, uploadCount: 1, uploadIndex: 1) else {
             XCTFail()
             return
         }
@@ -336,8 +108,8 @@ class ApplyDeferredUploadsTests: ServerTestCase {
             return
         }
         
-        XCTAssert(record2[CommentFile.idKey] as? String == id)
-        XCTAssert(record2["messageString"] as? String == messageString)
+        XCTAssert(record2[CommentFile.idKey] as? String == comment.id)
+        XCTAssert(record2["messageString"] as? String == comment.messageString)
     }
 
     // I'm doing this using two DeferredUpload's -- to simulate the case where changes for the same file are uploaded in two separate batches. I.e., it probably doesn't make sense to think of multiple changes to the same file being uploaded in the same batch.
@@ -381,6 +153,7 @@ class ApplyDeferredUploadsTests: ServerTestCase {
         let deferredUpload1 = DeferredUpload()
         deferredUpload1.fileGroupUUID = fileGroupUUID
         deferredUpload1.status = .pending
+        deferredUpload1.sharingGroupUUID = sharingGroupUUID
         let addResult1 = DeferredUploadRepository(db).add(deferredUpload1)
         guard case .success(deferredUploadId: let deferredUploadId1) = addResult1 else {
             XCTFail()
@@ -391,6 +164,7 @@ class ApplyDeferredUploadsTests: ServerTestCase {
         let deferredUpload2 = DeferredUpload()
         deferredUpload2.fileGroupUUID = fileGroupUUID
         deferredUpload2.status = .pending
+        deferredUpload2.sharingGroupUUID = sharingGroupUUID
         let addResult2 = DeferredUploadRepository(db).add(deferredUpload2)
         guard case .success(deferredUploadId: let deferredUploadId2) = addResult2 else {
             XCTFail()
@@ -530,6 +304,7 @@ class ApplyDeferredUploadsTests: ServerTestCase {
         let deferredUpload1 = DeferredUpload()
         deferredUpload1.fileGroupUUID = fileGroupUUID
         deferredUpload1.status = .pending
+        deferredUpload1.sharingGroupUUID = sharingGroupUUID
         let addResult1 = DeferredUploadRepository(db).add(deferredUpload1)
         guard case .success(deferredUploadId: let deferredUploadId1) = addResult1 else {
             XCTFail()
@@ -540,6 +315,7 @@ class ApplyDeferredUploadsTests: ServerTestCase {
         let deferredUpload2 = DeferredUpload()
         deferredUpload2.fileGroupUUID = fileGroupUUID
         deferredUpload2.status = .pending
+        deferredUpload2.sharingGroupUUID = sharingGroupUUID
         let addResult2 = DeferredUploadRepository(db).add(deferredUpload2)
         guard case .success(deferredUploadId: let deferredUploadId2) = addResult2 else {
             XCTFail()
@@ -691,6 +467,7 @@ class ApplyDeferredUploadsTests: ServerTestCase {
         let deferredUpload1 = DeferredUpload()
         deferredUpload1.fileGroupUUID = fileGroupUUID1
         deferredUpload1.status = .pending
+        deferredUpload1.sharingGroupUUID = sharingGroupUUID
         let addResult1 = DeferredUploadRepository(db).add(deferredUpload1)
         guard case .success(deferredUploadId: let deferredUploadId1) = addResult1 else {
             XCTFail()
@@ -700,6 +477,7 @@ class ApplyDeferredUploadsTests: ServerTestCase {
         
         let deferredUpload2 = DeferredUpload()
         deferredUpload2.fileGroupUUID = fileGroupUUID2
+        deferredUpload2.sharingGroupUUID = sharingGroupUUID
         deferredUpload2.status = .pending
         let addResult2 = DeferredUploadRepository(db).add(deferredUpload2)
         guard case .success(deferredUploadId: let deferredUploadId2) = addResult2 else {

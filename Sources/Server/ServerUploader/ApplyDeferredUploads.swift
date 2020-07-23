@@ -32,8 +32,7 @@ import LoggerAPI
     8) End the database transaction.
  */
 
-// Process a group of deferred uploads, for a single fileGroupUUID.
-// All DeferredUploads given must have the fileGroupUUID given.
+// Process a group of deferred uploads, for a single fileGroupUUID; all DeferredUploads given must have the fileGroupUUID given. The file group must be in the given sharing group. ie., all deferred uploads will have this sharingGroupUUID.
 // Call the `run` method to kick this off. Once this succeeds, it removes the DeferredUpload's. It does the datatabase operations within a transaction.
 // NOTE: Currently this statement of consistency applies at the database level, but not at the file level. If this fails mid-way through processing, new file versions may be present. We need to put in some code to deal with a restart which itself doesn't fail if the a new file version is present. Perhaps overwrite it?
 class ApplyDeferredUploads {
