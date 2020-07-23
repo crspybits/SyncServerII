@@ -92,6 +92,38 @@ extension UploaderCommon {
         
         return fileIndex
     }
+    
+    // Download the comment file and check it against the expectedCommentFile.
+    func checkCommentFile(expectedComment: ExampleComment, recordIndex: Int = 0, recordCount: Int = 1, fileVersion: FileVersionInt = 1, deviceUUID: String, fileUUID: String, userId: UserId) -> Bool {
+        let fileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: "text/plain", fileVersion: fileVersion)
+        
+        guard let commentFile = downloadCommentFile(fileName: fileName, userId: userId) else {
+            XCTFail()
+            return false
+        }
+        
+        guard commentFile.count == recordCount else {
+            XCTFail()
+            return false
+        }
+
+        guard let record = commentFile[recordIndex] else {
+            XCTFail()
+            return false
+        }
+        
+        guard record[CommentFile.idKey] as? String == expectedComment.id else {
+            XCTFail()
+            return false
+        }
+        
+        guard record["messageString"] as? String == expectedComment.messageString else {
+            XCTFail()
+            return false
+        }
+        
+        return true
+    }
 }
 
 struct ExampleComment {
