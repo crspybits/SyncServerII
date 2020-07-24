@@ -9,17 +9,32 @@
 import ServerShared
 import ChangeResolvers
 import XCTest
-@testable import TestsCommon
 import ServerAccount
 
-protocol UploaderCommon {
+public struct ExampleComment {
+    public let messageString:String
+    public let id: String
+    
+    public var record:CommentFile.FixedObject {
+        var result = CommentFile.FixedObject()
+        result[CommentFile.idKey] = id
+        result["messageString"] = messageString
+        return result
+    }
+    
+    public var updateContents: Data {
+        return try! JSONSerialization.data(withJSONObject: record)
+    }
+}
+
+public protocol UploaderCommon {
     var accountManager:AccountManager! {get}
     var db:Database! {get}
     func expectation(description: String) -> XCTestExpectation
     func waitForExpectations(timeout: TimeInterval, handler: XCWaitCompletionHandler?)
 }
 
-extension UploaderCommon {
+public extension UploaderCommon {
     func downloadCommentFile(fileName: String, userId: UserId) -> CommentFile? {
         guard let cloudStorage = FileController.getCreds(forUserId: userId, from: db, accountManager: accountManager) as? CloudStorage else {
             XCTFail()
@@ -45,7 +60,7 @@ extension UploaderCommon {
         return commentFile
     }
     
-    func createUploadForTextFile(deviceUUID: String, fileUUID: String, sharingGroupUUID: String, userId: UserId, deferredUploadId: Int64, updateContents: Data, uploadCount: Int32 = 1, uploadIndex:Int32 = 1) -> Upload? {
+    func createUploadForTextFile(deviceUUID: String, fileUUID: String, fileGroupUUID: String? = nil, sharingGroupUUID: String, userId: UserId, deferredUploadId: Int64? = nil, updateContents: Data, uploadCount: Int32 = 1, uploadIndex:Int32 = 1) -> Upload? {
         let upload = Upload()
         upload.deviceUUID = deviceUUID
         upload.fileUUID = fileUUID
@@ -59,6 +74,7 @@ extension UploaderCommon {
         upload.uploadIndex = uploadIndex
         upload.deferredUploadId = deferredUploadId
         upload.v0UploadFileVersion = false
+        upload.fileGroupUUID = fileGroupUUID
         
         let addUploadResult = UploadRepository(db).add(upload: upload, fileInFileIndex: true)
         guard case .success = addUploadResult else {
@@ -68,7 +84,7 @@ extension UploaderCommon {
         return upload
     }
     
-    func createDeferredUpload(fileGroupUUID: String, sharingGroupUUID: String) -> DeferredUpload? {
+    func createDeferredUpload(fileGroupUUID: String? = nil, sharingGroupUUID: String) -> DeferredUpload? {
         let deferredUpload = DeferredUpload()
         deferredUpload.fileGroupUUID = fileGroupUUID
         deferredUpload.status = .pending
@@ -126,18 +142,3 @@ extension UploaderCommon {
     }
 }
 
-struct ExampleComment {
-    let messageString:String
-    let id: String
-    
-    var record:CommentFile.FixedObject {
-        var result = CommentFile.FixedObject()
-        result[CommentFile.idKey] = id
-        result["messageString"] = messageString
-        return result
-    }
-    
-    var updateContents: Data {
-        return try! JSONSerialization.data(withJSONObject: record)
-    }
-}

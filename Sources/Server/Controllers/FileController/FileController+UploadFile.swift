@@ -88,6 +88,8 @@ extension FileController {
         }
         
         var existingFileInFileIndex:FileIndex?
+        var existingFileGroupUUID: String?
+        
         do {
             existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadRequest.sharingGroupUUID, fileUUID:uploadRequest.fileUUID)
         } catch (let error) {
@@ -95,6 +97,9 @@ extension FileController {
             finish(.errorMessage(message), params: params)
             return
         }
+        
+        // This will be nil if (a) there is no existing file and if (b) an existing file doesn't have a fileGroupUUID.
+        existingFileGroupUUID = existingFileInFileIndex?.fileGroupUUID
         
         // To send back to client.
         var creationDate:Date!
@@ -214,7 +219,7 @@ extension FileController {
             let cloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType:uploadRequest.mimeType, fileVersion: 0)
             
             // This also does addUploadEntry.
-            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
+            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID)
         }
         else {
             guard uploadRequest.changeResolverName == nil else {
@@ -229,11 +234,11 @@ extension FileController {
                 return
             }
             
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: Date(), uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID, uploadContents: data)
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: Date(), uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: data)
         }
     }
     
-    private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, deviceUUID: String) {
+    private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String) {
         // Lock will be held for the duration of the upload. Not the best, but don't have a better mechanism yet.
         
         Log.info("File being sent to cloud storage: \(cloudFileName)")
@@ -247,7 +252,7 @@ extension FileController {
             case .success(let checkSum):
                 Log.debug("File with checkSum \(checkSum) successfully uploaded!")
                 
-                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest, deviceUUID: deviceUUID)
+                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID)
 
             case .accessTokenRevokedOrExpired:
                 // Not going to do any cleanup. The access token has expired/been revoked. Presumably, the file wasn't uploaded.
@@ -264,7 +269,7 @@ extension FileController {
     }
     
     // This also calls finishUploads
-    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, deviceUUID: String, uploadContents: Data? = nil) {
+    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String, uploadContents: Data? = nil) {
     
         if !newFile && uploadContents == nil {
             let message = "vN file and uploadContents were nil"
@@ -313,6 +318,9 @@ extension FileController {
             
             upload.fileGroupUUID = fileGroupUUID
         }
+        else {
+            upload.fileGroupUUID = existingFileGroupUUID
+        }
     
         if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile == true {
             Log.info("Undeleted server file.")
@@ -339,7 +347,7 @@ extension FileController {
 
         switch addUploadResult {
         case .success:
-            guard let finishUploads = FinishUploads(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, sharingGroupName: nil, params: params) else {
+            guard let finishUploads = FinishUploads(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: params.uploader, sharingGroupName: nil, params: params) else {
                 finish(.errorCleanup(message: "Could not FinishUploads", cleanup: cleanup), params: params)
                 return
             }

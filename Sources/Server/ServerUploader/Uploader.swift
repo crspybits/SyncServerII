@@ -5,19 +5,18 @@ import ServerAccount
 import ServerShared
 
 // Processes entries in DeferredUpload in file group-based units.
-    
-/*
-/root/Apps/ServerMain/Tests/ChangeResolverTests/UploaderTests.swift:112:10: note: candidate has non-matching type '(Uploader, Error?) -> ()'
-    func run(completed: Uploader, with error: Error?) {
-         ^
-/root/Apps/ServerMain/Sources/Server/ServerUploader/Uploader.swift:10:10: note: protocol requires function 'run(completed:with:)' with type '(Uploader, Error?) -> ()'
-    func run(completed: Uploader, with error: Error?)
- */
-protocol UploaderDelegate: AnyObject {
-    func run(completed: Uploader, error: Swift.Error?)
+
+// For testing.
+protocol UploaderProtocol {
+    func run() throws
+    var delegate: UploaderDelegate? {get set}
 }
 
-class Uploader {
+protocol UploaderDelegate: AnyObject {
+    func run(completed: UploaderProtocol, error: Swift.Error?)
+}
+
+class Uploader: UploaderProtocol {
     enum Errors: Error {
         case failedInit
         case failedConnectingDatabase
@@ -77,7 +76,7 @@ class Uploader {
             throw Errors.failedToGetDeferredUploads
         }
 
-        // Sometimes multiple rows in DeferredUpload may refer to the same fileGroupUUID-- so need to process those together. (Except for those with a nil fileGroupUUID-- which are processed independently).
+        // Processes multiple rows in DeferredUpload when they refer to the same fileGroupUUID together. (Except for those with a nil fileGroupUUID-- which are processed independently).
         DispatchQueue.global().async {
             self.process(deferredUploads: deferredUploads) { error in
                 try? self.release()
@@ -130,8 +129,23 @@ class Uploader {
         
         let result = self.applyDeferredUploads(aggregatedGroups: aggregatedGroups)
         completion(result)
-            
-            // TODO: Apply to files without fileGroupUUID's.
+        
+        guard noFileGroupUUIDs.count > 0 else {
+            completion(result)
+            return
+        }
+        
+        assert(false)
+        
+        return
+        
+        // When a DeferredUpload has a nil fileGroupUUID-- will this necessarily mean that there is a single Upload associated with it?
+        
+        // let uploadsAggregatedByFileUUID =
+        
+        // TODO: Apply to files without fileGroupUUID's.
+        // Need to partition these by fileUUID-- i.e., to apply all changes for a single file at one time.
+        
 //            for noFileGroupUUID in noFileGroupUUIDs {
 //                // try Self.applyWithNoFileGroupUUID(deferredUpload: noFileGroupUUID)
 //            }

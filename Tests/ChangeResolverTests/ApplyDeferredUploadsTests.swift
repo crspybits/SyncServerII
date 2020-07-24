@@ -339,4 +339,6 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
     }
+    
+    // MARK: nil fileGroupUUID
 }

@@ -11,12 +11,20 @@ import Foundation
 import ServerShared
 import LoggerAPI
 
+protocol FinishUploadsParameters {
+    var repos: Repositories! {get set}
+    
+    // This must be non-nil
+    var currentSignedInUser: User? {get}
+}
+
 class FinishUploads {
     private let sharingGroupUUID: String
     private let deviceUUID: String
-    private let params:RequestProcessingParameters
+    private var params:FinishUploadsParameters
     private let userId: UserId
     private let sharingGroupName: String?
+    private let uploader: UploaderProtocol
     
     /** This is for both file uploads, and upload deletions.
      * Specific Use cases:
@@ -31,11 +39,12 @@ class FinishUploads {
      *  a) More than one file in batch, but both have nil fileGroupUUID.
      *  b) More than one file in batch, but they have different fileGroupUUID's.
      */
-    init?(sharingGroupUUID: String, deviceUUID: String, sharingGroupName: String?, params:RequestProcessingParameters) {
+    init?(sharingGroupUUID: String, deviceUUID: String, uploader: UploaderProtocol, sharingGroupName: String? = nil, params:FinishUploadsParameters) {
         self.sharingGroupUUID = sharingGroupUUID
         self.deviceUUID = deviceUUID
         self.params = params
         self.sharingGroupName = sharingGroupName
+        self.uploader = uploader
         
         // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
         guard let userId = params.currentSignedInUser?.userId else {
@@ -59,6 +68,8 @@ class FinishUploads {
         case error(RequestProcessingParameters.Response)
     }
 
+    // For v0 uploads, tranfers the Upload records to FileIndex
+    // For vN uploads, creates DeferredUpload records.
     func transfer() -> TransferResponse {
         let currentUploads: [Upload]
         
@@ -89,7 +100,7 @@ class FinishUploads {
             return .error(.failure(.message(message)))
         }
         
-        // If there is more than one file, must have a fileGroupUUID
+        // If there is more than one file, must have a fileGroupUUID. Thus, only with just a single file can it have a nil fileGroupUUID.
         if fileGroupUUID == nil && currentUploads.count > 1 {
             let message = "More than one upload and they have nil fileGroupUUID"
             Log.error(message)
@@ -133,14 +144,14 @@ class FinishUploads {
         
         if vNUploads {
             // Mark the uploads to indicate they are ready for deferred transfer.
-            guard markUploadsAsDeferred(uploads: currentUploads) else {
+            guard markUploadsAsDeferred(fileGroupUUID: fileGroupUUID, uploads: currentUploads) else {
                 let message = "Failed markUploadsAsDeferred"
                 Log.error(message)
                 return .error(.failure(.message(message)))
             }
             
             do {
-                try params.uploader.run()
+                try uploader.run()
             } catch let error {
                 let message = "Failed Uploader.run: \(error)"
                 Log.error(message)
@@ -172,13 +183,13 @@ class FinishUploads {
 
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
         
-        guard let staleVersionsToDelete = getIndexEntries(forUploadFiles: staleVersionsFromUploads, params:params) else {
+        guard let staleVersionsToDelete = getIndexEntries(forUploadFiles: staleVersionsFromUploads, fileIndex: params.repos.fileIndex) else {
             let message = "Failed to getIndexEntries for staleVersionsFromUploads: \(String(describing: staleVersionsFromUploads))"
             Log.error(message)
             return .error(.failure(.message(message)))
         }
         
-        guard let fileIndexDeletions = getIndexEntries(forUploadFiles: uploadDeletions, params:params) else {
+        guard let fileIndexDeletions = getIndexEntries(forUploadFiles: uploadDeletions, fileIndex: params.repos.fileIndex) else {
             let message = "Failed to getIndexEntries for uploadDeletions: \(String(describing: uploadDeletions))"
             Log.error(message)
             return .error(.failure(.message(message)))
@@ -210,7 +221,7 @@ class FinishUploads {
         // 3) Transfer info to the FileIndex repository from Upload.
         let numberTransferredResult =
             params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: getEffectiveOwningUserId, sharingGroupUUID: sharingGroupUUID,
-                uploadingDeviceUUID: params.deviceUUID!,
+                uploadingDeviceUUID: deviceUUID,
                 uploadRepo: params.repos.upload)
         
         var numberTransferred: Int32!
@@ -224,7 +235,7 @@ class FinishUploads {
         }
         
         // 4) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
-        let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: params.deviceUUID!, sharingGroupUUID: sharingGroupUUID)
+        let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         // 5/28/17; I just got an error on this:
         // [ERR] Number rows removed from Upload was 10 but should have been Optional(9)!
@@ -276,9 +287,11 @@ class FinishUploads {
     }
     
     // This is called only for vN files. These files will already be in the FileIndex.
-    private func markUploadsAsDeferred(uploads: [Upload]) -> Bool {
+    private func markUploadsAsDeferred(fileGroupUUID: String?, uploads: [Upload]) -> Bool {
         let deferredUpload = DeferredUpload()
         deferredUpload.status = .pending
+        deferredUpload.sharingGroupUUID = sharingGroupUUID
+        deferredUpload.fileGroupUUID = fileGroupUUID
         
         let result = params.repos.deferredUpload.retry {[unowned self] in
             return self.params.repos.deferredUpload.add(deferredUpload)
@@ -308,7 +321,7 @@ class FinishUploads {
 
 extension FinishUploads {
     // Returns nil on an error.
-    private func getIndexEntries(forUploadFiles uploadFiles:[Upload], params:RequestProcessingParameters) -> [FileInfo]? {
+    private func getIndexEntries(forUploadFiles uploadFiles:[Upload], fileIndex:FileIndexRepository) -> [FileInfo]? {
         var primaryFileIndexKeys = [FileIndexRepository.LookupKey]()
     
         for uploadFile in uploadFiles {
@@ -320,7 +333,7 @@ extension FinishUploads {
         var fileIndexObjs = [FileInfo]()
     
         if primaryFileIndexKeys.count > 0 {
-            let fileIndexResult = params.repos.fileIndex.fileIndex(forKeys: primaryFileIndexKeys)
+            let fileIndexResult = fileIndex.fileIndex(forKeys: primaryFileIndexKeys)
             switch fileIndexResult {
             case .fileIndex(let fileIndex):
                 fileIndexObjs = fileIndex

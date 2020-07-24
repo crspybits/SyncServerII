@@ -68,7 +68,7 @@ extension ControllerProtocol {
     }
 }
 
-public class RequestProcessingParameters {
+public class RequestProcessingParameters: FinishUploadsParameters {
     let request: RequestMessage!
     let ep: ServerEndpoint!
     

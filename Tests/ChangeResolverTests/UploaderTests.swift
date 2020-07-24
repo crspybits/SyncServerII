@@ -482,10 +482,12 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
     }
+    
+    // MARK: nil fileGroupUUID in some sharing groups.
 }
 
 extension UploaderTests: UploaderDelegate {
-    func run(completed: Uploader, error: Swift.Error?) {
+    func run(completed: UploaderProtocol, error: Swift.Error?) {
         runCompleted?(error)
     }
 }
