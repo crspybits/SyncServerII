@@ -109,9 +109,6 @@ class Uploader: UploaderProtocol {
             }
         }
         
-        // TODO: Fix
-        assert(noFileGroupUUIDs.count == 0)
-        
         var aggregatedGroups = [[DeferredUpload]]()
 
         let aggregateBySharingGroups = Self.aggregateSharingGroupUUIDs(deferredUploads: withFileGroupUUIDs)
@@ -128,21 +125,23 @@ class Uploader: UploaderProtocol {
             return
         }
         
-        let result = self.applyDeferredUploads(aggregatedGroups: aggregatedGroups)
-        completion(result)
-        return
+        if let error = self.applyDeferredUploads(aggregatedGroups: aggregatedGroups) {
+            completion(error)
+        }
         
-        /*
+        // Next: Deal with DeferredUpload's that don't have fileGroupUUID's
+        
         guard noFileGroupUUIDs.count > 0 else {
-            completion(result)
+            completion(nil)
             return
         }
-        */
+        
+        // What we want to do at this point is use the basic ApplyDeferredUpload's algorithm-- but without consideration for fileGroupUUID. That basic algorithm gets all the Upload records for all the DeferredUpload's, aggregates by fileUUID, and then applies changes to individual file's.
+    
+        assert(false)
+        
+        return
 
-        // When a DeferredUpload has a nil fileGroupUUID-- it necessarily means that there is just a single Upload associated with it.
-        
-        // let uploadsAggregatedByFileUUID =
-        
         // TODO: Apply to files without fileGroupUUID's.
         // Need to partition these by fileUUID-- i.e., to apply all changes for a single file at one time.
         

@@ -14,11 +14,10 @@ import LoggerAPI
 // Each DeferredUpload corresponds to one or more Upload record.
 /* Here's the algorithm:
     0) Open the database transaction.
-    1) Need to get the Account for the owner for this fileGroupUUID.
-    2) let allUploads = all of the Upload records corresponding to these DeferredUpload's.
-    3) let fileUUIDs = the set of unique fileUUID's within allUploads.
-    4) let uploads(fileUUID) be the set of Upload's for a given fileUUID within fileUUIDs, i.e., within allUploads.
-    5) for fileUUID in fileUUIDs {
+    1) let allUploads = all of the Upload records corresponding to these DeferredUpload's.
+    2) let fileUUIDs = the set of unique fileUUID's within allUploads.
+    3) let uploads(fileUUID) be the set of Upload's for a given fileUUID within fileUUIDs, i.e., within allUploads.
+    4) for fileUUID in fileUUIDs {
          let uploadsForFileUUID = uploads(fileUUID)
          Get the change resolver for this fileUUID from the FileIndex
          Read the file indicated by fileUUID from cloud storage.
@@ -27,17 +26,20 @@ import LoggerAPI
          }
          Write the file data for the updated file back to cloud storage.
        }
-    6) Do the update of the FileIndex based on these DeferredUpload records.
-    7) Remove these DeferredUpload from the database.
-    8) End the database transaction.
+    5) Do the update of the FileIndex based on these DeferredUpload records.
+    6) Remove these DeferredUpload from the database.
+    7) End the database transaction.
  */
 
-// Process a group of deferred uploads, for a single fileGroupUUID; all DeferredUploads given must have the fileGroupUUID given. The file group must be in the given sharing group. ie., all deferred uploads will have this sharingGroupUUID.
+// Process a group of deferred uploads
+// If a fileGroupUUID is given, then all DeferredUploads given must have the fileGroupUUID given. The file group must be in the given sharing group. ie., all deferred uploads will have this sharingGroupUUID. In this case, all updates in all of the DeferredUpload's are processed as a unit-- in one database transaction.
+// If no fileGroupUUID is given, then all DeferredUploads must have a nil fileGroupUUID. In this case, changes for each fileUUID are processed as a unit-- in separate database transaction's.
 // Call the `run` method to kick this off. Once this succeeds, it removes the DeferredUpload's. It does the datatabase operations within a transaction.
 // NOTE: Currently this statement of consistency applies at the database level, but not at the file level. If this fails mid-way through processing, new file versions may be present. We need to put in some code to deal with a restart which itself doesn't fail if the a new file version is present. Perhaps overwrite it?
 class ApplyDeferredUploads {
     enum Errors: Error {
         case notAllInGroupHaveSameFileGroupUUID
+        case notAllInGroupHaveNilFileGroupUUID
         case deferredUploadIds
         case couldNotGetAllUploads
         case couldNotGetFileUUIDs
@@ -63,7 +65,6 @@ class ApplyDeferredUploads {
     }
     
     let sharingGroupUUID: String
-    let fileGroupUUID: String
     let deferredUploads: [DeferredUpload]
     let db: Database
     let allUploads: [Upload]
@@ -73,11 +74,11 @@ class ApplyDeferredUploads {
     let fileUUIDs: [String]
     let uploadRepo:UploadRepository
     let deferredUploadRepo:DeferredUploadRepository
+    let haveFileGroupUUID: Bool
     var fileDeletions = [FileDeletion]()
     
-    init?(sharingGroupUUID: String, fileGroupUUID: String, deferredUploads: [DeferredUpload], accountManager: AccountManager, resolverManager: ChangeResolverManager, db: Database) throws {
+    init?(sharingGroupUUID: String, fileGroupUUID: String? = nil, deferredUploads: [DeferredUpload], accountManager: AccountManager, resolverManager: ChangeResolverManager, db: Database) throws {
         self.sharingGroupUUID = sharingGroupUUID
-        self.fileGroupUUID = fileGroupUUID
         self.deferredUploads = deferredUploads
         self.db = db
         self.accountManager = accountManager
@@ -90,8 +91,17 @@ class ApplyDeferredUploads {
             return nil
         }
         
-        guard (deferredUploads.filter {$0.fileGroupUUID == fileGroupUUID}).count == deferredUploads.count else {
-            throw Errors.notAllInGroupHaveSameFileGroupUUID
+        if let fileGroupUUID = fileGroupUUID {
+            guard (deferredUploads.filter {$0.fileGroupUUID == fileGroupUUID}).count == deferredUploads.count else {
+                throw Errors.notAllInGroupHaveSameFileGroupUUID
+            }
+            haveFileGroupUUID = true
+        }
+        else {
+            guard (deferredUploads.compactMap {$0.fileGroupUUID}).count == 0 else {
+                throw Errors.notAllInGroupHaveNilFileGroupUUID
+            }
+            haveFileGroupUUID = false
         }
         
         let deferredUploadIds = deferredUploads.compactMap{$0.deferredUploadId}
@@ -109,7 +119,7 @@ class ApplyDeferredUploads {
             throw Errors.couldNotGetFileUUIDs
         }
         
-        // Now that we have the fileUUIDs, we need to make sure they are unique.
+        // Now that we have the fileUUIDs, reduce to just the unique fileUUID's.
         self.fileUUIDs = Array(Set<String>(fileUUIDs))
     }
     
@@ -172,8 +182,8 @@ class ApplyDeferredUploads {
         return resolverType
     }
     
-    // Apply changes to all fileUUIDs. This deals with database transactions.
-    func run(completion: @escaping (Error?)->()) {
+    // Have a fileGroupUUID. Commit changes after entire file group is processed.
+    private func runWithFileGroupUUID(completion: @escaping (Error?)->()) {
         guard db.startTransaction() else {
             completion(Errors.failedStartingTransaction)
             return
@@ -206,6 +216,54 @@ class ApplyDeferredUploads {
         case .failure(let error):
             _ = self.db.rollback()
             completion(error)
+        }
+    }
+    
+    // Have no fileGroupUUID. Commit changes after each file is processed.
+    private func runWithoutFileGroupUUID(completion: @escaping (Error?)->()) {
+        func apply(fileUUID: String, completion: @escaping (Swift.Result<Void, Error>) -> ()) {
+            guard db.startTransaction() else {
+                completion(.failure(Errors.failedStartingTransaction))
+                return
+            }
+        
+            Log.debug("applyChangesToSingleFile: \(fileUUID)")
+
+            applyChangesToSingleFile(fileUUID: fileUUID) { error in
+                if let error = error {
+                    _ = self.db.rollback()
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard self.db.commit() else {
+                    completion(.failure(Errors.couldNotCommit))
+                    return
+                }
+            
+                completion(.success(()))
+            }
+        }
+        
+        let result = fileUUIDs.synchronouslyRun(apply: apply)
+        switch result {
+        case .success:
+            Log.info("About to start cleanup.")
+            // TODO: Could cleanup after each successful commit. But would have to remove just those DeferredUpload's dealt with so far. And remove any FileDeletion's completed.
+            self.cleanup(completion: completion)
+            
+        case .failure(let error):
+            completion(error)
+        }
+    }
+    
+    // Apply changes to all fileUUIDs. This deals with database transactions.
+    func run(completion: @escaping (Error?)->()) {
+        if haveFileGroupUUID {
+            runWithFileGroupUUID(completion: completion)
+        }
+        else {
+            runWithoutFileGroupUUID(completion: completion)
         }
     }
     
