@@ -123,6 +123,8 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
         
+        // Upload two changes to the same file.
+        
         guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID, userId: fileIndex.userId, deferredUploadId: deferredUploadId1, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1) else {
             XCTFail()
             return
@@ -216,7 +218,7 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         
         try uploader.run()
         
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 20, handler: nil)
         
         guard checkCommentFile(expectedComment: comment1, deviceUUID: deviceUUID, fileUUID: fileUUID1, userId: fileIndex.userId) else {
             XCTFail()
@@ -371,7 +373,7 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         
         try uploader.run()
         
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 20, handler: nil)
         
         guard checkCommentFile(expectedComment: comment1, deviceUUID: deviceUUID, fileUUID: fileUUID1, userId: fileIndex.userId) else {
             XCTFail()
@@ -384,7 +386,7 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         }
     }
     
-    func testUploaderWithTwoSharingGroupsWithTwoFilesInOneAndOneInOther() throws {
+    func testUploaderWithTwoSharingGroupsWithTwoFilesInOneAndOneInOtherWorks() throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
@@ -395,6 +397,7 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         let changeResolverName = CommentFile.changeResolverName
         
         // Do the v0 uploads.
+        
         guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID1, changeResolverName: changeResolverName),
             let sharingGroupUUID1 = result1.sharingGroupUUID else {
             XCTFail()
@@ -465,7 +468,8 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         
         try uploader.run()
         
-        waitForExpectations(timeout: 10, handler: nil)
+        // This takes appreciable real time. It has to download two files, upload them both too, and delete the prior version.
+        waitForExpectations(timeout: 20, handler: nil)
         
         guard checkCommentFile(expectedComment: comment1, deviceUUID: deviceUUID, fileUUID: fileUUID1, userId: fileIndex.userId) else {
             XCTFail()

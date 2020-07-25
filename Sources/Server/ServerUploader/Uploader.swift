@@ -89,6 +89,7 @@ class Uploader: UploaderProtocol {
                     Log.info("Succeeded!")
                 }
                 
+                Log.debug("Calling run delegate method: \(String(describing: error))")
                 self.delegate?.run(completed: self, error: error)
             }
         }
@@ -129,17 +130,16 @@ class Uploader: UploaderProtocol {
         
         let result = self.applyDeferredUploads(aggregatedGroups: aggregatedGroups)
         completion(result)
+        return
         
+        /*
         guard noFileGroupUUIDs.count > 0 else {
             completion(result)
             return
         }
-        
-        assert(false)
-        
-        return
-        
-        // When a DeferredUpload has a nil fileGroupUUID-- will this necessarily mean that there is a single Upload associated with it?
+        */
+
+        // When a DeferredUpload has a nil fileGroupUUID-- it necessarily means that there is just a single Upload associated with it.
         
         // let uploadsAggregatedByFileUUID =
         

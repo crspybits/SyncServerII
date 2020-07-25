@@ -11,6 +11,7 @@ struct FileDeletion {
     let options: CloudStorageFileNameOptions
     
     func delete(completion: @escaping (Error?)->()) {
+        Log.debug("Deleting file: \(self.cloudFileName)")
         cloudStorage.deleteFile(cloudFileName: cloudFileName, options: options) { result in
             switch result {
             case .success:

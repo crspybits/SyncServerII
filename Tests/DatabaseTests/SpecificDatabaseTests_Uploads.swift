@@ -463,13 +463,14 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
     
     // MARK: select(forDeferredUploadIds
     
-    func doAddDeferredUpload(status: DeferredUpload.Status, fileGroupUUID: String? = nil) -> DeferredUpload? {
+    func doAddDeferredUpload(status: DeferredUpload.Status, sharingGroupUUID: String, fileGroupUUID: String? = nil) -> DeferredUpload? {
         let repo = DeferredUploadRepository(db)
 
         let deferredUpload = DeferredUpload()
 
         deferredUpload.status = status
         deferredUpload.fileGroupUUID = fileGroupUUID
+        deferredUpload.sharingGroupUUID = sharingGroupUUID
         
         let result = repo.add(deferredUpload)
         
@@ -496,7 +497,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             return
         }
         
-        guard let deferredUpload = doAddDeferredUpload(status: .pending),
+        guard let deferredUpload = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -527,7 +528,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             return
         }
         
-        guard let deferredUpload = doAddDeferredUpload(status: .pending),
+        guard let deferredUpload = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -563,13 +564,13 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             return
         }
         
-        guard let deferredUpload1 = doAddDeferredUpload(status: .pending),
+        guard let deferredUpload1 = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = doAddDeferredUpload(status: .pending),
+        guard let deferredUpload2 = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return

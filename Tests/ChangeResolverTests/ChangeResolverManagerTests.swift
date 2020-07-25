@@ -24,4 +24,24 @@ class ChangeResolverManagerTests: ServerTestCase {
             return
         }
     }
+    
+    func testAddResolverTypeFailsWhenDuplicateAdded() throws {
+        let manager = ChangeResolverManager()
+        
+        guard !manager.validResolver(CommentFile.changeResolverName) else {
+            XCTFail()
+            return
+        }
+
+        try manager.addResolverType(CommentFile.self)
+
+        do {
+            // Addition of duplicate. Expected to fail.
+            try manager.addResolverType(CommentFile.self)
+        } catch {
+            return
+        }
+        
+        XCTFail()
+    }
 }

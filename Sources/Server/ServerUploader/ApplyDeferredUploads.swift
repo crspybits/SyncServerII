@@ -172,21 +172,29 @@ class ApplyDeferredUploads {
         return resolverType
     }
     
-    // Apply changes to all fileUUIDs. Kick off with default `withFileIndex`.
-    // This deals with database transactions.
+    // Apply changes to all fileUUIDs. This deals with database transactions.
     func run(completion: @escaping (Error?)->()) {
         guard db.startTransaction() else {
             completion(Errors.failedStartingTransaction)
             return
         }
         
-        run(withFileIndex: 0) { error in
-            guard error == nil else {
-                _ = self.db.rollback()
-                completion(error)
-                return
+        func apply(fileUUID: String, completion: @escaping (Swift.Result<Void, Error>) -> ()) {
+            Log.debug("applyChangesToSingleFile: \(fileUUID)")
+
+            applyChangesToSingleFile(fileUUID: fileUUID) { error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                completion(.success(()))
             }
-            
+        }
+        
+        let result = fileUUIDs.synchronouslyRun(apply: apply)
+        switch result {
+        case .success:
             guard self.db.commit() else {
                 completion(Errors.couldNotCommit)
                 return
@@ -194,36 +202,10 @@ class ApplyDeferredUploads {
             
             Log.info("About to start cleanup.")
             self.cleanup(completion: completion)
-        }
-    }
-    
-    private func run(withFileIndex fileIndex: Int, completion: @escaping (Error?)->()) {
-        // Base case of recursion
-        guard fileIndex < fileUUIDs.count else {
-            completion(nil)
-            return
-        }
-        
-        let currentFileUUID = fileUUIDs[fileIndex]
-        
-        Log.debug("applyChangesToSingleFile: \(currentFileUUID)")
-
-        applyChangesToSingleFile(fileUUID: currentFileUUID) {[unowned self] error in
-            guard error == nil else {
-                completion(error)
-                return
-            }
             
-            DispatchQueue.global(qos: .default).async {
-                self.run(withFileIndex: fileIndex + 1) { error in
-                    guard error == nil else {
-                        completion(error)
-                        return
-                    }
-                    
-                    completion(nil)
-                }
-            }
+        case .failure(let error):
+            _ = self.db.rollback()
+            completion(error)
         }
     }
     
@@ -262,6 +244,7 @@ class ApplyDeferredUploads {
         let currentCloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: fileUUID, mimeType:fileIndex.mimeType, fileVersion: fileIndex.fileVersion)
         let options = CloudStorageFileNameOptions(cloudFolderName: owningCreds.cloudFolderName, mimeType: fileIndex.mimeType)
         
+        Log.debug("downloadFile: \(currentCloudFileName)")
         cloudStorage.downloadFile(cloudFileName: currentCloudFileName, options: options) { downloadResult in
             guard case .success(data: let fileContents, checkSum: _) = downloadResult else {
                 completion(Errors.downloadError(downloadResult))
@@ -293,7 +276,9 @@ class ApplyDeferredUploads {
             }
             
             let nextCloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: fileUUID, mimeType:fileIndex.mimeType, fileVersion: nextVersion)
-            
+
+            Log.debug("uploadFile: \(nextCloudFileName)")
+
             cloudStorage.uploadFile(cloudFileName: nextCloudFileName, data: replacementFileContents, options: options) {[unowned self] uploadResult in
                 guard case .success(let checkSum) = uploadResult else {
                     completion(Errors.failedUploadingNewFileVersion)

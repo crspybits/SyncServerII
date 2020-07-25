@@ -46,6 +46,7 @@ class AccountManager {
         for accountType in accountTypes {
             // Don't add the same account type twice!
             if newAccountType == accountType {
+                // TODO: Thow an error; don't crash server.
                 assert(false)
             }
         }

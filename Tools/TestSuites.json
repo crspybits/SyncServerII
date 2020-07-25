@@ -3,6 +3,7 @@
     "other",
     "AccountAuthenticationTests",
     "DatabaseTests",
+    "ChangeResolverTests",
     "mock",
     "owning_google",
     "owning_dropbox",
@@ -56,6 +57,23 @@
     },
     {
       "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers"
+    }
+  ],
+  "ChangeResolverTests": [
+    {
+      "name": "ChangeResolverTests.ApplyDeferredUploadsTests"
+    },
+    {
+      "name": "ChangeResolverTests.ChangeResolverManagerTests"
+    },
+    {
+      "name": "ChangeResolverTests.FileDeletionTests"
+    },
+    {
+      "name": "ChangeResolverTests.UploaderTests"
+    },
+    {
+      "name": "ChangeResolverTests.UploaderUtilityTests"
     }
   ],
   "AccountAuthenticationTests": [
