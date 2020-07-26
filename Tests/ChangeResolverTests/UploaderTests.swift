@@ -41,10 +41,15 @@ class UploaderTests: ServerTestCase, UploaderCommon {
     
     // MARK: One sharing group
 
-    func testUploaderWithASingleFileWithOneChange() throws {
+    func runUploaderWithASingleFileWithOneChange(withFileGroup: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
-        let fileGroupUUID = Foundation.UUID().uuidString
+        
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
+        
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 upload.
@@ -89,10 +94,22 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         }
     }
     
-    func testUploaderWithASingleFileAndTwoChanges() throws {
+    func testUploaderWithASingleFileWithOneChange() throws {
+        try runUploaderWithASingleFileWithOneChange(withFileGroup: true)
+    }
+    
+    func testUploaderWithNoFileGroupWithASingleFileWithOneChange() throws {
+        try runUploaderWithASingleFileWithOneChange(withFileGroup: false)
+    }
+    
+    func runUploaderWithASingleFileAndTwoChanges(withFileGroup: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
-        let fileGroupUUID = Foundation.UUID().uuidString
+
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
 
         let changeResolverName = CommentFile.changeResolverName
 
@@ -158,13 +175,25 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
     }
+    
+    func testUploaderWithASingleFileAndTwoChanges() throws {
+        try runUploaderWithASingleFileAndTwoChanges(withFileGroup: true)
+    }
+    
+    func testUploaderWithNoFileGroupWithASingleFileAndTwoChanges() throws {
+        try runUploaderWithASingleFileAndTwoChanges(withFileGroup: false)
+    }
 
-    func testUploaderWithTwoFilesAndOneChangeEach() throws {
+    func runUploaderWithTwoFilesAndOneChangeEach(withFileGroup:Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
-        let fileGroupUUID = Foundation.UUID().uuidString
 
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
+        
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 uploads.
@@ -230,13 +259,28 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
     }
+    
+    func testUploaderWithTwoFilesAndOneChangeEach() throws {
+        try runUploaderWithTwoFilesAndOneChangeEach(withFileGroup: true)
+    }
+    
+    func testUploaderWithNoFileGroupWithTwoFilesAndOneChangeEach() throws {
+        try runUploaderWithTwoFilesAndOneChangeEach(withFileGroup: false)
+    }
 
-    func testUploaderWithTwoFileGroupsAndTwoFiles() throws {
+    func runUploaderWithTwoFileGroupsAndTwoFiles(withFileGroup:Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
-        let fileGroupUUID1 = Foundation.UUID().uuidString
-        let fileGroupUUID2 = Foundation.UUID().uuidString
+        
+        var fileGroupUUID1: String?
+        var fileGroupUUID2: String?
+
+        if withFileGroup {
+            fileGroupUUID1 = Foundation.UUID().uuidString
+            fileGroupUUID2 = Foundation.UUID().uuidString
+        }
+        
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 uploads.
@@ -302,15 +346,30 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
     }
+    
+    func testUploaderWithTwoFileGroupsAndTwoFiles() throws {
+        try runUploaderWithTwoFileGroupsAndTwoFiles(withFileGroup: true)
+    }
+    
+    func testUploaderWithNoFileGroupWithTwoFileGroupsAndTwoFiles() throws {
+        try runUploaderWithTwoFileGroupsAndTwoFiles(withFileGroup: false)
+    }
 
     // MARK: Two sharing groups
     
-    func testUploaderWithTwoSharingGroupsWithASingleFileGroupInEach() throws {
+    func runUploaderWithTwoSharingGroupsWithASingleFileGroupInEach(withFileGroup:Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
-        let fileGroupUUID1 = Foundation.UUID().uuidString
-        let fileGroupUUID2 = Foundation.UUID().uuidString
+
+        var fileGroupUUID1: String?
+        var fileGroupUUID2: String?
+
+        if withFileGroup {
+            fileGroupUUID1 = Foundation.UUID().uuidString
+            fileGroupUUID2 = Foundation.UUID().uuidString
+        }
+        
         let changeResolverName = CommentFile.changeResolverName
         
         // Do the v0 uploads.
@@ -386,13 +445,27 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         }
     }
     
-    func testUploaderWithTwoSharingGroupsWithTwoFilesInOneAndOneInOtherWorks() throws {
+    func testUploaderWithTwoSharingGroupsWithASingleFileGroupInEach() throws {
+        try runUploaderWithTwoSharingGroupsWithASingleFileGroupInEach(withFileGroup: true)
+    }
+    
+    func testUploaderWithNoFileGroupWithTwoSharingGroupsWithASingleFileGroupInEach() throws {
+        try runUploaderWithTwoSharingGroupsWithASingleFileGroupInEach(withFileGroup: false)
+    }
+    
+    func runUploaderWithTwoSharingGroupsWithTwoFilesInOneAndOneInOtherWorks(withFileGroup: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
         let fileUUID3 = Foundation.UUID().uuidString
-        let fileGroupUUID1 = Foundation.UUID().uuidString
-        let fileGroupUUID2 = Foundation.UUID().uuidString
+
+        var fileGroupUUID1: String?
+        var fileGroupUUID2: String?
+
+        if withFileGroup {
+            fileGroupUUID1 = Foundation.UUID().uuidString
+            fileGroupUUID2 = Foundation.UUID().uuidString
+        }
 
         let changeResolverName = CommentFile.changeResolverName
         
@@ -487,7 +560,13 @@ class UploaderTests: ServerTestCase, UploaderCommon {
         }
     }
     
-    // MARK: nil fileGroupUUID in some sharing groups.
+    func testUploaderWithTwoSharingGroupsWithTwoFilesInOneAndOneInOtherWorks() throws {
+        try runUploaderWithTwoSharingGroupsWithTwoFilesInOneAndOneInOtherWorks(withFileGroup: true)
+    }
+    
+    func testUploaderWithNoFileGroupWithTwoSharingGroupsWithTwoFilesInOneAndOneInOtherWorks() throws {
+        try runUploaderWithTwoSharingGroupsWithTwoFilesInOneAndOneInOtherWorks(withFileGroup: false)
+    }
 }
 
 extension UploaderTests: UploaderDelegate {

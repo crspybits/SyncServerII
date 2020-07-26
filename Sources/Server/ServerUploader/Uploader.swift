@@ -21,6 +21,7 @@ class Uploader: UploaderProtocol {
         case failedInit
         case failedConnectingDatabase
         case failedToGetDeferredUploads
+        case noGroups
         case missingGroupUUID
         case hasFileGroupUUID
         case failedApplyDeferredUploads
@@ -109,63 +110,66 @@ class Uploader: UploaderProtocol {
             }
         }
         
-        var aggregatedGroups = [[DeferredUpload]]()
+        var aggregateBySharingGroups = [[DeferredUpload]]()
+        
+        if withFileGroupUUIDs.count > 0 {
+            var aggregatedGroups = [[DeferredUpload]]()
+            aggregateBySharingGroups = Self.aggregateSharingGroupUUIDs(deferredUploads: withFileGroupUUIDs)
+            for aggregateForSingleSharingGroup in aggregateBySharingGroups {
+                // We have a list of deferred uploads, all with the same sharing group.
+                // Next, partition that by file group.
+                let aggregatedByFileGroups = Self.aggregateFileGroupUUIDs(deferredUploads: aggregateForSingleSharingGroup)
+                
+                aggregatedGroups += aggregatedByFileGroups
+            }
 
-        let aggregateBySharingGroups = Self.aggregateSharingGroupUUIDs(deferredUploads: withFileGroupUUIDs)
-        for aggregateForSingleSharingGroup in aggregateBySharingGroups {
-            // We have a list of deferred uploads, all with the same sharing group.
-            // Next, partition that by file group.
-            let aggregatedByFileGroups = Self.aggregateFileGroupUUIDs(deferredUploads: aggregateForSingleSharingGroup)
-            
-            aggregatedGroups += aggregatedByFileGroups
+            Log.debug("applyDeferredUploads: with file groups")
+            if let error = self.applyDeferredUploads(aggregatedGroups: aggregatedGroups, withFileGroupUUID: true) {
+                completion(error)
+            }
         }
         
-        guard aggregatedGroups.count > 0 else {
-            completion(nil)
-            return
-        }
-        
-        if let error = self.applyDeferredUploads(aggregatedGroups: aggregatedGroups) {
-            completion(error)
-        }
-        
-        // Next: Deal with DeferredUpload's that don't have fileGroupUUID's
+        // Next: Deal with any DeferredUpload's that don't have fileGroupUUID's
         
         guard noFileGroupUUIDs.count > 0 else {
             completion(nil)
             return
         }
         
-        // What we want to do at this point is use the basic ApplyDeferredUpload's algorithm-- but without consideration for fileGroupUUID. That basic algorithm gets all the Upload records for all the DeferredUpload's, aggregates by fileUUID, and then applies changes to individual file's.
+        // Use the basic ApplyDeferredUpload's algorithm-- but without consideration for fileGroupUUID. That basic algorithm gets all the Upload records for all the DeferredUpload's, aggregates by fileUUID, and then applies changes to individual file's.
     
-        assert(false)
+        // We do, however, need to partition these by sharingGroupUUID. ApplyDeferedUploads relies on each partition having the same sharingGroupUUID.
         
-        return
-
-        // TODO: Apply to files without fileGroupUUID's.
-        // Need to partition these by fileUUID-- i.e., to apply all changes for a single file at one time.
-        
-//            for noFileGroupUUID in noFileGroupUUIDs {
-//                // try Self.applyWithNoFileGroupUUID(deferredUpload: noFileGroupUUID)
-//            }
+        aggregateBySharingGroups = Self.aggregateSharingGroupUUIDs(deferredUploads: noFileGroupUUIDs)
+    
+        Log.debug("applyDeferredUploads: without file groups")
+        completion(self.applyDeferredUploads(aggregatedGroups: aggregateBySharingGroups, withFileGroupUUID: false))
     }
     
-    // Process a deferred upload with no fileGroupUUID
-//    static func applyWithNoFileGroupUUID(deferredUpload: DeferredUpload) throws {
-//        guard deferredUpload.fileGroupUUID == nil else {
-//            throw Errors.hasFileGroupUUID
-//        }
-//    }
-    
-    // Synchronously process each group of deferred uploads, all with the same fileGroupUUID.
+    // When withFileGroupUUID is true: Synchronously process each group of deferred uploads, all with the same fileGroupUUID.
     // Each of the aggregated groups must partition the collection of fileGroupUUID's. e.g., two of the sublists cannot contain the same fileGroupUUID, and each sublist must contain deferred uploads with the same fileGroupUUID.
-    func applyDeferredUploads(aggregatedGroups: [[DeferredUpload]]) -> Error? {
+    // When withFileGroupUUID is false: Similar processing, except without file groups. Each set of changes for the same fileUUID is processed as a unit.
+    func applyDeferredUploads(aggregatedGroups: [[DeferredUpload]], withFileGroupUUID: Bool) -> Error? {
         var applier: ApplyDeferredUploads!
 
         func apply(aggregatedGroup: [DeferredUpload], completion: @escaping (Swift.Result<Void, Error>) -> ()) {
-            guard aggregatedGroup.count > 0,
-                let fileGroupUUID = aggregatedGroup[0].fileGroupUUID,
-                let sharingGroupUUID = aggregatedGroup[0].sharingGroupUUID else {
+        
+            guard aggregatedGroup.count > 0 else {
+                completion(.failure(Errors.noGroups))
+                return
+            }
+
+            var fileGroupUUID: String?
+            if withFileGroupUUID {
+                guard let fgUUID = aggregatedGroup[0].fileGroupUUID else {
+                    completion(.failure(Errors.missingGroupUUID))
+                    return
+                }
+                
+                fileGroupUUID = fgUUID
+            }
+            
+            guard let sharingGroupUUID = aggregatedGroup[0].sharingGroupUUID else {
                 completion(.failure(Errors.missingGroupUUID))
                 return
             }

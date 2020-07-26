@@ -419,7 +419,7 @@ class UploadRepository : Repository, RepositoryLookup {
         }
         
         if upload.state == .uploadingFile || upload.state == .uploadingUndelete {
-            Log.error("upload.state2 group nil")
+            Log.debug("upload.state2 group nil")
             return false
         }
         

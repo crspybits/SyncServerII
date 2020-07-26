@@ -46,10 +46,15 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
     
     // MARK: ApplyDeferredUploads tests with a single file group
     
-    func testApplyDeferredUploadsWithASingleFileAndOneChange() throws {
+    func runApplyDeferredUploadsWithASingleFileAndOneChange(withFileGroup: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
-        let fileGroupUUID = Foundation.UUID().uuidString
+        
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
+
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 upload.
@@ -96,12 +101,24 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
     }
+    
+    func testApplyDeferredUploadsWithASingleFileAndOneChange() throws {
+        try runApplyDeferredUploadsWithASingleFileAndOneChange(withFileGroup: true)
+    }
+    
+    func testApplyDeferredUploadsWithNoFileGroupWithASingleFileAndOneChange() throws {
+        try runApplyDeferredUploadsWithASingleFileAndOneChange(withFileGroup: false)
+    }
 
     // I'm doing this using two DeferredUpload's -- to simulate the case where changes for the same file are uploaded in two separate batches. I.e., it probably doesn't make sense to think of multiple changes to the same file being uploaded in the same batch.
-    func testApplyDeferredUploadsWithASingleFileAndTwoChanges() throws {
+    func runApplyDeferredUploadsWithASingleFileAndTwoChanges(withFileGroup: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
-        let fileGroupUUID = Foundation.UUID().uuidString
+
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
 
         let changeResolverName = CommentFile.changeResolverName
 
@@ -169,11 +186,23 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
         }
     }
     
-    func testApplyDeferredUploadsWithTwoFilesAndOneChangeEach() throws {
+    func testApplyDeferredUploadsWithASingleFileAndTwoChanges() throws {
+        try runApplyDeferredUploadsWithASingleFileAndTwoChanges(withFileGroup: true)
+    }
+    
+    func testApplyDeferredUploadsWithNoFileGroupWithASingleFileAndTwoChanges() throws {
+        try runApplyDeferredUploadsWithASingleFileAndTwoChanges(withFileGroup: false)
+    }
+    
+    func runApplyDeferredUploadsWithTwoFilesAndOneChangeEach(withFileGroup: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
-        let fileGroupUUID = Foundation.UUID().uuidString
+
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
 
         let changeResolverName = CommentFile.changeResolverName
 
@@ -244,15 +273,29 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
         }
     }
     
+    func testApplyDeferredUploadsWithTwoFilesAndOneChangeEach() throws {
+        try runApplyDeferredUploadsWithTwoFilesAndOneChangeEach(withFileGroup: true)
+    }
+    
+    func testApplyDeferredUploadsWithNoFileGroupWithTwoFilesAndOneChangeEach() throws {
+        try runApplyDeferredUploadsWithTwoFilesAndOneChangeEach(withFileGroup: false)
+    }
+    
     // MARK: ApplyDeferredUploads tests with two file groups
 
-    func testApplyDeferredUploadsWithTwoFileGroupsAndTwoFiles() throws {
+    func runApplyDeferredUploadsWithTwoFileGroupsAndTwoFiles(withFileGroups: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
-        let fileGroupUUID1 = Foundation.UUID().uuidString
-        let fileGroupUUID2 = Foundation.UUID().uuidString
+        
+        var fileGroupUUID1: String?
+        var fileGroupUUID2: String?
 
+        if withFileGroups {
+            fileGroupUUID1 = Foundation.UUID().uuidString
+            fileGroupUUID2 = Foundation.UUID().uuidString
+        }
+        
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 uploads.
@@ -340,5 +383,11 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
         }
     }
     
-    // MARK: nil fileGroupUUID
+    func testApplyDeferredUploadsWithTwoFileGroupsAndTwoFiles() throws {
+        try runApplyDeferredUploadsWithTwoFileGroupsAndTwoFiles(withFileGroups: true)
+    }
+    
+    func testApplyDeferredWithNoFileGroupUploadsWithTwoFileGroupsAndTwoFiles() throws {
+        try runApplyDeferredUploadsWithTwoFileGroupsAndTwoFiles(withFileGroups: false)
+    }
 }

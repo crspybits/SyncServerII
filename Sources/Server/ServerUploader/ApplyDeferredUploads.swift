@@ -32,7 +32,8 @@ import LoggerAPI
  */
 
 // Process a group of deferred uploads
-// If a fileGroupUUID is given, then all DeferredUploads given must have the fileGroupUUID given. The file group must be in the given sharing group. ie., all deferred uploads will have this sharingGroupUUID. In this case, all updates in all of the DeferredUpload's are processed as a unit-- in one database transaction.
+// All deferred uploads given must have the sharingGroupUUID given.
+// If a fileGroupUUID is given, then all DeferredUploads given must have the fileGroupUUID given. The file group must be in the given sharing group. In this case, all updates in all of the DeferredUpload's are processed as a unit-- in one database transaction.
 // If no fileGroupUUID is given, then all DeferredUploads must have a nil fileGroupUUID. In this case, changes for each fileUUID are processed as a unit-- in separate database transaction's.
 // Call the `run` method to kick this off. Once this succeeds, it removes the DeferredUpload's. It does the datatabase operations within a transaction.
 // NOTE: Currently this statement of consistency applies at the database level, but not at the file level. If this fails mid-way through processing, new file versions may be present. We need to put in some code to deal with a restart which itself doesn't fail if the a new file version is present. Perhaps overwrite it?
@@ -40,6 +41,7 @@ class ApplyDeferredUploads {
     enum Errors: Error {
         case notAllInGroupHaveSameFileGroupUUID
         case notAllInGroupHaveNilFileGroupUUID
+        case notAllDeferredUploadsHaveSameSharingGroupUUID
         case deferredUploadIds
         case couldNotGetAllUploads
         case couldNotGetFileUUIDs
@@ -102,6 +104,10 @@ class ApplyDeferredUploads {
                 throw Errors.notAllInGroupHaveNilFileGroupUUID
             }
             haveFileGroupUUID = false
+        }
+        
+        guard (deferredUploads.filter {$0.sharingGroupUUID == sharingGroupUUID}).count == deferredUploads.count else {
+            throw Errors.notAllDeferredUploadsHaveSameSharingGroupUUID
         }
         
         let deferredUploadIds = deferredUploads.compactMap{$0.deferredUploadId}
