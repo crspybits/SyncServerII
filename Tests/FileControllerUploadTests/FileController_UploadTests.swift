@@ -49,10 +49,11 @@ class FileController_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        // Next, upload v1 of the file.
+        // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
         
         let fileIndex = FileIndexRepository(db)
         let upload = UploadRepository(db)
+        let deferredUploads = DeferredUploadRepository(db)
         
         guard let fileIndexCount1 = fileIndex.count() else {
             XCTFail()
@@ -60,6 +61,11 @@ class FileController_UploadTests: ServerTestCase, UploaderCommon {
         }
         
         guard let uploadCount1 = upload.count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let deferredUploadCount1 = deferredUploads.count() else {
             XCTFail()
             return
         }
@@ -72,21 +78,10 @@ class FileController_UploadTests: ServerTestCase, UploaderCommon {
             XCTFail()
             return
         }
-                        
-        guard let fileIndexCount2 = fileIndex.count() else {
-            XCTFail()
-            return
-        }
         
-        guard let uploadCount2 = upload.count() else {
-            XCTFail()
-            return
-        }
-        
-        XCTAssert(fileIndexCount1 == fileIndexCount2)
-        XCTAssert(uploadCount1 == uploadCount2)
-        
-        // TODO: Check for additional entry in the DeferredUpload table.
+        XCTAssert(fileIndexCount1 == fileIndex.count() )
+        XCTAssert(uploadCount1 == upload.count())
+        XCTAssert(deferredUploadCount1 == deferredUploads.count())
     }
     
     
