@@ -66,6 +66,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::FileControllerTests"
+               BuildableName = "FileControllerTests.xctest"
+               BlueprintName = "FileControllerTests"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "Server::OtherTests"
                BuildableName = "OtherTests.xctest"
                BlueprintName = "OtherTests"
@@ -96,16 +106,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::FileControllerTests"
-               BuildableName = "FileControllerTests.xctest"
-               BlueprintName = "FileControllerTests"
-               ReferencedContainer = "container:Server.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "Server::ChangeResolverTests"
                BuildableName = "ChangeResolverTests.xctest"
                BlueprintName = "ChangeResolverTests"
@@ -116,9 +116,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::AccountFileTests"
-               BuildableName = "AccountFileTests.xctest"
-               BlueprintName = "AccountFileTests"
+               BlueprintIdentifier = "Server::FileControllerUploadTests"
+               BuildableName = "FileControllerUploadTests.xctest"
+               BlueprintName = "FileControllerUploadTests"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -126,9 +126,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::FileControllerUploadTests"
-               BuildableName = "FileControllerUploadTests.xctest"
-               BlueprintName = "FileControllerUploadTests"
+               BlueprintIdentifier = "Server::AccountFileTests"
+               BuildableName = "AccountFileTests.xctest"
+               BlueprintName = "AccountFileTests"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>

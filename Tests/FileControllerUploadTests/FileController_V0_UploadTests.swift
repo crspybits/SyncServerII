@@ -1,5 +1,5 @@
 //
-//  FileController_UploadTests.swift
+//  FileController_V0_UploadTests.swift
 //  Server
 //
 //  Created by Christopher Prince on 3/22/17.
@@ -15,7 +15,7 @@ import Foundation
 import ServerShared
 import ChangeResolvers
 
-class FileController_UploadTests: ServerTestCase {
+class FileController_V0_UploadTests: ServerTestCase {
     override func setUp() {
         super.setUp()
         HeliumLogger.use(.debug)
@@ -45,7 +45,6 @@ class FileController_UploadTests: ServerTestCase {
         1) Type of file (e.g., JPEG, text, URL)
         2) Number of uploads in batch: 1, 2, ...
             Done uploads triggered?
-        3) V0 versus later versions.
      */
      
     // MARK: file upload, v0, 1 of 1 files.

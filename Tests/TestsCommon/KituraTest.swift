@@ -39,6 +39,7 @@ case header
 }
 
 extension KituraTest {
+    // `expectingUploaderToRun` signals whether or not to wait for Uploader run to complete.
     func performServerTest(testAccount:TestAccount = .primaryOwningAccount, expectingUploaderToRun: Bool = false,
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
         
@@ -58,13 +59,15 @@ extension KituraTest {
                 asyncTask(expectation, creds)
             }
             
-            NotificationCenter.default.addObserver(forName: Uploader.uploaderRunCompleted, object: nil, queue: nil) { notification in
-                if let error = notification.userInfo?[Uploader.errorKey] as? Swift.Error {
-                    XCTFail("\(error)")
+            if expectingUploaderToRun {
+                _ = NotificationCenter.default.addObserver(forName: Uploader.uploaderRunCompleted, object: nil, queue: nil) { notification in
+                    if let error = notification.userInfo?[Uploader.errorKey] as? Swift.Error {
+                        XCTFail("\(error)")
+                    }
+                    uploaderRunExpectation?.fulfill()
                 }
-                uploaderRunExpectation?.fulfill()
             }
-
+            
             // blocks test until request completes
             self.waitExpectation(timeout: 60) { error in
                 // executes whether ot nor expectations met.

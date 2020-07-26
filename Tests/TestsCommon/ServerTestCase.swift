@@ -610,6 +610,7 @@ class ServerTestCase : XCTestCase {
     // statusCodeExpected is only used if an error is expected.
     // owningAccountType will be the same type as testAccount when an owning user is uploading (you can pass nil here), and the type of the "parent" owner when a sharing user is uploading.
     // If dataToUpload is present, `file` is not used.
+    // `vNUpload` signals whether or not to wait for Uploader run to complete.
     @discardableResult
     func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, vNUpload: Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
@@ -703,12 +704,14 @@ class ServerTestCase : XCTestCase {
     @discardableResult
     func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, updatedMasterVersionExpected:Int64? = nil, fileVersion:FileVersionInt = 0, masterVersion:Int64 = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
-        let vNUpload = dataToUpload != nil
+        // This signals whether or not to wait for Uploader run to complete.
+        let vNUpload = dataToUpload != nil && uploadIndex == uploadCount
     
         return uploadServerFile(uploadIndex: uploadIndex, uploadCount: uploadCount, testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, updatedMasterVersionExpected:updatedMasterVersionExpected, fileVersion:fileVersion, masterVersion:masterVersion, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, dataToUpload: dataToUpload, fileGroupUUID:fileGroupUUID, changeResolverName: changeResolverName, vNUpload: vNUpload, statusCodeExpected: statusCodeExpected)
     }
     
     // Returns true iff the file could be uploaded.
+    // `vNUpload` signals whether or not to wait for Uploader run to complete.
     @discardableResult
     func runUploadTest(testAccount:TestAccount = .primaryOwningAccount, data:Data, uploadRequest:UploadFileRequest, deviceUUID:String, vNUpload:Bool = false, errorExpected:Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResponse? {
         
