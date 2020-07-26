@@ -24,6 +24,8 @@ See also: https://github.com/IBM-Swift/Kitura-net/issues/196
 public typealias ProcessRequest = (RequestProcessingParameters)->()
 
 class RequestHandler {
+    typealias PostRequestRunner = () throws -> ()
+    
     private var request:RouterRequest!
     private var response:RouterResponse!
     
@@ -176,7 +178,7 @@ class RequestHandler {
     }
     
     enum ServerResult {
-        case success(SuccessResult)
+        case success(SuccessResult, runner: RequestHandler.PostRequestRunner?)
         case failure(FailureResult)
     }
     
@@ -268,7 +270,7 @@ class RequestHandler {
         
         func dbTransactionHandleResult(_ result: ServerResult) {
             switch result {
-            case .success(_):
+            case .success:
                 if !db.commit() {
                     let message = "Error during COMMIT operation!"
                     Log.error(message)
@@ -276,7 +278,7 @@ class RequestHandler {
                     return
                 }
                 
-            case .failure(_):
+            case .failure:
                 if !db.rollback() {
                     let message = "Error during ROLLBACK operation!"
                     Log.error(message)
@@ -432,22 +434,34 @@ class RequestHandler {
     }
     
     private func handleTransactionResult(_ result:ServerResult) {
+        var postRequestRunner: RequestHandler.PostRequestRunner?
+        
         // `endWith` and `failWithError` call the `RouterResponse` `end` method, and thus we have waited until the very end of processing of the request to finish and return control back to the caller.
         switch result {
-        case .success(.jsonString(let jsonString)):
+        case .success(.jsonString(let jsonString), let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .jsonString(jsonString))
             
-        case .success(.dataWithHeaders(let data, headers: let headers)):
+        case .success(.dataWithHeaders(let data, headers: let headers), let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .data(data: data, headers: headers))
         
-        case .success(.headers(let headers)):
+        case .success(.headers(let headers), let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .headers(headers))
         
-        case .success(.nothing):
+        case .success(.nothing, let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .jsonDict([:]))
             
         case .failure(let failureResult):
             failWithError(failureResult: failureResult)
+        }
+        
+        do {
+            try postRequestRunner?()
+        } catch let error {
+            Log.error("Post commit runner: \(error)")
         }
     }
     
@@ -492,10 +506,15 @@ class RequestHandler {
         let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountManager: accountManager, changeResolverManager: changeResolverManager, uploader: uploader) { response in
         
             var message:ResponseMessage!
+            var postCommitRunner: RequestHandler.PostRequestRunner?
             
             switch response {
             case .success(let responseMessage):
                 message = responseMessage
+                
+            case .successWithRunner(let responseMessage, runner: let runner):
+                message = responseMessage
+                postCommitRunner = runner
                 
             case .failure(let failureResult):
                 if let failureResult = failureResult {
@@ -515,14 +534,14 @@ class RequestHandler {
             
             switch message.responseType {
             case .json:
-                handleResult(.success(.jsonString(jsonString)))
+                handleResult(.success(.jsonString(jsonString), runner: postCommitRunner))
 
             case .data(let data):
-                handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString])))
+                handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString]), runner: postCommitRunner))
                 
             case .header:
                 handleResult(.success(.headers(
-                    [ServerConstants.httpResponseMessageParams:jsonString])))
+                    [ServerConstants.httpResponseMessageParams:jsonString]), runner: postCommitRunner))
             }
         } // end: let params = RequestProcessingParameters
 

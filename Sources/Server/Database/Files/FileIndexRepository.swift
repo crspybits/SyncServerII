@@ -409,8 +409,6 @@ class FileIndexRepository : Repository, RepositoryLookup {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
-        Log.debug("changeResolverNameField: \(changeResolverNameField)")
-
         let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) \(changeResolverNameField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.query(statement: query) {

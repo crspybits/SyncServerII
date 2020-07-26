@@ -95,6 +95,8 @@ public class RequestProcessingParameters: FinishUploadsParameters {
     enum Response {
         case success(ResponseMessage)
         
+        case successWithRunner(ResponseMessage, runner: RequestHandler.PostRequestRunner?)
+        
         // Fatal error processing the request, i.e., an error that could not be handled in the normal responses made in the ResponseMessage.
         case failure(RequestHandler.FailureResult?)
     }

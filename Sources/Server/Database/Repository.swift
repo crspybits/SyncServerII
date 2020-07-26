@@ -196,7 +196,6 @@ private class Count: Model {
     var count: Int64?
     subscript(key:String) -> Any? {
         set {
-            Log.debug("newValue: \(newValue)")
             count = newValue as? Int64
         }
         

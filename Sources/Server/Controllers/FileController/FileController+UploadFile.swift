@@ -20,7 +20,7 @@ extension FileController {
     }
     
     private enum Info {
-        case success(response:UploadFileResponse)
+        case success(response:UploadFileResponse, runner: RequestHandler.PostRequestRunner?)
         case errorMessage(String)
         case errorResponse(RequestProcessingParameters.Response)
         case errorCleanup(message: String, cleanup: Cleanup?)
@@ -47,8 +47,8 @@ extension FileController {
                 params.completion(.failure(.message(message)))
             }
             
-        case .success(response: let response):
-            params.completion(.success(response))
+        case .success(response: let response, let runner):
+            params.completion(.successWithRunner(response, runner: runner))
         }
     }
     
@@ -185,7 +185,7 @@ extension FileController {
             // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
             response.creationDate = creationDate
             response.updateDate = upload.updateDate
-            finish(.success(response: response), params: params)
+            finish(.success(response: response, runner: nil), params: params)
             return
             
         case .noObjectFound:
@@ -354,7 +354,8 @@ extension FileController {
             
             let transferResponse = finishUploads.transfer()
             let response = UploadFileResponse()
-
+            var postCommitRunner: RequestHandler.PostRequestRunner?
+            
             switch transferResponse {
             case .success:
                 response.allUploadsFinished = .v0UploadsFinished
@@ -362,8 +363,9 @@ extension FileController {
             case .allUploadsNotYetReceived:
                 response.allUploadsFinished = .uploadsNotFinished
                 
-            case .deferredTransfer:
+            case .deferredTransfer(let runner):
                 response.allUploadsFinished = .vNUploadsTransferPending
+                postCommitRunner = runner
                 
             case .error(let response):
                 params.completion(response)
@@ -373,7 +375,7 @@ extension FileController {
             // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
             response.creationDate = creationDate
             response.updateDate = upload.updateDate
-            finish(.success(response: response), params: params)
+            finish(.success(response: response, runner: postCommitRunner), params: params)
             
         case .duplicateEntry:
             finish(.errorCleanup(message: "Violated assumption: Two uploads by same app at the same time?", cleanup: cleanup), params: params)

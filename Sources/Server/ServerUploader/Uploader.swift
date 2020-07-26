@@ -8,7 +8,7 @@ import ServerShared
 
 // For testing.
 protocol UploaderProtocol {
-    func run()
+    func run() throws
     var delegate: UploaderDelegate? {get set}
 }
 
@@ -19,7 +19,8 @@ protocol UploaderDelegate: AnyObject {
 // When the run method finishes: (a) the delegate method is called, if any, and (b) the uploaderRunCompleted notification is posted.
 // The userInfo payload of the notification has one key: errorKey, with either nil or a Swift.Error value.
 class Uploader: UploaderProtocol {
-    static let uploaderRunCompleted = Notification.Name("UploaderProcessingCompleted")
+    // For testing
+    static let uploaderRunCompleted = Notification.Name("UploaderRunCompleted")
     static let errorKey = "error"
 
     enum Errors: Error {
@@ -54,7 +55,11 @@ class Uploader: UploaderProtocol {
         self.deferredUploadRepo = DeferredUploadRepository(db)
     }
     
-    private func release() throws {
+    private func getLock() throws -> Bool {
+        return try db.getLock(lockName: lockName)
+    }
+    
+    private func releaseLock() throws {
         try db.releaseLock(lockName: lockName)
     }
     
@@ -63,7 +68,7 @@ class Uploader: UploaderProtocol {
     func run() throws {
         // Holding a lock here so that, across server instances, at most one Uploader can be running at one time.
         Log.debug("Attempting to get lock...")
-        guard try db.getLock(lockName: lockName) else {
+        guard try getLock() else {
             Log.debug("Could not get lock.")
             return
         }
@@ -72,20 +77,20 @@ class Uploader: UploaderProtocol {
 
         guard let deferredUploads = deferredUploadRepo.select(rowsWithStatus: .pending) else {
             Log.error("Failed setting up select to get deferred uploads")
-            try release()
+            try releaseLock()
             throw Errors.failedToGetDeferredUploads
         }
         
         guard deferredUploads.count > 0 else {
             Log.debug("No deferred uploads to process")
-            try release()
+            try releaseLock()
             return
         }
         
         let nonUniqueSharingGroupUUIDs = deferredUploads.compactMap {$0.sharingGroupUUID}
         guard nonUniqueSharingGroupUUIDs.count == deferredUploads.count else {
             Log.error("Could not get nonUniqueSharingGroupUUIDs")
-            try release()
+            try releaseLock()
             throw Errors.failedToGetNonUniqueSharingGroupUUIDs
         }
         
@@ -95,7 +100,7 @@ class Uploader: UploaderProtocol {
         
         DispatchQueue.global().async {
             self.process(deferredUploads: deferredUploads) { error in
-                try? self.release()
+                try? self.releaseLock()
                 
                 if let error = error {
                     self.recordGlobalError(error)
@@ -107,7 +112,9 @@ class Uploader: UploaderProtocol {
                 
                 Log.debug("Calling run delegate method: \(String(describing: error))")
                 
+                // Don't put `self` into this as the `object`-- get a failing conversion error to NSObject
                 let notification = Notification(name: Self.uploaderRunCompleted, object: nil, userInfo: [Self.errorKey: error as Any])
+                
                 NotificationCenter.default.post(notification)
 
                 self.delegate?.run(completed: self, error: error)
@@ -162,7 +169,7 @@ class Uploader: UploaderProtocol {
         
         // Use the basic ApplyDeferredUpload's algorithm-- but without consideration for fileGroupUUID. That basic algorithm gets all the Upload records for all the DeferredUpload's, aggregates by fileUUID, and then applies changes to individual file's.
     
-        // We do, however, need to partition these by sharingGroupUUID. ApplyDeferedUploads relies on each partition having the same sharingGroupUUID.
+        // We do, however, need to partition these by sharingGroupUUID. ApplyDeferedUploads, used by aggregateSharingGroupUUIDs, relies on each partition having the same sharingGroupUUID.
         
         aggregateBySharingGroups = Self.aggregateSharingGroupUUIDs(deferredUploads: noFileGroupUUIDs)
     

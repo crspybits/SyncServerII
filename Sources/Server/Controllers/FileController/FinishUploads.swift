@@ -63,7 +63,7 @@ class FinishUploads {
         // TODO: v0 transfer
         case success(numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)
         
-        case deferredTransfer
+        case deferredTransfer(runner: RequestHandler.PostRequestRunner?)
         
         case error(RequestProcessingParameters.Response)
     }
@@ -150,15 +150,9 @@ class FinishUploads {
                 return .error(.failure(.message(message)))
             }
             
-            do {
-                try uploader.run()
-            } catch let error {
-                let message = "Failed Uploader.run: \(error)"
-                Log.error(message)
-                return .error(.failure(.message(message)))
-            }
-            
-            return .deferredTransfer
+            // Doing uploader.run post-request as this will be after the database commit has occurred for the commit-- and we'll be able to fetch DeferredUpload's from the database then.
+            // I'm specifically capturing a strong reference to `self` in the following closure. I want the enum associated value to keep self until the `run` is finished its (synchronous) processing.
+            return .deferredTransfer(runner: { try self.uploader.run() })
         }
         
         // Else: v0 uploads-- files have already been uploaded. Just need to do the transfer to the FileIndex.
