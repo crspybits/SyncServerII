@@ -38,7 +38,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
@@ -52,7 +52,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadResult1.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState, sharingGroupUUID:sharingGroupUUID)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, sharingGroupUUID:sharingGroupUUID)
     }
@@ -65,7 +65,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
@@ -79,7 +79,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadResult1.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState, sharingGroupUUID:sharingGroupUUID)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, sharingGroupUUID:sharingGroupUUID)
         
@@ -94,7 +94,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
@@ -123,7 +123,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
@@ -146,7 +146,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         
         self.getUploads(expectedFiles: [uploadResult1.request, uploadResult2.request], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState, sharingGroupUUID:sharingGroupUUID)
 
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, masterVersion: uploadResult1.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
         
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, matchOptionals: false, expectedDeletionState:expectedDeletionState, sharingGroupUUID:sharingGroupUUID)
 
@@ -164,7 +164,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
@@ -184,7 +184,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = Foundation.UUID().uuidString
@@ -206,7 +206,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
@@ -226,7 +226,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
@@ -271,7 +271,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
@@ -287,7 +287,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             uploadResult.request.fileUUID!: true,
         ]
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadResult.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: uploadResult.request.masterVersion + MasterVersionInt(1), sharingGroupUUID: sharingGroupUUID)
 
         self.getIndex(expectedFiles: [uploadResult.request], masterVersionExpected: uploadResult.request.masterVersion + MasterVersionInt(2), sharingGroupUUID: sharingGroupUUID, expectedDeletionState:expectedDeletionState)
     }
@@ -304,7 +304,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         var masterVersion:MasterVersionInt = uploadResult.request.masterVersion + MasterVersionInt(1)
         let uploadDeletionRequest = UploadDeletionRequest()
@@ -314,7 +314,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         
         masterVersion += 1
         
@@ -334,7 +334,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             getUploads(expectedFiles: [uploadResult2.request], deviceUUID:deviceUUID, expectedCheckSums: [uploadResult.request.fileUUID: uploadResult.checkSum], sharingGroupUUID:sharingGroupUUID)
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         
         // Get the file index and make sure the file is not marked as deleted.
         guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID),
@@ -369,7 +369,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let invalidSharingGroupUUID = UUID().uuidString
 
@@ -390,7 +390,7 @@ class FileControllerTests_UploadDeletion: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let workingButBadSharingGroupUUID = UUID().uuidString
         guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {

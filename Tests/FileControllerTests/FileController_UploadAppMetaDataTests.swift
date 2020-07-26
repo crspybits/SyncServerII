@@ -49,7 +49,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID:sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID:sharingGroupUUID)
         masterVersion += 1
         
         guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupUUID:sharingGroupUUID),
@@ -65,7 +65,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
         assert(false) // DEPRECATED
         //uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, sharingGroupUUID:sharingGroupUUID)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
         
         if usingFileDownload {
@@ -105,7 +105,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
         
         guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupUUID:sharingGroupUUID), let fileInfoObjs1 = files, fileInfoObjs1.count == 1 else {
@@ -121,7 +121,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData, sharingGroupUUID:sharingGroupUUID, expectedError: expectedError)
         
         if !expectedError {
-            sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
+            // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
             masterVersion += 1
             
             guard let downloadAppMetaDataResponse = downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: uploadResult.request.fileUUID, sharingGroupUUID: sharingGroupUUID, expectedError: false) else {
@@ -157,7 +157,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let appMetaData2 = "Test2"
 
@@ -175,7 +175,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
         
         let uploadDeletionRequest = UploadDeletionRequest()
@@ -185,7 +185,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
         
         let appMetaData = AppMetaData(version: 0, contents: "Test2")
@@ -222,7 +222,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
         
         let appMetaData2 = AppMetaData(version: 1, contents: "Test2")
@@ -230,7 +230,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
 
         // Use a different deviceUUID so we can check that the app meta data update doesn't change it in the FileIndex.
         uploadAppMetaDataVersion(deviceUUID: deviceUUID2, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion, appMetaData: appMetaData2, sharingGroupUUID: sharingGroupUUID)
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, masterVersion: masterVersion, sharingGroupUUID: sharingGroupUUID)
         masterVersion += 1
 
         let appMetaData3 = AppMetaData(version: appMetaData2.version + 1, contents: appMetaData2.contents)
@@ -262,7 +262,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID:sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID:sharingGroupUUID)
         masterVersion += 1
         
         guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupUUID:sharingGroupUUID), let fileInfoObjs1 = files, fileInfoObjs1.count == 1 else {
@@ -289,7 +289,7 @@ class FileController_UploadAppMetaDataTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID:sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, masterVersion: masterVersion, sharingGroupUUID:sharingGroupUUID)
         masterVersion += 1
         
         guard let (files, _) = getIndex(deviceUUID: deviceUUID, sharingGroupUUID:sharingGroupUUID), let fileInfoObjs1 = files, fileInfoObjs1.count == 1 else {

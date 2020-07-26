@@ -34,7 +34,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 0, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 0, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testDoneUploadsWithSingleUpload() {
@@ -44,7 +44,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testDoneUploadsWithTwoUploads() {
@@ -62,8 +62,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         }
         
         Log.info("Done uploadJPEGFile")
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        Log.info("Done sendDoneUploads")
+        // self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testDoneUploadsThatUpdatesFileVersion() {
@@ -75,14 +74,14 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         guard let _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID), fileVersion:1, masterVersion: 1) else {
             XCTFail()
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     }
     
     func testDoneUploadsTwiceDoesNothingSecondTime() {
@@ -93,9 +92,9 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 0, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 0, sharingGroupUUID: sharingGroupUUID)
     }
     
     // If you first upload a file (followed by a DoneUploads), then delete it, and then upload again the last upload fails.
@@ -107,7 +106,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
@@ -115,7 +114,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
 
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         // Try upload again. This should fail.
         uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileVersion: 1, errorExpected: true)
@@ -129,7 +128,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         }
         
         let invalidSharingGroupUUID = UUID().uuidString
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: invalidSharingGroupUUID, failureExpected: true)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: invalidSharingGroupUUID, failureExpected: true)
     }
 
     func testDoneUploadsWithBadSharingGroupUUIDFails() {
@@ -145,7 +144,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: workingButBadSharingGroupUUID, failureExpected: true)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: workingButBadSharingGroupUUID, failureExpected: true)
     }
     
     func testDoneUploadsWithChangeOfSharingGroupNameWorks() {
@@ -167,7 +166,7 @@ class FileController_DoneUploadsTests: ServerTestCase, LinuxTestable {
         }
         
         let sharingGroupName = UUID().uuidString
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, sharingGroupName: sharingGroupName)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, sharingGroupName: sharingGroupName)
         
         guard let (_, sharingGroups2) = getIndex() else {
             XCTFail()

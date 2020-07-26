@@ -191,7 +191,7 @@ class FinishUploads {
 
        // Deferring computation of `effectiveOwningUserId` because: (a) don't always need it in the `transferUploads` below, and (b) it will cause unecessary failures in some cases where a sharing owner user has been removed. effectiveOwningUserId is only needed when v0 of a file is being uploaded.
         var effectiveOwningUserId: UserId?
-        func getEffectiveOwningUserId() -> FileController.EffectiveOwningUser {
+        func getEffectiveOwningUserId() -> FileIndexRepository.EffectiveOwningUser {
             if let effectiveOwningUserId = effectiveOwningUserId {
                 return .success(effectiveOwningUserId)
             }

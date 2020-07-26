@@ -115,7 +115,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedCheckSums: [:], sharingGroupUUID: sharingGroupUUID)
     }
     
@@ -129,7 +129,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         
         let invalidSharingGroupUUID = UUID().uuidString
 
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedCheckSums: [:], sharingGroupUUID: invalidSharingGroupUUID, errorExpected: true)
     }
     
@@ -147,7 +147,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         self.getUploads(expectedFiles: [], deviceUUID:deviceUUID, expectedCheckSums: [:], sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
     }
 }

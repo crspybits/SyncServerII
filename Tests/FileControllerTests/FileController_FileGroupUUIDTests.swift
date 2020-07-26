@@ -34,7 +34,7 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         guard let (files, _) = getIndex(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID),
             let fileIndex = files, fileIndex.count == 1 else {
@@ -57,7 +57,7 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         // Upload v1 with nil fileGroupUUID
         guard let _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID:uploadResult1.request.fileUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID), fileVersion:1, masterVersion: 1) else {
@@ -65,7 +65,7 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         guard let (files, _) = getIndex(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID), let fileIndex = files, fileIndex.count == 1 else {
             XCTFail()
@@ -88,7 +88,7 @@ class FileController_FileGroupUUIDTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         // Upload v1 *with* fileGroupUUID
         uploadTextFile(deviceUUID:deviceUUID, fileUUID:uploadResult1.request.fileUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID), fileVersion:1, masterVersion: 1, errorExpected: true, fileGroupUUID: fileGroupUUID)

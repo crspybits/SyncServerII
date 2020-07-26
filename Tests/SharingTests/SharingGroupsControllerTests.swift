@@ -232,7 +232,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -359,7 +359,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 0, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, failureExpected: true)
+        // self.sendDoneUploads(expectedNumberOfUploads: 0, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, failureExpected: true)
     }
     
     func testRemoveSharingGroupWorks_cannotDeleteFile() {
@@ -369,7 +369,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -396,7 +396,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -421,7 +421,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -444,7 +444,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -627,7 +627,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         // Need a second user as a member of the sharing group so we can do a file index on the sharing group after the first user is removed.
         var sharingInvitationUUID:String!
@@ -735,9 +735,9 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
 
         uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID2), masterVersion: masterVersion2)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID1)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID1)
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID2)
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID2)
     }
 }
 

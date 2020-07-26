@@ -480,8 +480,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
         case failure(RequestHandler.FailureResult?)
     }
     
+    enum EffectiveOwningUser {
+        case success(UserId)
+        case failure(RequestHandler.FailureResult)
+    }
+         
     func transferUploads(uploadUserId: UserId,
-        owningUserId: @escaping ()->(FileController.EffectiveOwningUser), sharingGroupUUID: String, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> TransferUploadsResult {
+        owningUserId: @escaping ()->(EffectiveOwningUser), sharingGroupUUID: String, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> TransferUploadsResult {
         
         var error = false
         var failureResult:RequestHandler.FailureResult?

@@ -823,47 +823,7 @@ class ServerTestCase : XCTestCase {
         let jpegFile = TestFile.catJpg
         return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, addUser:addUser, fileVersion:fileVersion, expectedMasterVersion:expectedMasterVersion, appMetaData:appMetaData, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName, errorExpected:errorExpected)
     }
-    
-    // sharingGroupName enables you to change the sharing group name during the DoneUploads.
-    // DEPRECATED
-    func sendDoneUploads(testAccount:TestAccount = .primaryOwningAccount, expectedNumberOfUploads:Int32?, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, sharingGroupName: String? = nil, failureExpected:Bool = false) {
-        
-        assert(false)
-        
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
-            let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
-            
-            let doneUploadsRequest = DoneUploadsRequest()
-            doneUploadsRequest.sharingGroupUUID = sharingGroupUUID
-            
-            if let sharingGroupName = sharingGroupName {
-                doneUploadsRequest.sharingGroupName = sharingGroupName
-            }
-            
-            self.performRequest(route: ServerEndpoints.doneUploads, headers: headers, urlParameters: "?" + doneUploadsRequest.urlParameters()!, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                
-                if failureExpected {
-                    XCTAssert(response!.statusCode != .OK, "Worked on doneUploadsRequest request!")
-                }
-                else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on doneUploadsRequest request")
-                    XCTAssert(dict != nil)
-                    
-                    if let doneUploadsResponse = try? DoneUploadsResponse.decode(dict!) {
-                        XCTAssert(doneUploadsResponse.numberUploadsTransferred == expectedNumberOfUploads, "doneUploadsResponse.numberUploadsTransferred: \(String(describing: doneUploadsResponse.numberUploadsTransferred)); expectedNumberOfUploads: \(String(describing: expectedNumberOfUploads))")
-                        XCTAssert(doneUploadsResponse.numberDeletionErrors == nil)
-                    }
-                    else {
-                        XCTFail()
-                    }
-                }
-                
-                expectation.fulfill()
-            }
-        }
-    }
-    
+
     func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
         
         let request = IndexRequest()
@@ -1408,7 +1368,7 @@ class ServerTestCase : XCTestCase {
             fileUUID = uploadResult.request.fileUUID
             actualUploadFileRequest = uploadResult.request
             actualCheckSum = uploadResult.checkSum
-            self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+            // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
             afterUploadTime = Date()
         }
         else {

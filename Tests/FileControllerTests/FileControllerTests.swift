@@ -39,7 +39,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
         
         guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupUUID: sharingGroupUUID), updatedMasterVersionExpected:1) else {
             XCTFail()
@@ -60,10 +60,10 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         // No uploads should have been successfully finished, i.e., expectedNumberOfUploads = nil, and the updatedMasterVersion should have been updated to 1.
-        self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
     }
 
     func testIndexWithNoFiles() {
@@ -124,7 +124,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: uploadResult.request.fileUUID)
         
@@ -183,7 +183,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request], sharingGroupUUID: sharingGroupUUID)
     }
@@ -206,7 +206,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         var cloudStorageCreds: CloudStorage!
         
@@ -258,7 +258,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         var checkSum:String!
         let file = TestFile.test2
@@ -323,7 +323,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let invalidSharingGroupUUID = UUID().uuidString
         
@@ -339,7 +339,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         }
         
         // Have to do a DoneUploads to transfer the files into the FileIndex
-        self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let workingButBadSharingGroupUUID = UUID().uuidString
         guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {

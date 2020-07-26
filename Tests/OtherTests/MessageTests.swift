@@ -12,7 +12,7 @@ import XCTest
 import Foundation
 import ServerShared
 
-class MessageTests: ServerTestCase, LinuxTestable {
+class MessageTests: ServerTestCase {
 
     override func setUp() {
          super.setUp()
@@ -143,27 +143,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         XCTAssert(upload.sharingInvitationUUID == "foobar")
     }
     
-    // Because of some Linux problems I was having.
-    func testDoneUploadsResponse() {
-        let numberUploads = Int32(23)
-        let response = DoneUploadsResponse()
-        response.numberUploadsTransferred = numberUploads
-        XCTAssert(response.numberUploadsTransferred == numberUploads)
-        
-        guard let jsonDict = response.toDictionary else {
-            XCTFail()
-            return
-        }
-        
-        // Could not cast value of type 'Foundation.NSNumber' (0x7fd77dcf8188) to 'Swift.Int32' (0x7fd77e0c9b18).
-        guard let response2 = try? DoneUploadsResponse.decode(jsonDict) else {
-            XCTFail()
-            return
-        }
-        
-        XCTAssert(response2.numberUploadsTransferred == numberUploads)
-    }
-    
     func testValidGetSharingInvitationInfoRequest() {
         let request = GetSharingInvitationInfoRequest()
         request.sharingInvitationUUID = Foundation.UUID().uuidString
@@ -174,26 +153,6 @@ class MessageTests: ServerTestCase, LinuxTestable {
         let request = GetSharingInvitationInfoRequest()
         request.sharingInvitationUUID = "foobar"
         XCTAssert(!request.valid())
-    }
-}
-
-extension MessageTests {
-    static var allTests : [(String, (MessageTests) -> () throws -> Void)] {
-        return [
-            ("testIfUploadFileRequestIsValid", testIfUploadFileRequestIsValid),
-            ("testURLParameters", testURLParameters),
-            ("testURLParametersForUploadDeletion", testURLParametersForUploadDeletion),
-            ("testBadUUIDForFileName", testBadUUIDForFileName),
-            ("testPropertyHasValue", testPropertyHasValue),
-            ("testNonNilRequestMessageParams", testNonNilRequestMessageParams),
-            ("testDoneUploadsResponse", testDoneUploadsResponse),
-            ("testValidGetSharingInvitationInfoRequest", testValidGetSharingInvitationInfoRequest),
-            ("testInvalidGetSharingInvitationInfoRequest", testInvalidGetSharingInvitationInfoRequest)
-        ]
-    }
-
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:MessageTests.self)
     }
 }
 
