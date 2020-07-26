@@ -32,16 +32,28 @@
   ],
   "DatabaseTests": [
     {
+      "name": "DatabaseTests.DatabaseLockTests"
+    },
+    {
       "name": "DatabaseTests.DatabaseModelTests"
     },
     {
       "name": "DatabaseTests.GeneralDatabaseTests"
     },
     {
+      "name": "DatabaseTests.SpecificDatabaseTests_DeferredUploadRepository"
+    },
+    {
       "name": "DatabaseTests.SpecificDatabaseTests_DeviceUUID"
     },
     {
       "name": "DatabaseTests.SpecificDatabaseTests_FileIndex"
+    },
+    {
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroups"
+    },
+    {
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers"
     },
     {
       "name": "DatabaseTests.SpecificDatabaseTests_SharingInvitationRepository"
@@ -51,12 +63,6 @@
     },
     {
       "name": "DatabaseTests.SpecificDatabaseTests_UserRepository"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroups"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers"
     }
   ],
   "ChangeResolverTests": [

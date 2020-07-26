@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "Signals",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+        "state": {
+          "branch": null,
+          "revision": "b7331c8bef913f5f8b3cffa6ecfcce679f7c2531",
+          "version": "1.0.21"
+        }
+      },
+      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
@@ -51,7 +60,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ChangeResolvers.git",
         "state": {
           "branch": "master",
-          "revision": "3727ca1d56f66dc6a00b3205ccf2128df8d5fcab",
+          "revision": "e9ec4feb4d11545a6b7a02e064522cbb4d7ad42a",
           "version": null
         }
       },
@@ -60,7 +69,7 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
         "state": {
           "branch": "master",
-          "revision": "cc23bc6154edc68c5583edfc04f9ceee861c36ae",
+          "revision": "1f54852c1af850f29bb1098f07099f8cfa15d55c",
           "version": null
         }
       },
@@ -200,6 +209,15 @@
         }
       },
       {
+        "package": "LinuxBridge",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+        "state": {
+          "branch": null,
+          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
+          "version": "3.1.0"
+        }
+      },
+      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -210,11 +228,11 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
         "state": {
           "branch": null,
-          "revision": "ed4f0e775c874b535fb24b00e6600b81f2932907",
-          "version": "2.1.1"
+          "revision": "5401a4713557237baabaef1caea93467cf5af138",
+          "version": "2.1.0"
         }
       },
       {
@@ -231,7 +249,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "7c8fd52c748244583d95ec814bbe7474f6366e77",
+          "revision": "ce2b3eaa0a208b1fd62c97b2aa584bb7aecadb48",
           "version": null
         }
       },
@@ -240,7 +258,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
         "state": {
           "branch": "master",
-          "revision": "b8c817d861cc4973c6f4fb47f4bf46b88d4d3ee7",
+          "revision": "b722e64c4bd7c3a34d17190865e54668629b7848",
           "version": null
         }
       },

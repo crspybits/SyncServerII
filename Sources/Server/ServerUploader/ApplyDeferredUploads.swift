@@ -56,14 +56,9 @@ class ApplyDeferredUploads {
         case failedSetupForApplyChangesToSingleFile(String)
         case unknownResolverType
         case couldNotGetDeviceUUID
-        case downloadError(DownloadResult)
-        case failedInitializingWholeFileReplacer
-        case noContentsForUpload
-        case failedAddingChange(Error)
-        case failedGettingReplacerData
-        case failedUploadingNewFileVersion
-        case failedUpdatingFileIndex
+        case couldNotGetPriorFileVersion
         case failedRemovingUploadRow
+        case failedUpdatingFileIndex
     }
     
     let sharingGroupUUID: String
@@ -291,66 +286,26 @@ class ApplyDeferredUploads {
             return
         }
         
-        // Only a single type of change resolver protocol so far. Need changes here when we add another.
-        guard let wholeFileReplacer = resolver as? WholeFileReplacer.Type else {
-            completion(Errors.unknownResolverType)
-            return
-        }
-        
-        // We're applying changes and creating the next version of the file
-        let nextVersion = fileIndex.fileVersion + 1
+        let options = CloudStorageFileNameOptions(cloudFolderName: owningCreds.cloudFolderName, mimeType: fileIndex.mimeType)
         
         guard let deviceUUID = fileIndex.deviceUUID else {
             completion(Errors.couldNotGetDeviceUUID)
             return
         }
         
-        let currentCloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: fileUUID, mimeType:fileIndex.mimeType, fileVersion: fileIndex.fileVersion)
-        let options = CloudStorageFileNameOptions(cloudFolderName: owningCreds.cloudFolderName, mimeType: fileIndex.mimeType)
+        guard let priorFileVersion = fileIndex.fileVersion else {
+            completion(Errors.couldNotGetPriorFileVersion)
+            return
+        }
         
-        Log.debug("downloadFile: \(currentCloudFileName)")
-        cloudStorage.downloadFile(cloudFileName: currentCloudFileName, options: options) { downloadResult in
-            guard case .success(data: let fileContents, checkSum: _) = downloadResult else {
-                completion(Errors.downloadError(downloadResult))
-                return
-            }
-            
-            guard var replacer = try? wholeFileReplacer.init(with: fileContents) else {
-                completion(Errors.failedInitializingWholeFileReplacer)
-                return
-            }
-            
-            for upload in uploadsForFileUUID {
-                guard let changeData = upload.uploadContents else {
-                    completion(Errors.noContentsForUpload)
-                    return
-                }
+        resolver.apply(changes: uploadsForFileUUID, toFileUUID: fileUUID, currentFileVersion: priorFileVersion, deviceUUID: deviceUUID, cloudStorage: cloudStorage, options: options) { result in
+            switch result {
+            case .failure(let error):
+                completion(error)
                 
-                do {
-                    try replacer.add(newRecord: changeData)
-                } catch let error {
-                    completion(Errors.failedAddingChange(error))
-                    return
-                }
-            }
-            
-            guard let replacementFileContents = try? replacer.getData() else {
-                completion(Errors.failedGettingReplacerData)
-                return
-            }
-            
-            let nextCloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: fileUUID, mimeType:fileIndex.mimeType, fileVersion: nextVersion)
-
-            Log.debug("uploadFile: \(nextCloudFileName)")
-
-            cloudStorage.uploadFile(cloudFileName: nextCloudFileName, data: replacementFileContents, options: options) {[unowned self] uploadResult in
-                guard case .success(let checkSum) = uploadResult else {
-                    completion(Errors.failedUploadingNewFileVersion)
-                    return
-                }
-                
-                fileIndex.lastUploadedCheckSum = checkSum
-                fileIndex.fileVersion = nextVersion
+            case .success(let applyResult):
+                fileIndex.lastUploadedCheckSum = applyResult.checkSum
+                fileIndex.fileVersion = applyResult.newFileVersion
                 fileIndex.updateDate = Date()
                 
                 guard self.fileIndexRepo.update(fileIndex: fileIndex) else {
@@ -373,6 +328,7 @@ class ApplyDeferredUploads {
                 }
                 
                 // Don't do deletions yet. The overall operations can't be repeated if the original files are gone.
+                let currentCloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: options.mimeType, fileVersion: priorFileVersion)
                 let deletion = FileDeletion(cloudStorage: cloudStorage, cloudFileName: currentCloudFileName, options: options)
                 self.fileDeletions += [deletion]
                 

@@ -25,7 +25,7 @@ enum UploadState : String {
     static func maxCharacterLength() -> Int { return 22 }
 }
 
-class Upload : NSObject, Model {
+class Upload : NSObject, Model, ChangeResolverContents {
     static let uploadIdKey = "uploadId"
     var uploadId: Int64!
     
@@ -76,7 +76,7 @@ class Upload : NSObject, Model {
     static let changeResolverNameKey = "changeResolverName"
     var changeResolverName: String?
     
-    // The contents of the upload for file versions > 0.
+    // The contents of the upload for files with changeResolverName's and file versions > 0.
     static let uploadContentsKey = "uploadContents"
     var uploadContents: Data?
 
