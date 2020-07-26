@@ -39,7 +39,7 @@ case header
 }
 
 extension KituraTest {
-    func performServerTest(testAccount:TestAccount = .primaryOwningAccount,
+    func performServerTest(testAccount:TestAccount = .primaryOwningAccount, expectingUploaderToRun: Bool = false,
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
         
         func runTest(usingCreds creds:Account) {
@@ -48,12 +48,26 @@ extension KituraTest {
             
             let requestQueue = DispatchQueue(label: "Request queue")
             let expectation = self.expectation(0)
+            var uploaderRunExpectation: XCTestExpectation?
+            
+            if expectingUploaderToRun {
+                uploaderRunExpectation = self.expectation(1)
+            }
+            
             requestQueue.async() {
                 asyncTask(expectation, creds)
+            }
+            
+            NotificationCenter.default.addObserver(forName: Uploader.uploaderRunCompleted, object: nil, queue: nil) { notification in
+                if let error = notification.userInfo?[Uploader.errorKey] as? Swift.Error {
+                    XCTFail("\(error)")
+                }
+                uploaderRunExpectation?.fulfill()
             }
 
             // blocks test until request completes
             self.waitExpectation(timeout: 60) { error in
+                // executes whether ot nor expectations met.
                 ServerMain.shutdown()
                 XCTAssertNil(error)
             }

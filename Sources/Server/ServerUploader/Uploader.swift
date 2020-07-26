@@ -8,7 +8,7 @@ import ServerShared
 
 // For testing.
 protocol UploaderProtocol {
-    func run() throws
+    func run()
     var delegate: UploaderDelegate? {get set}
 }
 
@@ -16,7 +16,12 @@ protocol UploaderDelegate: AnyObject {
     func run(completed: UploaderProtocol, error: Swift.Error?)
 }
 
+// When the run method finishes: (a) the delegate method is called, if any, and (b) the uploaderRunCompleted notification is posted.
+// The userInfo payload of the notification has one key: errorKey, with either nil or a Swift.Error value.
 class Uploader: UploaderProtocol {
+    static let uploaderRunCompleted = Notification.Name("UploaderProcessingCompleted")
+    static let errorKey = "error"
+
     enum Errors: Error {
         case failedInit
         case failedConnectingDatabase
@@ -25,6 +30,7 @@ class Uploader: UploaderProtocol {
         case missingGroupUUID
         case hasFileGroupUUID
         case failedApplyDeferredUploads
+        case failedToGetNonUniqueSharingGroupUUIDs
     }
     
     private let db: Database
@@ -56,34 +62,43 @@ class Uploader: UploaderProtocol {
     // This has no completion handler because we want this to run asynchronously of requests.
     func run() throws {
         // Holding a lock here so that, across server instances, at most one Uploader can be running at one time.
+        Log.debug("Attempting to get lock...")
         guard try db.getLock(lockName: lockName) else {
+            Log.debug("Could not get lock.")
             return
         }
         
+        Log.debug("Got lock!")
+
         guard let deferredUploads = deferredUploadRepo.select(rowsWithStatus: .pending) else {
+            Log.error("Failed setting up select to get deferred uploads")
             try release()
             throw Errors.failedToGetDeferredUploads
         }
         
         guard deferredUploads.count > 0 else {
-            // No deferred uploads to process
+            Log.debug("No deferred uploads to process")
             try release()
             return
         }
         
         let nonUniqueSharingGroupUUIDs = deferredUploads.compactMap {$0.sharingGroupUUID}
         guard nonUniqueSharingGroupUUIDs.count == deferredUploads.count else {
+            Log.error("Could not get nonUniqueSharingGroupUUIDs")
             try release()
-            throw Errors.failedToGetDeferredUploads
+            throw Errors.failedToGetNonUniqueSharingGroupUUIDs
         }
+        
+        Log.info("About to start async processing.")
 
         // Processes multiple rows in DeferredUpload when they refer to the same fileGroupUUID together. (Except for those with a nil fileGroupUUID-- which are processed independently).
+        
         DispatchQueue.global().async {
             self.process(deferredUploads: deferredUploads) { error in
                 try? self.release()
                 
                 if let error = error {
-                    // TODO: How to record this failure?
+                    self.recordGlobalError(error)
                     Log.error("Failed: \(error)")
                 }
                 else {
@@ -91,14 +106,23 @@ class Uploader: UploaderProtocol {
                 }
                 
                 Log.debug("Calling run delegate method: \(String(describing: error))")
+                
+                let notification = Notification(name: Self.uploaderRunCompleted, object: nil, userInfo: [Self.errorKey: error as Any])
+                NotificationCenter.default.post(notification)
+
                 self.delegate?.run(completed: self, error: error)
             }
         }
     }
     
-    // Assumes all `deferredUploads` have a sharingGroupUUID.
-    private func process(deferredUploads: [DeferredUpload], completion: @escaping (Error?)->()) {
+    private func recordGlobalError(_ error: Error) {
+    }
     
+    // Assumes all `deferredUploads` have a sharingGroupUUID.
+    private func process(deferredUploads: [DeferredUpload], completion: @escaping (Swift.Error?)->()) {
+    
+        Log.debug("Starting to process.")
+        
         var noFileGroupUUIDs = [DeferredUpload]()
         var withFileGroupUUIDs = [DeferredUpload]()
         for deferredUpload in deferredUploads {

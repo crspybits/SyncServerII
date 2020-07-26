@@ -176,7 +176,7 @@ class ApplyDeferredUploads {
     
     func changeResolver(forFileUUID fileUUID: String, usingFileIndex fileIndex: FileIndex) throws -> ChangeResolver.Type {
         guard let changeResolverName = fileIndex.changeResolverName else {
-            Log.error("couldNotLookupResolverName")
+            Log.error("couldNotLookupResolverName: \(String(describing: fileIndex.changeResolverName))")
             throw Errors.couldNotLookupResolverName
         }
         
