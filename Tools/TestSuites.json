@@ -4,6 +4,7 @@
     "AccountAuthenticationTests",
     "DatabaseTests",
     "ChangeResolverTests",
+    "FileControllerUploadTests",
     "mock",
     "owning_google",
     "owning_dropbox",
@@ -63,6 +64,17 @@
     },
     {
       "name": "DatabaseTests.SpecificDatabaseTests_UserRepository"
+    }
+  ],
+  "FileControllerUploadTests": [
+    {
+      "name": "FileControllerUploadTests.FileController_FinishUploadsTests"
+    },
+    {
+      "name": "FileControllerUploadTests.FileController_V0_UploadTests"
+    },
+    {
+      "name": "FileControllerUploadTests.FileController_VN_UploadTests"
     }
   ],
   "ChangeResolverTests": [
