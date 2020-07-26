@@ -145,202 +145,168 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         runUploadTwoV1TextFilesInSameSharingGroupWorks(withFileGroup: true)
     }
     
-    // Not running this without a file group -- because the test uses a file group to do a N / M batch upload.
-    // func testUploadTwoV1TextFilesInDifferentSharingGroupsWorks() {
-    // }
-    
-    // TODO: And this really is a separate set of tests than the present-- Need to work further on the plugins that are going to allow processing of the vN upload request data. They are going to take a collection of Upload rows targetting the same file, and merge the requests and update the file in cloud storage.
-    
-    // Deferred uploads: Where fileGroupUUID is nil
-    
-    // Deferred uploads: Where fileGroupUUID is non-nil
-
-    // TODO: After that work is done, can come back here to test the results. 
-    
-    // TODO: Check FileIndex row specifics after each test.
-    //  For change resolvers-- check for specific change resolver.
-    
-    // TODO: VN upload with a change resolver in vN upload.
-    
-    // TODO: VN upload without a change resolver in v0 upload.
-    
-    // TODO: VN upload with a bad change resolver name in v0 upload.
-    
-    // TODO: Don't allow uploading the same file twice in the same batch. This applies for v0 and vN uploads.
-    
-/*
-    func testUploadTextAndJPEGFile() {
+    func runUploadTwoV1Changes(fromDifferentFileGroupsInSameBatch: Bool) {
+        let changeResolverName = CommentFile.changeResolverName
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
-            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+        let fileUUID1 = Foundation.UUID().uuidString
+        let fileUUID2 = Foundation.UUID().uuidString
+
+        let fileGroupUUID1 = Foundation.UUID().uuidString
+        let fileGroupUUID2: String
+
+        if fromDifferentFileGroupsInSameBatch {
+            fileGroupUUID2 = Foundation.UUID().uuidString
+        }
+        else {
+            fileGroupUUID2 = fileGroupUUID1
+        }
+        
+        let exampleComment1 = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+        let exampleComment2 = ExampleComment(messageString: "Goodbye!", id: Foundation.UUID().uuidString)
+
+        // First upload the v0 files. Will use separate batches here. What I want to test is the VN upload process.
+  
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID1, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        XCTAssert(uploadResult1.response?.allUploadsFinished == true)
+        let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroupUUID: fileGroupUUID2, changeResolverName: changeResolverName)
         
-        guard let uploadResult2 = uploadJPEGFile(deviceUUID:deviceUUID, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
+        // Next, upload v1 of the files -- i.e., upload just the specific changes to the files.
+        
+        let fileIndex = FileIndexRepository(db)
+        let upload = UploadRepository(db)
+        let deferredUploads = DeferredUploadRepository(db)
+        
+        guard let fileIndexCount1 = fileIndex.count(),
+            let uploadCount1 = upload.count(),
+            let deferredUploadCount1 = deferredUploads.count() else {
+            XCTFail()
+            return
+        }
+                
+        let v1ChangeData1 = exampleComment1.updateContents
+        let v1ChangeData2 = exampleComment2.updateContents
+        
+        Log.debug("Starting vN uploads...")
+
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 2, testAccount: .primaryOwningAccount, deviceUUID: deviceUUID, fileUUID: fileUUID1, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData1) else {
             XCTFail()
             return
         }
         
-        XCTAssert(uploadResult2.response?.allUploadsFinished == true)
+        // Expecting a failure here.
+        let result2 = uploadTextFile(uploadIndex: 2, uploadCount: 2, testAccount: .primaryOwningAccount, deviceUUID: deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: fromDifferentFileGroupsInSameBatch, dataToUpload: v1ChangeData2)
+        
+        if !fromDifferentFileGroupsInSameBatch {
+            XCTAssert(result2 != nil)
+            XCTAssert(fileIndexCount1 == fileIndex.count() )
+            XCTAssert(uploadCount1 == upload.count())
+            XCTAssert(deferredUploadCount1 == deferredUploads.count())
+        }
     }
     
-    func testUploadingSameFileTwiceWorks() {
-        // index 1, count 2 so that the first upload doesn't cause a DoneUploads.
-        
+    func testUploadTwoV1ChangesFromDifferentFileGroupsInSameBatchFails() {
+        runUploadTwoV1Changes(fromDifferentFileGroupsInSameBatch: true)
+    }
+    
+    func testUploadTwoV1ChangesFromSameFileGroupsInSameBatchWorks() {
+        runUploadTwoV1Changes(fromDifferentFileGroupsInSameBatch: false)
+    }
+    
+    // I'd like to run a test with multiple sharing groups, so that the Uploader async processing for the multiple groups takes place together.
+    // Normally, in my test setup, this wouldn't happen. The Uploader run for the first batch would take place together, and the second batch would likely have to wait.
+    // However, this situation, with the multiple sharing groups, is possible. It can happen if a Uploader run attempt after a batch upload can't get the lock because some other server instance has the lock.
+    // I can do this test by faking the upload of the first batch: I can simulate another device/client uploading the first batch of files by uploading the file directly and making additions to FileIndex, Upload and DeferredUpload directly.
+    // And then, the second batch can be done as usual-- with the regular file upload endpoint.
+    func testUploadV1TextFilesInDifferentSharingGroupsWorks() {
+        let changeResolverName = CommentFile.changeResolverName
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 2, deviceUUID:deviceUUID),
-            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+        let fileUUID1 = Foundation.UUID().uuidString
+        let fileUUID2 = Foundation.UUID().uuidString
+
+        let fileGroupUUID1 = Foundation.UUID().uuidString
+        let fileGroupUUID2 = Foundation.UUID().uuidString
+        
+        let comment1 = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+        let comment2 = ExampleComment(messageString: "Goodbye!", id: Foundation.UUID().uuidString)
+
+        // First, do the v0 uploads.
+  
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID1, changeResolverName: changeResolverName),
+            let sharingGroupUUID1 = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        let sharingGroup = ServerShared.SharingGroup()
+        sharingGroup.sharingGroupName = "Louisiana Guys"
+        let sharingGroupUUID2 = UUID().uuidString
+        
+        guard createSharingGroup(sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroupUUID: fileGroupUUID2, changeResolverName: changeResolverName) else {
+            XCTFail()
+            return
+        }
+        
+        let fileIndexRepo = FileIndexRepository(db)
+        let uploadRepo = UploadRepository(db)
+        let deferredUploadsRepo = DeferredUploadRepository(db)
+        
+        guard let fileIndexCount1 = fileIndexRepo.count(),
+            let uploadCount1 = uploadRepo.count(),
+            let deferredUploadCount1 = deferredUploadsRepo.count() else {
             XCTFail()
             return
         }
 
-        XCTAssert(uploadResult1.response?.allUploadsFinished == false)
+        // Next, prepare the vN uploads-- not using the upload file endpoint for the first one-- faking that another server instance uploaded it and it didn't have an Uploader run occurring.
         
-        // Second upload.
-        guard let uploadResult2 = uploadTextFile(uploadIndex: 1, uploadCount: 2, deviceUUID: deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: uploadResult1.request.appMetaData) else {
+       guard let fileIndex = getFileIndex(sharingGroupUUID: sharingGroupUUID1, fileUUID: fileUUID1) else {
             XCTFail()
             return
         }
         
-        XCTAssert(uploadResult2.response?.allUploadsFinished == false)
+        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID1),
+            let deferredUploadId1 = deferredUpload1.deferredUploadId else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID1, userId: fileIndex.userId, deferredUploadId: deferredUploadId1, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1) else {
+            XCTFail()
+            return
+        }
+        
+        // Can do the second one normally. Both this upload and the faked one should get processed by Uploader run.
+        
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), dataToUpload: comment2.updateContents) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID1, fileUUID: fileUUID1) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(fileIndex1.fileVersion == 1)
+        
+        guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID2, fileUUID: fileUUID2) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(fileIndex2.fileVersion == 1)
+        
+        XCTAssert(fileIndexCount1 == fileIndexRepo.count() )
+        XCTAssert(uploadCount1 == uploadRepo.count())
+        XCTAssert(deferredUploadCount1 == deferredUploadsRepo.count())
     }
-
-    func testUploadTextFileWithStringWithSpacesAppMetaData() {
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, appMetaData: "A Simple String") else {
-            XCTFail()
-            return
-        }
-    }
-    
-    func testUploadTextFileWithJSONAppMetaData() {
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, appMetaData: "{ \"foo\": \"bar\" }") else {
-            XCTFail()
-            return
-        }
-    }
-    
-    func testUploadWithInvalidMimeTypeFails() {
-        let testAccount:TestAccount = .primaryOwningAccount
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let _ = addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
-            XCTFail()
-            return
-        }
-        
-        let fileUUIDToSend = Foundation.UUID().uuidString
-        
-        let file = TestFile.test1
-        guard case .string(let fileContents) = file.contents,
-            let data = fileContents.data(using: .utf8) else {
-            XCTFail()
-            return
-        }
-
-        let uploadRequest = UploadFileRequest()
-        uploadRequest.fileUUID = fileUUIDToSend
-        uploadRequest.mimeType = "foobar"
-        uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = file.checkSum(type: testAccount.scheme.accountName)
-        
-        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)
-    }
-    
-    func testUploadWithNoCheckSumFails() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let _ = addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
-            XCTFail()
-            return
-        }
-        
-        let fileUUIDToSend = Foundation.UUID().uuidString
-        
-        let uploadRequest = UploadFileRequest()
-        uploadRequest.fileUUID = fileUUIDToSend
-        uploadRequest.mimeType = "text/plain"
-        uploadRequest.sharingGroupUUID = sharingGroupUUID
-        
-        XCTAssert(uploadRequest.valid())
-    }
-
-    func testUploadWithBadCheckSumFails() {
-        let testAccount:TestAccount = .primaryOwningAccount
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let _ = addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName) else {
-            XCTFail()
-            return
-        }
-        
-        let fileUUIDToSend = Foundation.UUID().uuidString
-        
-        let file = TestFile.test1
-        guard case .string(let fileContents) = file.contents,
-            let data = fileContents.data(using: .utf8) else {
-            XCTFail()
-            return
-        }
-
-        let uploadRequest = UploadFileRequest()
-        uploadRequest.fileUUID = fileUUIDToSend
-        uploadRequest.mimeType = "text/plain"
-        uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = "foobar"
-        
-        runUploadTest(testAccount:testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: true)
-    }
-    
-    func testUploadWithInvalidSharingGroupUUIDFails() {
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1) else {
-            XCTFail()
-            return
-        }
-        
-        let invalidSharingGroupUUID = UUID().uuidString
-        uploadTextFile(uploadIndex: 1, uploadCount: 1, addUser: .no(sharingGroupUUID: invalidSharingGroupUUID), errorExpected: true)
-    }
-
-    func testUploadWithBadSharingGroupUUIDFails() {
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1) else {
-            XCTFail()
-            return
-        }
-        
-        let workingButBadSharingGroupUUID = UUID().uuidString
-        guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        uploadTextFile(uploadIndex: 1, uploadCount: 1, addUser: .no(sharingGroupUUID: workingButBadSharingGroupUUID), errorExpected: true)
-    }
-*/
 }
-
-//extension FileController_UploadTests {
-//    static var allTests : [(String, (FileController_UploadTests) -> () throws -> Void)] {
-//        return [
-//            ("testUploadTextFile", testUploadTextFile),
-//            ("testUploadJPEGFile", testUploadJPEGFile),
-//            ("testUploadURLFile", testUploadURLFile),
-//            ("testUploadTextAndJPEGFile", testUploadTextAndJPEGFile),
-//            ("testUploadingSameFileTwiceWorks", testUploadingSameFileTwiceWorks),
-//            ("testUploadTextFileWithStringWithSpacesAppMetaData", testUploadTextFileWithStringWithSpacesAppMetaData),
-//            ("testUploadTextFileWithJSONAppMetaData", testUploadTextFileWithJSONAppMetaData),
-//            ("testUploadWithInvalidMimeTypeFails", testUploadWithInvalidMimeTypeFails),
-//            ("testUploadWithInvalidSharingGroupUUIDFails", testUploadWithInvalidSharingGroupUUIDFails),
-//            ("testUploadWithBadSharingGroupUUIDFails", testUploadWithBadSharingGroupUUIDFails)
-//        ]
-//    }
-//
-//    func testLinuxTestSuiteIncludesAllTests() {
-//        linuxTestSuiteIncludesAllTests(testType:FileController_UploadTests.self)
-//    }
-//}

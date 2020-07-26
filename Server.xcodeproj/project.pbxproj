@@ -26,9 +26,9 @@
 				OBJ_2603 /* PBXTargetDependency */,
 				OBJ_2604 /* PBXTargetDependency */,
 				OBJ_2605 /* PBXTargetDependency */,
+				OBJ_2606 /* PBXTargetDependency */,
 				OBJ_2607 /* PBXTargetDependency */,
 				OBJ_2608 /* PBXTargetDependency */,
-				OBJ_2609 /* PBXTargetDependency */,
 				OBJ_2610 /* PBXTargetDependency */,
 				OBJ_2611 /* PBXTargetDependency */,
 				OBJ_2612 /* PBXTargetDependency */,
@@ -39,8 +39,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		1AD046C8211B7174B0032FC8 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6DF5541F72C5AD3027C2D2A4 /* Server.json */; };
-		51DBA013618C02DFF07E3183 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = FB04A45CB8E6A625FE5CB924 /* ServerTests.json */; };
+		20C25F6768CEF3D62B8FF983 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE5EB8A0B508764F0D17B59C /* ServerTests.json */; };
+		A092A0911F0F6531C2589FEE /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = CF49488A86E0095E5BA7656C /* Server.json */; };
 		OBJ_1017 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_313 /* Package.swift */; };
 		OBJ_1022 /* BaseCacheElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_322 /* BaseCacheElement.swift */; };
 		OBJ_1023 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_323 /* Credentials.swift */; };
@@ -1198,21 +1198,22 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		C6945B5AF96B5050850E102D /* CopyFiles */ = {
+		30ABD5D06F47FA2D25EA6AC7 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				1AD046C8211B7174B0032FC8 /* Server.json in CopyFiles */,
-				51DBA013618C02DFF07E3183 /* ServerTests.json in CopyFiles */,
+				A092A0911F0F6531C2589FEE /* Server.json in CopyFiles */,
+				20C25F6768CEF3D62B8FF983 /* ServerTests.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		6DF5541F72C5AD3027C2D2A4 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
+		CE5EB8A0B508764F0D17B59C /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		CF49488A86E0095E5BA7656C /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
 		ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */ = {isa = PBXFileReference; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */ = {isa = PBXFileReference; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1220,7 +1221,6 @@
 		Cryptor::Cryptor::Product /* Cryptor.framework */ = {isa = PBXFileReference; path = Cryptor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorECC::CryptorECC::Product /* CryptorECC.framework */ = {isa = PBXFileReference; path = CryptorECC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */ = {isa = PBXFileReference; path = CryptorRSA.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FB04A45CB8E6A625FE5CB924 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */ = {isa = PBXFileReference; path = HeliumLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-Credentials::Credentials::Product /* Credentials.framework */ = {isa = PBXFileReference; path = Credentials.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */ = {isa = PBXFileReference; path = CredentialsFacebook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -4086,54 +4086,54 @@
 		OBJ_586 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
-				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
-				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
-				Server::TestsCommon::Product /* TestsCommon.xctest */,
-				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
-				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
-				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
-				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
-				ServerShared::ServerShared::Product /* ServerShared.framework */,
-				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
-				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
-				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
-				Server::FileControllerUploadTests::Product /* FileControllerUploadTests.xctest */,
-				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
-				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
-				Server::AccountTests::Product /* AccountTests.xctest */,
-				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
-				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
-				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
-				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
-				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
-				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
-				Kitura::Kitura::Product /* Kitura.framework */,
 				SwiftJWT::SwiftJWT::Product /* SwiftJWT.framework */,
-				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
+				Kitura::Kitura::Product /* Kitura.framework */,
 				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
-				ServerFacebookAccount::ServerFacebookAccount::Product /* ServerFacebookAccount.framework */,
-				Cryptor::Cryptor::Product /* Cryptor.framework */,
-				Server::Server::Product /* Server.framework */,
-				Server::OtherTests::Product /* OtherTests.xctest */,
-				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
-				Socket::Socket::Product /* Socket.framework */,
-				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
-				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
-				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
-				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
-				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
+				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
+				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
+				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
+				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
 				ServerGoogleAccount::ServerGoogleAccount::Product /* ServerGoogleAccount.framework */,
-				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
-				Kitura-net::KituraNet::Product /* KituraNet.framework */,
+				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
+				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
+				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
+				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
+				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
 				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
 				swift-log::Logging::Product /* Logging.framework */,
-				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
+				ServerShared::ServerShared::Product /* ServerShared.framework */,
+				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
+				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
+				Server::OtherTests::Product /* OtherTests.xctest */,
+				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
+				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
+				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
+				Server::FileControllerUploadTests::Product /* FileControllerUploadTests.xctest */,
+				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
+				Server::Server::Product /* Server.framework */,
+				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
+				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
+				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
+				Server::TestsCommon::Product /* TestsCommon.xctest */,
+				Cryptor::Cryptor::Product /* Cryptor.framework */,
+				ServerFacebookAccount::ServerFacebookAccount::Product /* ServerFacebookAccount.framework */,
+				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
 				Server::Main::Product /* Main */,
+				Kitura-net::KituraNet::Product /* KituraNet.framework */,
+				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
+				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
 				Server::SharingTests::Product /* SharingTests.xctest */,
-				SSLService::SSLService::Product /* SSLService.framework */,
-				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
+				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
+				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
+				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
 				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
+				Socket::Socket::Product /* Socket.framework */,
+				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
+				Server::AccountTests::Product /* AccountTests.xctest */,
+				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
+				SSLService::SSLService::Product /* SSLService.framework */,
+				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
+				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
 			);
 			name = Products;
 			path = "";
@@ -5534,7 +5534,7 @@
 			buildPhases = (
 				OBJ_2172 /* Sources */,
 				OBJ_2225 /* Frameworks */,
-				C6945B5AF96B5050850E102D /* CopyFiles */,
+				30ABD5D06F47FA2D25EA6AC7 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -9152,27 +9152,27 @@
 		};
 		OBJ_2603 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerUploadTests /* FileControllerUploadTests */;
+			target = Server::ChangeResolverTests /* ChangeResolverTests */;
 		};
 		OBJ_2604 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::DatabaseTests /* DatabaseTests */;
+			target = Server::OtherTests /* OtherTests */;
 		};
 		OBJ_2605 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::SharingTests /* SharingTests */;
+			target = Server::DatabaseTests /* DatabaseTests */;
+		};
+		OBJ_2606 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::FileControllerTests /* FileControllerTests */;
 		};
 		OBJ_2607 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::ChangeResolverTests /* ChangeResolverTests */;
+			target = Server::FileControllerUploadTests /* FileControllerUploadTests */;
 		};
 		OBJ_2608 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::OtherTests /* OtherTests */;
-		};
-		OBJ_2609 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::AccountTests /* AccountTests */;
+			target = Server::SharingTests /* SharingTests */;
 		};
 		OBJ_2610 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9180,7 +9180,7 @@
 		};
 		OBJ_2611 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerTests /* FileControllerTests */;
+			target = Server::AccountTests /* AccountTests */;
 		};
 		OBJ_2612 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
