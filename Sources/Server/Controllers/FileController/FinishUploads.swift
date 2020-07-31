@@ -126,21 +126,22 @@ class FinishUploads {
             return .allUploadsNotYetReceived
         }
         
-        // All of the uploads must have v0UploadFileVersion non-nil
-        guard currentUploads.filter({$0.v0UploadFileVersion == nil}).count == 0 else {
-            let message = "Some of the v0UploadFileVersion's were nil"
+        // All of the uploads must have an upload state
+        guard currentUploads.filter({$0.state == nil}).count == 0 else {
+            let message = "Some of the upload states were nil"
             Log.error(message)
             return .error(.failure(.message(message)))
         }
         
         // All uploads must be the same (either v0 or vN, N > 1)
-        guard currentUploads.filter({$0.v0UploadFileVersion == currentUploads[0].v0UploadFileVersion}).count == currentUploads.count else {
+        guard currentUploads.filter({$0.state.isUploadFile &&
+            $0.state == currentUploads[0].state}).count == currentUploads.count else {
             let message = "All uploads must be either v0 or vN, N > 1"
             Log.error(message)
             return .error(.failure(.message(message)))
         }
         
-        let vNUploads = currentUploads.filter({$0.v0UploadFileVersion == false}).count > 0
+        let vNUploads = currentUploads.filter({$0.state == .vNUploadFileChange}).count > 0
         
         if vNUploads {
             // Mark the uploads to indicate they are ready for deferred transfer.
@@ -169,11 +170,11 @@ class FinishUploads {
         // 1) Filter out uploaded files with versions > 0 -- for the stale file versions. Note that we're not including files with status `uploadedUndelete`-- we don't need to delete any stale versions for these.
         let staleVersionsFromUploads = currentUploads.filter({
             // The left to right order of these checks is important-- check the state first. If the state is uploadingAppMetaData, there will be a nil fileVersion and don't want to check that.            
-            $0.state == .uploadedFile && $0.v0UploadFileVersion == false
+            $0.state == .v0UploadCompleteFile
         })
         
         // 2) Filter out upload deletions
-        let uploadDeletions = currentUploads.filter({$0.state == .toDeleteFromFileIndex})
+        let uploadDeletions = currentUploads.filter({$0.state == .deleteSingleFile})
 
         // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
         
@@ -283,7 +284,7 @@ class FinishUploads {
     // This is called only for vN files. These files will already be in the FileIndex.
     private func markUploadsAsDeferred(fileGroupUUID: String?, uploads: [Upload]) -> Bool {
         let deferredUpload = DeferredUpload()
-        deferredUpload.status = .pending
+        deferredUpload.status = .pendingChange
         deferredUpload.sharingGroupUUID = sharingGroupUUID
         deferredUpload.fileGroupUUID = fileGroupUUID
         

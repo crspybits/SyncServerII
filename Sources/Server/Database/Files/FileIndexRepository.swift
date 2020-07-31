@@ -16,6 +16,7 @@ import ChangeResolvers
 typealias FileIndexId = Int64
 
 class FileIndex : NSObject, Model {
+    
     static let fileIndexIdKey = "fileIndexId"
     var fileIndexId: FileIndexId!
     
@@ -59,6 +60,7 @@ class FileIndex : NSObject, Model {
     static let appMetaDataVersionKey = "appMetaDataVersion"
     var appMetaDataVersion: AppMetaDataVersionInt?
     
+    // When "deleted" files are not fully removed from the system. They are removed from cloud storage, but just marked as deleted in the FileIndex. This effectively also marks the containing file group as deleted.
     static let deletedKey = "deleted"
     var deleted:Bool!
     
@@ -165,7 +167,9 @@ class FileIndex : NSObject, Model {
     }
 }
 
-class FileIndexRepository : Repository, RepositoryLookup {
+class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
+    static let indexIdKey = FileIndex.fileIndexIdKey
+
     private(set) var db:Database!
     
     required init(_ db:Database) {
@@ -195,7 +199,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             // This plays a different role than it did in the Upload table. Here, it forms part of the filename in cloud storage, and thus must be retained. We will ignore this field otherwise, i.e., we will not have two entries in this table for the same userId, fileUUID pair.
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
-            // identifies a group of files (assigned by app)
+            // Optionally identifies a group of files (assigned by app). If NULL, the file is not in a file group (it's in a group of size 1).
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
             
             "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
@@ -335,11 +339,11 @@ class FileIndexRepository : Repository, RepositoryLookup {
         
         do {
             try insert.run()
-            Log.info("Sucessfully created FileIndex row")
+            Log.info("Sucessfully created \(tableName) row")
             return .success(uploadId: db.lastInsertId())
         }
         catch (let error) {
-            Log.info("Failed inserting Upload row: \(db.errorCode()); \(db.errorMessage())")
+            Log.info("Failed inserting \(tableName) row: \(db.errorCode()); \(db.errorMessage())")
             
             if db.errorCode() == Database.deadlockError {
                 return .deadlock
@@ -434,6 +438,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
         case primaryKeys(sharingGroupUUID: String, fileUUID:String)
         case sharingGroupUUID(sharingGroupUUID: String)
         case userAndSharingGroup(UserId, sharingGroupUUID: String)
+        case fileGroupUUIDAndSharingGroup(fileGroupUUID: String, sharingGroupUUID: String)
         
         var description : String {
             switch self {
@@ -447,6 +452,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 return "sharingGroupUUID(\(sharingGroupUUID)))"
             case .userAndSharingGroup(let userId, let sharingGroupUUID):
                 return "userId(\(userId)); sharingGroupUUID(\(sharingGroupUUID)))"
+            case .fileGroupUUIDAndSharingGroup(let fileGroupUUID, let sharingGroupUUID):
+                return "fileGroupUUID(\(fileGroupUUID); sharingGroupUUID(\(sharingGroupUUID))"
             }
         }
     }
@@ -463,6 +470,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return "sharingGroupUUID = '\(sharingGroupUUID)'"
         case .userAndSharingGroup(let userId, let sharingGroupUUID):
             return "userId = \(userId) AND sharingGroupUUID = '\(sharingGroupUUID)'"
+        case .fileGroupUUIDAndSharingGroup(let fileGroupUUID, let sharingGroupUUID):
+            return "fileGroupUUID = '\(fileGroupUUID)' AND sharingGroupUUID = '\(sharingGroupUUID)'"
         }
     }
     
@@ -505,7 +514,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
             let upload = rowModel as! Upload
             
             // This will a) mark the FileIndex entry as deleted for toDeleteFromFileIndex, and b) mark it as not deleted for *both* uploadingUndelete and uploading files. So, effectively, it does part of our upload undelete for us.
-            let uploadDeletion = upload.state == .toDeleteFromFileIndex
+            let uploadDeletion = upload.state == .deleteSingleFile
 
             let fileIndex = FileIndex()
             fileIndex.lastUploadedCheckSum = upload.lastUploadedCheckSum
@@ -524,43 +533,41 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileIndex.appMetaDataVersion = upload.appMetaDataVersion
             fileIndex.fileGroupUUID = upload.fileGroupUUID
             
-            if let v0UploadFileVersion = upload.v0UploadFileVersion {
-                if v0UploadFileVersion {
-                    fileIndex.fileVersion = 0
-                    fileIndex.creationDate = upload.creationDate
-                    fileIndex.changeResolverName = upload.changeResolverName
-                    
-                    // OWNER
-                    // version 0 of a file establishes the owning user. The owning user doesn't change if new versions are uploaded.
-                    switch owningUserId() {
-                    case .success(let userId):
-                        fileIndex.userId = userId
-                    case .failure(let failure):
-                        failureResult = failure
-                        error = true
-                        return
-                    }
-
-                    // Similarly, the sharing group id doesn't change over time.
-                    fileIndex.sharingGroupUUID = upload.sharingGroupUUID
+            if upload.state == .v0UploadCompleteFile {
+                fileIndex.fileVersion = 0
+                fileIndex.creationDate = upload.creationDate
+                fileIndex.changeResolverName = upload.changeResolverName
+                
+                // OWNER
+                // version 0 of a file establishes the owning user. The owning user doesn't change if new versions are uploaded.
+                switch owningUserId() {
+                case .success(let userId):
+                    fileIndex.userId = userId
+                case .failure(let failure):
+                    failureResult = failure
+                    error = true
+                    return
                 }
-                else {
-                    guard let fileVersion = upload.fileVersion else {
-                        Log.error("No file version, and v0UploadFileVersion")
-                        error = true
-                        return
-                    }
-                    
-                    fileIndex.fileVersion = fileVersion
+
+                // Similarly, the sharing group id doesn't change over time.
+                fileIndex.sharingGroupUUID = upload.sharingGroupUUID
+            }
+            else if upload.state == .vNUploadFileChange {
+                guard let fileVersion = upload.fileVersion else {
+                    Log.error("No file version, and vNUploadFileChange")
+                    error = true
+                    return
                 }
                 
-                fileIndex.updateDate = upload.updateDate
+                fileIndex.fileVersion = fileVersion
             }
             else if upload.state != .uploadingAppMetaData {
                 Log.error("No file version, and not uploading app meta data.")
                 error = true
                 return
             }
+            
+            fileIndex.updateDate = upload.updateDate
             
             let key = LookupKey.primaryKeys(sharingGroupUUID: upload.sharingGroupUUID, fileUUID: upload.fileUUID)
             let result = self.lookup(key: key, modelInit: FileIndex.init)
@@ -616,7 +623,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
                     return
                 }
                 else {
-                    guard let v0UploadFileVersion = upload.v0UploadFileVersion, v0UploadFileVersion else {
+                    guard upload.state == .v0UploadCompleteFile else {
                         Log.error("Did not have version 0 of file!")
                         error = true
                         return
@@ -666,6 +673,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
         }
     }
     
+    // Returns nil on error; number of rows marked otherwise.
     func markFilesAsDeleted(key:LookupKey) -> Int64? {
         let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + lookupConstraint(key: key)
         if db.query(statement: query) {

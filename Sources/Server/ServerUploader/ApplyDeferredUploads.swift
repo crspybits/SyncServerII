@@ -304,11 +304,13 @@ class ApplyDeferredUploads {
                 completion(error)
                 
             case .success(let applyResult):
-                fileIndex.lastUploadedCheckSum = applyResult.checkSum
-                fileIndex.fileVersion = applyResult.newFileVersion
-                fileIndex.updateDate = Date()
+                let updateSuccess = self.fileIndexRepo.update(indexId: fileIndex.fileIndexId, with: [
+                    FileIndex.lastUploadedCheckSumKey: .string(applyResult.checkSum),
+                    FileIndex.fileVersionKey: .int32(applyResult.newFileVersion),
+                    FileIndex.updateDateKey: .dateTime(Date())
+                 ])
                 
-                guard self.fileIndexRepo.update(fileIndex: fileIndex) else {
+                guard updateSuccess else {
                     completion(Errors.failedUpdatingFileIndex)
                     return
                 }

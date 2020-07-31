@@ -10,9 +10,14 @@ import LoggerAPI
 
 class DeferredUpload : NSObject, Model {
     enum Status: String {
-        case pending
+        case pendingChange
+        case pendingDeletion
         case completed
         case error
+        
+        var isPending: Bool {
+            return self == .pendingChange || self == .pendingDeletion
+        }
         
         static var maxCharacterLength: Int {
             return 20
@@ -205,8 +210,10 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     }
     
     // A nil result indicates an error. No rows in the query is returned as an empty array.
-    func select(rowsWithStatus status: DeferredUpload.Status) -> [DeferredUpload]? {
-        let query = "select * from \(tableName) where \(DeferredUpload.statusKey)='\(status.rawValue)'"
+    func select(rowsWithStatus status: [DeferredUpload.Status]) -> [DeferredUpload]? {
+        let quotedStatusString = status.map {$0.rawValue}.map {"'\($0)'"}.joined(separator: ",")
+        
+        let query = "select * from \(tableName) where \(DeferredUpload.statusKey) IN (\(quotedStatusString))"
 
         guard let select = Select(db:db, query: query, modelInit: DeferredUpload.init, ignoreErrors:false) else {
             Log.error("select: Failed calling constructor")

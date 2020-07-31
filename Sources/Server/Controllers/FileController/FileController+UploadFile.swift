@@ -12,6 +12,24 @@ import ServerShared
 import Kitura
 import ServerAccount
 
+/* Algorithm:
+
+1) Each upload will be N of M in a batch. Only when all of the uploads in a batch is received will an implict DoneUploads be carried out:
+    1.1) v0 uploads
+        * The entire initial file has been uploaded.
+        * New records for each of these v0 file(s) are created in the FileIndex.
+    1.2) vN uploads
+        * Only a change is uploaded.
+        * A DeferredUpload record is created for the batch.
+
+2) DeferredUpload processing
+    This is triggered after the DeferredUpload record is created in step 1.2)
+        * It occurs asynchronously to client request processing
+        * Only one instance of it will occur across possibly multiple server instances, so as to serialize the DeferredUpload processing.
+        * It uses the ChangeResolvers to do conflict free application of the changes in the Upload records to the files.
+ */
+
+
 extension FileController {
     private struct Cleanup {
         let cloudFileName: String
@@ -89,7 +107,7 @@ extension FileController {
         
         var existingFileInFileIndex:FileIndex?
         var existingFileGroupUUID: String?
-        
+ 
         do {
             existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadRequest.sharingGroupUUID, fileUUID:uploadRequest.fileUUID)
         } catch (let error) {
@@ -98,7 +116,7 @@ extension FileController {
             return
         }
         
-        // This will be nil if (a) there is no existing file and if (b) an existing file doesn't have a fileGroupUUID.
+        // This will be nil if (a) there is no existing file -- i.e., if this is an upload for a new file and if (b) an existing file doesn't have a fileGroupUUID.
         existingFileGroupUUID = existingFileInFileIndex?.fileGroupUUID
         
         // To send back to client.
@@ -228,9 +246,9 @@ extension FileController {
                 return
             }
             
-            // Need to add the upload data to the UploadRepository.
+            // Need to add the upload (i.e., change) data to the UploadRepository.
             guard let data = uploadRequest.data else {
-                finish(.errorResponse(.failure(.message("Could not get data from request"))), params: params)
+                finish(.errorResponse(.failure(.message("Could not get change data from request"))), params: params)
                 return
             }
             
@@ -281,7 +299,7 @@ extension FileController {
         upload.deviceUUID = deviceUUID
         upload.fileUUID = uploadRequest.fileUUID
         upload.mimeType = uploadRequest.mimeType
-        upload.v0UploadFileVersion = newFile
+        upload.state = newFile ? .v0UploadCompleteFile : .vNUploadFileChange
         upload.sharingGroupUUID = uploadRequest.sharingGroupUUID
         upload.uploadCount = uploadRequest.uploadCount
         upload.uploadIndex = uploadRequest.uploadIndex
@@ -320,14 +338,6 @@ extension FileController {
         }
         else {
             upload.fileGroupUUID = existingFileGroupUUID
-        }
-    
-        if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile == true {
-            Log.info("Undeleted server file.")
-            upload.state = .uploadedUndelete
-        }
-        else {
-            upload.state = .uploadedFile
         }
     
         // We are using the current signed in user's id here (and not the effective user id) because we need a way of indexing or organizing the collection of files uploaded by a particular user.

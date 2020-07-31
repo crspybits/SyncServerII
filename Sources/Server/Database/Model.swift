@@ -8,6 +8,10 @@
 
 import Foundation
 
+protocol ModelIndexId {
+    static var indexIdKey: String {get}
+}
+
 // Your object that abides by this protocol must provide member properties that match the databases column names and types.
 protocol Model : class {
     // Optionally provide converters that will enable converting from MySQL field values to their corresponding model values.

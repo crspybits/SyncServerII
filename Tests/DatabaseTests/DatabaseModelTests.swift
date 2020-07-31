@@ -208,7 +208,7 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         let userId = UserId(43)
         let fileVersion = FileVersionInt(322)
         let deviceUUID = Foundation.UUID().uuidString
-        let state:UploadState = .toDeleteFromFileIndex
+        let state:UploadState = .deleteSingleFile
         let appMetaData = "arba"
         let fileCheckSum = TestFile.test1.dropboxCheckSum
         let mimeType = "text/plain"

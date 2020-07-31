@@ -356,14 +356,12 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest1 = UploadDeletionRequest()
         uploadDeletionRequest1.fileUUID = upload1.request.fileUUID
-        uploadDeletionRequest1.masterVersion = masterVersion + 1
         uploadDeletionRequest1.sharingGroupUUID = sharingGroupUUID
 
         uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest1, deviceUUID: deviceUUID, addUser: false)
 
         let uploadDeletionRequest2 = UploadDeletionRequest()
         uploadDeletionRequest2.fileUUID = upload2.request.fileUUID
-        uploadDeletionRequest2.masterVersion = masterVersion + 1
         uploadDeletionRequest2.sharingGroupUUID = sharingGroupUUID
 
         uploadDeletion(testAccount: upload2.sharingTestAccount, uploadDeletionRequest: uploadDeletionRequest2, deviceUUID: deviceUUID, addUser: false)
@@ -395,8 +393,6 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
-        uploadDeletionRequest.fileVersion = 1
-        uploadDeletionRequest.masterVersion = masterVersion
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         // Original v0 uploader deletes file.
@@ -416,8 +412,6 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = result.request.fileUUID
-        uploadDeletionRequest.fileVersion = 0
-        uploadDeletionRequest.masterVersion = masterVersion
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         // Original v0 uploader deletes file.

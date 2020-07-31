@@ -87,18 +87,12 @@ class MessageTests: ServerTestCase {
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uuidString
-        uploadDeletionRequest.fileVersion = FileVersionInt(99)
-        uploadDeletionRequest.masterVersion = MasterVersionInt(23)
-        uploadDeletionRequest.actualDeletion = true
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         let result = uploadDeletionRequest.urlParameters()
 
         let expectedURLParams =
-            "actualDeletion=1&" +
             "fileUUID=\(uuidString)&" +
-            "fileVersion=99&" +
-            "masterVersion=23&" +
             "sharingGroupUUID=\(sharingGroupUUID)"
         
         XCTAssert(result == expectedURLParams, "Expected: \(String(describing: expectedURLParams)); actual: \(String(describing: result))")

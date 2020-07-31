@@ -814,6 +814,51 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         }
     }
     
+    func testDatabaseInsertDateValueIntoDateTimeColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c16", value: .dateTime(Date()))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNilValueIntoOptionalDateTimeColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c16", value: .dateTimeOptional(nil))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testDatabaseInsertNonNilValueIntoOptionalDateTimeColumnWorks() {
+        let repo = Table()
+        repo.db = db
+        let insert = Database.PreparedStatement(repo: repo, type: .insert)
+
+        insert.add(fieldName: "c16", value: .dateTimeOptional(Date()))
+        
+        do {
+            try insert.run()
+        }
+        catch (let error) {
+            XCTFail("\(error)")
+        }
+    }
+    
     func testDatabaseSelectDataValuesFromBlobColumnWorks() {
         let repo = Table3()
         repo.db = db

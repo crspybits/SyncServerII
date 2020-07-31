@@ -29,7 +29,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         super.tearDown()
     }
 
-    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: Data? = nil, changeResolverName: String = "ExampleChangeResolver", uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, deferredUploadId: Int64? = nil, missingField:Bool = false) -> Upload {
+    func doAddUpload(sharingGroupUUID: String, checkSum: String? = "", uploadContents: Data? = nil, changeResolverName: String? = "ExampleChangeResolver", uploadIndex: Int32 = 1, uploadCount: Int32 = 1, mimeType:String? = "text/plain", appMetaData:AppMetaData? = AppMetaData(version: 0, contents: "{ \"foo\": \"bar\" }"), userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, deferredUploadId: Int64? = nil, fileVersion: FileVersionInt = 0, missingField:Bool = false, expectError: Bool = false) -> Upload {
         let upload = Upload()
         
         if !missingField {
@@ -38,9 +38,9 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         
         upload.lastUploadedCheckSum = checkSum
         upload.fileUUID = Foundation.UUID().uuidString
-        upload.fileVersion = 13
+        upload.fileVersion = fileVersion
         upload.mimeType = mimeType
-        upload.state = .uploadingFile
+        upload.state = fileVersion == 0 ? .v0UploadCompleteFile : .vNUploadFileChange
         upload.userId = userId
         upload.appMetaData = appMetaData?.contents
         upload.appMetaDataVersion = appMetaData?.version
@@ -58,14 +58,18 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         var uploadId:Int64?
         switch result {
         case .success(uploadId: let id):
+            XCTAssertTrue(!expectError)
             if missingField {
                 XCTFail()
             }
             uploadId = id
         
         default:
-            if !missingField {
-                XCTFail()
+            XCTAssertTrue(expectError)
+            if !expectError {
+                if !missingField {
+                    XCTFail()
+                }
             }
         }
         
@@ -74,7 +78,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         return upload
     }
     
-    func testAddUpload() {
+    func testAddSingleUpload() {
         let sharingGroupUUID = UUID().uuidString
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
@@ -91,7 +95,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             return
         }
         
-        _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, missingField: true)
+        _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, missingField: true, expectError: true)
     }
     
     func doAddUploadDeletion(sharingGroupUUID: String, userId:UserId = 1, deviceUUID:String = Foundation.UUID().uuidString, missingField:Bool = false) -> Upload {
@@ -99,7 +103,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         upload.deviceUUID = deviceUUID
         upload.fileUUID = Foundation.UUID().uuidString
         upload.fileVersion = 1
-        upload.state = .toDeleteFromFileIndex
+        upload.state = .deleteSingleFile
         upload.sharingGroupUUID = sharingGroupUUID
         upload.uploadIndex = 1
         upload.uploadCount = 1
@@ -167,14 +171,24 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, appMetaData:nil)
     }
     
-    func testAddUploadSucceedsWithNilCheckSum() {
+    func testAddUploadSucceedsWithNilCheckSumWhenFileVersionGreaterThanZero() {
         let sharingGroupUUID = UUID().uuidString
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, checkSum:nil)
+        _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, checkSum:nil, changeResolverName: nil,  fileVersion: 1)
+    }
+    
+    func testAddUploadFailsWithNilCheckSumWhenFileVersionIsZero() {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        _ = doAddUpload(sharingGroupUUID:sharingGroupUUID, checkSum:nil, fileVersion: 0, expectError: true)
     }
     
     func testUpdateUpload() {
@@ -221,8 +235,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         
         let upload = doAddUpload(sharingGroupUUID:sharingGroupUUID)
         upload.lastUploadedCheckSum = nil
-        upload.state = .uploadedFile
-        upload.v0UploadFileVersion = true
+        upload.state = .v0UploadCompleteFile
         XCTAssert(!UploadRepository(db).update(upload: upload))
     }
     
@@ -497,7 +510,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             return
         }
         
-        guard let deferredUpload = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload = doAddDeferredUpload(status: .pendingChange, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -528,7 +541,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             return
         }
         
-        guard let deferredUpload = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload = doAddDeferredUpload(status: .pendingChange, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -564,13 +577,13 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
             return
         }
         
-        guard let deferredUpload1 = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload1 = doAddDeferredUpload(status: .pendingChange, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = doAddDeferredUpload(status: .pending, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload2 = doAddDeferredUpload(status: .pendingChange, sharingGroupUUID: sharingGroupUUID),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return

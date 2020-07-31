@@ -65,7 +65,7 @@ public extension UploaderCommon {
         upload.deviceUUID = deviceUUID
         upload.fileUUID = fileUUID
         upload.mimeType = "text/plain"
-        upload.state = .uploadingFile
+        upload.state = .vNUploadFileChange
         upload.userId = userId
         upload.updateDate = Date()
         upload.sharingGroupUUID = sharingGroupUUID
@@ -73,7 +73,6 @@ public extension UploaderCommon {
         upload.uploadCount = uploadCount
         upload.uploadIndex = uploadIndex
         upload.deferredUploadId = deferredUploadId
-        upload.v0UploadFileVersion = false
         upload.fileGroupUUID = fileGroupUUID
         
         let addUploadResult = UploadRepository(db).add(upload: upload, fileInFileIndex: true)
@@ -87,7 +86,7 @@ public extension UploaderCommon {
     func createDeferredUpload(fileGroupUUID: String? = nil, sharingGroupUUID: String) -> DeferredUpload? {
         let deferredUpload = DeferredUpload()
         deferredUpload.fileGroupUUID = fileGroupUUID
-        deferredUpload.status = .pending
+        deferredUpload.status = .pendingChange
         deferredUpload.sharingGroupUUID = sharingGroupUUID
         let addResult = DeferredUploadRepository(db).add(deferredUpload)
         guard case .success(deferredUploadId: let deferredUploadId) = addResult else {

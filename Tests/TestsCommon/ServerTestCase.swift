@@ -1307,6 +1307,9 @@ class ServerTestCase : XCTestCase {
     }
     
     func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
+    
+        // DEPRECATED-- FIX ME
+        assert(false)
 
         if addUser {
             let sharingGroupUUID = UUID().uuidString
@@ -1329,9 +1332,11 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(dict != nil)
                     
                     if let uploadDeletionResponse = try? UploadDeletionResponse.decode(dict!) {
-                        if updatedMasterVersionExpected != nil {
-                            XCTAssert(uploadDeletionResponse.masterVersionUpdate == updatedMasterVersionExpected)
-                        }
+                    assert(false)
+                    // FIX ME!!
+//                        if updatedMasterVersionExpected != nil {
+//                            XCTAssert(uploadDeletionResponse.masterVersionUpdate == updatedMasterVersionExpected)
+//                        }
                     }
                     else {
                         XCTFail()
@@ -1568,6 +1573,45 @@ class ServerTestCase : XCTestCase {
         }
         
         return false
+    }
+    
+    func doAddFileIndex(userId:UserId = 1, sharingGroupUUID:String, createSharingGroup: Bool, changeResolverName: String? = nil) -> FileIndex? {
+
+        if createSharingGroup {
+            guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+                XCTFail()
+                return nil
+            }
+            
+            guard case .success = SharingGroupUserRepository(db).add(sharingGroupUUID: sharingGroupUUID, userId: userId, permission: .write, owningUserId: nil) else {
+                XCTFail()
+                return nil
+            }
+        }
+        
+        let fileIndex = FileIndex()
+        fileIndex.lastUploadedCheckSum = "abcde"
+        fileIndex.deleted = false
+        fileIndex.fileUUID = Foundation.UUID().uuidString
+        fileIndex.deviceUUID = Foundation.UUID().uuidString
+        fileIndex.fileVersion = 1
+        fileIndex.mimeType = "text/plain"
+        fileIndex.userId = userId
+        fileIndex.appMetaData = "{ \"foo\": \"bar\" }"
+        fileIndex.creationDate = Date()
+        fileIndex.updateDate = Date()
+        fileIndex.sharingGroupUUID = sharingGroupUUID
+        fileIndex.changeResolverName = changeResolverName
+        
+        let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
+        guard case .success(let uploadId) = result1 else {
+            XCTFail()
+            return nil
+        }
+
+        fileIndex.fileIndexId = uploadId
+        
+        return fileIndex
     }
 }
 

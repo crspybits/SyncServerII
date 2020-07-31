@@ -4,7 +4,9 @@ import ChangeResolvers
 import ServerAccount
 import ServerShared
 
-// Processes entries in DeferredUpload in file group-based units.
+// TODO: Need to make sure, when the FileIndex, gets uploaded, that any deletion flag is not changed. In general, only update the fields we're intending to update. This is releant for UploadDeletion which will change the FileIndex in the primary UploadDeletion request processing.
+
+// Processes entries in DeferredUpload in file group-based units and sharing group-based units.
 
 // For testing.
 protocol UploaderProtocol {
@@ -75,7 +77,7 @@ class Uploader: UploaderProtocol {
         
         Log.debug("Got lock!")
 
-        guard let deferredUploads = deferredUploadRepo.select(rowsWithStatus: .pending) else {
+        guard let deferredUploads = deferredUploadRepo.select(rowsWithStatus: [.pendingDeletion, .pendingChange]) else {
             Log.error("Failed setting up select to get deferred uploads")
             try releaseLock()
             throw Errors.failedToGetDeferredUploads

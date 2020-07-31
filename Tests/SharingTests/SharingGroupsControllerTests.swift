@@ -383,7 +383,6 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
 
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
-        uploadDeletionRequest.masterVersion = masterVersion + 1
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)

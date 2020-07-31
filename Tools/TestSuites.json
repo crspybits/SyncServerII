@@ -39,6 +39,9 @@
       "name": "DatabaseTests.DatabaseModelTests"
     },
     {
+      "name": "DatabaseTests.DatabaseUpdateTests"
+    },
+    {
       "name": "DatabaseTests.GeneralDatabaseTests"
     },
     {

@@ -6,8 +6,18 @@
 //
 //
 
-// Persistent Storage for temporarily storing general meta data for file uploads and file deletions before finally storing that info in the FileIndex. This also represents files that need to be purged from cloud storage-- this will be for losers of FileIndex update races and for upload deletions.
-// 7/19/20; This now represents three kinds of events: 1) entire v0 file uploads, 2) vN file change uploads, and 3) file deletions. Because of the addition of change uploads, the prior index: "UNIQUE (fileUUID, userId, deviceUUID)" has to be removed. This is because the same user/device may upload multiple changes to the same file before they are applied to the file-- which is is done asynchronously to client requests. (I'm going to removing upload undeletion, and app meta data upload for all but v0 file uploads).
+// Persistent Storage for temporarily storing general meta data for file uploads and file deletions before finally storing that info in the FileIndex.
+
+/* 7/19/20; This now represents these kinds of events:
+    1) entire v0 file uploads,
+    2) vN file change uploads, and
+    3) single file deletion (files with no file group)
+    4) deletion of all files in a file group.
+    
+    Because of the addition of change uploads, the prior index: "UNIQUE (fileUUID, userId, deviceUUID)" has been removed. This is because the same user/device may upload multiple changes to the same file before they are applied to the file-- which is is done asynchronously to client requests.
+    
+    TODO: I'm going to removing upload undeletion, and app meta data upload for all but v0 file uploads.
+*/
 
 import Foundation
 import ServerShared
@@ -15,12 +25,19 @@ import LoggerAPI
 import ChangeResolvers
 
 enum UploadState : String {
-    case uploadingFile
-    case uploadedFile
+    case v0UploadCompleteFile
+    case vNUploadFileChange
+    case deleteSingleFile
+    // deletion of a file group will not be represented by an Upload row, but by a DeferredUpload row (only).
+    
+    // DEPRECATED.
     case uploadingUndelete
     case uploadedUndelete
     case uploadingAppMetaData
-    case toDeleteFromFileIndex
+    
+    var isUploadFile: Bool {
+        return self == .v0UploadCompleteFile || self == .vNUploadFileChange
+    }
 
     static func maxCharacterLength() -> Int { return 22 }
 }
@@ -39,9 +56,6 @@ class Upload : NSObject, Model, ChangeResolverContents {
     // On initial client request, this is for upload deletion. For file uploads, this is used when file versions > v0 but only *after* the initial client request.
     static let fileVersionKey = "fileVersion"
     var fileVersion: FileVersionInt!
-
-    static let v0UploadFileVersionKey = "v0UploadFileVersion"
-    var v0UploadFileVersion:Bool?
     
     static let deferredUploadIdKey = "deferredUploadId"
     // Reference to the DeferredUpload table for vN uploads.
@@ -155,9 +169,6 @@ class Upload : NSObject, Model, ChangeResolverContents {
             case Upload.fileVersionKey:
                 fileVersion = newValue as? FileVersionInt
                 
-            case Upload.v0UploadFileVersionKey:
-                v0UploadFileVersion = newValue as? Bool
-                
             case Upload.deferredUploadIdKey:
                 deferredUploadId = newValue as? Int64
 
@@ -187,11 +198,6 @@ class Upload : NSObject, Model, ChangeResolverContents {
             case Upload.updateDateKey:
                 return {(x:Any) -> Any? in
                     return DateExtras.date(x as! String, fromFormat: .DATETIME)
-                }
-                
-            case Upload.v0UploadFileVersionKey:
-                return {(x:Any) -> Any? in
-                    return (x as! Int8) == 1
                 }
                 
             case Upload.uploadContentsKey:
@@ -344,12 +350,6 @@ class UploadRepository : Repository, RepositoryLookup {
                 }
             }
             
-            if db.columnExists(Upload.v0UploadFileVersionKey, in: tableName) == false {
-                if !db.addColumn("\(Upload.v0UploadFileVersionKey) BOOL", to: tableName) {
-                    return .failure(.columnCreation)
-                }
-            }
-            
             if db.columnExists(Upload.deferredUploadIdKey, in: tableName) == false {
                 if !db.addColumn("\(Upload.deferredUploadIdKey) BIGINT", to: tableName) {
                     return .failure(.columnCreation)
@@ -377,21 +377,9 @@ class UploadRepository : Repository, RepositoryLookup {
             return true
         }
         
-        // changeResolverName can only be non-nil with a v0 upload.
-        if upload.changeResolverName != nil && upload.v0UploadFileVersion == false {
-            Log.error("changeResolverName group")
+        if upload.changeResolverName != nil && upload.state != .v0UploadCompleteFile {
+            Log.error("changeResolverName can only be non-nil with a v0 upload.")
             return true
-        }
-        
-        if upload.v0UploadFileVersion == nil && upload.fileVersion == nil
-            && upload.state != .uploadingAppMetaData  {
-            Log.error("v0UploadFileVersion group nil")
-            return true
-        }
-        
-        if upload.state == .toDeleteFromFileIndex {
-            Log.error("toDeleteFromFileIndex group nil")
-            return false
         }
         
         if upload.state == .uploadingAppMetaData {
@@ -399,9 +387,9 @@ class UploadRepository : Repository, RepositoryLookup {
             return upload.appMetaData == nil || upload.appMetaDataVersion == nil
         }
         
-        // We're uploading a file if we get to here. Criteria only for file uploads:
-        if upload.mimeType == nil || upload.updateDate == nil {
-            Log.error("upload.mimeType group nil: upload.mimeType: \(String(describing: upload.mimeType)); upload.updateDate: \(String(describing: upload.updateDate))")
+        if upload.state.isUploadFile &&
+            (upload.mimeType == nil || upload.updateDate == nil) {
+            Log.error("Uploading a file and the mimeType and/or updateDate is nil")
             return true
         }
         
@@ -413,18 +401,13 @@ class UploadRepository : Repository, RepositoryLookup {
             return true
         }
         
-        if !fileInFileIndex && upload.creationDate == nil {
-            Log.error("fileInFileIndex group nil")
+        if upload.state.isUploadFile && !fileInFileIndex && upload.creationDate == nil {
+            Log.error("Must have a creationDate when an uploaded file is not in the index.")
             return true
         }
         
-        if upload.state == .uploadingFile || upload.state == .uploadingUndelete {
-            Log.debug("upload.state2 group nil")
-            return false
-        }
-        
-        // Have to have lastUploadedCheckSum when we're in the uploaded state, and we have v0.
-        if upload.lastUploadedCheckSum == nil && upload.v0UploadFileVersion == true {
+        if upload.state.isUploadFile && upload.lastUploadedCheckSum == nil && upload.state == .v0UploadCompleteFile {
+            Log.error("Need lastUploadedCheckSum for v0 uploads.")
             return true
         }
         
@@ -487,7 +470,6 @@ class UploadRepository : Repository, RepositoryLookup {
         }
 
         insert.add(fieldName: Upload.fileVersionKey, value: .int32Optional(upload.fileVersion))
-        insert.add(fieldName: Upload.v0UploadFileVersionKey, value: .boolOptional(upload.v0UploadFileVersion))
         insert.add(fieldName: Upload.uploadContentsKey, value: .dataOptional(upload.uploadContents))
         insert.add(fieldName: Upload.uploadIndexKey, value: .int32Optional(upload.uploadIndex))
         insert.add(fieldName: Upload.uploadCountKey, value: .int32Optional(upload.uploadCount))
@@ -651,8 +633,7 @@ class UploadRepository : Repository, RepositoryLookup {
             
             fileInfo.fileUUID = upload.fileUUID
             fileInfo.fileVersion = upload.fileVersion
-            fileInfo.v0UploadFileVersion = upload.v0UploadFileVersion
-            fileInfo.deleted = upload.state == .toDeleteFromFileIndex
+            fileInfo.deleted = upload.state == .deleteSingleFile
             fileInfo.mimeType = upload.mimeType
             fileInfo.creationDate = upload.creationDate
             fileInfo.updateDate = upload.updateDate

@@ -9,6 +9,7 @@
 import LoggerAPI
 import Foundation
 import PerfectMySQL
+import ServerShared
 
 // See https://github.com/PerfectlySoft/Perfect-MySQL for assumptions about mySQL installation.
 // For mySQL interface docs, see: http://perfect.org/docs/MySQL.html
@@ -433,6 +434,9 @@ extension Database {
             
             case data(Data)
             case dataOptional(Data?)
+            
+            case dateTime(Date)
+            case dateTimeOptional(Date?)
         }
         
         enum Errors : Error {
@@ -598,6 +602,18 @@ extension Database {
                     else {
                         haveValue = false
                     }
+                    
+                case .dateTime(let dateValue):
+                    let dateString = DateExtras.date(dateValue, toFormat: .DATETIME)
+                    self.stmt.bindParam(dateString)
+                case .dateTimeOptional(let dateValue):
+                    if let dateValue = dateValue {
+                        let dateString = DateExtras.date(dateValue, toFormat: .DATETIME)
+                        self.stmt.bindParam(dateString)
+                    }
+                    else {
+                        haveValue = false
+                    }
                 }
                 
                 if !haveValue {
@@ -615,6 +631,37 @@ extension Database {
             case .update:
                 return repo.db.connection.numberAffectedRows()
             }
+        }
+    } // end PreparedStatement
+}
+
+extension RepositoryBasics where Self: ModelIndexId {
+
+    // Updates consist of fieldName/ValueType key/value pairs. indexId provides the value for the index field that youare updating, to find the record in the database (along with the ModelIndexId key). Don't include the index field in the update(s).
+    // Returns true iff success.
+    func update(indexId: Int64,
+        with updates:[String: Database.PreparedStatement.ValueType]) -> Bool {
+        
+        guard updates.count > 0 else {
+            return false
+        }
+        
+        let update = Database.PreparedStatement(repo: self, type: .update)
+        
+        update.where(fieldName: Self.indexIdKey, value: .int64(indexId))
+                
+        for (fieldName, valueType) in updates {
+            update.add(fieldName: fieldName, value: valueType)
+        }
+        
+        do {
+            try update.run()
+            Log.info("Sucessfully updated \(tableName) row")
+            return true
+        }
+        catch (let error) {
+            Log.error("Failed updating \(tableName) row: \(db.errorCode()); \(db.errorMessage()); \(error)")
+            return false
         }
     }
 }
