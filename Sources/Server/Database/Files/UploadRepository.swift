@@ -214,7 +214,8 @@ class Upload : NSObject, Model, ChangeResolverContents {
     }
 }
 
-class UploadRepository : Repository, RepositoryLookup {
+class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
+    static let indexIdKey = Upload.uploadIdKey
     private(set) var db:Database!
 
     required init(_ db:Database) {
@@ -549,11 +550,15 @@ class UploadRepository : Repository, RepositoryLookup {
         case userId(UserId)
         case filesForUserDevice(userId:UserId, deviceUUID:String, sharingGroupUUID: String)
         case primaryKey(fileUUID:String, userId:UserId, deviceUUID:String)
+        case fileGroupUUIDWithStatus(fileGroupUUID: String, status: UploadState)
+        case deferredUploadId(Int64)
         
         var description : String {
             switch self {
             case .uploadId(let uploadId):
                 return "uploadId(\(uploadId))"
+            case .deferredUploadId(let deferredUploadId):
+                return "deferredUploadId(\(deferredUploadId))"
             case .fileUUID(let fileUUID):
                 return "fileUUID(\(fileUUID))"
             case .userId(let userId):
@@ -562,6 +567,8 @@ class UploadRepository : Repository, RepositoryLookup {
                 return "userId(\(userId)); deviceUUID(\(deviceUUID)); sharingGroupUUID(\(sharingGroupUUID))"
             case .primaryKey(let fileUUID, let userId, let deviceUUID):
                 return "fileUUID(\(fileUUID)); userId(\(userId)); deviceUUID(\(deviceUUID))"
+             case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
+                return "fileGroupUUID(\(fileGroupUUID); status: \(status.rawValue))"
             }
         }
     }
@@ -570,6 +577,8 @@ class UploadRepository : Repository, RepositoryLookup {
         switch key {
         case .uploadId(let uploadId):
             return "uploadId = '\(uploadId)'"
+        case .deferredUploadId(let deferredUploadId):
+            return "deferredUploadId = \(deferredUploadId)"
         case .fileUUID(let fileUUID):
             return "fileUUID = '\(fileUUID)'"
         case .userId(let userId):
@@ -578,6 +587,8 @@ class UploadRepository : Repository, RepositoryLookup {
             return "userId = \(userId) and deviceUUID = '\(deviceUUID)' and sharingGroupUUID = '\(sharingGroupUUID)'"
         case .primaryKey(let fileUUID, let userId, let deviceUUID):
             return "fileUUID = '\(fileUUID)' and userId = \(userId) and deviceUUID = '\(deviceUUID)'"
+        case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
+            return "fileGroupUUID = '\(fileGroupUUID)' and status = '\(status.rawValue)'"
         }
     }
     

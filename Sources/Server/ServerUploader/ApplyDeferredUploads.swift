@@ -66,6 +66,7 @@ class ApplyDeferredUploads {
     let db: Database
     let allUploads: [Upload]
     let fileIndexRepo: FileIndexRepository
+    let userRepo: UserRepository
     let accountManager: AccountManager
     let resolverManager: ChangeResolverManager
     let fileUUIDs: [String]
@@ -83,6 +84,7 @@ class ApplyDeferredUploads {
         self.fileIndexRepo = FileIndexRepository(db)
         self.uploadRepo = UploadRepository(db)
         self.deferredUploadRepo = DeferredUploadRepository(db)
+        self.userRepo = UserRepository(db)
         
         guard deferredUploads.count > 0 else {
             return nil
@@ -137,36 +139,16 @@ class ApplyDeferredUploads {
             }
         }
         
-        FileDeletion.apply(deletions: fileDeletions) { _ in
+        if let error = FileDeletion.apply(deletions: fileDeletions), error.count > 0 {
+            completion(error[0])
+        }
+        else {
             completion(nil)
         }
     }
     
     func uploads(fileUUID: String) -> [Upload] {
         return allUploads.filter{$0.fileUUID == fileUUID}
-    }
-
-    func getFileIndex(forFileUUID fileUUID: String) throws -> FileIndex {
-        let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
-        let result = fileIndexRepo.lookup(key: key, modelInit: FileIndex.init)
-        guard case .found(let model) = result,
-            let fileIndex = model as? FileIndex else {
-            throw Errors.couldNotLookupFileUUID
-        }
-        
-        return fileIndex
-    }
-    
-    func getCloudStorage(forFileUUID fileUUID: String, usingFileIndex fileIndex: FileIndex) throws -> (Account, CloudStorage) {
-        guard let owningUserCreds = FileController.getCreds(forUserId: fileIndex.userId, from: db, accountManager: accountManager) else {
-            throw Errors.couldNotGetOwningUserCreds
-        }
-        
-        guard let cloudStorage = owningUserCreds as? CloudStorage else {
-            throw Errors.couldNotConvertToCloudStorage
-        }
-        
-        return (owningUserCreds, cloudStorage)
     }
     
     func changeResolver(forFileUUID fileUUID: String, usingFileIndex fileIndex: FileIndex) throws -> ChangeResolver.Type {
@@ -203,9 +185,12 @@ class ApplyDeferredUploads {
             }
         }
         
-        let result = fileUUIDs.synchronouslyRun(apply: apply)
-        switch result {
-        case .success:
+        let (_, errors) = fileUUIDs.synchronouslyRun(apply: apply)
+        if errors.count > 0 {
+            _ = self.db.rollback()
+            completion(errors[0])
+        }
+        else {
             guard self.db.commit() else {
                 completion(Errors.couldNotCommit)
                 return
@@ -213,10 +198,6 @@ class ApplyDeferredUploads {
             
             Log.info("About to start cleanup.")
             self.cleanup(completion: completion)
-            
-        case .failure(let error):
-            _ = self.db.rollback()
-            completion(error)
         }
     }
     
@@ -246,15 +227,14 @@ class ApplyDeferredUploads {
             }
         }
         
-        let result = fileUUIDs.synchronouslyRun(apply: apply)
-        switch result {
-        case .success:
+        let (_, errors) = fileUUIDs.synchronouslyRun(apply: apply)
+        if errors.count > 0 {
+            completion(errors[0])
+        }
+        else {
             Log.info("About to start cleanup.")
             // TODO: Could cleanup after each successful commit. But would have to remove just those DeferredUpload's dealt with so far. And remove any FileDeletion's completed.
             self.cleanup(completion: completion)
-            
-        case .failure(let error):
-            completion(error)
         }
     }
     
@@ -271,7 +251,7 @@ class ApplyDeferredUploads {
     func applyChangesToSingleFile(fileUUID: String, completion: @escaping (Error?)->()) {
         let uploadsForFileUUID = uploads(fileUUID: fileUUID)
         
-        guard let fileIndex = try? getFileIndex(forFileUUID: fileUUID) else {
+        guard let fileIndex = try? fileIndexRepo.getFileIndex(forFileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID) else {
             completion(Errors.failedSetupForApplyChangesToSingleFile("FileIndex"))
             return
         }
@@ -281,7 +261,7 @@ class ApplyDeferredUploads {
             return
         }
         
-        guard let (owningCreds, cloudStorage) = try? getCloudStorage(forFileUUID: fileUUID, usingFileIndex: fileIndex) else {
+        guard let (owningCreds, cloudStorage) = try? fileIndex.getCloudStorage(userRepo: userRepo, accountManager: accountManager) else {
             completion(Errors.failedSetupForApplyChangesToSingleFile("getCloudStorage"))
             return
         }

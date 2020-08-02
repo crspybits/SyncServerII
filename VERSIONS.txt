@@ -15,6 +15,8 @@ Version
     		Did this by: 
     			SHOW INDEX FROM Upload
     			DROP INDEX fileUUID ON Upload 
+    * Will need an agressive iOS app update requirement
+    	- iOS app will absolutely have to update prior to using endpoints for new server.
 
 Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.

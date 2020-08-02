@@ -173,7 +173,7 @@ extension FileController {
         else {
             // OWNER
             // Need to get creds for the user that uploaded the v0 file.
-            ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, from: params.db, accountManager: params.accountManager)
+            ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, userRepo: params.repos.user, accountManager: params.accountManager)
         }
         
         ownerCloudStorage = ownerAccount?.cloudStorage
@@ -357,12 +357,19 @@ extension FileController {
 
         switch addUploadResult {
         case .success:
-            guard let finishUploads = FinishUploads(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: params.uploader, sharingGroupName: nil, params: params) else {
+            guard let finishUploads = FinishUploadFiles(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: params.uploader, params: params) else {
                 finish(.errorCleanup(message: "Could not FinishUploads", cleanup: cleanup), params: params)
                 return
             }
             
-            let transferResponse = finishUploads.transfer()
+            let transferResponse: FinishUploadFiles.UploadsResponse
+            do {
+                transferResponse = try finishUploads.finish()
+            } catch let error {
+                finish(.errorCleanup(message: "Could not FinishUploads: \(error)", cleanup: cleanup), params: params)
+                return
+            }
+            
             let response = UploadFileResponse()
             var postCommitRunner: RequestHandler.PostRequestRunner?
             
@@ -373,12 +380,12 @@ extension FileController {
             case .allUploadsNotYetReceived:
                 response.allUploadsFinished = .uploadsNotFinished
                 
-            case .deferredTransfer(let runner):
+            case .deferred(let runner):
                 response.allUploadsFinished = .vNUploadsTransferPending
                 postCommitRunner = runner
                 
-            case .error(let response):
-                params.completion(response)
+            case .error(let error):
+                finish(.errorCleanup(message: "Could not FinishUploads: \(String(describing: error))", cleanup: cleanup), params: params)
                 return
             }
             

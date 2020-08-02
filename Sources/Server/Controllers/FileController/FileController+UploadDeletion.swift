@@ -13,21 +13,19 @@ import Kitura
 
 /* Algorithm:
 
-1) If the deletion request has a fileUUID
-    Gets the database key for that file
-2) If the deletion request has a fileGroupUUID
-    Gets the database key for that file group
-3) Gets all the [FileInfo] objects for the files for those keys
-4) If all of the files are already marked as deleted, returns success.
+1) Gets the database key for
+    a) the fileUUID if the request one
+    b) the fileGroupUUID, if the deletion request has one
+2) Gets all the [FileInfo] objects for the files for those keys
+3) If all of the files are already marked as deleted, returns success.
     Just a repeated attempt to delete the same file.
-5) If at least one file not yet deleted, marks the FileIndex as deleted for all of the files.
+4) If at least one file not yet deleted, marks the FileIndex as deleted for all of the files.
     Doesn't yet delete the file in Cloud Storage.
-6) Creates a DeferredUpload, and
+5) Creates a DeferredUpload, and
     a) If this deletion is for one fileUUID, creates a Upload record.
         and links in the DeferredUpload
     b) If this deletion is for a fileGroupUUID, doesn't create an Upload record.
-        and links in the DeferredUpload
-7) The Uploader will then (asynchonously):
+6) The Uploader will then (asynchonously):
     a) For a single fileUUID
         Flush out any DeferredUpload record(s) for that file
         And remove any Upload record(s).
@@ -65,7 +63,6 @@ extension FileController {
         // Do we have a fileUUID or a fileGroupUUID?
         
         var keys = [FileIndexRepository.LookupKey]()
-        var uploadState: UploadState?
         
         enum DeletionType {
             case singleFile
@@ -76,7 +73,6 @@ extension FileController {
         if let fileUUID = uploadDeletionRequest.fileUUID {
             let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, fileUUID: fileUUID)
             keys += [key]
-            uploadState = .deleteSingleFile
             deletionType = .singleFile
         }
         else if let fileGroupUUID = uploadDeletionRequest.fileGroupUUID {
@@ -119,25 +115,43 @@ extension FileController {
                 return
             }
         }
-                
-        // Create an entry
-        for (index, file) in files.enumerated() {
+        
+        let finishType:FinishUploadDeletion.DeletionsType
+        
+        switch deletionType {
+        case .fileGroup:
+            finishType = .fileGroup(fileGroupUUID: uploadDeletionRequest.fileGroupUUID)
+            
+        case .singleFile:
+            guard files.count == 1 else {
+                let message = "Single file deletion and not exactly one file."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
+            
+            let file = files[0]
+            
+            guard file.fileGroupUUID == nil else {
+                let message = "Single file deletion but the file had a file group."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
+                        
             let upload = Upload()
             upload.fileUUID = file.fileUUID
             upload.deviceUUID = deviceUUID
-            upload.state = uploadState
+            upload.state = .deleteSingleFile
             upload.userId = params.currentSignedInUser!.userId
-            upload.sharingGroupUUID = uploadDeletionRequest.sharingGroupUUID
-            upload.fileGroupUUID = file.fileGroupUUID
-            upload.uploadIndex = Int32(index + 1)
-            upload.uploadCount = Int32(files.count)
+            upload.sharingGroupUUID = sharingGroupUUID
             
             let uploadAddResult = params.repos.upload.add(upload: upload)
             
             switch uploadAddResult {
             case .success(_):
-                break
-                
+                finishType = .singleFile(upload: upload)
+
             default:
                 let message = "Error adding Upload record: \(uploadAddResult)"
                 Log.error(message)
@@ -146,12 +160,26 @@ extension FileController {
             }
         }
         
-        // Really ought to just have a second constructor here. We know that the upload (deletion) is finished. Why make the class guess?
-        guard let finishUploads = FinishUploads(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: params.uploader, sharingGroupName: nil, params: params) else {
+        let finishUploads = FinishUploadDeletion(type: finishType, uploader: params.uploader, sharingGroupUUID: sharingGroupUUID, params: params)
+        
+        do {
+            let result = try finishUploads.finish()
+            switch result {
+            case .deferred(let runner):
+                Log.info("Success deleting files: Subject to deferred transfer.")
+                let response = UploadDeletionResponse()
+                params.completion(.successWithRunner(response, runner: runner))
                 
+            case .error:
+                let message = "Could not complete FinishUploads"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+            }
+        } catch let error {
+            let message = "Could not finish FinishUploads: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
-        
-        finishUploads.transfer()
     }
 }

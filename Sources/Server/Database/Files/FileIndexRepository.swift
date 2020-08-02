@@ -12,6 +12,7 @@ import Foundation
 import LoggerAPI
 import ServerShared
 import ChangeResolvers
+import ServerAccount
 
 typealias FileIndexId = Int64
 
@@ -24,8 +25,7 @@ class FileIndex : NSObject, Model {
     var fileUUID: String!
     
     static let deviceUUIDKey = "deviceUUID"
-    // We don't give the deviceUUID when updating the fileIndex for an upload deletion.
-    var deviceUUID:String?
+    var deviceUUID:String!
     
     static let fileGroupUUIDKey = "fileGroupUUID"
     // Not all files have to be associated with a file group.
@@ -167,8 +167,31 @@ class FileIndex : NSObject, Model {
     }
 }
 
+extension FileIndex {
+    enum Errors: Swift.Error {
+        case couldNotGetOwningUserCreds
+        case couldNotConvertToCloudStorage
+    }
+    
+    func getCloudStorage(userRepo: UserRepository, accountManager: AccountManager) throws -> (Account, CloudStorage) {
+        guard let owningUserCreds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: accountManager) else {
+            throw Errors.couldNotGetOwningUserCreds
+        }
+        
+        guard let cloudStorage = owningUserCreds as? CloudStorage else {
+            throw Errors.couldNotConvertToCloudStorage
+        }
+        
+        return (owningUserCreds, cloudStorage)
+    }
+}
+
 class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
     static let indexIdKey = FileIndex.fileIndexIdKey
+    
+    enum Errors: Swift.Error {
+        case couldNotLookupFileUUID
+    }
 
     private(set) var db:Database!
     
@@ -772,5 +795,16 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         query += " )"
         
         return fileIndex(forSelectQuery: query)
+    }
+    
+    func getFileIndex(forFileUUID fileUUID: String, sharingGroupUUID: String) throws -> FileIndex {
+        let key = Self.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
+        let result = lookup(key: key, modelInit: FileIndex.init)
+        guard case .found(let model) = result,
+            let fileIndex = model as? FileIndex else {
+            throw Errors.couldNotLookupFileUUID
+        }
+        
+        return fileIndex
     }
 }

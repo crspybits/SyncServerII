@@ -53,9 +53,9 @@ class FileController : ControllerProtocol {
     
     // OWNER
     // userId is the owning user Id-- e.g., obtained from the userId field of FileIndex.
-    static func getCreds(forUserId userId: UserId, from db: Database, accountManager: AccountManager) -> Account? {
+    static func getCreds(forUserId userId: UserId, userRepo: UserRepository, accountManager: AccountManager) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
-        let userResults = UserRepository(db).lookup(key: userKey, modelInit: User.init)
+        let userResults = userRepo.lookup(key: userKey, modelInit: User.init)
         guard case .found(let model) = userResults,
             let user = model as? User else {
             Log.error("Could not get user from database.")

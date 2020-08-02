@@ -90,7 +90,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         }
         
         let params = Params(repos: repos, currentSignedInUser: user)
-        guard let finishUploads = FinishUploads(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader: fakeUploader, params: params) else {
+        guard let finishUploads = FinishUploadFiles(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader: fakeUploader, params: params) else {
             XCTFail()
             return
         }
@@ -107,7 +107,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         
         switch test {
         case .oneFile:
-            guard case .deferredTransfer = finishUploads.transfer() else {
+            guard case .deferred = try? finishUploads.finish() else {
                 XCTFail()
                 return
             }
@@ -117,7 +117,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
                 return
             }
             
-            guard case .error = finishUploads.transfer() else {
+            guard case .error = try? finishUploads.finish() else {
                 XCTFail()
                 return
             }
@@ -194,7 +194,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         }
         
         let params = Params(repos: repos, currentSignedInUser: user)
-        guard let finishUploads = FinishUploads(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader: fakeUploader, params: params) else {
+        guard let finishUploads = FinishUploadFiles(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader: fakeUploader, params: params) else {
             XCTFail()
             return
         }
@@ -216,12 +216,12 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         
         switch test {
         case .oneFileGroup:
-            guard case .deferredTransfer = finishUploads.transfer() else {
+            guard case .deferred = try? finishUploads.finish() else {
                 XCTFail()
                 return
             }
         case .twoFileGroups:
-            guard case .error = finishUploads.transfer() else {
+            guard case .error = try? finishUploads.finish() else {
                 XCTFail()
                 return
             }

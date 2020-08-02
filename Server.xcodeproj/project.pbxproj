@@ -40,7 +40,9 @@
 
 /* Begin PBXBuildFile section */
 		5D80B0BDB33182E92B3B21B0 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = B5286B451BE4861E5E7190CC /* ServerTests.json */; };
+		83461FB824D6E213005561F0 /* Uploader+UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83461FB724D6E213005561F0 /* Uploader+UploadDeletion.swift */; };
 		83FFE6DD24D48DC60096D733 /* DatabaseUpdateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FFE6DC24D48DC60096D733 /* DatabaseUpdateTests.swift */; };
+		83FFE6DF24D50B950096D733 /* FinishUploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FFE6DE24D50B950096D733 /* FinishUploadDeletion.swift */; };
 		865BCB551726025FC61EAAED /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = D5C57C1D27D3A5CC2D955748 /* Server.json */; };
 		OBJ_1014 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_311 /* Package.swift */; };
 		OBJ_1019 /* BaseCacheElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_320 /* BaseCacheElement.swift */; };
@@ -642,7 +644,7 @@
 		OBJ_2179 /* FileController+UploadDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* FileController+UploadDeletion.swift */; };
 		OBJ_2180 /* FileController+UploadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* FileController+UploadFile.swift */; };
 		OBJ_2181 /* FileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* FileController.swift */; };
-		OBJ_2182 /* FinishUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* FinishUploads.swift */; };
+		OBJ_2182 /* FinishUploadFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* FinishUploadFiles.swift */; };
 		OBJ_2183 /* PushNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* PushNotifications.swift */; };
 		OBJ_2184 /* PushNotificationsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* PushNotificationsController.swift */; };
 		OBJ_2185 /* SharingAccountsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* SharingAccountsController.swift */; };
@@ -6211,7 +6213,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		83461FB724D6E213005561F0 /* Uploader+UploadDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Uploader+UploadDeletion.swift"; sourceTree = "<group>"; };
 		83FFE6DC24D48DC60096D733 /* DatabaseUpdateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseUpdateTests.swift; sourceTree = "<group>"; };
+		83FFE6DE24D50B950096D733 /* FinishUploadDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishUploadDeletion.swift; sourceTree = "<group>"; };
 		B5286B451BE4861E5E7190CC /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		"ChangeResolvers::ChangeResolvers::Product" /* ChangeResolvers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"CredentialsAppleSignIn::CredentialsAppleSignIn::Product" /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -6389,7 +6393,7 @@
 		OBJ_276 /* EllipticCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EllipticCurve.swift; sourceTree = "<group>"; };
 		OBJ_277 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
 		OBJ_278 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/BlueECC/Package.swift; sourceTree = "<group>"; };
-		OBJ_28 /* FinishUploads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishUploads.swift; sourceTree = "<group>"; };
+		OBJ_28 /* FinishUploadFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishUploadFiles.swift; sourceTree = "<group>"; };
 		OBJ_281 /* CryptorRSA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptorRSA.swift; sourceTree = "<group>"; };
 		OBJ_282 /* CryptorRSAConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptorRSAConstants.swift; sourceTree = "<group>"; };
 		OBJ_283 /* CryptorRSADigest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptorRSADigest.swift; sourceTree = "<group>"; };
@@ -8139,7 +8143,8 @@
 				OBJ_25 /* FileController+UploadDeletion.swift */,
 				OBJ_26 /* FileController+UploadFile.swift */,
 				OBJ_27 /* FileController.swift */,
-				OBJ_28 /* FinishUploads.swift */,
+				OBJ_28 /* FinishUploadFiles.swift */,
+				83FFE6DE24D50B950096D733 /* FinishUploadDeletion.swift */,
 			);
 			path = FileController;
 			sourceTree = "<group>";
@@ -8856,7 +8861,7 @@
 			path = CodableQuery;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -8885,7 +8890,6 @@
 				OBJ_650 /* generateXcodeproj.sh */,
 				83FFE41124CE36F10096D733 /* Recovered References */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_506 /* Kitura-TemplateEngine 2.0.1 */ = {
@@ -9080,6 +9084,7 @@
 				OBJ_60 /* ChangeResolverManager.swift */,
 				OBJ_61 /* FileDeletion.swift */,
 				OBJ_62 /* Uploader.swift */,
+				83461FB724D6E213005561F0 /* Uploader+UploadDeletion.swift */,
 			);
 			path = ServerUploader;
 			sourceTree = "<group>";
@@ -11316,7 +11321,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_583 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -12043,6 +12048,7 @@
 				OBJ_2169 /* AccountManager+Extras.swift in Sources */,
 				OBJ_2170 /* AccountManager.swift in Sources */,
 				OBJ_2171 /* MockStorage.swift in Sources */,
+				83FFE6DF24D50B950096D733 /* FinishUploadDeletion.swift in Sources */,
 				OBJ_2172 /* Configuration.swift in Sources */,
 				OBJ_2173 /* ServerConfiguration.swift in Sources */,
 				OBJ_2174 /* TestConfiguration.swift in Sources */,
@@ -12052,8 +12058,9 @@
 				OBJ_2178 /* FileController+UploadAppMetaData.swift in Sources */,
 				OBJ_2179 /* FileController+UploadDeletion.swift in Sources */,
 				OBJ_2180 /* FileController+UploadFile.swift in Sources */,
+				83461FB824D6E213005561F0 /* Uploader+UploadDeletion.swift in Sources */,
 				OBJ_2181 /* FileController.swift in Sources */,
-				OBJ_2182 /* FinishUploads.swift in Sources */,
+				OBJ_2182 /* FinishUploadFiles.swift in Sources */,
 				OBJ_2183 /* PushNotifications.swift in Sources */,
 				OBJ_2184 /* PushNotificationsController.swift in Sources */,
 				OBJ_2185 /* SharingAccountsController.swift in Sources */,

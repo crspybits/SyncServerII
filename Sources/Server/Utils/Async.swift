@@ -40,21 +40,16 @@ class AsyncTailRecursion {
         lock.signal()
     }
 }
-
-enum SynchronouslyRunErrors<R>: Error {
-    case partial([R], Error)
-    case none(Error)
-}
         
 // Patterned partly after https://www.raywenderlich.com/5371-grand-central-dispatch-tutorial-for-swift-4-part-2-2#toc-anchor-002
 extension Sequence {
-    // Synchronously run the asynchronous apply method on each element in the sequence. If there is a failure, stops at that point, and the Result contains any partial success and the error.
-        
-    func synchronouslyRun<R>(apply: (_ element: Element, _ completion: @escaping (Swift.Result<R, Error>)->())->()) -> Result<[R], SynchronouslyRunErrors<R>> {
+    // Synchronously run the asynchronous apply method on each element in the sequence. stopAtFirstError determines whether this stops at the first error, if any, or continues despite errors.
+    // If the errors array is empty on return, there were no errors.
+    func synchronouslyRun<R>(stopAtFirstError: Bool = true, apply: (_ element: Element, _ completion: @escaping (Swift.Result<R, Error>)->())->()) -> ([R], [Swift.Error]) {
     
         let group = DispatchGroup()
     
-        var resultError: Error?
+        var resultErrors = [Error]()
         var resultSuccess = [R]()
 
         for element in self {
@@ -64,27 +59,17 @@ extension Sequence {
                 case .success(let s):
                     resultSuccess += [s]
                 case .failure(let error):
-                    resultError = error
+                    resultErrors += [error]
                 }
                 group.leave()
             }
             group.wait()
             
-            if let _ = resultError {
+            if resultErrors.count > 0 && stopAtFirstError {
                 break
             }
         }
         
-        if let resultError = resultError {
-            if resultSuccess.count == 0 {
-                return .failure(.none(resultError))
-            }
-            else {
-                return .failure(.partial(resultSuccess, resultError))
-            }
-        }
-        else {
-            return .success(resultSuccess)
-        }
+        return (resultSuccess, resultErrors)
     }
 }

@@ -533,7 +533,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
             }
             
             // Reconstruct the creds of the sharing user and attempt to access their cloud storage.
-            guard let cloudStorageCreds = FileController.getCreds(forUserId: sharingUserId, from: db, accountManager: accountManager) as? CloudStorage else {
+            guard let cloudStorageCreds = FileController.getCreds(forUserId: sharingUserId, userRepo: UserRepository(db), accountManager: accountManager) as? CloudStorage else {
                 XCTFail()
                 return
             }

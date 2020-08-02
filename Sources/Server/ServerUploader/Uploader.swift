@@ -34,13 +34,25 @@ class Uploader: UploaderProtocol {
         case hasFileGroupUUID
         case failedApplyDeferredUploads
         case failedToGetNonUniqueSharingGroupUUIDs
+        case mismatchWithDeferredUploadIdsCount
+        case couldNotLookupByGroups
+        case failedGettingCloudStorage
+        case failedToGetUploads
+        case failedToGetSharingGroupUUID
+        case failedToGetFileUUID
+        case couldNotRemoveUploadRow
+        case failedStartingDatabaseTransaction
+        case failedCommittingDatabaseTransaction
     }
     
-    private let db: Database
+    let db: Database
     private let resolverManager: ChangeResolverManager
-    private let accountManager: AccountManager
+    let accountManager: AccountManager
     private let lockName = "Uploader"
-    private let deferredUploadRepo:DeferredUploadRepository
+    let deferredUploadRepo:DeferredUploadRepository
+    let uploadRepo:UploadRepository
+    let fileIndexRepo:FileIndexRepository
+    let userRepo: UserRepository
     
     // For testing
     weak var delegate: UploaderDelegate?
@@ -55,6 +67,9 @@ class Uploader: UploaderProtocol {
         self.resolverManager = resolverManager
         self.accountManager = accountManager
         self.deferredUploadRepo = DeferredUploadRepository(db)
+        self.uploadRepo = UploadRepository(db)
+        self.fileIndexRepo = FileIndexRepository(db)
+        self.userRepo = UserRepository(db)
     }
     
     private func getLock() throws -> Bool {
@@ -77,58 +92,80 @@ class Uploader: UploaderProtocol {
         
         Log.debug("Got lock!")
 
-        guard let deferredUploads = deferredUploadRepo.select(rowsWithStatus: [.pendingDeletion, .pendingChange]) else {
-            Log.error("Failed setting up select to get deferred uploads")
+        guard let deferredFileDeletions = deferredUploadRepo.select(rowsWithStatus: [.pendingDeletion]) else {
+            Log.error("Failed setting up select to get deferred upload deletions")
             try releaseLock()
             throw Errors.failedToGetDeferredUploads
         }
         
-        guard deferredUploads.count > 0 else {
-            Log.debug("No deferred uploads to process")
+        // Must do pruning based on deletions before fetching the deferred file changes. Because the pruning may remove some of the deferred file changes.
+        guard pruneFileUploads(deferredFileDeletions: deferredFileDeletions) else {
+            Log.error("Failed pruning file uploads.")
+            try releaseLock()
+            throw Errors.failedToGetDeferredUploads
+        }
+        
+        guard let deferredFileChangeUploads = deferredUploadRepo.select(rowsWithStatus: [.pendingChange]) else {
+            Log.error("Failed fetching deferred file change uploads")
+            try releaseLock()
+            throw Errors.failedToGetDeferredUploads
+        }
+        
+        guard deferredFileChangeUploads.count > 0 || deferredFileDeletions.count > 0 else {
+            Log.debug("No deferred upload changes or deletions to process")
             try releaseLock()
             return
         }
         
-        let nonUniqueSharingGroupUUIDs = deferredUploads.compactMap {$0.sharingGroupUUID}
-        guard nonUniqueSharingGroupUUIDs.count == deferredUploads.count else {
+        let nonUniqueSharingGroupUUIDs = deferredFileChangeUploads.compactMap {$0.sharingGroupUUID}
+        guard nonUniqueSharingGroupUUIDs.count == deferredFileChangeUploads.count else {
             Log.error("Could not get nonUniqueSharingGroupUUIDs")
             try releaseLock()
             throw Errors.failedToGetNonUniqueSharingGroupUUIDs
         }
         
         Log.info("About to start async processing.")
-
-        // Processes multiple rows in DeferredUpload when they refer to the same fileGroupUUID together. (Except for those with a nil fileGroupUUID-- which are processed independently).
         
         DispatchQueue.global().async {
-            self.process(deferredUploads: deferredUploads) { error in
-                try? self.releaseLock()
-                
-                if let error = error {
-                    self.recordGlobalError(error)
-                    Log.error("Failed: \(error)")
-                }
-                else {
-                    Log.info("Succeeded!")
-                }
-                
-                Log.debug("Calling run delegate method: \(String(describing: error))")
-                
-                // Don't put `self` into this as the `object`-- get a failing conversion error to NSObject
-                let notification = Notification(name: Self.uploaderRunCompleted, object: nil, userInfo: [Self.errorKey: error as Any])
-                
-                NotificationCenter.default.post(notification)
+            do {
+                try self.processFileDeletions(deferredUploads: deferredFileDeletions)
+            } catch let error {
+                self.finishRun(error: error)
+                return
+            }
 
-                self.delegate?.run(completed: self, error: error)
+            self.processFileChanges(deferredUploads: deferredFileChangeUploads) { error in
+                self.finishRun(error: error)
             }
         }
+    }
+    
+    private func finishRun(error: Error?) {
+        try? releaseLock()
+
+        if let error = error {
+            recordGlobalError(error)
+            Log.error("Failed: \(error)")
+        }
+        else {
+            Log.info("Succeeded!")
+        }
+        
+        Log.debug("Calling run delegate method: \(String(describing: error))")
+        
+        // Don't put `self` into this as the `object`-- get a failing conversion error to NSObject
+        let notification = Notification(name: Self.uploaderRunCompleted, object: nil, userInfo: [Self.errorKey: error as Any])
+        
+        NotificationCenter.default.post(notification)
+
+        delegate?.run(completed: self, error: error)
     }
     
     private func recordGlobalError(_ error: Error) {
     }
     
     // Assumes all `deferredUploads` have a sharingGroupUUID.
-    private func process(deferredUploads: [DeferredUpload], completion: @escaping (Swift.Error?)->()) {
+    private func processFileChanges(deferredUploads: [DeferredUpload], completion: @escaping (Swift.Error?)->()) {
     
         Log.debug("Starting to process.")
         
@@ -225,11 +262,11 @@ class Uploader: UploaderProtocol {
             }
         }
         
-        let result = aggregatedGroups.synchronouslyRun(apply: apply)
-        switch result {
-        case .failure(let error):
-            return error
-        case .success:
+        let (_, errors) = aggregatedGroups.synchronouslyRun(apply: apply)
+        if errors.count > 0 {
+            return errors[0]
+        }
+        else {
             return nil
         }
     }
@@ -284,5 +321,104 @@ class Uploader: UploaderProtocol {
         
         aggregated += [current]
         return aggregated
+    }
+    
+    // Remove file uploads (DeferredUpload, Upload's) corresponding to these deletions. They are not relevant any more given that we're doing deletions.
+    func pruneFileUploads(deferredFileDeletions: [DeferredUpload]) -> Bool {
+        guard deferredFileDeletions.count > 0 else {
+            return true
+        }
+        
+        func prune() -> Bool {
+            // Removals for DeferredUpload's with file groups.
+
+            let deferredDeletionsWithFileGroups =
+                deferredFileDeletions.filter {$0.fileGroupUUID != nil}
+                
+            for deferredDeletion in deferredDeletionsWithFileGroups {
+                guard let fileGroupUUID = deferredDeletion.fileGroupUUID else {
+                    return false
+                }
+                
+                // Lookup any DeferredUpload file upload changes for this file group. Given that we're deleting the file group the upload changes are stale and not useful any more.
+                let key1 = DeferredUploadRepository.LookupKey.fileGroupUUIDWithStatus(
+                    fileGroupUUID: fileGroupUUID, status: .pendingChange)
+                guard case .removed(let numberDeferredRemoved) = deferredUploadRepo.remove(key: key1) else {
+                    return false
+                }
+                
+                Log.info("Removed \(numberDeferredRemoved) DeferredUpload's for upload file changes for file group: \(fileGroupUUID)")
+                
+                // Now, do that corresponding action for Upload records. Any upload records representing file upload changes for files in this file group should also be removed-- they are not relevant any more given that we're removing the file group.
+                let key2 = UploadRepository.LookupKey.fileGroupUUIDWithStatus(
+                    fileGroupUUID: fileGroupUUID,
+                    status: .vNUploadFileChange)
+                guard case .removed(let numberUploadsRemoved) = uploadRepo.remove(key: key2) else {
+                    return false
+                }
+                
+                Log.info("Removed \(numberUploadsRemoved) Upload's for upload file changes for file group: \(fileGroupUUID)")
+            } // end for
+
+            // Removals for DeferredUpload's without file groups.
+
+            let deferredDeletionsWithoutFileGroups = deferredFileDeletions.filter {$0.fileGroupUUID == nil}
+            var deferredIdsForFileChangeUploads = [Int64]()
+            
+            for deferredDeletion in deferredDeletionsWithoutFileGroups {
+                // Get the deletion Upload associated with this `deferredDeletion`
+                let key1 = UploadRepository.LookupKey.deferredUploadId(deferredDeletion.deferredUploadId)
+                guard case .found(let model) = uploadRepo.lookup(key: key1, modelInit: Upload.init), let uploadDeletion = model as? Upload else {
+                    return false
+                }
+                
+                // Lookup any file change Upload's associated the deletion's fileUUID
+                let key2 =  UploadRepository.LookupKey.fileGroupUUIDWithStatus(fileGroupUUID: uploadDeletion.fileUUID, status: .vNUploadFileChange)
+                guard let vNFileFileChangeUploads = uploadRepo.lookupAll(key: key2, modelInit: Upload.init) else {
+                    return false
+                }
+                
+                // Keep track of the deferredUploadId for these file Upload's and remove them.
+                for vNFileChangeUpload in vNFileFileChangeUploads {
+                    if let deferredUploadId = vNFileChangeUpload.deferredUploadId {
+                        deferredIdsForFileChangeUploads += [deferredUploadId]
+                    }
+                    
+                    let key = UploadRepository.LookupKey.uploadId(vNFileChangeUpload.uploadId)
+                    guard case .removed = uploadRepo.remove(key: key) else {
+                        return false
+                    }
+                }
+            } // end for
+            
+            // Get rid of any non-distinct deferredUploadId's for file DeferredUpload's
+            deferredIdsForFileChangeUploads = Array(Set<Int64>(deferredIdsForFileChangeUploads))
+            
+            // Remove these DeferredUpload's-- for file change uploads.
+            for deferredIdForFileChangeUpload in deferredIdsForFileChangeUploads {
+                let key = DeferredUploadRepository.LookupKey.deferredUploadId(deferredIdForFileChangeUpload)
+                guard case .removed = deferredUploadRepo.remove(key: key) else {
+                    return false
+                }
+            }
+            
+            return true
+        } // end prune
+        
+        guard db.startTransaction() else {
+            return false
+        }
+        
+        guard prune() else {
+            _ = db.rollback()
+            return false
+        }
+        
+        guard db.commit() else {
+            _ = db.rollback()
+            return false
+        }
+        
+        return true
     }
 }

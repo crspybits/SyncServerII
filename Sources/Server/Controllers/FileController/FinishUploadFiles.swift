@@ -5,7 +5,7 @@
 //  Created by Christopher G Prince on 7/5/20.
 //
 
-// This is the replacement for DoneUploads. It's not invoked from an endpoint, but rather from UploadFile and UploadDeletetion.
+// This is the replacement for DoneUploads. It's not invoked from an endpoint, but rather from UploadFile.
 
 import Foundation
 import ServerShared
@@ -18,32 +18,35 @@ protocol FinishUploadsParameters {
     var currentSignedInUser: User? {get}
 }
 
-class FinishUploads {
+class FinishUploadFiles {
     private let sharingGroupUUID: String
     private let deviceUUID: String
     private var params:FinishUploadsParameters
     private let userId: UserId
-    private let sharingGroupName: String?
     private let uploader: UploaderProtocol
     
     /** This is for both file uploads, and upload deletions.
-     * Specific Use cases:
+     * Specific upload use cases:
      * 1) v0 file uploads
      *  a) A v0 file upload that is 1 out of 1
      *  b) A v0 file upload that is N out of M, M > 1, N < M.
      *  c) A v0 file upload that is N out of M, M > 1, N == M.
-     *      All of these test to make sure that *only* v0 uploads are present.
+     *      In all of these *only* v0 uploads can be present.
      * 2) vN file uploads, N > 0.
+     *  a) A vN file upload that is 1 out of 1
+     *  b) A vN file upload that is N out of M, M > 1, N < M.
+     *  c) A vN file upload that is N out of M, M > 1, N == M.
+     *      In all of these *only* vN uploads can be present.
      *
      * Errors:
      *  a) More than one file in batch, but both have nil fileGroupUUID.
      *  b) More than one file in batch, but they have different fileGroupUUID's.
      */
-    init?(sharingGroupUUID: String, deviceUUID: String, uploader: UploaderProtocol, sharingGroupName: String? = nil, params:FinishUploadsParameters) {
+    
+    init?(sharingGroupUUID: String, deviceUUID: String, uploader: UploaderProtocol, params:FinishUploadsParameters) {
         self.sharingGroupUUID = sharingGroupUUID
         self.deviceUUID = deviceUUID
         self.params = params
-        self.sharingGroupName = sharingGroupName
         self.uploader = uploader
         
         // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
@@ -56,21 +59,20 @@ class FinishUploads {
         self.userId = userId
     }
     
-    enum TransferResponse {
+    enum UploadsResponse {
         // Given the uploadIndex's and uploadCount's in the Upload table, it's not yet time to do a FinishUploads.
         case allUploadsNotYetReceived
         
-        // TODO: v0 transfer
-        case success(numberTransferred:Int32, uploadDeletions:[FileInfo]?, staleVersionsToDelete:[FileInfo]?)
+        case success
         
-        case deferredTransfer(runner: RequestHandler.PostRequestRunner?)
+        case deferred(runner: RequestHandler.PostRequestRunner)
         
-        case error(RequestProcessingParameters.Response)
+        case error(message: String?)
     }
-
+    
     // For v0 uploads, tranfers the Upload records to FileIndex
     // For vN uploads, creates DeferredUpload records.
-    func transfer() -> TransferResponse {
+    func finish() throws -> UploadsResponse {
         let currentUploads: [Upload]
         
         // deferredUploadIdNull true because once these rows have a non-null  deferredUploadId they are pending deferred transfer and we should not deal with them here.
@@ -82,14 +84,14 @@ class FinishUploads {
         case .error(let error):
             let message = "Failed to get file uploads: \(String(describing: error))"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         guard currentUploads.count > 0 else {
             // This is an internal error. Why would we be calling finishUploads if there wan't at least one upload?
             let message = "Not at least one upload"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         // All uploads must have the same fileGroupUUID.
@@ -97,26 +99,26 @@ class FinishUploads {
         guard currentUploads.filter({$0.fileGroupUUID == fileGroupUUID}).count == currentUploads.count else {
             let message = "All uploads don't have the same fileGroupUUID"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         // If there is more than one file, must have a fileGroupUUID. Thus, only with just a single file can it have a nil fileGroupUUID.
         if fileGroupUUID == nil && currentUploads.count > 1 {
             let message = "More than one upload and they have nil fileGroupUUID"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         guard let uploadCount = currentUploads[0].uploadCount else {
             let message = "No uploadCount"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         guard currentUploads.filter({$0.uploadCount != uploadCount}).count == 0 else {
             let message = "Mismatch: At least one of the uploads had an uploadCount different than: \(uploadCount)"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         let actualIndexes = Set<Int32>(currentUploads.compactMap({$0.uploadIndex}))
@@ -130,7 +132,7 @@ class FinishUploads {
         guard currentUploads.filter({$0.state == nil}).count == 0 else {
             let message = "Some of the upload states were nil"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         // All uploads must be the same (either v0 or vN, N > 1)
@@ -138,7 +140,7 @@ class FinishUploads {
             $0.state == currentUploads[0].state}).count == currentUploads.count else {
             let message = "All uploads must be either v0 or vN, N > 1"
             Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
         let vNUploads = currentUploads.filter({$0.state == .vNUploadFileChange}).count > 0
@@ -148,48 +150,20 @@ class FinishUploads {
             guard markUploadsAsDeferred(fileGroupUUID: fileGroupUUID, uploads: currentUploads) else {
                 let message = "Failed markUploadsAsDeferred"
                 Log.error(message)
-                return .error(.failure(.message(message)))
+                return .error(message: message)
             }
             
             // Doing uploader.run post-request as this will be after the database commit has occurred for the commit-- and we'll be able to fetch DeferredUpload's from the database then.
             // I'm specifically capturing a strong reference to `self` in the following closure. I want the enum associated value to keep self until the `run` is finished its (synchronous) processing.
-            return .deferredTransfer(runner: { try self.uploader.run() })
+            return .deferred(runner: { try self.uploader.run() })
         }
         
         // Else: v0 uploads-- files have already been uploaded. Just need to do the transfer to the FileIndex.
         return transfer(currentUploads: currentUploads)
     }
     
-    // QUESTION: Is this only used for v0 uploads?
-    private func transfer(currentUploads: [Upload]) -> TransferResponse {
-        // 1) See if any of the file uploads are for file versions > 0. Later, we'll have to delete stale versions of the file(s) in cloud storage if so.
-        // 2) Get the upload deletions, if any.
-        
-        Log.debug("Number of file uploads and upload deletions: \(currentUploads.count)")
-        
-        // 1) Filter out uploaded files with versions > 0 -- for the stale file versions. Note that we're not including files with status `uploadedUndelete`-- we don't need to delete any stale versions for these.
-        let staleVersionsFromUploads = currentUploads.filter({
-            // The left to right order of these checks is important-- check the state first. If the state is uploadingAppMetaData, there will be a nil fileVersion and don't want to check that.            
-            $0.state == .v0UploadCompleteFile
-        })
-        
-        // 2) Filter out upload deletions
-        let uploadDeletions = currentUploads.filter({$0.state == .deleteSingleFile})
-
-        // Now, map the upload objects found to the file index. What we need here are not just the entries from the `Upload` table-- we need the corresponding entries from FileIndex since those have the deviceUUID's that we need in order to correctly name the files in cloud storage.
-        
-        guard let staleVersionsToDelete = getIndexEntries(forUploadFiles: staleVersionsFromUploads, fileIndex: params.repos.fileIndex) else {
-            let message = "Failed to getIndexEntries for staleVersionsFromUploads: \(String(describing: staleVersionsFromUploads))"
-            Log.error(message)
-            return .error(.failure(.message(message)))
-        }
-        
-        guard let fileIndexDeletions = getIndexEntries(forUploadFiles: uploadDeletions, fileIndex: params.repos.fileIndex) else {
-            let message = "Failed to getIndexEntries for uploadDeletions: \(String(describing: uploadDeletions))"
-            Log.error(message)
-            return .error(.failure(.message(message)))
-        }
-
+    // For v0 uploads only.
+    private func transfer(currentUploads: [Upload]) -> UploadsResponse {
        // Deferring computation of `effectiveOwningUserId` because: (a) don't always need it in the `transferUploads` below, and (b) it will cause unecessary failures in some cases where a sharing owner user has been removed. effectiveOwningUserId is only needed when v0 of a file is being uploaded.
         var effectiveOwningUserId: UserId?
         func getEffectiveOwningUserId() -> FileIndexRepository.EffectiveOwningUser {
@@ -213,7 +187,7 @@ class FinishUploads {
             }
         }
         
-        // 3) Transfer info to the FileIndex repository from Upload.
+        // Transfer info to the FileIndex repository from Upload.
         let numberTransferredResult =
             params.repos.fileIndex.transferUploads(uploadUserId: params.currentSignedInUser!.userId, owningUserId: getEffectiveOwningUserId, sharingGroupUUID: sharingGroupUUID,
                 uploadingDeviceUUID: deviceUUID,
@@ -224,12 +198,12 @@ class FinishUploads {
         case .success(numberUploadsTransferred: let num):
             numberTransferred = num
         case .failure(let failureResult):
-            let message = "Failed on transfer to FileIndex!"
+            let message = "Failed on transfer to FileIndex: \(String(describing: failureResult))"
             Log.error(message)
-            return .error(.failure(failureResult))
+            return .error(message: message)
         }
         
-        // 4) Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
+        // Remove the corresponding records from the Upload repo-- this is specific to the userId and the deviceUUID.
         let filesForUserDevice = UploadRepository.LookupKey.filesForUserDevice(userId: params.currentSignedInUser!.userId, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         // 5/28/17; I just got an error on this:
@@ -246,39 +220,16 @@ class FinishUploads {
             if numberRows != numberTransferred {
                 let message = "Number rows removed from Upload was \(numberRows) but should have been \(String(describing: numberTransferred))!"
                 Log.error(message)
-                return .error(.failure(.message(message)))
+                return .error(message: message)
             }
         
-        case .deadlock:
-            let message = "Failed removing rows from Upload: deadlock!"
+        default:
+            let message = "Failed removing rows from Upload: \(removalResult)"
             Log.error(message)
-            return .error(.failure(.message(message)))
-        
-        case .waitTimeout:
-            let message = "Failed removing rows from Upload: wait timeout!"
-            Log.error(message)
-            return .error(.failure(.message(message)))
-            
-        case .error(_):
-            let message = "Failed removing rows from Upload!"
-            Log.error(message)
-            return .error(.failure(.message(message)))
+            return .error(message: message)
         }
         
-        // See if we have to do a sharing group update operation.
-        if let sharingGroupName = sharingGroupName {
-            let serverSharingGroup = Server.SharingGroup()
-            serverSharingGroup.sharingGroupUUID = sharingGroupUUID
-            serverSharingGroup.sharingGroupName = sharingGroupName
-
-            if !params.repos.sharingGroup.update(sharingGroup: serverSharingGroup) {
-                let message = "Failed in updating sharing group."
-                Log.error(message)
-                return .error(.failure(.message(message)))
-            }
-        }
-        
-        return .success(numberTransferred:numberTransferred!, uploadDeletions:fileIndexDeletions, staleVersionsToDelete:staleVersionsToDelete)
+        return .success
     }
     
     // This is called only for vN files. These files will already be in the FileIndex.
@@ -314,7 +265,7 @@ class FinishUploads {
     }
 }
 
-extension FinishUploads {
+extension FinishUploadFiles {
     // Returns nil on an error.
     private func getIndexEntries(forUploadFiles uploadFiles:[Upload], fileIndex:FileIndexRepository) -> [FileInfo]? {
         var primaryFileIndexKeys = [FileIndexRepository.LookupKey]()

@@ -58,6 +58,16 @@
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::ChangeResolverTests"
+               BuildableName = "ChangeResolverTests.xctest"
+               BlueprintName = "ChangeResolverTests"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

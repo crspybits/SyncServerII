@@ -16,6 +16,8 @@ import ChangeResolvers
 import Credentials
 import ServerAccount
 
+// Tests of FileDeletion
+
 class FileDeletionTests: ServerTestCase {
     var accountManager:AccountManager!
 
@@ -50,7 +52,7 @@ class FileDeletionTests: ServerTestCase {
             return
         }
         
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, from: db, accountManager: accountManager) as? CloudStorage else {
+        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, userRepo: UserRepository(db), accountManager: accountManager) as? CloudStorage else {
             XCTFail()
             return
         }
@@ -66,8 +68,9 @@ class FileDeletionTests: ServerTestCase {
         let fileDeletion = FileDeletion(cloudStorage: cloudStorage, cloudFileName: fileName, options: options)
 
         let exp1 = expectation(description: "apply")
-        FileDeletion.apply(deletions: [fileDeletion]) { error in
-            XCTAssert(error == nil)
+        DispatchQueue.global().async {
+            let errors = FileDeletion.apply(deletions: [fileDeletion])
+            XCTAssert(errors == nil)
             exp1.fulfill()
         }
         waitExpectation(timeout: 10, handler: nil)
@@ -96,7 +99,7 @@ class FileDeletionTests: ServerTestCase {
             return
         }
         
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, from: db, accountManager: accountManager) as? CloudStorage else {
+        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, userRepo: UserRepository(db), accountManager: accountManager) as? CloudStorage else {
             XCTFail()
             return
         }
@@ -118,8 +121,9 @@ class FileDeletionTests: ServerTestCase {
         let fileDeletion2 = FileDeletion(cloudStorage: cloudStorage, cloudFileName: fileName2, options: options)
 
         let exp1 = expectation(description: "apply")
-        FileDeletion.apply(deletions: [fileDeletion1, fileDeletion2]) { error in
-            XCTAssert(error == nil)
+        DispatchQueue.global().async {
+            let errors = FileDeletion.apply(deletions: [fileDeletion1, fileDeletion2])
+            XCTAssert(errors == nil)
             exp1.fulfill()
         }
         waitExpectation(timeout: 10, handler: nil)
@@ -160,7 +164,7 @@ class FileDeletionTests: ServerTestCase {
             return
         }
         
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, from: db, accountManager: accountManager) as? CloudStorage else {
+        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, userRepo: UserRepository(db), accountManager: accountManager) as? CloudStorage else {
             XCTFail()
             return
         }
@@ -179,8 +183,10 @@ class FileDeletionTests: ServerTestCase {
         let exp1 = expectation(description: "apply")
         
         // Put the bad file deletion first-- so we can show that the deletion continues on a failure.
-        FileDeletion.apply(deletions: [fileDeletion2, fileDeletion1]) { error in
-            XCTAssert(error != nil)
+        DispatchQueue.global().async {
+            let errors = FileDeletion.apply(deletions: [fileDeletion2, fileDeletion1])
+            XCTAssert(errors != nil, "\(String(describing: errors))")
+            XCTAssert(errors?.count == 1)
             exp1.fulfill()
         }
         waitExpectation(timeout: 10, handler: nil)

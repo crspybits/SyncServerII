@@ -28,23 +28,26 @@ struct FileDeletion {
         }
     }
     
-    // On an error, it keeps going to try to remove the remaining files. The most recent error is returned in the completion.
-    static func apply(index: Int = 0, deletions: [FileDeletion], error: Error? = nil, completion: @escaping (Error?)->()) {
-        guard index < deletions.count else {
-            Log.debug("Removed \(deletions.count) file(s)")
-            completion(error)
-            return
+    // On an error, it keeps going to try to remove the remaining files.
+    static func apply(deletions: [FileDeletion]) -> [Error]? {
+        func singleDeletion(deletion: FileDeletion, completion: @escaping (Swift.Result<Void, Error>) -> ()) {
+            Log.debug("delete: \(deletion.cloudFileName)")
+            deletion.delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                }
+                else {
+                    completion(.success(()))
+                }
+            }
         }
         
-        let deletion = deletions[index]
-        var result: Error? = error
-        
-        deletion.delete { error in
-            if let error = error {
-                result = error
-            }
-            
-            apply(index: index + 1, deletions: deletions, error: result, completion: completion)
+        let (_, errors) = deletions.synchronouslyRun(stopAtFirstError: false, apply: singleDeletion)
+        if errors.count > 0 {
+            return errors
+        }
+        else {
+            return nil
         }
     }
 }

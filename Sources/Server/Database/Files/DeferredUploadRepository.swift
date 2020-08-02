@@ -28,8 +28,12 @@ class DeferredUpload : NSObject, Model {
     var deferredUploadId:Int64!
     
     static let sharingGroupUUIDKey = "sharingGroupUUID"
-    var sharingGroupUUID:String?
+    var sharingGroupUUID:String!
     
+    /* For a pendingDeletion:
+        a) if this is non-nil, then there is no associated Upload record. It indicates we're deleting all files in a file group;
+        b) if it's nil, then there is an associated Upload record-- this is a deletion for a single file (that doesn't have a file group).
+    */
     static let fileGroupUUIDKey = "fileGroupUUID"
     // Not all files have to be associated with a file group.
     var fileGroupUUID:String?
@@ -78,7 +82,7 @@ class DeferredUpload : NSObject, Model {
     }
 }
 
-class DeferredUploadRepository : Repository, RepositoryLookup {
+class DeferredUploadRepository : Repository, RepositoryLookup {    
     private(set) var db:Database!
 
     required init(_ db:Database) {
@@ -120,11 +124,14 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     
     enum LookupKey : CustomStringConvertible {
         case deferredUploadId(Int64)
+        case fileGroupUUIDWithStatus(fileGroupUUID: String, status: DeferredUpload.Status)
         
         var description : String {
             switch self {
             case .deferredUploadId(let deferredUploadId):
                 return "deferredUploadId(\(deferredUploadId))"
+            case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
+                return "fileGroupUUID(\(fileGroupUUID); status: \(status.rawValue))"
             }
         }
     }
@@ -133,6 +140,8 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
         switch key {
         case .deferredUploadId(let deferredUploadId):
             return "deferredUploadId = '\(deferredUploadId)'"
+        case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
+            return "fileGroupUUID = '\(fileGroupUUID)' and status = '\(status.rawValue)'"
         }
     }
     

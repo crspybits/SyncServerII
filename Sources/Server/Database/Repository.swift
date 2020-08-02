@@ -130,6 +130,35 @@ extension RepositoryLookup {
             return .error(error)
         }
     }
+    
+    func lookupAll<MODEL: Model>(key: LOOKUPKEY, modelInit:@escaping () -> MODEL) -> [MODEL]? {
+        let query = "select * from \(tableName) where " + lookupConstraint(key: key)
+        
+        guard let select = Select(db:db, query: query, modelInit: modelInit, ignoreErrors:false) else {
+            return nil
+        }
+        
+        var result = [MODEL]()
+        var error = false
+        select.forEachRow { model in
+            guard !error else {
+                return
+            }
+            
+            if let model = model as? MODEL {
+                result += [model]
+            }
+            else {
+                error = true
+            }
+        }
+        
+        guard !error && select.forEachRowStatus == nil else {
+            return nil
+        }
+        
+        return result
+    }
 }
 
 extension Repository {
