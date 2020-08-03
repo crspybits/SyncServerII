@@ -1,10 +1,12 @@
 {
   "all": [
-    "other",
     "AccountAuthenticationTests",
-    "DatabaseTests",
     "ChangeResolverTests",
-    "FileControllerUploadTests",
+    "DatabaseTests",
+    "FileControllerUploadChangeTests",
+    "FileControllerUploadDeletionTests",
+    "UploaderTests",
+    "other",
     "mock",
     "owning_google",
     "owning_dropbox",
@@ -20,15 +22,29 @@
     "sharing_groups",
     "sharing_groups_microsoft"
   ],
-  "other": [
+  "AccountAuthenticationTests": [
     {
-      "name": "OtherTests.HealthCheckTests"
+      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Google"
     },
     {
-      "name": "OtherTests.VersionTests"
+      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Facebook"
     },
     {
-      "name": "OtherTests.MessageTests"
+      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Dropbox"
+    },
+    {
+      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Microsoft"
+    }
+  ],
+  "ChangeResolverTests": [
+    {
+      "name": "ChangeResolverTests.ApplyDeferredUploadsTests"
+    },
+    {
+      "name": "ChangeResolverTests.ChangeResolverManagerTests"
+    },
+    {
+      "name": "ChangeResolverTests.FileDeletionTests"
     }
   ],
   "DatabaseTests": [
@@ -69,46 +85,34 @@
       "name": "DatabaseTests.SpecificDatabaseTests_UserRepository"
     }
   ],
-  "FileControllerUploadTests": [
+  "FileControllerUploadChangeTests": [
     {
-      "name": "FileControllerUploadTests.FileController_FinishUploadsTests"
+      "name": "FileControllerUploadChangeTests.FileController_FinishUploadsTests"
     },
     {
-      "name": "FileControllerUploadTests.FileController_V0_UploadTests"
+      "name": "FileControllerUploadChangeTests.FileController_V0_UploadTests"
     },
     {
-      "name": "FileControllerUploadTests.FileController_VN_UploadTests"
+      "name": "FileControllerUploadChangeTests.FileController_VN_UploadTests"
     }
   ],
-  "ChangeResolverTests": [
+  "FileControllerUploadDeletionTests": [
     {
-      "name": "ChangeResolverTests.ApplyDeferredUploadsTests"
+      "name": "FileControllerUploadDeletionTests.FileController_FinishUploadsTests"
     },
     {
-      "name": "ChangeResolverTests.ChangeResolverManagerTests"
-    },
-    {
-      "name": "ChangeResolverTests.FileDeletionTests"
-    },
-    {
-      "name": "ChangeResolverTests.UploaderTests"
-    },
-    {
-      "name": "ChangeResolverTests.UploaderUtilityTests"
+      "name": "FileControllerUploadDeletionTests.FileController_UploadDeletionTests"
     }
   ],
-  "AccountAuthenticationTests": [
+  "UploaderTests": [
     {
-      "name": "AccountTests.AccountAuthenticationTests_Google"
+      "name": "UploaderTests.UploaderFileChangeTests"
     },
     {
-      "name": "AccountTests.AccountAuthenticationTests_Facebook"
+      "name": "UploaderTests.UploaderFileDeletionTests"
     },
     {
-      "name": "AccountTests.AccountAuthenticationTests_Dropbox"
-    },
-    {
-      "name": "AccountTests.AccountAuthenticationTests_Microsoft"
+      "name": "UploaderTests.UploaderUtilityTests"
     }
   ],
   "mock": [
@@ -117,6 +121,17 @@
     },
     {
       "name": "AccountFileTests.MockStorageLiveTests"
+    }
+  ],
+  "other": [
+    {
+      "name": "OtherTests.HealthCheckTests"
+    },
+    {
+      "name": "OtherTests.VersionTests"
+    },
+    {
+      "name": "OtherTests.MessageTests"
     }
   ],
   "owning_google": [

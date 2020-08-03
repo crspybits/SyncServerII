@@ -15,7 +15,7 @@ import ServerShared
 import ChangeResolvers
 import Credentials
 
-class UploaderTests: ServerTestCase, UploaderCommon {
+class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
     var uploader: Uploader!
     var runCompleted:((Swift.Error?)->())?
@@ -66,7 +66,7 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -128,13 +128,13 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -216,13 +216,13 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -303,13 +303,13 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
 
-        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID),
+        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -401,13 +401,13 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID1),
+        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID1, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID2),
+        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID2, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -505,13 +505,13 @@ class UploaderTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID1),
+        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID1, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID2),
+        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID2, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -569,7 +569,7 @@ class UploaderTests: ServerTestCase, UploaderCommon {
     }
 }
 
-extension UploaderTests: UploaderDelegate {
+extension UploaderFileChangeTests: UploaderDelegate {
     func run(completed: UploaderProtocol, error: Swift.Error?) {
         runCompleted?(error)
     }

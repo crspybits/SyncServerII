@@ -31,7 +31,7 @@ struct UploaderFake: UploaderProtocol {
 
 class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
-    var uploader: UploaderProtocol!
+    //var uploader: UploaderProtocol!
     var runCompleted:((Swift.Error?)->())?
     
     override func setUp() {
@@ -43,13 +43,13 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         let resolverManager = ChangeResolverManager()
         do {
             try resolverManager.setupResolvers()
-            uploader = try Uploader(resolverManager: resolverManager, accountManager: accountManager)
+            //uploader = try Uploader(resolverManager: resolverManager, accountManager: accountManager)
         } catch let error {
             XCTFail("\(error)")
             return
         }
         
-        uploader.delegate = self
+        //uploader.delegate = self
         runCompleted = nil
     }
     

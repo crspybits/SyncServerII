@@ -67,25 +67,31 @@ extension Uploader {
             throw Errors.mismatchWithDeferredUploadIdsCount
         }
         
-        guard let uploads = uploadRepo.select(forDeferredUploadIds: deferredUploadIds) else {
-            throw Errors.failedToGetUploads
-        }
+        var uploads = [Upload]()
         
-        for upload in uploads {
-            guard let sharingGroupUUID = upload.sharingGroupUUID else {
-                throw Errors.failedToGetSharingGroupUUID
+        if deferredUploadIds.count > 0 {
+            guard let theUploads = uploadRepo.select(forDeferredUploadIds: deferredUploadIds) else {
+                throw Errors.failedToGetUploads
             }
             
-            guard let fileUUID = upload.fileUUID else {
-                throw Errors.failedToGetFileUUID
-            }
+            uploads = theUploads
             
-            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
-            guard case .found(let model) = fileIndexRepo.lookup(key: key, modelInit: FileIndex.init), let fileIndex = model as? FileIndex else {
-                throw Errors.failedToGetFileUUID
+            for upload in uploads {
+                guard let sharingGroupUUID = upload.sharingGroupUUID else {
+                    throw Errors.failedToGetSharingGroupUUID
+                }
+                
+                guard let fileUUID = upload.fileUUID else {
+                    throw Errors.failedToGetFileUUID
+                }
+                
+                let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
+                guard case .found(let model) = fileIndexRepo.lookup(key: key, modelInit: FileIndex.init), let fileIndex = model as? FileIndex else {
+                    throw Errors.failedToGetFileUUID
+                }
+                
+                deletions += [try getDeletionFrom(fileIndex: fileIndex)]
             }
-            
-            deletions += [try getDeletionFrom(fileIndex: fileIndex)]
         }
         
         // Not going to worry about any resulting errors because: (a) we might be trying the deletion a 2nd time and the file might just not be there, (b) the consequences of leaving a file in cloud storage are not dire-- just some "garbage" that could possibly be cleaned up later.

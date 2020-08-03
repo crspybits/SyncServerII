@@ -1306,20 +1306,24 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool=true, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) {
+    struct UploadDeletionResult {
+        let sharingGroupUUID: String?
+    }
     
-        // DEPRECATED-- FIX ME
-        assert(false)
+    func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) -> UploadDeletionResult? {
+        
+        var result: UploadDeletionResult?
+        var sharingGroupUUID:String!
 
         if addUser {
-            let sharingGroupUUID = UUID().uuidString
+            sharingGroupUUID = UUID().uuidString
             guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
                 XCTFail()
-                return
+                return nil
             }
         }
 
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount, expectingUploaderToRun: true) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.uploadDeletion, headers: headers, urlParameters: "?" + uploadDeletionRequest.urlParameters()!) { response, dict in
@@ -1329,14 +1333,14 @@ class ServerTestCase : XCTestCase {
                 }
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on upload deletion request")
-                    XCTAssert(dict != nil)
                     
-                    if let uploadDeletionResponse = try? UploadDeletionResponse.decode(dict!) {
-                    assert(false)
-                    // FIX ME!!
-//                        if updatedMasterVersionExpected != nil {
-//                            XCTAssert(uploadDeletionResponse.masterVersionUpdate == updatedMasterVersionExpected)
-//                        }
+                    if let dict = dict {
+                        if let _ = try? UploadDeletionResponse.decode(dict) {
+                            result = UploadDeletionResult(sharingGroupUUID: sharingGroupUUID)
+                        }
+                        else {
+                            XCTFail()
+                        }
                     }
                     else {
                         XCTFail()
@@ -1346,6 +1350,8 @@ class ServerTestCase : XCTestCase {
                 expectation.fulfill()
             }
         }
+        
+        return result
     }
     
     @discardableResult

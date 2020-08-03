@@ -11,6 +11,10 @@ import ChangeResolvers
 import XCTest
 import ServerAccount
 
+private enum Errors: Error {
+    case errorLookingUpFile
+}
+    
 public struct ExampleComment {
     public let messageString:String
     public let id: String
@@ -60,12 +64,12 @@ public extension UploaderCommon {
         return commentFile
     }
     
-    func createUploadForTextFile(deviceUUID: String, fileUUID: String, fileGroupUUID: String? = nil, sharingGroupUUID: String, userId: UserId, deferredUploadId: Int64? = nil, updateContents: Data, uploadCount: Int32 = 1, uploadIndex:Int32 = 1) -> Upload? {
+    func createUploadForTextFile(deviceUUID: String, fileUUID: String, fileGroupUUID: String? = nil, sharingGroupUUID: String, userId: UserId, deferredUploadId: Int64? = nil, updateContents: Data? = nil, uploadCount: Int32 = 1, uploadIndex:Int32 = 1, state:UploadState = .vNUploadFileChange) -> Upload? {
         let upload = Upload()
         upload.deviceUUID = deviceUUID
         upload.fileUUID = fileUUID
         upload.mimeType = "text/plain"
-        upload.state = .vNUploadFileChange
+        upload.state = state
         upload.userId = userId
         upload.updateDate = Date()
         upload.sharingGroupUUID = sharingGroupUUID
@@ -76,17 +80,19 @@ public extension UploaderCommon {
         upload.fileGroupUUID = fileGroupUUID
         
         let addUploadResult = UploadRepository(db).add(upload: upload, fileInFileIndex: true)
-        guard case .success = addUploadResult else {
+        guard case .success(let uploadId) = addUploadResult else {
             return nil
         }
+        
+        upload.uploadId = uploadId
         
         return upload
     }
     
-    func createDeferredUpload(fileGroupUUID: String? = nil, sharingGroupUUID: String) -> DeferredUpload? {
+    func createDeferredUpload(fileGroupUUID: String? = nil, sharingGroupUUID: String, status: DeferredUpload.Status) -> DeferredUpload? {
         let deferredUpload = DeferredUpload()
         deferredUpload.fileGroupUUID = fileGroupUUID
-        deferredUpload.status = .pendingChange
+        deferredUpload.status = status
         deferredUpload.sharingGroupUUID = sharingGroupUUID
         let addResult = DeferredUploadRepository(db).add(deferredUpload)
         guard case .success(deferredUploadId: let deferredUploadId) = addResult else {
@@ -138,6 +144,38 @@ public extension UploaderCommon {
         }
         
         return true
+    }
+    
+    func fileIsInCloudStorage(fileIndex: FileIndex) throws -> Bool {
+        var boolResult: Bool = false
+        
+        let exp2 = expectation(description: "run")
+
+        // Need to make sure the file has been removed from cloud storage.
+        let (_, cloudStorage) = try fileIndex.getCloudStorage(userRepo: UserRepository(db), accountManager: accountManager)
+        let cloudFileName = Filename.inCloud(deviceUUID: fileIndex.deviceUUID, fileUUID: fileIndex.fileUUID, mimeType: fileIndex.mimeType, fileVersion: fileIndex.fileVersion)
+        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: fileIndex.mimeType)
+        
+        var error: Error?
+        
+        cloudStorage.lookupFile(cloudFileName: cloudFileName, options: options) { result in
+            switch result {
+            case .success(let found):
+                boolResult = found
+            default:
+                error = Errors.errorLookingUpFile
+            }
+            
+            exp2.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+        
+        if let resultError = error {
+            throw resultError
+        }
+        
+        return boolResult
     }
 }
 

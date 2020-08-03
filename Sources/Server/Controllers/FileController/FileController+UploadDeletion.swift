@@ -138,13 +138,26 @@ extension FileController {
                 params.completion(.failure(.message(message)))
                 return
             }
+            
+            guard let fileUUID = file.fileUUID else {
+                let message = "Single file deletion and no fileUUID given."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
+            
+            Log.info("Upload deletion for fileUUID: ")
                         
             let upload = Upload()
-            upload.fileUUID = file.fileUUID
+            upload.fileUUID = fileUUID
             upload.deviceUUID = deviceUUID
             upload.state = .deleteSingleFile
             upload.userId = params.currentSignedInUser!.userId
             upload.sharingGroupUUID = sharingGroupUUID
+            
+            // So we don't get failures due to nil checks.
+            upload.uploadCount = 1
+            upload.uploadIndex = 1
             
             let uploadAddResult = params.repos.upload.add(upload: upload)
             

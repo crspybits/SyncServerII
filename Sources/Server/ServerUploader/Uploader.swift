@@ -344,15 +344,16 @@ class Uploader: UploaderProtocol {
                 let key1 = DeferredUploadRepository.LookupKey.fileGroupUUIDWithStatus(
                     fileGroupUUID: fileGroupUUID, status: .pendingChange)
                 guard case .removed(let numberDeferredRemoved) = deferredUploadRepo.remove(key: key1) else {
+                    Log.error("Could not remove: \(key1)")
                     return false
                 }
                 
                 Log.info("Removed \(numberDeferredRemoved) DeferredUpload's for upload file changes for file group: \(fileGroupUUID)")
                 
                 // Now, do that corresponding action for Upload records. Any upload records representing file upload changes for files in this file group should also be removed-- they are not relevant any more given that we're removing the file group.
-                let key2 = UploadRepository.LookupKey.fileGroupUUIDWithStatus(
+                let key2 = UploadRepository.LookupKey.fileGroupUUIDWithState(
                     fileGroupUUID: fileGroupUUID,
-                    status: .vNUploadFileChange)
+                    state: .vNUploadFileChange)
                 guard case .removed(let numberUploadsRemoved) = uploadRepo.remove(key: key2) else {
                     return false
                 }
@@ -369,12 +370,14 @@ class Uploader: UploaderProtocol {
                 // Get the deletion Upload associated with this `deferredDeletion`
                 let key1 = UploadRepository.LookupKey.deferredUploadId(deferredDeletion.deferredUploadId)
                 guard case .found(let model) = uploadRepo.lookup(key: key1, modelInit: Upload.init), let uploadDeletion = model as? Upload else {
+                    Log.error("Could not lookup: \(key1)")
                     return false
                 }
                 
                 // Lookup any file change Upload's associated the deletion's fileUUID
-                let key2 =  UploadRepository.LookupKey.fileGroupUUIDWithStatus(fileGroupUUID: uploadDeletion.fileUUID, status: .vNUploadFileChange)
+                let key2 =  UploadRepository.LookupKey.fileGroupUUIDWithState(fileGroupUUID: uploadDeletion.fileUUID, state: .vNUploadFileChange)
                 guard let vNFileFileChangeUploads = uploadRepo.lookupAll(key: key2, modelInit: Upload.init) else {
+                    Log.error("Could not lookupAll: \(key2)")
                     return false
                 }
                 

@@ -14,7 +14,7 @@ class FinishUploadDeletion {
     private let type: DeletionsType
     private let uploader: UploaderProtocol
     private let sharingGroupUUID: String
-    private let params: RequestProcessingParameters
+    private var params: FinishUploadsParameters
     
     enum Errors: Error {
         case badFinishUploadsType
@@ -25,7 +25,7 @@ class FinishUploadDeletion {
         case fileGroup(fileGroupUUID: String)
     }
     
-    init(type: DeletionsType, uploader: UploaderProtocol, sharingGroupUUID: String, params: RequestProcessingParameters) {
+    init(type: DeletionsType, uploader: UploaderProtocol, sharingGroupUUID: String, params:FinishUploadsParameters) {
         self.type = type
         self.uploader = uploader
         self.sharingGroupUUID = sharingGroupUUID
@@ -68,7 +68,12 @@ class FinishUploadDeletion {
         case .fileGroup:
             break
         case .singleFile(let upload):
-            let result = params.repos.upload.update(indexId: upload.uploadId, with: [Upload.deferredUploadIdKey: .int64(deferredUploadId)])
+            guard let uploadId = upload.uploadId else {
+                Log.error("Upload didn't have an id")
+                return .error
+            }
+            
+            let result = params.repos.upload.update(indexId: uploadId, with: [Upload.deferredUploadIdKey: .int64(deferredUploadId)])
             guard result else {
                 Log.error("Failed updating upload.")
                 return .error

@@ -1,0 +1,170 @@
+
+import XCTest
+@testable import Server
+@testable import TestsCommon
+import LoggerAPI
+import HeliumLogger
+import Foundation
+import ServerShared
+import ChangeResolvers
+import Credentials
+
+class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
+    var accountManager: AccountManager!
+    
+    override func setUp() {
+        super.setUp()
+        accountManager = AccountManager(userRepository: UserRepository(db))
+        accountManager.setupAccounts(credentials: Credentials())
+    }
+    
+    func runDeletionOfOneFile(withFileGroup: Bool) throws {
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
+        
+        guard let deferredCount = DeferredUploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount = UploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+
+        // This file is going to be deleted.
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileGroupUUID: fileGroupUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
+        
+        if let fileGroupUUID = fileGroupUUID {
+            uploadDeletionRequest.fileGroupUUID = fileGroupUUID
+        }
+        else {
+            uploadDeletionRequest.fileUUID = fileUUID
+        }
+        
+        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        XCTAssert(!found1)
+        
+        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
+    }
+    
+    func testDeletionOfOneFileWithNoFileGroup() throws {
+        try runDeletionOfOneFile(withFileGroup: false)
+    }
+    
+    func testDeletionOfOneFileWithFileGroup() throws {
+        try runDeletionOfOneFile(withFileGroup: true)
+    }
+    
+    func runTwoFileDeletions(withFileGroup: Bool) throws {
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID1 = Foundation.UUID().uuidString
+        let fileUUID2 = Foundation.UUID().uuidString
+
+        var fileGroupUUID: String?
+        if withFileGroup {
+            fileGroupUUID = Foundation.UUID().uuidString
+        }
+        
+        guard let deferredCount = DeferredUploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount = UploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+
+        // These files are going to be deleted.
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileGroupUUID: fileGroupUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileGroupUUID: fileGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID1) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID2) else {
+            XCTFail()
+            return
+        }
+
+        if fileGroupUUID == nil {
+            // Fake an earlier pending deletion, so that in this case we can actually run two non-file group deletions when the request is received.
+
+            guard let deferredUpload = createDeferredUpload(sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+                let deferredUploadId = deferredUpload.deferredUploadId else {
+                XCTFail()
+                return
+            }
+        
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, userId: fileIndex1.userId, deferredUploadId: deferredUploadId, state: .deleteSingleFile) else {
+                XCTFail()
+                return
+            }
+        }
+        
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
+        
+        if let fileGroupUUID = fileGroupUUID {
+            uploadDeletionRequest.fileGroupUUID = fileGroupUUID
+        }
+        else {
+            uploadDeletionRequest.fileUUID = fileUUID2
+        }
+        
+        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+            XCTFail()
+            return
+        }
+        
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        XCTAssert(!found1)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2)
+        XCTAssert(!found2)
+        
+        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
+    }
+    
+    func testTwoFileDeletionWithoutFileGroup() throws {
+        try runTwoFileDeletions(withFileGroup: false)
+    }
+    
+    func testTwoFileDeletionWithFileGroup() throws {
+        try runTwoFileDeletions(withFileGroup: true)
+    }
+}

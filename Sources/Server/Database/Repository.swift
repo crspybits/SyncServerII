@@ -135,6 +135,7 @@ extension RepositoryLookup {
         let query = "select * from \(tableName) where " + lookupConstraint(key: key)
         
         guard let select = Select(db:db, query: query, modelInit: modelInit, ignoreErrors:false) else {
+            Log.error("\(db.errorMessage())")
             return nil
         }
         

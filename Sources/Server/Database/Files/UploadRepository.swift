@@ -24,7 +24,8 @@ import ServerShared
 import LoggerAPI
 import ChangeResolvers
 
-enum UploadState : String {
+// `public` only because of some problems I was having with testing.
+public enum UploadState : String {
     case v0UploadCompleteFile
     case vNUploadFileChange
     case deleteSingleFile
@@ -90,7 +91,7 @@ class Upload : NSObject, Model, ChangeResolverContents {
     static let changeResolverNameKey = "changeResolverName"
     var changeResolverName: String?
     
-    // The contents of the upload for files with changeResolverName's and file versions > 0.
+    // The contents of the upload for file uploads, for files with changeResolverName's and file versions > 0.
     static let uploadContentsKey = "uploadContents"
     var uploadContents: Data?
 
@@ -437,7 +438,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         }
     }
     
-    // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful.
+    // uploadId in the model is ignored and the automatically generated uploadId is returned if the add is successful. On success, the upload record is modified with this uploadId.
     func add(upload:Upload, fileInFileIndex:Bool=false) -> AddResult {
         if basicFieldCheck(upload: upload, fileInFileIndex:fileInFileIndex) {
             Log.error("One of the model values was nil!")
@@ -481,7 +482,9 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         do {
             try insert.run()
             Log.info("Sucessfully created Upload row")
-            return .success(uploadId: db.lastInsertId())
+            let uploadId = db.lastInsertId()
+            upload.uploadId = uploadId
+            return .success(uploadId: uploadId)
         }
         catch (let error) {
             Log.info("Failed inserting Upload row: \(db.errorCode()); \(db.errorMessage())")
@@ -550,7 +553,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         case userId(UserId)
         case filesForUserDevice(userId:UserId, deviceUUID:String, sharingGroupUUID: String)
         case primaryKey(fileUUID:String, userId:UserId, deviceUUID:String)
-        case fileGroupUUIDWithStatus(fileGroupUUID: String, status: UploadState)
+        case fileGroupUUIDWithState(fileGroupUUID: String, state: UploadState)
         case deferredUploadId(Int64)
         
         var description : String {
@@ -567,8 +570,8 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
                 return "userId(\(userId)); deviceUUID(\(deviceUUID)); sharingGroupUUID(\(sharingGroupUUID))"
             case .primaryKey(let fileUUID, let userId, let deviceUUID):
                 return "fileUUID(\(fileUUID)); userId(\(userId)); deviceUUID(\(deviceUUID))"
-             case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
-                return "fileGroupUUID(\(fileGroupUUID); status: \(status.rawValue))"
+             case .fileGroupUUIDWithState(let fileGroupUUID, let state):
+                return "fileGroupUUID(\(fileGroupUUID); state: \(state.rawValue))"
             }
         }
     }
@@ -587,8 +590,8 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             return "userId = \(userId) and deviceUUID = '\(deviceUUID)' and sharingGroupUUID = '\(sharingGroupUUID)'"
         case .primaryKey(let fileUUID, let userId, let deviceUUID):
             return "fileUUID = '\(fileUUID)' and userId = \(userId) and deviceUUID = '\(deviceUUID)'"
-        case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
-            return "fileGroupUUID = '\(fileGroupUUID)' and status = '\(status.rawValue)'"
+        case .fileGroupUUIDWithState(let fileGroupUUID, let state):
+            return "fileGroupUUID = '\(fileGroupUUID)' and state = '\(state.rawValue)'"
         }
     }
     
@@ -685,6 +688,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
     // Return nil on an error. If somehow, no ids match, an empty array is returned.
     func select(forDeferredUploadIds deferredUploadIds: [Int64]) -> [Upload]? {
         guard deferredUploadIds.count > 0 else {
+            Log.error("No upload ids given")
             return nil
         }
         
