@@ -68,6 +68,7 @@ let package = Package(
         .testTarget(name: "FileControllerTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerUploadChangeTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerUploadDeletionTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "FileControllerBothUploadTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "UploaderTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "SharingTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "AccountFileTests", dependencies: ["TestsCommon"]),
