@@ -10,9 +10,6 @@ import ChangeResolvers
 import Credentials
 import ServerAccount
 
-// TODO: Full upload tests
-// Try to delete a file that's in a file group, by just giving its fileUUID: Error expected
-
 class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
     var uploader: Uploader!
