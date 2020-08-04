@@ -63,7 +63,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let fileIndex = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
+        guard let userId = result.uploadingUserId else {
             XCTFail()
             return
         }
@@ -77,7 +77,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
         
         if fileGroupUUID == nil {
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: fileIndex.userId, deferredUploadId: deferredUploadId, state: .deleteSingleFile) else {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
@@ -96,6 +96,11 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
+        
+        guard let fileIndex = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
+            XCTFail()
+            return
+        }
         
         let found = try fileIsInCloudStorage(fileIndex: fileIndex)
         XCTAssert(!found)
@@ -136,17 +141,12 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
+        guard let userId = result.uploadingUserId else {
+            XCTFail()
+            return
+        }
+        
         guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroupUUID: fileGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID1) else {
-            XCTFail()
-            return
-        }
-        
-        guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID2) else {
             XCTFail()
             return
         }
@@ -160,7 +160,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
         
         if fileGroupUUID == nil {
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: fileIndex1.userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
@@ -171,7 +171,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
                 return
             }
         
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: fileIndex2.userId, deferredUploadId: deferredUploadId2, state: .deleteSingleFile) else {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId2, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
@@ -190,6 +190,17 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
+        
+
+        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID1) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID2) else {
+            XCTFail()
+            return
+        }
         
         let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
         XCTAssert(!found1)
@@ -229,17 +240,12 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
+        guard let userId = result.uploadingUserId else {
+            XCTFail()
+            return
+        }
+        
         guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile) else {
-            XCTFail()
-            return
-        }
-        
-        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID1) else {
-            XCTFail()
-            return
-        }
-        
-        guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID2) else {
             XCTFail()
             return
         }
@@ -258,7 +264,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
     
-        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, userId: fileIndex2.userId, deferredUploadId: deferredUploadId2, state: .deleteSingleFile) else {
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId2, state: .deleteSingleFile) else {
             XCTFail()
             return
         }
@@ -276,6 +282,16 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
+
+        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID1) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID2) else {
+            XCTFail()
+            return
+        }
         
         let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
         XCTAssert(!found1)

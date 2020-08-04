@@ -43,6 +43,7 @@ class Uploader: UploaderProtocol {
         case couldNotRemoveUploadRow
         case failedStartingDatabaseTransaction
         case failedCommittingDatabaseTransaction
+        case couldNotGetFileGroup
     }
     
     let db: Database
@@ -374,12 +375,16 @@ class Uploader: UploaderProtocol {
                     return false
                 }
                 
-                // Lookup any file change Upload's associated the deletion's fileUUID
-                let key2 =  UploadRepository.LookupKey.fileGroupUUIDWithState(fileGroupUUID: uploadDeletion.fileUUID, state: .vNUploadFileChange)
+                Log.debug("without file group: \(key1)")
+                
+                // Lookup any file change Upload's associated with the deletion's fileUUID
+                let key2 =  UploadRepository.LookupKey.fileUUIDWithState(fileUUID: uploadDeletion.fileUUID, state: .vNUploadFileChange)
                 guard let vNFileFileChangeUploads = uploadRepo.lookupAll(key: key2, modelInit: Upload.init) else {
                     Log.error("Could not lookupAll: \(key2)")
                     return false
                 }
+                
+                Log.debug("vNFileFileChangeUploads: \(vNFileFileChangeUploads)")
                 
                 // Keep track of the deferredUploadId for these file Upload's and remove them.
                 for vNFileChangeUpload in vNFileFileChangeUploads {

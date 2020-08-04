@@ -1310,7 +1310,7 @@ class ServerTestCase : XCTestCase {
         let sharingGroupUUID: String?
     }
     
-    func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false) -> UploadDeletionResult? {
+    func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool, updatedMasterVersionExpected:Int64? = nil, expectError:Bool = false, expectingUploaderToRun: Bool = true) -> UploadDeletionResult? {
         
         var result: UploadDeletionResult?
         var sharingGroupUUID:String!
@@ -1323,7 +1323,7 @@ class ServerTestCase : XCTestCase {
             }
         }
 
-        self.performServerTest(testAccount:testAccount, expectingUploaderToRun: true) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount, expectingUploaderToRun: expectingUploaderToRun) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.uploadDeletion, headers: headers, urlParameters: "?" + uploadDeletionRequest.urlParameters()!) { response, dict in
@@ -1332,18 +1332,21 @@ class ServerTestCase : XCTestCase {
                     XCTAssert(response!.statusCode != .OK, "Did not fail on upload deletion request")
                 }
                 else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on upload deletion request")
-                    
-                    if let dict = dict {
-                        if let _ = try? UploadDeletionResponse.decode(dict) {
-                            result = UploadDeletionResult(sharingGroupUUID: sharingGroupUUID)
+                    if response!.statusCode == .OK {
+                        if let dict = dict {
+                            if let _ = try? UploadDeletionResponse.decode(dict) {
+                                result = UploadDeletionResult(sharingGroupUUID: sharingGroupUUID)
+                            }
+                            else {
+                                XCTFail()
+                            }
                         }
                         else {
                             XCTFail()
                         }
                     }
                     else {
-                        XCTFail()
+                        XCTFail("Did not work on upload deletion request")
                     }
                 }
                 

@@ -45,18 +45,30 @@ extension Uploader {
             return
         }
         
-        var deletions = [FileDeletion]()
+        var fileDeletions = [FileDeletion]()
+        var uploads = [Upload]()
         
-        // Case 1) Upload deletions when we're removing entire file groups. (Have no Upload records for these).
+        // Case 1) Upload deletions when we're removing entire file groups. Have no Upload records for the deletion, but there are Upload records for changes with the same file group.
         let deferredUploadsWithFileGroups = deferredUploads.filter {$0.fileGroupUUID != nil}
         for deferredUploadWithFileGroup in deferredUploadsWithFileGroups {
-            let key = FileIndexRepository.LookupKey.fileGroupUUIDAndSharingGroup(fileGroupUUID: deferredUploadWithFileGroup.fileGroupUUID!, sharingGroupUUID: deferredUploadWithFileGroup.sharingGroupUUID)
-            guard let fileIndexes = fileIndexRepo.lookupAll(key: key, modelInit: FileIndex.init) else {
+            guard let fileGroupUUID = deferredUploadWithFileGroup.fileGroupUUID else {
+                throw Errors.couldNotGetFileGroup
+            }
+            
+            let key1 = FileIndexRepository.LookupKey.fileGroupUUIDAndSharingGroup(fileGroupUUID: deferredUploadWithFileGroup.fileGroupUUID!, sharingGroupUUID: deferredUploadWithFileGroup.sharingGroupUUID)
+            guard let fileIndexes = fileIndexRepo.lookupAll(key: key1, modelInit: FileIndex.init) else {
                 throw Errors.couldNotLookupByGroups
             }
             
+            let key2 = UploadRepository.LookupKey.fileGroupUUIDWithState(fileGroupUUID: fileGroupUUID, state: .vNUploadFileChange)
+            guard let theUploads = uploadRepo.lookupAll(key: key2, modelInit: Upload.init) else {
+                throw Errors.failedToGetUploads
+            }
+            
+            uploads += theUploads
+            
             for fileIndex in fileIndexes {
-                deletions += [try getDeletionFrom(fileIndex: fileIndex)]
+                fileDeletions += [try getDeletionFrom(fileIndex: fileIndex)]
             }
         }
              
@@ -67,14 +79,12 @@ extension Uploader {
             throw Errors.mismatchWithDeferredUploadIdsCount
         }
         
-        var uploads = [Upload]()
-        
         if deferredUploadIds.count > 0 {
             guard let theUploads = uploadRepo.select(forDeferredUploadIds: deferredUploadIds) else {
                 throw Errors.failedToGetUploads
             }
             
-            uploads = theUploads
+            uploads += theUploads
             
             for upload in uploads {
                 guard let sharingGroupUUID = upload.sharingGroupUUID else {
@@ -90,12 +100,12 @@ extension Uploader {
                     throw Errors.failedToGetFileUUID
                 }
                 
-                deletions += [try getDeletionFrom(fileIndex: fileIndex)]
+                fileDeletions += [try getDeletionFrom(fileIndex: fileIndex)]
             }
         }
         
-        // Not going to worry about any resulting errors because: (a) we might be trying the deletion a 2nd time and the file might just not be there, (b) the consequences of leaving a file in cloud storage are not dire-- just some "garbage" that could possibly be cleaned up later.
-        if let errors = FileDeletion.apply(deletions: deletions) {
+        // Not going to worry about any resulting errors because: (a) we might be trying the deletion a 2nd (or more) time and the file might just not be there, (b) the consequences of leaving a file in cloud storage are not dire-- just some garbage that could possibly be cleaned up later.
+        if let errors = FileDeletion.apply(deletions: fileDeletions) {
             Log.warning("Some error(s) occurred while deleting files: \(errors)")
         }
         
