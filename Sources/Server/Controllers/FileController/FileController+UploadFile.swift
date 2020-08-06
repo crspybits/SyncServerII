@@ -132,7 +132,7 @@ extension FileController {
                 return
             }
         
-            if existingFileInFileIndex.deleted && (uploadRequest.undeleteServerFile == nil || uploadRequest.undeleteServerFile == false) {
+            if existingFileInFileIndex.deleted {
                 let message = "Attempt to upload an existing file, but it has already been deleted."
                 finish(.errorMessage(message), params: params)
                 return

@@ -99,4 +99,72 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
     func testOneUploadFileChangeAndThenOneUploadDeletionWithFileGroup() throws {
         try runOneUploadFileChangeAndThenOneUploadDeletion(withFileGroup: true)
     }
+    
+    func runUploadChange(withDeletionBefore:Bool) throws {
+        let fileUUID = Foundation.UUID().uuidString
+        let deviceUUID = Foundation.UUID().uuidString
+        let changeResolverName = CommentFile.changeResolverName
+        
+        guard let deferredCount = DeferredUploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount = UploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+                
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        if withDeletionBefore {
+            let uploadDeletionRequest = UploadDeletionRequest()
+            uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
+            uploadDeletionRequest.fileUUID = fileUUID
+            
+            guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+                XCTFail()
+                return
+            }
+        }
+        
+        let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
+        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withDeletionBefore, dataToUpload: comment1.updateContents)
+        
+        if withDeletionBefore {
+            XCTAssert(result2 == nil, "\(String(describing: result2))")
+        }
+        else {
+            XCTAssert(result2 != nil, "\(String(describing: result2))")
+        }
+        
+        guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        
+        if withDeletionBefore {
+            XCTAssert(!found1)
+        }
+        else {
+            XCTAssert(found1)
+        }
+        
+        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
+    }
+    
+    func testUploadChangeAfterDeletionCompletedFails() throws {
+        try runUploadChange(withDeletionBefore: true)
+    }
+
+    func testUploadChangeWithNoPriorDeletionWorks() throws {
+        try runUploadChange(withDeletionBefore: false)
+    }
 }
