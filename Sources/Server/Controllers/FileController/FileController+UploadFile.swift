@@ -148,13 +148,7 @@ extension FileController {
             
             creationDate = existingFileInFileIndex.creationDate
         }
-        else {
-            if uploadRequest.undeleteServerFile != nil && uploadRequest.undeleteServerFile == true  {
-                let message = "Attempt to undelete a file but it's a new file!"
-                finish(.errorMessage(message), params: params)
-                return
-            }
-            
+        else {            
             Log.info("Uploading first version of file.")
         
             // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.

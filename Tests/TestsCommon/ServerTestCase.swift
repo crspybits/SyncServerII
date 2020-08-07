@@ -666,7 +666,6 @@ class ServerTestCase : XCTestCase {
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUIDToSend
         uploadRequest.mimeType = mimeType.rawValue
-        uploadRequest.undeleteServerFile = undelete == 1
         uploadRequest.fileGroupUUID = fileGroupUUID
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = requestCheckSum
