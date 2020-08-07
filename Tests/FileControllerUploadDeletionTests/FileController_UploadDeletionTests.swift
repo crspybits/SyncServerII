@@ -306,4 +306,125 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
     func testUploadDeletionWithFileGroupWithFileGroupFileWorks() throws {
         try runUploadDeletion(withTest: .deleteFileHavingFileGroupWithFileGroupWorks)
     }
+    
+    func testThatUploadDeletionTwiceOfSameFileWorks() throws {
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        guard let deferredCount = DeferredUploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+        
+        guard let uploadCount = UploadRepository(db).count() else {
+            XCTFail()
+            return
+        }
+
+        // This file is going to be deleted.
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
+        uploadDeletionRequest.fileUUID = fileUUID
+        
+        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectingUploaderToRun: false) else {
+            XCTFail()
+            return
+        }
+        
+        guard let fileIndex = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex)
+        XCTAssert(!found1)
+        
+        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
+    }
+    
+    func testThatDeletionOfUnknownFileUUIDFails() {
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+
+        // Using this upload file only for creating a user.
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
+        
+        let unknownFileUUID = Foundation.UUID().uuidString
+        uploadDeletionRequest.fileUUID = unknownFileUUID
+        
+        let deletionResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true, expectingUploaderToRun: false)
+        XCTAssert(deletionResult == nil)
+    }
+    
+    func testThatUploadByOneDeviceAndDeletionByAnotherActuallyDeletes() {
+    }
+    
+    func testThatUploadDeletionWithFakeSharingGroupUUIDFails() {
+        /*
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        
+        let invalidSharingGroupUUID = UUID().uuidString
+
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult1.request.fileVersion
+        uploadDeletionRequest.masterVersion = uploadResult1.request.masterVersion + MasterVersionInt(1)
+        uploadDeletionRequest.sharingGroupUUID = invalidSharingGroupUUID
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
+        */
+    }
+
+    func testThatUploadDeletionWithBadSharingGroupUUIDFails() {
+        /*
+        let deviceUUID = Foundation.UUID().uuidString
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        
+        let workingButBadSharingGroupUUID = UUID().uuidString
+        guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
+        uploadDeletionRequest.fileVersion = uploadResult1.request.fileVersion
+        uploadDeletionRequest.masterVersion = uploadResult1.request.masterVersion + MasterVersionInt(1)
+        uploadDeletionRequest.sharingGroupUUID = workingButBadSharingGroupUUID
+        
+        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
+        */
+    }
 }

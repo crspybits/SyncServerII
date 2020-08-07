@@ -5,6 +5,7 @@
     "DatabaseTests",
     "FileControllerUploadChangeTests",
     "FileControllerUploadDeletionTests",
+    "FileControllerBothUploadTests",
     "UploaderTests",
     "other",
     "mock",
@@ -102,6 +103,14 @@
     },
     {
       "name": "FileControllerUploadDeletionTests.FileController_UploadDeletionTests"
+    }
+  ],
+  "FileControllerBothUploadTests": [
+    {
+      "name": "FileControllerBothUploadTests.FileController_BothUploadSeparateTests"
+    },
+    {
+      "name": "FileControllerBothUploadTests.FileController_UploadsOverlapTests"
     }
   ],
   "UploaderTests": [

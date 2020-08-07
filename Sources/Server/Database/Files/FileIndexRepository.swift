@@ -697,8 +697,9 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
     }
     
     // Returns nil on error; number of rows marked otherwise.
+    // 8/5/20: Just added the "and \(FileIndex.deletedKey) = 0"-- which should ensure that the update can not occur twice, successfully, in a race.
     func markFilesAsDeleted(key:LookupKey) -> Int64? {
-        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + lookupConstraint(key: key)
+        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + lookupConstraint(key: key) + " and \(FileIndex.deletedKey) = 0"
         if db.query(statement: query) {
             let numberRows = db.numberAffectedRows()
             Log.debug("Number rows: \(numberRows) for query: \(query)")

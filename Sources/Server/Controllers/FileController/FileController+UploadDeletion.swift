@@ -99,11 +99,19 @@ extension FileController {
             files = fileInfos
         }
         
+        guard files.count > 0 else {
+            let message = "File(s) \(keys) not in FileIndex"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         // Are all of the file(s) marked as deleted?
         if (files.filter {$0.deleted == true}).count == files.count {
             Log.info("File(s) already marked as deleted: Not deleting again.")
             let response = UploadDeletionResponse()
             params.completion(.success(response))
+            return
         }
         
         // Mark the file(s) as deleted in the FileIndex
