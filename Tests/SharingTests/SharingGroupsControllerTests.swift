@@ -388,30 +388,6 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true)
     }
     
-    func testRemoveSharingGroupWorks_uploadAppMetaDataFails() {
-        let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
-            XCTFail()
-            return
-        }
-        
-        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
-            XCTFail()
-            return
-        }
-
-        let appMetaData = AppMetaData(version: 0, contents: "Foo")
-
-        uploadAppMetaDataVersion(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, masterVersion:masterVersion+1, appMetaData: appMetaData, sharingGroupUUID:sharingGroupUUID, expectedError: true)
-    }
-    
     func testRemoveSharingGroupWorks_downloadAppMetaDataFails() {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Foo"
@@ -755,7 +731,6 @@ extension SharingGroupsControllerTests {
             ("testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup", testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup),
             ("testRemoveSharingGroupWorks_cannotThenDoDoneUploads", testRemoveSharingGroupWorks_cannotThenDoDoneUploads),
             ("testRemoveSharingGroupWorks_cannotDeleteFile", testRemoveSharingGroupWorks_cannotDeleteFile),
-            ("testRemoveSharingGroupWorks_uploadAppMetaDataFails", testRemoveSharingGroupWorks_uploadAppMetaDataFails),
             ("testRemoveSharingGroupWorks_downloadAppMetaDataFails", testRemoveSharingGroupWorks_downloadAppMetaDataFails),
             ("testRemoveSharingGroupWorks_downloadFileFails", testRemoveSharingGroupWorks_downloadFileFails),
             ("testRemoveSharingGroup_failsWithBadMasterVersion", testRemoveSharingGroup_failsWithBadMasterVersion),
