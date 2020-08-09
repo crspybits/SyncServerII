@@ -17,7 +17,6 @@ extension Database {
         FileIndexRepository.self,
         SharingInvitationRepository.self,
         SharingGroupUserRepository.self,
-        MasterVersionRepository.self,
         DeferredUploadRepository.self
     ]
     

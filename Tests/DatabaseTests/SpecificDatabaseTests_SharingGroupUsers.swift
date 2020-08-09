@@ -150,11 +150,6 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
 
-        guard MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = AccountScheme.google.accountName
@@ -203,20 +198,10 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-        
-        guard MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID1) else {
-            XCTFail()
-            return
-        }
 
         let sharingGroupUUID2 = UUID().uuidString
 
         guard addSharingGroup(sharingGroupUUID: sharingGroupUUID2, sharingGroupName: "Foobar") else {
-            XCTFail()
-            return
-        }
-        
-        guard MasterVersionRepository(db).initialize(sharingGroupUUID: sharingGroupUUID2) else {
             XCTFail()
             return
         }

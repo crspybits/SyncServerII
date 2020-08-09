@@ -24,47 +24,6 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-      
-    // A test that causes a conflict with the master version on the server. Presumably this needs to take the form of (a) device1 uploading a file to the server, (b) device2 uploading a file, and finishing that upload (`DoneUploads` endpoint), and (c) device1 uploading a second file using its original master version.
-    func testMasterVersionConflict1() {
-        let deviceUUID1 = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
-            XCTFail()
-            return
-        }
-        
-        let deviceUUID2 = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
-            XCTFail()
-            return
-        }
-        
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
-        
-        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupUUID: sharingGroupUUID), updatedMasterVersionExpected:1) else {
-            XCTFail()
-            return
-        }
-    }
-    
-    func testMasterVersionConflict2() {
-        let deviceUUID1 = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID1), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
-            XCTFail()
-            return
-        }
-        
-        let deviceUUID2 = Foundation.UUID().uuidString
-        guard let _ = uploadTextFile(deviceUUID:deviceUUID2, addUser:.no(sharingGroupUUID: sharingGroupUUID)) else {
-            XCTFail()
-            return
-        }
-        
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
-        
-        // No uploads should have been successfully finished, i.e., expectedNumberOfUploads = nil, and the updatedMasterVersion should have been updated to 1.
-        //self.sendDoneUploads(expectedNumberOfUploads: nil, deviceUUID:deviceUUID2, sharingGroupUUID: sharingGroupUUID)
-    }
 
     func testIndexWithNoFiles() {
         let deviceUUID = Foundation.UUID().uuidString
@@ -189,11 +148,11 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
     }
         
     func testDownloadFileTextSucceeds() {
-        downloadTextFile(masterVersionExpectedWithDownload: 1)
+        downloadTextFile()
     }
     
     func testDownloadURLFileSucceeds() {
-        downloadServerFile(mimeType: .url, file: .testUrlFile, masterVersionExpectedWithDownload: 1)
+        downloadServerFile(mimeType: .url, file: .testUrlFile)
     }
     
     func testDownloadFileTextWithASimulatedUserChangeSucceeds() {
@@ -245,7 +204,7 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         // Don't want the download to fail just due to a checksum mismatch.
         uploadResult.request.checkSum = checkSum
 
-        downloadTextFile(testAccount: testAccount, masterVersionExpectedWithDownload: 1, uploadFileRequest: uploadResult.request, contentsChangedExpected: true)
+        downloadTextFile(testAccount: testAccount, uploadFileRequest: uploadResult.request, contentsChangedExpected: true)
     }
     
     func testDownloadTextFileWhereFileDeletedGivesGoneResponse() {
@@ -282,7 +241,6 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
             
             let downloadFileRequest = DownloadFileRequest()
             downloadFileRequest.fileUUID = uploadRequest.fileUUID
-            downloadFileRequest.masterVersion = 1
             downloadFileRequest.fileVersion = 0
             downloadFileRequest.sharingGroupUUID = sharingGroupUUID
             
@@ -302,17 +260,12 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
         }
     }
     
-    func testDownloadFileTextWhereMasterVersionDiffersFails() {
-        downloadTextFile(masterVersionExpectedWithDownload: 0, expectUpdatedMasterUpdate:true)
-    }
-    
     func testDownloadFileTextWithAppMetaDataSucceeds() {
-        downloadTextFile(masterVersionExpectedWithDownload: 1,
-            appMetaData:"{ \"foo\": \"bar\" }")
+        downloadTextFile(appMetaData:"{ \"foo\": \"bar\" }")
     }
     
     func testDownloadFileTextWithDifferentDownloadVersion() {
-        downloadTextFile(masterVersionExpectedWithDownload: 1, downloadFileVersion:1, expectedError: true)
+        downloadTextFile(downloadFileVersion:1, expectedError: true)
     }
     
     func testIndexWithFakeSharingGroupUUIDFails() {
@@ -360,8 +313,6 @@ class FileControllerTests: ServerTestCase, LinuxTestable {
 extension FileControllerTests {
     static var allTests : [(String, (FileControllerTests) -> () throws -> Void)] {
         return [
-            ("testMasterVersionConflict1", testMasterVersionConflict1),
-            ("testMasterVersionConflict2", testMasterVersionConflict2),
             ("testIndexWithNoFiles", testIndexWithNoFiles),
             ("testGetIndexForOnlySharingGroupsWorks", testGetIndexForOnlySharingGroupsWorks),
             ("testIndexWithOneFile", testIndexWithOneFile),
@@ -371,7 +322,6 @@ extension FileControllerTests {
             ("testDownloadFileTextWithASimulatedUserChangeSucceeds", testDownloadFileTextWithASimulatedUserChangeSucceeds),
             ("testDownloadTextFileWhereFileDeletedGivesGoneResponse",
                 testDownloadTextFileWhereFileDeletedGivesGoneResponse),
-            ("testDownloadFileTextWhereMasterVersionDiffersFails", testDownloadFileTextWhereMasterVersionDiffersFails),
             ("testDownloadFileTextWithAppMetaDataSucceeds", testDownloadFileTextWithAppMetaDataSucceeds),
             ("testDownloadFileTextWithDifferentDownloadVersion", testDownloadFileTextWithDifferentDownloadVersion),
             ("testIndexWithFakeSharingGroupUUIDFails", testIndexWithFakeSharingGroupUUIDFails),

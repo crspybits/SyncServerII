@@ -142,13 +142,6 @@ class UserController : ControllerProtocol {
             return
         }
         
-        if !params.repos.masterVersion.initialize(sharingGroupUUID: addUserRequest.sharingGroupUUID) {
-            let message = "Failed on creating MasterVersion record for sharing group!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         let response = AddUserResponse()
         response.userId = userId
         

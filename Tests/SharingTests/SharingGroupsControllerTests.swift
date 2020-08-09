@@ -12,7 +12,7 @@ import LoggerAPI
 import Foundation
 import ServerShared
 
-class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
+class SharingGroupsControllerTests: ServerTestCase {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -123,7 +123,6 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             }
             XCTAssert(!deleted)
             XCTAssert(sharingGroup.permission == .admin)
-            XCTAssert(sharingGroup.masterVersion == 0)
         }
         
         let filtered = sharingGroups.filter {$0.sharingGroupUUID == sharingGroupUUID2}
@@ -149,40 +148,14 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
         let sharingGroup = ServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
-        guard updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, masterVersion: masterVersion) else {
+        guard updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup) else {
             XCTFail()
             return
         }
-    }
-    
-    func testUpdateSharingGroupWithBadMasterVersionFails() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        let sharingGroup = ServerShared.SharingGroup()
-        sharingGroup.sharingGroupUUID = sharingGroupUUID
-        sharingGroup.sharingGroupName = "Louisiana Guys"
-        
-        updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, masterVersion: masterVersion+1, expectMasterVersionUpdate: true)
     }
     
     // MARK: Remove sharing groups
@@ -195,12 +168,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -233,13 +201,8 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         }
         
         // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
 
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -280,12 +243,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -305,12 +263,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -328,17 +281,12 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
-            XCTFail()
-            return
-        }
-        
-        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), masterVersion:masterVersion+1, errorExpected:true)
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected:true)
     }
     
     func testRemoveSharingGroupWorks_cannotThenDoDoneUploads() {
@@ -349,12 +297,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -371,12 +314,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         
         // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -398,12 +336,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         
         // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -421,38 +354,14 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         
         // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
-            XCTFail()
-            return
-        }
-        
-        downloadTextFile(masterVersionExpectedWithDownload:Int(masterVersion+1),  downloadFileVersion:0, uploadFileRequest:uploadResult.request, expectedError: true)
+        downloadTextFile(downloadFileVersion:0, uploadFileRequest:uploadResult.request, expectedError: true)
     }
     
-    func testRemoveSharingGroup_failsWithBadMasterVersion() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard !removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion+1) else {
-            XCTFail()
-            return
-        }
-    }
-
     func testUpdateSharingGroupForDeletedSharingGroupFails() {
         let deviceUUID = Foundation.UUID().uuidString
         let sharingGroupUUID = Foundation.UUID().uuidString
@@ -461,23 +370,16 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard var masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
+        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
-        
-        guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
-            XCTFail()
-            return
-        }
-        
-        masterVersion += 1
-        
+                
         let sharingGroup = ServerShared.SharingGroup()
         sharingGroup.sharingGroupUUID = sharingGroupUUID
         sharingGroup.sharingGroupName = "Louisiana Guys"
         
-        let result = updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, masterVersion: masterVersion, expectFailure: true)
+        let result = updateSharingGroup(deviceUUID:deviceUUID, sharingGroup: sharingGroup, expectFailure: true)
         XCTAssert(result == false)
     }
     
@@ -491,12 +393,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -542,17 +439,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
-            XCTFail()
-            return
-        }
-        
-        guard let masterVersion2 = getMasterVersion(testAccount: sharingUser, sharingGroupUUID: sharingGroupUUID), masterVersion + 1 == masterVersion2 else {
+        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -578,22 +465,6 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
         }
     }
     
-    func testRemoveUserFromSharingGroup_failsWithBadMasterVersion() {
-        let deviceUUID = Foundation.UUID().uuidString
-        let sharingGroupUUID = Foundation.UUID().uuidString
-        guard let _ = self.addNewUser(sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion + 1, expectMasterVersionUpdate: true)
-    }
-    
     // When user has files in the sharing group-- those should be marked as deleted.
     func testRemoveUserFromSharingGroup_userHasFiles() {
         let deviceUUID = Foundation.UUID().uuidString
@@ -617,12 +488,7 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
-            XCTFail()
-            return
-        }
-        
-        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
+        guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
@@ -663,17 +529,12 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             expectation.fulfill()
         }
         
-        guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {
+        guard removeUserFromSharingGroup(testAccount: owningUser, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
             XCTFail()
             return
         }
         
-        guard removeUserFromSharingGroup(testAccount: owningUser, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID, masterVersion: masterVersion) else {
-            XCTFail()
-            return
-        }
-        
-        let result = uploadTextFile(testAccount: sharingUser, owningAccountType: owningUser.scheme.accountName, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), masterVersion: masterVersion + 1, errorExpected: true)
+        let result = uploadTextFile(testAccount: sharingUser, owningAccountType: owningUser.scheme.accountName, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), errorExpected: true)
         XCTAssert(result == nil)
     }
     
@@ -693,59 +554,13 @@ class SharingGroupsControllerTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-        
-        // Upload (only; no DoneUploads) to sharing group 1
-        guard let masterVersion1 = getMasterVersion(sharingGroupUUID: sharingGroupUUID1) else {
-            XCTFail()
-            return
-        }
 
-        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID1), masterVersion: masterVersion1)
-        
-        // Upload (only; no DoneUploads) to sharing group 2
-        guard let masterVersion2 = getMasterVersion(sharingGroupUUID: sharingGroupUUID2) else {
-            XCTFail()
-            return
-        }
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID1))
 
-        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID2), masterVersion: masterVersion2)
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID2))
         
         // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID1)
         
         // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID2)
-    }
-}
-
-extension SharingGroupsControllerTests {
-    static var allTests : [(String, (SharingGroupsControllerTests) -> () throws -> Void)] {
-        return [
-            ("testCreateSharingGroupWorks", testCreateSharingGroupWorks),
-            ("testThatNonOwningUserCannotCreateASharingGroup", testThatNonOwningUserCannotCreateASharingGroup),
-            ("testNewlyCreatedSharingGroupHasNoFiles", testNewlyCreatedSharingGroupHasNoFiles),
-            ("testUpdateSharingGroupWorks", testUpdateSharingGroupWorks),
-            ("testUpdateSharingGroupWithBadMasterVersionFails", testUpdateSharingGroupWithBadMasterVersionFails),
-            ("testRemoveSharingGroupWorks", testRemoveSharingGroupWorks),
-            ("testRemoveSharingGroupWorks_filesMarkedAsDeleted", testRemoveSharingGroupWorks_filesMarkedAsDeleted),
-            ("testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup", testRemoveSharingGroupWorks_multipleUsersRemovedFromSharingGroup),
-            ("testRemoveSharingGroupWorks_cannotThenInviteSomeoneToThatGroup", testRemoveSharingGroupWorks_cannotThenInviteSomeoneToThatGroup),
-            ("testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup", testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup),
-            ("testRemoveSharingGroupWorks_cannotThenDoDoneUploads", testRemoveSharingGroupWorks_cannotThenDoDoneUploads),
-            ("testRemoveSharingGroupWorks_cannotDeleteFile", testRemoveSharingGroupWorks_cannotDeleteFile),
-            ("testRemoveSharingGroupWorks_downloadAppMetaDataFails", testRemoveSharingGroupWorks_downloadAppMetaDataFails),
-            ("testRemoveSharingGroupWorks_downloadFileFails", testRemoveSharingGroupWorks_downloadFileFails),
-            ("testRemoveSharingGroup_failsWithBadMasterVersion", testRemoveSharingGroup_failsWithBadMasterVersion),
-            ("testUpdateSharingGroupForDeletedSharingGroupFails", testUpdateSharingGroupForDeletedSharingGroupFails),
-            ("testRemoveUserFromSharingGroup_lastUserInSharingGroup", testRemoveUserFromSharingGroup_lastUserInSharingGroup),
-            ("testRemoveUserFromSharingGroup_notLastUserInSharingGroup", testRemoveUserFromSharingGroup_notLastUserInSharingGroup),
-            ("testRemoveUserFromSharingGroup_failsWithBadMasterVersion",
-                testRemoveUserFromSharingGroup_failsWithBadMasterVersion),
-            ("testRemoveUserFromSharingGroup_userHasFiles", testRemoveUserFromSharingGroup_userHasFiles),
-            ("testRemoveUserFromSharingGroup_owningUserHasSharingUsers", testRemoveUserFromSharingGroup_owningUserHasSharingUsers),
-            ("testInterleavedUploadsToDifferentSharingGroupsWorks", testInterleavedUploadsToDifferentSharingGroupsWorks)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: SharingGroupsControllerTests.self)
     }
 }

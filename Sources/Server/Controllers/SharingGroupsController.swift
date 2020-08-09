@@ -53,13 +53,6 @@ class SharingGroupsController : ControllerProtocol {
             return
         }
         
-        if !params.repos.masterVersion.initialize(sharingGroupUUID: request.sharingGroupUUID) {
-            let message = "Failed on creating MasterVersion record for sharing group!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         let response = CreateSharingGroupResponse()
         params.completion(.success(response))
     }

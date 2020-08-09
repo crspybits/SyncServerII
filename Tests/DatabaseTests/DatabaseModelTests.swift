@@ -42,25 +42,6 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
         XCTAssert(deviceUUID.userId == nil)
     }
     
-    func testMasterVersion() {
-        let masterVersion = MasterVersion()
-        
-        let newSharingGroupUUID = UUID().uuidString
-        let newMasterVersion = MasterVersionInt(100)
-        
-        masterVersion[MasterVersion.sharingGroupUUIDKey] = newSharingGroupUUID
-        masterVersion[MasterVersion.masterVersionKey] = newMasterVersion
-        
-        XCTAssert(masterVersion.sharingGroupUUID == newSharingGroupUUID)
-        XCTAssert(masterVersion.masterVersion == newMasterVersion)
-
-        masterVersion[MasterVersion.sharingGroupUUIDKey] = nil
-        masterVersion[MasterVersion.masterVersionKey] = nil
-        
-        XCTAssert(masterVersion.sharingGroupUUID == nil)
-        XCTAssert(masterVersion.masterVersion == nil)
-    }
-    
     func testSharingInvitation() {
         let sharingInvitation = SharingInvitation()
         
@@ -301,7 +282,6 @@ extension DatabaseModelTests {
     static var allTests : [(String, (DatabaseModelTests) -> () throws -> Void)] {
         return [
             ("testDeviceUUID", testDeviceUUID),
-            ("testMasterVersion", testMasterVersion),
             ("testSharingInvitation", testSharingInvitation),
             ("testUser", testUser),
             ("testFileIndex", testFileIndex),

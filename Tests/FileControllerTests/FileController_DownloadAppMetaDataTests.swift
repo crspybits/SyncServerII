@@ -27,11 +27,10 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
 
 #if false
     func testDownloadAppMetaDataForBadUUIDFails() {
-        let masterVersion: MasterVersionInt = 0
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Test1"
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, masterVersion:masterVersion, appMetaData:appMetaData),
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -40,11 +39,10 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase, LinuxTestable {
         // sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
     
         let badFileUUID = Foundation.UUID().uuidString
-        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: badFileUUID, masterVersionExpectedWithDownload:1, appMetaDataVersion: 0, sharingGroupUUID: sharingGroupUUID, expectedError: true)
+        downloadAppMetaDataVersion(deviceUUID:deviceUUID, fileUUID: badFileUUID, appMetaDataVersion: 0, sharingGroupUUID: sharingGroupUUID, expectedError: true)
     }
     
     func testDownloadAppMetaDataForReallyBadUUIDFails() {
-        let masterVersion: MasterVersionInt = 0
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Test1"
 

@@ -64,7 +64,7 @@ class MockStorageLiveTests: ServerTestCase, LinuxTestable {
     }
     
     func testDownloadFile() {
-        downloadTextFile(masterVersionExpectedWithDownload: 1)
+        downloadTextFile()
     }
 }
 

@@ -20,10 +20,6 @@ class SharingGroup : NSObject, Model {
     
     static let deletedKey = "deleted"
     var deleted:Bool!
-    
-    // Not a part of this table, but a convenience for doing joins with the MasterVersion table.
-    static let masterVersionKey = "masterVersion"
-    var masterVersion: MasterVersionInt!
 
     // Similarly, not part of this table. For doing joins.
     public static let permissionKey = "permission"
@@ -49,9 +45,6 @@ class SharingGroup : NSObject, Model {
             
             case SharingGroup.deletedKey:
                 deleted = newValue as! Bool?
-
-            case SharingGroup.masterVersionKey:
-                masterVersion = newValue as! MasterVersionInt?
                 
             case SharingGroup.permissionKey:
                 permission = newValue as! Permission?
@@ -96,7 +89,6 @@ class SharingGroup : NSObject, Model {
         clientGroup.sharingGroupUUID = sharingGroupUUID
         clientGroup.sharingGroupName = sharingGroupName
         clientGroup.deleted = deleted
-        clientGroup.masterVersion = masterVersion
         clientGroup.permission = permission
         clientGroup.sharingGroupUsers = sharingGroupUsers
         
@@ -186,10 +178,9 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     }
 
     func sharingGroups(forUserId userId: UserId, sharingGroupUserRepo: SharingGroupUserRepository, userRepo: UserRepository) -> [SharingGroup]? {
-        let masterVersionTableName = MasterVersionRepository.tableName
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
         
-        let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission, \(sharingGroupUserTableName).owningUserId FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID AND \(tableName).sharingGroupUUID = \(masterVersionTableName).sharingGroupUUID"
+        let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted,  \(sharingGroupUserTableName).permission, \(sharingGroupUserTableName).owningUserId FROM \(tableName),\(sharingGroupUserTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID"
         
         // The "owners" or "parents" of the sharing groups the sharing user is in
         guard let owningUsers = userRepo.getOwningSharingGroupUsers(forSharingUserId: userId) else {

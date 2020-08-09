@@ -15,7 +15,7 @@ import ServerShared
 import Kitura
 import ServerAccount
 
-class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
+class Sharing_FileManipulationTests: ServerTestCase {
     var accountManager: AccountManager!
     
     override func setUp() {
@@ -26,7 +26,7 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
     override func tearDown() {
         super.tearDown()
     }
-    
+#if false
     struct SharingUploadResult {
         let request: UploadFileRequest
         let checkSum:String
@@ -794,47 +794,6 @@ class Sharing_FileManipulationTests: ServerTestCase, LinuxTestable {
         
         downloadTextFile(testAccount: sharingAccount, masterVersionExpectedWithDownload: Int(masterVersion+1), uploadFileRequest: result.request)
     }
-}
-
-extension Sharing_FileManipulationTests {
-    static var allTests : [(String, (Sharing_FileManipulationTests) -> () throws -> Void)] {
-        return [
-            ("testThatReadSharingUserCannotUploadAFile", testThatReadSharingUserCannotUploadAFile),
-            ("testThatReadSharingUserCannotUploadDeleteAFile", testThatReadSharingUserCannotUploadDeleteAFile),
-            ("testThatReadSharingUserCanDownloadAFile", testThatReadSharingUserCanDownloadAFile),
-            ("testThatReadSharingUserCanDownloadDeleteAFile", testThatReadSharingUserCanDownloadDeleteAFile),
-            ("testThatWriteSharingUserCanUploadAFile", testThatWriteSharingUserCanUploadAFile),
-            ("testThatV0FileOwnerRemainsFileOwner", testThatV0FileOwnerRemainsFileOwner),
-            ("testUploadDeletionWithDifferentV0OwnersWorks",
-                testUploadDeletionWithDifferentV0OwnersWorks),
-            ("testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks", testThatUploadDeletionOfFileAfterV1UploadBySharingUserWorks),
-            ("testUploadDeletionForNonRootOwningUserWorks", testUploadDeletionForNonRootOwningUserWorks),
-            ("testThatWriteSharingUserCanUploadDeleteAFile", testThatWriteSharingUserCanUploadDeleteAFile),
-            ("testThatWriteSharingUserCanDownloadAFile", testThatWriteSharingUserCanDownloadAFile),
-            ("testThatWriteSharingUserCanDownloadDeleteAFile", testThatWriteSharingUserCanDownloadDeleteAFile),
-            ("testThatAdminSharingUserCanUploadAFile", testThatAdminSharingUserCanUploadAFile),
-            ("testThatAdminSharingUserCanUploadDeleteAFile", testThatAdminSharingUserCanUploadDeleteAFile),
-            ("testThatAdminSharingUserCanDownloadAFile", testThatAdminSharingUserCanDownloadAFile),
-            ("testThatAdminSharingUserCanDownloadDeleteAFile", testThatAdminSharingUserCanDownloadDeleteAFile),
-            ("testThatOwningUserCanDownloadSharingUserFile", testThatOwningUserCanDownloadSharingUserFile),
-            ("testThatSharingUserCanDownloadSharingUserFile", testThatSharingUserCanDownloadSharingUserFile),
-            ("testUploadByOwningSharingUserThenDownloadByBothWorks",
-                testUploadByOwningSharingUserThenDownloadByBothWorks),
-            ("testCanAccessCloudStorageOfRedeemingUser", testCanAccessCloudStorageOfRedeemingUser),
-            ("testUploadByOwningSharingUserAfterInvitingUserDeletedWorks",
-                testUploadByOwningSharingUserAfterInvitingUserDeletedWorks),
-            ("testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone",
-                testUploadByNonOwningSharingUserAfterInvitingUserDeletedRespondsWithGone),
-            ("testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks",
-                testDownloadFileOwnedByThirdUserAfterInvitingUserDeletedWorks),
-            ("testThatUploadForSecondSharingGroupWorks", testThatUploadForSecondSharingGroupWorks),
-            ("testThatDoneUploadsForSecondSharingGroupWorks", testThatDoneUploadsForSecondSharingGroupWorks),
-            ("testThatDownloadForSecondSharingGroupWorks", testThatDownloadForSecondSharingGroupWorks)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:Sharing_FileManipulationTests.self)
-    }
+#endif
 }
 

@@ -278,28 +278,3 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
     }
 }
 
-//extension SpecificDatabaseTests {
-//    static var allTests : [(String, (SpecificDatabaseTests) -> () throws -> Void)] {
-//        return [
-//            ("testUpdateToNextMasterVersion", testUpdateToNextMasterVersion),
-//            ("testUpdateToNextTwiceMasterVersion", testUpdateToNextTwiceMasterVersion),
-//            ("testUpdateToNextFailsWithWrongExpectedMasterVersion", testUpdateToNextFailsWithWrongExpectedMasterVersion),
-//            ("testAddFileIndex", testAddFileIndex),
-//            ("testUpdateFileIndexWithNoChanges", testUpdateFileIndexWithNoChanges),
-//            ("testUpdateFileIndexWithAChange", testUpdateFileIndexWithAChange),
-//            ("testUpdateFileIndexFailsWithoutFileIndexId", testUpdateFileIndexFailsWithoutFileIndexId),
-//            ("testUpdateUploadSucceedsWithNilAppMetaData", testUpdateUploadSucceedsWithNilAppMetaData),
-//            ("testLookupFromFileIndex", testLookupFromFileIndex),
-//            ("testFileIndexWithNoFiles", testFileIndexWithNoFiles),
-//            ("testFileIndexWithOneFile", testFileIndexWithOneFile),
-//            ("testAddDeviceUUID", testAddDeviceUUID),
-//            ("testAddDeviceUUIDFailsAfterMax", testAddDeviceUUIDFailsAfterMax),
-//            ("testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax", testAddDeviceUUIDDoesNotFailFailsAfterMaxWithNilMax),
-//            ("testLookupFromDeviceUUID", testLookupFromDeviceUUID)
-//        ]
-//    }
-//
-//    func testLinuxTestSuiteIncludesAllTests() {
-//        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests.self)
-//    }
-//}
