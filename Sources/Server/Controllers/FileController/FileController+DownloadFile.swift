@@ -38,17 +38,18 @@ extension FileController {
 
         let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
         
-        var fileIndexObj:FileIndex?
+        let fileIndex:FileIndex
         
         switch lookupResult {
-        case .found(let modelObj):
-            fileIndexObj = modelObj as? FileIndex
-            if fileIndexObj == nil {
+        case .found(let model):
+            guard let model = model as? FileIndex else {
                 let message = "Could not convert model object to FileIndex"
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
             }
+            
+            fileIndex = model
             
         case .noObjectFound:
             let message = "Could not find file in FileIndex"
@@ -63,43 +64,40 @@ extension FileController {
             return
         }
         
-        guard downloadRequest.fileVersion == fileIndexObj!.fileVersion else {
-            let message = "Expected file version \(String(describing: downloadRequest.fileVersion)) was not the same as the actual version \(String(describing: fileIndexObj!.fileVersion))"
+        guard downloadRequest.fileVersion == fileIndex.fileVersion else {
+            let message = "Expected file version \(String(describing: downloadRequest.fileVersion)) was not the same as the actual version \(String(describing: fileIndex.fileVersion))"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard downloadRequest.appMetaDataVersion == fileIndexObj!.appMetaDataVersion else {
-            let message = "Expected app meta data version \(String(describing: downloadRequest.appMetaDataVersion)) was not the same as the actual version \(String(describing: fileIndexObj!.appMetaDataVersion))"
+        guard let deleted = fileIndex.deleted else {
+            let message = "Nil fileIndex.deleted value"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        if fileIndexObj!.deleted! {
+        guard !deleted else {
             let message = "The file you are trying to download has been deleted!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
-                    
-        // TODO: *5*: Eventually, this should bypass the middle man and stream from the cloud storage service directly to the client.
-        
+                            
         // Both the deviceUUID and the fileUUID must come from the file index-- They give the specific name of the file in cloud storage. The deviceUUID of the requesting device is not the right one.
-        guard let deviceUUID = fileIndexObj!.deviceUUID else {
+        guard let deviceUUID = fileIndex.deviceUUID else {
             let message = "No deviceUUID!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        // DEPRECATED
-        var cloudFileName: String! // = fileIndexObj!.cloudFileName(deviceUUID:deviceUUID, mimeType: fileIndexObj!.mimeType)
+        let cloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: downloadRequest.fileUUID, mimeType: fileIndex.mimeType, fileVersion: downloadRequest.fileVersion)
 
         // OWNER
         // The cloud storage for the file is the original owning user's storage.
-        guard let owningUserCreds = FileController.getCreds(forUserId: fileIndexObj!.userId, userRepo: params.repos.user, accountManager: params.accountManager) else {
+        guard let owningUserCreds = FileController.getCreds(forUserId: fileIndex.userId, userRepo: params.repos.user, accountManager: params.accountManager) else {
             let message = "Could not obtain owning users creds"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -114,7 +112,7 @@ extension FileController {
             return
         }
         
-        let options = CloudStorageFileNameOptions(cloudFolderName: owningUserCreds.cloudFolderName, mimeType: fileIndexObj!.mimeType)
+        let options = CloudStorageFileNameOptions(cloudFolderName: owningUserCreds.cloudFolderName, mimeType: fileIndex.mimeType)
         
         cloudStorageCreds.downloadFile(cloudFileName: cloudFileName, options:options) { result in
             switch result {
@@ -125,12 +123,12 @@ extension FileController {
 
                 var contentsChanged = false
                 // 11/4/18; This is conditional because for migration purposes, the FileIndex may not contain a lastUploadedCheckSum. i.e., it comes from a FileIndex record before we added the lastUploadedCheckSum field.
-                if let lastUploadedCheckSum = fileIndexObj!.lastUploadedCheckSum {
+                if let lastUploadedCheckSum = fileIndex.lastUploadedCheckSum {
                     contentsChanged = checkSum != lastUploadedCheckSum
                 }
                 
                 let response = DownloadFileResponse()
-                response.appMetaData = fileIndexObj!.appMetaData
+                response.appMetaData = fileIndex.appMetaData
                 response.data = data
                 response.checkSum = checkSum
                 response.cloudStorageType = cloudStorageType
@@ -142,7 +140,7 @@ extension FileController {
                 let message = "Access token revoked or expired."
                 Log.error(message)
                 let response = DownloadFileResponse()
-                response.appMetaData = fileIndexObj!.appMetaData
+                response.appMetaData = fileIndex.appMetaData
                 response.cloudStorageType = cloudStorageType
                 response.gone = GoneReason.authTokenExpiredOrRevoked.rawValue
                 params.completion(.success(response))
@@ -151,7 +149,7 @@ extension FileController {
                 let message = "File not found."
                 Log.error(message)
                 let response = DownloadFileResponse()
-                response.appMetaData = fileIndexObj!.appMetaData
+                response.appMetaData = fileIndex.appMetaData
                 response.cloudStorageType = cloudStorageType
                 response.gone = GoneReason.fileRemovedOrRenamed.rawValue
                 params.completion(.success(response))

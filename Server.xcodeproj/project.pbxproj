@@ -43,6 +43,7 @@
 
 /* Begin PBXBuildFile section */
 		411FA229A2E7FAB917CFB4ED /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 071A43AF64F4C0AA50241854 /* Server.json */; };
+		838F737324DF97A60003A186 /* FileController_DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838F737224DF97A60003A186 /* FileController_DownloadTests.swift */; };
 		9B7F9CA27A1825A510727CFE /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = E031EE5C6960B6CA79C6B054 /* ServerTests.json */; };
 		OBJ_1000 /* Logging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "swift-log::Logging::Product" /* Logging.framework */; };
 		OBJ_1023 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_319 /* Package.swift */; };
@@ -7193,6 +7194,7 @@
 
 /* Begin PBXFileReference section */
 		071A43AF64F4C0AA50241854 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
+		838F737224DF97A60003A186 /* FileController_DownloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController_DownloadTests.swift; sourceTree = "<group>"; };
 		"ChangeResolvers::ChangeResolvers::Product" /* ChangeResolvers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"CredentialsAppleSignIn::CredentialsAppleSignIn::Product" /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"CredentialsDropbox::CredentialsDropbox::Product" /* CredentialsDropbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -8933,6 +8935,7 @@
 		OBJ_106 /* FileControllerTests */ = {
 			isa = PBXGroup;
 			children = (
+				838F737224DF97A60003A186 /* FileController_DownloadTests.swift */,
 				OBJ_107 /* FileControllerTests.swift */,
 				OBJ_108 /* FileControllerTests_GetUploads.swift */,
 				OBJ_109 /* FileController_DownloadAppMetaDataTests.swift */,
@@ -12960,6 +12963,7 @@
 				OBJ_1531 /* FileControllerTests.swift in Sources */,
 				OBJ_1532 /* FileControllerTests_GetUploads.swift in Sources */,
 				OBJ_1533 /* FileController_DownloadAppMetaDataTests.swift in Sources */,
+				838F737324DF97A60003A186 /* FileController_DownloadTests.swift in Sources */,
 				OBJ_1534 /* FileController_MultiVersionFiles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
