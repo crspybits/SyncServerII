@@ -63,7 +63,7 @@ class ApplyDeferredUploads {
     }
     
     let sharingGroupUUID: String
-    let deferredUploads: [DeferredUpload]
+    var deferredUploads: [DeferredUpload]
     let db: Database
     let allUploads: [Upload]
     let fileIndexRepo: FileIndexRepository
@@ -137,6 +137,9 @@ class ApplyDeferredUploads {
                 numberRows == 1 else {
                 return false
             }
+            
+            // Remove the DeferredUpload so we don't remove them multiple times.
+            self.deferredUploads.removeAll { $0.deferredUploadId == deferredUpload.deferredUploadId }
         }
         
         return true
@@ -271,7 +274,7 @@ class ApplyDeferredUploads {
         }
     }
     
-    // Success result is uploadsForFileUUID
+    // Success result is uploadsForFileUUID. Also removes all uploads for the fileUUID.
     func applyChangesToSingleFile(fileUUID: String, completion: @escaping (Swift.Result<[Upload], Error>)->()) {
         let uploadsForFileUUID = uploads(fileUUID: fileUUID)
         

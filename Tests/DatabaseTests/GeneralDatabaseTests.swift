@@ -164,7 +164,7 @@ class model2 : Model {
     }
 }
 
-class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
+class GeneralDatabaseTests: ServerTestCase {
     let c1Value = "a"
     let c2Value = "bc"
     let c3Value = "def"
@@ -992,35 +992,5 @@ class GeneralDatabaseTests: ServerTestCase, LinuxTestable {
         }
         
         XCTAssert(count1 + 1 == count2)
-    }
-}
-
-extension GeneralDatabaseTests {
-    static var allTests : [(String, (GeneralDatabaseTests) -> () throws -> Void)] {
-        return [
-            ("testSelectForEachRowIgnoringErrors", testSelectForEachRowIgnoringErrors),
-
-            ("testSelectForEachRowNotIgnoringErrors", testSelectForEachRowNotIgnoringErrors),
-            ("testTypeConverters", testTypeConverters),
-            /*
-            ("testColumnExists", testColumnExists),
-            ("testAddColumn", testAddColumn),
-            ("testRemoveColumn", testRemoveColumn),
-            
-            ("testDatabaseInsertStringValueIntoStringColumnWorks", testDatabaseInsertStringValueIntoStringColumnWorks),
-            ("testDatabaseInsertIntValueIntoIntColumnWorks", testDatabaseInsertIntValueIntoIntColumnWorks),
-            ("testDatabaseInsertBoolValueIntoBoolColumnWorks", testDatabaseInsertBoolValueIntoBoolColumnWorks),
-            ("testDatabaseInsertNullValueIntoIntColumnWorks", testDatabaseInsertNullValueIntoIntColumnWorks),
-            ("testDatabaseInsertStringValueIntoIntColumnFails", testDatabaseInsertStringValueIntoIntColumnFails),
-
-            ("testDatabaseInsertValuesIntoColumnsWorks", testDatabaseInsertValuesIntoColumnsWorks),
-            ("testDatabaseUpdateWorks", testDatabaseUpdateWorks),
-            ("testDatabaseUpdateWithTwoFieldsInWhereClauseWorks", testDatabaseUpdateWithTwoFieldsInWhereClauseWorks)
-            */
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:GeneralDatabaseTests.self)
     }
 }

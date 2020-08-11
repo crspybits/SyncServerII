@@ -50,7 +50,9 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         upload.uploadCount = uploadCount
         upload.uploadIndex = uploadIndex
         upload.deferredUploadId = deferredUploadId
-        upload.changeResolverName = changeResolverName
+        if fileVersion == 0 {
+            upload.changeResolverName = changeResolverName
+        }
         
         let result = UploadRepository(db).add(upload: upload)
         
@@ -607,5 +609,22 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         let actual = Set<Int64>(result.compactMap{$0.uploadId})
 
         XCTAssert(expectation == actual)
+    }
+    
+    func testLookupAll() {
+        let sharingGroupUUID = UUID().uuidString
+        guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
+            XCTFail()
+            return
+        }
+        
+        let upload = doAddUpload(sharingGroupUUID:sharingGroupUUID, fileVersion: 1)
+        
+        let key =  UploadRepository.LookupKey.fileUUIDWithState(fileUUID: upload.fileUUID, state: .vNUploadFileChange)
+        guard let vNFileFileChangeUploads = UploadRepository(db).lookupAll(key: key, modelInit: Upload.init) else {
+            return
+        }
+        
+        XCTAssert(vNFileFileChangeUploads.count == 1)
     }
 }
