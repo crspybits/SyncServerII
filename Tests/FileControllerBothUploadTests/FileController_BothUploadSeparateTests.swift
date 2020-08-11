@@ -52,7 +52,7 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
 
-        guard let deferredUpload = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -131,7 +131,7 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
         let comment2 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
         
-        guard let deferredUpload = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return

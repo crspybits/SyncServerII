@@ -606,7 +606,11 @@ class ServerTestCase : XCTestCase {
         uploadRequest.checkSum = requestCheckSum
         uploadRequest.uploadIndex = uploadIndex
         uploadRequest.uploadCount = uploadCount
-        uploadRequest.appMetaData = appMetaData
+        
+        if let appMetaData = appMetaData {
+            uploadRequest.appMetaData = AppMetaData(contents: appMetaData)
+        }
+        
         uploadRequest.changeResolverName = changeResolverName
         
         Log.info("Starting runUploadTest: uploadTextFile: uploadRequest: \(String(describing: uploadRequest.toDictionary))")
@@ -656,9 +660,15 @@ class ServerTestCase : XCTestCase {
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
             XCTAssert(ServerEndpoints.uploadFile.method == .post)
             
-            Log.debug("uploadRequest.urlParameters(): \(uploadRequest.urlParameters()!)")
+            guard let parameters = uploadRequest.urlParameters() else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
             
-            self.performRequest(route: ServerEndpoints.uploadFile, responseDictFrom: .header, headers: headers, urlParameters: "?" + uploadRequest.urlParameters()!, body:data) { response, dict in
+            Log.debug("uploadRequest.urlParameters(): \(parameters)")
+            
+            self.performRequest(route: ServerEndpoints.uploadFile, responseDictFrom: .header, headers: headers, urlParameters: "?" + parameters, body:data) { response, dict in
                 
                 Log.info("Status code: \(response!.statusCode)")
 
@@ -743,7 +753,9 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        uploadRequest.appMetaData = appMetaData
+        if let appMetaData = appMetaData {
+            uploadRequest.appMetaData = AppMetaData(contents: appMetaData)
+        }
         
         Log.info("Starting runUploadTest: uploadJPEGFile")
         let uploadResponse = runUploadTest(testAccount: testAccount, data:data, uploadRequest:uploadRequest, deviceUUID:deviceUUID, errorExpected: errorExpected)
@@ -1254,39 +1266,7 @@ class ServerTestCase : XCTestCase {
         let data: Data?
     }
     
-    @discardableResult
-    func downloadServerFile(testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, file: TestFile = .test1, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadResult? {
-    
-        let deviceUUID = Foundation.UUID().uuidString
-        
-        var actualUploadFileRequest:UploadFileRequest!
-        var actualCheckSum:String!
-
-        let beforeUploadTime = Date()
-        var afterUploadTime:Date!
-        var fileUUID:String!
-        var actualSharingGroupUUID: String!
-        
-        if uploadFileRequest == nil {
-            guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, mimeType: mimeType, deviceUUID:deviceUUID, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData:appMetaData, file: file),
-                let sharingGroupUUID = uploadResult.sharingGroupUUID else {
-                XCTFail()
-                return nil
-            }
-            
-            actualSharingGroupUUID = sharingGroupUUID
-            
-            fileUUID = uploadResult.request.fileUUID
-            actualUploadFileRequest = uploadResult.request
-            actualCheckSum = uploadResult.checkSum
-            afterUploadTime = Date()
-        }
-        else {
-            actualUploadFileRequest = uploadFileRequest
-            actualCheckSum = uploadFileRequest!.checkSum
-            actualSharingGroupUUID = uploadFileRequest!.sharingGroupUUID
-        }
-        
+    func downloadFile(testAccount: TestAccount, fileUUID: String?, fileVersion: FileVersionInt, sharingGroupUUID: String, deviceUUID: String, expectedCheckSum: String? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadResult? {
         var fileResponse:DownloadFileResponse?
         var dataResponse:Data?
         
@@ -1294,20 +1274,25 @@ class ServerTestCase : XCTestCase {
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let downloadFileRequest = DownloadFileRequest()
-            downloadFileRequest.fileUUID = actualUploadFileRequest!.fileUUID
-            downloadFileRequest.fileVersion = downloadFileVersion
-            downloadFileRequest.sharingGroupUUID = actualSharingGroupUUID
+            downloadFileRequest.fileUUID = fileUUID
+            downloadFileRequest.fileVersion = fileVersion
+            downloadFileRequest.sharingGroupUUID = sharingGroupUUID
             
             self.performRequest(route: ServerEndpoints.downloadFile, responseDictFrom:.header, headers: headers, urlParameters: "?" + downloadFileRequest.urlParameters()!, body:nil) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
+                Log.info("Status code: \(String(describing: response?.statusCode))")
                 
                 if expectedError {
-                    XCTAssert(response!.statusCode != .OK, "Did not work on failing downloadFileRequest request")
+                    XCTAssert(response?.statusCode != .OK, "Did not work on failing downloadFileRequest request")
                     XCTAssert(dict == nil)
                 }
                 else {
-                    XCTAssert(response!.statusCode == .OK, "Did not work on downloadFileRequest request")
-                    XCTAssert(dict != nil)
+                    guard response?.statusCode == .OK else {
+                        return
+                    }
+                    
+                    guard dict != nil else {
+                        return
+                    }
                     
                     if let dict = dict,
                         let downloadFileResponse = try? DownloadFileResponse.decode(dict) {
@@ -1326,8 +1311,8 @@ class ServerTestCase : XCTestCase {
                             loadTesting = true
                         }
     
-                        if !loadTesting {
-                            XCTAssert(downloadFileResponse.checkSum == actualCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(String(describing: actualCheckSum))")
+                        if let expectedCheckSum = expectedCheckSum, !loadTesting {
+                            XCTAssert(downloadFileResponse.checkSum == expectedCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(String(describing: expectedCheckSum))")
                         }
                         
                         // DEPRECATED
@@ -1345,17 +1330,12 @@ class ServerTestCase : XCTestCase {
             }
         }
         
-        if let afterUploadTime = afterUploadTime, let fileUUID = fileUUID {
-            checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime, sharingGroupUUID: actualSharingGroupUUID)
+        if fileResponse == nil && dataResponse == nil {
+            return nil
         }
-        
-        return DownloadResult(response: fileResponse, data: dataResponse)
-    }
-    
-    @discardableResult
-    func downloadTextFile(testAccount:TestAccount = .primaryOwningAccount, file:TestFile = .test1, appMetaData:String? = nil, uploadFileVersion:FileVersionInt = 0, downloadFileVersion:FileVersionInt = 0, uploadFileRequest:UploadFileRequest? = nil, expectedError: Bool = false, contentsChangedExpected: Bool = false) -> DownloadResult? {
-    
-        return downloadServerFile(testAccount:testAccount, mimeType: .text, file: file, appMetaData:appMetaData, uploadFileVersion:uploadFileVersion, downloadFileVersion:downloadFileVersion, uploadFileRequest:uploadFileRequest, expectedError: expectedError, contentsChangedExpected: contentsChangedExpected)
+        else {
+            return DownloadResult(response: fileResponse, data: dataResponse)
+        }
     }
     
     func checkThatDateFor(fileUUID: String, isBetween start: Date, end: Date, sharingGroupUUID:String) {

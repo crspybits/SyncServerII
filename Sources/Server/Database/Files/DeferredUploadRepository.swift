@@ -7,6 +7,14 @@
 
 import Foundation
 import LoggerAPI
+import ServerShared
+
+/* This table represents two kinds of things:
+1) In pending states, it represents an upload that needs to be processed asynchronously by the Uploader.
+2) In .completed or .error states it is used by the GetUploadResults endpoint to report on the completion of Uploader asynchronously processing.
+
+A single row in this table is used to represent (a) a single upload deletion, (b) the last file upload in a batch of uploads (either 1 of 1, or the last in an N of M batch).
+ */
 
 class DeferredUpload : NSObject, Model {
     enum Status: String {
@@ -26,6 +34,14 @@ class DeferredUpload : NSObject, Model {
     
     static let deferredUploadIdKey = "deferredUploadId"
     var deferredUploadId:Int64!
+    
+    // The signed in userId of the user creating the DeferredUpload.
+    static let userIdKey = "userId"
+    var userId:UserId!
+    
+    // Assigned after the DeferredUpload completed-- so we can know when to remove this row.
+    static let completionDateKey = "completionDate"
+    var completionDate:Date!
     
     static let sharingGroupUUIDKey = "sharingGroupUUID"
     var sharingGroupUUID:String!
@@ -49,6 +65,9 @@ class DeferredUpload : NSObject, Model {
 
             case DeferredUpload.sharingGroupUUIDKey:
                 sharingGroupUUID = newValue as? String
+
+            case DeferredUpload.userIdKey:
+                userId = newValue as? UserId
                 
             case DeferredUpload.fileGroupUUIDKey:
                 fileGroupUUID = newValue as? String
@@ -103,10 +122,15 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
             
             "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
+            "userId BIGINT NOT NULL, " +
+
+            // Not NON NULL because this will be nil initially, and then get updated when the deferred uploaded is completed.
+            "completionDate DATETIME," +
+
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
 
             "status VARCHAR(\(DeferredUpload.Status.maxCharacterLength)) NOT NULL, " +
-            
+
             "UNIQUE (deferredUploadId))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -125,6 +149,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     enum LookupKey : CustomStringConvertible {
         case deferredUploadId(Int64)
         case fileGroupUUIDWithStatus(fileGroupUUID: String, status: DeferredUpload.Status)
+        case resultsUUID(String)
         
         var description : String {
             switch self {
@@ -132,6 +157,8 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
                 return "deferredUploadId(\(deferredUploadId))"
             case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
                 return "fileGroupUUID(\(fileGroupUUID); status: \(status.rawValue))"
+            case .resultsUUID(let resultsUUID):
+                return "resultsUUID(\(resultsUUID))"
             }
         }
     }
@@ -142,6 +169,8 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
             return "deferredUploadId = '\(deferredUploadId)'"
         case .fileGroupUUIDWithStatus(let fileGroupUUID, let status):
             return "fileGroupUUID = '\(fileGroupUUID)' and status = '\(status.rawValue)'"
+        case .resultsUUID(let resultsUUID):
+            return "resultsUUID = '\(resultsUUID)'"
         }
     }
     
@@ -165,13 +194,18 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
         }
     }
     
-    // deferredUploadId in the model is ignored and the automatically generated deferredUploadId is returned if the add is successful.
+    // deferredUploadId in the model is ignored and the automatically generated deferredUploadId is returned if the add is successful. Adds a new UUID for resultsUUID.
     func add(_ deferredUpload:DeferredUpload) -> AddResult {
         let insert = Database.PreparedStatement(repo: self, type: .insert)
+        
+        guard let userId = deferredUpload.userId else {
+            return .otherError("No userId given")
+        }
         
         insert.add(fieldName: DeferredUpload.sharingGroupUUIDKey, value: .stringOptional(deferredUpload.sharingGroupUUID))
         insert.add(fieldName: DeferredUpload.fileGroupUUIDKey, value: .stringOptional(deferredUpload.fileGroupUUID))
         insert.add(fieldName: DeferredUpload.statusKey, value: .stringOptional(deferredUpload.status?.rawValue))
+        insert.add(fieldName: DeferredUpload.userIdKey, value: .int64(userId))
 
         do {
             try insert.run()

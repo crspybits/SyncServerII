@@ -61,7 +61,7 @@ class FileControllerTests_GetUploads: ServerTestCase, LinuxTestable {
         }
 
         // Second upload-- shouldn't result in second entries in Upload table.
-        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: uploadResult.request.appMetaData) else {
+        guard let _ = uploadTextFile(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: uploadResult.request.appMetaData?.contents) else {
             XCTFail()
             return
         }

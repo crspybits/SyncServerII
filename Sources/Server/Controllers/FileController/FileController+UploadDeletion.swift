@@ -180,11 +180,11 @@ extension FileController {
                 return
             }
         }
-        
-        let finishUploads = FinishUploadDeletion(type: finishType, uploader: params.uploader, sharingGroupUUID: sharingGroupUUID, params: params)
-        
+
         do {
+            let finishUploads = try FinishUploadDeletion(type: finishType, uploader: params.uploader, sharingGroupUUID: sharingGroupUUID, params: params)
             let result = try finishUploads.finish()
+            
             switch result {
             case .deferred(let runner):
                 Log.info("Success deleting files: Subject to deferred transfer.")

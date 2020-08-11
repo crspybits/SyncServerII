@@ -22,7 +22,7 @@ class FinishUploadFiles {
     private let sharingGroupUUID: String
     private let deviceUUID: String
     private var params:FinishUploadsParameters
-    private let userId: UserId
+    private let currentSignedInUser: UserId
     private let uploader: UploaderProtocol
     
     /** This is for both file uploads, and upload deletions.
@@ -50,13 +50,13 @@ class FinishUploadFiles {
         self.uploader = uploader
         
         // Get uploads for the current signed in user -- uploads are identified by userId, not effectiveOwningUserId, because we want to organize uploads by specific user.
-        guard let userId = params.currentSignedInUser?.userId else {
+        guard let currentSignedInUser = params.currentSignedInUser?.userId else {
             let message = "Could not get userId"
             Log.error(message)
             return nil
         }
         
-        self.userId = userId
+        self.currentSignedInUser = currentSignedInUser
     }
     
     enum UploadsResponse {
@@ -76,7 +76,7 @@ class FinishUploadFiles {
         let currentUploads: [Upload]
         
         // deferredUploadIdNull true because once these rows have a non-null  deferredUploadId they are pending deferred transfer and we should not deal with them here.
-        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true)
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: currentSignedInUser, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true)
         
         switch fileUploadsResult {
         case .uploads(let uploads):
@@ -147,7 +147,7 @@ class FinishUploadFiles {
         
         if vNUploads {
             // Mark the uploads to indicate they are ready for deferred transfer.
-            guard markUploadsAsDeferred(fileGroupUUID: fileGroupUUID, uploads: currentUploads) else {
+            guard markUploadsAsDeferred(signedInUserId: currentSignedInUser, fileGroupUUID: fileGroupUUID, uploads: currentUploads) else {
                 let message = "Failed markUploadsAsDeferred"
                 Log.error(message)
                 return .error(message: message)
@@ -233,11 +233,12 @@ class FinishUploadFiles {
     }
     
     // This is called only for vN files. These files will already be in the FileIndex.
-    private func markUploadsAsDeferred(fileGroupUUID: String?, uploads: [Upload]) -> Bool {
+    private func markUploadsAsDeferred(signedInUserId: UserId, fileGroupUUID: String?, uploads: [Upload]) -> Bool {
         let deferredUpload = DeferredUpload()
         deferredUpload.status = .pendingChange
         deferredUpload.sharingGroupUUID = sharingGroupUUID
         deferredUpload.fileGroupUUID = fileGroupUUID
+        deferredUpload.userId = signedInUserId
         
         let result = params.repos.deferredUpload.retry {[unowned self] in
             return self.params.repos.deferredUpload.add(deferredUpload)

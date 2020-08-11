@@ -57,9 +57,6 @@ class FileIndex : NSObject, Model {
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
     
-    static let appMetaDataVersionKey = "appMetaDataVersion"
-    var appMetaDataVersion: AppMetaDataVersionInt?
-    
     // When "deleted" files are not fully removed from the system. They are removed from cloud storage, but just marked as deleted in the FileIndex. This effectively also marks the containing file group as deleted.
     static let deletedKey = "deleted"
     var deleted:Bool!
@@ -106,9 +103,6 @@ class FileIndex : NSObject, Model {
                 
             case FileIndex.appMetaDataKey:
                 appMetaData = newValue as! String?
-                
-            case FileIndex.appMetaDataVersionKey:
-                appMetaDataVersion = newValue as! AppMetaDataVersionInt?
             
             case FileIndex.deletedKey:
                 deleted = newValue as! Bool?
@@ -163,7 +157,7 @@ class FileIndex : NSObject, Model {
     }
     
     override var description : String {
-        return "fileIndexId: \(String(describing: fileIndexId)); fileUUID: \(String(describing: fileUUID)); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(String(describing: updateDate)); userId: \(String(describing: userId)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(String(describing: deleted)); fileVersion: \(String(describing: fileVersion)); lastUploadedCheckSum: \(String(describing: lastUploadedCheckSum))"
+        return "fileIndexId: \(String(describing: fileIndexId)); fileUUID: \(String(describing: fileUUID)); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(String(describing: updateDate)); userId: \(String(describing: userId)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); deleted: \(String(describing: deleted)); fileVersion: \(String(describing: fileVersion)); lastUploadedCheckSum: \(String(describing: lastUploadedCheckSum))"
     }
 }
 
@@ -279,13 +273,6 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                 }
             }
             
-            // 3/23/18; Evolution 3: Add the appMetaDataVersion column.
-            if db.columnExists(FileIndex.appMetaDataVersionKey, in: tableName) == false {
-                if !db.addColumn("\(FileIndex.appMetaDataVersionKey) INT", to: tableName) {
-                    return .failure(.columnCreation)
-                }
-            }
-            
             // 4/19/18; Evolution 4: Add in fileGroupUUID
             if db.columnExists(FileIndex.fileGroupUUIDKey, in: tableName) == false {
                 if !db.addColumn("\(FileIndex.fileGroupUUIDKey) VARCHAR(\(Database.uuidLength))", to: tableName) {
@@ -337,7 +324,6 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
 
         insert.add(fieldName: FileIndex.fileVersionKey, value: .int32Optional(fileIndex.fileVersion))
         insert.add(fieldName: FileIndex.userIdKey, value: .int64Optional(fileIndex.userId))
-        insert.add(fieldName: FileIndex.appMetaDataVersionKey, value: .int32Optional(fileIndex.appMetaDataVersion))
         
         insert.add(fieldName: FileIndex.deletedKey, value: .boolOptional(fileIndex.deleted))
 
@@ -399,6 +385,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
     enum UpdateType {
         case uploadFile
         case uploadDeletion
+        
+        // DEPRECATED
         case uploadAppMetaData
     }
     
@@ -413,8 +401,6 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
         let appMetaDataField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaData, fieldName: FileIndex.appMetaDataKey)
-
-        let appMetaDataVersionField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaDataVersion, fieldName: FileIndex.appMetaDataVersionKey, fieldIsString: false)
         
         let lastUploadedCheckSumField = getUpdateFieldSetter(fieldValue: fileIndex.lastUploadedCheckSum, fieldName: FileIndex.lastUploadedCheckSumKey)
         
@@ -436,7 +422,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) \(changeResolverNameField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(fileVersionField) \(fileGroupUUIDField) \(changeResolverNameField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -544,8 +530,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             fileIndex.deleted = uploadDeletion
             fileIndex.fileUUID = upload.fileUUID
             
-            // If this an uploadDeletion or updating app meta data, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
-            if !uploadDeletion && upload.state != .uploadingAppMetaData {
+            // If this an uploadDeletion, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
+            if !uploadDeletion {
                 // Using `uploadingDeviceUUID` here, but equivalently use upload.deviceUUID-- they are the same. See [1] above.
                 assert(uploadingDeviceUUID == upload.deviceUUID)
                 fileIndex.deviceUUID = uploadingDeviceUUID
@@ -553,7 +539,6 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             
             fileIndex.mimeType = upload.mimeType
             fileIndex.appMetaData = upload.appMetaData
-            fileIndex.appMetaDataVersion = upload.appMetaDataVersion
             fileIndex.fileGroupUUID = upload.fileGroupUUID
             
             if upload.state == .v0UploadCompleteFile {
@@ -584,8 +569,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                 
                 fileIndex.fileVersion = fileVersion
             }
-            else if upload.state != .uploadingAppMetaData {
-                Log.error("No file version, and not uploading app meta data.")
+            else {
+                Log.error("No file version.")
                 error = true
                 return
             }
@@ -610,7 +595,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                         return
                     }
                 }
-                else if upload.state != .uploadingAppMetaData {
+                else {
                     guard upload.fileVersion == (existingFileIndex.fileVersion + 1) else {
                         Log.error("Did not have next version of file!")
                         error = true
@@ -624,9 +609,6 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                 if uploadDeletion {
                     updateType = .uploadDeletion
                 }
-                else if upload.state == .uploadingAppMetaData {
-                    updateType = .uploadAppMetaData
-                }
                 
                 guard self.update(fileIndex: fileIndex, updateType: updateType) else {
                     Log.error("Could not update FileIndex!")
@@ -635,12 +617,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                 }
                 
             case .noObjectFound:
-                if upload.state == .uploadingAppMetaData {
-                    Log.error("Attempting to upload app meta data for a file not present in the file index: \(key)!")
-                    error = true
-                    return
-                }
-                else if uploadDeletion {
+                if uploadDeletion {
                     Log.error("Attempting to delete a file not present in the file index: \(key)!")
                     error = true
                     return
@@ -746,7 +723,6 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             fileInfo.mimeType = rowModel.mimeType
             fileInfo.creationDate = rowModel.creationDate
             fileInfo.updateDate = rowModel.updateDate
-            fileInfo.appMetaDataVersion = rowModel.appMetaDataVersion
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID

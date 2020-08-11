@@ -34,7 +34,6 @@ public enum UploadState : String {
     // DEPRECATED.
     case uploadingUndelete
     case uploadedUndelete
-    case uploadingAppMetaData
     
     var isUploadFile: Bool {
         return self == .v0UploadCompleteFile || self == .vNUploadFileChange
@@ -94,10 +93,6 @@ class Upload : NSObject, Model, ChangeResolverContents {
     // The contents of the upload for file uploads, for files with changeResolverName's and file versions > 0.
     static let uploadContentsKey = "uploadContents"
     var uploadContents: Data?
-
-    // DEPRECATED
-    static let appMetaDataVersionKey = "appMetaDataVersion"
-    var appMetaDataVersion: AppMetaDataVersionInt?
     
     // This is not present in upload deletions.
     static let mimeTypeKey = "mimeType"
@@ -145,9 +140,6 @@ class Upload : NSObject, Model, ChangeResolverContents {
                 
             case Upload.appMetaDataKey:
                 appMetaData = newValue as! String?
-                
-            case Upload.appMetaDataVersionKey:
-                appMetaDataVersion = newValue as! AppMetaDataVersionInt?
                 
             case Upload.mimeTypeKey:
                 mimeType = newValue as! String?
@@ -319,13 +311,6 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
                 }
             }
             
-            // 3/23/18; Evolution 3: Add the appMetaDataVersion column.
-            if db.columnExists(Upload.appMetaDataVersionKey, in: tableName) == false {
-                if !db.addColumn("\(Upload.appMetaDataVersionKey) INT", to: tableName) {
-                    return .failure(.columnCreation)
-                }
-            }
-            
             if db.columnExists(Upload.fileGroupUUIDKey, in: tableName) == false {
                 if !db.addColumn("\(Upload.fileGroupUUIDKey) VARCHAR(\(Database.uuidLength))", to: tableName) {
                     return .failure(.columnCreation)
@@ -384,22 +369,9 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             return true
         }
         
-        if upload.state == .uploadingAppMetaData {
-            Log.error("upload.state1 group nil")
-            return upload.appMetaData == nil || upload.appMetaDataVersion == nil
-        }
-        
         if upload.state.isUploadFile &&
             (upload.mimeType == nil || upload.updateDate == nil) {
             Log.error("Uploading a file and the mimeType and/or updateDate is nil")
-            return true
-        }
-        
-        // The meta data and version must be nil or non-nil *together*.
-        let metaDataNil = upload.appMetaData == nil
-        let metaDataVersionNil = upload.appMetaDataVersion == nil
-        if metaDataNil != metaDataVersionNil {
-            Log.error("upload.metaDataNil group nil")
             return true
         }
         
@@ -454,7 +426,6 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         insert.add(fieldName: Upload.sharingGroupUUIDKey, value: .stringOptional(upload.sharingGroupUUID))
 
         insert.add(fieldName: Upload.appMetaDataKey, value: .stringOptional(upload.appMetaData))
-        insert.add(fieldName: Upload.appMetaDataVersionKey, value: .int32Optional(upload.appMetaDataVersion))
         insert.add(fieldName: Upload.fileGroupUUIDKey, value: .stringOptional(upload.fileGroupUUID))
         insert.add(fieldName: Upload.lastUploadedCheckSumKey, value: .stringOptional(upload.lastUploadedCheckSum))
         insert.add(fieldName: Upload.mimeTypeKey, value: .stringOptional(upload.mimeType))
@@ -663,31 +634,6 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         }
         
         return result
-    }
-
-    // DEPRECATED
-    static func isValidAppMetaDataUpload(currServerAppMetaDataVersion: AppMetaDataVersionInt?, currServerAppMetaData: String?, optionalUpload appMetaData:AppMetaData?) -> Bool {
-
-        if appMetaData == nil {
-            // Doesn't matter what the current app meta data is-- we're not changing it.
-            return true
-        }
-        else {
-            return isValidAppMetaDataUpload(currServerAppMetaDataVersion: currServerAppMetaDataVersion, currServerAppMetaData: currServerAppMetaData, upload: appMetaData!)
-        }
-    }
-    
-    // DEPRECATED
-    static func isValidAppMetaDataUpload(currServerAppMetaDataVersion: AppMetaDataVersionInt?, currServerAppMetaData: String?, upload appMetaData:AppMetaData) -> Bool {
-
-        if currServerAppMetaDataVersion == nil {
-            // No app meta data yet on server for this file. Need 0 first version.
-            return appMetaData.version == 0
-        }
-        else {
-            // Already have app meta data on server-- must have next version.
-            return appMetaData.version == currServerAppMetaDataVersion! + 1
-        }
     }
     
     // Return nil on an error. If somehow, no ids match, an empty array is returned.

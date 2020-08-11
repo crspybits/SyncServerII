@@ -118,6 +118,7 @@ extension Uploader {
             }
         }
         
+        // TODO/DeferredUpload: Change this to an update of the DeferredUpload records.
         for deferredUpload in deferredUploads {
             let key = DeferredUploadRepository.LookupKey.deferredUploadId(deferredUpload.deferredUploadId)
             guard case .removed = deferredUploadRepo.remove(key: key) else {

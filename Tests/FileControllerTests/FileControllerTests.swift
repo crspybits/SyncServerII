@@ -1,5 +1,5 @@
 //
-//  FileControllerTests.swift
+//  FileController_IndexTests.swift
 //  Server
 //
 //  Created by Christopher Prince on 1/15/17.
@@ -14,7 +14,7 @@ import Foundation
 import ServerShared
 import ServerAccount
 
-class FileControllerTests: ServerTestCase {
+class FileController_IndexTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()

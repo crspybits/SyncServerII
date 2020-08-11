@@ -110,7 +110,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         let params = Params(repos: repos, currentSignedInUser: user)
         let uploader = UploaderFake(delegate: self)
         
-        let finishUploads = FinishUploadDeletion(type: type, uploader: uploader, sharingGroupUUID: sharingGroupUUID, params: params)
+        let finishUploads = try FinishUploadDeletion(type: type, uploader: uploader, sharingGroupUUID: sharingGroupUUID, params: params)
         
         guard case .deferred = try finishUploads.finish() else {
             XCTFail()

@@ -67,7 +67,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         // Simulate an upload deletion request for file
 
-        guard let deferredUpload = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+        guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -150,7 +150,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         // Simulate an upload deletion request for files
 
-        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+        guard let deferredUpload1 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
@@ -162,7 +162,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
                 return
             }
         
-            guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+            guard let deferredUpload2 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
                 let deferredUploadId2 = deferredUpload2.deferredUploadId else {
                 XCTFail()
                 return
@@ -250,12 +250,12 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         // Simulate an upload deletion request for files
 
         // For fileUUID, just use its file group in a DeferredUpload; don't need an Upload record.
-        guard let _ = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion) else {
+        guard let _ = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion) else {
             XCTFail()
             return
         }
     
-        guard let deferredUpload2 = createDeferredUpload(sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+        guard let deferredUpload2 = createDeferredUpload(userId: userId, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return

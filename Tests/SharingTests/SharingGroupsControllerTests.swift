@@ -359,7 +359,7 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
         
-        downloadTextFile(downloadFileVersion:0, uploadFileRequest:uploadResult.request, expectedError: true)
+        // downloadTextFile(downloadFileVersion:0, uploadFileRequest:uploadResult.request, expectedError: true)
     }
     
     func testUpdateSharingGroupForDeletedSharingGroupFails() {

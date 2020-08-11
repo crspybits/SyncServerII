@@ -9,15 +9,18 @@
 
 import Foundation
 import LoggerAPI
+import ServerShared
 
 class FinishUploadDeletion {
     private let type: DeletionsType
     private let uploader: UploaderProtocol
     private let sharingGroupUUID: String
     private var params: FinishUploadsParameters
+    private let currentSignedInUser: UserId
     
     enum Errors: Error {
         case badFinishUploadsType
+        case noUserId
     }
      
     enum DeletionsType {
@@ -25,11 +28,17 @@ class FinishUploadDeletion {
         case fileGroup(fileGroupUUID: String)
     }
     
-    init(type: DeletionsType, uploader: UploaderProtocol, sharingGroupUUID: String, params:FinishUploadsParameters) {
+    init(type: DeletionsType, uploader: UploaderProtocol, sharingGroupUUID: String, params:FinishUploadsParameters) throws {
         self.type = type
         self.uploader = uploader
         self.sharingGroupUUID = sharingGroupUUID
         self.params = params
+        
+        guard let userId = self.params.currentSignedInUser?.userId else {
+            throw Errors.noUserId
+        }
+        
+        self.currentSignedInUser = userId
     }
     
     enum DeletionsResponse {
@@ -41,6 +50,7 @@ class FinishUploadDeletion {
         let deferredUpload = DeferredUpload()
         deferredUpload.status = .pendingDeletion
         deferredUpload.sharingGroupUUID = sharingGroupUUID
+        deferredUpload.userId = currentSignedInUser
         
         switch type {
         case .fileGroup(fileGroupUUID: let fileGroupUUID):

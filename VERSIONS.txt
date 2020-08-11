@@ -10,8 +10,10 @@ Version
     * Endpoints removed:
     	DoneUploads endpoint-- now using an N of M pair of parameters in upload requests.
     	AppMetaDataUpload endpoint-- can only provide app meta data in v0 of a file.
-    * Database format changes.
+    * Database changes.
     	- Various columns added.
+    	- Remove appMetaDataVersion column from Upload, and FileIndex
+    	- Removed MasterVersion table.
     	- Index removed from Upload table: "UNIQUE (fileUUID, userId, deviceUUID)"
     		Did this by: 
     			SHOW INDEX FROM Upload

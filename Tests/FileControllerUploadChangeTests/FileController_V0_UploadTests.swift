@@ -421,6 +421,17 @@ class FileController_V0_UploadTests: ServerTestCase {
         // TODO: Check for additional entry in the DeferredUpload table.
     }
     
+   func testUploadFileWithAppMetaDataWorks() {
+        let fileUUID = Foundation.UUID().uuidString
+        let deviceUUID = Foundation.UUID().uuidString
+        let appMetaData = "{ \"foo\": \"bar\" }"
+
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, appMetaData: appMetaData) else {
+            XCTFail()
+            return
+        }
+    }
+    
 //    func testUploadOneV1TextFileWorks() {
 //        uploadSingleVNFile(changeResolverName: changeResolverName) { addUser, deviceUUID, fileUUID, fileGroupUUID, changeResolverName in
 //            return uploadTextFile(deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName)

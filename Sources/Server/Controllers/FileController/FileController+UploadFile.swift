@@ -337,7 +337,7 @@ extension FileController {
         // We are using the current signed in user's id here (and not the effective user id) because we need a way of indexing or organizing the collection of files uploaded by a particular user.
         upload.userId = params.currentSignedInUser!.userId
     
-        upload.appMetaData = uploadRequest.appMetaData
+        upload.appMetaData = uploadRequest.appMetaData?.contents
 
         if newFile {
             upload.creationDate = creationDate

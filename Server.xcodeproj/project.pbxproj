@@ -44,6 +44,7 @@
 /* Begin PBXBuildFile section */
 		411FA229A2E7FAB917CFB4ED /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 071A43AF64F4C0AA50241854 /* Server.json */; };
 		838F737324DF97A60003A186 /* FileController_DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838F737224DF97A60003A186 /* FileController_DownloadTests.swift */; };
+		83BC149C24E106A600E439C5 /* FileController+GetUploadResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BC149B24E106A600E439C5 /* FileController+GetUploadResults.swift */; };
 		9B7F9CA27A1825A510727CFE /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = E031EE5C6960B6CA79C6B054 /* ServerTests.json */; };
 		OBJ_1000 /* Logging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "swift-log::Logging::Product" /* Logging.framework */; };
 		OBJ_1023 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_319 /* Package.swift */; };
@@ -7195,6 +7196,7 @@
 /* Begin PBXFileReference section */
 		071A43AF64F4C0AA50241854 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = Server.json; sourceTree = SOURCE_ROOT; };
 		838F737224DF97A60003A186 /* FileController_DownloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileController_DownloadTests.swift; sourceTree = "<group>"; };
+		83BC149B24E106A600E439C5 /* FileController+GetUploadResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileController+GetUploadResults.swift"; sourceTree = "<group>"; };
 		"ChangeResolvers::ChangeResolvers::Product" /* ChangeResolvers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"CredentialsAppleSignIn::CredentialsAppleSignIn::Product" /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"CredentialsDropbox::CredentialsDropbox::Product" /* CredentialsDropbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -9275,6 +9277,7 @@
 				OBJ_23 /* FileController+DownloadFile.swift */,
 				OBJ_24 /* FileController+UploadDeletion.swift */,
 				OBJ_25 /* FileController+UploadFile.swift */,
+				83BC149B24E106A600E439C5 /* FileController+GetUploadResults.swift */,
 				OBJ_26 /* FileController.swift */,
 				OBJ_27 /* FinishUploadDeletion.swift */,
 				OBJ_28 /* FinishUploadFiles.swift */,
@@ -9975,7 +9978,7 @@
 			path = .build/checkouts/TypeDecoder/Sources/TypeDecoder;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -10004,7 +10007,6 @@
 				OBJ_661 /* generateXcodeproj.sh */,
 				838F702C24DCDEAC0003A186 /* Recovered References */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_501 /* KituraContracts 1.2.1 */ = {
@@ -12642,7 +12644,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_591 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -13415,6 +13417,7 @@
 				OBJ_2375 /* FileIndexRepository.swift in Sources */,
 				OBJ_2376 /* UploadRepository.swift in Sources */,
 				OBJ_2378 /* Model.swift in Sources */,
+				83BC149C24E106A600E439C5 /* FileController+GetUploadResults.swift in Sources */,
 				OBJ_2379 /* Repositories.swift in Sources */,
 				OBJ_2380 /* Repository.swift in Sources */,
 				OBJ_2381 /* SharingGroupRepository.swift in Sources */,

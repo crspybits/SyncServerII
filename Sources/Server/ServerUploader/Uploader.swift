@@ -131,11 +131,15 @@ class Uploader: UploaderProtocol {
             do {
                 try self.processFileDeletions(deferredUploads: deferredFileDeletions)
             } catch let error {
+                Log.error("\(error)")
                 self.finishRun(error: error)
                 return
             }
 
             self.processFileChanges(deferredUploads: deferredFileChangeUploads) { error in
+                if let error = error {
+                    Log.error("\(error); deferredFileChangeUploads: \(deferredFileChangeUploads)")
+                }
                 self.finishRun(error: error)
             }
         }
@@ -196,6 +200,7 @@ class Uploader: UploaderProtocol {
 
             Log.debug("applyDeferredUploads: with file groups")
             if let error = self.applyDeferredUploads(aggregatedGroups: aggregatedGroups, withFileGroupUUID: true) {
+                Log.error("applyDeferredUploads: with file groups: \(error)")
                 completion(error)
             }
         }
@@ -226,6 +231,7 @@ class Uploader: UploaderProtocol {
         func apply(aggregatedGroup: [DeferredUpload], completion: @escaping (Swift.Result<Void, Error>) -> ()) {
         
             guard aggregatedGroup.count > 0 else {
+                Log.error("applyDeferredUploads: no groups")
                 completion(.failure(Errors.noGroups))
                 return
             }
@@ -233,6 +239,7 @@ class Uploader: UploaderProtocol {
             var fileGroupUUID: String?
             if withFileGroupUUID {
                 guard let fgUUID = aggregatedGroup[0].fileGroupUUID else {
+                    Log.error("applyDeferredUploads: missingGroupUUID")
                     completion(.failure(Errors.missingGroupUUID))
                     return
                 }
@@ -241,6 +248,7 @@ class Uploader: UploaderProtocol {
             }
             
             guard let sharingGroupUUID = aggregatedGroup[0].sharingGroupUUID else {
+                Log.error("applyDeferredUploads: missing sharingGroupUUID")
                 completion(.failure(Errors.missingGroupUUID))
                 return
             }
@@ -250,12 +258,14 @@ class Uploader: UploaderProtocol {
             applier = try? ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup, accountManager: accountManager, resolverManager: resolverManager, db: db)
             
             guard applier != nil else {
+                Log.error("applyDeferredUploads: failedApplyDeferredUploads")
                 completion(.failure(Errors.failedApplyDeferredUploads))
                 return
             }
                         
             applier.run { error in
                 if let error = error {
+                    Log.error("applyDeferredUploads: run: \(error)")
                     completion(.failure(error))
                     return
                 }
@@ -265,6 +275,7 @@ class Uploader: UploaderProtocol {
         
         let (_, errors) = aggregatedGroups.synchronouslyRun(apply: apply)
         if errors.count > 0 {
+            Log.error("synchronouslyRun: \(errors[0])")
             return errors[0]
         }
         else {
@@ -342,6 +353,7 @@ class Uploader: UploaderProtocol {
                 }
                 
                 // Lookup any DeferredUpload file upload changes for this file group. Given that we're deleting the file group the upload changes are stale and not useful any more.
+                // TODO/DeferredUpload: Change this to an update of the DeferredUpload records.
                 let key1 = DeferredUploadRepository.LookupKey.fileGroupUUIDWithStatus(
                     fileGroupUUID: fileGroupUUID, status: .pendingChange)
                 guard case .removed(let numberDeferredRemoved) = deferredUploadRepo.remove(key: key1) else {
@@ -403,6 +415,8 @@ class Uploader: UploaderProtocol {
             deferredIdsForFileChangeUploads = Array(Set<Int64>(deferredIdsForFileChangeUploads))
             
             // Remove these DeferredUpload's-- for file change uploads.
+            // TODO/DeferredUpload: Change this to an update of the DeferredUpload records.
+            // Need a status for upload not done, deleted.
             for deferredIdForFileChangeUpload in deferredIdsForFileChangeUploads {
                 let key = DeferredUploadRepository.LookupKey.deferredUploadId(deferredIdForFileChangeUpload)
                 guard case .removed = deferredUploadRepo.remove(key: key) else {

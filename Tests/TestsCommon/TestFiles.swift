@@ -14,6 +14,23 @@ struct TestFile {
     enum FileContents {
         case string(String)
         case url(URL)
+        
+        func equal(to data: Data) -> Bool {
+            switch self {
+            case .string(let string):
+                guard let dataString = String(data: data, encoding: .utf8) else {
+                    return false
+                }
+                return dataString == string
+                
+            case .url(let url):
+                guard let urlData = try? Data(contentsOf: url) else {
+                    return false
+                }
+                
+                return data == urlData
+            }
+        }
     }
     
     let dropboxCheckSum:String

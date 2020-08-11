@@ -73,7 +73,7 @@ class PruneTests: ServerTestCase, UploaderCommon {
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
         
         // Set up the upload change
-        guard let deferredUpload1 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload1 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
@@ -86,7 +86,7 @@ class PruneTests: ServerTestCase, UploaderCommon {
         }
         
         // Set up the upload deletion
-        guard let deferredUpload2 = createDeferredUpload(fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+        guard let deferredUpload2 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return

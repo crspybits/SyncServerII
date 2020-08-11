@@ -59,6 +59,7 @@ class ApplyDeferredUploads {
         case couldNotGetPriorFileVersion
         case failedRemovingUploadRow
         case failedUpdatingFileIndex
+        case couldNotCleanupDeferredUploads
     }
     
     let sharingGroupUUID: String
@@ -126,7 +127,7 @@ class ApplyDeferredUploads {
         self.fileUUIDs = Array(Set<String>(fileUUIDs))
     }
     
-    func cleanup(completion: @escaping (Error?)->()) {
+    func cleanupDeferredUploads(deferredUploads: [DeferredUpload]) -> Bool {
         for deferredUpload in deferredUploads {
             let key = DeferredUploadRepository.LookupKey.deferredUploadId(deferredUpload.deferredUploadId)
             let result = deferredUploadRepo.retry {
@@ -134,11 +135,14 @@ class ApplyDeferredUploads {
             }
             guard case .removed(numberRows: let numberRows) = result,
                 numberRows == 1 else {
-                completion(Errors.failedRemovingDeferredUpload)
-                return
+                return false
             }
         }
         
+        return true
+    }
+    
+    func cleanupDeletions(completion: @escaping (Error?)->()) {
         if let error = FileDeletion.apply(deletions: fileDeletions), error.count > 0 {
             completion(error[0])
         }
@@ -175,8 +179,11 @@ class ApplyDeferredUploads {
         func apply(fileUUID: String, completion: @escaping (Swift.Result<Void, Error>) -> ()) {
             Log.debug("applyChangesToSingleFile: \(fileUUID)")
 
-            applyChangesToSingleFile(fileUUID: fileUUID) { error in
-                if let error = error {
+            applyChangesToSingleFile(fileUUID: fileUUID) { result in
+                switch result {
+                case .success:
+                    break
+                case .failure(let error):
                     completion(.failure(error))
                     return
                 }
@@ -186,19 +193,25 @@ class ApplyDeferredUploads {
         }
         
         let (_, errors) = fileUUIDs.synchronouslyRun(apply: apply)
-        if errors.count > 0 {
+        
+        guard errors.count == 0 else {
             _ = self.db.rollback()
             completion(errors[0])
+            return
         }
-        else {
-            guard self.db.commit() else {
-                completion(Errors.couldNotCommit)
-                return
-            }
-            
-            Log.info("About to start cleanup.")
-            self.cleanup(completion: completion)
+
+        guard self.cleanupDeferredUploads(deferredUploads: deferredUploads) else {
+            completion(Errors.couldNotCleanupDeferredUploads)
+            return
         }
+
+        guard self.db.commit() else {
+            completion(Errors.couldNotCommit)
+            return
+        }
+        
+        Log.info("About to start deletions cleanup.")
+        self.cleanupDeletions(completion: completion)
     }
     
     // Have no fileGroupUUID. Commit changes after each file is processed.
@@ -211,11 +224,21 @@ class ApplyDeferredUploads {
         
             Log.debug("applyChangesToSingleFile: \(fileUUID)")
 
-            applyChangesToSingleFile(fileUUID: fileUUID) { error in
-                if let error = error {
+            applyChangesToSingleFile(fileUUID: fileUUID) { result in
+                switch result {
+                case .failure(let error):
                     _ = self.db.rollback()
                     completion(.failure(error))
                     return
+                    
+                case .success(let uploadsForFileUUID):
+                    let deferredUploadIds = Set<Int64>(uploadsForFileUUID.compactMap {$0.deferredUploadId})
+                    let deferredUploadsToRemove = self.deferredUploads.filter {deferredUploadIds.contains($0.deferredUploadId) }
+                    guard self.cleanupDeferredUploads(deferredUploads: deferredUploadsToRemove) else {
+                        _ = self.db.rollback()
+                        completion(.failure(Errors.couldNotCleanupDeferredUploads))
+                        return
+                    }
                 }
                 
                 guard self.db.commit() else {
@@ -228,14 +251,14 @@ class ApplyDeferredUploads {
         }
         
         let (_, errors) = fileUUIDs.synchronouslyRun(apply: apply)
-        if errors.count > 0 {
+        guard errors.count == 0 else {
             completion(errors[0])
+            return
         }
-        else {
-            Log.info("About to start cleanup.")
-            // TODO: Could cleanup after each successful commit. But would have to remove just those DeferredUpload's dealt with so far. And remove any FileDeletion's completed.
-            self.cleanup(completion: completion)
-        }
+
+        Log.info("About to start deletion cleanup.")
+        // TODO: Could cleanup after each successful commit. But would have to remove just those DeferredUpload's dealt with so far. And remove any FileDeletion's completed.
+        self.cleanupDeletions(completion: completion)
     }
     
     // Apply changes to all fileUUIDs. This deals with database transactions.
@@ -248,40 +271,41 @@ class ApplyDeferredUploads {
         }
     }
     
-    func applyChangesToSingleFile(fileUUID: String, completion: @escaping (Error?)->()) {
+    // Success result is uploadsForFileUUID
+    func applyChangesToSingleFile(fileUUID: String, completion: @escaping (Swift.Result<[Upload], Error>)->()) {
         let uploadsForFileUUID = uploads(fileUUID: fileUUID)
         
         guard let fileIndex = try? fileIndexRepo.getFileIndex(forFileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID) else {
-            completion(Errors.failedSetupForApplyChangesToSingleFile("FileIndex"))
+            completion(.failure(Errors.failedSetupForApplyChangesToSingleFile("FileIndex")))
             return
         }
         
         guard let resolver = try? changeResolver(forFileUUID: fileUUID, usingFileIndex: fileIndex) else {
-            completion(Errors.failedSetupForApplyChangesToSingleFile("Resolver"))
+            completion(.failure(Errors.failedSetupForApplyChangesToSingleFile("Resolver")))
             return
         }
         
         guard let (owningCreds, cloudStorage) = try? fileIndex.getCloudStorage(userRepo: userRepo, accountManager: accountManager) else {
-            completion(Errors.failedSetupForApplyChangesToSingleFile("getCloudStorage"))
+            completion(.failure(Errors.failedSetupForApplyChangesToSingleFile("getCloudStorage")))
             return
         }
         
         let options = CloudStorageFileNameOptions(cloudFolderName: owningCreds.cloudFolderName, mimeType: fileIndex.mimeType)
         
         guard let deviceUUID = fileIndex.deviceUUID else {
-            completion(Errors.couldNotGetDeviceUUID)
+            completion(.failure(Errors.couldNotGetDeviceUUID))
             return
         }
         
         guard let priorFileVersion = fileIndex.fileVersion else {
-            completion(Errors.couldNotGetPriorFileVersion)
+            completion(.failure(Errors.couldNotGetPriorFileVersion))
             return
         }
         
         resolver.apply(changes: uploadsForFileUUID, toFileUUID: fileUUID, currentFileVersion: priorFileVersion, deviceUUID: deviceUUID, cloudStorage: cloudStorage, options: options) { result in
             switch result {
             case .failure(let error):
-                completion(error)
+                completion(.failure(error))
                 
             case .success(let applyResult):
                 let updateSuccess = self.fileIndexRepo.update(indexId: fileIndex.fileIndexId, with: [
@@ -291,7 +315,7 @@ class ApplyDeferredUploads {
                  ])
                 
                 guard updateSuccess else {
-                    completion(Errors.failedUpdatingFileIndex)
+                    completion(.failure(Errors.failedUpdatingFileIndex))
                     return
                 }
                 
@@ -304,7 +328,7 @@ class ApplyDeferredUploads {
                     
                     guard case .removed(numberRows: let numberRows) = result,
                         numberRows == 1 else {
-                        completion(Errors.failedRemovingUploadRow)
+                        completion(.failure(Errors.failedRemovingUploadRow))
                         return
                     }
                 }
@@ -314,7 +338,7 @@ class ApplyDeferredUploads {
                 let deletion = FileDeletion(cloudStorage: cloudStorage, cloudFileName: currentCloudFileName, options: options)
                 self.fileDeletions += [deletion]
                 
-                completion(nil)
+                completion(.success(uploadsForFileUUID))
             }
         }
     }

@@ -63,20 +63,6 @@ extension FileController {
             return
         }
         
-        guard let fileIndexAppMetaDataVersion = fileIndexObj.appMetaDataVersion else {
-            let message = "Nil app meta data version in FileIndex."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        guard downloadAppMetaDataRequest.appMetaDataVersion == fileIndexAppMetaDataVersion else {
-            let message = "Expected app meta data version \(String(describing: downloadAppMetaDataRequest.appMetaDataVersion)) was not the same as the actual version \(fileIndexAppMetaDataVersion)"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
         let response = DownloadAppMetaDataResponse()
         response.appMetaData = fileIndexObj.appMetaData
         params.completion(.success(response))

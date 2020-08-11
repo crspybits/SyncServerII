@@ -13,88 +13,87 @@ import Foundation
 import ServerShared
 import HeliumLogger
 import ServerAccount
+import ChangeResolvers
 
 class FileController_DownloadTests: ServerTestCase {
+    override func setUp() {
+        super.setUp()
+    }
+    
     func testDownloadFileTextSucceeds() {
         let file:TestFile = .test1
-        
-        guard let result = downloadTextFile(file: file) else {
-            XCTFail()
-            return
-        }
-        
-        guard let data = result.data else {
-            XCTFail()
-            return
-        }
-        
-        guard let downloadedString = String(data: data, encoding: .utf8) else {
-            XCTFail()
-            return
-        }
-        
-        guard case .string(let fileString) = file.contents else {
-            XCTFail()
-            return
-        }
-        
-        XCTAssert(fileString == downloadedString)
-    }
-    
-    func testDownloadURLFileSucceeds() {
-        downloadServerFile(mimeType: .url, file: .testUrlFile)
-    }
-    
-    func testDownloadFileTextWithASimulatedUserChangeSucceeds() {
-        let testAccount:TestAccount = .primaryOwningAccount
         let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
         
-        guard let uploadResult = uploadTextFile(testAccount: testAccount, deviceUUID: deviceUUID),
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        //self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
-        var cloudStorageCreds: CloudStorage!
-        
-        let exp = expectation(description: "\(#function)\(#line)")
-        testAccount.scheme.doHandler(for: .getCredentials, testAccount: testAccount) { creds in
-            // For social accounts, e.g., Facebook, this will result in nil and fail below. That's what we want. Just trying to get cloud storage creds.
-            cloudStorageCreds = creds as? CloudStorage
-            
-            exp.fulfill()
-        }
-        waitForExpectations(timeout: 10, handler: nil)
-        
-        guard cloudStorageCreds != nil else {
+        guard let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fileUUID, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum) else {
             XCTFail()
             return
         }
         
-        let file = TestFile.test2
+        guard let data = downloadResult.data else {
+            XCTFail()
+            return
+        }
         
-        let checkSum = file.checkSum(type: testAccount.scheme.accountName)
-
-        let uploadRequest = UploadFileRequest()
-        uploadRequest.fileUUID = uploadResult.request.fileUUID
-        uploadRequest.mimeType = "text/plain"
-        uploadRequest.sharingGroupUUID = sharingGroupUUID
-        uploadRequest.checkSum = checkSum
+        XCTAssert(file.contents.equal(to: data))
+    }
     
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
-
-        // DEPRECATED
-        var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
-        deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
-
-        uploadFile(accountType: testAccount.scheme.accountName, creds: cloudStorageCreds, deviceUUID: deviceUUID, testFile: file, uploadRequest: uploadRequest, fileVersion: 0, options: options)
+    func testDownloadURLFileSucceeds() {
+        let file:TestFile = .testUrlFile
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
         
-        // Don't want the download to fail just due to a checksum mismatch.
-        uploadResult.request.checkSum = checkSum
-
-        downloadTextFile(testAccount: testAccount, uploadFileRequest: uploadResult.request, contentsChangedExpected: true)
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        guard let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fileUUID, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum) else {
+            XCTFail()
+            return
+        }
+        
+        guard let data = downloadResult.data else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(file.contents.equal(to: data))
+    }
+    
+    func testDownloadTextFileWithFileGroup() {
+        let file:TestFile = .test1
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        let fileGroupUUID = Foundation.UUID().uuidString
+        
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, fileGroupUUID: fileGroupUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        guard let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fileUUID, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum) else {
+            XCTFail()
+            return
+        }
+        
+        guard let data = downloadResult.data else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(file.contents.equal(to: data))
     }
     
     func testDownloadTextFileWhereFileDeletedGivesGoneResponse() {
@@ -107,8 +106,6 @@ class FileController_DownloadTests: ServerTestCase {
             return
         }
         
-        //self.sendDoneUploads(testAccount: testAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
         var checkSum:String!
         let file = TestFile.test2
         
@@ -116,14 +113,13 @@ class FileController_DownloadTests: ServerTestCase {
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = uploadResult.request.fileUUID
-        uploadRequest.mimeType = "text/plain"
+        uploadRequest.mimeType = file.mimeType.rawValue
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = checkSum
     
-        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
+        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: file.mimeType.rawValue)
 
-        // DEPRECATED
-        var cloudFileName: String! // = uploadRequest.cloudFileName(deviceUUID:deviceUUID, mimeType: uploadRequest.mimeType)
+        let cloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: uploadResult.request.fileUUID, mimeType: file.mimeType.rawValue, fileVersion: 0)
         deleteFile(testAccount: testAccount, cloudFileName: cloudFileName, options: options)
 
         self.performServerTest(testAccount:testAccount) { expectation, testCreds in
@@ -151,10 +147,157 @@ class FileController_DownloadTests: ServerTestCase {
     }
     
     func testDownloadFileTextWithAppMetaDataSucceeds() {
-        downloadTextFile(appMetaData:"{ \"foo\": \"bar\" }")
+        let file:TestFile = .test1
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        let appMetaData = "{ \"foo\": \"bar\" }"
+        
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData: appMetaData, file: file),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        guard let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fileUUID, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum) else {
+            XCTFail()
+            return
+        }
+        
+        guard let data = downloadResult.data else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(file.contents.equal(to: data))
+        XCTAssert(downloadResult.response?.appMetaData == appMetaData)
     }
     
-    func testDownloadFileTextWithDifferentDownloadVersion() {
-        downloadTextFile(downloadFileVersion:1, expectedError: true)
+    func testDownloadFileWithIncorrectVersionFails() {        
+        let file:TestFile = .test1
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        let appMetaData = "{ \"foo\": \"bar\" }"
+        
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, appMetaData: appMetaData, file: file),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fileUUID, fileVersion: 1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum, expectedError: true)
+        XCTAssert(downloadResult == nil)
+    }
+    
+    func testThatDownloadWithNilFileVersionFails() {
+        let file:TestFile = .test1
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        let fileGroupUUID = Foundation.UUID().uuidString
+        
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, fileGroupUUID: fileGroupUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        let downloadResult = downloadFile(testAccount: testAccount, fileUUID: nil, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum, expectedError: true)
+        XCTAssert(downloadResult == nil)
+    }
+    
+    func testDownloadFileWithIncorrectUUIDFails() {
+        let file:TestFile = .test1
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        let fileGroupUUID = Foundation.UUID().uuidString
+        
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, fileGroupUUID: fileGroupUUID),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        let fakeFileUUID = Foundation.UUID().uuidString
+        let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fakeFileUUID, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum, expectedError: true)
+        XCTAssert(downloadResult == nil)
+    }
+    
+    func testThatFileUploadTimeIsReasonable() {
+        let file:TestFile = .test1
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let beforeUploadTime = Date()
+        
+        guard let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file),
+            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        let afterUploadTime = Date()
+
+        guard let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fileUUID, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, expectedCheckSum: uploadResult.checkSum) else {
+            XCTFail()
+            return
+        }
+        
+        
+        guard let data = downloadResult.data else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(file.contents.equal(to: data))
+        
+        checkThatDateFor(fileUUID: fileUUID, isBetween: beforeUploadTime, end: afterUploadTime, sharingGroupUUID: sharingGroupUUID)
+    }
+    
+    func testDownloadVNOfFileWorks() throws {
+        let file:TestFile = .commentFile
+        let comment = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
+
+        guard case .string(let initialFileString) = file.contents,
+            let initialData = initialFileString.data(using: .utf8) else {
+            XCTFail()
+            return
+        }
+        
+        var initialCommentFile = try CommentFile(with: initialData)
+        try initialCommentFile.add(newRecord: comment.updateContents)
+        
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        let changeResolverName = CommentFile.changeResolverName
+
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: file, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: testAccount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: comment.updateContents) else {
+            XCTFail()
+            return
+        }
+        
+        guard let downloadResult = downloadFile(testAccount: testAccount, fileUUID: fileUUID, fileVersion: 1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID) else {
+            XCTFail()
+            return
+        }
+        
+        guard let downloadedData = downloadResult.data else {
+            XCTFail()
+            return
+        }
+        
+        let downloadedCommentFile = try CommentFile(with: downloadedData)
+        
+        XCTAssert(initialCommentFile == downloadedCommentFile)
     }
 }
