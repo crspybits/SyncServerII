@@ -54,10 +54,12 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             uploadDeletionRequest.fileUUID = fileUUID
         }
         
-        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+        guard let deletionResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
             XCTFail()
             return
         }
+        
+        XCTAssert(deletionResult.deferredUploadId != nil)
         
         guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
             XCTFail()

@@ -186,9 +186,10 @@ extension FileController {
             let result = try finishUploads.finish()
             
             switch result {
-            case .deferred(let runner):
+            case .deferred(let deferredUploadId, let runner):
                 Log.info("Success deleting files: Subject to deferred transfer.")
                 let response = UploadDeletionResponse()
+                response.deferredUploadId = deferredUploadId
                 params.completion(.successWithRunner(response, runner: runner))
                 
             case .error:

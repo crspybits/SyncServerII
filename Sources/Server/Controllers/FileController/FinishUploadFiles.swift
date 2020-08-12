@@ -65,7 +65,7 @@ class FinishUploadFiles {
         
         case success
         
-        case deferred(runner: RequestHandler.PostRequestRunner)
+        case deferred(deferredUploadId: Int64, runner: RequestHandler.PostRequestRunner)
         
         case error(message: String?)
     }
@@ -147,7 +147,7 @@ class FinishUploadFiles {
         
         if vNUploads {
             // Mark the uploads to indicate they are ready for deferred transfer.
-            guard markUploadsAsDeferred(signedInUserId: currentSignedInUser, fileGroupUUID: fileGroupUUID, uploads: currentUploads) else {
+            guard let deferredUploadId = markUploadsAsDeferred(signedInUserId: currentSignedInUser, fileGroupUUID: fileGroupUUID, uploads: currentUploads) else {
                 let message = "Failed markUploadsAsDeferred"
                 Log.error(message)
                 return .error(message: message)
@@ -155,7 +155,7 @@ class FinishUploadFiles {
             
             // Doing uploader.run post-request as this will be after the database commit has occurred for the commit-- and we'll be able to fetch DeferredUpload's from the database then.
             // I'm specifically capturing a strong reference to `self` in the following closure. I want the enum associated value to keep self until the `run` is finished its (synchronous) processing.
-            return .deferred(runner: { try self.uploader.run() })
+            return .deferred(deferredUploadId: deferredUploadId, runner: { try self.uploader.run() })
         }
         
         // Else: v0 uploads-- files have already been uploaded. Just need to do the transfer to the FileIndex.
@@ -233,7 +233,7 @@ class FinishUploadFiles {
     }
     
     // This is called only for vN files. These files will already be in the FileIndex.
-    private func markUploadsAsDeferred(signedInUserId: UserId, fileGroupUUID: String?, uploads: [Upload]) -> Bool {
+    private func markUploadsAsDeferred(signedInUserId: UserId, fileGroupUUID: String?, uploads: [Upload]) -> Int64? {
         let deferredUpload = DeferredUpload()
         deferredUpload.status = .pendingChange
         deferredUpload.sharingGroupUUID = sharingGroupUUID
@@ -252,17 +252,17 @@ class FinishUploadFiles {
         
         default:
             Log.error("Failed inserting DeferredUpload: \(result)")
-            return false
+            return nil
         }
         
         for upload in uploads {
             upload.deferredUploadId = deferredUploadId
             guard params.repos.upload.update(upload: upload, fileInFileIndex: true) else {
-                return false
+                return nil
             }
         }
         
-        return true
+        return deferredUploadId
     }
 }
 

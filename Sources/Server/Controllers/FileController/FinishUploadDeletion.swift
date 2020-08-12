@@ -42,7 +42,7 @@ class FinishUploadDeletion {
     }
     
     enum DeletionsResponse {
-        case deferred(runner: RequestHandler.PostRequestRunner)
+        case deferred(deferredUploadId: Int64, runner: RequestHandler.PostRequestRunner)
         case error
     }
     
@@ -68,7 +68,7 @@ class FinishUploadDeletion {
         switch result {
         case .success(deferredUploadId: let id):
             deferredUploadId = id
-        
+            
         default:
             Log.error("Failed inserting DeferredUpload: \(result)")
             return .error
@@ -90,6 +90,6 @@ class FinishUploadDeletion {
             }
         }
         
-        return .deferred(runner: { try self.uploader.run() })
+        return .deferred(deferredUploadId: deferredUploadId, runner: { try self.uploader.run() })
     }
 }

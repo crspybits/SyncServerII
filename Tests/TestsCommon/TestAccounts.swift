@@ -252,7 +252,7 @@ extension AccountScheme {
                     case .accessTokenRevokedOrExpired:
                         XCTFail()
                     case .failure(let error):
-                        XCTFail("\(error)")
+                        XCTFail("cloudFileName: \(cloudFileName); \(error)")
                     }
                     
                     expectation.fulfill()

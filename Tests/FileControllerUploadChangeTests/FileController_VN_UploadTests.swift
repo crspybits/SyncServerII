@@ -48,6 +48,8 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
+        XCTAssert(result.response?.deferredUploadId != nil)
+        
         // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
         
         let fileIndex = FileIndexRepository(db)

@@ -1212,6 +1212,7 @@ class ServerTestCase : XCTestCase {
     
     struct UploadDeletionResult {
         let sharingGroupUUID: String?
+        let deferredUploadId: Int64?
     }
     
     func uploadDeletion(testAccount:TestAccount = .primaryOwningAccount, uploadDeletionRequest:UploadDeletionRequest, deviceUUID:String, addUser:Bool, expectError:Bool = false, expectingUploaderToRun: Bool = true) -> UploadDeletionResult? {
@@ -1238,8 +1239,8 @@ class ServerTestCase : XCTestCase {
                 else {
                     if response!.statusCode == .OK {
                         if let dict = dict {
-                            if let _ = try? UploadDeletionResponse.decode(dict) {
-                                result = UploadDeletionResult(sharingGroupUUID: sharingGroupUUID)
+                            if let response = try? UploadDeletionResponse.decode(dict) {
+                                result = UploadDeletionResult(sharingGroupUUID: sharingGroupUUID, deferredUploadId: response.deferredUploadId)
                             }
                             else {
                                 XCTFail()

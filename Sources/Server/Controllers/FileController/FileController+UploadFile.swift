@@ -374,8 +374,9 @@ extension FileController {
             case .allUploadsNotYetReceived:
                 response.allUploadsFinished = .uploadsNotFinished
                 
-            case .deferred(let runner):
+            case .deferred(let deferredUploadId, let runner):
                 response.allUploadsFinished = .vNUploadsTransferPending
+                response.deferredUploadId = deferredUploadId
                 postCommitRunner = runner
                 
             case .error(let error):
