@@ -47,9 +47,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             XCTFail()
             return
         }
-        
-        XCTAssert(result.response?.deferredUploadId != nil)
-        
+                
         // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
         
         let fileIndex = FileIndexRepository(db)
@@ -65,10 +63,12 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
                 
         let v1ChangeData = exampleComment.updateContents
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData) else {
+        guard let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData) else {
             XCTFail()
             return
         }
+        
+        XCTAssert(result2.response?.deferredUploadId != nil)
         
         XCTAssert(fileIndexCount1 == fileIndex.count() )
         XCTAssert(uploadCount1 == upload.count())
