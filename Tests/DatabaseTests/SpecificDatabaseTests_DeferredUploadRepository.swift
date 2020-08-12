@@ -22,7 +22,7 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
         repo = DeferredUploadRepository(db)
     }
     
-    func doAddDeferredUpload(userId: UserId, status: DeferredUpload.Status, sharingGroupUUID: String, fileGroupUUID: String? = nil) -> DeferredUpload? {
+    func doAddDeferredUpload(userId: UserId, status: DeferredUploadStatus, sharingGroupUUID: String, fileGroupUUID: String? = nil) -> DeferredUpload? {
         let deferredUpload = DeferredUpload()
 
         deferredUpload.status = status
@@ -62,7 +62,7 @@ class SpecificDatabaseTests_DeferredUploadRepository: ServerTestCase {
             return
         }
                 
-        let newStatus = DeferredUpload.Status.completed
+        let newStatus = DeferredUploadStatus.completed
         deferredUpload.status = newStatus
         
         guard repo.update(deferredUpload) else {

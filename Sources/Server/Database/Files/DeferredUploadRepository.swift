@@ -17,21 +17,6 @@ A single row in this table is used to represent (a) a single upload deletion, (b
  */
 
 class DeferredUpload : NSObject, Model {
-    enum Status: String {
-        case pendingChange
-        case pendingDeletion
-        case completed
-        case error
-        
-        var isPending: Bool {
-            return self == .pendingChange || self == .pendingDeletion
-        }
-        
-        static var maxCharacterLength: Int {
-            return 20
-        }
-    }
-    
     static let deferredUploadIdKey = "deferredUploadId"
     var deferredUploadId:Int64!
     
@@ -55,7 +40,7 @@ class DeferredUpload : NSObject, Model {
     var fileGroupUUID:String?
     
     static let statusKey = "status"
-    var status:Status!
+    var status:DeferredUploadStatus!
     
     subscript(key:String) -> Any? {
         set {
@@ -73,7 +58,7 @@ class DeferredUpload : NSObject, Model {
                 fileGroupUUID = newValue as? String
 
             case DeferredUpload.statusKey:
-                status = newValue as? Status
+                status = newValue as? DeferredUploadStatus
                 
             default:
                 assert(false)
@@ -92,7 +77,7 @@ class DeferredUpload : NSObject, Model {
                     guard let rawValue = x as? String else {
                         return nil
                     }
-                    return Status(rawValue: rawValue)
+                    return DeferredUploadStatus(rawValue: rawValue)
                 }
             
             default:
@@ -129,7 +114,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
 
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
 
-            "status VARCHAR(\(DeferredUpload.Status.maxCharacterLength)) NOT NULL, " +
+            "status VARCHAR(\(DeferredUploadStatus.maxCharacterLength)) NOT NULL, " +
 
             "UNIQUE (deferredUploadId))"
         
@@ -148,7 +133,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     
     enum LookupKey : CustomStringConvertible {
         case deferredUploadId(Int64)
-        case fileGroupUUIDWithStatus(fileGroupUUID: String, status: DeferredUpload.Status)
+        case fileGroupUUIDWithStatus(fileGroupUUID: String, status: DeferredUploadStatus)
         case resultsUUID(String)
         
         var description : String {
@@ -253,7 +238,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup {
     }
     
     // A nil result indicates an error. No rows in the query is returned as an empty array.
-    func select(rowsWithStatus status: [DeferredUpload.Status]) -> [DeferredUpload]? {
+    func select(rowsWithStatus status: [DeferredUploadStatus]) -> [DeferredUpload]? {
         let quotedStatusString = status.map {$0.rawValue}.map {"'\($0)'"}.joined(separator: ",")
         
         let query = "select * from \(tableName) where \(DeferredUpload.statusKey) IN (\(quotedStatusString))"

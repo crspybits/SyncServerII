@@ -89,7 +89,7 @@ public extension UploaderCommon {
         return upload
     }
     
-    func createDeferredUpload(userId: UserId, fileGroupUUID: String? = nil, sharingGroupUUID: String, status: DeferredUpload.Status) -> DeferredUpload? {
+    func createDeferredUpload(userId: UserId, fileGroupUUID: String? = nil, sharingGroupUUID: String, status: DeferredUploadStatus) -> DeferredUpload? {
         let deferredUpload = DeferredUpload()
         deferredUpload.fileGroupUUID = fileGroupUUID
         deferredUpload.status = status
