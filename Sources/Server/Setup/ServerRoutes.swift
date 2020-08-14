@@ -28,7 +28,6 @@ public class ServerRoutes {
         proxyRouter.addRoute(ep: ServerEndpoints.uploadFile, processRequest: fileController.uploadFile)
         proxyRouter.addRoute(ep: ServerEndpoints.downloadFile, processRequest: fileController.downloadFile)
         proxyRouter.addRoute(ep: ServerEndpoints.downloadAppMetaData, processRequest: fileController.downloadAppMetaData)
-        proxyRouter.addRoute(ep: ServerEndpoints.getUploads, processRequest: fileController.getUploads)
         proxyRouter.addRoute(ep: ServerEndpoints.uploadDeletion, processRequest: fileController.uploadDeletion)
         proxyRouter.addRoute(ep: ServerEndpoints.getUploadsResults, processRequest: fileController.getUploadsResults)
         

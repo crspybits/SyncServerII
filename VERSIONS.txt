@@ -7,9 +7,11 @@ Version
     * Removed SMServerLib-- no longer used.
     * Now using ChangeResolvers on server.
     	- This implies a change also for clients because they are no longer dealing with conflict resolution
-    * Endpoints removed:
-    	DoneUploads endpoint-- now using an N of M pair of parameters in upload requests.
+    * Endpoint changes:
+    	- Removed DoneUploads endpoint-- now using an N of M pair of parameters in upload requests.
     	AppMetaDataUpload endpoint-- can only provide app meta data in v0 of a file.
+    	- Added GetUploadsResults
+    	- Removed GetUploads.
     * Database changes.
     	- Various columns added.
     	- Remove appMetaDataVersion column from Upload, and FileIndex

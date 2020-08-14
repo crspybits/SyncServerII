@@ -131,36 +131,4 @@ class FileController : ControllerProtocol {
             params.completion(.failure(.message(message)))
         }
     }
-    
-    func getUploads(params:RequestProcessingParameters) {
-        guard let getUploadsRequest = params.request as? GetUploadsRequest else {
-            let message = "Did not receive GetUploadsRequest"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        guard sharingGroupSecurityCheck(sharingGroupUUID: getUploadsRequest.sharingGroupUUID, params: params) else {
-            let message = "Failed in sharing group security check."
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        let uploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, sharingGroupUUID: getUploadsRequest.sharingGroupUUID, deviceUUID: params.deviceUUID!)
-
-        switch uploadsResult {
-        case .uploads(let uploads):
-            let fileInfo = UploadRepository.uploadsToFileInfo(uploads: uploads)
-            let response = GetUploadsResponse()
-            response.uploads = fileInfo
-            params.completion(.success(response))
-            
-        case .error(let error):
-            let message = "Error: \(String(describing: error))"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-    }
 }
