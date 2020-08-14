@@ -30,6 +30,7 @@ public class ServerRoutes {
         proxyRouter.addRoute(ep: ServerEndpoints.downloadAppMetaData, processRequest: fileController.downloadAppMetaData)
         proxyRouter.addRoute(ep: ServerEndpoints.getUploads, processRequest: fileController.getUploads)
         proxyRouter.addRoute(ep: ServerEndpoints.uploadDeletion, processRequest: fileController.uploadDeletion)
+        proxyRouter.addRoute(ep: ServerEndpoints.getUploadsResults, processRequest: fileController.getUploadsResults)
         
         let sharingAccountsController = SharingAccountsController()
         proxyRouter.addRoute(ep: ServerEndpoints.createSharingInvitation, processRequest: sharingAccountsController.createSharingInvitation)

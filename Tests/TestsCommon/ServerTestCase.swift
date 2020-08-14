@@ -526,6 +526,57 @@ class ServerTestCase : XCTestCase {
     
     static let cloudFolderName = "CloudFolder"
     
+    func getUploadsResults(request:GetUploadsResultsRequest, testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String) -> GetUploadsResultsResponse? {
+        
+        var result: GetUploadsResultsResponse?
+        
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            
+            guard let parameters = request.urlParameters() else {
+                Log.error("Could not generate urlParameters")
+                expectation.fulfill()
+                return
+            }
+            
+            Log.debug("urlParameters(): \(parameters)")
+            
+            self.performRequest(route: ServerEndpoints.getUploadsResults, headers: headers, urlParameters: "?" + parameters) { response, dict in
+                
+                Log.info("Status code: \(String(describing: response?.statusCode))")
+
+                guard let response = response else {
+                    Log.error("Did not work on getUploadsResults request: Could not get response")
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard let dict = dict else {
+                    Log.error("Did not work on getUploadsResults request: No dict")
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard response.statusCode == .OK else {
+                    Log.error("Did not work on getUploadsResults request: Bad status code")
+                    expectation.fulfill()
+                    return
+                }
+
+                if let getUploadsResponse = try? GetUploadsResultsResponse.decode(dict) {
+                    result = getUploadsResponse
+                }
+                else {
+                    Log.error("Could not decode GetUploadsResultsResponse")
+                }
+
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
     struct UploadFileResult {
         let request: UploadFileRequest
         let sharingGroupUUID:String?
