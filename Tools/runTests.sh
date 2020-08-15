@@ -144,7 +144,8 @@ runSpecificSuite () {
                 outputPrefix="\t\t"
             
                 # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
-                swift package --build-path ${BUILD_PATH} clean
+                # 8/15/20; Try again now with current swift version to not use this
+                # swift package --build-path ${BUILD_PATH} clean
             fi
         else
             outputPrefix="\t"

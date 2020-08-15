@@ -493,11 +493,11 @@ class Sharing_FileManipulationTests: ServerTestCase {
             return
         }
             
-        var sharingInvitationUUID:String!
-            
-        createSharingInvitation(permission: .read, sharingGroupUUID: sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID!
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(permission: .read, sharingGroupUUID: sharingGroupUUID)
+        
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         guard let masterVersion = getMasterVersion(sharingGroupUUID: sharingGroupUUID) else {

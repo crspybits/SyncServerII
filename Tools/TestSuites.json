@@ -7,6 +7,7 @@
     "FileControllerUploadDeletionTests",
     "FileControllerBothUploadTests",
     "UploaderTests",
+    "PushNotificationTests",
     "other",
     "mock",
     "owning_google",
@@ -125,6 +126,20 @@
     },
     {
       "name": "UploaderTests.UploaderUtilityTests"
+    }
+  ],
+  "PushNotificationTests": [
+    {
+      "name": "PushNotificationTests.SendPushNotificationsTests",
+      "parameters": [
+        "FAKE_PUSH_NOTIFICATIONS"
+      ]
+    },
+    {
+      "name": "PushNotificationTests.RegisterPushNotificationsTest",
+      "parameters": [
+        "FAKE_PUSH_NOTIFICATIONS"
+      ]
     }
   ],
   "mock": [

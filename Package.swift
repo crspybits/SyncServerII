@@ -73,6 +73,7 @@ let package = Package(
         .testTarget(name: "SharingTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "AccountFileTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "ChangeResolverTests", dependencies: ["TestsCommon"]),
-        .testTarget(name: "OtherTests", dependencies: ["TestsCommon"])
+        .testTarget(name: "OtherTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "PushNotificationTests", dependencies: ["TestsCommon"])
     ]
 )

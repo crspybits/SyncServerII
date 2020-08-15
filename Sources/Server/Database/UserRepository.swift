@@ -265,7 +265,7 @@ class UserRepository : Repository, RepositoryLookup {
         
         if db.query(statement: query) {
             let numberUpdates = db.numberAffectedRows()
-            // 7/6/18; I'm allowing 0 updates -- in case the update doesn't change the roow.
+            // 7/6/18; I'm allowing 0 updates -- in case the update doesn't change the row.
             guard numberUpdates <= 1 else {
                 Log.error("Expected <= 1 updated, but had \(numberUpdates)")
                 return false

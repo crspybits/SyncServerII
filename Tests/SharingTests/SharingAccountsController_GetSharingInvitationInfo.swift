@@ -43,9 +43,10 @@ class SharingAccountsController_GetSharingInvitationInfo: ServerTestCase, LinuxT
         let allowSharingAcceptance = false
         
         if existing {
-            createSharingInvitation(testAccount: owningUser, permission: permission, numberAcceptors: 1, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-                sharingInvitationUUID = invitationUUID
-                expectation.fulfill()
+            sharingInvitationUUID = createSharingInvitation(testAccount: owningUser, permission: permission, numberAcceptors: 1, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID)
+            guard sharingInvitationUUID != nil else {
+                XCTFail()
+                return
             }
         }
         else {
@@ -91,20 +92,20 @@ class SharingAccountsController_GetSharingInvitationInfo: ServerTestCase, LinuxT
             XCTFail()
             return
         }
-
-        var sharingInvitationUUID:String!
         
         let permission: Permission = .admin
         let allowSharingAcceptance = true
         
-        createSharingInvitation(testAccount: owningUser, permission: permission, numberAcceptors: 1, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(testAccount: owningUser, permission: permission, numberAcceptors: 1, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         if hasBeenRedeemed {
-            redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
-                expectation.fulfill()
+            guard let _ = redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
+                XCTFail()
+                return
             }
         }
         
@@ -140,16 +141,11 @@ class SharingAccountsController_GetSharingInvitationInfo: ServerTestCase, LinuxT
             XCTFail()
             return
         }
-
-        var sharingInvitationUUID:String!
         
         let permission: Permission = .admin
         let allowSharingAcceptance = true
         
-        createSharingInvitation(testAccount: owningUser, permission: permission, numberAcceptors: 1, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
-        }
+        let sharingInvitationUUID:String! = createSharingInvitation(testAccount: owningUser, permission: permission, numberAcceptors: 1, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID)
         
         guard sharingInvitationUUID != nil else {
             XCTFail()

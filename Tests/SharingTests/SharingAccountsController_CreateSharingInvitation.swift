@@ -34,17 +34,18 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        self.createSharingInvitation(permission: sharingPermission, numberAcceptors: numberAcceptors, allowSharingAcceptance:allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID, errorExpected: errorExpected) { expectation, invitationUUID in
-            if !errorExpected {
-                XCTAssert(invitationUUID != nil)
-                guard let _ = UUID(uuidString: invitationUUID!) else {
-                    XCTFail()
-                    expectation.fulfill()
-                    return
-                }
+        let invitationUUID: String! = self.createSharingInvitation(permission: sharingPermission, numberAcceptors: numberAcceptors, allowSharingAcceptance:allowSharingAcceptance, sharingGroupUUID:sharingGroupUUID, errorExpected: errorExpected)
+
+        if !errorExpected {
+            guard invitationUUID != nil else {
+                XCTFail()
+                return
             }
             
-            expectation.fulfill()
+            guard let _ = UUID(uuidString: invitationUUID!) else {
+                XCTFail()
+                return
+            }
         }
     }
     
@@ -86,22 +87,19 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             XCTFail()
             return
         }
+
+        let sharingInvitationUUID:String! = createSharingInvitation(testAccount: sharingUser, permission: .write, sharingGroupUUID: actualSharingGroupUUID, errorExpected: false)
         
-        var sharingInvitationUUID:String!
-        
-        createSharingInvitation(testAccount: sharingUser, permission: .write, sharingGroupUUID: actualSharingGroupUUID, errorExpected: false) { expectation, invitationUUID in
-            XCTAssert(invitationUUID != nil)
-            guard let _ = UUID(uuidString: invitationUUID!) else {
-                XCTFail()
-                expectation.fulfill()
-                return
-            }
-            
-            sharingInvitationUUID = invitationUUID
-            
-            expectation.fulfill()
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
-            
+        
+        guard let _ = UUID(uuidString: sharingInvitationUUID) else {
+            XCTFail()
+            return
+        }
+
         // Now, who is the owning user?
         // If the admin sharing user is an owning user, then the owning user of the invitation will be the admin sharing user.
         // If the admin sharing user is a sharing user, then the owning user will be the owning user (inviter) of the admin user.
@@ -140,9 +138,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             
         // The sharing user just created is that with account sharingUser. The following will fail because we're attempting to create a sharing invitation with a non-admin user. This non-admin (read) user is referenced by the sharingUser token.
             
-        createSharingInvitation(testAccount: sharingUser, permission: .read, sharingGroupUUID: actualSharingGroupUUID, errorExpected: true) { expectation, invitationUUID in
-            expectation.fulfill()
-        }
+        _ = createSharingInvitation(testAccount: sharingUser, permission: .read, sharingGroupUUID: actualSharingGroupUUID, errorExpected: true)
     }
     
     func testFailureOfSharingInvitationCreationByAReadSharingUser() {
@@ -160,9 +156,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             return
         }
             
-        createSharingInvitation(testAccount: sharingUser, permission: .read, sharingGroupUUID:actualSharingGroupUUID, errorExpected: true) { expectation, invitationUUID in
-            expectation.fulfill()
-        }
+        _ = createSharingInvitation(testAccount: sharingUser, permission: .read, sharingGroupUUID:actualSharingGroupUUID, errorExpected: true)
     }
     
     func testFailureOfSharingInvitationCreationByAWriteSharingUser() {
@@ -200,9 +194,7 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        createSharingInvitation(testAccount: .secondaryOwningAccount, permission: .write, sharingGroupUUID:sharingGroupUUID1, errorExpected: true) { expectation, invitationUUID in
-            expectation.fulfill()
-        }
+        _ = createSharingInvitation(testAccount: .secondaryOwningAccount, permission: .write, sharingGroupUUID:sharingGroupUUID1, errorExpected: true)
     }
     
     func testDisallowingSharingAcceptanceWorks() {

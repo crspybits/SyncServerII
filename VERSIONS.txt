@@ -10,8 +10,9 @@ Version
     * Endpoint changes:
     	- Removed DoneUploads endpoint-- now using an N of M pair of parameters in upload requests.
     	AppMetaDataUpload endpoint-- can only provide app meta data in v0 of a file.
-    	- Added GetUploadsResults
+    	- Added GetUploadsResults: Determine the status of asynchronous processing of an upload file or an upload deletion.
     	- Removed GetUploads.
+    	- Added SendPushNotifications: Send a push notification to all members of a sharing group (except for the sender).
     * Database changes.
     	- Various columns added.
     	- Remove appMetaDataVersion column from Upload, and FileIndex

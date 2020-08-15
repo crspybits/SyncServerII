@@ -57,7 +57,6 @@ class SharingGroupsController : ControllerProtocol {
         params.completion(.success(response))
     }
     
-    // Updates master version: Because this changes the sharing group.
     func updateSharingGroup(params:RequestProcessingParameters) {
         guard let request = params.request as? UpdateSharingGroupRequest else {
             let message = "Did not receive UpdateSharingGroupRequest"

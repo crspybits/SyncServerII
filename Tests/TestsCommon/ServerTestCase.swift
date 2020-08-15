@@ -197,16 +197,12 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        var sharingInvitationUUID:String!
-        
-        createSharingInvitation(testAccount: owningUser, permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
-        }
+        var sharingInvitationUUID:String! = createSharingInvitation(testAccount: owningUser, permission: .read, sharingGroupUUID:sharingGroupUUID)
         
         let sharingUser: TestAccount = .primarySharingAccount
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return nil
         }
         
         // Primary sharing account user now exists.
@@ -219,18 +215,9 @@ class ServerTestCase : XCTestCase {
             return nil
         }
         
-        createSharingInvitation(testAccount: owningUser, permission: .write, sharingGroupUUID:sharingGroupUUID2) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
-        }
+        sharingInvitationUUID = createSharingInvitation(testAccount: owningUser, permission: .write, sharingGroupUUID:sharingGroupUUID2)
         
-        var result: RedeemSharingInvitationResponse!
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { response, expectation in
-            result = response
-            expectation.fulfill()
-        }
-        
-        guard result != nil else {
+        guard let result = redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
             XCTFail()
             return nil
         }
@@ -934,7 +921,10 @@ class ServerTestCase : XCTestCase {
         return result
     }
 
-    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, numberAcceptors: UInt = 1, allowSharingAcceptance: Bool = true, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, errorExpected: Bool = false, completion:@escaping (_ expectation: XCTestExpectation, _ sharingInvitationUUID:String?)->()) {
+    // If successful, returns the sharingInvitationUUID
+    func createSharingInvitation(testAccount: TestAccount = .primaryOwningAccount, permission: Permission? = nil, numberAcceptors: UInt = 1, allowSharingAcceptance: Bool = true, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String, errorExpected: Bool = false) -> String? {
+        
+        var result: String?
         
         self.performServerTest(testAccount: testAccount) { expectation, testCreds in
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
@@ -952,16 +942,19 @@ class ServerTestCase : XCTestCase {
                 Log.info("Status code: \(response!.statusCode)")
                 if errorExpected {
                     XCTAssert(response!.statusCode != .OK)
-                    completion(expectation, nil)
                 }
                 else {
                     XCTAssert(response!.statusCode == .OK, "Did not work on request: \(response!.statusCode)")
                     XCTAssert(dict != nil)
                     let response = try? CreateSharingInvitationResponse.decode(dict!)
-                    completion(expectation, response?.sharingInvitationUUID)
+                    result = response?.sharingInvitationUUID
                 }
+                
+                expectation.fulfill()
             }
         }
+        
+        return result
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
@@ -986,18 +979,17 @@ class ServerTestCase : XCTestCase {
             }
         }
 
-        var sharingInvitationUUID:String!
         
-        createSharingInvitation(testAccount: owningUserWhenCreating, permission: permission, numberAcceptors: numberAcceptors, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:actualSharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID: String! = createSharingInvitation(testAccount: owningUserWhenCreating, permission: permission, numberAcceptors: numberAcceptors, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:actualSharingGroupUUID)
+        
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected) { result, expectation in
-            if !failureExpected {
-                XCTAssert(result?.userId != nil && result?.sharingGroupUUID != nil)
-            }
-            expectation.fulfill()
+        let result = redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: failureExpected)
+        if !failureExpected {
+            XCTAssert(result?.userId != nil && result?.sharingGroupUUID != nil)
         }
 
         if failureExpected {
@@ -1057,8 +1049,10 @@ class ServerTestCase : XCTestCase {
         }
     }
     
-    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false, completion:@escaping (_ result: RedeemSharingInvitationResponse?, _ expectation: XCTestExpectation)->()) {
+    func redeemSharingInvitation(sharingUser:TestAccount, deviceUUID:String = Foundation.UUID().uuidString, canGiveCloudFolderName: Bool = true, sharingInvitationUUID:String? = nil, errorExpected:Bool=false) -> RedeemSharingInvitationResponse? {
     
+        var result:RedeemSharingInvitationResponse?
+        
         var actualCloudFolderName: String?
         if sharingUser.scheme.accountName == AccountScheme.google.accountName && canGiveCloudFolderName {
             actualCloudFolderName = ServerTestCase.cloudFolderName
@@ -1078,8 +1072,6 @@ class ServerTestCase : XCTestCase {
             
             self.performRequest(route: ServerEndpoints.redeemSharingInvitation, headers: headers, urlParameters: urlParameters, body:nil) { response, dict in
                 Log.info("Status code: \(response!.statusCode)")
-
-                var result: RedeemSharingInvitationResponse?
                 
                 if errorExpected {
                     XCTAssert(response!.statusCode != .OK, "Worked on request!")
@@ -1096,9 +1088,11 @@ class ServerTestCase : XCTestCase {
                     }
                 }
                 
-                completion(result, expectation)
+                expectation.fulfill()
             }
         }
+        
+        return result
     }
     
     func getSharingInvitationInfo(sharingInvitationUUID:String? = nil, errorExpected:Bool=false, httpStatusCodeExpected: HTTPStatusCode = .OK, completion:@escaping (_ result: GetSharingInvitationInfoResponse?, _ expectation: XCTestExpectation)->()) {
@@ -1474,6 +1468,108 @@ class ServerTestCase : XCTestCase {
         fileIndex.fileIndexId = uploadId
         
         return fileIndex
+    }
+    
+    func registerPushNotificationToken(request:RegisterPushNotificationTokenRequest, testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String) -> RegisterPushNotificationTokenResponse? {
+        
+        var result: RegisterPushNotificationTokenResponse?
+        
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            
+            guard let parameters = request.urlParameters() else {
+                Log.error("Could not generate urlParameters")
+                expectation.fulfill()
+                return
+            }
+            
+            Log.debug("urlParameters(): \(parameters)")
+            
+            self.performRequest(route: ServerEndpoints.registerPushNotificationToken, headers: headers, urlParameters: "?" + parameters) { response, dict in
+                
+                Log.info("Status code: \(String(describing: response?.statusCode))")
+
+                guard let response = response else {
+                    Log.error("Did not work on registerPushNotificationToken request: Could not get response")
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard let dict = dict else {
+                    Log.error("Did not work on registerPushNotificationToken request: No dict")
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard response.statusCode == .OK else {
+                    Log.error("Did not work on registerPushNotificationToken request: Bad status code")
+                    expectation.fulfill()
+                    return
+                }
+
+                if let registerResponse = try? RegisterPushNotificationTokenResponse.decode(dict) {
+                    result = registerResponse
+                }
+                else {
+                    Log.error("Could not decode registerPushNotificationToken")
+                }
+
+                expectation.fulfill()
+            }
+        }
+        
+        return result
+    }
+    
+    func sendPushNotification(request:SendPushNotificationsRequest, testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String) -> SendPushNotificationsResponse? {
+        
+        var result: SendPushNotificationsResponse?
+        
+        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
+            
+            guard let parameters = request.urlParameters() else {
+                Log.error("Could not generate urlParameters")
+                expectation.fulfill()
+                return
+            }
+            
+            Log.debug("urlParameters(): \(parameters)")
+            
+            self.performRequest(route: ServerEndpoints.sendPushNotifications, headers: headers, urlParameters: "?" + parameters) { response, dict in
+                
+                Log.info("Status code: \(String(describing: response?.statusCode))")
+
+                guard let response = response else {
+                    Log.error("Did not work on sendPushNotification request: Could not get response")
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard let dict = dict else {
+                    Log.error("Did not work on sendPushNotification request: No dict")
+                    expectation.fulfill()
+                    return
+                }
+                
+                guard response.statusCode == .OK else {
+                    Log.error("Did not work on sendPushNotification request: Bad status code")
+                    expectation.fulfill()
+                    return
+                }
+
+                if let sendResponse = try? SendPushNotificationsResponse.decode(dict) {
+                    result = sendResponse
+                }
+                else {
+                    Log.error("Could not decode sendPushNotification")
+                }
+
+                expectation.fulfill()
+            }
+        }
+        
+        return result
     }
 }
 

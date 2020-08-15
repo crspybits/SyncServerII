@@ -38,8 +38,9 @@ class RequestHandler {
     private let changeResolverManager: ChangeResolverManager
     private let db: Database
     private let uploader:Uploader
+    private let pushNotifications: PushNotificationsService
     
-    init(request:RouterRequest, response:RouterResponse, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, uploader:Uploader, db: Database, endpoint:ServerEndpoint? = nil) {
+    init(request:RouterRequest, response:RouterResponse, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, uploader:Uploader, pushNotifications: PushNotificationsService, db: Database, endpoint:ServerEndpoint? = nil) {
         self.accountManager = accountManager
         self.changeResolverManager = changeResolverManager
         self.uploader = uploader
@@ -53,6 +54,7 @@ class RequestHandler {
             self.authenticationLevel = endpoint!.authenticationLevel
         }
         self.endpoint = endpoint
+        self.pushNotifications = pushNotifications
         ServerStatsKeeper.session.increment(stat: .apiRequestsCreated)
         
         Log.info("RequestHandler.init: numberCreated: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsCreated)); numberDeleted: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsDeleted));")
@@ -503,7 +505,7 @@ class RequestHandler {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountManager: accountManager, changeResolverManager: changeResolverManager, uploader: uploader) { response in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountManager: accountManager, changeResolverManager: changeResolverManager, uploader: uploader, pushNotifications: pushNotifications) { response in
         
             var message:ResponseMessage!
             var postCommitRunner: RequestHandler.PostRequestRunner?

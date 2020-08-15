@@ -63,17 +63,17 @@ class SharingGroupsControllerTests: ServerTestCase {
             XCTFail()
             return
         }
-        
-        var sharingInvitationUUID:String!
-        
-        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+
+        let sharingInvitationUUID:String! = createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         let testAccount:TestAccount = .nonOwningSharingAccount
-        redeemSharingInvitation(sharingUser: testAccount, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser: testAccount, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return
         }
         
         let deviceUUID2 = Foundation.UUID().uuidString
@@ -231,16 +231,17 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
 
-        var sharingInvitationUUID:String!
-        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         let sharingUser: TestAccount = .secondaryOwningAccount
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return
         }
         
         guard removeSharingGroup(deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
@@ -268,9 +269,7 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
         
-        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID, errorExpected: true) { expectation, _ in
-            expectation.fulfill()
-        }
+        _ = createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID, errorExpected: true)
     }
     
     func testRemoveSharingGroupWorks_cannotThenUploadFileToThatSharingGroup() {
@@ -426,17 +425,17 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
 
-        var sharingInvitationUUID:String!
-        
-        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         let sharingUser: TestAccount = .secondaryOwningAccount
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return
         }
         
         guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
@@ -476,16 +475,17 @@ class SharingGroupsControllerTests: ServerTestCase {
         // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         // Need a second user as a member of the sharing group so we can do a file index on the sharing group after the first user is removed.
-        var sharingInvitationUUID:String!
-        createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(permission: .read, sharingGroupUUID:sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         let sharingUser: TestAccount = .secondaryOwningAccount
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return
         }
         
         guard removeUserFromSharingGroup(deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID) else {
@@ -517,16 +517,17 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
         
-        var sharingInvitationUUID:String!
-        createSharingInvitation(testAccount: owningUser, permission: .write, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(testAccount: owningUser, permission: .write, sharingGroupUUID:sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         let sharingUser: TestAccount = .nonOwningSharingAccount
         
-        redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser:sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return
         }
         
         guard removeUserFromSharingGroup(testAccount: owningUser, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID) else {

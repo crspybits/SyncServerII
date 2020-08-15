@@ -44,5 +44,6 @@ public class ServerRoutes {
         
         let pushNotificationsController = PushNotificationsController()
         proxyRouter.addRoute(ep: ServerEndpoints.registerPushNotificationToken, processRequest: pushNotificationsController.registerPushNotificationToken)
+        proxyRouter.addRoute(ep: ServerEndpoints.sendPushNotifications, processRequest: pushNotificationsController.sendPushNotifications)
     }
 }

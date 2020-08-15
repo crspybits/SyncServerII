@@ -102,15 +102,15 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
 
-        var sharingInvitationUUID:String!
-        
-        createSharingInvitation(permission: permission, sharingGroupUUID:sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(permission: permission, sharingGroupUUID:sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
-        redeemSharingInvitation(sharingUser:sharingUser, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser:sharingUser, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) else {
+            XCTFail()
+            return
         }
     }
         
@@ -123,8 +123,9 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
 
-        redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) { _, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) else {
+            XCTFail()
+            return
         }
     }
     
@@ -141,15 +142,15 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        var sharingInvitationUUID:String!
-        
-        createSharingInvitation(permission: .read, sharingGroupUUID: sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        let sharingInvitationUUID:String! = createSharingInvitation(permission: .read, sharingGroupUUID: sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
-        redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) { _, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) else {
+            XCTFail()
+            return
         }
     }
     
@@ -163,12 +164,11 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             XCTFail()
             return
         }
-        
-        var sharingInvitationUUID:String!
-        
-        createSharingInvitation(testAccount: owningAccount, permission: .read, sharingGroupUUID:sharingGroupUUID1) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+
+        let sharingInvitationUUID:String! = createSharingInvitation(testAccount: owningAccount, permission: .read, sharingGroupUUID:sharingGroupUUID1)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
         
         let secondOwningAccount:TestAccount = .secondaryOwningAccount
@@ -176,12 +176,7 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         let sharingGroupUUID2 = Foundation.UUID().uuidString
         addNewUser(testAccount: secondOwningAccount, sharingGroupUUID: sharingGroupUUID2, deviceUUID:deviceUUID2)
         
-        var result: RedeemSharingInvitationResponse!
-        redeemSharingInvitation(sharingUser: secondOwningAccount, sharingInvitationUUID: sharingInvitationUUID) { response, expectation in
-            result = response
-            expectation.fulfill()
-        }
-        
+        let result: RedeemSharingInvitationResponse! = redeemSharingInvitation(sharingUser: secondOwningAccount, sharingInvitationUUID: sharingInvitationUUID)
         guard result != nil else {
             XCTFail()
             return
@@ -204,15 +199,15 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
             
-        var sharingInvitationUUID:String!
-            
-        createSharingInvitation(permission: .read, sharingGroupUUID: sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        var sharingInvitationUUID:String! = createSharingInvitation(permission: .read, sharingGroupUUID: sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
-            
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) { _, expectation in
-            expectation.fulfill()
+
+        guard let _ = redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return
         }
             
         // Check to make sure we have a new user:
@@ -231,14 +226,16 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
             
-        createSharingInvitation(permission: .write, sharingGroupUUID: sharingGroupUUID) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        sharingInvitationUUID = createSharingInvitation(permission: .write, sharingGroupUUID: sharingGroupUUID)
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
-            
+        
         // Since the user account represented by sharingUser is already a member of the sharing group referenced by the specific sharingGroupUUID, this redeem attempt will fail.
-        redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { _, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) else {
+            XCTFail()
+            return
         }
     }
     
@@ -343,21 +340,17 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        var sharingInvitationUUID:String!
+        let sharingInvitationUUID:String! = createSharingInvitation(testAccount: .primaryOwningAccount, permission: permission, sharingGroupUUID:sharingGroupUUID1)
         
-        createSharingInvitation(testAccount: .primaryOwningAccount, permission: permission, sharingGroupUUID:sharingGroupUUID1) { expectation, invitationUUID in
-            sharingInvitationUUID = invitationUUID
-            expectation.fulfill()
+        guard sharingInvitationUUID != nil else {
+            XCTFail()
+            return
         }
+
+        var redeemResult: RedeemSharingInvitationResponse? = redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID)
         
-        var redeemResult: RedeemSharingInvitationResponse?
-        
-        redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
-            XCTAssert(result?.userId != nil && result?.sharingGroupUUID != nil)
-            redeemResult = result
-            expectation.fulfill()
-        }
-        
+        XCTAssert(redeemResult?.userId != nil && redeemResult?.sharingGroupUUID != nil)
+
         guard redeemResult != nil else {
             XCTFail()
             return
@@ -386,8 +379,9 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) { result, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) else {
+            XCTFail()
+            return
         }
     }
     
@@ -411,8 +405,9 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID) { result, expectation in
-            expectation.fulfill()
+        guard let _ = redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID) else {
+            XCTFail()
+            return
         }
         
         // Make sure the sharing invitation has now been removed.
