@@ -40,116 +40,62 @@
   ],
   "ChangeResolverTests": [
     {
-      "name": "ChangeResolverTests.ApplyDeferredUploadsTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "ChangeResolverTests.ApplyDeferredUploadsTests"
     },
     {
-      "name": "ChangeResolverTests.ChangeResolverManagerTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "ChangeResolverTests.ChangeResolverManagerTests"
     },
     {
-      "name": "ChangeResolverTests.FileDeletionTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "ChangeResolverTests.FileDeletionTests"
     }
   ],
   "DatabaseTests": [
     {
-      "name": "DatabaseTests.DatabaseLockTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.DatabaseLockTests"
     },
     {
-      "name": "DatabaseTests.DatabaseModelTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.DatabaseModelTests"
     },
     {
-      "name": "DatabaseTests.DatabaseUpdateTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.DatabaseUpdateTests"
     },
     {
-      "name": "DatabaseTests.GeneralDatabaseTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.GeneralDatabaseTests"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_DeferredUploadRepository",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_DeferredUploadRepository"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_DeviceUUID",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_DeviceUUID"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_FileIndex",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_FileIndex"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroups",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroups"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingInvitationRepository",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_SharingInvitationRepository"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_Uploads",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_Uploads"
     },
     {
-      "name": "DatabaseTests.SpecificDatabaseTests_UserRepository",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "DatabaseTests.SpecificDatabaseTests_UserRepository"
     }
   ],
   "FileControllerUploadChangeTests": [
     {
-      "name": "FileControllerUploadChangeTests.FileController_FinishUploadsTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "FileControllerUploadChangeTests.FileController_FinishUploadsTests"
     },
     {
-      "name": "FileControllerUploadChangeTests.FileController_V0_UploadTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "FileControllerUploadChangeTests.FileController_V0_UploadTests"
     },
     {
-      "name": "FileControllerUploadChangeTests.FileController_VN_UploadTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "FileControllerUploadChangeTests.FileController_VN_UploadTests"
     }
   ],
   "FileControllerUploadDeletionTests": [

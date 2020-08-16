@@ -81,14 +81,14 @@ extension FileController {
         guard uploadRequest.uploadCount >= 1, uploadRequest.uploadIndex >= 1, uploadRequest.uploadIndex <= uploadRequest.uploadCount else {
             let message = "uploadCount \(String(describing: uploadRequest.uploadCount)) and/or uploadIndex \(String(describing: uploadRequest.uploadIndex)) are invalid."
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            finish(.errorMessage(message), params: params)
             return
         }
         
         guard let deviceUUID = params.deviceUUID else {
             let message = "Did not have deviceUUID"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            finish(.errorMessage(message), params: params)
             return
         }
                 
@@ -246,12 +246,11 @@ extension FileController {
                 return
             }
             
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: Date(), uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: data)
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: todaysDate, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: data)
         }
     }
     
     private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String) {
-        // Lock will be held for the duration of the upload. Not the best, but don't have a better mechanism yet.
         
         Log.info("File being sent to cloud storage: \(cloudFileName)")
 
@@ -301,15 +300,7 @@ extension FileController {
         upload.changeResolverName = uploadRequest.changeResolverName
 
         // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
-        var expectedCheckSum: String?
-        expectedCheckSum = uploadRequest.checkSum?.lowercased()
-        
-#if DEBUG
-        // Short-circuit check sum test in the case of load testing. 'cause it won't be right :).
-        if let loadTesting = Configuration.server.loadTestingCloudStorage, loadTesting {
-            expectedCheckSum = uploadedCheckSum
-        }
-#endif
+        let expectedCheckSum: String? = uploadRequest.checkSum?.lowercased()
 
         if newFile, let expectedCheckSum = expectedCheckSum {
             guard uploadedCheckSum?.lowercased() == expectedCheckSum else {
