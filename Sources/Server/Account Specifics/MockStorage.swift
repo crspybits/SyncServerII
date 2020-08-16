@@ -50,6 +50,8 @@ class MockStorage: CloudStorage {
     }
 
     func uploadFile(cloudFileName: String, data: Data, options: CloudStorageFileNameOptions?, completion: @escaping (Result<String>) -> ()) {
+        Log.debug("MockStorage: uploadFile: \(cloudFileName)")
+        
         Self.directory[cloudFileName] = data
         
         guard let hash = getHash(data: data) else {
@@ -63,6 +65,8 @@ class MockStorage: CloudStorage {
     }
     
     func downloadFile(cloudFileName: String, options: CloudStorageFileNameOptions?, completion: @escaping (DownloadResult) -> ()) {
+        Log.debug("MockStorage: downloadFile: \(cloudFileName)")
+
         runAfterDuration {
             guard let data = Self.directory[cloudFileName] else {
                 completion(.fileNotFound)
@@ -79,6 +83,8 @@ class MockStorage: CloudStorage {
     }
     
     func deleteFile(cloudFileName: String, options: CloudStorageFileNameOptions?, completion: @escaping (Result<()>) -> ()) {
+        Log.debug("MockStorage: deleteFile: \(cloudFileName)")
+
         guard let _ = Self.directory[cloudFileName] else {
             completion(.failure(Errors.fileNotFound))
             return
@@ -92,6 +98,8 @@ class MockStorage: CloudStorage {
     }
     
     func lookupFile(cloudFileName: String, options: CloudStorageFileNameOptions?, completion: @escaping (Result<Bool>) -> ()) {
+        Log.debug("MockStorage: lookupFile: \(cloudFileName)")
+
         guard let _ = Self.directory[cloudFileName] else {
             completion(.success(false))
             return

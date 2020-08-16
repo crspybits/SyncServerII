@@ -7,6 +7,7 @@
 
 import Foundation
 import ServerAccount
+import LoggerAPI
 
 extension Account {
     // Pass as the `mock` the MockStorage if you are using it.
@@ -18,6 +19,8 @@ extension Account {
         if let loadTesting = Configuration.server.loadTestingCloudStorage, loadTesting {
             useMockStorage = true
         }
+        
+        Log.debug("cloudStorage: useMockStorage: \(useMockStorage)")
         
         if useMockStorage {
             return mock

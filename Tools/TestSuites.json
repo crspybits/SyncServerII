@@ -184,31 +184,23 @@
   ],
   "PushNotificationTests": [
     {
-      "name": "PushNotificationTests.SendPushNotificationsTests",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "PushNotificationTests.SendPushNotificationsTests"
     },
     {
-      "name": "PushNotificationTests.RegisterPushNotificationsTest",
-      "parameters": [
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+      "name": "PushNotificationTests.RegisterPushNotificationsTest"
     }
   ],
   "AccountFileTests": [
     {
       "name": "AccountFileTests.MockStorageTests",
       "parameters": [
-        "MOCK_STORAGE",
-        "FAKE_PUSH_NOTIFICATIONS"
-      ]
+        "MOCK_STORAGE" 
+       ]
     },
     {
       "name": "AccountFileTests.MockStorageLiveTests",
       "parameters": [
-        "MOCK_STORAGE",
-        "FAKE_PUSH_NOTIFICATIONS"
+        "MOCK_STORAGE"
       ]
     }
   ],
