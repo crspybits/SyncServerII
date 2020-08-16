@@ -34,16 +34,10 @@ class RequestHandler {
     private var currentSignedInUser:User?
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
-    private let accountManager: AccountManager
-    private let changeResolverManager: ChangeResolverManager
+    private let services: Services
     private let db: Database
-    private let uploader:Uploader
-    private let pushNotifications: PushNotificationsService
-    
-    init(request:RouterRequest, response:RouterResponse, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, uploader:Uploader, pushNotifications: PushNotificationsService, db: Database, endpoint:ServerEndpoint? = nil) {
-        self.accountManager = accountManager
-        self.changeResolverManager = changeResolverManager
-        self.uploader = uploader
+
+    init(request:RouterRequest, response:RouterResponse, services: Services, db: Database, endpoint:ServerEndpoint? = nil) {
         self.db = db
         self.request = request
         self.response = response
@@ -54,7 +48,7 @@ class RequestHandler {
             self.authenticationLevel = endpoint!.authenticationLevel
         }
         self.endpoint = endpoint
-        self.pushNotifications = pushNotifications
+        self.services = services
         ServerStatsKeeper.session.increment(stat: .apiRequestsCreated)
         
         Log.info("RequestHandler.init: numberCreated: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsCreated)); numberDeleted: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsDeleted));")
@@ -322,7 +316,7 @@ class RequestHandler {
         case .primary, .secondary:
             // Only do this if we are requiring primary or secondary authorization-- this gets account specific properties from the request, assuming we are using authorization.
             do {
-                accountProperties = try accountManager.getProperties(fromRequest: request)
+                accountProperties = try services.accountManager.getProperties(fromRequest: request)
             } catch (let error) {
                 let message = "YIKES: could not get account properties from request: \(error)"
                 Log.error(message)
@@ -357,7 +351,7 @@ class RequestHandler {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try accountManager.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!))
+                    dbCreds = try services.accountManager.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!))
                 } catch (let error) {
                     errorString = "\(error)"  
                 }
@@ -423,7 +417,7 @@ class RequestHandler {
                 return
             }
             
-            if let profileCreds = accountManager.accountFromProperties(properties: accountProperties, user: credsUser) {
+            if let profileCreds = services.accountManager.accountFromProperties(properties: accountProperties, user: credsUser) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
                     doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
@@ -488,7 +482,7 @@ class RequestHandler {
                     return
                 }
                 
-                effectiveOwningUserCreds = try? accountManager.accountFromJSON(effectiveOwningUser.creds, accountName: effectiveOwningUser.accountType, user: .user(effectiveOwningUser))
+                effectiveOwningUserCreds = try? services.accountManager.accountFromJSON(effectiveOwningUser.creds, accountName: effectiveOwningUser.accountType, user: .user(effectiveOwningUser))
                 
                 guard effectiveOwningUserCreds != nil else {
                     handleResult(.failure(.message("Could not get effective owning user creds.")))
@@ -505,7 +499,7 @@ class RequestHandler {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountManager: accountManager, changeResolverManager: changeResolverManager, uploader: uploader, pushNotifications: pushNotifications) { response in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, services: services) { response in
         
             var message:ResponseMessage!
             var postCommitRunner: RequestHandler.PostRequestRunner?

@@ -98,13 +98,6 @@ struct ServerConfiguration: Decodable, GoogleCredsConfiguration, MicrosoftCredsC
     }
     let awssns:AWSSNS?
     
-    // If set to true, uses MockStorage.
-    // This is a `var` only for testing-- so I can change this to true during test cases.
-    var loadTestingCloudStorage: Bool?
-    
-#if DEBUG
-    mutating func setupLoadTestingCloudStorage() {
-        loadTestingCloudStorage = true
-    }
-#endif
+    // If true, uses MockStorage.
+    let loadTestingCloudStorage: Bool?
 }

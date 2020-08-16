@@ -65,6 +65,8 @@ class ServerTestCase : XCTestCase {
         HeliumLogger.use(.debug)
         
         TestAccount.registerHandlers()
+        
+        MockStorage.reset()
     }
     
     override func tearDown() {
@@ -1287,9 +1289,6 @@ class ServerTestCase : XCTestCase {
                         if let expectedCheckSum = expectedCheckSum, !loadTesting {
                             XCTAssert(downloadFileResponse.checkSum == expectedCheckSum, "downloadFileResponse.checkSum: \(String(describing: downloadFileResponse.checkSum)); actualCheckSum: \(String(describing: expectedCheckSum))")
                         }
-                        
-                        // DEPRECATED
-                        // XCTAssert(downloadFileResponse.appMetaData == appMetaData?.contents)
                         
                         guard let _ = downloadFileResponse.cloudStorageType else {
                             XCTFail()

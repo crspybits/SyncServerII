@@ -118,7 +118,7 @@ class UserController : ControllerProtocol {
             return
         }
         
-        guard let userId = params.repos.user.add(user: user, accountManager: params.accountManager) else {
+        guard let userId = params.repos.user.add(user: user, accountManager: params.services.accountManager) else {
             let message = "Failed on adding user to User!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -149,7 +149,7 @@ class UserController : ControllerProtocol {
         profileCreds.accountCreationUser = .userId(userId)
 
         // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
-        guard let cloudStorageCreds = profileCreds.cloudStorage else {
+        guard let cloudStorageCreds = profileCreds.cloudStorage(mock: params.services.mockStorage) else {
             let message = "Could not obtain CloudStorage Creds"
             Log.error(message)
             params.completion(.failure(.message(message)))

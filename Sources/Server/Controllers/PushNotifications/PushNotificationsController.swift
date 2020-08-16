@@ -31,15 +31,15 @@ class PushNotificationsController : ControllerProtocol {
             return
         }
         
-        let topicName = params.pushNotifications.topicName(userId: userId)
+        let topicName = params.services.pushNotifications.topicName(userId: userId)
 
-        params.pushNotifications.createPlatformEndpoint(apnsToken: request.pushNotificationToken) { response in
+        params.services.pushNotifications.createPlatformEndpoint(apnsToken: request.pushNotificationToken) { response in
             switch response {
             case .success(let endpointArn):
-                params.pushNotifications.createTopic(topicName: topicName) { response in
+                params.services.pushNotifications.createTopic(topicName: topicName) { response in
                     switch response {
                     case .success(let topicArn):
-                        params.pushNotifications.subscribe(endpointArn: endpointArn, topicArn: topicArn) { response in
+                        params.services.pushNotifications.subscribe(endpointArn: endpointArn, topicArn: topicArn) { response in
                             switch response {
                             case .success:
                                 guard params.repos.user.updatePushNotificationTopic(

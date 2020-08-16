@@ -167,10 +167,10 @@ extension FileController {
         else {
             // OWNER
             // Need to get creds for the user that uploaded the v0 file.
-            ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, userRepo: params.repos.user, accountManager: params.accountManager)
+            ownerAccount = FileController.getCreds(forUserId: existingFileInFileIndex!.userId, userRepo: params.repos.user, accountManager: params.services.accountManager)
         }
         
-        ownerCloudStorage = ownerAccount?.cloudStorage
+        ownerCloudStorage = ownerAccount?.cloudStorage(mock: params.services.mockStorage)
         guard ownerCloudStorage != nil && ownerAccount != nil else {
             let message = "Could not obtain creds for v0 file: Assuming this means owning user is no longer on system."
             Log.error(message)
@@ -220,7 +220,7 @@ extension FileController {
             
             // Only new files can have change resolvers.
             if let resolverName = uploadRequest.changeResolverName {
-                guard params.changeResolverManager.validResolver(resolverName) else {
+                guard params.services.changeResolverManager.validResolver(resolverName) else {
                     let message = "Bad change resolver: \(resolverName)"
                     finish(.errorMessage(message), params: params)
                     return
@@ -351,7 +351,7 @@ extension FileController {
 
         switch addUploadResult {
         case .success:
-            guard let finishUploads = FinishUploadFiles(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: params.uploader, params: params) else {
+            guard let finishUploads = FinishUploadFiles(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: params.services.uploader, params: params) else {
                 finish(.errorCleanup(message: "Could not FinishUploads", cleanup: cleanup), params: params)
                 return
             }

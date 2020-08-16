@@ -239,7 +239,7 @@ extension AccountScheme {
                     return
                 }
                 
-                guard let cloudStorage = creds.cloudStorage else {
+                guard let cloudStorage = creds.cloudStorage(mock: MockStorage()) else {
                     XCTFail()
                     expectation.fulfill()
                     return
@@ -252,7 +252,7 @@ extension AccountScheme {
                     case .accessTokenRevokedOrExpired:
                         XCTFail()
                     case .failure(let error):
-                        XCTFail("cloudFileName: \(cloudFileName); \(error)")
+                        Log.warning("cloudFileName: \(cloudFileName); \(error)")
                     }
                     
                     expectation.fulfill()
@@ -267,7 +267,7 @@ extension AccountScheme {
             creds.accessToken = testAccount.token()
             creds.accountId = testAccount.id()
             
-            guard let cloudStorage = creds.cloudStorage else {
+            guard let cloudStorage = creds.cloudStorage(mock: MockStorage()) else {
                 XCTFail()
                 expectation.fulfill()
                 return
@@ -300,7 +300,7 @@ extension AccountScheme {
                     return
                 }
                 
-                guard let cloudStorage = creds.cloudStorage else {
+                guard let cloudStorage = creds.cloudStorage(mock: MockStorage()) else {
                     XCTFail()
                     expectation.fulfill()
                     return

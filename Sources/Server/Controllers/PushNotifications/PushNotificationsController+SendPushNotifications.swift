@@ -105,12 +105,12 @@ extension PushNotificationsController {
         
         modifiedMessage += ": " + message
         
-        guard let formattedMessage = params.pushNotifications.format(message: modifiedMessage) else {
+        guard let formattedMessage = params.services.pushNotifications.format(message: modifiedMessage) else {
             Log.error("sendNotifications: Failed on formatting message.")
             return false
         }
         
-        guard params.pushNotifications.send(formattedMessage: formattedMessage, toUsers: users) else {
+        guard params.services.pushNotifications.send(formattedMessage: formattedMessage, toUsers: users) else {
             return false
         }
         

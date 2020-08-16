@@ -12,10 +12,10 @@ import LoggerAPI
 import HeliumLogger
 import ServerShared
 
-class MockStorageLiveTests: ServerTestCase, LinuxTestable {
+class MockStorageLiveTests: ServerTestCase {
     override func setUp() {
         super.setUp()
-        Configuration.setupLoadTestingCloudStorage()
+        MockStorage.reset()
     }
 
     func testUploadFile() {
@@ -25,8 +25,6 @@ class MockStorageLiveTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-        
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let fileIndexResult = FileIndexRepository(db).fileIndex(forSharingGroupUUID: sharingGroupUUID)
         switch fileIndexResult {
@@ -52,33 +50,28 @@ class MockStorageLiveTests: ServerTestCase, LinuxTestable {
             return
         }
         
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult1.request.fileUUID
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         
-        uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
-
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
+        let result = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false)
+        XCTAssert(result != nil)
     }
     
     func testDownloadFile() {
-        assert(false)
-        //downloadTextFile()
+        let deviceUUID = Foundation.UUID().uuidString
+        
+        // This file is going to be deleted.
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
+            let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+                
+        guard let _ = downloadFile(testAccount: .primaryOwningAccount, fileUUID: uploadResult1.request.fileUUID, fileVersion: 0, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID) else {
+            XCTFail()
+            return
+        }
     }
 }
 
-extension MockStorageLiveTests {
-    static var allTests : [(String, (MockStorageLiveTests) -> () throws -> Void)] {
-        return [
-            ("testUploadFile", testUploadFile),
-            ("testDeleteFile", testDeleteFile),
-            ("testDownloadFile", testDownloadFile)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: MockStorageLiveTests.self)
-    }
-}

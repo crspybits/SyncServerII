@@ -97,14 +97,14 @@ extension FileController {
 
         // OWNER
         // The cloud storage for the file is the original owning user's storage.
-        guard let owningUserCreds = FileController.getCreds(forUserId: fileIndex.userId, userRepo: params.repos.user, accountManager: params.accountManager) else {
+        guard let owningUserCreds = FileController.getCreds(forUserId: fileIndex.userId, userRepo: params.repos.user, accountManager: params.services.accountManager) else {
             let message = "Could not obtain owning users creds"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let cloudStorageCreds = owningUserCreds.cloudStorage,
+        guard let cloudStorageCreds = owningUserCreds.cloudStorage(mock: params.services.mockStorage),
             let cloudStorageType = owningUserCreds.accountScheme.cloudStorageType else {
             let message = "Could not obtain cloud storage creds or cloud storage type."
             Log.error(message)

@@ -45,7 +45,10 @@ let package = Package(
 
         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMajor(from: "2.7.0")),
                 
-        .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMajor(from: "1.8.1"))
+        .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMajor(from: "1.8.1")),
+        
+        // Really, only for testing
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.3.1"))
 	],
     targets: [
         .target(name: "Main",
@@ -56,7 +59,7 @@ let package = Package(
             ]),
 
         .target(name: "Server",
-            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount", "ChangeResolvers"],
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount", "ChangeResolvers", "CryptoSwift"],
             swiftSettings: [
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")

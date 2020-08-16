@@ -53,10 +53,4 @@ class Configuration {
         // In case the line in the file had trailing white space (e.g., a new line)
         self.deployedGitTag = tag.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines)
     }
-    
-#if DEBUG
-    static func setupLoadTestingCloudStorage() {
-        server.setupLoadTestingCloudStorage()
-    }
-#endif
 }

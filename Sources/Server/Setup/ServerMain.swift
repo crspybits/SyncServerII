@@ -79,22 +79,12 @@ public class ServerMain {
             return
         }
         
-        let pushNotifications:PushNotificationsService
-#if FAKE_PUSH_NOTIFICATIONS
-        guard let pns = FakePushNotifications() else {
-            Startup.halt("Failed during startup: Failed setting up FakePushNotifications")
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager, uploader: uploader) else {
+            Startup.halt("Failed during startup: Failed setting up Services")
             return
         }
-        pushNotifications = pns
-#else
-        guard let pns = PushNotifications() else {
-            Startup.halt("Failed during startup: Failed setting up PushNotifications")
-            return
-        }
-        pushNotifications = pns
-#endif
 
-        let serverRoutes = CreateRoutes(accountManager: accountManager, changeResolverManager: resolverManager, uploader: uploader, pushNotifications: pushNotifications, db: db)
+        let serverRoutes = CreateRoutes(services: services, db: db)
         
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
         

@@ -88,10 +88,7 @@ public class RequestProcessingParameters: FinishUploadsParameters {
     var repos:Repositories!
     let routerResponse:RouterResponse!
     let deviceUUID:String?
-    let accountManager: AccountManager
-    let changeResolverManager: ChangeResolverManager
-    let uploader:Uploader
-    let pushNotifications: PushNotificationsService
+    let services:Services
     
     enum Response {
         case success(ResponseMessage)
@@ -104,7 +101,7 @@ public class RequestProcessingParameters: FinishUploadsParameters {
     
     let completion: (Response)->()
     
-    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, accountManager: AccountManager, changeResolverManager: ChangeResolverManager, uploader:Uploader, pushNotifications: PushNotificationsService, completion: @escaping (Response)->()) {
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, services: Services, completion: @escaping (Response)->()) {
     
         self.request = request
         self.ep = ep
@@ -119,10 +116,7 @@ public class RequestProcessingParameters: FinishUploadsParameters {
         self.routerResponse = routerResponse
         self.deviceUUID = deviceUUID
         self.completion = completion
-        self.accountManager = accountManager
-        self.changeResolverManager = changeResolverManager
-        self.uploader = uploader
-        self.pushNotifications = pushNotifications
+        self.services = services
     }
     
     func fail(_ message: String) {
