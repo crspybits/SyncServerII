@@ -76,9 +76,11 @@ extension KituraTest {
             }
             
             // At least with Google accounts, I'm having problems with periodic `unauthorized` responses. Could be due to some form of throttling?
+#if !MOCK_STORAGE
             if testAccount.scheme.accountName == AccountScheme.google.accountName {
                 sleep(5)
             }
+#endif
             Log.info("performServerTest: Ends")
         }
         

@@ -3,9 +3,11 @@
     "AccountAuthenticationTests",
     "ChangeResolverTests",
     "DatabaseTests",
-    "FileControllerUploadChangeTests",
+    "FileControllerUploadFileTests",
     "FileControllerUploadDeletionTests",
     "FileControllerBothUploadTests",
+    "FileControllerTests",
+    "FileControllerTests2",
     "UploaderTests",
     "PushNotificationTests",
     "AccountFileTests",
@@ -87,15 +89,15 @@
       "name": "DatabaseTests.SpecificDatabaseTests_UserRepository"
     }
   ],
-  "FileControllerUploadChangeTests": [
+  "FileControllerUploadFileTests": [
     {
-      "name": "FileControllerUploadChangeTests.FileController_FinishUploadsTests"
+      "name": "FileControllerUploadFileTests.FileController_FinishUploadsTests"
     },
     {
-      "name": "FileControllerUploadChangeTests.FileController_V0_UploadTests"
+      "name": "FileControllerUploadFileTests.FileController_V0_UploadTests"
     },
     {
-      "name": "FileControllerUploadChangeTests.FileController_VN_UploadTests"
+      "name": "FileControllerUploadFileTests.FileController_VN_UploadTests"
     }
   ],
   "FileControllerUploadDeletionTests": [
@@ -126,6 +128,28 @@
     },
     {
       "name": "UploaderTests.UploaderUtilityTests"
+    }
+  ],
+  "FileControllerTests2": [
+    {
+      "name": "FileControllerTests.FileController_DownloadAppMetaDataTests",
+      "parameters": [
+        "MOCK_STORAGE" 
+       ]
+    }
+  ],
+  "FileControllerTests": [
+    {
+      "name": "FileControllerTests.FileController_DownloadTests"
+    },
+    {
+      "name": "FileControllerTests.FileController_GetUploadsResults"
+    },
+    {
+      "name": "FileControllerTests.FileController_IndexTests",
+      "parameters": [
+        "MOCK_STORAGE" 
+       ]
     }
   ],
   "PushNotificationTests": [

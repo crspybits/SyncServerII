@@ -15,6 +15,7 @@ import Foundation
 import ServerShared
 import ChangeResolvers
 import Credentials
+import ServerAccount
 
 class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
@@ -26,6 +27,43 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         accountManager = AccountManager(userRepository: UserRepository(db))
         let credentials = Credentials()
         accountManager.setupAccounts(credentials: credentials)
+    }
+    
+    func runUploadVNFile(withMimeType: Bool) {
+        let file:TestFile = .commentFile
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        var mimeType: MimeType?
+        let changeResolverName = CommentFile.changeResolverName
+
+        let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        if withMimeType {
+            mimeType = file.mimeType
+        }
+
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withMimeType, file: file, dataToUpload: comment.updateContents)
+        if withMimeType {
+            XCTAssert(result2 == nil)
+        }
+        else {
+            XCTAssert(result2 != nil)
+        }
+    }
+    
+    func testUploadVNFileWithoutMimeTypeWorks() {
+        runUploadVNFile(withMimeType: false)
+    }
+    
+    func testUploadVNFileWithMimeTypeFails() {
+        runUploadVNFile(withMimeType: true)
     }
     
     func runUploadOneV1TextFileWorks(withFileGroup: Bool) {
@@ -81,6 +119,51 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
     
     func testUploadOneV1TextFileWithNoFileGroupWorks() {
         runUploadOneV1TextFileWorks(withFileGroup: false)
+    }
+    
+    func testUploadV1TextFileWithDifferentDeviceUUIDWorks() {
+        let changeResolverName = CommentFile.changeResolverName
+        let deviceUUID1 = Foundation.UUID().uuidString
+        let deviceUUID2 = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let fileGroupUUID = Foundation.UUID().uuidString
+        
+        let exampleComment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+         
+        // First upload the v0 file.
+  
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID1, fileUUID: fileUUID, stringFile: .commentFile, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+                
+        // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
+        
+        let fileIndex = FileIndexRepository(db)
+        let upload = UploadRepository(db)
+        let deferredUploads = DeferredUploadRepository(db)
+        
+        guard let fileIndexCount1 = fileIndex.count(),
+            let uploadCount1 = upload.count(),
+            let deferredUploadCount1 = deferredUploads.count() else {
+            XCTFail()
+            return
+        }
+                
+        let v1ChangeData = exampleComment.updateContents
+        
+        guard let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, deviceUUID: deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData) else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(result2.response?.deferredUploadId != nil)
+        
+        XCTAssert(fileIndexCount1 == fileIndex.count() )
+        XCTAssert(uploadCount1 == upload.count())
+        XCTAssert(deferredUploadCount1 == deferredUploads.count())
     }
     
     func runUploadTwoV1TextFilesInSameSharingGroupWorks(withFileGroup: Bool) {
@@ -147,6 +230,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         runUploadTwoV1TextFilesInSameSharingGroupWorks(withFileGroup: true)
     }
     
+    // Single changes for each of two files.
     func runUploadTwoV1Changes(fromDifferentFileGroupsInSameBatch: Bool) {
         let changeResolverName = CommentFile.changeResolverName
         let deviceUUID = Foundation.UUID().uuidString
@@ -310,5 +394,151 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         XCTAssert(fileIndexCount1 == fileIndexRepo.count() )
         XCTAssert(uploadCount1 == uploadRepo.count())
         XCTAssert(deferredUploadCount1 == deferredUploadsRepo.count())
+    }
+    
+    func testUploadTwoChangesToTheSameFileWorks() throws {
+        let changeResolverName = CommentFile.changeResolverName
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let comment1 = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+        let comment2 = ExampleComment(messageString: "Goodbye!", id: Foundation.UUID().uuidString)
+
+        // First, do the v0 uploads.
+  
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+            let sharingGroupUUID1 = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        // Prepare the v1 uploads
+       guard let fileIndex = getFileIndex(sharingGroupUUID: sharingGroupUUID1, fileUUID: fileUUID) else {
+            XCTFail()
+            return
+        }
+        
+        // This upload needs to be with a different user. (We don't allow 2 rows in the Upload table with the same fileUUID and userId).
+        let otherUserId = fileIndex.userId + 1
+        guard let deferredUpload1 = createDeferredUpload(userId: otherUserId, sharingGroupUUID: sharingGroupUUID1, status: .pendingChange),
+            let deferredUploadId1 = deferredUpload1.deferredUploadId else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID1, userId: otherUserId, deferredUploadId: deferredUploadId1, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID1), dataToUpload: comment2.updateContents) else {
+            XCTFail()
+            return
+        }
+        
+        guard let mimeType = result.request.mimeType else {
+            XCTFail()
+            return
+        }
+        
+        let (_, cloudStorage) = try fileIndex.getCloudStorage(userRepo: UserRepository(db), accountManager: accountManager)
+        let cloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: mimeType, fileVersion: 1)
+        let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: mimeType)
+        
+        var commentFileData: Data!
+        
+        let exp = expectation(description: "download")
+        
+        cloudStorage.downloadFile(cloudFileName: cloudFileName, options: options) { result in
+            switch result {
+            case .success(data: let data, checkSum: _):
+                commentFileData = data
+            default:
+                XCTFail()
+                return
+            }
+            
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10, handler: nil)
+        
+        let commentFile = try CommentFile(with: commentFileData)
+        
+        guard lookup(comment: comment1, commentFile: commentFile) else {
+            XCTFail()
+            return
+        }
+        
+        guard lookup(comment: comment2, commentFile: commentFile) else {
+            XCTFail()
+            return
+        }
+        
+        let comment3 = ExampleComment(messageString: "Goodbye!", id: Foundation.UUID().uuidString)
+        guard !lookup(comment: comment3, commentFile: commentFile) else {
+            XCTFail()
+            return
+        }
+    }
+    
+    func runUploadVersionN(withAppMetaData: Bool) {
+        let changeResolverName = CommentFile.changeResolverName
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        let comment = ExampleComment(messageString: "Goodbye!", id: Foundation.UUID().uuidString)
+
+        // First, do the v0 uploads.
+  
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+                
+        var appMetaData: String?
+        if withAppMetaData {
+            appMetaData = "Example app meta data"
+        }
+        
+        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: appMetaData, errorExpected: withAppMetaData, dataToUpload: comment.updateContents)
+        
+        if withAppMetaData {
+            XCTAssert(result2 == nil)
+        }
+        else {
+            XCTAssert(result2 != nil)
+        }
+    }
+    
+    func testUploadAppMetaDataWithVersionNFails() {
+        runUploadVersionN(withAppMetaData: true)
+    }
+
+    func testUploadWithoutAppMetaDataWithVersionNWorks() {
+        runUploadVersionN(withAppMetaData: false)
+    }
+
+    func lookup(comment: ExampleComment, commentFile: CommentFile) -> Bool {
+        for element in 0..<commentFile.count {
+            guard let fileComment = commentFile[element] else {
+                XCTFail()
+                return false
+            }
+            
+            guard let id = fileComment[CommentFile.idKey] as? String else {
+                return false
+            }
+
+            guard let message = fileComment[ExampleComment.messageKey] as? String else {
+                return false
+            }
+            
+            if id == comment.id && message == comment.messageString {
+                return true
+            }
+        }
+        
+        return false
     }
 }

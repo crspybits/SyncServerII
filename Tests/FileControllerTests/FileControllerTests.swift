@@ -82,9 +82,6 @@ class FileController_IndexTests: ServerTestCase {
             return
         }
         
-        // Have to do a DoneUploads to transfer the files into the FileIndex
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
         let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: uploadResult.request.fileUUID)
         
         let fileIndexResult = FileIndexRepository(db).lookup(key: key, modelInit: FileIndex.init)
@@ -141,9 +138,6 @@ class FileController_IndexTests: ServerTestCase {
             return
         }
         
-        // Have to do a DoneUploads to transfer the files into the FileIndex
-        //self.sendDoneUploads(expectedNumberOfUploads: 2, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
-        
         self.getIndex(expectedFiles: [uploadResult1.request, uploadResult2.request], sharingGroupUUID: sharingGroupUUID)
     }
     
@@ -153,9 +147,6 @@ class FileController_IndexTests: ServerTestCase {
             XCTFail()
             return
         }
-        
-        // Have to do a DoneUploads to transfer the files into the FileIndex
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let invalidSharingGroupUUID = UUID().uuidString
         
@@ -169,9 +160,6 @@ class FileController_IndexTests: ServerTestCase {
             XCTFail()
             return
         }
-        
-        // Have to do a DoneUploads to transfer the files into the FileIndex
-        //self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
         
         let workingButBadSharingGroupUUID = UUID().uuidString
         guard addSharingGroup(sharingGroupUUID: workingButBadSharingGroupUUID) else {

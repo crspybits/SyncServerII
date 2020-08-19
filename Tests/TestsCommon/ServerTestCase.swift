@@ -587,7 +587,7 @@ class ServerTestCase : XCTestCase {
     // If dataToUpload is present, `file` is not used.
     // `vNUpload` signals whether or not to wait for Uploader run to complete.
     @discardableResult
-    func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, vNUpload: Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType? = .text, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, vNUpload: Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         var sharingGroupUUID = UUID().uuidString
         var uploadingUserId: UserId?
@@ -640,7 +640,7 @@ class ServerTestCase : XCTestCase {
 
         let uploadRequest = UploadFileRequest()
         uploadRequest.fileUUID = fileUUIDToSend
-        uploadRequest.mimeType = mimeType.rawValue
+        uploadRequest.mimeType = mimeType?.rawValue
         uploadRequest.fileGroupUUID = fileGroupUUID
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = requestCheckSum
@@ -679,12 +679,12 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         // This signals whether or not to wait for Uploader run to complete.
         let vNUpload = dataToUpload != nil && uploadIndex == uploadCount && !errorExpected
     
-        return uploadServerFile(uploadIndex: uploadIndex, uploadCount: uploadCount, testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, fileVersion:fileVersion, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, dataToUpload: dataToUpload, fileGroupUUID:fileGroupUUID, changeResolverName: changeResolverName, vNUpload: vNUpload, statusCodeExpected: statusCodeExpected)
+        return uploadServerFile(uploadIndex: uploadIndex, uploadCount: uploadCount, testAccount:testAccount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, dataToUpload: dataToUpload, fileGroupUUID:fileGroupUUID, changeResolverName: changeResolverName, vNUpload: vNUpload, statusCodeExpected: statusCodeExpected)
     }
     
     // Returns true iff the file could be uploaded.
@@ -1370,7 +1370,12 @@ class ServerTestCase : XCTestCase {
             cloudFileName = nonStandardFileName
         }
         else {
-            cloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType: uploadRequest.mimeType, fileVersion: fileVersion)
+            guard let mimeType = uploadRequest.mimeType else {
+                XCTFail()
+                return nil
+            }
+            
+            cloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType: mimeType, fileVersion: fileVersion)
         }
         
         let exp = expectation(description: "\(#function)\(#line)")

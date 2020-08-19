@@ -369,9 +369,8 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             return true
         }
         
-        if upload.state.isUploadFile &&
-            (upload.mimeType == nil || upload.updateDate == nil) {
-            Log.error("Uploading a file and the mimeType and/or updateDate is nil")
+        if upload.state.isUploadFile && upload.updateDate == nil {
+            Log.error("Uploading a file and the updateDate is nil")
             return true
         }
         

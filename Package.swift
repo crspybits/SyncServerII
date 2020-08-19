@@ -69,7 +69,7 @@ let package = Package(
         .testTarget(name: "AccountAuthenticationTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "DatabaseTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerTests", dependencies: ["TestsCommon"]),
-        .testTarget(name: "FileControllerUploadChangeTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "FileControllerUploadFileTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerUploadDeletionTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerBothUploadTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "UploaderTests", dependencies: ["TestsCommon"]),

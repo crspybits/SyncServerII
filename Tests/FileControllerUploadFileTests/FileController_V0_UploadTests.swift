@@ -104,6 +104,34 @@ class FileController_V0_UploadTests: ServerTestCase {
         }
     }
     
+    func runUploadV0File(withMimeType: Bool) {
+        let file:TestFile = .test1
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        var mimeType: MimeType?
+        
+        if withMimeType {
+            mimeType = file.mimeType
+        }
+        
+        let uploadResult = uploadServerFile(uploadIndex: 1, uploadCount: 1, testAccount:testAccount, mimeType: mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, errorExpected: !withMimeType, file: file)
+        if withMimeType {
+            XCTAssert(uploadResult != nil)
+        }
+        else {
+            XCTAssert(uploadResult == nil)
+        }
+    }
+    
+    func testUploadV0FileWithoutMimeTypeFails() {
+        runUploadV0File(withMimeType: false)
+    }
+    
+    func testUploadV0FileWithMimeTypeWorks() {
+        runUploadV0File(withMimeType: true)
+    }
+    
     func testUploadSingleV0JPEGFile() {
         uploadSingleV0File { deviceUUID, fileUUID, changeResolverName in
             return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID)

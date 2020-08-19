@@ -10,19 +10,21 @@ import ServerShared
 import ChangeResolvers
 import XCTest
 import ServerAccount
+import LoggerAPI
 
 private enum Errors: Error {
     case errorLookingUpFile
 }
     
 public struct ExampleComment {
+    static let messageKey = "messageString"
     public let messageString:String
     public let id: String
     
     public var record:CommentFile.FixedObject {
         var result = CommentFile.FixedObject()
         result[CommentFile.idKey] = id
-        result["messageString"] = messageString
+        result[Self.messageKey] = messageString
         return result
     }
     
@@ -163,6 +165,7 @@ public extension UploaderCommon {
             switch result {
             case .success(let found):
                 boolResult = found
+                Log.debug("cloudStorage.lookupFile: \(found)")
             default:
                 error = Errors.errorLookingUpFile
             }

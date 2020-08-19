@@ -98,12 +98,6 @@ extension FileController {
             finish(.errorMessage(message), params: params)
             return
         }
-
-        guard let _ = MimeType(rawValue: uploadRequest.mimeType) else {
-            let message = "Unknown mime type passed: \(String(describing: uploadRequest.mimeType))"
-            finish(.errorMessage(message), params: params)
-            return
-        }
         
         var existingFileInFileIndex:FileIndex?
         var existingFileGroupUUID: String?
@@ -139,13 +133,6 @@ extension FileController {
             }
         
             newFile = false
-            
-            guard existingFileInFileIndex.mimeType == uploadRequest.mimeType else {
-                let message = "File being uploaded(\(String(describing: uploadRequest.mimeType))) doesn't have the same mime type as current version: \(String(describing: existingFileInFileIndex.mimeType))"
-                finish(.errorMessage(message), params: params)
-                return
-            }
-            
             creationDate = existingFileInFileIndex.creationDate
         }
         else {            
@@ -209,12 +196,6 @@ extension FileController {
             return
         }
         
-        guard let mimeType = uploadRequest.mimeType else {
-            let message = "No mimeType given!"
-            finish(.errorMessage(message), params: params)
-            return
-        }
-        
         if newFile {
             Log.debug("uploadRequest.changeResolverName: \(String(describing: uploadRequest.changeResolverName))")
             
@@ -226,14 +207,32 @@ extension FileController {
                     return
                 }
             }
+            
+            guard let mimeType = uploadRequest.mimeType else {
+                let message = "No mime type given with v0 of file."
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
+            guard let _ = MimeType(rawValue: mimeType) else {
+                let message = "Unknown mime type given: \(String(describing: uploadRequest.mimeType))"
+                finish(.errorMessage(message), params: params)
+                return
+            }
         
             // Need to upload complete file.
-            let cloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType:uploadRequest.mimeType, fileVersion: 0)
+            let cloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType:mimeType, fileVersion: 0)
             
             // This also does addUploadEntry.
             uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID)
         }
         else {
+            guard uploadRequest.mimeType ==  nil else {
+                let message = "Mime type given with vN of file."
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
             guard uploadRequest.changeResolverName == nil else {
                 let message = "vN upload and there was a change resolver: \(String(describing: uploadRequest.changeResolverName))"
                 finish(.errorMessage(message), params: params)
