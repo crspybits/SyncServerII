@@ -42,7 +42,7 @@ public protocol UploaderCommon {
 
 public extension UploaderCommon {
     func downloadCommentFile(fileName: String, userId: UserId) -> CommentFile? {
-        guard let cloudStorage = FileController.getCreds(forUserId: userId, userRepo: UserRepository(db), accountManager: accountManager) as? CloudStorage else {
+        guard let cloudStorage = FileController.getCreds(forUserId: userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
             XCTFail()
             return nil
         }
@@ -149,13 +149,13 @@ public extension UploaderCommon {
         return true
     }
     
-    func fileIsInCloudStorage(fileIndex: FileIndex) throws -> Bool {
+    func fileIsInCloudStorage(fileIndex: FileIndex, services: Services) throws -> Bool {
         var boolResult: Bool = false
         
         let exp2 = expectation(description: "run")
 
         // Need to make sure the file has been removed from cloud storage.
-        let (_, cloudStorage) = try fileIndex.getCloudStorage(userRepo: UserRepository(db), accountManager: accountManager)
+        let (_, cloudStorage) = try fileIndex.getCloudStorage(userRepo: UserRepository(db), services: services)
         let cloudFileName = Filename.inCloud(deviceUUID: fileIndex.deviceUUID, fileUUID: fileIndex.fileUUID, mimeType: fileIndex.mimeType, fileVersion: fileIndex.fileVersion)
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: fileIndex.mimeType)
         

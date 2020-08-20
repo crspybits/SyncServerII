@@ -68,20 +68,18 @@ class ApplyDeferredUploads {
     let allUploads: [Upload]
     let fileIndexRepo: FileIndexRepository
     let userRepo: UserRepository
-    let accountManager: AccountManager
-    let resolverManager: ChangeResolverManager
+    let services: UploaderServices
     let fileUUIDs: [String]
     let uploadRepo:UploadRepository
     let deferredUploadRepo:DeferredUploadRepository
     let haveFileGroupUUID: Bool
     var fileDeletions = [FileDeletion]()
     
-    init?(sharingGroupUUID: String, fileGroupUUID: String? = nil, deferredUploads: [DeferredUpload], accountManager: AccountManager, resolverManager: ChangeResolverManager, db: Database) throws {
+    init?(sharingGroupUUID: String, fileGroupUUID: String? = nil, deferredUploads: [DeferredUpload], services: UploaderServices, db: Database) throws {
         self.sharingGroupUUID = sharingGroupUUID
         self.deferredUploads = deferredUploads
         self.db = db
-        self.accountManager = accountManager
-        self.resolverManager = resolverManager
+        self.services = services
         self.fileIndexRepo = FileIndexRepository(db)
         self.uploadRepo = UploadRepository(db)
         self.deferredUploadRepo = DeferredUploadRepository(db)
@@ -164,7 +162,7 @@ class ApplyDeferredUploads {
             throw Errors.couldNotLookupResolverName
         }
         
-        guard let resolverType = resolverManager.getResolverType(changeResolverName) else {
+        guard let resolverType = services.changeResolverManager.getResolverType(changeResolverName) else {
             Log.error("couldNotLookupResolver")
             throw Errors.couldNotLookupResolver
         }
@@ -288,7 +286,7 @@ class ApplyDeferredUploads {
             return
         }
         
-        guard let (owningCreds, cloudStorage) = try? fileIndex.getCloudStorage(userRepo: userRepo, accountManager: accountManager) else {
+        guard let (owningCreds, cloudStorage) = try? fileIndex.getCloudStorage(userRepo: userRepo, services: services) else {
             completion(.failure(Errors.failedSetupForApplyChangesToSingleFile("getCloudStorage")))
             return
         }

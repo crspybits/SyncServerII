@@ -7,7 +7,6 @@
     "FileControllerUploadDeletionTests",
     "FileControllerBothUploadTests",
     "FileControllerTests",
-    "FileControllerTests2",
     "UploaderTests",
     "PushNotificationTests",
     "AccountFileTests",
@@ -130,15 +129,13 @@
       "name": "UploaderTests.UploaderUtilityTests"
     }
   ],
-  "FileControllerTests2": [
+  "FileControllerTests": [
     {
       "name": "FileControllerTests.FileController_DownloadAppMetaDataTests",
       "parameters": [
         "MOCK_STORAGE" 
        ]
-    }
-  ],
-  "FileControllerTests": [
+    },
     {
       "name": "FileControllerTests.FileController_DownloadTests"
     },

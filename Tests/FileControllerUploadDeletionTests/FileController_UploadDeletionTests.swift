@@ -11,11 +11,29 @@ import Credentials
 
 class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
+    var services: Services!
     
     override func setUp() {
         super.setUp()
+
         accountManager = AccountManager(userRepository: UserRepository(db))
-        accountManager.setupAccounts(credentials: Credentials())
+        let credentials = Credentials()
+        accountManager.setupAccounts(credentials: credentials)
+        let resolverManager = ChangeResolverManager()
+
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager) else {
+            XCTFail()
+            return
+        }
+        
+        self.services = services
+        
+        do {
+            try resolverManager.setupResolvers()
+        } catch let error {
+            XCTFail("\(error)")
+            return
+        }
     }
     
     func runDeletionOfOneFile(withFileGroup: Bool) throws {
@@ -66,7 +84,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
@@ -158,9 +176,9 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
         XCTAssert(!found2)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
@@ -250,11 +268,11 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
         XCTAssert(!found2)
-        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3)
+        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3, services: services)
         XCTAssert(!found3)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
@@ -349,7 +367,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex, services: services)
         XCTAssert(!found1)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
@@ -401,7 +419,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex, services: services)
         XCTAssert(!found1)
     }
     
@@ -422,5 +440,37 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         
         let deletionResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false, expectError: true, expectingUploaderToRun: false)
         XCTAssert(deletionResult == nil)
+    }
+    
+    func testUploadDeletionOfVNFileWorks() {
+        let changeResolverName = CommentFile.changeResolverName
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let exampleComment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+         
+        // First upload the v0 file.
+  
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: TestFile.commentFile.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+                
+        // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
+        
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: exampleComment.updateContents) else {
+            XCTFail()
+            return
+        }
+        
+        let uploadDeletionRequest = UploadDeletionRequest()
+        uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
+        uploadDeletionRequest.fileUUID = fileUUID
+        
+        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+            XCTFail()
+            return
+        }
     }
 }

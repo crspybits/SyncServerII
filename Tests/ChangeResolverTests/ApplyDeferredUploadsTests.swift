@@ -13,6 +13,7 @@ import ServerAccount
 class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
     var accountManager:AccountManager!
     var resolverManager:ChangeResolverManager!
+    var services:Services!
     
     override func setUp() {
         super.setUp()
@@ -20,8 +21,15 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
         accountManager = AccountManager(userRepository: UserRepository(db))
         let credentials = Credentials()
         accountManager.setupAccounts(credentials: credentials)
-
         resolverManager = ChangeResolverManager()
+
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager) else {
+            XCTFail()
+            return
+        }
+        
+        self.services = services
+        
         do {
             try resolverManager.setupResolvers()
         } catch let error {
@@ -82,7 +90,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload], accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload], services: services, db: db) else {
             XCTFail()
             return
         }
@@ -159,7 +167,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], services: services, db: db) else {
             XCTFail()
             return
         }
@@ -248,7 +256,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], services: services, db: db) else {
             XCTFail()
             return
         }
@@ -340,7 +348,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads1 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID1, deferredUploads: [deferredUpload1], accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+        guard let applyDeferredUploads1 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID1, deferredUploads: [deferredUpload1], services: services,  db: db) else {
             XCTFail()
             return
         }
@@ -356,7 +364,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
         
         waitExpectation(timeout: 10, handler: nil)
         
-        guard let applyDeferredUploads2 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID2, deferredUploads: [deferredUpload2], accountManager: accountManager, resolverManager: resolverManager, db: db) else {
+        guard let applyDeferredUploads2 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID2, deferredUploads: [deferredUpload2], services: services, db: db) else {
             XCTFail()
             return
         }

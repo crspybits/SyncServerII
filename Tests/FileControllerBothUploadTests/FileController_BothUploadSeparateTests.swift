@@ -13,6 +13,7 @@ import Credentials
 
 class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
+    var services: Services!
     
     override func setUp() {
         super.setUp()
@@ -21,6 +22,21 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         accountManager = AccountManager(userRepository: UserRepository(db))
         let credentials = Credentials()
         accountManager.setupAccounts(credentials: credentials)
+        let resolverManager = ChangeResolverManager()
+
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager) else {
+            XCTFail()
+            return
+        }
+        
+        self.services = services
+        
+        do {
+            try resolverManager.setupResolvers()
+        } catch let error {
+            XCTFail("\(error)")
+            return
+        }
     }
     
     func runOneUploadFileChangeAndOneUploadDeletion(withFileGroup: Bool) {
@@ -163,11 +179,11 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
         XCTAssert(found2)
-        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3)
+        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3, services: services)
         XCTAssert(!found3)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())

@@ -70,20 +70,22 @@ public class ServerMain {
             return
         }
         
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager) else {
+            Startup.halt("Failed during startup: Failed setting up Services")
+            return
+        }
+        
         let uploader:Uploader
 
         do {
-            uploader = try Uploader(resolverManager: resolverManager, accountManager: accountManager)
+            uploader = try Uploader(services: services)
         } catch let error {
             Startup.halt("Failed during startup: Failed setting up Uploader: \(error)")
             return
         }
         
-        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager, uploader: uploader) else {
-            Startup.halt("Failed during startup: Failed setting up Services")
-            return
-        }
-
+        services.uploader = uploader
+        
         let serverRoutes = CreateRoutes(services: services, db: db)
         
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())

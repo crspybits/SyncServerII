@@ -11,6 +11,7 @@ import Credentials
 
 class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
+    var services: Services!
     
     override func setUp() {
         super.setUp()
@@ -18,6 +19,21 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         accountManager = AccountManager(userRepository: UserRepository(db))
         let credentials = Credentials()
         accountManager.setupAccounts(credentials: credentials)
+        let resolverManager = ChangeResolverManager()
+
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager) else {
+            XCTFail()
+            return
+        }
+        
+        self.services = services
+        
+        do {
+            try resolverManager.setupResolvers()
+        } catch let error {
+            XCTFail("\(error)")
+            return
+        }
     }
     
     // Upload file change, and an upload deletion for the same file.
@@ -85,7 +101,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         // Expectation: File should be deleted.
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
@@ -133,7 +149,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
-        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withDeletionBefore, dataToUpload: comment1.updateContents)
+        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withDeletionBefore, dataToUpload: comment1.updateContents)
         
         if withDeletionBefore {
             XCTAssert(result2 == nil, "\(String(describing: result2))")
@@ -147,7 +163,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         
         if withDeletionBefore {
             XCTAssert(!found1)
@@ -244,7 +260,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         // Expectation: File should be deleted.
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())
@@ -362,10 +378,10 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         // Expectation: File should be deleted.
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
 
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
         XCTAssert(found2)
         
         XCTAssert(deferredCount == DeferredUploadRepository(db).count())

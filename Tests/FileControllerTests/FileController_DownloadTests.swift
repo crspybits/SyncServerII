@@ -281,7 +281,7 @@ class FileController_DownloadTests: ServerTestCase {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: testAccount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: comment.updateContents) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: testAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: comment.updateContents) else {
             XCTFail()
             return
         }

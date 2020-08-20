@@ -43,13 +43,11 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         let resolverManager = ChangeResolverManager()
         do {
             try resolverManager.setupResolvers()
-            //uploader = try Uploader(resolverManager: resolverManager, accountManager: accountManager)
         } catch let error {
             XCTFail("\(error)")
             return
         }
         
-        //uploader.delegate = self
         runCompleted = nil
     }
     

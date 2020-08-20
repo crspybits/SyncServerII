@@ -31,6 +31,7 @@ class MockStorage: CloudStorage {
     }
     
     static func reset() {
+        Log.info("MockStorage: reset")
         directory.removeAll()
     }
     

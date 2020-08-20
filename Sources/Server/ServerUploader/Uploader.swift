@@ -14,6 +14,12 @@ protocol UploaderProtocol {
     var delegate: UploaderDelegate? {get set}
 }
 
+protocol UploaderServices {
+    var accountManager: AccountManager {get}
+    var changeResolverManager: ChangeResolverManager {get}
+    var mockStorage: MockStorage {get}
+}
+
 protocol UploaderDelegate: AnyObject {
     func run(completed: UploaderProtocol, error: Swift.Error?)
 }
@@ -47,8 +53,7 @@ class Uploader: UploaderProtocol {
     }
     
     let db: Database
-    private let resolverManager: ChangeResolverManager
-    let accountManager: AccountManager
+    let services: UploaderServices
     private let lockName = "Uploader"
     let deferredUploadRepo:DeferredUploadRepository
     let uploadRepo:UploadRepository
@@ -58,15 +63,14 @@ class Uploader: UploaderProtocol {
     // For testing
     weak var delegate: UploaderDelegate?
     
-    init(resolverManager: ChangeResolverManager, accountManager: AccountManager) throws {
+    init(services: UploaderServices) throws {
         // Need a separate database connection-- to have a separate transaction and to acquire lock.
         guard let db = Database() else {
             throw Errors.failedConnectingDatabase
         }
         
         self.db = db
-        self.resolverManager = resolverManager
-        self.accountManager = accountManager
+        self.services = services
         self.deferredUploadRepo = DeferredUploadRepository(db)
         self.uploadRepo = UploadRepository(db)
         self.fileIndexRepo = FileIndexRepository(db)
@@ -255,7 +259,7 @@ class Uploader: UploaderProtocol {
             
             // `applier.run` executes asynchronously. Need to retain the applier.
             
-            applier = try? ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup, accountManager: accountManager, resolverManager: resolverManager, db: db)
+            applier = try? ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup, services: services, db: db)
             
             guard applier != nil else {
                 Log.error("applyDeferredUploads: failedApplyDeferredUploads")

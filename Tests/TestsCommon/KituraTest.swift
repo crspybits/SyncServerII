@@ -59,8 +59,9 @@ extension KituraTest {
                 asyncTask(expectation, creds)
             }
             
+            var observer: AnyObject?
             if expectingUploaderToRun {
-                _ = NotificationCenter.default.addObserver(forName: Uploader.uploaderRunCompleted, object: nil, queue: nil) { notification in
+                observer = NotificationCenter.default.addObserver(forName: Uploader.uploaderRunCompleted, object: nil, queue: nil) { notification in
                     if let error = notification.userInfo?[Uploader.errorKey] as? Swift.Error {
                         XCTFail("\(error)")
                     }
@@ -73,6 +74,10 @@ extension KituraTest {
                 // executes whether ot nor expectations met.
                 ServerMain.shutdown()
                 XCTAssertNil(error)
+            }
+            
+            if let observer = observer {
+                NotificationCenter.default.removeObserver(observer)
             }
             
             // At least with Google accounts, I'm having problems with periodic `unauthorized` responses. Could be due to some form of throttling?

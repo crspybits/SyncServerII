@@ -135,7 +135,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
 
-        guard let _ = uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: comment1.updateContents) else {
+        guard let _ = uploadTextFile(mimeType: nil, deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: comment1.updateContents) else {
             XCTFail()
             return
         }

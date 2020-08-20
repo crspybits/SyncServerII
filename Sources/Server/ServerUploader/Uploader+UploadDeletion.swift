@@ -12,7 +12,7 @@ import LoggerAPI
 
 extension Uploader {
     private func getDeletionFrom(fileIndex: FileIndex) throws -> FileDeletion {
-        guard let (owningCreds, cloudStorage) = try? fileIndex.getCloudStorage(userRepo: userRepo, accountManager: accountManager) else {
+        guard let (owningCreds, cloudStorage) = try? fileIndex.getCloudStorage(userRepo: userRepo, services: services) else {
             throw Errors.failedGettingCloudStorage
         }
         

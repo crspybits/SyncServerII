@@ -167,12 +167,12 @@ extension FileIndex {
         case couldNotConvertToCloudStorage
     }
     
-    func getCloudStorage(userRepo: UserRepository, accountManager: AccountManager) throws -> (Account, CloudStorage) {
-        guard let owningUserCreds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: accountManager) else {
+    func getCloudStorage(userRepo: UserRepository, services: UploaderServices) throws -> (Account, CloudStorage) {
+        guard let owningUserCreds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: services.accountManager) else {
             throw Errors.couldNotGetOwningUserCreds
         }
         
-        guard let cloudStorage = owningUserCreds as? CloudStorage else {
+        guard let cloudStorage = owningUserCreds.cloudStorage(mock: services.mockStorage) else {
             throw Errors.couldNotConvertToCloudStorage
         }
         

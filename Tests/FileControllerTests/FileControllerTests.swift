@@ -13,6 +13,7 @@ import LoggerAPI
 import Foundation
 import ServerShared
 import ServerAccount
+import ChangeResolvers
 
 class FileController_IndexTests: ServerTestCase {
 
@@ -155,8 +156,7 @@ class FileController_IndexTests: ServerTestCase {
     
     func testIndexWithBadSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
-            let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
@@ -168,6 +168,42 @@ class FileController_IndexTests: ServerTestCase {
         }
         
         self.getIndex(expectedFiles: [uploadResult.request], sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
+    }
+    
+    func testFileIndexReportsVariousFileVersion() {
+        let changeResolverName = CommentFile.changeResolverName
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let exampleComment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+         
+        // First upload the v0 file.
+  
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+                
+        // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
+
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: exampleComment.updateContents) else {
+            XCTFail()
+            return
+        }
+
+        guard let (fi, _) = getIndex(testAccount: .primaryOwningAccount, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID), let fileInfo = fi else {
+            XCTFail()
+            return
+        }
+        
+        let filtered = fileInfo.filter {$0.fileUUID == fileUUID}
+        guard filtered.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filtered[0].fileVersion == 1, "filtered[0].fileVersion: \(String(describing: filtered[0].fileVersion))")
     }
     
     // TODO: *0*: Make sure we're not trying to download a file that has already been deleted.

@@ -19,11 +19,16 @@ class PruneTests: ServerTestCase, UploaderCommon {
         
         accountManager = AccountManager(userRepository: UserRepository(db))
         accountManager.setupAccounts(credentials: Credentials())
-        
         let resolverManager = ChangeResolverManager()
+
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager) else {
+            XCTFail()
+            return
+        }
+        
         do {
             try resolverManager.setupResolvers()
-            uploader = try Uploader(resolverManager: resolverManager, accountManager: accountManager)
+            uploader = try Uploader(services: services)
         } catch let error {
             XCTFail("\(error)")
             return

@@ -14,21 +14,29 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
     var accountManager: AccountManager!
     var uploader: Uploader!
     var runCompleted:((Swift.Error?)->())?
+    var services: Services!
     
     override func setUp() {
         super.setUp()
         
         accountManager = AccountManager(userRepository: UserRepository(db))
         accountManager.setupAccounts(credentials: Credentials())
-        
         let resolverManager = ChangeResolverManager()
+
+        guard let services = Services(accountManager: accountManager, changeResolverManager: resolverManager) else {
+            XCTFail()
+            return
+        }
+        
         do {
             try resolverManager.setupResolvers()
-            uploader = try Uploader(resolverManager: resolverManager, accountManager: accountManager)
+            uploader = try Uploader(services: services)
         } catch let error {
             XCTFail("\(error)")
             return
         }
+        
+        self.services = services
         
         uploader.delegate = self
         runCompleted = nil
@@ -99,7 +107,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found = try fileIsInCloudStorage(fileIndex: fileIndex)
+        let found = try fileIsInCloudStorage(fileIndex: fileIndex, services: services)
         XCTAssert(!found)
     }
     
@@ -199,9 +207,9 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
         XCTAssert(!found2)
     }
     
@@ -290,9 +298,9 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
         XCTAssert(!found2)
     }
 }
