@@ -47,6 +47,7 @@ class Uploader: UploaderProtocol {
         case failedToGetSharingGroupUUID
         case failedToGetFileUUID
         case couldNotRemoveUploadRow
+        case couldNotUpdateDeferredUploads
         case failedStartingDatabaseTransaction
         case failedCommittingDatabaseTransaction
         case couldNotGetFileGroup
@@ -357,15 +358,16 @@ class Uploader: UploaderProtocol {
                 }
                 
                 // Lookup any DeferredUpload file upload changes for this file group. Given that we're deleting the file group the upload changes are stale and not useful any more.
-                // TODO/DeferredUpload: Change this to an update of the DeferredUpload records.
+                // TODO/DeferredUpload: Test the status change.
                 let key1 = DeferredUploadRepository.LookupKey.fileGroupUUIDWithStatus(
                     fileGroupUUID: fileGroupUUID, status: .pendingChange)
-                guard case .removed(let numberDeferredRemoved) = deferredUploadRepo.remove(key: key1) else {
-                    Log.error("Could not remove: \(key1)")
+                let newStatus = DeferredUploadStatus.completed.rawValue
+                guard let updateAllResult = deferredUploadRepo.updateAll(key: key1, updates: [DeferredUpload.statusKey: .string(newStatus)]) else {
+                    Log.error("Could not update status: \(key1)")
                     return false
                 }
-                
-                Log.info("Removed \(numberDeferredRemoved) DeferredUpload's for upload file changes for file group: \(fileGroupUUID)")
+
+                Log.info("Changed status to \(newStatus) for \(updateAllResult) DeferredUpload's for upload file changes for file group: \(fileGroupUUID)")
                 
                 // Now, do that corresponding action for Upload records. Any upload records representing file upload changes for files in this file group should also be removed-- they are not relevant any more given that we're removing the file group.
                 let key2 = UploadRepository.LookupKey.fileGroupUUIDWithState(
@@ -418,12 +420,10 @@ class Uploader: UploaderProtocol {
             // Get rid of any non-distinct deferredUploadId's for file DeferredUpload's
             deferredIdsForFileChangeUploads = Array(Set<Int64>(deferredIdsForFileChangeUploads))
             
-            // Remove these DeferredUpload's-- for file change uploads.
-            // TODO/DeferredUpload: Change this to an update of the DeferredUpload records.
-            // Need a status for upload not done, deleted.
+            // Remove these DeferredUpload's-- for file change uploads. These have been pruned because there is a deletion for the same file.
+            // TODO/DeferredUpload: Test the status change.
             for deferredIdForFileChangeUpload in deferredIdsForFileChangeUploads {
-                let key = DeferredUploadRepository.LookupKey.deferredUploadId(deferredIdForFileChangeUpload)
-                guard case .removed = deferredUploadRepo.remove(key: key) else {
+                guard deferredUploadRepo.update(indexId: deferredIdForFileChangeUpload, with: [DeferredUpload.statusKey: .string(DeferredUploadStatus.completed.rawValue)]) else {
                     return false
                 }
             }

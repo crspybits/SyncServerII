@@ -43,6 +43,10 @@ public enum UploadState : String {
 }
 
 class Upload : NSObject, Model, ChangeResolverContents {
+    required override init() {
+        super.init()
+    }
+
     static let uploadIdKey = "uploadId"
     var uploadId: Int64!
     

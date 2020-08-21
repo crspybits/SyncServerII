@@ -15,6 +15,8 @@ import Foundation
 import ServerShared
 
 class model : Model {
+    required init() {}
+    
     var c1: String!
     var c2: String!
     var c3: String!
@@ -124,6 +126,8 @@ case TestEnum2
 }
 
 class model2 : Model {
+    required init() {}
+
     var c1: TestEnum!
     var c2: Date!
 
@@ -281,6 +285,8 @@ class GeneralDatabaseTests: ServerTestCase {
     }
     
     class Table3Model : Model {
+        required init() {}
+        
         var c1: String!
         var c2: Int32!
         var c3: Int32!

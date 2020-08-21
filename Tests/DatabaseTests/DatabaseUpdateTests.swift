@@ -111,5 +111,32 @@ class DatabaseUpdateTests: ServerTestCase {
         XCTAssertTrue(fileIndex.fileIndexId == fileIndex2.fileIndexId)
         XCTAssertTrue(fileIndex2.fileVersion == newFileVersion)
         XCTAssertTrue(fileIndex2.deleted == true)
-    }    
+    }
+    
+    func testUpdateAll() {
+        guard let _ = doAddFileIndex(userId:exampleUserId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: true) else {
+            XCTFail()
+            return
+        }
+        
+        guard let _ = doAddFileIndex(userId:exampleUserId, sharingGroupUUID: sharingGroupUUID, createSharingGroup: false) else {
+            XCTFail()
+            return
+        }
+        
+        let newVersion = FileVersionInt(87)
+        
+        let key = FileIndexRepository.LookupKey.sharingGroupUUID(sharingGroupUUID: sharingGroupUUID)
+        let result = fileIndexRepo.updateAll(key: key, updates: [FileIndex.fileVersionKey : .int32(newVersion)])
+        XCTAssert(result == 2)
+        
+        guard let records = fileIndexRepo.lookupAll(key: key, modelInit: FileIndex.init), records.count == 2 else {
+            XCTFail()
+            return
+        }
+        
+        for record in records {
+            XCTAssert(record.fileVersion == newVersion)
+        }
+    }
 }

@@ -38,7 +38,7 @@ class DeviceUUID : NSObject, Model {
         }
     }
 
-    override init() {
+    required override init() {
         super.init()
     }
     

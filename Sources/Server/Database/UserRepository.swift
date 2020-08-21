@@ -14,6 +14,10 @@ import LoggerAPI
 import ServerAccount
 
 class User : NSObject, Model, UserData {
+    required override init() {
+        super.init()
+    }
+
     static let userIdKey = "userId"
     var userId: UserId!
     

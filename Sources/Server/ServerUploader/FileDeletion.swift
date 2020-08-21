@@ -19,7 +19,7 @@ struct FileDeletion {
             default:
                 // We have done everything successfully, but we've failed on deleting the old file version. It's possible, however, that we've actually removed the old file version, but just failed getting the result.
                 // In the worst case, there's a stale version of a file in cloud storage. Don't report this as an actual error, which will cause a db transaction rollback.
-                Log.warning("Failed removing prior file version: \(self.cloudFileName)")
+                Log.warning("Failed removing file: \(self.cloudFileName)")
                 completion(FileDeletionError.failedDeletingFile)
                 return
             }

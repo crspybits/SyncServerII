@@ -160,6 +160,33 @@ extension RepositoryLookup {
         
         return result
     }
+
+    // Returns the number of updates. Nil is returned on error.
+    func updateAll(key: LOOKUPKEY, updates: [String: Database.PreparedStatement.ValueType]) -> Int64? {
+    
+        guard updates.count > 0 else {
+            return nil
+        }
+        
+        let update = Database.PreparedStatement(repo: self, type: .update)
+        
+        let constraint = lookupConstraint(key: key)
+        update.where(constraint: constraint)
+                
+        for (fieldName, valueType) in updates {
+            update.add(fieldName: fieldName, value: valueType)
+        }
+        
+        do {
+            let numberUpdates = try update.run()
+            Log.info("Sucessfully updated \(tableName) row; numberUpdates = \(numberUpdates)")
+            return numberUpdates
+        }
+        catch (let error) {
+            Log.error("Failed updating \(tableName) row: \(db.errorCode()); \(db.errorMessage()); \(error)")
+            return nil
+        }
+    }
 }
 
 extension Repository {
@@ -223,6 +250,8 @@ extension Repository {
 }
 
 private class Count: Model {
+    required init() {}
+    
     var count: Int64?
     subscript(key:String) -> Any? {
         set {

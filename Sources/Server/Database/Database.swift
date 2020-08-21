@@ -453,6 +453,7 @@ extension Database {
         
         private var whereValueTypes = [ValueType]()
         private var whereFieldNames = [String]()
+        private var whereConstraint:String?
 
         enum StatementType {
             case insert
@@ -476,6 +477,12 @@ extension Database {
             assert(statementType == .update)
             whereFieldNames += [fieldName]
             whereValueTypes += [value]
+        }
+        
+        // For update only; provide a single value for a WHERE clause. E.g., from a LOOKUPKEY
+        func `where`(constraint: String) {
+            assert(statementType == .update)
+            whereConstraint = constraint
         }
         
         // Returns the id of the inserted row for an insert. For an update, returns the number of rows updated.
@@ -520,6 +527,8 @@ extension Database {
                         count += 1
                         whereClause += "\(whereFieldName)=?"
                     }
+                } else if let whereConstraint = whereConstraint {
+                    whereClause = "WHERE \(whereConstraint)"
                 }
                 
                 query = "UPDATE \(repo.tableName) SET \(setValues) \(whereClause)"

@@ -515,6 +515,17 @@ class ServerTestCase : XCTestCase {
     
     static let cloudFolderName = "CloudFolder"
     
+    func getUploadsResults(testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String, deferredUploadId: Int64) -> DeferredUploadStatus? {
+        let request = GetUploadsResultsRequest()
+        request.deferredUploadId = deferredUploadId
+        
+        guard let getUploadsResult = getUploadsResults(request: request, testAccount: testAccount, deviceUUID: deviceUUID) else {
+            return nil
+        }
+        
+        return getUploadsResult.status
+    }
+    
     func getUploadsResults(request:GetUploadsResultsRequest, testAccount:TestAccount = .primaryOwningAccount, deviceUUID:String) -> GetUploadsResultsResponse? {
         
         var result: GetUploadsResultsResponse?

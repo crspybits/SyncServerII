@@ -13,6 +13,8 @@ extension Database {
     }
     
     private class Result<T>: Model {
+        required init() {}
+        
         var value: T?
         
         subscript(key: String) -> Any? {

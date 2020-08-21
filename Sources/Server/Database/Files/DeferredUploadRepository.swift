@@ -17,6 +17,10 @@ A single row in this table is used to represent (a) a single upload deletion, (b
  */
 
 class DeferredUpload : NSObject, Model {
+    required override init() {
+        super.init()
+    }
+
     static let deferredUploadIdKey = "deferredUploadId"
     var deferredUploadId:Int64!
     
@@ -86,7 +90,9 @@ class DeferredUpload : NSObject, Model {
     }
 }
 
-class DeferredUploadRepository : Repository, RepositoryLookup {    
+class DeferredUploadRepository : Repository, RepositoryLookup, ModelIndexId {
+    static let indexIdKey = DeferredUpload.deferredUploadIdKey
+    
     private(set) var db:Database!
 
     required init(_ db:Database) {
