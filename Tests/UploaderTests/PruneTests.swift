@@ -110,7 +110,18 @@ class PruneTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        XCTAssert(deferredCount + 1 == DeferredUploadRepository(db).count(), "\(deferredCount) + 1 != \(String(describing: DeferredUploadRepository(db).count()))")
+        // deferredUploadId1 -- for upload change, it gets pruned.
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
+
+        guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .pendingDeletion else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(deferredCount + 2 == DeferredUploadRepository(db).count(), "\(deferredCount) + 2 != \(String(describing: DeferredUploadRepository(db).count()))")
         
         if withFileGroup {
             // The upload deletion has no Upload record

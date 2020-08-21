@@ -69,12 +69,12 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
 
         guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
-            let deferredUploadId = deferredUpload.deferredUploadId else {
+            let deferredUploadId1 = deferredUpload.deferredUploadId else {
             XCTFail()
             return
         }
             
-        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId1, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
             XCTFail()
             return
         }
@@ -83,7 +83,18 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         uploadDeletionRequest.fileUUID = fileUUID2
         
-        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+        guard let uploadResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false),
+            let deferredUploadId2 = uploadResult.deferredUploadId else {
+            XCTFail()
+            return
+        }
+
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .completed else {
             XCTFail()
             return
         }
@@ -148,17 +159,17 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         let comment2 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
         
         guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
-            let deferredUploadId = deferredUpload.deferredUploadId else {
+            let deferredUploadId1 = deferredUpload.deferredUploadId else {
             XCTFail()
             return
         }
             
-        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId1, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
             XCTFail()
             return
         }
         
-        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId, updateContents: comment2.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId1, updateContents: comment2.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
             XCTFail()
             return
         }
@@ -167,7 +178,8 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
         uploadDeletionRequest.fileUUID = fileUUID3
         
-        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+        guard let uploadResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false),
+            let deferredUploadId2 = uploadResult.deferredUploadId else {
             XCTFail()
             return
         }
@@ -186,7 +198,17 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
         let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3, services: services)
         XCTAssert(!found3)
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(deferredCount + 2 == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
     }
     

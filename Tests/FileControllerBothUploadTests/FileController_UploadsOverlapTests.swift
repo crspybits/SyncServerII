@@ -71,12 +71,12 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
 
         guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
-            let deferredUploadId = deferredUpload.deferredUploadId else {
+            let deferredUploadId1 = deferredUpload.deferredUploadId else {
             XCTFail()
             return
         }
             
-        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID,  userId: userId, deferredUploadId:deferredUploadId, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID,  userId: userId, deferredUploadId:deferredUploadId1, updateContents: comment1.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
             XCTFail()
             return
         }
@@ -90,7 +90,8 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             uploadDeletionRequest.fileUUID = fileUUID1
         }
         
-        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+        guard let deletionResults = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false),
+            let deferredUploadId2 = deletionResults.deferredUploadId else {
             XCTFail()
             return
         }
@@ -104,7 +105,17 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(deferredCount + 2 == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
     }
 
@@ -137,15 +148,20 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             return
         }
         
+        var deferredUploadId1:Int64?
+        
         if withDeletionBefore {
             let uploadDeletionRequest = UploadDeletionRequest()
             uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
             uploadDeletionRequest.fileUUID = fileUUID
             
-            guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+            guard let deletionResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
                 XCTFail()
                 return
             }
+            
+            deferredUploadId1 = deletionResult.deferredUploadId
+            XCTAssert(deferredUploadId1 != nil)
         }
         
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
@@ -153,9 +169,27 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         
         if withDeletionBefore {
             XCTAssert(result2 == nil, "\(String(describing: result2))")
+            guard let deferredUploadId1 = deferredUploadId1 else {
+                XCTFail()
+                return
+            }
+            
+            guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+                XCTFail()
+                return
+            }
         }
         else {
-            XCTAssert(result2 != nil, "\(String(describing: result2))")
+            guard let result2 = result2,
+                let deferredUploadId2 = result2.response?.deferredUploadId else {
+                XCTFail()
+                return
+            }
+            
+            guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status1 == .completed else {
+                XCTFail()
+                return
+            }
         }
         
         guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
@@ -172,7 +206,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             XCTAssert(found1)
         }
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        XCTAssert(deferredCount + 1 == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
     }
     
@@ -249,7 +283,8 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             uploadDeletionRequest.fileUUID = fileUUID1
         }
         
-        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+        guard let deletionResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false),
+            let deferredUploadId3 = deletionResult.deferredUploadId else {
             XCTFail()
             return
         }
@@ -262,8 +297,23 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         // Expectation: File should be deleted.
         let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
         XCTAssert(!found1)
+            
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        guard let status3 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId3), status3 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(deferredCount + 3 == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
     }
     
@@ -346,12 +396,10 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             return
         }
             
-        guard let upload3 = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId3, updateContents: comment3.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
+        guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId:deferredUploadId3, updateContents: comment3.updateContents, uploadCount: 1, uploadIndex: 1, state: .vNUploadFileChange) else {
             XCTFail()
             return
         }
-        
-        
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.sharingGroupUUID = sharingGroupUUID
@@ -362,7 +410,8 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             uploadDeletionRequest.fileUUID = fileUUID1
         }
         
-        guard let _ = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false) else {
+        guard let deletionResult = uploadDeletion(uploadDeletionRequest: uploadDeletionRequest, deviceUUID: deviceUUID, addUser: false),
+            let deferredUploadId4 = deletionResult.deferredUploadId else {
             XCTFail()
             return
         }
@@ -384,7 +433,27 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
         XCTAssert(found2)
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
+
+        guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        guard let status3 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId3), status3 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        guard let status4 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId4), status4 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(deferredCount + 4 == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
     }
     

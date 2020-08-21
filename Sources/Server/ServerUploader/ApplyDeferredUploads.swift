@@ -60,6 +60,7 @@ class ApplyDeferredUploads {
         case failedRemovingUploadRow
         case failedUpdatingFileIndex
         case couldNotCleanupDeferredUploads
+        case couldNotUpdateDeferredUploads
     }
     
     let sharingGroupUUID: String
@@ -126,17 +127,14 @@ class ApplyDeferredUploads {
     }
     
     func cleanupDeferredUploads(deferredUploads: [DeferredUpload]) -> Bool {
+        // TODO/DeferredUpload: Test the status change.
         for deferredUpload in deferredUploads {
-            let key = DeferredUploadRepository.LookupKey.deferredUploadId(deferredUpload.deferredUploadId)
-            let result = deferredUploadRepo.retry {
-                return self.deferredUploadRepo.remove(key: key)
-            }
-            guard case .removed(numberRows: let numberRows) = result,
-                numberRows == 1 else {
+            guard deferredUploadRepo.update(indexId: deferredUpload.deferredUploadId, with: [DeferredUpload.statusKey: .string(DeferredUploadStatus.completed.rawValue)]) else {
+                Log.error("Could not update DeferredUpload")
                 return false
             }
             
-            // Remove the DeferredUpload so we don't remove them multiple times.
+            // Remove the DeferredUpload from the array so we don't update them multiple times.
             self.deferredUploads.removeAll { $0.deferredUploadId == deferredUpload.deferredUploadId }
         }
         

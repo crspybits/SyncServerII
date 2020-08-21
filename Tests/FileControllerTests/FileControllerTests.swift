@@ -187,7 +187,17 @@ class FileController_IndexTests: ServerTestCase {
                 
         // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
 
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: exampleComment.updateContents) else {
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: exampleComment.updateContents) else {
+            XCTFail()
+            return
+        }
+        
+        guard let deferredUploadId = uploadResult.response?.deferredUploadId else {
+            XCTFail()
+            return
+        }
+        
+        guard let status = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId), status == .completed else {
             XCTFail()
             return
         }

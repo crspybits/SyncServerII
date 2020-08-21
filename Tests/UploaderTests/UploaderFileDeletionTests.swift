@@ -76,13 +76,13 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         // Simulate an upload deletion request for file
 
         guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
-            let deferredUploadId = deferredUpload.deferredUploadId else {
+            let deferredUploadId1 = deferredUpload.deferredUploadId else {
             XCTFail()
             return
         }
-        
+                
         if fileGroupUUID == nil {
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId, state: .deleteSingleFile) else {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
@@ -99,7 +99,12 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         waitForExpectations(timeout: 10, handler: nil)
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        guard let status = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status == .completed else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(deferredCount + 1 == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
         
         guard let fileIndex = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID) else {
@@ -164,6 +169,8 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
+        var deferredUploadId2: Int64?
+        
         if fileGroupUUID == nil {
             guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
                 XCTFail()
@@ -171,15 +178,17 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             }
         
             guard let deferredUpload2 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
-                let deferredUploadId2 = deferredUpload2.deferredUploadId else {
+                let deferredUploadId = deferredUpload2.deferredUploadId else {
                 XCTFail()
                 return
             }
         
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId2, state: .deleteSingleFile) else {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
+            
+            deferredUploadId2 = deferredUploadId
         }
         
         let exp = expectation(description: "run")
@@ -192,8 +201,22 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         try uploader.run()
         
         waitForExpectations(timeout: 10, handler: nil)
+
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        if let deferredUploadId2 = deferredUploadId2 {
+            guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .completed else {
+                XCTFail()
+                return
+            }
+        }
+        
+        let extra:Int64 = deferredUploadId2 == nil ? 1 : 2
+        
+        XCTAssert(deferredCount + extra == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
         
 
@@ -258,7 +281,8 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         // Simulate an upload deletion request for files
 
         // For fileUUID, just use its file group in a DeferredUpload; don't need an Upload record.
-        guard let _ = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion) else {
+        guard let deferredUpload1 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+            let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
@@ -284,8 +308,18 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         try uploader.run()
         
         waitForExpectations(timeout: 10, handler: nil)
+
+        guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
+            XCTFail()
+            return
+        }
         
-        XCTAssert(deferredCount == DeferredUploadRepository(db).count())
+        guard let status2 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId2), status2 == .completed else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(deferredCount + 2 == DeferredUploadRepository(db).count())
         XCTAssert(uploadCount == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
 
         guard let fileIndex1 = getFileIndex(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID1) else {
