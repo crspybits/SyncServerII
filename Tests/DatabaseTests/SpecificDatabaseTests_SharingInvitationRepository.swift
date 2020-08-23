@@ -13,7 +13,7 @@ import Foundation
 import Dispatch
 import ServerShared
 
-class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTestable {
+class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase {
 
     override func setUp() {
         super.setUp()
@@ -259,21 +259,5 @@ class SpecificDatabaseTests_SharingInvitationRepository: ServerTestCase, LinuxTe
         XCTAssert(invitation.sharingInvitationUUID == uuid)
         XCTAssert(invitation.numberAcceptors == 1)
         XCTAssert(invitation.allowSocialAcceptance == true)
-    }
-}
-
-extension SpecificDatabaseTests_SharingInvitationRepository {
-    static var allTests : [(String, (SpecificDatabaseTests_SharingInvitationRepository) -> () throws -> Void)] {
-        return [
-            ("testAddingSharingInvitation", testAddingSharingInvitation),
-            ("testAttemptToRemoveStaleInvitationsThatAreNotStale", testAttemptToRemoveStaleInvitationsThatAreNotStale),
-            ("testRemoveStaleSharingInvitations", testRemoveStaleSharingInvitations),
-            ("testDecrementSharingInvitationWithNumberAcceptorsGreaterThan1", testDecrementSharingInvitationWithNumberAcceptorsGreaterThan1),
-            ("testDecrementSharingInvitationWithNumberAcceptorsEqualTo1", testDecrementSharingInvitationWithNumberAcceptorsEqualTo1)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests_SharingInvitationRepository.self)
     }
 }

@@ -23,26 +23,6 @@ import ServerAccount
     import Darwin.C
 #endif
 
-protocol LinuxTestable {
-    associatedtype TestClassType
-    static var allTests : [(String, (TestClassType) -> () throws -> Void)] {get}
-}
-
-extension LinuxTestable {
-    typealias LinuxTestableType = XCTestCase & LinuxTestable
-    // Modified from https://oleb.net/blog/2017/03/keeping-xctest-in-sync/
-    func linuxTestSuiteIncludesAllTests<T: LinuxTestableType>(testType:T.Type) {
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-            // Adding 1 to linuxCount because it doesn't have *this* test.
-            let linuxCount = testType.allTests.count + 1
-        
-            let darwinCount = Int(testType.defaultTestSuite.testCaseCount)
-            XCTAssertEqual(linuxCount, darwinCount,
-                "\(darwinCount - linuxCount) test(s) are missing from allTests")
-        #endif
-    }
-}
-
 class ServerTestCase : XCTestCase {
     var db:Database!
     

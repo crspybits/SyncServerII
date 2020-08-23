@@ -17,7 +17,7 @@ import Foundation
 import ServerShared
 import ServerGoogleAccount
 
-class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
+class SpecificDatabaseTests_UserRepository: ServerTestCase {
     var accountManager: AccountManager!
     var userRepo: UserRepository!
     
@@ -174,26 +174,5 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase, LinuxTestable {
         case .noObjectFound:
             XCTFail("No User Found")
         }
-    }
-}
-
-extension SpecificDatabaseTests_UserRepository {
-    static var allTests : [(String, (SpecificDatabaseTests_UserRepository) -> () throws -> Void)] {
-        return [
-            ("testAddOwningUser", testAddOwningUser),
-            ("testAddOwningUserWorksIfYouGivePermissions", testAddOwningUserWorksIfYouGivePermissions),
-            
-            ("testAddGoogleUser", testAddGoogleUser),
-            ("testAddSharingFacebookUser", testAddSharingFacebookUser),
-            ("testAddDropboxUser", testAddDropboxUser),
-            
-            ("testUserLookup1", testUserLookup1),
-            ("testUserLookup1b", testUserLookup1b),
-            ("testUserLookup2", testUserLookup2)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests_UserRepository.self)
     }
 }

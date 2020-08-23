@@ -13,7 +13,7 @@ import Foundation
 import ServerShared
 import KituraNet
 
-class SharingAccountsController_GetSharingInvitationInfo: ServerTestCase, LinuxTestable {
+class SharingAccountsController_GetSharingInvitationInfo: ServerTestCase {
     override func setUp() {
         super.setUp()
     }
@@ -169,20 +169,4 @@ class SharingAccountsController_GetSharingInvitationInfo: ServerTestCase, LinuxT
     }
 }
 
-extension SharingAccountsController_GetSharingInvitationInfo {
-    static var allTests : [(String, (SharingAccountsController_GetSharingInvitationInfo) -> () throws -> Void)] {
-        return [
-            ("testNonExistentSharingInvitationUUID", testNonExistentSharingInvitationUUID),
-            ("testExistingSharingInvitationUUID", testExistingSharingInvitationUUID),
-            ("testGetSharingInvitationInfoThatHasNotBeenRedeemedWorks", testGetSharingInvitationInfoThatHasNotBeenRedeemedWorks),
-            ("testGetSharingInvitationInfoThatHasAlreadyBeenRedeemedFails", testGetSharingInvitationInfoThatHasAlreadyBeenRedeemedFails),
-            ("testGetSharingInvitationInfoWithSecondaryAuthWorks", testGetSharingInvitationInfoWithSecondaryAuthWorks)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:
-            SharingAccountsController_GetSharingInvitationInfo.self)
-    }
-}
 

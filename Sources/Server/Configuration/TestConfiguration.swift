@@ -59,6 +59,13 @@ struct TestConfiguration: Decodable {
     let DropboxAccessTokenRevoked: String
     let DropboxId3: String
 
+    /* Regenerating refresh token:
+        1) For a specific microsoft account, sign in using the microsoft ms-identity-mobile-apple-swift-objc-master/MSALiOS app.
+        2) Grab the id token from the console.
+        3) Copy that token into /Users/chris/Desktop/Apps/SyncServerII/Private/ServerMicrosoftAccount/token.plist
+        4) Run the ServerMicrosoftAccount Swift Package testGenerateTokens test method.
+        5) Copy the refresh token from the console to the server testing configuration, along with the id token.
+     */
     struct MicrosoftTokens: Decodable {
         let refreshToken: String
         

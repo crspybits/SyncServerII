@@ -32,6 +32,8 @@ class MessageTests: ServerTestCase {
         uploadRequest.mimeType = "text/plain"
         uploadRequest.sharingGroupUUID = UUID().uuidString
         uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
+        uploadRequest.uploadCount = 1
+        uploadRequest.uploadIndex = 1
         
         guard uploadRequest.valid() else {
             XCTFail()
@@ -118,6 +120,8 @@ class MessageTests: ServerTestCase {
         uploadRequest.mimeType = "text/plain"
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = TestFile.test1.dropboxCheckSum
+        uploadRequest.uploadCount = 1
+        uploadRequest.uploadIndex = 1
         
         guard uploadRequest.valid() else {
             XCTFail()

@@ -13,7 +13,7 @@ import LoggerAPI
 import Foundation
 import ServerShared
 
-class HealthCheckTests: ServerTestCase, LinuxTestable {
+class HealthCheckTests: ServerTestCase {
     override func setUp() {
         super.setUp()        
     }
@@ -23,15 +23,4 @@ class HealthCheckTests: ServerTestCase, LinuxTestable {
     }
 }
 
-extension HealthCheckTests {
-    static var allTests : [(String, (HealthCheckTests) -> () throws -> Void)] {
-        return [
-            ("testThatHealthCheckReturnsExpectedInfo", testThatHealthCheckReturnsExpectedInfo),
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: HealthCheckTests.self)
-    }
-}
 

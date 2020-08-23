@@ -178,6 +178,15 @@
     },
     {
       "name": "SharingTests.SharingAccountsController_CreateSharingInvitation"
+    },
+    {
+      "name": "SharingTests.SharingAccountsController_GetSharingInvitationInfo"
+    },
+    {
+      "name": "SharingTests.SharingAccountsController_RedeemSharingInvitation"
+    },
+    {
+      "name": "SharingTests.SharingGroupsControllerTests"
     }
   ],
   "other": [

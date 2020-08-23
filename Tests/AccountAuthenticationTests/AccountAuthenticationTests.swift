@@ -16,7 +16,7 @@ https://bugs.swift.org/browse/SR-12232
 https://oleb.net/2020/swift-test-discovery/
 */
 
-class AccountAuthenticationTests: ServerTestCase, LinuxTestable {
+class AccountAuthenticationTests: ServerTestCase {
     let serverResponseTime:TimeInterval = 10
     var testAccount: TestAccount!
     var cloudFolderName:String?
@@ -96,20 +96,3 @@ class AccountAuthenticationTests: ServerTestCase, LinuxTestable {
     }
 }
 
-extension AccountAuthenticationTests {
-    static var allTests : [(String, (AccountAuthenticationTests) -> () throws -> Void)] {
-        let result:[(String, (AccountAuthenticationTests) -> () throws -> Void)] = [
-            ("testGoodEndpointWithBadCredsFails", testGoodEndpointWithBadCredsFails),
-            ("testGoodEndpointWithGoodCredsWorks", testGoodEndpointWithGoodCredsWorks),
-            ("testBadPathWithGoodCredsFails", testBadPathWithGoodCredsFails),
-            ("testGoodPathWithBadMethodWithGoodCredsFails", testGoodPathWithBadMethodWithGoodCredsFails),
-            ("testThatUserHasValidCreds", testThatUserHasValidCreds),
-            ]
-        
-        return result
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:AccountAuthenticationTests.self)
-    }
-}

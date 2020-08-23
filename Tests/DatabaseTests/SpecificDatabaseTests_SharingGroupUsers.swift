@@ -13,7 +13,7 @@ import HeliumLogger
 import Foundation
 import ServerShared
 
-class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
+class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
     var accountManager: AccountManager!
     var userRepo: UserRepository!
     
@@ -246,21 +246,5 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase, LinuxTestable {
             return
         }
         XCTAssert(filter2[0].sharingGroupName == "Foobar")
-    }
-}
-
-extension SpecificDatabaseTests_SharingGroupUsers {
-    static var allTests : [(String, (SpecificDatabaseTests_SharingGroupUsers) -> () throws -> Void)] {
-        return [
-            ("testAddSharingGroupUser", testAddSharingGroupUser),
-            ("testAddMultipleSharingGroupUsers", testAddMultipleSharingGroupUsers),
-            ("testAddSharingGroupUserFailsIfYouAddTheSameUserToSameGroupTwice", testAddSharingGroupUserFailsIfYouAddTheSameUserToSameGroupTwice),
-            ("testLookupFromSharingGroupUser", testLookupFromSharingGroupUser),
-            ("testGetUserSharingGroupsForMultipleGroups", testGetUserSharingGroupsForMultipleGroups)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests_SharingGroupUsers.self)
     }
 }

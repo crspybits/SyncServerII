@@ -13,7 +13,7 @@ import HeliumLogger
 import Foundation
 import ServerShared
 
-class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
+class SpecificDatabaseTests_SharingGroups: ServerTestCase {
 
     override func setUp() {
         super.setUp()
@@ -75,20 +75,5 @@ class SpecificDatabaseTests_SharingGroups: ServerTestCase, LinuxTestable {
         case .error(let error):
             XCTFail("Error: \(error)")
         }
-    }
-}
-
-extension SpecificDatabaseTests_SharingGroups {
-    static var allTests : [(String, (SpecificDatabaseTests_SharingGroups) -> () throws -> Void)] {
-        return [
-            ("testAddSharingGroupWithoutName", testAddSharingGroupWithoutName),
-            ("testAddSharingGroupWithName", testAddSharingGroupWithName),
-            ("testLookupFromSharingGroupExisting", testLookupFromSharingGroupExisting),
-            ("testLookupFromSharingGroupNonExisting", testLookupFromSharingGroupNonExisting)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: SpecificDatabaseTests_SharingGroups.self)
     }
 }

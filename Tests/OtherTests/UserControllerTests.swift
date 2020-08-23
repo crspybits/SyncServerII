@@ -14,7 +14,7 @@ import Foundation
 import ServerShared
 import ServerAccount
 
-class UserControllerTests: ServerTestCase, LinuxTestable {
+class UserControllerTests: ServerTestCase {
 
     override func setUp() {
         super.setUp()        
@@ -224,8 +224,6 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-        
-        // self.sendDoneUploads(expectedNumberOfUploads: 1, deviceUUID:deviceUUID, sharingGroupUUID: sharingGroupUUID)
 
         // Remove the user
         performServerTest { expectation, creds in
@@ -269,27 +267,6 @@ class UserControllerTests: ServerTestCase, LinuxTestable {
             XCTFail()
             return
         }
-    }
-}
-
-extension UserControllerTests {
-    static var allTests : [(String, (UserControllerTests) -> () throws -> Void)] {
-        return [
-            ("testAddUserSucceedsWhenAddingNewUser", testAddUserSucceedsWhenAddingNewUser),
-            ("testAddUserFailsWhenAddingExistingUser", testAddUserFailsWhenAddingExistingUser),
-            ("testAddRemoveAddWorks", testAddRemoveAddWorks),
-            ("testCheckCredsWhenUserDoesExist", testCheckCredsWhenUserDoesExist),
-            ("testCheckCredsWhenUserDoesNotExist", testCheckCredsWhenUserDoesNotExist),
-            ("testCheckCredsWithBadAccessToken", testCheckCredsWithBadAccessToken),
-            ("testRemoveUserFailsWithNonExistingUser", testRemoveUserFailsWithNonExistingUser),
-            ("testRemoveUserSucceedsWithExistingUser", testRemoveUserSucceedsWithExistingUser),
-            ("testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved", testThatFilesUploadedByUserMarkedAsDeletedWhenUserRemoved),
-            ("testAddUserWithSharingGroupNameWorks", testAddUserWithSharingGroupNameWorks)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: UserControllerTests.self)
     }
 }
 

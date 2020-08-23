@@ -14,7 +14,7 @@ import XCTest
 import Foundation
 import ServerShared
 
-class FailureTests: ServerTestCase, LinuxTestable {
+class FailureTests: ServerTestCase {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -38,12 +38,3 @@ class FailureTests: ServerTestCase, LinuxTestable {
     }
 }
 
-extension FailureTests {
-    static var allTests : [(String, (FailureTests) -> () throws -> Void)] {
-        return [("testThatHealthCheckFailsWhenRequested", testThatHealthCheckFailsWhenRequested)]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:FailureTests.self)
-    }
-}

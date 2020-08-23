@@ -14,7 +14,7 @@ import HeliumLogger
 import Foundation
 import ServerShared
 
-class DatabaseModelTests: ServerTestCase, LinuxTestable {
+class DatabaseModelTests: ServerTestCase {
     override func setUp() {
         super.setUp()
         HeliumLogger.use(.debug)
@@ -278,18 +278,3 @@ class DatabaseModelTests: ServerTestCase, LinuxTestable {
     // SharingGroupUser
 }
 
-extension DatabaseModelTests {
-    static var allTests : [(String, (DatabaseModelTests) -> () throws -> Void)] {
-        return [
-            ("testDeviceUUID", testDeviceUUID),
-            ("testSharingInvitation", testSharingInvitation),
-            ("testUser", testUser),
-            ("testFileIndex", testFileIndex),
-            ("testUpload", testUpload),
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:DatabaseModelTests.self)
-    }
-}

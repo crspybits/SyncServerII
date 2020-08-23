@@ -13,7 +13,7 @@ import LoggerAPI
 import Foundation
 import ServerShared
 
-class VersionTests: ServerTestCase, LinuxTestable {
+class VersionTests: ServerTestCase {
     override func setUp() {
         super.setUp()        
     }
@@ -53,16 +53,3 @@ class VersionTests: ServerTestCase, LinuxTestable {
         }
     }
 }
-
-extension VersionTests {
-    static var allTests : [(String, (VersionTests) -> () throws -> Void)] {
-        return [
-            ("testThatVersionGetsReturnedInHeaders", testThatVersionGetsReturnedInHeaders),
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType: VersionTests.self)
-    }
-}
-

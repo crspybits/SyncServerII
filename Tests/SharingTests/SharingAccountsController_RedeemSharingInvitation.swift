@@ -13,7 +13,7 @@ import LoggerAPI
 import Foundation
 import ServerShared
 
-class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTestable {
+class SharingAccountsController_RedeemSharingInvitation: ServerTestCase {
 
     override func setUp() {
         super.setUp()
@@ -108,10 +108,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        guard let _ = redeemSharingInvitation(sharingUser:sharingUser, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) else {
-            XCTFail()
-            return
-        }
+        let result = redeemSharingInvitation(sharingUser:sharingUser, canGiveCloudFolderName: false, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true)
+        XCTAssert(result == nil)
     }
         
     func redeemingASharingInvitationWithoutGivingTheInvitationUUIDFails(sharingUser: TestAccount) {
@@ -123,10 +121,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
 
-        guard let _ = redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true) else {
-            XCTFail()
-            return
-        }
+        let result = redeemSharingInvitation(sharingUser: sharingUser, errorExpected:true)
+        XCTAssert(result == nil)
     }
     
     func testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails() {
@@ -148,10 +144,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        guard let _ = redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true) else {
-            XCTFail()
-            return
-        }
+        let result = redeemSharingInvitation(sharingUser: .primaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID, errorExpected:true)
+        XCTAssert(result == nil)
     }
     
     // 8/12/18; This now works-- i.e., you can redeem with other owning accounts-- because each user can now be in multiple sharing groups. (Prior to this, it was a failure test!).
@@ -233,10 +227,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
         }
         
         // Since the user account represented by sharingUser is already a member of the sharing group referenced by the specific sharingGroupUUID, this redeem attempt will fail.
-        guard let _ = redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) else {
-            XCTFail()
-            return
-        }
+        let result = redeemSharingInvitation(sharingUser: sharingUser, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true)
+        XCTAssert(result == nil)
     }
     
     func testThatRedeemingForSameSharingGroupFails() {
@@ -347,16 +339,14 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
 
-        var redeemResult: RedeemSharingInvitationResponse? = redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID)
-        
-        XCTAssert(redeemResult?.userId != nil && redeemResult?.sharingGroupUUID != nil)
-
-        guard redeemResult != nil else {
+        guard let redeemResult = redeemSharingInvitation(sharingUser: .secondaryOwningAccount, sharingInvitationUUID: sharingInvitationUUID) else {
             XCTFail()
             return
         }
         
-        checkOwingUserForSharingGroupUser(sharingGroupUUID: sharingGroupUUID1, sharingUserId: redeemResult!.userId, sharingUser: .secondaryOwningAccount, owningUser: .primaryOwningAccount)
+        XCTAssert(redeemResult.userId != nil && redeemResult.sharingGroupUUID != nil)
+        
+        checkOwingUserForSharingGroupUser(sharingGroupUUID: sharingGroupUUID1, sharingUserId: redeemResult.userId, sharingUser: .secondaryOwningAccount, owningUser: .primaryOwningAccount)
     }
     
     func testRedeemingSharingInvitationThatHasAlreadyBeenRedeemedFails() {
@@ -379,10 +369,8 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
             return
         }
         
-        guard let _ = redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true) else {
-            XCTFail()
-            return
-        }
+        let result = redeemSharingInvitation(sharingUser:sharingUser2, sharingInvitationUUID: sharingInvitationUUID, errorExpected: true)
+        XCTAssert(result == nil)
     }
     
     func testTwoAcceptorsSharingInvitationCanBeRedeemedTwice() {
@@ -437,46 +425,3 @@ class SharingAccountsController_RedeemSharingInvitation: ServerTestCase, LinuxTe
     }
 }
 
-extension SharingAccountsController_RedeemSharingInvitation {
-    static var allTests : [(String, (SharingAccountsController_RedeemSharingInvitation) -> () throws -> Void)] {
-        return [
-            ("testThatRedeemingWithASharingAccountWorks", testThatRedeemingWithASharingAccountWorks),
-            
-            ("testThatRedeemingWithANonOwningSharingAccountWorks", testThatRedeemingWithANonOwningSharingAccountWorks),
-            
-            ("testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails",
-                testThatRedeemingUsingGoogleAccountWithoutCloudFolderNameFails),
-            
-            ("testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails", testThatRedeemingASharingInvitationByAUserWithoutGivingTheInvitationUUIDFails),
-            
-            ("testThatRedeemingWithTheSameAccountAsTheOwningAccountFails", testThatRedeemingWithTheSameAccountAsTheOwningAccountFails),
-            
-            ("testThatRedeemingWithAnExistingOtherOwningAccountWorks", testThatRedeemingWithAnExistingOtherOwningAccountWorks),
-            
-            ("testThatRedeemingWithAnExistingOtherSharingAccountWorks", testThatRedeemingWithAnExistingOtherSharingAccountWorks),
-            
-            ("testThatRedeemingForSameSharingGroupFails", testThatRedeemingForSameSharingGroupFails),
-            
-            ("testThatCheckingCredsOnASharingUserGivesSharingPermission", testThatCheckingCredsOnASharingUserGivesSharingPermission),
-            
-            ("testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission", testThatCheckingCredsOnARootOwningUserGivesAdminSharingPermission),
-            
-            ("testThatDeletingSharingUserWorks", testThatDeletingSharingUserWorks),
-            
-            ("testThatRedeemingWithAnExistingOwningAccountWorks", testThatRedeemingWithAnExistingOwningAccountWorks),
-            
-            ("testRedeemingSharingInvitationThatHasAlreadyBeenRedeemedFails", testRedeemingSharingInvitationThatHasAlreadyBeenRedeemedFails),
-            
-            ("testTwoAcceptorsSharingInvitationCanBeRedeemedTwice", testTwoAcceptorsSharingInvitationCanBeRedeemedTwice),
-            
-            ("testNonSocialSharingInvitationRedeemedSociallyFails", testNonSocialSharingInvitationRedeemedSociallyFails),
-            
-            ("testNonSocialSharingInvitationRedeemedNonSociallyWorks", testNonSocialSharingInvitationRedeemedNonSociallyWorks)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:
-            SharingAccountsController_RedeemSharingInvitation.self)
-    }
-}

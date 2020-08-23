@@ -14,7 +14,7 @@ import XCTest
 import Foundation
 import ServerShared
 
-class GeneralAuthTests: ServerTestCase, LinuxTestable {
+class GeneralAuthTests: ServerTestCase {
 
     func testBadEndpointFails() {
         performServerTest { expectation, creds in
@@ -37,15 +37,3 @@ class GeneralAuthTests: ServerTestCase, LinuxTestable {
     }
 }
 
-extension GeneralAuthTests {
-    static var allTests : [(String, (GeneralAuthTests) -> () throws -> Void)] {
-        return [
-            ("testBadEndpointFails", testBadEndpointFails),
-            ("testGoodEndpointWithNoCredsRequiredWorks", testGoodEndpointWithNoCredsRequiredWorks)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:GeneralAuthTests.self)
-    }
-}
