@@ -48,6 +48,9 @@ class ServerTestCase : XCTestCase {
     
     override func setUp() {
         super.setUp()
+        Log.logger = HeliumLogger()
+        HeliumLogger.use(.debug)
+        
         // The same file is assumed to contain both the server configuration and test configuration keys.
 #if os(Linux)
         try! Configuration.setup(configFileFullPath: "./ServerTests.json", testConfigFileFullPath: "./ServerTests.json")
@@ -60,9 +63,6 @@ class ServerTestCase : XCTestCase {
         
         Database.remove(db: db)
         _ = Database.setup(db: db)
-        
-        Log.logger = HeliumLogger()
-        HeliumLogger.use(.debug)
         
         TestAccount.registerHandlers()
         
@@ -584,7 +584,7 @@ class ServerTestCase : XCTestCase {
         let data: Data
         
         // The checksum sent along with the upload.
-        let checkSum: String
+        let checkSum: String?
         let response: UploadFileResponse?
     }
     
@@ -598,7 +598,7 @@ class ServerTestCase : XCTestCase {
     // If dataToUpload is present, `file` is not used.
     // `vNUpload` signals whether or not to wait for Uploader run to complete.
     @discardableResult
-    func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType? = nil, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, vNUpload: Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType? = nil, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile? = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, vNUpload: Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         var sharingGroupUUID = UUID().uuidString
         var uploadingUserId: UserId?
@@ -626,6 +626,10 @@ class ServerTestCase : XCTestCase {
         var data:Data! = dataToUpload
         
         if data == nil {
+            guard let file = file else {
+                return nil
+            }
+            
             switch file.contents {
             case .string(let string):
                 data = string.data(using: .utf8)!
@@ -646,7 +650,7 @@ class ServerTestCase : XCTestCase {
             checkSumType = testAccount.scheme.accountName
         }
         
-        let requestCheckSum = file.checkSum(type: checkSumType)
+        let requestCheckSum = file?.checkSum(type: checkSumType)
         Log.info("Starting runUploadTest: uploadTextFile: requestCheckSum: \(String(describing: requestCheckSum))")
 
         let uploadRequest = UploadFileRequest()
@@ -681,16 +685,13 @@ class ServerTestCase : XCTestCase {
         
         Log.info("Completed runUploadTest: uploadTextFile")
         
-        guard let checkSum = file.checkSum(type: checkSumType) else {
-            XCTFail()
-            return nil
-        }
+        let checkSum = file?.checkSum(type: checkSumType)
         
         return UploadFileResult(request: uploadRequest, sharingGroupUUID: sharingGroupUUID, uploadingUserId: uploadingUserId, data: data, checkSum: checkSum, response: response)
     }
     
     @discardableResult
-    func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType? = TestFile.test1.mimeType, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType? = TestFile.test1.mimeType, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile? = .test1, dataToUpload: Data? = nil, fileGroupUUID:String? = nil, changeResolverName: String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         // This signals whether or not to wait for Uploader run to complete.
         let vNUpload = dataToUpload != nil && uploadIndex == uploadCount && !errorExpected
@@ -971,7 +972,7 @@ class ServerTestCase : XCTestCase {
     }
     
     // This also creates the owning user-- using .primaryOwningAccount
-    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .google2, addUser:AddUser = .yes, owningUserWhenCreating:TestAccount = .primaryOwningAccount, numberAcceptors: UInt = 1, allowSharingAcceptance: Bool = true, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupUUID: String?, _ sharingInvitationUUID:String?)->())? = nil) {
+    func createSharingUser(withSharingPermission permission:Permission = .read, sharingUser:TestAccount = .dropbox1, addUser:AddUser = .yes, owningUserWhenCreating:TestAccount = .primaryOwningAccount, numberAcceptors: UInt = 1, allowSharingAcceptance: Bool = true, failureExpected: Bool = false, completion:((_ newSharingUserId:UserId?, _ sharingGroupUUID: String?, _ sharingInvitationUUID:String?)->())? = nil) {
         // a) Create sharing invitation with one account.
         // b) Next, need to "sign out" of that account, and sign into another account
         // c) And, redeem sharing invitation with that new account.
@@ -991,7 +992,6 @@ class ServerTestCase : XCTestCase {
                 return
             }
         }
-
         
         let sharingInvitationUUID: String! = createSharingInvitation(testAccount: owningUserWhenCreating, permission: permission, numberAcceptors: numberAcceptors, allowSharingAcceptance: allowSharingAcceptance, sharingGroupUUID:actualSharingGroupUUID)
         
@@ -1070,9 +1070,15 @@ class ServerTestCase : XCTestCase {
         if sharingUser.scheme.accountName == AccountScheme.google.accountName && canGiveCloudFolderName {
             actualCloudFolderName = ServerTestCase.cloudFolderName
         }
-
+        
         self.performServerTest(testAccount:sharingUser) { expectation, accountCreds in
-            let headers = self.setupHeaders(testUser: sharingUser, accessToken: accountCreds.accessToken, deviceUUID:deviceUUID)
+            guard let accessToken = accountCreds.accessToken else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
+            
+            let headers = self.setupHeaders(testUser: sharingUser, accessToken: accessToken, deviceUUID:deviceUUID)
             
             var urlParameters:String?
             

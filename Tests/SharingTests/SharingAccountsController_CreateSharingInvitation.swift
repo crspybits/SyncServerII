@@ -14,7 +14,7 @@ import Foundation
 import ServerShared
 
 // You can run this with primarySharingAccount set to any account that allows sharing.
-class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTestable {
+class SharingAccountsController_CreateSharingInvitation: ServerTestCase {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -215,31 +215,5 @@ class SharingAccountsController_CreateSharingInvitation: ServerTestCase, LinuxTe
     
     func testThatMaxPlusOneAcceptorsFails() {
          successfulSharingInvitationCreation(sharingPermission: .read, numberAcceptors: ServerConstants.maxNumberSharingInvitationAcceptors + 1, errorExpected: true)
-    }
-}
-
-extension SharingAccountsController_CreateSharingInvitation {
-    static var allTests : [(String, (SharingAccountsController_CreateSharingInvitation) -> () throws -> Void)] {
-        return [
-            ("testSuccessfulReadSharingInvitationCreationByAnOwningUser", testSuccessfulReadSharingInvitationCreationByAnOwningUser),
-            ("testSuccessfulWriteSharingInvitationCreationByAnOwningUser", testSuccessfulWriteSharingInvitationCreationByAnOwningUser),
-            ("testSuccessfulAdminSharingInvitationCreationByAnOwningUser", testSuccessfulAdminSharingInvitationCreationByAnOwningUser),
-            ("testSuccessfulSharingInvitationCreationByAnAdminSharingUser", testSuccessfulSharingInvitationCreationByAnAdminSharingUser),
-            ("testFailureOfSharingInvitationCreationByAReadSharingUser", testFailureOfSharingInvitationCreationByAReadSharingUser),
-            ("testFailureOfSharingInvitationCreationByAWriteSharingUser", testFailureOfSharingInvitationCreationByAWriteSharingUser),
-            ("testSharingInvitationCreationFailsWithNoAuthorization", testSharingInvitationCreationFailsWithNoAuthorization),
-            ("testSharingInvitationCreationFailsWithoutMembershipInSharingGroup", testSharingInvitationCreationFailsWithoutMembershipInSharingGroup),
-            
-            ("testDisallowingSharingAcceptanceWorks", testDisallowingSharingAcceptanceWorks),
-            ("testThatNoAcceptorsFails", testThatNoAcceptorsFails),
-            ("testThat1AcceptorsWorks", testThat1AcceptorsWorks),
-            ("testThatMaxAcceptorsWorks", testThatMaxAcceptorsWorks),
-            ("testThatMaxPlusOneAcceptorsFails", testThatMaxPlusOneAcceptorsFails)
-        ]
-    }
-    
-    func testLinuxTestSuiteIncludesAllTests() {
-        linuxTestSuiteIncludesAllTests(testType:
-            SharingAccountsController_CreateSharingInvitation.self)
     }
 }

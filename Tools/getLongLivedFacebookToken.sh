@@ -2,13 +2,16 @@
 
 # Usage:
 # 	arg1: the name of the .json configuration file for the server
+# 	arg2: the name of the Facebook token in that file, e.g., FacebookLongLivedToken1
+#
 
 # Using https://stackoverflow.com/questions/10467272/get-long-live-access-token-from-facebook to extend the life of a Facebook access token
 
 CONFIG_FILE=$1
+FACEBOOK_TOKEN=$2
 
 getToken () {
-    # Parameters:
+    # Parameters to this method:
     local tokenKey=$1
     
 	local FB_CLIENT_ID=`jq -r .FacebookClientId < "$CONFIG_FILE"`
@@ -22,5 +25,4 @@ getToken () {
 	echo $RESULT | jq -r .access_token
 }
 
-getToken "FacebookLongLivedToken1"
-getToken "FacebookLongLivedToken2"
+getToken ${FACEBOOK_TOKEN}

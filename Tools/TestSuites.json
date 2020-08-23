@@ -10,6 +10,7 @@
     "UploaderTests",
     "PushNotificationTests",
     "AccountFileTests",
+    "SharingTests",
     "other",
     "owning_google",
     "owning_dropbox",
@@ -169,6 +170,14 @@
       "parameters": [
         "MOCK_STORAGE"
       ]
+    }
+  ],
+  "SharingTests": [
+    {
+      "name": "SharingTests.Sharing_FileManipulationTests"
+    },
+    {
+      "name": "SharingTests.SharingAccountsController_CreateSharingInvitation"
     }
   ],
   "other": [
