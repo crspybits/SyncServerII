@@ -34,7 +34,7 @@ class CreateRoutes {
                 }
                 
                 do {
-                    try request.setup(request: routerRequest)
+                    try request.setup(routerRequest: routerRequest)
                 } catch (let error) {
                     Log.error("Error doing request setup: \(error)")
                     return nil

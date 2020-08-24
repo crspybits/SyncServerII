@@ -13,13 +13,14 @@ extension Account {
     // Pass as the `mock` the MockStorage if you are using it.
     func cloudStorage(mock: CloudStorage?) -> CloudStorage? {
         var useMockStorage: Bool = false
+#if DEBUG
 #if DEBUG && MOCK_STORAGE
         useMockStorage = true
 #endif
         if let loadTesting = Configuration.server.loadTestingCloudStorage, loadTesting {
             useMockStorage = true
         }
-        
+#endif
         Log.debug("cloudStorage: useMockStorage: \(useMockStorage)")
         
         if useMockStorage {
