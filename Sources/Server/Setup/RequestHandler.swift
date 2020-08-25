@@ -35,10 +35,9 @@ class RequestHandler {
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
     private let services: Services
-    private let db: Database
-
-    init(request:RouterRequest, response:RouterResponse, services: Services, db: Database, endpoint:ServerEndpoint? = nil) {
-        self.db = db
+    private var db: Database?
+    
+    init(request:RouterRequest, response:RouterResponse, services: Services, endpoint:ServerEndpoint? = nil) {
         self.request = request
         self.response = response
         if endpoint == nil {
@@ -183,7 +182,7 @@ class RequestHandler {
         case failure
     }
     
-    func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsResult {
+    func handlePermissionsAndLocking(requestObject:RequestMessage, db: Database) -> PermissionsResult {
         if let sharing = endpoint.sharing {
             // Endpoint uses sharing group. Must give sharingGroupUUID in request.
             
@@ -215,7 +214,7 @@ class RequestHandler {
                 // One reason that the sharing group user might not be found is that the SharingGroupUser was removed from the system-- e.g., if an owning user is deleted, SharingGroupUser rows that have it as their owningUserId will be removed.
                 // If a client fails with this error, it seems like some kind of client error or edge case where the client should have been updated already (i.e., from an Index endpoint call) so that it doesn't make such a request. Therefore, I'm not going to code a special case on the client to deal with this.
                 // 7/8/20; Actually, this occurs simply when an incorrect sharingGroupUUID is used when uploading a file. Let's test to see if the sharingGroupUUID exists.
-                if let exists = sharingGroupExists(sharingGroupUUID: sharingGroupUUID), exists {
+                if let exists = sharingGroupExists(sharingGroupUUID: sharingGroupUUID, db: db), exists {
                     self.failWithError(failureResult:
                         .goneWithReason(message: "SharingGroupUser object not found!", .userRemoved))
                 }
@@ -236,7 +235,7 @@ class RequestHandler {
         return .success(sharingGroupUUID: nil)
     }
     
-    private func sharingGroupExists(sharingGroupUUID: String) -> Bool? {
+    private func sharingGroupExists(sharingGroupUUID: String, db: Database) -> Bool? {
         let key = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
         let result = SharingGroupRepository(db).lookup(key: key, modelInit: SharingGroup.init)
         switch result {
@@ -305,6 +304,15 @@ class RequestHandler {
         }
 #endif
 
+        // Establishing a database connection per request.
+        guard let db = Database() else {
+            let message = "Could not open database connection for request."
+            Log.error(message)
+            failWithError(message: message)
+            return
+        }
+        
+        self.db = db
         repositories = Repositories(db: db)
         
         var accountProperties: AccountProperties?
@@ -361,7 +369,7 @@ class RequestHandler {
                     return
                 }
                 
-                let result = handlePermissionsAndLocking(requestObject: requestObject)
+                let result = handlePermissionsAndLocking(requestObject: requestObject, db: db)
                 switch result {
                 case .failure:
                     return
@@ -394,8 +402,9 @@ class RequestHandler {
         if profile == nil {
             assert(authenticationLevel! == .none)
             
-            dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
+            dbTransaction(db, handleResult: handleTransactionResult) { [weak self] handleResult in
+                guard let self = self else { return }
+                self.doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
@@ -419,8 +428,9 @@ class RequestHandler {
             
             if let profileCreds = services.accountManager.accountFromProperties(properties: accountProperties, user: credsUser) {
             
-                dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
+                dbTransaction(db, handleResult: handleTransactionResult) { [weak self] handleResult in
+                    guard let self = self else { return }
+                    self.doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
@@ -547,9 +557,7 @@ class RequestHandler {
     }
     
     // MARK: AccountDelegate
-    
 
-    
     enum CheckDeviceUUIDResult {
         case success
         case uuidNotNeeded

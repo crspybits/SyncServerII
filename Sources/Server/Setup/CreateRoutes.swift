@@ -14,17 +14,15 @@ import LoggerAPI
 class CreateRoutes {
     private var router = Router()
     let services: Services
-    let db: Database
     
-    init(services: Services, db: Database) {
-        self.db = db
+    init(services: Services) {
         self.services = services
     }
     
     func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest) {
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info("parsedURL: \(routerRequest.parsedURL)")
-            let handler = RequestHandler(request: routerRequest, response: routerResponse, services: services, db: db, endpoint:ep)
+            let handler = RequestHandler(request: routerRequest, response: routerResponse, services: services, endpoint:ep)
             
             func create(routerRequest: RouterRequest) -> RequestMessage? {
                 let queryDict = routerRequest.queryParameters
@@ -78,8 +76,9 @@ class CreateRoutes {
         ServerSetup.credentials(self.router, proxyRouter: self, accountManager: services.accountManager)
         ServerRoutes.add(proxyRouter: self)
 
-        self.router.error {[unowned self] request, response, _ in
-            let handler = RequestHandler(request: request, response: response, services: self.services, db: self.db)
+        self.router.error { [weak self] request, response, _ in
+            guard let self = self else { return }
+            let handler = RequestHandler(request: request, response: response, services: self.services)
             
             let errorDescription: String
             if let error = response.error {
@@ -92,8 +91,9 @@ class CreateRoutes {
             handler.failWithError(message: message)
         }
 
-        self.router.all { request, response, _ in
-            let handler = RequestHandler(request: request, response: response, services: self.services, db: self.db)
+        self.router.all { [weak self] request, response, _ in
+            guard let self = self else { return }
+            let handler = RequestHandler(request: request, response: response, services: self.services)
             let message = "Route not found in server: \(request.originalURL)"
             response.statusCode = .notFound
             handler.failWithError(message: message)

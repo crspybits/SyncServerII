@@ -86,7 +86,7 @@ public class ServerMain {
         
         services.uploader = uploader
         
-        let serverRoutes = CreateRoutes(services: services, db: db)
+        let serverRoutes = CreateRoutes(services: services)
         
         Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
         

@@ -13,7 +13,7 @@ EXPOSE 8080
 ADD VERSION .
 
 # Binaries should have been compiled against the correct platform (i.e. Ubuntu 16.04).
-COPY .build/debug/Main /root/SyncServerII/.build/debug/Main
+COPY .build.linux/debug/Main /root/SyncServerII/.build/debug/Main
 
 # This depends on the Server.json file being copied into a directory that's mounted at /root/extras
 # For now, I'm also writing the server log to /root/extras. Later it would be nice to make it available over the web instead of having to sign-in to the server.
