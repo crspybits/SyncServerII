@@ -59,7 +59,7 @@ class FinishUploadDeletion {
             break
         }
         
-        let result = params.repos.deferredUpload.retry {[unowned self] in
+        let result = params.repos.deferredUpload.retry { [unowned self] in
             return self.params.repos.deferredUpload.add(deferredUpload)
         }
         

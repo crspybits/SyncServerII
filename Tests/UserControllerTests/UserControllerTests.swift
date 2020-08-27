@@ -20,17 +20,19 @@ class UserControllerTests: ServerTestCase {
         super.setUp()        
     }
     
-    func testAddUserSucceedsWhenAddingNewUser() {
+    func runAddUserSucceedsWhenAddingNewUser(testAccount:TestAccount) {
         let deviceUUID = Foundation.UUID().uuidString
         let sharingGroupUUID = UUID().uuidString
-        let testAccount:TestAccount = .primaryOwningAccount
         
         guard let addUserResponse = addNewUser(testAccount:testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID) else {
             XCTFail()
             return
         }
         
-        XCTAssert(addUserResponse.userId != nil)
+        guard addUserResponse.userId != nil else {
+            XCTFail()
+            return
+        }
         
         let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)
         switch result {
@@ -54,6 +56,17 @@ class UserControllerTests: ServerTestCase {
             let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: "text/plain")
             self.lookupFile(forOwningTestAccount: testAccount, cloudFileName: fileName, options: options)
         }
+    }
+    
+    func testAddUserSucceedsWhenAddingNewUser() {
+        let testAccount:TestAccount = .primaryOwningAccount
+        runAddUserSucceedsWhenAddingNewUser(testAccount:testAccount)
+    }
+    
+    // Trying to reproduce client issue.
+    func testAddUserSucceedsWhenAddingNewDropboxUser() {
+        let testAccount:TestAccount = .dropbox1
+        runAddUserSucceedsWhenAddingNewUser(testAccount:testAccount)
     }
     
     func testAddUserWithSharingGroupNameWorks() {

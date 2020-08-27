@@ -29,7 +29,6 @@ import ServerAccount
         * It uses the ChangeResolvers to do conflict free application of the changes in the Upload records to the files.
  */
 
-
 extension FileController {
     private struct Cleanup {
         let cloudFileName: String
@@ -55,7 +54,7 @@ extension FileController {
             
         case .errorCleanup(message: let message, cleanup: let cleanup):
             if let cleanup = cleanup {
-                cleanup.ownerCloudStorage.deleteFile(cloudFileName: cleanup.cloudFileName, options: cleanup.options, completion: {_ in
+                cleanup.ownerCloudStorage.deleteFile(cloudFileName: cleanup.cloudFileName, options: cleanup.options, completion: { _ in
                     Log.error(message)
                     params.completion(.failure(.message(message)))
                 })
@@ -257,7 +256,9 @@ extension FileController {
         
         let cleanup = Cleanup(cloudFileName: cloudFileName, options: options, ownerCloudStorage: ownerCloudStorage)
         
-        ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) {[unowned self] result in
+        ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) { [weak self] result in
+            guard let self = self else { return }
+            
             switch result {
             case .success(let checkSum):
                 Log.debug("File with checkSum \(checkSum) successfully uploaded!")

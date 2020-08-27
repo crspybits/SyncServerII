@@ -126,7 +126,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(fileIndexCount1 == fileIndex.count() )
         XCTAssert(uploadCount1 == upload.count())
-        XCTAssert(deferredUploadCount1 == deferredUploads.count())
+        XCTAssert(deferredUploadCount1 + 1 == deferredUploads.count())
     }
     
     func testUploadOneV1TextFileWorks() {
@@ -179,7 +179,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(fileIndexCount1 == fileIndex.count() )
         XCTAssert(uploadCount1 == upload.count())
-        XCTAssert(deferredUploadCount1 == deferredUploads.count())
+        XCTAssert(deferredUploadCount1 + 1 == deferredUploads.count())
     }
     
     func runUploadTwoV1TextFilesInSameSharingGroupWorks(withFileGroup: Bool) {
@@ -239,7 +239,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(fileIndexCount1 == fileIndex.count() )
         XCTAssert(uploadCount1 == upload.count())
-        XCTAssert(deferredUploadCount1 == deferredUploads.count())
+        XCTAssert(deferredUploadCount1 + 1 == deferredUploads.count(), "deferredUploadCount1: \(deferredUploadCount1) == deferredUploads.count(): \(deferredUploads.count())")
     }
     
     func testUploadTwoV1TextFilesInSameSharingGroupWorks() {
@@ -306,7 +306,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             XCTAssert(result2 != nil)
             XCTAssert(fileIndexCount1 == fileIndex.count() )
             XCTAssert(uploadCount1 == upload.count())
-            XCTAssert(deferredUploadCount1 == deferredUploads.count())
+            XCTAssert(deferredUploadCount1 + 1 == deferredUploads.count(), "deferredUploadCount1 + 1: \(deferredUploadCount1) != deferredUploads.count(): \(deferredUploads.count())")
         }
     }
     
@@ -409,7 +409,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(fileIndexCount1 == fileIndexRepo.count() )
         XCTAssert(uploadCount1 == uploadRepo.count())
-        XCTAssert(deferredUploadCount1 == deferredUploadsRepo.count())
+        XCTAssert(deferredUploadCount1 + 2 == deferredUploadsRepo.count())
     }
     
     func testUploadTwoChangesToTheSameFileWorks() throws {

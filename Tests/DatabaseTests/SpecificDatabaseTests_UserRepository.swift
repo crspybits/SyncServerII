@@ -16,6 +16,7 @@ import CredentialsGoogle
 import Foundation
 import ServerShared
 import ServerGoogleAccount
+import ServerAccount
 
 class SpecificDatabaseTests_UserRepository: ServerTestCase {
     var accountManager: AccountManager!
@@ -173,6 +174,39 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
             
         case .noObjectFound:
             XCTFail("No User Found")
+        }
+    }
+    
+    // For https://github.com/SyncServerII/ServerMain/issues/4
+    func testUpdateCreds() {
+        // Faking this so we don't have to startup server.
+        accountManager.addAccountType(GoogleCreds.self)
+        
+        let credsId = "100"
+        
+        let user1 = User()
+        user1.username = "Chris"
+        user1.accountType = AccountScheme.google.accountName
+        user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
+        user1.credsId = credsId
+        user1.cloudFolderName = "folder1"
+        
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+            XCTFail()
+            return
+        }
+        
+        user1.userId = userId
+        
+        guard let creds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: accountManager) else {
+            XCTFail()
+            return
+        }
+        
+        let accountCreationUser = AccountCreationUser.user(user1)
+        guard userRepo.updateCreds(creds: creds, forUser: accountCreationUser, accountManager: accountManager) else {
+            XCTFail()
+            return
         }
     }
 }

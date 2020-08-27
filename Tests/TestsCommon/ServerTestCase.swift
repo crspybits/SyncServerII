@@ -39,7 +39,9 @@ class ServerTestCase : XCTestCase {
         try! Configuration.setup(configFileFullPath: "/tmp/ServerTests.json", testConfigFileFullPath: "/tmp/ServerTests.json")
 #endif
 
+        Log.info("About to open...")
         self.db = Database()
+        Log.info("Opened.")
         
         Database.remove(db: db)
         _ = Database.setup(db: db)
@@ -55,6 +57,7 @@ class ServerTestCase : XCTestCase {
         Log.info("About to close...")
         // Otherwise we can have too many db connections open during testing.
         self.db.close()
+        self.db = nil
         Log.info("Closed")
     }
 

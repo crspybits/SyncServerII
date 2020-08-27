@@ -35,8 +35,7 @@ class RequestHandler {
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
     private let services: Services
-    private var db: Database?
-    
+
     init(request:RouterRequest, response:RouterResponse, services: Services, endpoint:ServerEndpoint? = nil) {
         self.request = request
         self.response = response
@@ -182,7 +181,7 @@ class RequestHandler {
         case failure
     }
     
-    func handlePermissionsAndLocking(requestObject:RequestMessage, db: Database) -> PermissionsResult {
+    func handlePermissionsAndLocking(requestObject:RequestMessage) -> PermissionsResult {
         if let sharing = endpoint.sharing {
             // Endpoint uses sharing group. Must give sharingGroupUUID in request.
             
@@ -214,7 +213,7 @@ class RequestHandler {
                 // One reason that the sharing group user might not be found is that the SharingGroupUser was removed from the system-- e.g., if an owning user is deleted, SharingGroupUser rows that have it as their owningUserId will be removed.
                 // If a client fails with this error, it seems like some kind of client error or edge case where the client should have been updated already (i.e., from an Index endpoint call) so that it doesn't make such a request. Therefore, I'm not going to code a special case on the client to deal with this.
                 // 7/8/20; Actually, this occurs simply when an incorrect sharingGroupUUID is used when uploading a file. Let's test to see if the sharingGroupUUID exists.
-                if let exists = sharingGroupExists(sharingGroupUUID: sharingGroupUUID, db: db), exists {
+                if let exists = sharingGroupExists(sharingGroupUUID: sharingGroupUUID), exists {
                     self.failWithError(failureResult:
                         .goneWithReason(message: "SharingGroupUser object not found!", .userRemoved))
                 }
@@ -235,9 +234,9 @@ class RequestHandler {
         return .success(sharingGroupUUID: nil)
     }
     
-    private func sharingGroupExists(sharingGroupUUID: String, db: Database) -> Bool? {
+    private func sharingGroupExists(sharingGroupUUID: String) -> Bool? {
         let key = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
-        let result = SharingGroupRepository(db).lookup(key: key, modelInit: SharingGroup.init)
+        let result = repositories.sharingGroup.lookup(key: key, modelInit: SharingGroup.init)
         switch result {
         case .found:
             return true
@@ -312,7 +311,6 @@ class RequestHandler {
             return
         }
         
-        self.db = db
         repositories = Repositories(db: db)
         
         var accountProperties: AccountProperties?
@@ -369,7 +367,7 @@ class RequestHandler {
                     return
                 }
                 
-                let result = handlePermissionsAndLocking(requestObject: requestObject, db: db)
+                let result = handlePermissionsAndLocking(requestObject: requestObject)
                 switch result {
                 case .failure:
                     return

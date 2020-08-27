@@ -272,15 +272,6 @@
         }
       },
       {
-        "package": "ServerDropboxAccount",
-        "repositoryURL": "https://github.com/SyncServerII/ServerDropboxAccount.git",
-        "state": {
-          "branch": "master",
-          "revision": "c35c9d5e589e7386810a012267d077a8129a9761",
-          "version": null
-        }
-      },
-      {
         "package": "ServerFacebookAccount",
         "repositoryURL": "https://github.com/SyncServerII/ServerFacebookAccount.git",
         "state": {

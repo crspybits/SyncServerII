@@ -17,7 +17,11 @@ let package = Package(
         .package(url: "https://github.com/SyncServerII/ChangeResolvers.git", .branch("master")),
         
         .package(url: "https://github.com/SyncServerII/ServerAccount.git", .branch("master")),
-        .package(url: "https://github.com/SyncServerII/ServerDropboxAccount.git", .branch("master")),
+        
+        .package(path: "../ServerDropboxAccount"),
+
+        //.package(url: "https://github.com/SyncServerII/ServerDropboxAccount.git", .branch("master")),
+        
         .package(url: "https://github.com/SyncServerII/ServerGoogleAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerMicrosoftAccount.git", .branch("master")),
         .package(url: "https://github.com/SyncServerII/ServerAppleSignInAccount.git", .branch("master")),
@@ -72,6 +76,7 @@ let package = Package(
         .testTarget(name: "FileControllerUploadFileTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerUploadDeletionTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "FileControllerBothUploadTests", dependencies: ["TestsCommon"]),
+        .testTarget(name: "UserControllerTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "UploaderTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "SharingTests", dependencies: ["TestsCommon"]),
         .testTarget(name: "AccountFileTests", dependencies: ["TestsCommon"]),

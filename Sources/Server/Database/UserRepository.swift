@@ -217,24 +217,21 @@ class UserRepository : Repository, RepositoryLookup {
             userId = id
         }
         
-        let query = "UPDATE \(tableName) SET creds = '\(credsJSONString)' WHERE " +
-            lookupConstraint(key: .userId(userId))
+        Log.debug("credsJSONString: \(credsJSONString)")
         
-        if db.query(statement: query) {
-            let numberUpdates = db.numberAffectedRows()
-            // 7/6/18; I'm allowing 0 updates because in some cases, e.g., Dropbox, there will be no change in the row.
-            guard numberUpdates <= 1 else {
-                Log.error("Expected <= 1 updated, but had \(numberUpdates)")
-                return false
-            }
-
-            return true
+        let update = Database.PreparedStatement(repo: self, type: .update)
+        update.add(fieldName: User.credsKey, value: .string(credsJSONString))
+        update.where(fieldName: User.userIdKey, value: .int64(userId))
+        
+        do {
+            try update.run()
         }
-        else {
-            let error = db.error
-            Log.error("Could not update row for \(tableName): \(error)")
+        catch (let error) {
+            Log.error("Failed updating User: \(error)")
             return false
         }
+        
+        return true
     }
     
     // For a sharing user, will have one element per sharing group the user is a member of. These are the "owners" or "parents" of the sharing groups the sharing user is in. Returns an empty list if the user isn't a sharing user.

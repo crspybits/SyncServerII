@@ -53,7 +53,7 @@ class Uploader: UploaderProtocol {
         case couldNotGetFileGroup
     }
     
-    let db: Database
+    var db: Database!
     let services: UploaderServices
     private let lockName = "Uploader"
     let deferredUploadRepo:DeferredUploadRepository
@@ -141,7 +141,8 @@ class Uploader: UploaderProtocol {
                 return
             }
 
-            self.processFileChanges(deferredUploads: deferredFileChangeUploads) { error in
+            self.processFileChanges(deferredUploads: deferredFileChangeUploads) { [weak self] error in
+                guard let self = self else { return }
                 if let error = error {
                     Log.error("\(error); deferredFileChangeUploads: \(deferredFileChangeUploads)")
                 }

@@ -223,7 +223,8 @@ class ApplyDeferredUploads {
         
             Log.debug("applyChangesToSingleFile: \(fileUUID)")
 
-            applyChangesToSingleFile(fileUUID: fileUUID) { result in
+            applyChangesToSingleFile(fileUUID: fileUUID) { [weak self] result in
+                guard let self = self else { return }
                 switch result {
                 case .failure(let error):
                     _ = self.db.rollback()
@@ -301,7 +302,9 @@ class ApplyDeferredUploads {
             return
         }
         
-        resolver.apply(changes: uploadsForFileUUID, toFileUUID: fileUUID, currentFileVersion: priorFileVersion, deviceUUID: deviceUUID, cloudStorage: cloudStorage, options: options) { result in
+        resolver.apply(changes: uploadsForFileUUID, toFileUUID: fileUUID, currentFileVersion: priorFileVersion, deviceUUID: deviceUUID, cloudStorage: cloudStorage, options: options) { [weak self] result in
+            guard let self = self else { return }
+            
             switch result {
             case .failure(let error):
                 completion(.failure(error))

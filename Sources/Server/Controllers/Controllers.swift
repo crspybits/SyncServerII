@@ -12,10 +12,6 @@ import Credentials
 import Kitura
 import ServerShared
 import ServerAccount
-//
-//protocol ControllerProtocol {
-//    static func setup() -> Bool
-//}
 
 extension ControllerProtocol {
     // Make sure the current signed in user is a member of the sharing group.

@@ -279,8 +279,16 @@ extension AccountScheme {
                     break
                 case .accessTokenRevokedOrExpired:
                     XCTFail()
-                case .failure:
-                    XCTFail()
+                case .failure(let error):
+                    if fileNotFoundOK,
+                        let error = error as? DropboxCreds.DropboxError,
+                        case .couldNotGetId = error {
+                        expectation.fulfill()
+                    }
+                    else {
+                        XCTFail("DropboxCreds file deletion: \(error)")
+                        expectation.fulfill()
+                    }
                 }
 
                 expectation.fulfill()

@@ -18,27 +18,12 @@ import ChangeResolvers
 class FileController_V0_UploadTests: ServerTestCase {
     override func setUp() {
         super.setUp()
-        HeliumLogger.use(.debug)
     }
     
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-//    private func lookupUpload(key: UploadRepository.LookupKey) -> Upload? {
-//        let lookupResult = UploadRepository(db).lookup(key: lookupKey, modelInit: Upload.init)
-//        switch lookupResult {
-//        case .error, .noObjectFound:
-//            return nil
-//        case .found(let model):
-//            guard let upload = model as? Upload else {
-//                return nil
-//            }
-//
-//            return upload
-//        }
-//    }
     
     /*
     Testing parameters:

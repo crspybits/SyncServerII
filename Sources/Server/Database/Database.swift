@@ -233,7 +233,7 @@ class Database {
 
 private struct DBLog {
     static func query(_ query: String) {
-        // Log.debug("DB QUERY: \(query)")
+        Log.debug("DB QUERY: \(query)")
     }
 }
 
@@ -298,7 +298,12 @@ class Select {
         let results = self.stmt.results()
         var failure = false
         
-        let returnCode = results.forEachRow { row in
+        let returnCode = results.forEachRow { [weak self] row in
+            guard let self = self else {
+                failure = true
+                return
+            }
+            
             if failure {
                 return
             }

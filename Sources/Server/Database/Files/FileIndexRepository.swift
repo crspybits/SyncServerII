@@ -515,7 +515,12 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             return .failure(nil)
         }
         
-        uploadSelect.forEachRow { rowModel in
+        uploadSelect.forEachRow { [weak self] rowModel in
+            guard let self = self else {
+                error = true
+                return
+            }
+            
             if error {
                 return
             }
