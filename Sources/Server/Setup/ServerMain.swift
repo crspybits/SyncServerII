@@ -79,8 +79,9 @@ public class ServerMain {
         
         let uploader:Uploader
 
+        let uploaderHelpers = UploaderHelpers(accountManager: accountManager, changeResolverManager: resolverManager, mockStorage: services.mockStorage)
         do {
-            uploader = try Uploader(services: services)
+            uploader = try Uploader(services: uploaderHelpers)
         } catch let error {
             Startup.halt("Failed during startup: Failed setting up Uploader: \(error)")
             return

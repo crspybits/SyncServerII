@@ -75,46 +75,41 @@ generateOutput () {
     local outputPrefix=$2
     local compilerResult=$3
 
-    # The following depends on the assumption: That when a Swift test passes, there is a line containing the text " 0 failure", and that each test, pass or fail has lines "failure" in them (e.g., 0 failures or N failures). And further, that there are two of these lines per test. Of course, changes in the Swift testing output could change this and break this assumption.
+    # The following depends on the assumption:
     # As of 8/26/20, with Swift 5.3 beta, the filtered testing results have a summary line:
     #   Executed 21 tests, with 0 failures (0 unexpected) in 4.894 (4.894) seconds
 
     # https://linuxize.com/post/regular-expressions-in-grep/
     # The following pulls out a single line, such as:
     #   Executed 21 tests, with 0 failure
-    local executedText=`cat "$resultsFileName" | grep -o 'Executed [0-9]* test, with [0-9]* failure' | head -n 1`
+    
+    local executedText=`cat "$resultsFileName" | grep -Eo 'Executed [0-9]* test[s]?, with [0-9]* failure' | head -n 1`
+
     # 2nd item -- number tests
     # 5th item -- number of failures
-    local actualNumberTests=`echo "$executedText" | awk '{print $2}'`
-    local actualNumberFailures=`echo "$executedText" | awk '{print $5}'`
-
-    printf "Total tests: $actualNumberTests\n"
-    printf "Number failures: $actualNumberFailures\n"
     
-    # The number of lines of output, divided by 2, is the total number of tests.
-    local totalLines=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ERROR | wc -l`
-    local totalTests=`expr $totalLines / 2`
+    local totalTests=`echo "$executedText" | awk '{print $2}'`
+    local failures=`echo "$executedText" | awk '{print $5}'`
 
-    # This gives failures-- the number of lines divided by 2 is N, the number of failures.
-    local failures=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ' 0 failure' | grep -Ev ERROR | wc -l`
-    failures=`expr $failures / 2`
     TOTAL_FAILED_TEST_CASES=`expr $TOTAL_FAILED_TEST_CASES + $failures`
-    local passLines=`cat "$resultsFileName" | grep ' passed at ' | wc -l`
-    local testsPassed=`expr $passLines / 2`
 
     local possibleCompileFailure="false"
 
     if [ "${compilerResult}empty" != "empty" ] && [ $compilerResult -ne 0 ]; then
         possibleCompileFailure="true"
     fi
+    
+#    printf "possibleCompileFailure: $possibleCompileFailure\n"
+#    printf "failures: $failures\n"
+#    printf "totalTests: $totalTests\n"
 
-    if [ $possibleCompileFailure == "false" ] && [ "$failures" == "0" ] && [ $testsPassed == $totalTests ]; then
-        printf "${outputPrefix}${GREEN}Passed${NC} ($testsPassed/$totalTests tests): $resultsFileName\n"
+    if [ $possibleCompileFailure == "false" ] && [ "$failures" == 0 ]; then
+        printf "${outputPrefix}${GREEN}Passed${NC} ($totalTests/$totalTests tests): $resultsFileName\n"
         TOTAL_SUITES_PASSED=`expr $TOTAL_SUITES_PASSED + 1`
     else
         TOTAL_SUITES_FAILED=`expr $TOTAL_SUITES_FAILED + 1`
 
-        if [ $possibleCompileFailure == "true" ] && [ "$failures" == "0" ]; then
+        if [ $possibleCompileFailure == "true" ] && [ "$failures" == 0 ]; then
              printf "${outputPrefix}${RED}Compile failure${NC}: $resultsFileName\n"
         else
             printf "${outputPrefix}${RED}$failures FAILURES${NC} (out of $totalTests tests): $resultsFileName\n"
