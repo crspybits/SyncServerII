@@ -12,14 +12,9 @@ import ServerShared
 import LoggerAPI
 
 class CreateRoutes {
-    private var router = Router()
-    let services: Services
+    private init() {}
     
-    init(services: Services) {
-        self.services = services
-    }
-    
-    func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest) {
+    private static func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest, services: Services, router: Router) {
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info("parsedURL: \(routerRequest.parsedURL)")
             let handler = RequestHandler(request: routerRequest, response: routerResponse, services: services, endpoint:ep)
@@ -51,34 +46,39 @@ class CreateRoutes {
         
         switch (ep.method) {
         case .get:
-            self.router.get(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            router.get(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
             
         case .post:
-            self.router.post(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            router.post(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         
         case .patch:
-            self.router.patch(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            router.patch(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         
         case .delete:
-            self.router.delete(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            router.delete(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         }
     }
     
-    func getRoutes() -> Router {
-        ServerSetup.credentials(self.router, proxyRouter: self, accountManager: services.accountManager)
-        ServerRoutes.add(proxyRouter: self)
+    static func getRoutes(services: Services) -> Router {
+        let router = Router()
+        
+        ServerSetup.credentials(router, accountManager: services.accountManager)
+        
+        let routes = ServerRoutes.routes()
+        for (endpoint, controllerMethod) in routes {
+            addRoute(ep: endpoint, processRequest: controllerMethod, services: services, router: router)
+        }
 
-        self.router.error { [weak self] request, response, _ in
-            guard let self = self else { return }
-            let handler = RequestHandler(request: request, response: response, services: self.services)
+        router.error { request, response, _ in
+            let handler = RequestHandler(request: request, response: response, services: services)
             
             let errorDescription: String
             if let error = response.error {
@@ -91,15 +91,14 @@ class CreateRoutes {
             handler.failWithError(message: message)
         }
 
-        self.router.all { [weak self] request, response, _ in
-            guard let self = self else { return }
-            let handler = RequestHandler(request: request, response: response, services: self.services)
+        router.all { request, response, _ in
+            let handler = RequestHandler(request: request, response: response, services: services)
             let message = "Route not found in server: \(request.originalURL)"
             response.statusCode = .notFound
             handler.failWithError(message: message)
         }
         
-        return self.router
+        return router
     }
 }
 

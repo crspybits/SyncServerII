@@ -28,7 +28,7 @@ import CredentialsGoogle
 import ServerShared
 import ServerAccount
 
-protocol KituraTest {
+protocol KituraTest: AnyObject {
     func expectation(_ index: Int) -> XCTestExpectation
     func waitExpectation(timeout t: TimeInterval, handler: XCWaitCompletionHandler?)
 }
@@ -39,59 +39,60 @@ case header
 }
 
 extension KituraTest {
+    private func runTest(testAccount:TestAccount, usingCreds creds:Account, expectingUploaderToRun: Bool, asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
+        Log.info("performServerTest: Starts")
+        ServerMain.startup(type: .nonBlocking)
+        
+        let requestQueue = DispatchQueue(label: "Request queue")
+        let expectation = self.expectation(0)
+        var uploaderRunExpectation: XCTestExpectation?
+        
+        if expectingUploaderToRun {
+            uploaderRunExpectation = self.expectation(1)
+        }
+        
+        requestQueue.async() {
+            asyncTask(expectation, creds)
+        }
+        
+        var observer: AnyObject?
+        if expectingUploaderToRun {
+            observer = NotificationCenter.default.addObserver(forName: Uploader.uploaderRunCompleted, object: nil, queue: nil) { notification in
+                if let error = notification.userInfo?[Uploader.errorKey] as? Swift.Error {
+                    XCTFail("\(error)")
+                }
+                uploaderRunExpectation?.fulfill()
+            }
+        }
+        
+        // blocks test until request completes
+        self.waitExpectation(timeout: 60) { error in
+            // executes whether ot nor expectations met.
+            ServerMain.shutdown()
+            XCTAssertNil(error)
+        }
+        
+        if let observer = observer {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        
+        // At least with Google accounts, I'm having problems with periodic `unauthorized` responses. Could be due to some form of throttling?
+#if !MOCK_STORAGE
+        if testAccount.scheme.accountName == AccountScheme.google.accountName {
+            sleep(5)
+        }
+#endif
+        Log.info("performServerTest: Ends")
+    }
+    
     // `expectingUploaderToRun` signals whether or not to wait for Uploader run to complete.
     func performServerTest(testAccount:TestAccount = .primaryOwningAccount, expectingUploaderToRun: Bool = false,
         asyncTask: @escaping (XCTestExpectation, Account) -> Void) {
         
-        func runTest(usingCreds creds:Account) {
-            Log.info("performServerTest: Starts")
-            ServerMain.startup(type: .nonBlocking)
-            
-            let requestQueue = DispatchQueue(label: "Request queue")
-            let expectation = self.expectation(0)
-            var uploaderRunExpectation: XCTestExpectation?
-            
-            if expectingUploaderToRun {
-                uploaderRunExpectation = self.expectation(1)
-            }
-            
-            requestQueue.async() {
-                asyncTask(expectation, creds)
-            }
-            
-            var observer: AnyObject?
-            if expectingUploaderToRun {
-                observer = NotificationCenter.default.addObserver(forName: Uploader.uploaderRunCompleted, object: nil, queue: nil) { notification in
-                    if let error = notification.userInfo?[Uploader.errorKey] as? Swift.Error {
-                        XCTFail("\(error)")
-                    }
-                    uploaderRunExpectation?.fulfill()
-                }
-            }
-            
-            // blocks test until request completes
-            self.waitExpectation(timeout: 60) { error in
-                // executes whether ot nor expectations met.
-                ServerMain.shutdown()
-                XCTAssertNil(error)
-            }
-            
-            if let observer = observer {
-                NotificationCenter.default.removeObserver(observer)
-            }
-            
-            // At least with Google accounts, I'm having problems with periodic `unauthorized` responses. Could be due to some form of throttling?
-#if !MOCK_STORAGE
-            if testAccount.scheme.accountName == AccountScheme.google.accountName {
-                sleep(5)
-            }
-#endif
-            Log.info("performServerTest: Ends")
-        }
-        
-        testAccount.scheme.doHandler(for: .getCredentials, testAccount: testAccount) { creds in
+        testAccount.scheme.doHandler(for: .getCredentials, testAccount: testAccount) { [weak self] creds in
+            guard let self = self else { return }
             Log.debug("creds: \(String(describing: creds.accessToken))")
-            runTest(usingCreds: creds)
+            self.runTest(testAccount: testAccount, usingCreds: creds, expectingUploaderToRun: expectingUploaderToRun, asyncTask: asyncTask)
         }
     }
     
@@ -134,7 +135,8 @@ extension KituraTest {
             [.method(route.method.rawValue), .hostname("localhost"),
                 .port(Int16(Configuration.server.port)), .path(path), .headers(allHeaders), .schema("http://")]
         
-        let req:ClientRequest = HTTP.request(options) { (response:ClientResponse?) in
+        let req:ClientRequest = HTTP.request(options) { [weak self] (response:ClientResponse?) in
+            guard let self = self else { return }
             var dict:[String:Any]?
             if response != nil {
                 dict = self.getResponseDict(response: response!, responseDictFrom:responseDictFrom)

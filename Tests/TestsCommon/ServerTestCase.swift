@@ -219,7 +219,8 @@ class ServerTestCase : XCTestCase {
 
         var result:DownloadAppMetaDataResponse?
         
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
 
             let downloadAppMetaDataRequest = DownloadAppMetaDataRequest()
@@ -263,7 +264,8 @@ class ServerTestCase : XCTestCase {
     func healthCheck() -> HealthCheckResponse? {
         var result:HealthCheckResponse?
         
-        performServerTest { expectation in
+        performServerTest { [weak self] expectation in
+            guard let self = self else { return }
             self.performRequest(route: ServerEndpoints.healthCheck) { response, dict in
                 XCTAssert(response!.statusCode == .OK, "Failed on healthcheck request")
 
@@ -319,7 +321,8 @@ class ServerTestCase : XCTestCase {
         addUserRequest.sharingGroupName = sharingGroupName
         addUserRequest.sharingGroupUUID = sharingGroupUUID
         
-        self.performServerTest(testAccount:testAccount) { expectation, creds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, creds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             var queryParams:String?
@@ -355,7 +358,8 @@ class ServerTestCase : XCTestCase {
         createRequest.sharingGroupName = sharingGroup?.sharingGroupName
         createRequest.sharingGroupUUID = sharingGroupUUID
         
-        self.performServerTest(testAccount:testAccount) { expectation, creds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, creds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             var queryParams:String?
@@ -396,7 +400,8 @@ class ServerTestCase : XCTestCase {
         updateRequest.sharingGroupUUID = sharingGroup.sharingGroupUUID
         updateRequest.sharingGroupName = sharingGroup.sharingGroupName
         
-        self.performServerTest(testAccount:testAccount) { expectation, creds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, creds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             var queryParams:String?
@@ -435,7 +440,8 @@ class ServerTestCase : XCTestCase {
         let removeRequest = RemoveSharingGroupRequest()
         removeRequest.sharingGroupUUID = sharingGroupUUID
         
-        self.performServerTest(testAccount:testAccount) { expectation, creds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, creds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             var queryParams:String?
@@ -468,7 +474,8 @@ class ServerTestCase : XCTestCase {
         let removeRequest = RemoveUserFromSharingGroupRequest()
         removeRequest.sharingGroupUUID = sharingGroupUUID
         
-        self.performServerTest(testAccount:testAccount) { expectation, creds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, creds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             var queryParams:String?
@@ -513,7 +520,8 @@ class ServerTestCase : XCTestCase {
         
         var result: GetUploadsResultsResponse?
         
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             guard let parameters = request.urlParameters() else {
@@ -689,7 +697,8 @@ class ServerTestCase : XCTestCase {
         
         var result: UploadFileResponse?
         
-        self.performServerTest(testAccount:testAccount, expectingUploaderToRun: vNUpload) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount, expectingUploaderToRun: vNUpload) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             // The method for ServerEndpoints.uploadFile really must be a POST to upload the file.
@@ -815,7 +824,8 @@ class ServerTestCase : XCTestCase {
             return
         }
         
-        self.performServerTest { expectation, creds in
+        self.performServerTest { [weak self] expectation, creds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.index, headers: headers, urlParameters: "?" + parameters, body:nil) { response, dict in
@@ -874,7 +884,8 @@ class ServerTestCase : XCTestCase {
     func getIndex(testAccount: TestAccount = .primaryOwningAccount, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil) -> ([FileInfo]?, [ServerShared.SharingGroup])? {
         var result:([FileInfo]?, [ServerShared.SharingGroup])?
         
-        self.performServerTest(testAccount: testAccount) { expectation, creds in
+        self.performServerTest(testAccount: testAccount) { [weak self] expectation, creds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             let request = IndexRequest()
@@ -923,7 +934,8 @@ class ServerTestCase : XCTestCase {
         
         var result: String?
         
-        self.performServerTest(testAccount: testAccount) { expectation, testCreds in
+        self.performServerTest(testAccount: testAccount) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let request = CreateSharingInvitationRequest()
@@ -1054,7 +1066,8 @@ class ServerTestCase : XCTestCase {
             actualCloudFolderName = ServerTestCase.cloudFolderName
         }
         
-        self.performServerTest(testAccount:sharingUser) { expectation, accountCreds in
+        self.performServerTest(testAccount:sharingUser) { [weak self] expectation, accountCreds in
+            guard let self = self else { return }
             guard let accessToken = accountCreds.accessToken else {
                 XCTFail()
                 expectation.fulfill()
@@ -1099,7 +1112,8 @@ class ServerTestCase : XCTestCase {
     
     func getSharingInvitationInfo(sharingInvitationUUID:String? = nil, errorExpected:Bool=false, httpStatusCodeExpected: HTTPStatusCode = .OK, completion:@escaping (_ result: GetSharingInvitationInfoResponse?, _ expectation: XCTestExpectation)->()) {
 
-        self.performServerTest() { expectation in
+        self.performServerTest() { [weak self] expectation in
+            guard let self = self else { return }
             var urlParameters:String?
             
             if sharingInvitationUUID != nil {
@@ -1148,7 +1162,8 @@ class ServerTestCase : XCTestCase {
 
         let deviceUUID = Foundation.UUID().uuidString
         
-        self.performServerTest(testAccount: testAccount) { expectation, account in
+        self.performServerTest(testAccount: testAccount) { [weak self] expectation, account in
+            guard let self = self else { return }
             var urlParameters:String?
 
             let headers = self.setupHeaders(testUser:testAccount, accessToken: account.accessToken, deviceUUID:deviceUUID)
@@ -1202,7 +1217,8 @@ class ServerTestCase : XCTestCase {
             }
         }
 
-        self.performServerTest(testAccount:testAccount, expectingUploaderToRun: expectingUploaderToRun) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount, expectingUploaderToRun: expectingUploaderToRun) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.uploadDeletion, headers: headers, urlParameters: "?" + uploadDeletionRequest.urlParameters()!) { response, dict in
@@ -1245,7 +1261,8 @@ class ServerTestCase : XCTestCase {
         var fileResponse:DownloadFileResponse?
         var dataResponse:Data?
         
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser:testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             let downloadFileRequest = DownloadFileRequest()
@@ -1478,7 +1495,8 @@ class ServerTestCase : XCTestCase {
         
         var result: RegisterPushNotificationTokenResponse?
         
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             guard let parameters = request.urlParameters() else {
@@ -1529,7 +1547,8 @@ class ServerTestCase : XCTestCase {
         
         var result: SendPushNotificationsResponse?
         
-        self.performServerTest(testAccount:testAccount) { expectation, testCreds in
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, testCreds in
+            guard let self = self else { return }
             let headers = self.setupHeaders(testUser: testAccount, accessToken: testCreds.accessToken, deviceUUID:deviceUUID)
             
             guard let parameters = request.urlParameters() else {

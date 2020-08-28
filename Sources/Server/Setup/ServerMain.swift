@@ -59,6 +59,8 @@ public class ServerMain {
             Startup.halt("Failed during startup: Could not setup database tables(s).")
             return
         }
+        // Don't need this connection any more.
+        db.close()
 
         let accountManager = AccountManager(userRepository: UserRepository(db))
         let resolverManager = ChangeResolverManager()
@@ -86,9 +88,9 @@ public class ServerMain {
         
         services.uploader = uploader
         
-        let serverRoutes = CreateRoutes(services: services)
+        let routes = CreateRoutes.getRoutes(services: services)
         
-        Kitura.addHTTPServer(onPort: Configuration.server.port, with: serverRoutes.getRoutes())
+        Kitura.addHTTPServer(onPort: Configuration.server.port, with: routes)
         
         switch type {
         case .blocking:
@@ -99,6 +101,7 @@ public class ServerMain {
         }
     }
     
+    // For testing
     public class func shutdown() {
         Kitura.stop()
     }

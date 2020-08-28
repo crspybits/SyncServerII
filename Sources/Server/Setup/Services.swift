@@ -57,4 +57,8 @@ class Services: UploaderServices {
         self.accountManager = accountManager
         self.changeResolverManager = changeResolverManager
     }
+    
+    deinit {
+        Log.debug("Services: deinit")
+    }
 }

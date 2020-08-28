@@ -14,7 +14,7 @@ protocol UploaderProtocol {
     var delegate: UploaderDelegate? {get set}
 }
 
-protocol UploaderServices {
+protocol UploaderServices: AnyObject {
     var accountManager: AccountManager {get}
     var changeResolverManager: ChangeResolverManager {get}
     var mockStorage: MockStorage {get}
@@ -54,7 +54,10 @@ class Uploader: UploaderProtocol {
     }
     
     var db: Database!
-    let services: UploaderServices
+    
+    // `weak` to avoid a circular reference
+    weak var services: UploaderServices!
+    
     private let lockName = "Uploader"
     let deferredUploadRepo:DeferredUploadRepository
     let uploadRepo:UploadRepository

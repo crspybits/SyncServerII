@@ -19,6 +19,10 @@ class ChangeResolverManager {
     init() {
     }
     
+    deinit {
+        Log.debug("ChangeResolverManager: deinit")
+    }
+    
     func addResolverType(_ newResolverType:ChangeResolver.Type) throws {
         for resolverType in resolverTypes {
             // Don't add the same resolver type twice!

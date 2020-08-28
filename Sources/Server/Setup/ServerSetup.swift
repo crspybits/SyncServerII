@@ -37,7 +37,7 @@ class ServerSetup {
         return randomString
     }
 
-    static func credentials(_ router:Router, proxyRouter:CreateRoutes, accountManager: AccountManager) {
+    static func credentials(_ router:Router, accountManager: AccountManager) {
         let secret = self.randomString(length: secretStringLength)
         router.all(middleware: KituraSession.Session(secret: secret))
         

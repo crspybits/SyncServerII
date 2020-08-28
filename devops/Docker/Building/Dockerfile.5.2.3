@@ -4,9 +4,8 @@
 # Note that I'm not using Ubuntu 14.04 because I'm currently using Perfect for mySQL interface
 # and that has problems with the mysqlclient for 14.04. See https://github.com/PerfectlySoft/Perfect-MySQL
 
-# This is for Ubuntu 16.04 (xenial), the latest build of Swift 5.3
-# See https://hub.docker.com/r/swiftlang/swift/tags
-FROM swiftlang/swift:nightly-5.3-xenial
+# This is for Ubuntu 16.04 (xenial)
+FROM swift:5.2.3-xenial
 LABEL maintainer="Chris Prince <chris@SpasticMuffin.biz>"
 LABEL Description="Docker image for building the Swift SyncServer server"
 

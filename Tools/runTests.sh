@@ -76,7 +76,21 @@ generateOutput () {
     local compilerResult=$3
 
     # The following depends on the assumption: That when a Swift test passes, there is a line containing the text " 0 failure", and that each test, pass or fail has lines "failure" in them (e.g., 0 failures or N failures). And further, that there are two of these lines per test. Of course, changes in the Swift testing output could change this and break this assumption.
+    # As of 8/26/20, with Swift 5.3 beta, the filtered testing results have a summary line:
+    #   Executed 21 tests, with 0 failures (0 unexpected) in 4.894 (4.894) seconds
 
+    # https://linuxize.com/post/regular-expressions-in-grep/
+    # The following pulls out a single line, such as:
+    #   Executed 21 tests, with 0 failure
+    local executedText=`cat "$resultsFileName" | grep -o 'Executed [0-9]* test, with [0-9]* failure' | head -n 1`
+    # 2nd item -- number tests
+    # 5th item -- number of failures
+    local actualNumberTests=`echo "$executedText" | awk '{print $2}'`
+    local actualNumberFailures=`echo "$executedText" | awk '{print $5}'`
+
+    printf "Total tests: $actualNumberTests\n"
+    printf "Number failures: $actualNumberFailures\n"
+    
     # The number of lines of output, divided by 2, is the total number of tests.
     local totalLines=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ERROR | wc -l`
     local totalTests=`expr $totalLines / 2`
