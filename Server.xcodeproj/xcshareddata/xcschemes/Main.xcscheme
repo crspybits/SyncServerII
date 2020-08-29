@@ -48,6 +48,16 @@
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Server::FileControllerUploadFileTests"
+               BuildableName = "FileControllerUploadFileTests.xctest"
+               BlueprintName = "FileControllerUploadFileTests"
+               ReferencedContainer = "container:Server.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

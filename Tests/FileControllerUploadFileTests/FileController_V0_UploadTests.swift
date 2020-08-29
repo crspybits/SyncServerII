@@ -61,7 +61,8 @@ class FileController_V0_UploadTests: ServerTestCase {
             XCTFail()
             return nil
         }
-
+        
+        XCTAssert(result.response?.creationDate != nil)
         XCTAssert(result.response?.allUploadsFinished == .v0UploadsFinished)
                 
         guard let fileIndexCount2 = fileIndex.count() else {

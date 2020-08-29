@@ -23,6 +23,7 @@ Version
     			DROP INDEX fileUUID ON Upload 
     * Will need an agressive iOS app update requirement
     	- iOS app will absolutely have to update prior to using endpoints for new server.
+    * Updated to using Swift 5.3
 
 Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.

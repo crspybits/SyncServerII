@@ -71,6 +71,9 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         }
         else {
             XCTAssert(result2 != nil)
+            
+            // nil creation date with vN uploads.
+            XCTAssert(result2?.response?.creationDate == nil)
         }
     }
     
