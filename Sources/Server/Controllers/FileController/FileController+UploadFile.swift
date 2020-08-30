@@ -195,6 +195,14 @@ extension FileController {
             return
         }
         
+        // Content data for the initial v0 file or vN change.
+        guard let fileContents = uploadRequest.data else {
+            let message = "Could not get content data for file from request"
+            Log.error(message)
+            finish(.errorMessage(message), params: params)
+            return
+        }
+        
         if newFile {
             Log.debug("uploadRequest.changeResolverName: \(String(describing: uploadRequest.changeResolverName))")
             
@@ -202,6 +210,19 @@ extension FileController {
             if let resolverName = uploadRequest.changeResolverName {
                 guard params.services.changeResolverManager.validResolver(resolverName) else {
                     let message = "Bad change resolver: \(resolverName)"
+                    finish(.errorMessage(message), params: params)
+                    return
+                }
+                
+                // Test the initial data given. We have a change resolver, and want to ensure that the data works with the resolver. Otherwise, we can get into a situation where a vN change for the file gets uploaded and it fails because the v0 upload was invalid.
+                guard let resolver = params.services.changeResolverManager.getResolverType(resolverName) else {
+                    let message = "Could not get resolver for: \(resolverName)"
+                    finish(.errorMessage(message), params: params)
+                    return
+                }
+                
+                guard resolver.validV0(contents: fileContents) else {
+                    let message = "v0 contents for change resolver (\(resolverName)) were not valid."
                     finish(.errorMessage(message), params: params)
                     return
                 }
@@ -223,7 +244,7 @@ extension FileController {
             let cloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType:mimeType, fileVersion: 0)
             
             // This also does addUploadEntry.
-            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID)
+            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, contents: fileContents, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID)
         }
         else {
             guard uploadRequest.mimeType ==  nil else {
@@ -238,17 +259,11 @@ extension FileController {
                 return
             }
             
-            // Need to add the upload (i.e., change) data to the UploadRepository.
-            guard let data = uploadRequest.data else {
-                finish(.errorResponse(.failure(.message("Could not get change data from request"))), params: params)
-                return
-            }
-            
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: todaysDate, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: data)
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: todaysDate, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: fileContents)
         }
     }
     
-    private func uploadV0File(cloudFileName: String, mimeType: String, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String) {
+    private func uploadV0File(cloudFileName: String, mimeType: String, contents: Data, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String) {
         
         Log.info("File being sent to cloud storage: \(cloudFileName)")
 
@@ -256,7 +271,7 @@ extension FileController {
         
         let cleanup = Cleanup(cloudFileName: cloudFileName, options: options, ownerCloudStorage: ownerCloudStorage)
         
-        ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: uploadRequest.data, options:options) { [weak self] result in
+        ownerCloudStorage.uploadFile(cloudFileName:cloudFileName, data: contents, options:options) { [weak self] result in
             guard let self = self else { return }
             
             switch result {

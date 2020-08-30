@@ -60,7 +60,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ChangeResolvers.git",
         "state": {
           "branch": "master",
-          "revision": "53bf235c9890d6c8968416f971c64259ff783389",
+          "revision": "82f4dfa2d117676435c1107c12fb46221af4150d",
           "version": null
         }
       },
@@ -258,7 +258,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "040883f3d8cf1fab53a46839f1b5fc889dfe2c86",
+          "revision": "d580f5fb871c557cb2cf9075d13e7aa4dd014334",
           "version": null
         }
       },

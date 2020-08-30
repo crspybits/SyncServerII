@@ -93,7 +93,7 @@ generateOutput () {
     local totalTests=`echo "$executedText" | awk '{print $2}'`
     local failures=`echo "$executedText" | awk '{print substr($7,2); }'`
     if [ "$failures" == 0 ]; then
-        # sometimes unexpected is 0, but failures are non-zero.
+        # sometimes `unexpected` is 0, but `failures` are non-zero.
         failures=`echo "$executedText" | awk '{print $5}'`
     fi
 

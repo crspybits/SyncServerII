@@ -446,6 +446,32 @@ class FileController_V0_UploadTests: ServerTestCase {
         }
     }
     
+    func runChangeResolverUploadTest(withValidV0: Bool) {
+        let changeResolverName = CommentFile.changeResolverName
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+         
+        let file: TestFile
+        if withValidV0 {
+            file = .commentFile
+        }
+        else {
+            file = .test1
+        }
+        
+        let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, errorExpected:!withValidV0, stringFile: file, changeResolverName: changeResolverName)
+        
+        XCTAssert((result != nil) == withValidV0)
+    }
+    
+    func testUploadV0FileWithInvalidV0ChangeResolverFails() {
+        runChangeResolverUploadTest(withValidV0: false)
+    }
+    
+    func testUploadV0FileWithValidV0ChangeResolverWorks() {
+        runChangeResolverUploadTest(withValidV0: true)
+    }
+    
 //    func testUploadOneV1TextFileWorks() {
 //        uploadSingleVNFile(changeResolverName: changeResolverName) { addUser, deviceUUID, fileUUID, fileGroupUUID, changeResolverName in
 //            return uploadTextFile(deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName)
