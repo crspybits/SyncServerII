@@ -30,14 +30,13 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         do {
             try resolverManager.setupResolvers()
-            uploader = try Uploader(services: services)
         } catch let error {
             XCTFail("\(error)")
             return
         }
         
+        uploader = Uploader(services: services.uploaderServices)
         self.services = services
-        
         uploader.delegate = self
         runCompleted = nil
     }
@@ -112,7 +111,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found = try fileIsInCloudStorage(fileIndex: fileIndex, services: services)
+        let found = try fileIsInCloudStorage(fileIndex: fileIndex, services: services.uploaderServices)
         XCTAssert(!found)
     }
     
@@ -230,9 +229,9 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services.uploaderServices)
         XCTAssert(!found2)
     }
     
@@ -332,9 +331,9 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services.uploaderServices)
         XCTAssert(!found2)
     }
 }

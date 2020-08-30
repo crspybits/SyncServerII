@@ -10,21 +10,12 @@ import LoggerAPI
 
 // My version of dependency injection
 
-class Services: UploaderServices {
+class Services {
     let pushNotifications:PushNotificationsService
     let accountManager: AccountManager
     let changeResolverManager: ChangeResolverManager
-    
-    private var _mockStorage: MockStorage!
-    var mockStorage: MockStorage {
-        if _mockStorage == nil {
-            _mockStorage = MockStorage()
-        }
-        return _mockStorage
-    }
-    
-    // Setup outside of constructor due to circular reference
-    var uploader: Uploader!
+    lazy var mockStorage = MockStorage()
+    let uploaderServices: UploaderServices
     
     init?(accountManager: AccountManager, changeResolverManager: ChangeResolverManager) {
 
@@ -56,6 +47,8 @@ class Services: UploaderServices {
 
         self.accountManager = accountManager
         self.changeResolverManager = changeResolverManager
+        
+        uploaderServices = UploaderHelpers(accountManager: accountManager, changeResolverManager: changeResolverManager)
     }
     
     deinit {

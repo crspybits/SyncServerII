@@ -191,11 +191,11 @@ class FileController_BothUploadSeparateTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services.uploaderServices)
         XCTAssert(found2)
-        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3, services: services)
+        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3, services: services.uploaderServices)
         XCTAssert(!found3)
         
         guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {

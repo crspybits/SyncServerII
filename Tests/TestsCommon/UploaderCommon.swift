@@ -149,7 +149,7 @@ public extension UploaderCommon {
         return true
     }
     
-    func fileIsInCloudStorage(fileIndex: FileIndex, services: Services) throws -> Bool {
+    func fileIsInCloudStorage(fileIndex: FileIndex, services: UploaderServices) throws -> Bool {
         var boolResult: Bool = false
         
         let exp2 = expectation(description: "run")

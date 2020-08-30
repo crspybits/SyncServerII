@@ -42,9 +42,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::UserControllerTests"
-               BuildableName = "UserControllerTests.xctest"
-               BlueprintName = "UserControllerTests"
+               BlueprintIdentifier = "Server::ChangeResolverTests"
+               BuildableName = "ChangeResolverTests.xctest"
+               BlueprintName = "ChangeResolverTests"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -52,9 +52,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::FileControllerUploadFileTests"
-               BuildableName = "FileControllerUploadFileTests.xctest"
-               BlueprintName = "FileControllerUploadFileTests"
+               BlueprintIdentifier = "Server::UploaderTests"
+               BuildableName = "UploaderTests.xctest"
+               BlueprintName = "UploaderTests"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>

@@ -75,7 +75,8 @@ class ApplyDeferredUploads {
     let deferredUploadRepo:DeferredUploadRepository
     let haveFileGroupUUID: Bool
     var fileDeletions = [FileDeletion]()
-    
+    static let debugAlloc = DebugAlloc(name: "ApplyDeferredUploads")
+
     init?(sharingGroupUUID: String, fileGroupUUID: String? = nil, deferredUploads: [DeferredUpload], services: UploaderServices, db: Database) throws {
         self.sharingGroupUUID = sharingGroupUUID
         self.deferredUploads = deferredUploads
@@ -112,7 +113,7 @@ class ApplyDeferredUploads {
             throw Errors.deferredUploadIds
         }
         
-        guard let allUploads = UploadRepository(db).select(forDeferredUploadIds: deferredUploadIds) else {
+        guard let allUploads = uploadRepo.select(forDeferredUploadIds: deferredUploadIds) else {
             throw Errors.couldNotGetAllUploads
         }
         self.allUploads = allUploads
@@ -124,6 +125,13 @@ class ApplyDeferredUploads {
         
         // Now that we have the fileUUIDs, reduce to just the unique fileUUID's.
         self.fileUUIDs = Array(Set<String>(fileUUIDs))
+        
+        Self.debugAlloc.create()
+    }
+    
+    deinit {
+        Log.debug("ApplyDeferredUploads: deinit")
+        Self.debugAlloc.destroy()
     }
     
     func cleanupDeferredUploads(deferredUploads: [DeferredUpload]) -> Bool {

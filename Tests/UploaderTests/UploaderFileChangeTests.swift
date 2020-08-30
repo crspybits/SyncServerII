@@ -34,14 +34,21 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
         
         do {
             try resolverManager.setupResolvers()
-            uploader = try Uploader(services: services)
         } catch let error {
             XCTFail("\(error)")
             return
         }
         
+        uploader = Uploader(services: services.uploaderServices)
+
         uploader.delegate = self
         runCompleted = nil
+    }
+    
+    override func tearDown() {
+        super.tearDown()
+        // Not sure why this is needed, but without this, the test accumulates un-closed db connections.
+        uploader = nil
     }
     
     // MARK: One sharing group

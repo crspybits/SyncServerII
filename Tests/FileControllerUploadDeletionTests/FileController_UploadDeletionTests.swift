@@ -87,7 +87,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
         
         guard let status = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId) else {
@@ -203,9 +203,9 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services.uploaderServices)
         XCTAssert(!found2)
         
         let extra: Int64 = (withFileGroup ? 1 : 2)
@@ -308,11 +308,11 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services.uploaderServices)
         XCTAssert(!found2)
-        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3, services: services)
+        let found3 = try fileIsInCloudStorage(fileIndex: fileIndex3, services: services.uploaderServices)
         XCTAssert(!found3)
         
         XCTAssert(deferredCount + 2 == DeferredUploadRepository(db).count())
@@ -417,7 +417,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex, services: services.uploaderServices)
         XCTAssert(!found1)
         
         guard let status = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId), status == .completed else {
@@ -529,7 +529,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex, services: services.uploaderServices)
         XCTAssert(!found1)
         
         guard let status = getUploadsResults(deviceUUID: deviceUUID1, deferredUploadId: deferredUploadId),

@@ -90,7 +90,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload], services: services, db: db) else {
+        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload], services: services.uploaderServices, db: db) else {
             XCTFail()
             return
         }
@@ -167,7 +167,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], services: services, db: db) else {
+        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], services: services.uploaderServices, db: db) else {
             XCTFail()
             return
         }
@@ -256,7 +256,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], services: services, db: db) else {
+        guard let applyDeferredUploads = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: [deferredUpload1, deferredUpload2], services: services.uploaderServices, db: db) else {
             XCTFail()
             return
         }
@@ -348,7 +348,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let applyDeferredUploads1 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID1, deferredUploads: [deferredUpload1], services: services,  db: db) else {
+        guard let applyDeferredUploads1 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID1, deferredUploads: [deferredUpload1], services: services.uploaderServices,  db: db) else {
             XCTFail()
             return
         }
@@ -364,7 +364,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
         
         waitExpectation(timeout: 10, handler: nil)
         
-        guard let applyDeferredUploads2 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID2, deferredUploads: [deferredUpload2], services: services, db: db) else {
+        guard let applyDeferredUploads2 = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID2, deferredUploads: [deferredUpload2], services: services.uploaderServices, db: db) else {
             XCTFail()
             return
         }

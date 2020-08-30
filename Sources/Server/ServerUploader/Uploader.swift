@@ -20,10 +20,15 @@ protocol UploaderServices {
     var mockStorage: MockStorage {get}
 }
 
-struct UploaderHelpers: UploaderServices {
+class UploaderHelpers: UploaderServices {
     let accountManager: AccountManager
     let changeResolverManager: ChangeResolverManager
-    let mockStorage: MockStorage
+    lazy var mockStorage = MockStorage()
+    
+    init(accountManager: AccountManager, changeResolverManager: ChangeResolverManager) {
+        self.accountManager = accountManager
+        self.changeResolverManager = changeResolverManager
+    }
 }
 
 protocol UploaderDelegate: AnyObject {
@@ -59,37 +64,65 @@ class Uploader: UploaderProtocol {
         case couldNotGetFileGroup
     }
     
-    var db: Database!
     let services: UploaderServices
     private let lockName = "Uploader"
-    let deferredUploadRepo:DeferredUploadRepository
-    let uploadRepo:UploadRepository
-    let fileIndexRepo:FileIndexRepository
-    let userRepo: UserRepository
+    
+    // Only set the following database-related members in getDbConnection()
+    
+    // Need a separate database connection-- to have a separate transaction and to acquire lock.
+    private(set) var _db: Database!
+    
+    // Need separate repo references because these depend on a database connection, and we have separate db connection opened here.
+    private(set) var deferredUploadRepo:DeferredUploadRepository!
+    private(set) var uploadRepo:UploadRepository!
+    private(set) var fileIndexRepo:FileIndexRepository!
+    private(set) var userRepo: UserRepository!
     
     // For testing
     weak var delegate: UploaderDelegate?
     
-    init(services: UploaderServices) throws {
-        // Need a separate database connection-- to have a separate transaction and to acquire lock.
+    static let debugAlloc = DebugAlloc(name: "Uploader")
+
+    init(services: UploaderServices) {
+        self.services = services
+        
+        // Defering connecting to database until actual usage of Uploader methods (and not doing it in the constructor) because (a) we need separate connections per request because use of db connections are not thread safe, and (b) because db connections are dropped after a period of time.
+        // We get separate connections per request because of the way request processing is architected and uses the Uploader. More specifically, the Uploader is constructed *per request*.
+        // Note that we should not have a problem with too many connections open due to this db connection because the first connnection that gets the lock will cause the other connections to last only for a brief period-- because they will not also be able to get the lock.
+        Self.debugAlloc.create()
+    }
+    
+    deinit {
+        Log.debug("Uploader: deinit")
+        Self.debugAlloc.destroy()
+    }
+    
+    // If there is no current db connection, opens one. If there is, returns it.
+    // Only the first call to this can fail.
+    func getDbConnection() throws -> Database {
+        if let db = _db {
+            return db
+        }
+
         guard let db = Database() else {
             throw Errors.failedConnectingDatabase
         }
         
-        self.db = db
-        self.services = services
+        self._db = db
         self.deferredUploadRepo = DeferredUploadRepository(db)
         self.uploadRepo = UploadRepository(db)
         self.fileIndexRepo = FileIndexRepository(db)
         self.userRepo = UserRepository(db)
+        
+        return _db
     }
-    
+        
     private func getLock() throws -> Bool {
-        return try db.getLock(lockName: lockName)
+        return try getDbConnection().getLock(lockName: lockName)
     }
     
     private func releaseLock() throws {
-        try db.releaseLock(lockName: lockName)
+        try getDbConnection().releaseLock(lockName: lockName)
     }
     
     // Check if there is uploading to do. e.g., DeferredUpload records. Uses a lock so it is safe *across* instances of the server. i.e., there will be at most one instance of this running across server instances. Runs asynchronously if it can get the lock.
@@ -237,7 +270,7 @@ class Uploader: UploaderProtocol {
     // When withFileGroupUUID is true: Synchronously process each group of deferred uploads, all with the same fileGroupUUID.
     // Each of the aggregated groups must partition the collection of fileGroupUUID's. e.g., two of the sublists cannot contain the same fileGroupUUID, and each sublist must contain deferred uploads with the same fileGroupUUID.
     // When withFileGroupUUID is false: Similar processing, except without file groups. Each set of changes for the same fileUUID is processed as a unit.
-    func applyDeferredUploads(aggregatedGroups: [[DeferredUpload]], withFileGroupUUID: Bool) -> Error? {
+    private func applyDeferredUploads(aggregatedGroups: [[DeferredUpload]], withFileGroupUUID: Bool) -> Error? {
         var applier: ApplyDeferredUploads!
 
         func apply(aggregatedGroup: [DeferredUpload], completion: @escaping (Swift.Result<Void, Error>) -> ()) {
@@ -265,9 +298,13 @@ class Uploader: UploaderProtocol {
                 return
             }
             
-            // `applier.run` executes asynchronously. Need to retain the applier.
-            
-            applier = try? ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup, services: services, db: db)
+            do {
+                // `applier.run` executes asynchronously. Need to retain the applier.
+                applier = try ApplyDeferredUploads(sharingGroupUUID: sharingGroupUUID, fileGroupUUID: fileGroupUUID, deferredUploads: aggregatedGroup, services: services, db: try getDbConnection())
+            } catch let error {
+                completion(.failure(error))
+                return
+            }
             
             guard applier != nil else {
                 Log.error("applyDeferredUploads: failedApplyDeferredUploads")
@@ -437,6 +474,14 @@ class Uploader: UploaderProtocol {
             
             return true
         } // end prune
+        
+        let db: Database
+        do {
+            db = try getDbConnection()
+        } catch let error {
+            Log.error("\(error)")
+            return false
+        }
         
         guard db.startTransaction() else {
             return false

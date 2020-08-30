@@ -87,8 +87,9 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
             return
         }
         
+        
         let params = Params(repos: repos, currentSignedInUser: user)
-        guard let finishUploads = FinishUploadFiles(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader: fakeUploader, params: params) else {
+        guard let finishUploads = FinishUploadFiles(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader: fakeUploader,  params: params) else {
             XCTFail()
             return
         }
@@ -192,7 +193,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         }
         
         let params = Params(repos: repos, currentSignedInUser: user)
-        guard let finishUploads = FinishUploadFiles(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader: fakeUploader, params: params) else {
+        guard let finishUploads = FinishUploadFiles(sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, uploader:fakeUploader, params: params) else {
             XCTFail()
             return
         }

@@ -102,7 +102,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         // Expectation: File should be deleted.
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
         
         guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
@@ -197,7 +197,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         
         if withDeletionBefore {
             XCTAssert(!found1)
@@ -295,7 +295,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         // Expectation: File should be deleted.
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
             
         guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {
@@ -427,10 +427,10 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         // Expectation: File should be deleted.
-        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services)
+        let found1 = try fileIsInCloudStorage(fileIndex: fileIndex1, services: services.uploaderServices)
         XCTAssert(!found1)
 
-        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services)
+        let found2 = try fileIsInCloudStorage(fileIndex: fileIndex2, services: services.uploaderServices)
         XCTAssert(found2)
         
         guard let status1 = getUploadsResults(deviceUUID: deviceUUID, deferredUploadId: deferredUploadId1), status1 == .completed else {

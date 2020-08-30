@@ -180,9 +180,11 @@ extension FileController {
                 return
             }
         }
+        
+        let uploader = Uploader(services: params.services.uploaderServices)
 
         do {
-            let finishUploads = try FinishUploadDeletion(type: finishType, uploader: params.services.uploader, sharingGroupUUID: sharingGroupUUID, params: params)
+            let finishUploads = try FinishUploadDeletion(type: finishType, uploader: uploader, sharingGroupUUID: sharingGroupUUID, params: params)
             let result = try finishUploads.finish()
             
             switch result {

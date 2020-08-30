@@ -77,19 +77,20 @@ generateOutput () {
 
     # The following depends on the assumption:
     # As of 8/26/20, with Swift 5.3 beta, the filtered testing results have a summary line:
-    #   Executed 21 tests, with 0 failures (0 unexpected) in 4.894 (4.894) seconds
+    #   Executed 12 tests, with 54 failures (6 unexpected) in 270.938 (270.938) seconds
+    # The number in parentheses "(N unexpected)" is the number of test cases that failed.
 
     # https://linuxize.com/post/regular-expressions-in-grep/
     # The following pulls out a single line, such as:
-    #   Executed 21 tests, with 0 failure
-    
-    local executedText=`cat "$resultsFileName" | grep -Eo 'Executed [0-9]* test[s]?, with [0-9]* failure' | head -n 1`
+    #   Executed 12 tests, with 54 failures (6 unexpected)
+
+    local executedText=`cat "$resultsFileName" | grep -Eo 'Executed [0-9]* test[s]?, with [0-9]* failure[s]? \([0-9]* unexpected\)' | head -n 1`
 
     # 2nd item -- number tests
     # 5th item -- number of failures
     
     local totalTests=`echo "$executedText" | awk '{print $2}'`
-    local failures=`echo "$executedText" | awk '{print $5}'`
+    local failures=`echo "$executedText" | awk '{print substr($7,2); }'`
 
     TOTAL_FAILED_TEST_CASES=`expr $TOTAL_FAILED_TEST_CASES + $failures`
 

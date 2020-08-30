@@ -460,7 +460,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        let (_, cloudStorage) = try fileIndex.getCloudStorage(userRepo: UserRepository(db), services: services)
+        let (_, cloudStorage) = try fileIndex.getCloudStorage(userRepo: UserRepository(db), services: services.uploaderServices)
         let cloudFileName = Filename.inCloud(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: mimeType, fileVersion: 1)
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: mimeType)
         

@@ -340,9 +340,11 @@ extension FileController {
             return params.repos.upload.add(upload: upload, fileInFileIndex: !newFile)
         }
 
+        let uploader = Uploader(services: params.services.uploaderServices)
+
         switch addUploadResult {
         case .success:
-            guard let finishUploads = FinishUploadFiles(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: params.services.uploader, params: params) else {
+            guard let finishUploads = FinishUploadFiles(sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, uploader: uploader, params: params) else {
                 finish(.errorCleanup(message: "Could not FinishUploads", cleanup: cleanup), params: params)
                 return
             }
