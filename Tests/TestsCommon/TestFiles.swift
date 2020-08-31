@@ -33,9 +33,9 @@ struct TestFile {
         }
     }
     
-    let dropboxCheckSum:String
-    let md5CheckSum:String // Google
-    let sha1Hash: String // Microsoft
+    let dropboxCheckSum:String?
+    let md5CheckSum:String? // Google
+    let sha1Hash: String? // Microsoft
     
     let contents: FileContents
     let mimeType: MimeType
@@ -106,4 +106,18 @@ struct TestFile {
         sha1Hash: "92D74581DBCBC143ED68079A476CD770BE7E4BD9",
         contents: .url(urlFile),
         mimeType: .url)
+        
+    static let testNoCheckSum = TestFile(
+        dropboxCheckSum: nil,
+        md5CheckSum: nil,
+        sha1Hash: nil,
+        contents: .string("Hello World"),
+        mimeType: .text)
+        
+    static let testBadCheckSum = TestFile(
+        dropboxCheckSum: "blah",
+        md5CheckSum: "blah",
+        sha1Hash: "blah",
+        contents: .string("Hello World"),
+        mimeType: .text)
 }

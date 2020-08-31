@@ -176,9 +176,7 @@ extension FileController {
             Log.info("File was already present: Not uploading again.")
             let upload = model as! Upload
             let response = UploadFileResponse()
-            
-            // Given that the file is still in the Upload table, there must be more files in the batch needing upload.
-            response.allUploadsFinished = .uploadsNotFinished
+            response.allUploadsFinished = .duplicateFileUpload
             
             // 12/27/17; Send the dates back down to the client. https://github.com/crspybits/SharedImages/issues/44
             response.creationDate = creationDate
@@ -317,7 +315,13 @@ extension FileController {
         // Waiting until now to check UploadRequest checksum because what's finally important is that the checksum before the upload is the same as that computed by the cloud storage service.
         let expectedCheckSum: String? = uploadRequest.checkSum?.lowercased()
 
-        if newFile, let expectedCheckSum = expectedCheckSum {
+        if newFile {
+            guard let expectedCheckSum = expectedCheckSum else {
+                let message = "No check sum given for a v0 file."
+                finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
+                return
+            }
+            
             guard uploadedCheckSum?.lowercased() == expectedCheckSum else {
                 let message = "Checksum after upload to cloud storage \(String(describing: uploadedCheckSum)) is not the same as before upload \(String(describing: expectedCheckSum))."
                 finish(.errorCleanup(message: message, cleanup: cleanup), params: params)

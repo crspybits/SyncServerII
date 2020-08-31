@@ -55,7 +55,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
 
         let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
 
-        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -65,7 +65,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             mimeType = file.mimeType
         }
 
-        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withMimeType, file: file, dataToUpload: comment.updateContents)
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: mimeType?.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withMimeType, file: file, dataToUpload: comment.updateContents)
         if withMimeType {
             XCTAssert(result2 == nil)
         }
@@ -559,5 +559,39 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         }
         
         return false
+    }
+    
+    func runUploadVNFile(withChangeResolver: Bool) {
+        let file:TestFile = .commentFile
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        
+        let changeResolverName = CommentFile.changeResolverName
+
+        let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        var secondChangeResolver: String?
+        if withChangeResolver {
+            secondChangeResolver = changeResolverName
+        }
+        
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withChangeResolver, file: file, dataToUpload: comment.updateContents, changeResolverName: secondChangeResolver)
+        
+        XCTAssert((result2 == nil) == withChangeResolver)
+    }
+    
+    func testUploadVNWithChangeResolverFails() {
+        runUploadVNFile(withChangeResolver: true)
+    }
+    
+    func testUploadVNWithoutChangeResolverWorks() {
+        runUploadVNFile(withChangeResolver: false)
     }
 }
