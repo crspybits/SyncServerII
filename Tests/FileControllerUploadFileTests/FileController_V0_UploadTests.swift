@@ -130,24 +130,6 @@ class FileController_V0_UploadTests: ServerTestCase {
     // With non-nil changeResolverName
     let changeResolverName = CommentFile.changeResolverName
     
-    func testUploadSingleV0TextFileWithChangeResolverName() {
-        uploadSingleV0File(changeResolverName: changeResolverName) { deviceUUID, fileUUID, changeResolverName in
-            return uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, changeResolverName: changeResolverName)
-        }
-    }
-    
-    func testUploadSingleV0JPEGFileWithChangeResolverName() {
-        uploadSingleV0File(changeResolverName: changeResolverName) { deviceUUID, fileUUID, changeResolverName in
-            return uploadJPEGFile(deviceUUID: deviceUUID, fileUUID: fileUUID, changeResolverName: changeResolverName)
-        }
-    }
-
-    func testUploadSingleV0URLFileWithChangeResolverName() {
-        uploadSingleV0File(changeResolverName: changeResolverName) { deviceUUID, fileUUID, changeResolverName in
-            return uploadFileUsingServer(deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile, changeResolverName: changeResolverName)
-        }
-    }
-    
     // TODO: Upload a single file, with a non-nil fileGroupUUID
     
     // MARK: file upload, v0, 1 of 2 files, and then 2 of 2 files.

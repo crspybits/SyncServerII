@@ -58,7 +58,7 @@ class MessageTests: ServerTestCase {
         
         let resultArray = result.components(separatedBy: "&")
         
-        let expectedCheckSum = "checkSum=\(TestFile.test1.dropboxCheckSum)"
+        let expectedCheckSum = "checkSum=\(TestFile.test1.dropboxCheckSum!)"
         let expectedFileUUID = "fileUUID=\(uuidString1)"
         let expectedMimeType = "mimeType=text%2Fplain"
         let expectedSharingGroupUUID = "sharingGroupUUID=\(sharingGroupUUID)"
@@ -79,7 +79,7 @@ class MessageTests: ServerTestCase {
             expectedMimeType + "&" +
             expectedSharingGroupUUID
 
-        XCTAssert(result == expected, "Result was: \(String(describing: result))")
+        XCTAssert(result == expected, "Result was: \(String(describing: result)); Expected was: \(String(describing: expected))")
     }
     
     func testURLParametersForUploadDeletion() {

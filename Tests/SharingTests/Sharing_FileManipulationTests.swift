@@ -190,7 +190,6 @@ class Sharing_FileManipulationTests: ServerTestCase {
             XCTFail()
             return
         }
-        // sendDoneUploads(testAccount: .primaryOwningAccount, expectedNumberOfUploads: 1, deviceUUID:deviceUUID1, sharingGroupUUID: sharingGroupUUID)
         
         let uploadDeletionRequest = UploadDeletionRequest()
         uploadDeletionRequest.fileUUID = uploadResult.request.fileUUID
