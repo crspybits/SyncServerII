@@ -3,9 +3,7 @@
 
 # For Ubuntu 16.04, Swift 5.3 beta
 # https://hub.docker.com/r/swiftlang/swift/tags
-# FROM swiftlang/swift:nightly-master-xenial-slim
-# TODO: This is the *build* image, and is *only* temporary. See https://github.com/apple/swift-docker/issues/199
-FROM swiftlang/swift:nightly-5.3-xenial
+FROM swiftlang/swift:nightly-master-xenial-slim
 LABEL maintainer="Chris Prince <chris@SpasticMuffin.biz>"
 LABEL Description="Runtime Docker Container for the Apple's Swift programming language"
 
