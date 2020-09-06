@@ -76,7 +76,8 @@ class FinishUploadFiles {
         let currentUploads: [Upload]
         
         // deferredUploadIdNull true because once these rows have a non-null  deferredUploadId they are pending deferred transfer and we should not deal with them here.
-        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: currentSignedInUser, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true)
+        // 9/5/20: `forUpdate: true` is due to: https://github.com/SyncServerII/ServerMain/issues/5
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: currentSignedInUser, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true, forUpdate: true)
         
         switch fileUploadsResult {
         case .uploads(let uploads):
@@ -124,7 +125,7 @@ class FinishUploadFiles {
         let actualIndexes = Set<Int32>(currentUploads.compactMap({$0.uploadIndex}))
         let expectedIndexes = Set<Int32>(1...uploadCount)
         guard actualIndexes == expectedIndexes else {
-            Log.info("Expected indexes: \(expectedIndexes), actual indexes: \(actualIndexes)")
+            Log.info("Expected indexes: \(expectedIndexes), actual indexes: \(actualIndexes); number of current uploads: \(currentUploads.count)")
             return .allUploadsNotYetReceived
         }
         

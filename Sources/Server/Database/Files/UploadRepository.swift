@@ -574,7 +574,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         }
     }
     
-    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, deferredUploadIdNull: Bool = false, andState state:UploadState? = nil) -> Select? {
+    func select(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID:String, deferredUploadIdNull: Bool = false, andState state:UploadState? = nil, forUpdate: Bool = false) -> Select? {
     
         var query = "select * from \(tableName) where userId=\(userId) and sharingGroupUUID = '\(sharingGroupUUID)' and deviceUUID='\(deviceUUID)'"
         
@@ -584,6 +584,10 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         
         if deferredUploadIdNull {
             query += " and deferredUploadId IS NULL"
+        }
+        
+        if forUpdate {
+            query += " FOR UPDATE"
         }
         
         return Select(db:db, query: query, modelInit: Upload.init, ignoreErrors:false)
@@ -597,9 +601,9 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
     // With nil `andState` parameter value, returns both file uploads and upload deletions.
     // Uploads are identified by userId, not effectiveOwningUserId: We want to organize uploads by specific user.
     // Set deferredUploadIdNil to true if you only want records where deferredUploadIdNil is non-nil.
-    func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, deferredUploadIdNull: Bool = false, andState state:UploadState? = nil) -> UploadedFilesResult {
+    func uploadedFiles(forUserId userId: UserId, sharingGroupUUID: String, deviceUUID: String, deferredUploadIdNull: Bool = false, andState state:UploadState? = nil, forUpdate: Bool = false) -> UploadedFilesResult {
         
-        guard let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: deferredUploadIdNull, andState: state) else {
+        guard let selectUploadedFiles = select(forUserId: userId, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: deferredUploadIdNull, andState: state, forUpdate: forUpdate) else {
             return .error(nil)
         }
 

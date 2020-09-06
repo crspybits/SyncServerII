@@ -69,6 +69,7 @@ extension FileController {
         }
     }
     
+    // 9/5/20; Getting https://github.com/SyncServerII/ServerMain/issues/5 with parallel uploads.
     func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
             let message = "Did not receive UploadFileRequest"
