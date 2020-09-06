@@ -198,14 +198,22 @@ class Database {
         See https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html#isolevel_repeatable-read
     */
     func startTransaction() -> Bool {
-        let start = "START TRANSACTION;"
-        if query(statement: start) {
-            return true
+        // 9/5/20: Due to: https://github.com/SyncServerII/ServerMain/issues/5
+        let isolationLevel = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED;"
+
+        guard query(statement: isolationLevel) else {
+            Log.error("Could not set isolation level: \(self.error)")
+            return false
         }
-        else {
+        
+        let start = "START TRANSACTION;"
+        
+        guard query(statement: start) else {
             Log.error("Could not start transaction: \(self.error)")
             return false
         }
+        
+        return true
     }
     
     func commit() -> Bool {

@@ -69,7 +69,6 @@ extension FileController {
         }
     }
     
-    // 9/5/20; Getting https://github.com/SyncServerII/ServerMain/issues/5 with parallel uploads.
     func uploadFile(params:RequestProcessingParameters) {
         guard let uploadRequest = params.request as? UploadFileRequest else {
             let message = "Did not receive UploadFileRequest"
@@ -166,10 +165,16 @@ extension FileController {
             return
         }
         
+        guard let signedInUserId = params.currentSignedInUser?.userId else {
+            let message = "Could not get signed in user."
+            finish(.errorMessage(message), params: params)
+            return
+        }
+        
         // There is an unlikely race condition here -- two processes (within the same app, with the same deviceUUID) could be uploading the same file at the same time, both could upload, but only one would be able to create the Upload entry. I'm going to assume that this will not happen: That a single app/cilent will only upload the same file once at one time. (I used to create the Upload table entry first to avoid this race condition, but it's unlikely and leads to some locking issues-- see [1]).
         
         // Check to see if the file is present already-- i.e., if has been uploaded already.
-        let key = UploadRepository.LookupKey.primaryKey(fileUUID: uploadRequest.fileUUID, userId: params.currentSignedInUser!.userId, deviceUUID: deviceUUID)
+        let key = UploadRepository.LookupKey.primaryKey(fileUUID: uploadRequest.fileUUID, userId: signedInUserId, deviceUUID: deviceUUID)
         let lookupResult = params.repos.upload.lookup(key: key, modelInit: Upload.init)
                 
         switch lookupResult {
@@ -243,7 +248,7 @@ extension FileController {
             let cloudFileName = Filename.inCloud(deviceUUID:deviceUUID, fileUUID: uploadRequest.fileUUID, mimeType:mimeType, fileVersion: 0)
             
             // This also does addUploadEntry.
-            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, contents: fileContents, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID)
+            uploadV0File(cloudFileName: cloudFileName, mimeType: mimeType, contents: fileContents, creationDate: creationDate, todaysDate: todaysDate, params: params, ownerCloudStorage: ownerCloudStorage, ownerAccount: ownerAccount, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, signedInUserId: signedInUserId)
         }
         else {
             guard uploadRequest.mimeType ==  nil else {
@@ -258,11 +263,11 @@ extension FileController {
                 return
             }
             
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: todaysDate, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: fileContents)
+            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: todaysDate, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: fileContents, signedInUserId: signedInUserId)
         }
     }
     
-    private func uploadV0File(cloudFileName: String, mimeType: String, contents: Data, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String) {
+    private func uploadV0File(cloudFileName: String, mimeType: String, contents: Data, creationDate: Date, todaysDate: Date, params:RequestProcessingParameters, ownerCloudStorage: CloudStorage, ownerAccount: Account, uploadRequest:UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String, signedInUserId: UserId) {
         
         Log.info("File being sent to cloud storage: \(cloudFileName)")
 
@@ -277,7 +282,7 @@ extension FileController {
             case .success(let checkSum):
                 Log.debug("File with checkSum \(checkSum) successfully uploaded!")
                 
-                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID)
+                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, signedInUserId: signedInUserId)
 
             case .accessTokenRevokedOrExpired:
                 // Not going to do any cleanup. The access token has expired/been revoked. Presumably, the file wasn't uploaded.
@@ -294,7 +299,7 @@ extension FileController {
     }
     
     // This also calls finishUploads
-    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String, uploadContents: Data? = nil) {
+    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String, uploadContents: Data? = nil, signedInUserId: UserId) {
     
         if !newFile && uploadContents == nil {
             let message = "vN file and uploadContents were nil"
@@ -346,7 +351,7 @@ extension FileController {
         }
     
         // We are using the current signed in user's id here (and not the effective user id) because we need a way of indexing or organizing the collection of files uploaded by a particular user.
-        upload.userId = params.currentSignedInUser!.userId
+        upload.userId = signedInUserId
     
         upload.appMetaData = uploadRequest.appMetaData?.contents
 
@@ -355,6 +360,16 @@ extension FileController {
         }
     
         upload.updateDate = todaysDate
+        
+        // 9/5/20; To deal with https://github.com/SyncServerII/ServerMain/issues/5 issue with parallel uploads, and in particular the `forUpdate: true`.
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: signedInUserId, sharingGroupUUID: uploadRequest.sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true, forUpdate: true)
+        switch fileUploadsResult {
+        case .uploads:
+            break
+        case .error(let error):
+            finish(.errorCleanup(message: "Could not get uploadedFiles: \(String(describing: error))", cleanup: cleanup), params: params)
+            return
+        }
     
         let addUploadResult = params.repos.upload.retry {
             return params.repos.upload.add(upload: upload, fileInFileIndex: !newFile)

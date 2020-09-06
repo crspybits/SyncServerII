@@ -76,8 +76,7 @@ class FinishUploadFiles {
         let currentUploads: [Upload]
         
         // deferredUploadIdNull true because once these rows have a non-null  deferredUploadId they are pending deferred transfer and we should not deal with them here.
-        // 9/5/20: `forUpdate: true` is due to: https://github.com/SyncServerII/ServerMain/issues/5
-        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: currentSignedInUser, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true, forUpdate: true)
+        let fileUploadsResult = params.repos.upload.uploadedFiles(forUserId: currentSignedInUser, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, deferredUploadIdNull: true)
         
         switch fileUploadsResult {
         case .uploads(let uploads):
