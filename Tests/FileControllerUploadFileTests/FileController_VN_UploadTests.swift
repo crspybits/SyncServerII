@@ -401,7 +401,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        XCTAssert(fileIndex1.fileVersion == 1)
+        XCTAssert(fileIndex1.fileVersion == 1, "\(fileIndex1.fileVersion)")
         
         guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID2, fileUUID: fileUUID2) else {
             XCTFail()
@@ -410,7 +410,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         XCTAssert(fileIndex2.fileVersion == 1)
         
-        XCTAssert(fileIndexCount1 == fileIndexRepo.count() )
+        XCTAssert(fileIndexCount1 == fileIndexRepo.count(), "fileIndexCount1: \(fileIndexCount1) != fileIndexRepo.count(): \(fileIndexRepo.count())")
         XCTAssert(uploadCount1 == uploadRepo.count())
         XCTAssert(deferredUploadCount1 + 2 == deferredUploadsRepo.count())
     }
