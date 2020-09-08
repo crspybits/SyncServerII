@@ -176,7 +176,7 @@ class Uploader: UploaderProtocol {
                 try self.processFileDeletions(deferredUploads: deferredFileDeletions)
             } catch let error {
                 Log.error("\(error)")
-                self.finishRun(error: error)
+                self.finishRun(message: "processFileDeletions", error: error)
                 return
             }
 
@@ -185,23 +185,23 @@ class Uploader: UploaderProtocol {
                 if let error = error {
                     Log.error("\(error); deferredFileChangeUploads: \(deferredFileChangeUploads)")
                 }
-                self.finishRun(error: error)
+                self.finishRun(message: "processFileChanges", error: error)
             }
         }
     }
     
-    private func finishRun(error: Error?) {
+    private func finishRun(message: String, error: Error?) {
         try? releaseLock()
 
         if let error = error {
             recordGlobalError(error)
-            Log.error("Failed: \(error)")
+            Log.error("\(message): Failed: \(error)")
         }
         else {
-            Log.info("Succeeded!")
+            Log.info("\(message): Succeeded!")
         }
         
-        Log.debug("Calling run delegate method: \(String(describing: error))")
+        Log.debug("\(message): Calling run delegate method: \(String(describing: error))")
         
         // Don't put `self` into this as the `object`-- get a failing conversion error to NSObject
         let notification = Notification(name: Self.uploaderRunCompleted, object: nil, userInfo: [Self.errorKey: error as Any])
