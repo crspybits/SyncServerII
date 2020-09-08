@@ -594,4 +594,70 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
     func testUploadVNWithoutChangeResolverWorks() {
         runUploadVNFile(withChangeResolver: false)
     }
+    
+    enum ChangeResolverTest {
+        case v0HadNoChangeResolver
+        case uploadedChangeIsBad
+        case v0HadChangeResolverAndUploadedChangeIsGood
+    }
+    
+    func runUploadVNFile(changeResolverTest: ChangeResolverTest) {
+        let file:TestFile = .commentFile
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        var mimeType: MimeType?
+        var changeResolverName: String?
+
+        let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+                
+        if changeResolverTest != .v0HadNoChangeResolver {
+            changeResolverName = CommentFile.changeResolverName
+        }
+
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+        
+        let dataToUpload: Data
+        let errorExpected: Bool
+        
+        switch changeResolverTest {
+        case .uploadedChangeIsBad:
+            errorExpected = true
+            dataToUpload = "Some bad data".data(using: .utf8)!
+            
+        case .v0HadChangeResolverAndUploadedChangeIsGood:
+            errorExpected = false
+            dataToUpload = comment.updateContents
+            
+        case .v0HadNoChangeResolver:
+            errorExpected = true
+            dataToUpload = comment.updateContents
+        }
+        
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: errorExpected, file: file, dataToUpload: dataToUpload)
+        
+        switch changeResolverTest {
+        case .uploadedChangeIsBad, .v0HadNoChangeResolver:
+            XCTAssert(result2 == nil)
+            
+        case .v0HadChangeResolverAndUploadedChangeIsGood:
+            XCTAssert(result2 != nil)
+        }
+    }
+
+    func testUploadVNFileV0HadNoChangeResolverFails() {
+        runUploadVNFile(changeResolverTest: .v0HadNoChangeResolver)
+    }
+    
+    func testUploadVNFileUploadedChangeIsBadFails() {
+        runUploadVNFile(changeResolverTest: .uploadedChangeIsBad)
+    }
+    
+    func testUploadVNFileV0HadChangeResolverAndUploadedChangeIsGoodWorks() {
+        runUploadVNFile(changeResolverTest: .v0HadChangeResolverAndUploadedChangeIsGood)
+    }
 }

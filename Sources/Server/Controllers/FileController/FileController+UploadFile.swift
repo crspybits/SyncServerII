@@ -109,6 +109,14 @@ extension FileController {
             return
         }
         
+        // Content data for the initial v0 file or vN change.
+        guard let fileContents = uploadRequest.data else {
+            let message = "Could not get content data for file from request"
+            Log.error(message)
+            finish(.errorMessage(message), params: params)
+            return
+        }
+        
         // This will be nil if (a) there is no existing file -- i.e., if this is an upload for a new file and if (b) an existing file doesn't have a fileGroupUUID.
         existingFileGroupUUID = existingFileInFileIndex?.fileGroupUUID
         
@@ -127,6 +135,24 @@ extension FileController {
         
             if existingFileInFileIndex.deleted {
                 let message = "Attempt to upload an existing file, but it has already been deleted."
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
+            guard let changeResolverName = existingFileInFileIndex.changeResolverName else {
+                let message = "Attempt to upload change for vN file, but v0 had no change resolver."
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
+            guard let resolverType = params.services.changeResolverManager.getResolverType(changeResolverName) else {
+                let message = "Could not get change resolver type for: \(changeResolverName)"
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
+            guard resolverType.valid(uploadContents: fileContents) else {
+                let message = "Uploaded change is not valid for resolver type: \(changeResolverName)"
                 finish(.errorMessage(message), params: params)
                 return
             }
@@ -195,14 +221,6 @@ extension FileController {
             break
             
         case .error(let message):
-            finish(.errorMessage(message), params: params)
-            return
-        }
-        
-        // Content data for the initial v0 file or vN change.
-        guard let fileContents = uploadRequest.data else {
-            let message = "Could not get content data for file from request"
-            Log.error(message)
             finish(.errorMessage(message), params: params)
             return
         }
