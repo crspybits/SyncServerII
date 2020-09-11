@@ -33,7 +33,7 @@ class PruneTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        uploader = Uploader(services: services.uploaderServices)
+        uploader = Uploader(services: services.uploaderServices, delegate: nil)
         uploader.delegate = self
         runCompleted = nil
     }

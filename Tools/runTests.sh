@@ -92,9 +92,18 @@ generateOutput () {
     
     local totalTests=`echo "$executedText" | awk '{print $2}'`
     local failures=`echo "$executedText" | awk '{print substr($7,2); }'`
-    if [ "$failures" == 0 ]; then
+        
+    if [ "empty${failures}" == "empty" ] || [ "$failures" == 0 ]; then
         # sometimes `unexpected` is 0, but `failures` are non-zero.
-        failures=`echo "$executedText" | awk '{print $5}'`
+        
+        if [ "empty${executedText}" == "empty" ]; then
+            printf "${outputPrefix}${RED}Unknown failure${NC}\n"
+            
+            # Just to give failures a value because otherwise getting script failures. e.g., "expr: syntax error"
+            failures=1
+        else
+            failures=`echo "$executedText" | awk '{print $5}'`
+        fi
     fi
 
     TOTAL_FAILED_TEST_CASES=`expr $TOTAL_FAILED_TEST_CASES + $failures`

@@ -35,7 +35,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        uploader = Uploader(services: services.uploaderServices)
+        uploader = Uploader(services: services.uploaderServices, delegate: nil)
         self.services = services
         uploader.delegate = self
         runCompleted = nil

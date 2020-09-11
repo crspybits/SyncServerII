@@ -408,10 +408,10 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        XCTAssert(fileIndex2.fileVersion == 1)
+        XCTAssert(fileIndex2.fileVersion == 1, "\(fileIndex2.fileVersion)")
         
         XCTAssert(fileIndexCount1 == fileIndexRepo.count(), "fileIndexCount1: \(fileIndexCount1) != fileIndexRepo.count(): \(fileIndexRepo.count())")
-        XCTAssert(uploadCount1 == uploadRepo.count())
+        XCTAssert(uploadCount1 == uploadRepo.count(), "uploadCount1: \(uploadCount1) != uploadRepo.count(): \(uploadRepo.count())")
         XCTAssert(deferredUploadCount1 + 2 == deferredUploadsRepo.count())
     }
     

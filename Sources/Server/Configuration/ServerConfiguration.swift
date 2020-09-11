@@ -100,4 +100,10 @@ struct ServerConfiguration: Decodable, GoogleCredsConfiguration, MicrosoftCredsC
     
     // If true, uses MockStorage.
     let loadTestingCloudStorage: Bool?
+    
+    struct PeriodicUploader: Decodable {
+        let canRun: Bool
+        let interval: TimeInterval
+    }
+    let periodicUploader: PeriodicUploader?
 }

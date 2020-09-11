@@ -393,7 +393,7 @@ extension FileController {
             return params.repos.upload.add(upload: upload, fileInFileIndex: !newFile)
         }
 
-        let uploader = Uploader(services: params.services.uploaderServices)
+        let uploader = Uploader(services: params.services.uploaderServices, delegate: params.services)
 
         switch addUploadResult {
         case .success:

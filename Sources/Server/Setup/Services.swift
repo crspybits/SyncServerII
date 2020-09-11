@@ -16,6 +16,7 @@ class Services {
     let changeResolverManager: ChangeResolverManager
     lazy var mockStorage = MockStorage()
     let uploaderServices: UploaderServices
+    var periodicUploader:PeriodicUploader?
     
     init?(accountManager: AccountManager, changeResolverManager: ChangeResolverManager) {
 
@@ -49,9 +50,19 @@ class Services {
         self.changeResolverManager = changeResolverManager
         
         uploaderServices = UploaderHelpers(accountManager: accountManager, changeResolverManager: changeResolverManager)
+        
+        if let periodic = Configuration.server.periodicUploader, periodic.canRun {
+            periodicUploader = PeriodicUploader(interval: periodic.interval, services: uploaderServices)
+        }
     }
     
     deinit {
         Log.debug("Services: deinit")
+    }
+}
+
+extension Services: PeriodicUploaderDelegate {
+    func resetPeriodicUploader(_ uploader: Uploader) {
+        periodicUploader?.reset()
     }
 }

@@ -14,6 +14,10 @@ protocol UploaderProtocol {
     var delegate: UploaderDelegate? {get set}
 }
 
+protocol PeriodicUploaderDelegate: AnyObject {
+    func resetPeriodicUploader(_ uploader: Uploader)
+}
+
 protocol UploaderServices {
     var accountManager: AccountManager {get}
     var changeResolverManager: ChangeResolverManager {get}
@@ -83,13 +87,15 @@ class Uploader: UploaderProtocol {
     
     static let debugAlloc = DebugAlloc(name: "Uploader")
 
-    init(services: UploaderServices) {
+    init(services: UploaderServices, delegate: PeriodicUploaderDelegate?) {
         self.services = services
         
         // Defering connecting to database until actual usage of Uploader methods (and not doing it in the constructor) because (a) we need separate connections per request because use of db connections are not thread safe, and (b) because db connections are dropped after a period of time.
         // We get separate connections per request because of the way request processing is architected and uses the Uploader. More specifically, the Uploader is constructed *per request*.
         // Note that we should not have a problem with too many connections open due to this db connection because the first connnection that gets the lock will cause the other connections to last only for a brief period-- because they will not also be able to get the lock.
         Self.debugAlloc.create()
+        
+        delegate?.resetPeriodicUploader(self)
     }
     
     deinit {

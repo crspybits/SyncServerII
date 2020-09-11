@@ -181,7 +181,7 @@ extension FileController {
             }
         }
         
-        let uploader = Uploader(services: params.services.uploaderServices)
+        let uploader = Uploader(services: params.services.uploaderServices, delegate: params.services)
 
         do {
             let finishUploads = try FinishUploadDeletion(type: finishType, uploader: uploader, sharingGroupUUID: sharingGroupUUID, params: params)
