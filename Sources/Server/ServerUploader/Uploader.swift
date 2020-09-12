@@ -341,53 +341,13 @@ class Uploader: UploaderProtocol {
     // Each DeferredUpload *must* have a non-nil fileGroupUUID. The ordering of the groups in the result is not well defined.
     // Each sub-array in result has the same fileGroupUUID
     static func aggregateFileGroupUUIDs(deferredUploads: [DeferredUpload]) ->  [[DeferredUpload]] {
-        return aggregate(deferredUploads: deferredUploads, using: \.fileGroupUUID)
+        return Partition.array(deferredUploads, using: \.fileGroupUUID)
     }
 
     // Each DeferredUpload *must* have a non-nil sharingGroupUUID. The ordering of the groups in the result is not well defined.
     // Each sub-array in result has the same sharingGroupUUID
     static func aggregateSharingGroupUUIDs(deferredUploads: [DeferredUpload]) ->  [[DeferredUpload]] {
-        return aggregate(deferredUploads: deferredUploads, using: \.sharingGroupUUID)
-    }
-    
-    static func aggregate(deferredUploads: [DeferredUpload], using keyPath: KeyPath<DeferredUpload, String?>) ->  [[DeferredUpload]] {
-    
-        guard deferredUploads.count > 0 else {
-            return [[]]
-        }
-        
-        // Each sub-array has the same value for keyPath
-        var aggregated = [[DeferredUpload]]()
-
-        let sorted = deferredUploads.sorted { du1, du2  in
-            guard let value1 = du1[keyPath: keyPath],
-                let value2 = du2[keyPath: keyPath] else {
-                return false
-            }
-            return value1 < value2
-        }
-        
-        var current = [DeferredUpload]()
-        var currentKeyValue: String?
-        for deferredUpload in sorted {
-            if let keyValue = currentKeyValue {
-                if keyValue == deferredUpload[keyPath: keyPath] {
-                    current += [deferredUpload]
-                }
-                else {
-                    currentKeyValue = deferredUpload[keyPath: keyPath]
-                    aggregated += [current]
-                    current = [deferredUpload]
-                }
-            }
-            else {
-                currentKeyValue = deferredUpload[keyPath: keyPath]
-                current += [deferredUpload]
-            }
-        }
-        
-        aggregated += [current]
-        return aggregated
+        return Partition.array(deferredUploads, using: \.sharingGroupUUID)
     }
     
     // Remove file uploads (DeferredUpload, Upload's) corresponding to these deletions. They are not relevant any more given that we're doing deletions.
