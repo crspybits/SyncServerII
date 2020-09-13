@@ -15,6 +15,7 @@ Version
     	- Added SendPushNotifications: Send a push notification to all members of a sharing group (except for the sender).
     * Database changes.
     	- Various columns added.
+    		e.g., add objectType column to FileIndex and Upload tables
     	- Remove appMetaDataVersion column from Upload, and FileIndex
     	- Removed MasterVersion table.
     	- Index removed from Upload table: "UNIQUE (fileUUID, userId, deviceUUID)"

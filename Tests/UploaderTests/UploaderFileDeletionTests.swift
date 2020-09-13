@@ -45,9 +45,9 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        var fileGroupUUID: String?
+        var fileGroup: FileGroup?
         if withFileGroup {
-            fileGroupUUID = Foundation.UUID().uuidString
+            fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
         guard let deferredCount = DeferredUploadRepository(db).count() else {
@@ -61,7 +61,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 upload.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroupUUID: fileGroupUUID),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -74,14 +74,14 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         // Simulate an upload deletion request for file
 
-        guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+        guard let deferredUpload = createDeferredUpload(userId: userId, fileGroupUUID: fileGroup?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
             let deferredUploadId1 = deferredUpload.deferredUploadId else {
             XCTFail()
             return
         }
                 
-        if fileGroupUUID == nil {
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
+        if fileGroup == nil {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, fileGroup: nil, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
@@ -128,9 +128,9 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
 
-        var fileGroupUUID: String?
+        var fileGroup: FileGroup?
         if withFileGroup {
-            fileGroupUUID = Foundation.UUID().uuidString
+            fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
         guard let deferredCount = DeferredUploadRepository(db).count() else {
@@ -144,7 +144,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 uploads.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -155,14 +155,14 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroupUUID: fileGroupUUID) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroup: fileGroup) else {
             XCTFail()
             return
         }
         
         // Simulate an upload deletion request for files
 
-        guard let deferredUpload1 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+        guard let deferredUpload1 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroup?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
@@ -170,19 +170,19 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         
         var deferredUploadId2: Int64?
         
-        if fileGroupUUID == nil {
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
+        if fileGroup == nil {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID1, fileGroup: nil, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId1, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
         
-            guard let deferredUpload2 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+            guard let deferredUpload2 = createDeferredUpload(userId: userId, fileGroupUUID: nil, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
                 let deferredUploadId = deferredUpload2.deferredUploadId else {
                 XCTFail()
                 return
             }
         
-            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId, state: .deleteSingleFile) else {
+            guard let _ = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID2, fileGroup: nil, sharingGroupUUID: sharingGroupUUID, userId: userId, deferredUploadId: deferredUploadId, state: .deleteSingleFile) else {
                 XCTFail()
                 return
             }
@@ -248,7 +248,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         let fileUUID1 = Foundation.UUID().uuidString // has file group
         let fileUUID2 = Foundation.UUID().uuidString // has no file group
 
-        let fileGroupUUID = Foundation.UUID().uuidString
+        let fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
 
         guard let deferredCount = DeferredUploadRepository(db).count() else {
             XCTFail()
@@ -261,7 +261,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 uploads.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -280,7 +280,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         // Simulate an upload deletion request for files
 
         // For fileUUID, just use its file group in a DeferredUpload; don't need an Upload record.
-        guard let deferredUpload1 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
+        guard let deferredUpload1 = createDeferredUpload(userId: userId, fileGroupUUID: fileGroup.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingDeletion),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return

@@ -72,6 +72,10 @@ class Upload : NSObject, Model, ChangeResolverContents {
     // Not all files have to be associated with a file group.
     var fileGroupUUID:String?
     
+    static let objectTypeKey = "objectType"
+    // Not all files have to be associated with a file group, and thus not all files have a objectType.
+    var objectType:String?
+    
     // Currently allowing files to be in exactly one sharing group.
     static let sharingGroupUUIDKey = "sharingGroupUUID"
     var sharingGroupUUID: String!
@@ -123,6 +127,9 @@ class Upload : NSObject, Model, ChangeResolverContents {
                 
             case Upload.fileGroupUUIDKey:
                 fileGroupUUID = newValue as! String?
+                
+            case Upload.objectTypeKey:
+                objectType = newValue as? String
 
             case Upload.sharingGroupUUIDKey:
                 sharingGroupUUID = newValue as! String?
@@ -246,6 +253,8 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             // identifies a group of files (assigned by app)
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
             
+            "objectType VARCHAR(\(FileGroup.maxLengthObjectTypeName)), " +
+
             "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
             // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates. Plus, upload deletions need not have dates. And when uploading a new version of a file we won't give the creationDate.
@@ -352,6 +361,12 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
                     return .failure(.columnCreation)
                 }
             }
+            
+            if db.columnExists(Upload.objectTypeKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.objectTypeKey) VARCHAR(\(FileGroup.maxLengthObjectTypeName))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
 
         default:
             break
@@ -429,7 +444,10 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         insert.add(fieldName: Upload.sharingGroupUUIDKey, value: .stringOptional(upload.sharingGroupUUID))
 
         insert.add(fieldName: Upload.appMetaDataKey, value: .stringOptional(upload.appMetaData))
+        
         insert.add(fieldName: Upload.fileGroupUUIDKey, value: .stringOptional(upload.fileGroupUUID))
+        insert.add(fieldName: Upload.objectTypeKey, value: .stringOptional(upload.objectType))
+        
         insert.add(fieldName: Upload.lastUploadedCheckSumKey, value: .stringOptional(upload.lastUploadedCheckSum))
         insert.add(fieldName: Upload.mimeTypeKey, value: .stringOptional(upload.mimeType))
 
@@ -495,6 +513,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         let mimeTypeField = getUpdateFieldSetter(fieldValue: upload.mimeType, fieldName: Upload.mimeTypeKey)
         
         let fileGroupUUIDField = getUpdateFieldSetter(fieldValue: upload.fileGroupUUID, fieldName: Upload.fileGroupUUIDKey)
+        let objectTypeField = getUpdateFieldSetter(fieldValue: upload.objectType, fieldName: Upload.objectTypeKey)
         
         let deferredUploadIdField = getUpdateFieldSetter(fieldValue: upload.deferredUploadId, fieldName: Upload.deferredUploadIdKey, fieldIsString: false)
         
@@ -502,7 +521,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         
         let changeResolverNameField = getUpdateFieldSetter(fieldValue: upload.changeResolverName, fieldName: Upload.changeResolverNameKey)
         
-        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) \(deferredUploadIdField) \(fileVersionField) \(changeResolverNameField) WHERE uploadId=\(upload.uploadId!)"
+        let query = "UPDATE \(tableName) SET fileUUID='\(upload.fileUUID!)', userId=\(upload.userId!), state='\(upload.state!.rawValue)', deviceUUID='\(upload.deviceUUID!)' \(lastUploadedCheckSumField) \(appMetaDataField) \(mimeTypeField) \(fileGroupUUIDField) \(deferredUploadIdField) \(fileVersionField) \(changeResolverNameField) \(objectTypeField) WHERE uploadId=\(upload.uploadId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -636,6 +655,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             fileInfo.updateDate = upload.updateDate
             fileInfo.fileGroupUUID = upload.fileGroupUUID
             fileInfo.sharingGroupUUID = upload.sharingGroupUUID
+            fileInfo.objectType = upload.objectType
 
             result += [fileInfo]
         }

@@ -57,7 +57,7 @@ public extension UploaderCommon {
             case .success(data: let data, checkSum: _):
                 commentFile = try? CommentFile(with: data)
             default:
-                XCTFail()
+                XCTFail("\(result)")
             }
             exp2.fulfill()
         }
@@ -66,7 +66,7 @@ public extension UploaderCommon {
         return commentFile
     }
     
-    func createUploadForTextFile(deviceUUID: String, fileUUID: String, fileGroupUUID: String? = nil, sharingGroupUUID: String, userId: UserId, deferredUploadId: Int64? = nil, updateContents: Data? = nil, uploadCount: Int32 = 1, uploadIndex:Int32 = 1, state:UploadState = .vNUploadFileChange) -> Upload? {
+    internal func createUploadForTextFile(deviceUUID: String, fileUUID: String, fileGroup: ServerTestCase.FileGroup? = nil, sharingGroupUUID: String, userId: UserId, deferredUploadId: Int64? = nil, updateContents: Data? = nil, uploadCount: Int32 = 1, uploadIndex:Int32 = 1, state:UploadState = .vNUploadFileChange) -> Upload? {
         let upload = Upload()
         upload.deviceUUID = deviceUUID
         upload.fileUUID = fileUUID
@@ -79,7 +79,8 @@ public extension UploaderCommon {
         upload.uploadCount = uploadCount
         upload.uploadIndex = uploadIndex
         upload.deferredUploadId = deferredUploadId
-        upload.fileGroupUUID = fileGroupUUID
+        upload.fileGroupUUID = fileGroup?.fileGroupUUID
+        upload.objectType = fileGroup?.objectType
         
         let addUploadResult = UploadRepository(db).add(upload: upload, fileInFileIndex: true)
         guard case .success(let uploadId) = addUploadResult else {

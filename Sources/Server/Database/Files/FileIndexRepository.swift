@@ -30,6 +30,10 @@ class FileIndex : NSObject, Model {
     static let fileGroupUUIDKey = "fileGroupUUID"
     // Not all files have to be associated with a file group.
     var fileGroupUUID:String?
+
+    static let objectTypeKey = "objectType"
+    // Not all files have to be associated with a file group, and thus not all files have a objectType.
+    var objectType:String?
     
     // Currently allowing files to be in exactly one sharing group.
     static let sharingGroupUUIDKey = "sharingGroupUUID"
@@ -82,6 +86,9 @@ class FileIndex : NSObject, Model {
 
             case FileIndex.fileGroupUUIDKey:
                 fileGroupUUID = newValue as! String?
+
+            case FileIndex.objectTypeKey:
+                objectType = newValue as? String
                 
             case FileIndex.sharingGroupUUIDKey:
                 sharingGroupUUID = newValue as! String?
@@ -219,6 +226,9 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             // Optionally identifies a group of files (assigned by app). If NULL, the file is not in a file group (it's in a group of size 1).
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
             
+            // 9/12/20; Not making this NOT NULL to grandfather in earlier versions of Neebla and because not all files have file groups.
+            "objectType VARCHAR(\(FileGroup.maxLengthObjectTypeName)), " +
+            
             "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
             // Not saying "NOT NULL" here only because in the first deployed version of the database, I didn't have these dates.
@@ -286,6 +296,12 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                     return .failure(.columnCreation)
                 }
             }
+
+            if db.columnExists(FileIndex.objectTypeKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.objectTypeKey) VARCHAR(\(FileGroup.maxLengthObjectTypeName))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
             
         default:
             break
@@ -328,6 +344,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         insert.add(fieldName: FileIndex.deletedKey, value: .boolOptional(fileIndex.deleted))
 
         insert.add(fieldName: FileIndex.fileGroupUUIDKey, value: .stringOptional(fileIndex.fileGroupUUID))
+        insert.add(fieldName: FileIndex.objectTypeKey, value: .stringOptional(fileIndex.objectType))
+        
         insert.add(fieldName: FileIndex.appMetaDataKey, value: .stringOptional(fileIndex.appMetaData))
         insert.add(fieldName: FileIndex.fileUUIDKey, value: .stringOptional(fileIndex.fileUUID))
         insert.add(fieldName: FileIndex.deviceUUIDKey, value: .stringOptional(fileIndex.deviceUUID))
@@ -411,7 +429,9 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         let fileVersionField = getUpdateFieldSetter(fieldValue: fileIndex.fileVersion, fieldName: FileIndex.fileVersionKey, fieldIsString: false)
         
         let fileGroupUUIDField = getUpdateFieldSetter(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
-        
+
+        let objectTypeField = getUpdateFieldSetter(fieldValue: fileIndex.objectType, fieldName: FileIndex.objectTypeKey)
+
         var updateDateValue:String?
         if fileIndex.updateDate != nil {
             updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
@@ -422,7 +442,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         
         let deletedValue = fileIndex.deleted == true ? 1 : 0
         
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(fileVersionField) \(fileGroupUUIDField) \(changeResolverNameField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(fileVersionField) \(fileGroupUUIDField) \(changeResolverNameField) \(objectTypeField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -545,6 +565,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             fileIndex.mimeType = upload.mimeType
             fileIndex.appMetaData = upload.appMetaData
             fileIndex.fileGroupUUID = upload.fileGroupUUID
+            fileIndex.objectType = upload.objectType
             
             if upload.state == .v0UploadCompleteFile {
                 fileIndex.fileVersion = 0
@@ -731,6 +752,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
+            fileInfo.objectType = rowModel.objectType
             
             guard let accountType = rowModel.accountType,
                 let accountScheme = AccountScheme(.accountName(accountType)),

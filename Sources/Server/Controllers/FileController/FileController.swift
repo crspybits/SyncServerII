@@ -19,7 +19,7 @@ class FileController : ControllerProtocol {
         case errorLookingUpInFileIndex
     }
     
-    // Result is nil if there is no existing file in the FileIndex. Throws an error if there is an error.
+    // Result is nil only if there is no existing file in the FileIndex. Throws an error if there is an error.
     static func checkForExistingFile(params:RequestProcessingParameters, sharingGroupUUID: String, fileUUID: String) throws -> FileIndex? {
         
         let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)

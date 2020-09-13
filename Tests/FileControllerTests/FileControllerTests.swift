@@ -144,7 +144,7 @@ class FileController_IndexTests: ServerTestCase {
     
     func testIndexWithFakeSharingGroupUUIDFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID), let _ = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }

@@ -103,6 +103,15 @@ extension FileController {
  
         do {
             existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadRequest.sharingGroupUUID, fileUUID:uploadRequest.fileUUID)
+            
+            // For an existing file, check to make sure that the request has no file group. It's an error to try to upload an existing file with a file group. E.g., this could be a client attempt to re-assign an existing file to a different file group, which is not allowed.
+            if let _ = existingFileInFileIndex {
+                guard uploadRequest.fileGroupUUID == nil else {
+                    let message = "fileGroupUUID given for vN upload."
+                    finish(.errorMessage(message), params: params)
+                    return
+                }
+            }
         } catch (let error) {
             let message = "Could not lookup file in FileIndex: \(error)"
             finish(.errorMessage(message), params: params)
@@ -117,7 +126,7 @@ extension FileController {
             return
         }
         
-        // This will be nil if (a) there is no existing file -- i.e., if this is an upload for a new file and if (b) an existing file doesn't have a fileGroupUUID.
+        // This will be nil if (a) there is no existing file -- i.e., if this is an upload for a new file (v0) and if (b) an existing file doesn't have a fileGroupUUID.
         existingFileGroupUUID = existingFileInFileIndex?.fileGroupUUID
         
         // To send back to client.
@@ -281,7 +290,7 @@ extension FileController {
                 return
             }
             
-            addUploadEntry(newFile: false, fileVersion: nil, creationDate: nil, todaysDate: todaysDate, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, uploadContents: fileContents, signedInUserId: signedInUserId)
+            addUploadEntry(newFile: false, creationDate: nil, todaysDate: todaysDate, uploadedCheckSum: nil, cleanup: nil, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, existingObjectType: existingFileInFileIndex?.objectType, deviceUUID: deviceUUID, uploadContents: fileContents, signedInUserId: signedInUserId)
         }
     }
     
@@ -300,7 +309,7 @@ extension FileController {
             case .success(let checkSum):
                 Log.debug("File with checkSum \(checkSum) successfully uploaded!")
                 
-                self.addUploadEntry(newFile: true, fileVersion: 0, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, deviceUUID: deviceUUID, signedInUserId: signedInUserId)
+                self.addUploadEntry(newFile: true, creationDate: creationDate, todaysDate: todaysDate, uploadedCheckSum: checkSum, cleanup: cleanup, params: params, uploadRequest: uploadRequest, existingFileGroupUUID: existingFileGroupUUID, existingObjectType: nil, deviceUUID: deviceUUID, signedInUserId: signedInUserId)
 
             case .accessTokenRevokedOrExpired:
                 // Not going to do any cleanup. The access token has expired/been revoked. Presumably, the file wasn't uploaded.
@@ -316,9 +325,9 @@ extension FileController {
         }
     }
     
-    // This also calls finishUploads
-    private func addUploadEntry(newFile: Bool, fileVersion: FileVersionInt?, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, existingFileGroupUUID: String?, deviceUUID: String, uploadContents: Data? = nil, signedInUserId: UserId) {
-    
+    // This also calls finishUploads. `newFile` true means v0 upload; false means vN upload.
+    private func addUploadEntry(newFile: Bool, creationDate: Date?, todaysDate: Date?, uploadedCheckSum: String?, cleanup: Cleanup?, params:RequestProcessingParameters, uploadRequest: UploadFileRequest, existingFileGroupUUID: String?, existingObjectType: String?, deviceUUID: String, uploadContents: Data? = nil, signedInUserId: UserId) {
+        
         if !newFile && uploadContents == nil {
             let message = "vN file and uploadContents were nil"
             finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
@@ -345,7 +354,7 @@ extension FileController {
                 finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
                 return
             }
-            
+
             guard uploadedCheckSum?.lowercased() == expectedCheckSum else {
                 let message = "Checksum after upload to cloud storage \(String(describing: uploadedCheckSum)) is not the same as before upload \(String(describing: expectedCheckSum))."
                 finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
@@ -354,10 +363,16 @@ extension FileController {
         }
 
         upload.lastUploadedCheckSum = uploadedCheckSum
-    
+
         if let fileGroupUUID = uploadRequest.fileGroupUUID {
-            guard fileVersion == 0 else {
-                let message = "fileGroupUUID was given, but file version being uploaded (\(String(describing: fileVersion))) is not 0"
+            guard newFile else {
+                let message = "fileGroupUUID was given, but vN file being uploaded"
+                finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
+                return
+            }
+            
+            guard let _ = uploadRequest.objectType else {
+                let message = "fileGroupUUID was given, but no object type given"
                 finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
                 return
             }
@@ -366,6 +381,25 @@ extension FileController {
         }
         else {
             upload.fileGroupUUID = existingFileGroupUUID
+        }
+        
+        if let objectType = uploadRequest.objectType {
+            guard newFile else {
+                let message = "Object type given, but vN file being uploaded."
+                finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
+                return
+            }
+            
+            guard let _ = uploadRequest.fileGroupUUID else {
+                let message = "Object type given for v0 upload, but file group not given."
+                finish(.errorCleanup(message: message, cleanup: cleanup), params: params)
+                return
+            }
+            
+            upload.objectType = objectType
+        }
+        else {
+            upload.objectType = existingObjectType
         }
     
         // We are using the current signed in user's id here (and not the effective user id) because we need a way of indexing or organizing the collection of files uploaded by a particular user.

@@ -49,10 +49,10 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         var repos = Repositories(db: db)
-
-        var fileGroupUUID: String?
+        
+        var fileGroup: FileGroup?
         if withFileGroup {
-            fileGroupUUID = Foundation.UUID().uuidString
+            fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
         guard let deferredCount = DeferredUploadRepository(db).count() else {
@@ -66,7 +66,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 upload.
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroupUUID: fileGroupUUID),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -81,8 +81,8 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         
         var type: FinishUploadDeletion.DeletionsType!
         
-        if let fileGroupUUID = fileGroupUUID {
-            type = .fileGroup(fileGroupUUID: fileGroupUUID)
+        if let fileGroup = fileGroup {
+            type = .fileGroup(fileGroupUUID: fileGroup.fileGroupUUID)
         }
         else {
             guard let upload = createUploadForTextFile(deviceUUID: deviceUUID, fileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID, userId: fileIndex.userId, state: .deleteSingleFile) else {
@@ -118,7 +118,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         // We've not actually run the Uploader, so the DeferredUpload record is still present.
         XCTAssert(deferredCount + 1 == DeferredUploadRepository(db).count())
         
-        if fileGroupUUID == nil {
+        if fileGroup == nil {
             // As is the Upload record.
             XCTAssert(uploadCount + 1 == UploadRepository(db).count(), "\(uploadCount) != \(String(describing: UploadRepository(db).count())))")
         }

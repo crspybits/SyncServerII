@@ -197,25 +197,26 @@ class FileController_V0_UploadTests: ServerTestCase {
     
     func testUploadTwoV0TextFiles() {
         let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
-        let fileGroupUUID = Foundation.UUID().uuidString
+        let fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
+        
         uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
-            return uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
+            return uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroup: fileGroup)
         }
     }
     
     func testUploadTwoV0JPEGFiles() {
         let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
-        let fileGroupUUID = Foundation.UUID().uuidString
+        let fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
-            return uploadJPEGFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroupUUID: fileGroupUUID)
+            return uploadJPEGFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: addUser, fileGroup: fileGroup)
         }
     }
     
     func testUploadTwoV0URLFiles() {
         let fileUUIDs = [Foundation.UUID().uuidString, Foundation.UUID().uuidString]
-        let fileGroupUUID = Foundation.UUID().uuidString
+        let fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foobar")
         uploadTwoV0Files(fileUUIDs: fileUUIDs) { addUser, deviceUUID, fileUUID, uploadIndex, uploadCount in
-            return uploadFileUsingServer(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile, addUser: addUser, fileGroupUUID: fileGroupUUID)
+            return uploadFileUsingServer(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID: deviceUUID, fileUUID: fileUUID, mimeType: .url, file: .testUrlFile, addUser: addUser, fileGroup: fileGroup)
         }
     }
     
@@ -226,9 +227,9 @@ class FileController_V0_UploadTests: ServerTestCase {
         var uploadIndex: Int32 = 1
         let uploadCount: Int32 = Int32(fileUUIDs.count)
         var addUser:AddUser = .yes
-        let fileGroupUUID1 = Foundation.UUID().uuidString
+        let fileGroup1 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         
-        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroupUUID: fileGroupUUID1),
+        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroup: fileGroup1),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -238,17 +239,17 @@ class FileController_V0_UploadTests: ServerTestCase {
 
         XCTAssert(result1.response?.allUploadsFinished == .uploadsNotFinished)
 
-        let fileGroupUUID2: String
+        let fileGroup2: FileGroup
         if differentFileGroupUUIDs {
-            fileGroupUUID2 = Foundation.UUID().uuidString
+            fileGroup2 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         else {
-            fileGroupUUID2 = fileGroupUUID1
+            fileGroup2 = fileGroup1
         }
         
         uploadIndex += 1
         
-        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: differentFileGroupUUIDs, fileGroupUUID:fileGroupUUID2)
+        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: differentFileGroupUUIDs, fileGroup:fileGroup2)
         
         if differentFileGroupUUIDs {
             XCTAssert(result2 == nil)
@@ -273,13 +274,13 @@ class FileController_V0_UploadTests: ServerTestCase {
         var uploadIndex: Int32 = 1
         let uploadCount: Int32 = Int32(fileUUIDs.count)
         var addUser:AddUser = .yes
-        var fileGroupUUID: String?
+        var fileGroup: FileGroup?
         
         if !nilFileGroupUUIDs {
-            fileGroupUUID = Foundation.UUID().uuidString
+            fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
-        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroupUUID: fileGroupUUID),
+        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroup: fileGroup),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -291,7 +292,7 @@ class FileController_V0_UploadTests: ServerTestCase {
         
         uploadIndex += 1
         
-        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: nilFileGroupUUIDs, fileGroupUUID:fileGroupUUID)
+        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: nilFileGroupUUIDs, fileGroup:fileGroup)
         
         if nilFileGroupUUIDs {
             XCTAssert(result2 == nil)
@@ -316,9 +317,9 @@ class FileController_V0_UploadTests: ServerTestCase {
         var uploadIndex: Int32 = 1
         let uploadCount: Int32 = Int32(fileUUIDs.count)
         var addUser:AddUser = .yes
-        var fileGroupUUID: String? = Foundation.UUID().uuidString
+        var fileGroup: FileGroup? = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         
-        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroupUUID: fileGroupUUID),
+        guard let result1 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, fileGroup: fileGroup),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -330,10 +331,10 @@ class FileController_V0_UploadTests: ServerTestCase {
         
         uploadIndex += 1
         if oneFileHasNilGroupUUID {
-            fileGroupUUID = nil
+            fileGroup = nil
         }
         
-        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: oneFileHasNilGroupUUID, fileGroupUUID:fileGroupUUID)
+        let result2 = uploadTextFile(uploadIndex: uploadIndex, uploadCount: uploadCount, deviceUUID:deviceUUID, fileUUID: fileUUIDs[Int(uploadIndex)-1], addUser: addUser, errorExpected: oneFileHasNilGroupUUID, fileGroup:fileGroup)
         
         if oneFileHasNilGroupUUID {
             XCTAssert(result2 == nil)

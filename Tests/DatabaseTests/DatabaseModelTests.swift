@@ -127,6 +127,7 @@ class DatabaseModelTests: ServerTestCase {
         let creationDate = Date()
         let updateDate = Date()
         let changeResolverName = "SomeChangeResolver"
+        let objectType = "SomeType"
         
         fileIndex[FileIndex.fileIndexIdKey] = newFileIndexId
         fileIndex[FileIndex.fileUUIDKey] = newFileUUID
@@ -140,6 +141,7 @@ class DatabaseModelTests: ServerTestCase {
         fileIndex[FileIndex.creationDateKey] = creationDate
         fileIndex[FileIndex.updateDateKey] = updateDate
         fileIndex[FileIndex.changeResolverNameKey] = changeResolverName
+        fileIndex[FileIndex.objectTypeKey] = objectType
         
         XCTAssert(fileIndex.fileIndexId == newFileIndexId)
         XCTAssert(fileIndex.fileUUID == newFileUUID)
@@ -153,6 +155,7 @@ class DatabaseModelTests: ServerTestCase {
         XCTAssert(fileIndex.creationDate == creationDate)
         XCTAssert(fileIndex.updateDate == updateDate)
         XCTAssert(fileIndex.changeResolverName == changeResolverName)
+        XCTAssert(fileIndex.objectType == objectType)
 
         fileIndex[FileIndex.fileIndexIdKey] = nil
         fileIndex[FileIndex.fileUUIDKey] = nil
@@ -166,6 +169,7 @@ class DatabaseModelTests: ServerTestCase {
         fileIndex[FileIndex.creationDateKey] = nil
         fileIndex[FileIndex.updateDateKey] = nil
         fileIndex[FileIndex.changeResolverNameKey] = nil
+        fileIndex[FileIndex.objectTypeKey] = nil
 
         XCTAssert(fileIndex.fileIndexId == nil)
         XCTAssert(fileIndex.fileUUID == nil)
@@ -179,6 +183,7 @@ class DatabaseModelTests: ServerTestCase {
         XCTAssert(fileIndex.creationDate == nil)
         XCTAssert(fileIndex.updateDate == nil)
         XCTAssert(fileIndex.changeResolverName == nil)
+        XCTAssert(fileIndex.objectType == nil)
     }
     
     func testUpload() {
@@ -202,6 +207,7 @@ class DatabaseModelTests: ServerTestCase {
         }
         let uploadCount:Int32 = 1
         let uploadIndex:Int32 = 2
+        let objectType = "ObjectType"
         
         upload[Upload.uploadIdKey] = uploadId
         upload[Upload.fileUUIDKey] = fileUUID
@@ -218,7 +224,8 @@ class DatabaseModelTests: ServerTestCase {
         upload[Upload.uploadIndexKey] = uploadIndex
         upload[Upload.uploadCountKey] = uploadCount
         upload[Upload.changeResolverNameKey] = changeResolverName
-
+        upload[Upload.objectTypeKey] = objectType
+        
         XCTAssert(upload.uploadId == uploadId)
         XCTAssert(upload.fileUUID == fileUUID)
         XCTAssert(upload.userId == userId)
@@ -233,7 +240,8 @@ class DatabaseModelTests: ServerTestCase {
         XCTAssert(upload.uploadContents == contents)
         XCTAssert(upload.uploadIndex == uploadIndex)
         XCTAssert(upload.changeResolverName == changeResolverName)
-        
+        XCTAssert(upload.objectType == objectType)
+
         guard let count = upload.uploadCount else {
             XCTFail()
             return
@@ -255,7 +263,8 @@ class DatabaseModelTests: ServerTestCase {
         upload[Upload.uploadIndexKey] = nil
         upload[Upload.uploadCountKey] = nil
         upload[Upload.changeResolverNameKey] = nil
-        
+        upload[Upload.objectTypeKey] = nil
+
         XCTAssert(upload.uploadId == nil)
         XCTAssert(upload.fileUUID == nil)
         XCTAssert(upload.userId == nil)
@@ -271,6 +280,7 @@ class DatabaseModelTests: ServerTestCase {
         XCTAssert(upload.uploadIndex == nil)
         XCTAssert(upload.uploadCount == nil)
         XCTAssert(upload.changeResolverName == nil)
+        XCTAssert(upload.objectType == nil)
     }
     
     // SharingGroup

@@ -191,6 +191,10 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
             XCTAssert(fileIndex1.userId != nil && fileIndex1.userId == fileIndex2.userId)
             XCTAssert(fileIndex1.appMetaData != nil && fileIndex1.appMetaData == fileIndex2.appMetaData)
             XCTAssert(fileIndex1.sharingGroupUUID != nil && fileIndex1.sharingGroupUUID == fileIndex2.sharingGroupUUID)
+            
+            XCTAssert(fileIndex1.objectType != nil && fileIndex1.objectType == fileIndex2.objectType)
+            XCTAssert(fileIndex1.fileGroupUUID != nil && fileIndex1.fileGroupUUID == fileIndex2.fileGroupUUID)
+
             XCTAssert(fileIndex2.changeResolverName == changeResolverName)
 
         case .noObjectFound:

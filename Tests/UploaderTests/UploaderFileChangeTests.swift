@@ -57,15 +57,15 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
         
-        var fileGroupUUID: String?
+        var fileGroup: FileGroup?
         if withFileGroup {
-            fileGroupUUID = Foundation.UUID().uuidString
+            fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 upload.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -78,7 +78,7 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId = deferredUpload.deferredUploadId else {
             XCTFail()
             return
@@ -117,16 +117,16 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
     func runUploaderWithASingleFileAndTwoChanges(withFileGroup: Bool) throws {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
-
-        var fileGroupUUID: String?
+        
+        var fileGroup: FileGroup?
         if withFileGroup {
-            fileGroupUUID = Foundation.UUID().uuidString
+            fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
 
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 upload.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -140,13 +140,13 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -200,22 +200,22 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
-
-        var fileGroupUUID: String?
+        
+        var fileGroup: FileGroup?
         if withFileGroup {
-            fileGroupUUID = Foundation.UUID().uuidString
+            fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 uploads.
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroupUUID: fileGroupUUID, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
@@ -228,13 +228,13 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -285,24 +285,24 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
         
-        var fileGroupUUID1: String?
-        var fileGroupUUID2: String?
+        var fileGroup1: FileGroup?
+        var fileGroup2: FileGroup?
 
         if withFileGroup {
-            fileGroupUUID1 = Foundation.UUID().uuidString
-            fileGroupUUID2 = Foundation.UUID().uuidString
+            fileGroup1 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
+            fileGroup2 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
         let changeResolverName = CommentFile.changeResolverName
 
         // Do the v0 uploads.
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID1, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup1, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroupUUID: fileGroupUUID2, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
@@ -315,13 +315,13 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
 
-        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup1?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
+        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup2?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -374,18 +374,18 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
         let fileUUID1 = Foundation.UUID().uuidString
         let fileUUID2 = Foundation.UUID().uuidString
 
-        var fileGroupUUID1: String?
-        var fileGroupUUID2: String?
+        var fileGroup1: FileGroup?
+        var fileGroup2: FileGroup?
 
         if withFileGroup {
-            fileGroupUUID1 = Foundation.UUID().uuidString
-            fileGroupUUID2 = Foundation.UUID().uuidString
+            fileGroup1 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
+            fileGroup2 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
         let changeResolverName = CommentFile.changeResolverName
         
         // Do the v0 uploads.
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID1, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup1, changeResolverName: changeResolverName),
             let sharingGroupUUID1 = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -400,7 +400,7 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroupUUID: fileGroupUUID2, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
@@ -413,13 +413,13 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID1, status: .pendingChange),
+        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup1?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID1, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID2, status: .pendingChange),
+        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup2?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID2, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
@@ -471,19 +471,19 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
         let fileUUID2 = Foundation.UUID().uuidString
         let fileUUID3 = Foundation.UUID().uuidString
 
-        var fileGroupUUID1: String?
-        var fileGroupUUID2: String?
+        var fileGroup1: FileGroup?
+        var fileGroup2: FileGroup?
 
         if withFileGroup {
-            fileGroupUUID1 = Foundation.UUID().uuidString
-            fileGroupUUID2 = Foundation.UUID().uuidString
+            fileGroup1 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
+            fileGroup2 = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
 
         let changeResolverName = CommentFile.changeResolverName
         
         // Do the v0 uploads.
         
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroupUUID: fileGroupUUID1, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup1, changeResolverName: changeResolverName),
             let sharingGroupUUID1 = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -498,12 +498,12 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroupUUID: fileGroupUUID2, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID3, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroupUUID: fileGroupUUID2, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID3, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
@@ -517,13 +517,13 @@ class UploaderFileChangeTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID1, sharingGroupUUID: sharingGroupUUID1, status: .pendingChange),
+        guard let deferredUpload1 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup1?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID1, status: .pendingChange),
             let deferredUploadId1 = deferredUpload1.deferredUploadId else {
             XCTFail()
             return
         }
         
-        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroupUUID2, sharingGroupUUID: sharingGroupUUID2, status: .pendingChange),
+        guard let deferredUpload2 = createDeferredUpload(userId: fileIndex.userId, fileGroupUUID: fileGroup2?.fileGroupUUID, sharingGroupUUID: sharingGroupUUID2, status: .pendingChange),
             let deferredUploadId2 = deferredUpload2.deferredUploadId else {
             XCTFail()
             return
