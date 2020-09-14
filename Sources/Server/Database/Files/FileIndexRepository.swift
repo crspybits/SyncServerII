@@ -753,6 +753,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
             fileInfo.objectType = rowModel.objectType
+            fileInfo.changeResolverName = rowModel.changeResolverName
+            fileInfo.appMetaData = rowModel.appMetaData
             
             guard let accountType = rowModel.accountType,
                 let accountScheme = AccountScheme(.accountName(accountType)),

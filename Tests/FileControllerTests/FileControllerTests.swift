@@ -170,7 +170,7 @@ class FileController_IndexTests: ServerTestCase {
         self.getIndex(expectedFiles: [uploadResult.request], sharingGroupUUID: workingButBadSharingGroupUUID, errorExpected: true)
     }
     
-    func testFileIndexReportsVariousFileVersion() {
+    func testFileIndexReportsVariousFileVersions() {
         let changeResolverName = CommentFile.changeResolverName
         let deviceUUID = Foundation.UUID().uuidString
         let fileUUID = Foundation.UUID().uuidString
@@ -214,6 +214,35 @@ class FileController_IndexTests: ServerTestCase {
         }
         
         XCTAssert(filtered[0].fileVersion == 1, "filtered[0].fileVersion: \(String(describing: filtered[0].fileVersion))")
+    }
+    
+    func testFileIndexReportsAppMetaDataAndChangeResolverName() {
+        let changeResolverName = CommentFile.changeResolverName
+        let deviceUUID = Foundation.UUID().uuidString
+        let fileUUID = Foundation.UUID().uuidString
+                 
+        // First upload a v0 file, with change resolver name and app meta data
+        let appMetaData = "Foobly."
+        
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, appMetaData: appMetaData, stringFile: .commentFile, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        guard let (fi, _) = getIndex(testAccount: .primaryOwningAccount, deviceUUID: deviceUUID, sharingGroupUUID: sharingGroupUUID), let fileInfo = fi else {
+            XCTFail()
+            return
+        }
+        
+        let filtered = fileInfo.filter {$0.fileUUID == fileUUID}
+        guard filtered.count == 1 else {
+            XCTFail()
+            return
+        }
+        
+        XCTAssert(filtered[0].appMetaData == appMetaData)
+        XCTAssert(filtered[0].changeResolverName == changeResolverName)
     }
     
     // TODO: *0*: Make sure we're not trying to download a file that has already been deleted.
