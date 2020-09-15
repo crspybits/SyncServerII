@@ -144,7 +144,8 @@ extension FileController {
         
             if existingFileInFileIndex.deleted {
                 let message = "Attempt to upload an existing file, but it has already been deleted."
-                finish(.errorMessage(message), params: params)
+                finish(.errorResponse(.failure(
+                    .goneWithReason(message: message, .fileRemovedOrRenamed))), params: params)
                 return
             }
             
