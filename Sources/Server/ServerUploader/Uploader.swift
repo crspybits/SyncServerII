@@ -396,6 +396,7 @@ class Uploader: UploaderProtocol {
             var deferredIdsForFileChangeUploads = [Int64]()
             
             for deferredDeletion in deferredDeletionsWithoutFileGroups {
+                #warning("9/20/20: This lookup just failed. And the server is now stuck in terms of deferred operations. Need some means of removing these if they fail more than a set number of times. This looks like an example where I could record this on the deferred upload record as an error-- so the client can know of the failure.")
                 // Get the deletion Upload associated with this `deferredDeletion`
                 let key1 = UploadRepository.LookupKey.deferredUploadId(deferredDeletion.deferredUploadId)
                 guard case .found(let model) = uploadRepo.lookup(key: key1, modelInit: Upload.init), let uploadDeletion = model as? Upload else {
