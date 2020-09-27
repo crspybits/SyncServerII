@@ -3,6 +3,10 @@ import PackageDescription
 
 let package = Package(
     name: "Server",
+    platforms: [
+        // Needed for CryptoSwift, for development on MacOS to avoid build errors
+        .macOS(.v10_12)
+    ],
     dependencies: [
         //.package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", .branch("master")),
         .package(url: "https://github.com/crspybits/SwiftyAWSSNS.git", .upToNextMajor(from: "0.3.0")),

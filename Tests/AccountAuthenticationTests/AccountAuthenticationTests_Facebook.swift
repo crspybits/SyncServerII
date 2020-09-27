@@ -52,5 +52,9 @@ class AccountAuthenticationTests_Facebook: AccountAuthenticationTests {
             }
         }
     }
+    
+    override func testThatAccountForExistingUserCannotBeCreated() {
+        super.testThatAccountForExistingUserCannotBeCreated()
+    }
 }
 

@@ -52,7 +52,12 @@ class FileDeletionTests: ServerTestCase {
             return
         }
         
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
+        guard let userId = addUserResponse.userId else {
+            XCTFail()
+            return
+        }
+        
+        guard let cloudStorage = FileController.getCreds(forUserId: userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
             XCTFail()
             return
         }
@@ -99,7 +104,12 @@ class FileDeletionTests: ServerTestCase {
             return
         }
         
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
+        guard let userId = addUserResponse.userId else {
+            XCTFail()
+            return
+        }
+        
+        guard let cloudStorage = FileController.getCreds(forUserId: userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
             XCTFail()
             return
         }
@@ -164,7 +174,12 @@ class FileDeletionTests: ServerTestCase {
             return
         }
         
-        guard let cloudStorage = FileController.getCreds(forUserId: addUserResponse.userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
+        guard let userId = addUserResponse.userId else {
+            XCTFail()
+            return
+        }
+        
+        guard let cloudStorage = FileController.getCreds(forUserId: userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
             XCTFail()
             return
         }

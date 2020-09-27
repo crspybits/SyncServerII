@@ -26,15 +26,15 @@
 				OBJ_3076 /* PBXTargetDependency */,
 				OBJ_3077 /* PBXTargetDependency */,
 				OBJ_3078 /* PBXTargetDependency */,
-				OBJ_3079 /* PBXTargetDependency */,
 				OBJ_3080 /* PBXTargetDependency */,
-				OBJ_3081 /* PBXTargetDependency */,
 				OBJ_3082 /* PBXTargetDependency */,
+				OBJ_3083 /* PBXTargetDependency */,
 				OBJ_3084 /* PBXTargetDependency */,
-				OBJ_3085 /* PBXTargetDependency */,
 				OBJ_3086 /* PBXTargetDependency */,
 				OBJ_3087 /* PBXTargetDependency */,
+				OBJ_3088 /* PBXTargetDependency */,
 				OBJ_3089 /* PBXTargetDependency */,
+				OBJ_3090 /* PBXTargetDependency */,
 				OBJ_3091 /* PBXTargetDependency */,
 				OBJ_3092 /* PBXTargetDependency */,
 			);
@@ -44,8 +44,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		BDBE1A19FD28BF20390C87B5 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BC1421DB108D9DF8B3ACDDA /* Server.json */; };
-		FCA74122B95DA430194666E7 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2A9E5E175187186D1CC73450 /* ServerTests.json */; };
+		55B46D0F0C03CED2E1D64F33 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8DFA9DE1140B7C8493C96C5A /* Server.json */; };
+		F99E6C9452679341868D5835 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 266234A7E79A556A79C65571 /* ServerTests.json */; };
 		OBJ_1005 /* ApplyDeferredUploadsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_97 /* ApplyDeferredUploadsTests.swift */; };
 		OBJ_1006 /* ChangeResolverManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_98 /* ChangeResolverManagerTests.swift */; };
 		OBJ_1007 /* FileDeletionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_99 /* FileDeletionTests.swift */; };
@@ -1486,22 +1486,22 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		A0A2C2782559CEB9E9F130AA /* CopyFiles */ = {
+		0E078CF289F96181A9B3D97A /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				BDBE1A19FD28BF20390C87B5 /* Server.json in CopyFiles */,
-				FCA74122B95DA430194666E7 /* ServerTests.json in CopyFiles */,
+				55B46D0F0C03CED2E1D64F33 /* Server.json in CopyFiles */,
+				F99E6C9452679341868D5835 /* ServerTests.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2A9E5E175187186D1CC73450 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
-		9BC1421DB108D9DF8B3ACDDA /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
+		266234A7E79A556A79C65571 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		8DFA9DE1140B7C8493C96C5A /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
 		ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */ = {isa = PBXFileReference; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */ = {isa = PBXFileReference; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -3452,7 +3452,7 @@
 		OBJ_156 /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_157 /* CryptoSwift 1.3.1 */,
+				OBJ_157 /* CryptoSwift 1.3.2 */,
 				OBJ_239 /* PerfectThread 3.0.7 */,
 				OBJ_245 /* PerfectLib 3.1.4 */,
 				OBJ_257 /* PerfectMySQL 3.5.1 */,
@@ -3484,7 +3484,7 @@
 				OBJ_598 /* TypeDecoder 1.3.4 */,
 				OBJ_603 /* KituraContracts 1.2.1 */,
 				OBJ_616 /* Kitura-TemplateEngine 2.0.1 */,
-				OBJ_620 /* Kitura-net 2.4.0 */,
+				OBJ_620 /* Kitura-net 2.4.1 */,
 				OBJ_672 /* SSLService 1.0.52 */,
 				OBJ_677 /* Socket 1.0.52 */,
 				OBJ_683 /* LoggerAPI 1.9.0 */,
@@ -3494,13 +3494,13 @@
 			path = "";
 			sourceTree = "<group>";
 		};
-		OBJ_157 /* CryptoSwift 1.3.1 */ = {
+		OBJ_157 /* CryptoSwift 1.3.2 */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_158 /* CryptoSwift */,
 				OBJ_238 /* Package.swift */,
 			);
-			name = "CryptoSwift 1.3.1";
+			name = "CryptoSwift 1.3.2";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
@@ -4687,7 +4687,7 @@
 			path = ".build/checkouts/Kitura-TemplateEngine/Sources/KituraTemplateEngine";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_620 /* Kitura-net 2.4.0 */ = {
+		OBJ_620 /* Kitura-net 2.4.1 */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_621 /* CCurl */,
@@ -4695,7 +4695,7 @@
 				OBJ_629 /* KituraNet */,
 				OBJ_671 /* Package.swift */,
 			);
-			name = "Kitura-net 2.4.0";
+			name = "Kitura-net 2.4.1";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
@@ -4910,59 +4910,59 @@
 			isa = PBXGroup;
 			children = (
 				ServerFacebookAccount::ServerFacebookAccount::Product /* ServerFacebookAccount.framework */,
-				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
-				Cryptor::Cryptor::Product /* Cryptor.framework */,
-				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
-				Server::FileControllerUploadDeletionTests::Product /* FileControllerUploadDeletionTests.xctest */,
-				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
-				Kitura-net::KituraNet::Product /* KituraNet.framework */,
-				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
-				Socket::Socket::Product /* Socket.framework */,
-				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
-				Server::Server::Product /* Server.framework */,
-				Server::FileControllerBothUploadTests::Product /* FileControllerBothUploadTests.xctest */,
-				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
-				Server::UploaderTests::Product /* UploaderTests.xctest */,
-				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
-				Server::TestsCommon::Product /* TestsCommon.xctest */,
-				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
-				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
-				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
-				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
-				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
-				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
-				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
-				SwiftJWT::SwiftJWT::Product /* SwiftJWT.framework */,
-				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
-				SSLService::SSLService::Product /* SSLService.framework */,
-				Server::SharingTests::Product /* SharingTests.xctest */,
-				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
-				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
-				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
-				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
-				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
-				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
-				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
-				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
-				Server::OtherTests::Product /* OtherTests.xctest */,
-				ServerGoogleAccount::ServerGoogleAccount::Product /* ServerGoogleAccount.framework */,
-				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
-				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
 				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
-				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
-				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
-				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
-				Kitura::Kitura::Product /* Kitura.framework */,
-				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
-				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
+				Server::FileControllerUploadDeletionTests::Product /* FileControllerUploadDeletionTests.xctest */,
+				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
+				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
+				Server::Server::Product /* Server.framework */,
+				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
 				Server::Main::Product /* Main */,
-				swift-log::Logging::Product /* Logging.framework */,
-				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
+				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
+				Server::OtherTests::Product /* OtherTests.xctest */,
+				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
+				SwiftJWT::SwiftJWT::Product /* SwiftJWT.framework */,
+				Server::FileControllerBothUploadTests::Product /* FileControllerBothUploadTests.xctest */,
+				SSLService::SSLService::Product /* SSLService.framework */,
+				ServerGoogleAccount::ServerGoogleAccount::Product /* ServerGoogleAccount.framework */,
+				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
+				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
+				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
 				ServerShared::ServerShared::Product /* ServerShared.framework */,
+				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
+				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
+				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
+				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
+				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
+				Kitura-net::KituraNet::Product /* KituraNet.framework */,
+				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
+				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
+				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
 				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
 				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
+				Kitura::Kitura::Product /* Kitura.framework */,
+				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
+				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
+				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
 				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
-				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
+				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
+				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
+				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
+				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
+				Server::TestsCommon::Product /* TestsCommon.xctest */,
+				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
+				Cryptor::Cryptor::Product /* Cryptor.framework */,
+				Socket::Socket::Product /* Socket.framework */,
+				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
+				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
+				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
+				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
+				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
+				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
+				Server::UploaderTests::Product /* UploaderTests.xctest */,
+				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
+				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
+				swift-log::Logging::Product /* Logging.framework */,
+				Server::SharingTests::Product /* SharingTests.xctest */,
 			);
 			name = Products;
 			path = "";
@@ -6558,7 +6558,7 @@
 			buildPhases = (
 				OBJ_2647 /* Sources */,
 				OBJ_2708 /* Frameworks */,
-				A0A2C2782559CEB9E9F130AA /* CopyFiles */,
+				0E078CF289F96181A9B3D97A /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -11085,59 +11085,59 @@
 		};
 		OBJ_3076 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::OtherTests /* OtherTests */;
+			target = Server::TestsCommon /* TestsCommon */;
 		};
 		OBJ_3077 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerUploadFileTests /* FileControllerUploadFileTests */;
+			target = Server::DatabaseTests /* DatabaseTests */;
 		};
 		OBJ_3078 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerBothUploadTests /* FileControllerBothUploadTests */;
-		};
-		OBJ_3079 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::FileControllerTests /* FileControllerTests */;
+			target = Server::UserControllerTests /* UserControllerTests */;
 		};
 		OBJ_3080 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
-		};
-		OBJ_3081 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::PushNotificationTests /* PushNotificationTests */;
+			target = Server::SharingTests /* SharingTests */;
 		};
 		OBJ_3082 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::UploaderTests /* UploaderTests */;
+			target = Server::FileControllerUploadDeletionTests /* FileControllerUploadDeletionTests */;
+		};
+		OBJ_3083 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::FileControllerBothUploadTests /* FileControllerBothUploadTests */;
 		};
 		OBJ_3084 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountFileTests /* AccountFileTests */;
-		};
-		OBJ_3085 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::FileControllerUploadDeletionTests /* FileControllerUploadDeletionTests */;
+			target = Server::UploaderTests /* UploaderTests */;
 		};
 		OBJ_3086 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::DatabaseTests /* DatabaseTests */;
+			target = Server::FileControllerUploadFileTests /* FileControllerUploadFileTests */;
 		};
 		OBJ_3087 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::SharingTests /* SharingTests */;
+			target = Server::FileControllerTests /* FileControllerTests */;
+		};
+		OBJ_3088 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::PushNotificationTests /* PushNotificationTests */;
 		};
 		OBJ_3089 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::UserControllerTests /* UserControllerTests */;
+			target = Server::AccountFileTests /* AccountFileTests */;
+		};
+		OBJ_3090 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::OtherTests /* OtherTests */;
 		};
 		OBJ_3091 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::ChangeResolverTests /* ChangeResolverTests */;
+			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
 		};
 		OBJ_3092 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::TestsCommon /* TestsCommon */;
+			target = Server::ChangeResolverTests /* ChangeResolverTests */;
 		};
 		OBJ_3194 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -12358,7 +12358,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.3.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.3.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -12367,7 +12367,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.3.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.3.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -12529,7 +12529,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -12538,7 +12538,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -12612,7 +12612,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -12621,7 +12621,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -12823,7 +12823,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -12832,7 +12832,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -12847,9 +12847,9 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Server.xcodeproj/CryptoSwift_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG -DSERVER";
@@ -12875,9 +12875,9 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Server.xcodeproj/CryptoSwift_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
@@ -12898,7 +12898,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -12907,7 +12907,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13029,7 +13029,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13038,7 +13038,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13048,7 +13048,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13057,7 +13057,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13123,7 +13123,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13132,7 +13132,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13653,7 +13653,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13662,7 +13662,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13736,7 +13736,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13745,7 +13745,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13755,7 +13755,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13764,7 +13764,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13774,7 +13774,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13783,7 +13783,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13793,7 +13793,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13802,7 +13802,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13812,7 +13812,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13821,7 +13821,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13831,7 +13831,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13840,7 +13840,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13906,7 +13906,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13915,7 +13915,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -13989,7 +13989,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -13998,7 +13998,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -14184,7 +14184,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -14193,7 +14193,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -14272,7 +14272,7 @@
 				INFOPLIST_FILE = Server.xcodeproj/Main_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-I/usr/local/Cellar/openssl@1.1/1.1.1d/include",
@@ -14317,7 +14317,7 @@
 				INFOPLIST_FILE = Server.xcodeproj/Main_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-I/usr/local/Cellar/openssl@1.1/1.1.1d/include",
@@ -14503,7 +14503,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -14512,7 +14512,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.0.0";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
@@ -14570,7 +14570,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.1.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.1.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -14579,7 +14579,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.1.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.1.0";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
@@ -14657,7 +14657,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -14666,7 +14666,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.0.0";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
@@ -14724,7 +14724,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -14733,7 +14733,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.0.0";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
@@ -14890,7 +14890,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -14899,7 +14899,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -14922,7 +14922,7 @@
 				INFOPLIST_FILE = Server.xcodeproj/Server_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-I/usr/local/Cellar/openssl@1.1/1.1.1d/include",
@@ -14970,7 +14970,7 @@
 				INFOPLIST_FILE = Server.xcodeproj/Server_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-I/usr/local/Cellar/openssl@1.1/1.1.1d/include",
@@ -15069,7 +15069,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.3.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.3.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15078,7 +15078,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.3.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.3.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15176,7 +15176,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15185,7 +15185,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15259,7 +15259,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15268,7 +15268,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15342,7 +15342,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15351,7 +15351,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15452,7 +15452,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15461,7 +15461,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15535,7 +15535,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15544,7 +15544,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15554,7 +15554,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15563,7 +15563,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15643,7 +15643,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.1.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.1.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15652,7 +15652,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.1.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.1.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15809,7 +15809,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15818,7 +15818,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15884,7 +15884,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15893,7 +15893,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -15979,7 +15979,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4.2 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 4.2 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.2.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
@@ -15988,7 +15988,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4.2 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 4.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 4.2 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 4.2.0";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
@@ -16054,7 +16054,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -16063,7 +16063,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -16137,7 +16137,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -16146,7 +16146,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -16303,7 +16303,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -16312,7 +16312,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -16504,7 +16504,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -16513,7 +16513,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12_beta_6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk -package-description-version 5.0.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.0.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

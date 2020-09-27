@@ -399,7 +399,12 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
         
-        let key2 = SharingGroupUserRepository.LookupKey.userId(addUserResponse.userId)
+        guard let userId = addUserResponse.userId else {
+            XCTFail()
+            return
+        }
+        
+        let key2 = SharingGroupUserRepository.LookupKey.userId(userId)
         let result2 = SharingGroupUserRepository(db).lookup(key: key2 , modelInit: SharingGroupUser.init)
         guard case .noObjectFound = result2 else {
             XCTFail()
@@ -446,7 +451,12 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
         
-        let key2 = SharingGroupUserRepository.LookupKey.userId(addUserResponse.userId)
+        guard let userId = addUserResponse.userId else {
+            XCTFail()
+            return
+        }
+        
+        let key2 = SharingGroupUserRepository.LookupKey.userId(userId)
         let result2 = SharingGroupUserRepository(db).lookup(key: key2 , modelInit: SharingGroupUser.init)
         guard case .noObjectFound = result2 else {
             XCTFail()

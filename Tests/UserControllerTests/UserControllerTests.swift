@@ -29,12 +29,12 @@ class UserControllerTests: ServerTestCase {
             return
         }
         
-        guard addUserResponse.userId != nil else {
+        guard let userId = addUserResponse.userId else {
             XCTFail()
             return
         }
         
-        let result = UserRepository(self.db).lookup(key: .userId(addUserResponse.userId), modelInit: User.init)
+        let result = UserRepository(self.db).lookup(key: .userId(userId), modelInit: User.init)
         switch result {
         case .error(let error):
             XCTFail("\(error)")

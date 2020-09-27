@@ -94,5 +94,52 @@ class AccountAuthenticationTests: ServerTestCase {
             }
         }
     }
+    
+    func testThatAccountForExistingUserCannotBeCreated() {
+        guard let testAccount = testAccount else { return }
+        let deviceUUID = Foundation.UUID().uuidString
+        let sharingGroupUUID = Foundation.UUID().uuidString
+
+        guard let _ = addNewUser(testAccount: testAccount, sharingGroupUUID: sharingGroupUUID, deviceUUID:deviceUUID, cloudFolderName: cloudFolderName) else {
+            XCTFail()
+            return
+        }
+        
+        let addUserRequest = AddUserRequest()
+        addUserRequest.cloudFolderName = cloudFolderName
+        addUserRequest.sharingGroupUUID = sharingGroupUUID
+        
+        self.performServerTest(testAccount:testAccount) { [weak self] expectation, creds in
+            guard let self = self else { return }
+            
+            guard let accessToken = creds.accessToken else {
+                XCTFail()
+                expectation.fulfill()
+                return
+            }
+            
+            let headers = self.setupHeaders(testUser: testAccount, accessToken: accessToken, deviceUUID:deviceUUID)
+            
+            var queryParams:String?
+            if let params = addUserRequest.urlParameters() {
+                queryParams = "?" + params
+            }
+            
+            self.performRequest(route: ServerEndpoints.addUser, headers: headers, urlParameters: queryParams) { response, dict in
+                Log.info("Status code: \(response!.statusCode)")
+                XCTAssert(response!.statusCode == .OK, "Did not work on addUser request: \(response!.statusCode)")
+                
+                if let dict = dict, let addUserResponse = try? AddUserResponse.decode(dict) {
+                    XCTAssert(addUserResponse.userAlreadyExisted == true)
+                    XCTAssert(addUserResponse.userId == nil)
+                }
+                else {
+                    XCTFail()
+                }
+
+                expectation.fulfill()
+            }
+        }
+    }
 }
 

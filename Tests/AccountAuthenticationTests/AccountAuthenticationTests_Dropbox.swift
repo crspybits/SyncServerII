@@ -34,5 +34,9 @@ class AccountAuthenticationTests_Dropbox: AccountAuthenticationTests {
     override func testThatUserHasValidCreds() {
         super.testThatUserHasValidCreds()
     }
+    
+    override func testThatAccountForExistingUserCannotBeCreated() {
+        super.testThatAccountForExistingUserCannotBeCreated()
+    }
 }
 

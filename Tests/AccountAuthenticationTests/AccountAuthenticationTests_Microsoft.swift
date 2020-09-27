@@ -40,6 +40,10 @@ class AccountAuthenticationTests_Microsoft: AccountAuthenticationTests {
     override func testThatUserHasValidCreds() {
         super.testThatUserHasValidCreds()
     }
+    
+    override func testThatAccountForExistingUserCannotBeCreated() {
+        super.testThatAccountForExistingUserCannotBeCreated()
+    }
 }
 
 

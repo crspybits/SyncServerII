@@ -40,4 +40,8 @@ class AccountAuthenticationTests_Google: AccountAuthenticationTests {
     override func testThatUserHasValidCreds() {
         super.testThatUserHasValidCreds()
     }
+    
+    override func testThatAccountForExistingUserCannotBeCreated() {
+        super.testThatAccountForExistingUserCannotBeCreated()
+    }
 }

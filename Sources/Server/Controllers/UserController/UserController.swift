@@ -74,8 +74,10 @@ class UserController : ControllerProtocol {
             break
         case .error, .exists(_):
             let message = "Could not add user: Already exists!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
+            Log.warning(message)
+            let response = AddUserResponse()
+            response.userAlreadyExisted = true
+            params.completion(.success(response))
             return
         }
         
