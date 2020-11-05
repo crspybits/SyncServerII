@@ -233,7 +233,7 @@ class UserControllerTests: ServerTestCase {
         }
         
         // Upload a file.
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID)) else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString) else {
             XCTFail()
             return
         }

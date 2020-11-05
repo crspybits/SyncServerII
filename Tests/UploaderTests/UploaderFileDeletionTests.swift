@@ -61,7 +61,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 upload.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -144,7 +144,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 uploads.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -155,7 +155,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroup: fileGroup) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup) else {
             XCTFail()
             return
         }
@@ -261,7 +261,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 uploads.
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -272,7 +272,7 @@ class UploaderFileDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, stringFile: .commentFile) else {
             XCTFail()
             return
         }

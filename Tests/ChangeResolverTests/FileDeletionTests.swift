@@ -28,7 +28,7 @@ class FileDeletionTests: ServerTestCase {
     }
     
     // Returns the cloud file name
-    func uploadFile(file: TestFile, cloudStorage: CloudStorage, newFileUUID fileUUID: String, sharingGroupUUID: String, deviceUUID: String, testAccount: TestAccount) -> String? {
+    func uploadFile(file: TestFile, fileLabel: String, cloudStorage: CloudStorage, newFileUUID fileUUID: String, sharingGroupUUID: String, deviceUUID: String, testAccount: TestAccount) -> String? {
         let checkSum = file.checkSum(type: testAccount.scheme.accountName)
 
         let uploadRequest = UploadFileRequest()
@@ -36,6 +36,7 @@ class FileDeletionTests: ServerTestCase {
         uploadRequest.mimeType = "text/plain"
         uploadRequest.sharingGroupUUID = sharingGroupUUID
         uploadRequest.checkSum = checkSum
+        uploadRequest.fileLabel = fileLabel
     
         let options = CloudStorageFileNameOptions(cloudFolderName: ServerTestCase.cloudFolderName, mimeType: file.mimeType.rawValue)
 
@@ -63,7 +64,7 @@ class FileDeletionTests: ServerTestCase {
         }
         
         let file: TestFile = .test1
-        guard let fileName = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
+        guard let fileName = uploadFile(file: file, fileLabel: UUID().uuidString, cloudStorage: cloudStorage, newFileUUID: fileUUID, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
             XCTFail()
             return
         }
@@ -115,12 +116,12 @@ class FileDeletionTests: ServerTestCase {
         }
         
         let file: TestFile = .test1
-        guard let fileName1 = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
+        guard let fileName1 = uploadFile(file: file, fileLabel: UUID().uuidString, cloudStorage: cloudStorage, newFileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
             XCTFail()
             return
         }
         
-        guard let fileName2 = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
+        guard let fileName2 = uploadFile(file: file, fileLabel: UUID().uuidString, cloudStorage: cloudStorage, newFileUUID: fileUUID2, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
             XCTFail()
             return
         }
@@ -185,7 +186,7 @@ class FileDeletionTests: ServerTestCase {
         }
         
         let file: TestFile = .test1
-        guard let fileName1 = uploadFile(file: file, cloudStorage: cloudStorage, newFileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
+        guard let fileName1 = uploadFile(file: file, fileLabel: UUID().uuidString, cloudStorage: cloudStorage, newFileUUID: fileUUID1, sharingGroupUUID: sharingGroupUUID, deviceUUID: deviceUUID, testAccount: .primaryOwningAccount) else {
             XCTFail()
             return
         }

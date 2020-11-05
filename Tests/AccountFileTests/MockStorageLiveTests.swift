@@ -20,7 +20,7 @@ class MockStorageLiveTests: ServerTestCase {
 
     func testUploadFile() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -44,7 +44,7 @@ class MockStorageLiveTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
-        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -62,7 +62,7 @@ class MockStorageLiveTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         
         // This file is going to be deleted.
-        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
+        guard let uploadResult1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return

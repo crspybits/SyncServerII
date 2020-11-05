@@ -70,6 +70,9 @@ class FileIndex : NSObject, Model {
     
     static let lastUploadedCheckSumKey = "lastUploadedCheckSum"
     var lastUploadedCheckSum: String?
+
+    static let fileLabelKey = "fileLabel"
+    var fileLabel: String?
     
     // For queries; not in this table.
     static let accountTypeKey = "accountType"
@@ -122,6 +125,9 @@ class FileIndex : NSObject, Model {
                 
             case FileIndex.changeResolverNameKey:
                 changeResolverName = newValue as? String
+
+            case FileIndex.fileLabelKey:
+                fileLabel = newValue as? String
                 
             case User.accountTypeKey:
                 accountType = newValue as! String?
@@ -208,6 +214,9 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         return "FileIndex"
     }
     
+    static let uniqueFileLabelConstraintName = "UniqueFileLabel"
+    static let uniqueFileLabelConstraint = "UNIQUE (fileGroupUUID, fileLabel)"
+    
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(fileIndexId BIGINT NOT NULL AUTO_INCREMENT, " +
@@ -241,6 +250,9 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             // App-specific meta data
             "appMetaData TEXT, " +
 
+            // 11/3/20; Optional only because files prior to this don't have this field.
+            "fileLabel VARCHAR(\(FileLabel.maxLength)), " +
+            
             // true if file has been deleted, false if not.
             "deleted BOOL NOT NULL, " +
             
@@ -256,6 +268,9 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             
             "changeResolverName VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength)), " +
 
+            // Because file label's must be unique within file group's.
+            "CONSTRAINT \(Self.uniqueFileLabelConstraintName) \(Self.uniqueFileLabelConstraint), " +
+            
             "UNIQUE (fileUUID, sharingGroupUUID), " +
             "UNIQUE (fileIndexId))"
         
@@ -302,6 +317,19 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                     return .failure(.columnCreation)
                 }
             }
+
+            if db.columnExists(FileIndex.fileLabelKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.fileLabelKey) VARCHAR(\(FileLabel.maxLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+
+            if db.namedConstraintExists(Self.uniqueFileLabelConstraintName, in: tableName) == false {
+                if !db.createConstraint(constraint:
+                    "\(Self.uniqueFileLabelConstraintName) \(Self.uniqueFileLabelConstraint)", tableName: tableName) {
+                    return .failure(.constraintCreation)
+                }
+            }
             
         default:
             break
@@ -311,7 +339,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
     }
     
     private func haveNilFieldForAdd(fileIndex:FileIndex) -> Bool {
-        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.lastUploadedCheckSum == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.lastUploadedCheckSum == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil || fileIndex.fileLabel == nil
     }
     
     enum AddFileIndexResponse: RetryRequest {
@@ -363,6 +391,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             let updateDateValue = DateExtras.date(updateDate, toFormat: .DATETIME)
             insert.add(fieldName: FileIndex.updateDateKey, value: .string(updateDateValue))
         }
+        
+        insert.add(fieldName: FileIndex.fileLabelKey, value: .stringOptional(fileIndex.fileLabel))
         
         do {
             try insert.run()
@@ -460,7 +490,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             return false
         }
     }
-    
+
     enum LookupKey : CustomStringConvertible {
         case fileIndexId(Int64)
         case userId(UserId)
@@ -468,6 +498,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
         case sharingGroupUUID(sharingGroupUUID: String)
         case userAndSharingGroup(UserId, sharingGroupUUID: String)
         case fileGroupUUIDAndSharingGroup(fileGroupUUID: String, sharingGroupUUID: String)
+        case fileGroupUUIDAndFileLabel(fileGroupUUID: String, fileLabel: String)
         
         var description : String {
             switch self {
@@ -483,6 +514,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                 return "userId(\(userId)); sharingGroupUUID(\(sharingGroupUUID)))"
             case .fileGroupUUIDAndSharingGroup(let fileGroupUUID, let sharingGroupUUID):
                 return "fileGroupUUID(\(fileGroupUUID); sharingGroupUUID(\(sharingGroupUUID))"
+            case .fileGroupUUIDAndFileLabel(fileGroupUUID: let fileGroupUUID, fileLabel: let fileLabel):
+                return "fileGroupUUID(\(fileGroupUUID); fileLabel(\(fileLabel))"
             }
         }
     }
@@ -501,6 +534,8 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             return "userId = \(userId) AND sharingGroupUUID = '\(sharingGroupUUID)'"
         case .fileGroupUUIDAndSharingGroup(let fileGroupUUID, let sharingGroupUUID):
             return "fileGroupUUID = '\(fileGroupUUID)' AND sharingGroupUUID = '\(sharingGroupUUID)'"
+        case .fileGroupUUIDAndFileLabel(let fileGroupUUID, let fileLabel):
+            return "fileGroupUUID = '\(fileGroupUUID)' AND fileLabel = '\(fileLabel)'"
         }
     }
     
@@ -566,7 +601,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             fileIndex.appMetaData = upload.appMetaData
             fileIndex.fileGroupUUID = upload.fileGroupUUID
             fileIndex.objectType = upload.objectType
-            
+
             if upload.state == .v0UploadCompleteFile {
                 fileIndex.fileVersion = 0
                 fileIndex.creationDate = upload.creationDate
@@ -583,8 +618,9 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
                     return
                 }
 
-                // Similarly, the sharing group id doesn't change over time.
+                // Similarly, the sharing group id and fileLabel do not change over time.
                 fileIndex.sharingGroupUUID = upload.sharingGroupUUID
+                fileIndex.fileLabel = upload.fileLabel
             }
             else if upload.state == .vNUploadFileChange {
                 guard let fileVersion = upload.fileVersion else {
@@ -755,6 +791,7 @@ class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
             fileInfo.objectType = rowModel.objectType
             fileInfo.changeResolverName = rowModel.changeResolverName
             fileInfo.appMetaData = rowModel.appMetaData
+            fileInfo.fileLabel = rowModel.fileLabel
             
             guard let accountType = rowModel.accountType,
                 let accountScheme = AccountScheme(.accountName(accountType)),

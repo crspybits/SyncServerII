@@ -100,7 +100,7 @@ extension FileController {
         
         var existingFileInFileIndex:FileIndex?
         var existingFileGroupUUID: String?
- 
+
         do {
             existingFileInFileIndex = try FileController.checkForExistingFile(params:params, sharingGroupUUID: uploadRequest.sharingGroupUUID, fileUUID:uploadRequest.fileUUID)
             
@@ -136,6 +136,12 @@ extension FileController {
         
         var newFile = true
         if let existingFileInFileIndex = existingFileInFileIndex {
+            guard uploadRequest.fileLabel == nil else {
+                let message = "fileLabel given for a vN file."
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
             guard uploadRequest.appMetaData == nil else {
                 let message = "App meta data only allowed with v0 of file."
                 finish(.errorMessage(message), params: params)
@@ -176,6 +182,45 @@ extension FileController {
             // 8/9/17; I'm no longer going to use a date from the client for dates/times-- clients can lie.
             // https://github.com/crspybits/SyncServerII/issues/4
             creationDate = todaysDate
+            
+            guard let fileLabel = uploadRequest.fileLabel else {
+                let message = "No fileLabel given for a v0 file."
+                finish(.errorMessage(message), params: params)
+                return
+            }
+            
+            if let fileGroupUUID = uploadRequest.fileGroupUUID {
+                // We also need to check all other fileLabel's for the file group-- we must not have a conflict.
+                let fileIndexKey = FileIndexRepository.LookupKey.fileGroupUUIDAndFileLabel(fileGroupUUID: fileGroupUUID, fileLabel: fileLabel)
+                let lookupFileIndex = params.repos.fileIndex.lookup(key: fileIndexKey, modelInit: FileIndex.init)
+                switch lookupFileIndex {
+                case .noObjectFound:
+                    break
+                case .found:
+                    let message = "Already have fileLabel in FileIndex!"
+                    finish(.errorMessage(message), params: params)
+                    return
+                case .error:
+                    let message = "Error looking up fileLabel in FileIndex"
+                    finish(.errorMessage(message), params: params)
+                    return
+                }
+                
+                let uploadKey = UploadRepository.LookupKey.fileGroupUUIDAndFileLabel(fileGroupUUID: fileGroupUUID, fileLabel: fileLabel)
+                let uploadIndex = params.repos.upload.lookup(key: uploadKey, modelInit: Upload.init)
+                switch uploadIndex {
+                case .noObjectFound:
+                    break
+                case .found:
+                    let message = "Already have fileLabel in Upload!"
+                    finish(.errorMessage(message), params: params)
+                    return
+                case .error:
+                    let message = "Error looking up fileLabel in Upload"
+                    finish(.errorMessage(message), params: params)
+                    return
+                }
+            }
         }
         
         var ownerCloudStorage:CloudStorage!
@@ -350,6 +395,8 @@ extension FileController {
         let expectedCheckSum: String? = uploadRequest.checkSum?.lowercased()
 
         if newFile {
+            upload.fileLabel = uploadRequest.fileLabel
+
             guard let expectedCheckSum = expectedCheckSum else {
                 let message = "No check sum given for a v0 file."
                 finish(.errorCleanup(message: message, cleanup: cleanup), params: params)

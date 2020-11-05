@@ -64,7 +64,7 @@ class PruneTests: ServerTestCase, UploaderCommon {
             fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return

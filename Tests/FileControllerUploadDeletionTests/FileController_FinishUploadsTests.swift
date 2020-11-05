@@ -66,7 +66,7 @@ class FileController_FinishUploadsTests: ServerTestCase, UploaderCommon {
         }
 
         // Do the v0 upload.
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return

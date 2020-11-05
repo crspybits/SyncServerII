@@ -116,6 +116,9 @@ class Upload : NSObject, Model, ChangeResolverContents {
     static let uploadCountKey = "uploadCount"
     var uploadCount: Int32!
     
+    static let fileLabelKey = "fileLabel"
+    var fileLabel: String?
+    
     subscript(key:String) -> Any? {
         set {
             switch key {
@@ -176,6 +179,9 @@ class Upload : NSObject, Model, ChangeResolverContents {
             case Upload.deferredUploadIdKey:
                 deferredUploadId = newValue as? Int64
 
+            case Upload.fileLabelKey:
+                fileLabel = newValue as? String
+                
             default:
                 Log.error("key: \(key)")
                 assert(false)
@@ -234,6 +240,9 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         return "Upload"
     }
     
+    static let uniqueFileLabelConstraintName = "UniqueFileLabel"
+    static let uniqueFileLabelConstraint = "UNIQUE (fileGroupUUID, fileLabel)"
+    
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
             "(uploadId BIGINT NOT NULL AUTO_INCREMENT, " +
@@ -289,6 +298,9 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             // Non-nil for vN file uploads when they have been sent for deferred uploading.
             "deferredUploadId BIGINT, " +
             
+            // 11/3/20; Optional only because earlier files will not have a fileLabel.
+            "fileLabel VARCHAR(\(FileLabel.maxLength)), " +
+            
             "changeResolverName VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength)), " +
 
             "state VARCHAR(\(UploadState.maxCharacterLength())) NOT NULL, " +
@@ -298,6 +310,9 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
             
+            // Because file label's must be unique within file group's.
+            "CONSTRAINT \(Self.uniqueFileLabelConstraintName) \(Self.uniqueFileLabelConstraint), " +
+
             "UNIQUE (uploadId))"
         
         let result = db.createTableIfNeeded(tableName: "\(tableName)", columnCreateQuery: createColumns)
@@ -365,6 +380,19 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             if db.columnExists(Upload.objectTypeKey, in: tableName) == false {
                 if !db.addColumn("\(Upload.objectTypeKey) VARCHAR(\(FileGroup.maxLengthObjectTypeName))", to: tableName) {
                     return .failure(.columnCreation)
+                }
+            }
+
+            if db.columnExists(Upload.fileLabelKey, in: tableName) == false {
+                if !db.addColumn("\(Upload.fileLabelKey) VARCHAR(\(FileLabel.maxLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+            
+            if db.namedConstraintExists(Self.uniqueFileLabelConstraintName, in: tableName) == false {
+                if !db.createConstraint(constraint:
+                    "\(Self.uniqueFileLabelConstraintName) \(Self.uniqueFileLabelConstraint)", tableName: tableName) {
+                    return .failure(.constraintCreation)
                 }
             }
 
@@ -470,6 +498,8 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         insert.add(fieldName: Upload.changeResolverNameKey, value: .stringOptional(upload.changeResolverName))
         
         insert.add(fieldName: Upload.deferredUploadIdKey, value: .int64Optional(upload.deferredUploadId))
+        
+        insert.add(fieldName: Upload.fileLabelKey, value: .stringOptional(upload.fileLabel))
 
         do {
             try insert.run()
@@ -549,6 +579,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
         case fileGroupUUIDWithState(fileGroupUUID: String, state: UploadState)
         case fileUUIDWithState(fileUUID: String, state: UploadState)
         case deferredUploadId(Int64)
+        case fileGroupUUIDAndFileLabel(fileGroupUUID: String, fileLabel: String)
         
         var description : String {
             switch self {
@@ -567,7 +598,9 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             case .fileGroupUUIDWithState(let fileGroupUUID, let state):
                 return "fileGroupUUID(\(fileGroupUUID); state: \(state.rawValue))"
             case .fileUUIDWithState(let fileUUID, let state):
-                return "fileGroupUUID(\(fileUUID); state: \(state.rawValue))"
+                return "fileUUID(\(fileUUID); state: \(state.rawValue))"
+            case .fileGroupUUIDAndFileLabel(let fileGroupUUID, let fileLabel):
+                return "fileGroupUUID(\(fileGroupUUID); fileLabel: \(fileLabel))"
             }
         }
     }
@@ -590,6 +623,8 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             return "fileGroupUUID = '\(fileGroupUUID)' and state = '\(state.rawValue)'"
         case .fileUUIDWithState(let fileUUID, let state):
             return "fileUUID = '\(fileUUID)' and state = '\(state.rawValue)'"
+        case .fileGroupUUIDAndFileLabel(let fileGroupUUID, let fileLabel):
+            return "fileGroupUUID = '\(fileGroupUUID)' and fileLabel = '\(fileLabel)'"
         }
     }
     
@@ -656,6 +691,7 @@ class UploadRepository : Repository, RepositoryLookup, ModelIndexId {
             fileInfo.fileGroupUUID = upload.fileGroupUUID
             fileInfo.sharingGroupUUID = upload.sharingGroupUUID
             fileInfo.objectType = upload.objectType
+            fileInfo.fileLabel = upload.fileLabel
 
             result += [fileInfo]
         }

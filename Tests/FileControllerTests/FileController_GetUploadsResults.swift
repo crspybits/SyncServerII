@@ -44,7 +44,7 @@ class FileController_GetUploadsResults: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
         let changeResolverName = CommentFile.changeResolverName
 
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: file, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: file, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -113,7 +113,7 @@ class FileController_GetUploadsResults: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
         let changeResolverName = CommentFile.changeResolverName
 
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: file, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: file, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -178,7 +178,7 @@ class FileController_GetUploadsResults: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
         let changeResolverName = CommentFile.changeResolverName
 
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: file, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: file, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return

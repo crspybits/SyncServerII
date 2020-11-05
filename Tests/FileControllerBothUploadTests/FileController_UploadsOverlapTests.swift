@@ -57,7 +57,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -142,7 +142,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             return
         }
                 
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: .commentFile, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -165,7 +165,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
         }
         
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
-        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withDeletionBefore, dataToUpload: comment1.updateContents)
+        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, errorExpected: withDeletionBefore, dataToUpload: comment1.updateContents)
         
         if withDeletionBefore {
             XCTAssert(result2 == nil, "\(String(describing: result2))")
@@ -238,7 +238,7 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -346,14 +346,14 @@ class FileController_UploadsOverlapTests: ServerTestCase, UploaderCommon {
             fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
         }
         
-        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
+        guard let result1 = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup:fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
         }
         
         // Explicitly not including this one in file group because we're going to upload a change for it, which we don't want removed with the other file group.
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, stringFile: .commentFile, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }

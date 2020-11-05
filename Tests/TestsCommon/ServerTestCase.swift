@@ -596,7 +596,7 @@ class ServerTestCase : XCTestCase {
     // If dataToUpload is present, `file` is not used.
     // `vNUpload` signals whether or not to wait for Uploader run to complete.
     @discardableResult
-    func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, mimeType: String? = nil, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile? = .test1, dataToUpload: Data? = nil, fileGroup:FileGroup? = nil, changeResolverName: String? = nil, vNUpload: Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadServerFile(uploadIndex: Int32, uploadCount: Int32, testAccount:TestAccount = .primaryOwningAccount, fileLabel: String?, mimeType: String? = nil, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, file: TestFile? = .test1, dataToUpload: Data? = nil, fileGroup:FileGroup? = nil, changeResolverName: String? = nil, vNUpload: Bool = false, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         var sharingGroupUUID = UUID().uuidString
         var uploadingUserId: UserId?
@@ -660,6 +660,7 @@ class ServerTestCase : XCTestCase {
         uploadRequest.uploadIndex = uploadIndex
         uploadRequest.uploadCount = uploadCount
         uploadRequest.objectType = fileGroup?.objectType
+        uploadRequest.fileLabel = fileLabel
         
         if let appMetaData = appMetaData {
             uploadRequest.appMetaData = AppMetaData(contents: appMetaData)
@@ -700,12 +701,12 @@ class ServerTestCase : XCTestCase {
     }
     
     @discardableResult
-    func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType? = TestFile.test1.mimeType, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile? = .test1, dataToUpload: Data? = nil, fileGroup:FileGroup? = nil, changeResolverName: String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
+    func uploadTextFile(uploadIndex: Int32 = 1, uploadCount: Int32 = 1, testAccount:TestAccount = .primaryOwningAccount, mimeType: MimeType? = TestFile.test1.mimeType, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String? = nil, addUser:AddUser = .yes, fileLabel: String?, cloudFolderName:String? = ServerTestCase.cloudFolderName, appMetaData:String? = nil, errorExpected:Bool = false, undelete: Int32 = 0, stringFile: TestFile? = .test1, dataToUpload: Data? = nil, fileGroup:FileGroup? = nil, changeResolverName: String? = nil, statusCodeExpected: HTTPStatusCode? = nil) -> UploadFileResult? {
     
         // This signals whether or not to wait for Uploader run to complete.
         let vNUpload = dataToUpload != nil && uploadIndex == uploadCount && !errorExpected
     
-        return uploadServerFile(uploadIndex: uploadIndex, uploadCount: uploadCount, testAccount:testAccount, mimeType: mimeType?.rawValue, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, dataToUpload: dataToUpload, fileGroup: fileGroup, changeResolverName: changeResolverName, vNUpload: vNUpload, statusCodeExpected: statusCodeExpected)
+        return uploadServerFile(uploadIndex: uploadIndex, uploadCount: uploadCount, testAccount:testAccount, fileLabel: fileLabel, mimeType: mimeType?.rawValue, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, addUser:addUser, cloudFolderName:cloudFolderName, appMetaData:appMetaData, errorExpected:errorExpected, undelete: undelete, file: stringFile, dataToUpload: dataToUpload, fileGroup: fileGroup, changeResolverName: changeResolverName, vNUpload: vNUpload, statusCodeExpected: statusCodeExpected)
     }
     
     // Returns true iff the file could be uploaded.
@@ -769,7 +770,7 @@ class ServerTestCase : XCTestCase {
         return result
     }
     
-    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, appMetaData:String? = nil, fileGroup: FileGroup? = nil, changeResolverName: String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+    func uploadFileUsingServer(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, mimeType: MimeType = .jpeg, file: TestFile, fileLabel: String, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, appMetaData:String? = nil, fileGroup: FileGroup? = nil, changeResolverName: String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
     
         var sharingGroupUUID: String!
         var uploadingUserId: UserId?
@@ -810,6 +811,7 @@ class ServerTestCase : XCTestCase {
         uploadRequest.fileGroupUUID = fileGroup?.fileGroupUUID
         uploadRequest.changeResolverName = changeResolverName
         uploadRequest.objectType = fileGroup?.objectType
+        uploadRequest.fileLabel = fileLabel
         
         guard uploadRequest.valid() else {
             XCTFail()
@@ -829,7 +831,7 @@ class ServerTestCase : XCTestCase {
     func uploadJPEGFile(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, appMetaData:String? = nil, fileGroup: FileGroup? = nil, changeResolverName: String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
         
         let jpegFile = TestFile.catJpg
-        return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, addUser:addUser, fileVersion:fileVersion, appMetaData:appMetaData, fileGroup: fileGroup, changeResolverName: changeResolverName, errorExpected:errorExpected)
+        return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .jpeg, file: jpegFile, fileLabel: UUID().uuidString, addUser:addUser, fileVersion:fileVersion, appMetaData:appMetaData, fileGroup: fileGroup, changeResolverName: changeResolverName, errorExpected:errorExpected)
     }
 
     func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
@@ -1500,6 +1502,7 @@ class ServerTestCase : XCTestCase {
         fileIndex.updateDate = Date()
         fileIndex.sharingGroupUUID = sharingGroupUUID
         fileIndex.changeResolverName = changeResolverName
+        fileIndex.fileLabel = "file1"
         
         let result1 = FileIndexRepository(db).add(fileIndex: fileIndex)
         guard case .success(let uploadId) = result1 else {

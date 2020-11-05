@@ -30,7 +30,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Test1"
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData),
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -45,7 +45,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Test1"
 
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData), let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData), let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
         }
@@ -60,7 +60,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
 
         Log.debug("About to uploadTextFile")
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData) else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData) else {
             XCTFail()
             return
         }
@@ -85,7 +85,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Test1"
 
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData),
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -103,7 +103,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         var appMetaData = "Test1"
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID,  appMetaData:appMetaData),
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -118,7 +118,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         
         // Expect an error here because you can only upload app meta data with version 0 of the file.
         appMetaData = "Test2"
-        uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData:appMetaData, errorExpected: true)
+        uploadTextFile(deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, appMetaData:appMetaData, errorExpected: true)
     }
     
     // Upload app meta data version 0, then upload app meta version nil, and then make sure when you download you still have app meta version 0. i.e., nil doesn't overwrite a non-nil version.
@@ -127,7 +127,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         let appMetaData = "Test1"
         let file: TestFile = .commentFile
         
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData, stringFile: file, changeResolverName: CommentFile.changeResolverName),
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData, stringFile: file, changeResolverName: CommentFile.changeResolverName),
             let sharingGroupUUID = uploadResult1.sharingGroupUUID else {
             XCTFail()
             return
@@ -135,7 +135,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         
         let comment1 = ExampleComment(messageString: "Example", id: Foundation.UUID().uuidString)
 
-        guard let _ = uploadTextFile(mimeType: nil, deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: comment1.updateContents) else {
+        guard let _ = uploadTextFile(mimeType: nil, deviceUUID:deviceUUID, fileUUID: uploadResult1.request.fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, dataToUpload: comment1.updateContents) else {
             XCTFail()
             return
         }
@@ -152,7 +152,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Test1"
 
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData) else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData) else {
             XCTFail()
             return
         }
@@ -165,7 +165,7 @@ class FileController_DownloadAppMetaDataTests: ServerTestCase {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Test1"
 
-        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, appMetaData:appMetaData) else {
+        guard let uploadResult1 = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData:appMetaData) else {
             XCTFail()
             return
         }

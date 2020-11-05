@@ -56,7 +56,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // This file is going to be deleted.
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileGroup: fileGroup),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, fileGroup: fileGroup),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -130,7 +130,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // These files are going to be deleted.
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileGroup: fileGroup),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, fileGroup: fileGroup),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -141,7 +141,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileGroup: fileGroup) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, fileGroup: fileGroup) else {
             XCTFail()
             return
         }
@@ -241,7 +241,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // These files are going to be deleted.
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileGroup: fileGroup),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, fileGroup: fileGroup),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -252,12 +252,12 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileGroup: fileGroup) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, fileGroup: fileGroup) else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID3, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileGroup: nil) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID3, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, fileGroup: nil) else {
             XCTFail()
             return
         }
@@ -330,7 +330,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
         let fileGroup = FileGroup(fileGroupUUID: Foundation.UUID().uuidString, objectType: "Foo")
 
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileGroup: fileGroup),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, fileGroup: fileGroup),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -392,7 +392,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         }
 
         // This file is going to be deleted.
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -438,7 +438,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
 
         let account = TestAccount.dropbox1
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: account, deviceUUID:deviceUUID1, fileUUID: fileUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: account, deviceUUID:deviceUUID1, fileUUID: fileUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -487,7 +487,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
 
         // Using this upload file only for creating a user.
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -509,7 +509,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
 
         // Using this upload file only for creating a user.
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID1, fileUUID: fileUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID1, fileUUID: fileUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -545,7 +545,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
         let fileUUID = Foundation.UUID().uuidString
 
         // Using this upload file only for creating a user.
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString) else {
             XCTFail()
             return
         }
@@ -568,7 +568,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
          
         // First upload the v0 file.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: TestFile.commentFile.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: TestFile.commentFile.mimeType, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: .commentFile, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -576,7 +576,7 @@ class FileController_UploadDeletionTests: ServerTestCase, UploaderCommon {
                 
         // Next, upload v1 of the file -- i.e., upload just the specific change to the file.
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: exampleComment.updateContents) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, dataToUpload: exampleComment.updateContents) else {
             XCTFail()
             return
         }

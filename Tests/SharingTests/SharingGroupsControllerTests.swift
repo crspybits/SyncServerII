@@ -194,7 +194,7 @@ class SharingGroupsControllerTests: ServerTestCase {
     func testRemoveSharingGroupWorks_filesMarkedAsDeleted() {
         let deviceUUID = Foundation.UUID().uuidString
 
-        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -284,7 +284,7 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
         
-        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected:true)
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, errorExpected:true)
     }
     
     func testRemoveSharingGroupWorks_cannotThenDoDoneUploads() {
@@ -303,7 +303,7 @@ class SharingGroupsControllerTests: ServerTestCase {
     
     func testRemoveSharingGroupWorks_cannotDeleteFile() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
@@ -324,7 +324,7 @@ class SharingGroupsControllerTests: ServerTestCase {
     func testRemoveSharingGroupWorks_downloadAppMetaDataFails() {
         let deviceUUID = Foundation.UUID().uuidString
         let appMetaData = "Foo"
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, appMetaData: appMetaData), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString, appMetaData: appMetaData), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
@@ -339,7 +339,7 @@ class SharingGroupsControllerTests: ServerTestCase {
     
     func testRemoveSharingGroupWorks_downloadFileFails() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID),
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString),
             let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
@@ -467,7 +467,7 @@ class SharingGroupsControllerTests: ServerTestCase {
     // When user has files in the sharing group-- those should be marked as deleted.
     func testRemoveUserFromSharingGroup_userHasFiles() {
         let deviceUUID = Foundation.UUID().uuidString
-        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
+        guard let uploadResult = uploadTextFile(deviceUUID:deviceUUID, fileLabel: UUID().uuidString), let sharingGroupUUID = uploadResult.sharingGroupUUID else {
             XCTFail()
             return
         }
@@ -533,7 +533,7 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
         
-        let result = uploadTextFile(testAccount: sharingUser, owningAccountType: owningUser.scheme.accountName, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), errorExpected: true)
+        let result = uploadTextFile(testAccount: sharingUser, owningAccountType: owningUser.scheme.accountName, deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), fileLabel: UUID().uuidString, errorExpected: true)
         XCTAssert(result == nil)
     }
     
@@ -554,8 +554,8 @@ class SharingGroupsControllerTests: ServerTestCase {
             return
         }
 
-        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID1))
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID1), fileLabel: UUID().uuidString)
 
-        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID2))
+        uploadTextFile(deviceUUID:deviceUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID2), fileLabel: UUID().uuidString)
     }
 }

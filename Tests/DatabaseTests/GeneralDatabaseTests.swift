@@ -204,6 +204,8 @@ class GeneralDatabaseTests: ServerTestCase {
 
     static let testTableName3 = "TestTableABC"
 
+    static let testTableName4 = "TestTableABCDEF"
+
     let c2Table2Value = Date()
 
     override func setUp() {
@@ -220,10 +222,12 @@ class GeneralDatabaseTests: ServerTestCase {
         let _ = db.query(statement: "DROP TABLE \(testTableName)")
         let _ = db.query(statement: "DROP TABLE \(testTableName2)")
         let _ = db.query(statement: "DROP TABLE \(GeneralDatabaseTests.testTableName3)")
+        let _ = db.query(statement: "DROP TABLE \(GeneralDatabaseTests.testTableName4)")
         
         XCTAssert(createTable())
         XCTAssert(createTable2())
         XCTAssert(createTable3())
+        XCTAssert(createTable4())
         insertRows()
         insertRows2()
         
@@ -352,6 +356,24 @@ class GeneralDatabaseTests: ServerTestCase {
 
         if case .success(.created) = db.createTableIfNeeded(tableName: GeneralDatabaseTests.testTableName3, columnCreateQuery: createColumns) {
             return true
+        }
+        else {
+            return false
+        }
+    }
+    
+    let constraint1Name = "Constraint1"
+    let constraint2Name = "Constraint2"
+    
+    func createTable4() -> Bool {
+        let createColumns =
+            "(c1 VARCHAR(100) NOT NULL, " +
+            "c2 INT(3) NOT NULL)"
+
+        if case .success(.created) = db.createTableIfNeeded(tableName: GeneralDatabaseTests.testTableName4, columnCreateQuery: createColumns) {
+        
+            return db.createConstraint(constraint:
+                "\(constraint1Name) UNIQUE (c1)", tableName: GeneralDatabaseTests.testTableName4)
         }
         else {
             return false
@@ -514,6 +536,16 @@ class GeneralDatabaseTests: ServerTestCase {
     func testRemoveColumn() {
         XCTAssert(db.addColumn("newTextColumn TEXT", to: testTableName))
         XCTAssert(db.removeColumn("newTextColumn", from: testTableName))
+    }
+    
+    func testConstraintExists() {
+        XCTAssert(db.namedConstraintExists("Constraint1", in: Self.testTableName4) == true)
+        XCTAssert(db.namedConstraintExists("Foo", in: Self.testTableName4) == false)
+    }
+    
+    func testAddConstraint() {
+        XCTAssert(db.createConstraint(constraint:
+                "\(constraint2Name) UNIQUE (c2)", tableName: Self.testTableName4))
     }
     
     // MARK: Database.PreparedStatement

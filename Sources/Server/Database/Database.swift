@@ -107,6 +107,7 @@ class Database {
         case query
         case tableCreation
         case columnCreation
+        case constraintCreation
         case columnRemoval
     }
     
@@ -184,6 +185,42 @@ class Database {
         let alterTable = "ALTER TABLE \(tableName) DROP \(columnName)"
         
         guard query(statement: alterTable) else {
+            Log.error("Failure: \(self.error)")
+            return false
+        }
+        
+        return true
+    }
+    
+    func namedConstraintExists(_ constraintName:String, in tableName:String) -> Bool? {
+        let checkForConstraint = "SELECT * " +
+            "FROM information_schema.TABLE_CONSTRAINTS " +
+            "WHERE " +
+            "CONSTRAINT_SCHEMA = '\(Configuration.server.db.database)' AND " +
+            "TABLE_NAME = '\(tableName)' AND " +
+            "CONSTRAINT_NAME = '\(constraintName)' AND " +
+            "CONSTRAINT_TYPE = 'UNIQUE'"
+        
+        guard query(statement: checkForConstraint) else {
+            Log.error("Failure: \(self.error)")
+            return nil
+        }
+        
+        if let results = connection.storeResults(), results.numRows() == 1 {
+            Log.info("Constraint \(constraintName) was already in database table \(tableName)")
+            return true
+        }
+        
+        Log.info("Constraint \(constraintName) was not in database table \(tableName)")
+        return false
+    }
+    
+    // constraint, e.g., "UniqueFileLabel UNIQUE (fileGroupUUID, fileLabel)"
+    func createConstraint(constraint: String, tableName: String) -> Bool {
+        let create = "ALTER TABLE \(tableName) " +
+            "ADD CONSTRAINT \(constraint)"
+            
+        guard query(statement: create) else {
             Log.error("Failure: \(self.error)")
             return false
         }

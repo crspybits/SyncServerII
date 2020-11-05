@@ -55,7 +55,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         let changeResolverName = CommentFile.changeResolverName
         let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
 
-        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: UUID().uuidString, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -65,7 +65,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             mimeType = file.mimeType
         }
 
-        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: mimeType?.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withMimeType, file: file, dataToUpload: comment.updateContents)
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: nil, mimeType: mimeType?.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withMimeType, file: file, dataToUpload: comment.updateContents)
         if withMimeType {
             XCTAssert(result2 == nil)
         }
@@ -85,6 +85,29 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         runUploadVNFile(withMimeType: true)
     }
     
+    func testUploadVNFileWithFileLabelFails() {
+        let file:TestFile = .commentFile
+        let deviceUUID = Foundation.UUID().uuidString
+        let testAccount:TestAccount = .primaryOwningAccount
+        let fileUUID = Foundation.UUID().uuidString
+        let mimeType = file.mimeType
+        
+        let changeResolverName = CommentFile.changeResolverName
+        let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
+
+        let fileLabel = UUID().uuidString
+        
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: fileLabel, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+            let sharingGroupUUID = result1.sharingGroupUUID else {
+            XCTFail()
+            return
+        }
+
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: fileLabel, mimeType: mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: true, file: file, dataToUpload: comment.updateContents)
+
+        XCTAssert(result2 == nil)
+    }
+    
     func runUploadOneV1TextFileWorks(withFileGroup: Bool) {
         let changeResolverName = CommentFile.changeResolverName
         let deviceUUID = Foundation.UUID().uuidString
@@ -100,7 +123,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
          
         // First upload the v0 file.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -121,7 +144,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
                 
         let v1ChangeData = exampleComment.updateContents
         
-        guard let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData) else {
+        guard let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, dataToUpload: v1ChangeData) else {
             XCTFail()
             return
         }
@@ -173,13 +196,13 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             expectedError = false
         }
         
-        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .yes, cloudFolderName: ServerTestCase.cloudFolderName, file: file, fileGroup: fileGroup1, changeResolverName: changeResolverName),
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: UUID().uuidString, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .yes, cloudFolderName: ServerTestCase.cloudFolderName, file: file, fileGroup: fileGroup1, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
         }
 
-        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: expectedError, file: file,  dataToUpload: comment.updateContents, fileGroup:fileGroup2)
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: nil, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: expectedError, file: file,  dataToUpload: comment.updateContents, fileGroup:fileGroup2)
 
         switch fileGroupOption {
         case .sameFileGroup, .differentFileGroup:
@@ -213,7 +236,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
          
         // First upload the v0 file.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID1, fileUUID: fileUUID, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID1, fileUUID: fileUUID,  fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -234,7 +257,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
                 
         let v1ChangeData = exampleComment.updateContents
         
-        guard let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData) else {
+        guard let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, dataToUpload: v1ChangeData) else {
             XCTFail()
             return
         }
@@ -262,13 +285,13 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
 
         // First upload the v0 files.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 2, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 2, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 2, uploadCount: 2, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 2, uploadCount: 2, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
@@ -291,12 +314,12 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         Log.debug("Starting vN uploads...")
 
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID1, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData1) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID1, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, dataToUpload: v1ChangeData1) else {
             XCTFail()
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 2, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData2) else {
+        guard let _ = uploadTextFile(uploadIndex: 2, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, dataToUpload: v1ChangeData2) else {
             XCTFail()
             return
         }
@@ -332,13 +355,13 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
 
         // First upload the v0 files. Will use separate batches here. What I want to test is the VN upload process.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup1, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup1, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
         }
         
-        let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName)
+        let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName)
         
         // Next, upload v1 of the files -- i.e., upload just the specific changes to the files.
         
@@ -358,13 +381,13 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         Log.debug("Starting vN uploads...")
 
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID1, addUser: .no(sharingGroupUUID: sharingGroupUUID), dataToUpload: v1ChangeData1) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID1, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, dataToUpload: v1ChangeData1) else {
             XCTFail()
             return
         }
         
         // Expecting a failure here.
-        let result2 = uploadTextFile(uploadIndex: 2, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: fromDifferentFileGroupsInSameBatch, dataToUpload: v1ChangeData2)
+        let result2 = uploadTextFile(uploadIndex: 2, uploadCount: 2, testAccount: .primaryOwningAccount, mimeType: nil, deviceUUID: deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, errorExpected: fromDifferentFileGroupsInSameBatch, dataToUpload: v1ChangeData2)
         
         if !fromDifferentFileGroupsInSameBatch {
             XCTAssert(result2 != nil)
@@ -401,7 +424,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
 
         // First, do the v0 uploads.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, stringFile: .commentFile, fileGroup: fileGroup1, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID1, fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup1, changeResolverName: changeResolverName),
             let sharingGroupUUID1 = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -416,7 +439,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), fileLabel: UUID().uuidString, stringFile: .commentFile, fileGroup: fileGroup2, changeResolverName: changeResolverName) else {
             XCTFail()
             return
         }
@@ -452,7 +475,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         
         // Can do the second one normally. Both this upload and the faked one should get processed by Uploader run.
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), dataToUpload: comment2.updateContents) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID2, addUser: .no(sharingGroupUUID: sharingGroupUUID2), fileLabel: nil, dataToUpload: comment2.updateContents) else {
             XCTFail()
             return
         }
@@ -462,7 +485,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        XCTAssert(fileIndex1.fileVersion == 1, "\(fileIndex1.fileVersion)")
+        XCTAssert(fileIndex1.fileVersion == 1, "\(String(describing: fileIndex1.fileVersion))")
         
         guard let fileIndex2 = getFileIndex(sharingGroupUUID: sharingGroupUUID2, fileUUID: fileUUID2) else {
             XCTFail()
@@ -486,7 +509,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
 
         // First, do the v0 uploads.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: .commentFile, changeResolverName: changeResolverName),
             let sharingGroupUUID1 = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -511,7 +534,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             return
         }
         
-        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID1), dataToUpload: comment2.updateContents) else {
+        guard let _ = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID1), fileLabel: nil, dataToUpload: comment2.updateContents) else {
             XCTFail()
             return
         }
@@ -570,7 +593,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
 
         // First, do the v0 uploads.
   
-        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, stringFile: .commentFile, changeResolverName: changeResolverName),
+        guard let result = uploadTextFile(uploadIndex: 1, uploadCount: 1, deviceUUID:deviceUUID, fileUUID: fileUUID, fileLabel: UUID().uuidString, stringFile: .commentFile, changeResolverName: changeResolverName),
             let sharingGroupUUID = result.sharingGroupUUID else {
             XCTFail()
             return
@@ -581,7 +604,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             appMetaData = "Example app meta data"
         }
         
-        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), appMetaData: appMetaData, errorExpected: withAppMetaData, dataToUpload: comment.updateContents)
+        let result2 = uploadTextFile(uploadIndex: 1, uploadCount: 1, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), fileLabel: nil, appMetaData: appMetaData, errorExpected: withAppMetaData, dataToUpload: comment.updateContents)
         
         if withAppMetaData {
             XCTAssert(result2 == nil)
@@ -632,7 +655,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
 
         let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
 
-        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: UUID().uuidString, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -643,7 +666,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             secondChangeResolver = changeResolverName
         }
         
-        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withChangeResolver, file: file, dataToUpload: comment.updateContents, changeResolverName: secondChangeResolver)
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: nil, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: withChangeResolver, file: file, dataToUpload: comment.updateContents, changeResolverName: secondChangeResolver)
         
         XCTAssert((result2 == nil) == withChangeResolver)
     }
@@ -667,7 +690,6 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
         let deviceUUID = Foundation.UUID().uuidString
         let testAccount:TestAccount = .primaryOwningAccount
         let fileUUID = Foundation.UUID().uuidString
-        var mimeType: MimeType?
         var changeResolverName: String?
 
         let comment = ExampleComment(messageString: "Hello, World", id: Foundation.UUID().uuidString)
@@ -676,7 +698,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             changeResolverName = CommentFile.changeResolverName
         }
 
-        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
+        guard let result1 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: UUID().uuidString, mimeType: file.mimeType.rawValue, deviceUUID:deviceUUID, fileUUID: fileUUID, cloudFolderName: ServerTestCase.cloudFolderName, file: file, changeResolverName: changeResolverName),
             let sharingGroupUUID = result1.sharingGroupUUID else {
             XCTFail()
             return
@@ -699,7 +721,7 @@ class FileController_VN_UploadTests: ServerTestCase, UploaderCommon {
             dataToUpload = comment.updateContents
         }
         
-        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: errorExpected, file: file, dataToUpload: dataToUpload)
+        let result2 = uploadServerFile(uploadIndex: 1,  uploadCount: 1, testAccount:testAccount, fileLabel: nil, mimeType: nil, deviceUUID:deviceUUID, fileUUID: fileUUID, addUser: .no(sharingGroupUUID: sharingGroupUUID), errorExpected: errorExpected, file: file, dataToUpload: dataToUpload)
         
         switch changeResolverTest {
         case .uploadedChangeIsBad, .v0HadNoChangeResolver:
