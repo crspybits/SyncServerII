@@ -142,7 +142,8 @@ class Uploader: UploaderProtocol {
         }
         
         Log.debug("Got lock!")
-
+        
+        // Get `pendingDeletions` across all users. The `Uploader` works across all users-- and this is OK because of the mutex lock.
         guard let deferredFileDeletions = deferredUploadRepo.select(rowsWithStatus: [.pendingDeletion]) else {
             Log.error("Failed setting up select to get deferred upload deletions")
             try releaseLock()
@@ -152,6 +153,7 @@ class Uploader: UploaderProtocol {
         // Must do pruning based on deletions before fetching the deferred file changes. Because the pruning may remove some of the deferred file changes.
         guard pruneFileUploads(deferredFileDeletions: deferredFileDeletions) else {
             Log.error("Failed pruning file uploads.")
+            // TODO(https://github.com/SyncServerII/ServerMain/issues/9)
             try releaseLock()
             throw Errors.failedToGetDeferredUploads
         }
@@ -351,6 +353,7 @@ class Uploader: UploaderProtocol {
     }
     
     // Remove file uploads (DeferredUpload, Upload's) corresponding to these deletions. They are not relevant any more given that we're doing deletions.
+    // If `deferredFileDeletions` is empty, this returns immediately.
     func pruneFileUploads(deferredFileDeletions: [DeferredUpload]) -> Bool {
         guard deferredFileDeletions.count > 0 else {
             return true
@@ -396,8 +399,7 @@ class Uploader: UploaderProtocol {
             var deferredIdsForFileChangeUploads = [Int64]()
             
             for deferredDeletion in deferredDeletionsWithoutFileGroups {
-                #warning("9/20/20: This lookup just failed. And the server is now stuck in terms of deferred operations. Need some means of removing these if they fail more than a set number of times. This looks like an example where I could record this on the deferred upload record as an error-- so the client can know of the failure.")
-                #warning("If we get this again, one fix would be to remove the DeferredUpload that caused this to fail.")
+                // TODO(https://github.com/SyncServerII/ServerMain/issues/8)
                 // Get the deletion Upload associated with this `deferredDeletion`
                 let key1 = UploadRepository.LookupKey.deferredUploadId(deferredDeletion.deferredUploadId)
                 guard case .found(let model) = uploadRepo.lookup(key: key1, modelInit: Upload.init), let uploadDeletion = model as? Upload else {
@@ -427,7 +429,7 @@ class Uploader: UploaderProtocol {
                         return false
                     }
                 }
-            } // end for
+            } // end for: deferredDeletionsWithoutFileGroups
             
             // Get rid of any non-distinct deferredUploadId's for file DeferredUpload's
             deferredIdsForFileChangeUploads = Array(Set<Int64>(deferredIdsForFileChangeUploads))

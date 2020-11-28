@@ -141,6 +141,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup, ModelIndexId {
         case deferredUploadId(Int64)
         case fileGroupUUIDWithStatus(fileGroupUUID: String, status: DeferredUploadStatus)
         case resultsUUID(String)
+        case userId(UserId)
         
         var description : String {
             switch self {
@@ -150,6 +151,8 @@ class DeferredUploadRepository : Repository, RepositoryLookup, ModelIndexId {
                 return "fileGroupUUID(\(fileGroupUUID); status: \(status.rawValue))"
             case .resultsUUID(let resultsUUID):
                 return "resultsUUID(\(resultsUUID))"
+            case .userId(let userId):
+                return "userId(\(userId))"
             }
         }
     }
@@ -162,6 +165,8 @@ class DeferredUploadRepository : Repository, RepositoryLookup, ModelIndexId {
             return "fileGroupUUID = '\(fileGroupUUID)' and status = '\(status.rawValue)'"
         case .resultsUUID(let resultsUUID):
             return "resultsUUID = '\(resultsUUID)'"
+        case .userId(let userId):
+            return "userId = \(userId)"
         }
     }
     
@@ -244,6 +249,7 @@ class DeferredUploadRepository : Repository, RepositoryLookup, ModelIndexId {
     }
     
     // A nil result indicates an error. No rows in the query is returned as an empty array.
+    // This `select` is not constrained by `UserId` because it is used from the `Uploader`, and the intent there is that the Uploader works *across* users.
     func select(rowsWithStatus status: [DeferredUploadStatus]) -> [DeferredUpload]? {
         let quotedStatusString = status.map {$0.rawValue}.map {"'\($0)'"}.joined(separator: ",")
         

@@ -222,14 +222,27 @@ class UserController : ControllerProtocol {
             return
         }
         
-        // When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
+        // TODO: When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
         
+        // This is somewhat aggressive: I'm going to remove both `Upload` and `DeferredUpload` records. It's somewhat aggressive because this gets rid of "work" the user has already done. However both of these record types have a UserId field, and this userId is being removed below (when we remove the `UserRepository` record). Plus, if the user was the cloud storage owner on these files, these files are getting marked as deleted as part of this user deletion anyways.
         let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)
         let removeResult2 = params.repos.upload.retry {
             return params.repos.upload.remove(key: uploadRepoKey)
         }
         guard case .removed = removeResult2 else {
-            let message = "Could not remove upload files for user!"
+            let message = "Could not remove Upload records for user!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // 11/28/20; Didn't have this DeferredUpload deletion until today. I think this was the source of https://github.com/SyncServerII/ServerMain/issues/9 and https://github.com/SyncServerII/ServerMain/issues/8.
+        let deferrredUploadRepoKey = DeferredUploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        let deferrredUploadRemoveResult = params.repos.deferredUpload.retry {
+            return params.repos.deferredUpload.remove(key: deferrredUploadRepoKey)
+        }
+        guard case .removed = deferrredUploadRemoveResult else {
+            let message = "Could not remove DeferredUpload records for user!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return

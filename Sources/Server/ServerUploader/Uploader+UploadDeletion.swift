@@ -79,6 +79,7 @@ extension Uploader {
             throw Errors.mismatchWithDeferredUploadIdsCount
         }
         
+        // Case 2) continued
         if deferredUploadIds.count > 0 {
             guard let theUploads = uploadRepo.select(forDeferredUploadIds: deferredUploadIds) else {
                 throw Errors.failedToGetUploads
@@ -104,12 +105,14 @@ extension Uploader {
             }
         }
         
+        // End: specific code for Case 1) and Case 2); moving on to more general code.
+        
         // Not going to worry about any resulting errors because: (a) we might be trying the deletion a 2nd (or more) time and the file might just not be there, (b) the consequences of leaving a file in cloud storage are not dire-- just some garbage that could possibly be cleaned up later.
         if let errors = FileDeletion.apply(deletions: fileDeletions) {
             Log.warning("Some error(s) occurred while deleting files: \(errors)")
         }
         
-        // Now, delete the database records.
+        // Now, delete the Upload database records, and change the status of the DeferredUpload records to `completed`.
         
         for upload in uploads {
             let key = UploadRepository.LookupKey.uploadId(upload.uploadId)
