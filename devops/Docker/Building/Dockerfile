@@ -1,12 +1,15 @@
 # `swift:5.2.3-xenial` below references https://github.com/apple/swift-docker/blob/38f179345ace24236d6c09de84e77d91384014cd/5.2/ubuntu/16.04/Dockerfile
 # More generally, these Dockerfile's are listed at https://hub.docker.com/_/swift
 
+# This is for Ubuntu 16.04 (xenial), the latest build of Swift 5.3
+# See https://hub.docker.com/r/swiftlang/swift/tags
+# FROM swiftlang/swift:nightly-5.3-xenial
+
 # Note that I'm not using Ubuntu 14.04 because I'm currently using Perfect for mySQL interface
 # and that has problems with the mysqlclient for 14.04. See https://github.com/PerfectlySoft/Perfect-MySQL
 
-# This is for Ubuntu 16.04 (xenial), the latest build of Swift 5.3
-# See https://hub.docker.com/r/swiftlang/swift/tags
-FROM swiftlang/swift:nightly-5.3-xenial
+# This is for Ubuntu 16.04 (xenial), the prod build of Swift 5.3.1
+FROM swift:5.3.1-xenial
 LABEL maintainer="Chris Prince <chris@SpasticMuffin.biz>"
 LABEL Description="Docker image for building the Swift SyncServer server"
 
