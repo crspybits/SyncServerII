@@ -14,9 +14,9 @@ let package = Package(
         // 7/2/17; See comment in SwiftMain with the same date.
         // .Package(url: "https://github.com/RuntimeTools/SwiftMetrics.git", majorVersion: 1, minor: 2),
 
-        .package(path: "../ServerShared"),
+        // .package(path: "../ServerShared"),
         // .package(url: "../ServerShared", .branch("master")),
-        //.package(url: "https://github.com/SyncServerII/ServerShared.git", .branch("master")),
+        .package(url: "https://github.com/SyncServerII/ServerShared.git", .branch("master")),
         
         .package(url: "https://github.com/SyncServerII/ChangeResolvers.git", .branch("master")),
         

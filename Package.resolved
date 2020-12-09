@@ -290,6 +290,15 @@
         }
       },
       {
+        "package": "ServerShared",
+        "repositoryURL": "https://github.com/SyncServerII/ServerShared.git",
+        "state": {
+          "branch": "master",
+          "revision": "476a79c48021d4b983d8d5a0f4f8702d06929b6c",
+          "version": null
+        }
+      },
+      {
         "package": "SwiftJWKtoPEM",
         "repositoryURL": "https://github.com/ibm-cloud-security/Swift-JWK-to-PEM.git",
         "state": {

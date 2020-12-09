@@ -10,6 +10,7 @@ import Foundation
 import HeliumLogger
 import LoggerAPI
 import Kitura
+import ServerShared
 
 // If given, the single command line argument to the server is expected to be a full path to the server config file.
 
@@ -76,6 +77,8 @@ public class ServerMain {
             Startup.halt("Failed during startup: Failed setting up Services")
             return
         }
+        
+        Log.info("Using mime types: \(MimeType.allCases)")
        
         let routes = CreateRoutes.getRoutes(services: services)
         
