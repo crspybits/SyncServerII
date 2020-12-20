@@ -17,7 +17,7 @@ class PruneTests: ServerTestCase, UploaderCommon {
     override func setUp() {
         super.setUp()
         
-        accountManager = AccountManager(userRepository: UserRepository(db))
+        accountManager = AccountManager()
         accountManager.setupAccounts(credentials: Credentials())
         let resolverManager = ChangeResolverManager()
 

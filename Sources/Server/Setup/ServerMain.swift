@@ -60,10 +60,9 @@ public class ServerMain {
             Startup.halt("Failed during startup: Could not setup database tables(s).")
             return
         }
-        // Don't need this connection any more.
         db.close()
 
-        let accountManager = AccountManager(userRepository: UserRepository(db))
+        let accountManager = AccountManager()
         let resolverManager = ChangeResolverManager()
         
         do {

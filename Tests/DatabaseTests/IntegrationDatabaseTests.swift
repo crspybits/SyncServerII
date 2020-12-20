@@ -24,7 +24,7 @@ class IntegrationDatabaseTests: ServerTestCase {
     override func setUp() {
         super.setUp()
         userRepo = UserRepository(db)
-        accountManager = AccountManager(userRepository: userRepo)
+        accountManager = AccountManager()
     }
 
     // For https://github.com/SyncServerII/ServerMain/issues/4
@@ -56,7 +56,8 @@ class IntegrationDatabaseTests: ServerTestCase {
         user1.credsId = credsId
         user1.cloudFolderName = "folder1"
         
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -84,7 +85,7 @@ class IntegrationDatabaseTests: ServerTestCase {
             break
         }
         
-        guard let credsJSON = user1.creds, let creds = try? accountManager.accountFromJSON(credsJSON, accountName: user1.accountType, user: .user(user1)) else {
+        guard let credsJSON = user1.creds, let creds = try? accountManager.accountFromJSON(credsJSON, accountName: user1.accountType, user: .user(user1), accountDelegate: accountDelegate) else {
             XCTFail()
             return
         }

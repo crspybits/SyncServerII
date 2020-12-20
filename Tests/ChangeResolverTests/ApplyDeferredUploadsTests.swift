@@ -18,7 +18,7 @@ class ApplyDeferredUploadsTests: ServerTestCase, UploaderCommon {
     override func setUp() {
         super.setUp()
 
-        accountManager = AccountManager(userRepository: UserRepository(db))
+        accountManager = AccountManager()
         let credentials = Credentials()
         accountManager.setupAccounts(credentials: credentials)
         resolverManager = ChangeResolverManager()

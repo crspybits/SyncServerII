@@ -20,7 +20,7 @@ class DatabaseUpdateTests: ServerTestCase {
     override func setUp() {
         super.setUp()
         userRepo = UserRepository(db)
-        accountManager = AccountManager(userRepository: userRepo)
+        accountManager = AccountManager()
         
         let user1 = User()
         user1.username = "Chris"
@@ -28,7 +28,8 @@ class DatabaseUpdateTests: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }

@@ -78,7 +78,10 @@ class User : NSObject, Model, UserData {
 
 class UserRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
-
+    
+    // Set this after you create the UserRepository
+    var accountManager: AccountManager!
+    
     required init(_ db:Database) {
         self.db = db
     }
@@ -167,7 +170,7 @@ class UserRepository : Repository, RepositoryLookup {
     
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
     // 6/12/19; Added `validateJSON`-- this is only for testing and normally should be left with the true default value.
-    func add(user:User, accountManager: AccountManager, validateJSON: Bool = true) -> Int64? {
+    func add(user:User, accountManager: AccountManager, accountDelegate: AccountDelegate?, validateJSON: Bool = true) -> Int64? {
         if user.username == nil || user.accountType == nil || user.credsId == nil {
             Log.error("One of the model values was nil!")
             return nil
@@ -175,7 +178,7 @@ class UserRepository : Repository, RepositoryLookup {
         
         if validateJSON {
             // Validate the JSON before we insert it.
-            guard let _ = try? accountManager.accountFromJSON(user.creds, accountName: user.accountType, user: .user(user)) else {
+            guard let _ = try? accountManager.accountFromJSON(user.creds, accountName: user.accountType, user: .user(user), accountDelegate: accountDelegate) else {
                 Log.error("Invalid creds JSON: \(String(describing: user.creds)) for accountType: \(String(describing: user.accountType))")
                 return nil
             }
@@ -204,7 +207,8 @@ class UserRepository : Repository, RepositoryLookup {
         case .user(let oldCredsUser):
             // First need to merge creds-- otherwise, we might override part of the creds with our update.
             
-            guard let oldCreds = try? accountManager.accountFromJSON(oldCredsUser.creds, accountName: oldCredsUser.accountType, user: .user(oldCredsUser)) else {
+            // the `accountDelegate` is passed as nil because the creds that result here will never need to do the save operation in that delegate.
+            guard let oldCreds = try? accountManager.accountFromJSON(oldCredsUser.creds, accountName: oldCredsUser.accountType, user: .user(oldCredsUser), accountDelegate: nil) else {
                 return false
             }
             

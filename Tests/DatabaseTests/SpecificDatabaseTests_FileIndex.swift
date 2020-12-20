@@ -15,15 +15,18 @@ import Credentials
 import CredentialsGoogle
 import Foundation
 import ServerShared
+import ServerAccount
 
 class SpecificDatabaseTests_FileIndex: ServerTestCase {
     var accountManager: AccountManager!
     var userRepo: UserRepository!
+    var accountDelegate: AccountDelegate!
     
     override func setUp() {
         super.setUp()
         userRepo = UserRepository(db)
-        accountManager = AccountManager(userRepository: userRepo)
+        accountManager = AccountManager()
+        accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
     }
     
     override func tearDown() {
@@ -37,7 +40,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -56,7 +59,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -75,7 +78,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -98,7 +101,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         let sharingGroupUUID = UUID().uuidString
 
         // 6/12/19; Just added the JSON validation parameter. I have *no* idea how this was working before this. It ought to have required the server to be running for it to work.
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -120,7 +123,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -141,7 +144,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -164,7 +167,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         let sharingGroupUUID = UUID().uuidString
         let changeResolverName = "Foobar"
         
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -210,7 +213,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail("Bad credentialsId!")
             return
         }
@@ -242,7 +245,7 @@ class SpecificDatabaseTests_FileIndex: ServerTestCase {
         user1.credsId = "100"
         let sharingGroupUUID = UUID().uuidString
 
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }

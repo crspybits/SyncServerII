@@ -181,7 +181,7 @@ extension FileIndex {
     }
     
     func getCloudStorage(userRepo: UserRepository, services: UploaderServices) throws -> (Account, CloudStorage) {
-        guard let owningUserCreds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: services.accountManager) else {
+        guard let owningUserCreds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: services.accountManager, accountDelegate: nil) else {
             throw Errors.couldNotGetOwningUserCreds
         }
         

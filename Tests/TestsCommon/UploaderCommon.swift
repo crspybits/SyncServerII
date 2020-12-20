@@ -42,7 +42,7 @@ public protocol UploaderCommon {
 
 public extension UploaderCommon {
     func downloadCommentFile(fileName: String, userId: UserId) -> CommentFile? {
-        guard let cloudStorage = FileController.getCreds(forUserId: userId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
+        guard let cloudStorage = FileController.getCreds(forUserId: userId, userRepo: UserRepository(db), accountManager: accountManager, accountDelegate: nil)?.cloudStorage(mock: MockStorage()) else {
             XCTFail()
             return nil
         }

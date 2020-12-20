@@ -120,7 +120,7 @@ class UserController : ControllerProtocol {
             return
         }
         
-        guard let userId = params.repos.user.add(user: user, accountManager: params.services.accountManager) else {
+        guard let userId = params.repos.user.add(user: user, accountManager: params.services.accountManager, accountDelegate: params.accountDelegate) else {
             let message = "Failed on adding user to User!"
             Log.error(message)
             params.completion(.failure(.message(message)))

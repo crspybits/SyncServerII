@@ -265,7 +265,7 @@ class SharingAccountsController : ControllerProtocol {
             }
         }
         
-        guard let userId = params.repos.user.add(user: user, accountManager: params.services.accountManager) else {
+        guard let userId = params.repos.user.add(user: user, accountManager: params.services.accountManager, accountDelegate: params.accountDelegate) else {
             let message = "Failed on adding sharing user to User!"
             Log.error(message)
             completion(.failure(.message(message)))

@@ -1,6 +1,7 @@
 {
   "all": [
     "AccountAuthenticationTests",
+    "AccountFileTests",
     "ChangeResolverTests",
     "DatabaseTests",
     "FileControllerUploadFileTests",
@@ -9,7 +10,6 @@
     "FileControllerTests",
     "UploaderTests",
     "PushNotificationTests",
-    "AccountFileTests",
     "SharingTests",
     "OtherTests",
     "UserControllerTests"

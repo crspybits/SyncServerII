@@ -22,7 +22,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
     
     override func setUp() {
         super.setUp()
-        accountManager = AccountManager(userRepository: UserRepository(db))
+        accountManager = AccountManager()
         accountManager.setupAccounts(credentials: Credentials())
     }
     
@@ -610,7 +610,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
             }
             
             // Reconstruct the creds of the sharing user and attempt to access their cloud storage.
-            guard let cloudStorageCreds = FileController.getCreds(forUserId: sharingUserId, userRepo: UserRepository(db), accountManager: accountManager)?.cloudStorage(mock: MockStorage()) else {
+            guard let cloudStorageCreds = FileController.getCreds(forUserId: sharingUserId, userRepo: UserRepository(db), accountManager: accountManager, accountDelegate: nil)?.cloudStorage(mock: MockStorage()) else {
                 XCTFail()
                 return
             }

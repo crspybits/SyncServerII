@@ -85,6 +85,7 @@ public class RequestProcessingParameters: FinishUploadsParameters {
     let routerResponse:RouterResponse!
     let deviceUUID:String?
     let services:Services
+    let accountDelegate: AccountDelegate
     
     enum Response {
         case success(ResponseMessage)
@@ -97,7 +98,7 @@ public class RequestProcessingParameters: FinishUploadsParameters {
     
     let completion: (Response)->()
     
-    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, services: Services, completion: @escaping (Response)->()) {
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, services: Services, accountDelegate: AccountDelegate, completion: @escaping (Response)->()) {
     
         self.request = request
         self.ep = ep
@@ -113,6 +114,7 @@ public class RequestProcessingParameters: FinishUploadsParameters {
         self.deviceUUID = deviceUUID
         self.completion = completion
         self.services = services
+        self.accountDelegate = accountDelegate
     }
     
     func fail(_ message: String) {

@@ -312,6 +312,7 @@ class RequestHandler {
         }
         
         repositories = Repositories(db: db)
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: repositories.user, accountManager: services.accountManager)
         
         var accountProperties: AccountProperties?
         
@@ -357,7 +358,7 @@ class RequestHandler {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try services.accountManager.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!))
+                    dbCreds = try services.accountManager.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), accountDelegate: accountDelegate)
                 } catch (let error) {
                     errorString = "\(error)"  
                 }
@@ -402,7 +403,7 @@ class RequestHandler {
             
             dbTransaction(db, handleResult: handleTransactionResult) { [weak self] handleResult in
                 guard let self = self else { return }
-                self.doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
+                self.doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, accountDelegate: accountDelegate, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
@@ -424,11 +425,11 @@ class RequestHandler {
                 return
             }
             
-            if let profileCreds = services.accountManager.accountFromProperties(properties: accountProperties, user: credsUser) {
+            if let profileCreds = services.accountManager.accountFromProperties(properties: accountProperties, user: credsUser, accountDelegate: accountDelegate) {
             
                 dbTransaction(db, handleResult: handleTransactionResult) { [weak self] handleResult in
                     guard let self = self else { return }
-                    self.doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
+                    self.doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, accountDelegate: accountDelegate, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
@@ -469,7 +470,7 @@ class RequestHandler {
         }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountProperties?, sharingGroupUUID: String?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountProperties?, sharingGroupUUID: String?, accountDelegate: AccountDelegate, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         
@@ -490,7 +491,7 @@ class RequestHandler {
                     return
                 }
                 
-                effectiveOwningUserCreds = try? services.accountManager.accountFromJSON(effectiveOwningUser.creds, accountName: effectiveOwningUser.accountType, user: .user(effectiveOwningUser))
+                effectiveOwningUserCreds = try? services.accountManager.accountFromJSON(effectiveOwningUser.creds, accountName: effectiveOwningUser.accountType, user: .user(effectiveOwningUser), accountDelegate: accountDelegate)
                 
                 guard effectiveOwningUserCreds != nil else {
                     handleResult(.failure(.message("Could not get effective owning user creds.")))
@@ -507,7 +508,7 @@ class RequestHandler {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, services: services) { response in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, services: services, accountDelegate: accountDelegate) { response in
         
             var message:ResponseMessage!
             var postCommitRunner: RequestHandler.PostRequestRunner?

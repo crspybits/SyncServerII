@@ -25,7 +25,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
     override func setUp() {
         super.setUp()
         userRepo = UserRepository(db)
-        accountManager = AccountManager(userRepository: userRepo)
+        accountManager = AccountManager()
     }
     
     func addOwningUsers() {
@@ -36,7 +36,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
         user1.credsId = "100"
         user1.cloudFolderName = "folder1"
         
-        let result1 = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        let result1 = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false)
         XCTAssert(result1 == 1, "Bad credentialsId!")
 
         let user2 = User()
@@ -46,7 +47,7 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
         user2.credsId = "200"
         user2.cloudFolderName = "folder2"
         
-        let result2 = userRepo.add(user: user2, accountManager: accountManager, validateJSON: false)
+        let result2 = userRepo.add(user: user2, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false)
         XCTAssert(result2 == 2, "Bad credentialsId!")
     }
     
@@ -61,7 +62,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let _ = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let _ = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -85,8 +87,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
         
         user1.credsId = "100"
         
-
-        guard let _ = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let _ = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -165,7 +167,8 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
             XCTAssert(user.userId == 1)
             XCTAssert(user.cloudFolderName == "folder1")
 
-            guard let credsObject = try? accountManager.accountFromJSON(user.creds, accountName: user.accountType, user: .user(user)) else {
+            let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+            guard let credsObject = try? accountManager.accountFromJSON(user.creds, accountName: user.accountType, user: .user(user), accountDelegate: accountDelegate) else {
                 XCTFail()
                 return
             }
@@ -191,14 +194,15 @@ class SpecificDatabaseTests_UserRepository: ServerTestCase {
         user1.credsId = credsId
         user1.cloudFolderName = "folder1"
         
-        guard let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
         
         user1.userId = userId
         
-        guard let creds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: accountManager) else {
+        guard let creds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: accountManager, accountDelegate: accountDelegate) else {
             XCTFail()
             return
         }

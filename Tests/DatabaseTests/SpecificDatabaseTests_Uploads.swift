@@ -15,13 +15,20 @@ import Credentials
 import CredentialsGoogle
 import Foundation
 import ServerShared
+import ServerAccount
 
 class SpecificDatabaseTests_Uploads: ServerTestCase {
+    var accountDelegate: AccountDelegate!
+    
     override func setUp() {
         super.setUp()
         if case .failure = UploadRepository(db).upcreate() {
             XCTFail()
         }
+        
+        let userRepo = UserRepository(db)
+        let accountManager = AccountManager()
+        accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
     }
     
     override func tearDown() {
@@ -288,14 +295,14 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
     
     func testGetUploadsWithNoFiles() {
         let userRepo = UserRepository(db)
-        let accountManager = AccountManager(userRepository: userRepo)
+        let accountManager = AccountManager()
         let user1 = User()
         user1.username = "Chris"
         user1.accountType = AccountScheme.google.accountName
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let result1 = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
+        let result1 = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false)
         XCTAssert(result1 == 1, "Bad credentialsId!")
         
         let uploadedFilesResult = UploadRepository(db).uploadedFiles(forUserId: result1!, sharingGroupUUID: UUID().uuidString, deviceUUID: Foundation.UUID().uuidString)
@@ -309,7 +316,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
 
     func testUploadedIndexWithOneFile() {
         let userRepo = UserRepository(db)
-        let accountManager = AccountManager(userRepository: userRepo)
+        let accountManager = AccountManager()
         let sharingGroupUUID = UUID().uuidString
         let user1 = User()
         user1.username = "Chris"
@@ -317,7 +324,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
+        let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
@@ -353,7 +360,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
 
     func testUploadedIndexWithNonNilDeferredUploadId() {
         let userRepo = UserRepository(db)
-        let accountManager = AccountManager(userRepository: userRepo)
+        let accountManager = AccountManager()
         let sharingGroupUUID = UUID().uuidString
         let user1 = User()
         user1.username = "Chris"
@@ -361,7 +368,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
+        let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID) else {
@@ -432,7 +439,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         let sharingGroupUUID1 = UUID().uuidString
         let sharingGroupUUID2 = UUID().uuidString
         let userRepo = UserRepository(db)
-        let accountManager = AccountManager(userRepository: userRepo)
+        let accountManager = AccountManager()
         
         let user1 = User()
         user1.username = "Chris"
@@ -440,7 +447,7 @@ class SpecificDatabaseTests_Uploads: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        let userId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false)
+        let userId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false)
         XCTAssert(userId == 1, "Bad credentialsId!")
         
         guard case .success = SharingGroupRepository(db).add(sharingGroupUUID: sharingGroupUUID1) else {

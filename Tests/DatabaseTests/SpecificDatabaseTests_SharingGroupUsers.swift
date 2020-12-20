@@ -20,7 +20,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
     override func setUp() {
         super.setUp()
         userRepo = UserRepository(db)
-        accountManager = AccountManager(userRepository: userRepo)
+        accountManager = AccountManager()
     }
     
     override func tearDown() {
@@ -64,7 +64,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -88,7 +89,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId1: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId1: UserId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -104,7 +106,7 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
         user2.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user2.credsId = "101"
         
-        guard let userId2: UserId = userRepo.add(user: user2, accountManager: accountManager, validateJSON: false) else {
+        guard let userId2: UserId = userRepo.add(user: user2, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -130,7 +132,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId1: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId1: UserId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -156,7 +159,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
@@ -212,7 +216,8 @@ class SpecificDatabaseTests_SharingGroupUsers: ServerTestCase {
         user1.creds = "{\"accessToken\": \"SomeAccessTokenValue1\"}"
         user1.credsId = "100"
         
-        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, validateJSON: false) else {
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: userRepo, accountManager: accountManager)
+        guard let userId: UserId = userRepo.add(user: user1, accountManager: accountManager, accountDelegate: accountDelegate, validateJSON: false) else {
             XCTFail()
             return
         }
