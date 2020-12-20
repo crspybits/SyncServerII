@@ -17,6 +17,8 @@ import ServerAccount
 import ChangeResolvers
 import Credentials
 
+// Needs: .primarySharingAccount, .nonOwningSharingAccount, .secondarySharingAccount, .secondaryOwningAccount
+
 class Sharing_FileManipulationTests: ServerTestCase {
     var accountManager: AccountManager!
     
