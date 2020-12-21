@@ -17,6 +17,8 @@ import CredentialsGoogle
 import CredentialsFacebook
 import CredentialsDropbox
 import CredentialsMicrosoft
+import CredentialsAppleSignIn
+import LoggerAPI
 
 extension AccountManager {
     func setupAccounts(credentials: Credentials) {
@@ -51,6 +53,14 @@ extension AccountManager {
 //            }
 //
 //            proxyRouter.addRoute(ep: AppleServerServerNotification.endpoint, processRequest: process)
+            if let clientId = Configuration.server.appleSignIn?.clientId {
+                let appleCredentials = CredentialsAppleSignInToken(clientId: clientId, tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
+                credentials.register(plugin: appleCredentials)
+                addAccountType(AppleSignInCreds.self)
+            }
+            else {
+                Log.warning("No Configuration.server.appleSignIn.clientId; cannot register CredentialsAppleSignInToken")
+            }
         }
         
         // 8/8/17; There needs to be at least one sign-in type configured for the server to do anything. And at least one of these needs to allow owning users. If there can be no owning users, how do you create anything to share? https://github.com/crspybits/SyncServerII/issues/9

@@ -41,7 +41,7 @@ let package = Package(
         // .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", .branch("master")),
         .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git",  from: "0.1.0"),
         
-        // .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git", .branch("master")),
+        .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git", .branch("master")),
         // .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git",  from: "0.1.0"),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
@@ -67,7 +67,7 @@ let package = Package(
             ]),
 
         .target(name: "Server",
-            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount", "ChangeResolvers", "CryptoSwift"],
+            dependencies: ["ServerShared", "Credentials", "CredentialsGoogle", "PerfectThread", "PerfectMySQL", "HeliumLogger", "CredentialsFacebook", "CredentialsDropbox", "Kitura", "PerfectLib", "SwiftyAWSSNS", "CredentialsMicrosoft", "ServerAccount", "ServerDropboxAccount", "ServerGoogleAccount", "ServerMicrosoftAccount", "ServerAppleSignInAccount", "ServerFacebookAccount", "ChangeResolvers", "CryptoSwift", "CredentialsAppleSignIn"],
             swiftSettings: [
                 .define("DEBUG", .when(platforms: nil, configuration: .debug)),
                 .define("SERVER")

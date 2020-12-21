@@ -258,7 +258,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
         "state": {
           "branch": "master",
-          "revision": "b722e64c4bd7c3a34d17190865e54668629b7848",
+          "revision": "07c2b3e21ac78d4efae6f7d4f1afb8d913c4df61",
           "version": null
         }
       },
@@ -294,7 +294,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerShared.git",
         "state": {
           "branch": "master",
-          "revision": "476a79c48021d4b983d8d5a0f4f8702d06929b6c",
+          "revision": "9b99f582b354237594c0eafe9fe00f8225518eee",
           "version": null
         }
       },
