@@ -56,12 +56,15 @@ class ServerSetup {
             // If the endpoint doesn't require authentication, handle it specially.
             for route in ServerEndpoints.session.all + accountEndpoints {
                 if route.authenticationLevel == .none &&
-                    route.path == request.urlURL.path {                    
+                    route.path == request.urlURL.path {
+                    Log.info("Handling without credentials: \(request.urlURL.path)")
                     next()
                     return
                 }
             }
             
+            Log.info("Handling with credentials: \(request.urlURL.path)")
+
             credentials.handle(request: request, response: response, next: next)
         }
         

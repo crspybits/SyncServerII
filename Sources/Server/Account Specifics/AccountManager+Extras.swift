@@ -49,26 +49,11 @@ extension AccountManager {
         }
         
         if Configuration.server.allowedSignInTypes.AppleSignIn == true {
-            let controller = AppleServerServerNotification()
-
-            func process(params:RequestProcessingParameters) {
-                Log.debug("AppleServerServerNotification: Got request.")
-                // TODO: So far the update isn't doing anything. Seems like what we'll need to do here is to disable or remove Apple Sign In accounts where the server to server notification tells us that the account is no longer valid.
-                controller.update()
-                
-                if let request = params.request as? NotificationRequest {
-                    let requestDataString = String(data: request.data, encoding: .utf8)
-                    Log.debug("AppleServerServerNotification: requestDataString: \(String(describing: requestDataString))")
-                }
-                else {
-                    Log.error("AppleServerServerNotification: Request wasn't a NotificationRequest")
-                }
-            }
-
-            let appleServerToServerRoute:ServerRoute = (AppleServerServerNotification.endpoint, process)
-
             if let clientId = Configuration.server.appleSignIn?.clientId {
+                let controller = AppleServerToServerNotifications(clientId: clientId)
+                let appleServerToServerRoute:ServerRoute = (NotificationRequest.endpoint, controller.process)
                 let appleCredentials = CredentialsAppleSignInToken(clientId: clientId, tokenTimeToLive: Configuration.server.signInTokenTimeToLive)
+                
                 credentials.register(plugin: appleCredentials)
                 addAccountType(AppleSignInCreds.self)
                 resultRoutes += [appleServerToServerRoute]
@@ -89,6 +74,6 @@ extension AccountManager {
             return []
         }
         
-        return []
+        return resultRoutes
     }
 }

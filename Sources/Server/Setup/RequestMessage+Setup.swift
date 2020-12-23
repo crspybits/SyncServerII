@@ -16,7 +16,7 @@ extension RequestMessage {
             var data = Data()
             request.sizeOfDataInBytes = try routerRequest.read(into: &data)
             request.data = data
-            Log.debug("Processed RequestingFileUpload: bytes: \(String(describing: request.sizeOfDataInBytes))")
+            Log.debug("Processed NeedingRequestBodyData: bytes: \(String(describing: request.sizeOfDataInBytes))")
         }
     }
 }

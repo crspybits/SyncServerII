@@ -133,7 +133,7 @@ public class Controllers {
         SharingAccountsController.self,
         SharingGroupsController.self,
         PushNotificationsController.self,
-        AppleServerServerNotification.self]
+        AppleServerToServerNotifications.self]
     
     static func setup() -> Bool {
         for controller in list {

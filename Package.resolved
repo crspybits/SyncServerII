@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "AppleJWTDecoder",
+        "repositoryURL": "https://github.com/SyncServerII/AppleJWTDecoder.git",
+        "state": {
+          "branch": null,
+          "revision": "862f4c6991433eadaf787ce539b97531c686c1a3",
+          "version": "0.0.3"
+        }
+      },
+      {
         "package": "Cryptor",
         "repositoryURL": "https://github.com/Kitura/BlueCryptor.git",
         "state": {
@@ -69,7 +78,7 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
         "state": {
           "branch": "master",
-          "revision": "4d817d63fc6c1b8e6faea7f902e46dbcba125475",
+          "revision": "923c5818010198f00d45d0026ea6ad501766427f",
           "version": null
         }
       },
@@ -191,6 +200,15 @@
         }
       },
       {
+        "package": "OpenSSL",
+        "repositoryURL": "https://github.com/Kitura/OpenSSL.git",
+        "state": {
+          "branch": null,
+          "revision": "80b04f33b086fc90e28d9ae159d43705fb348e16",
+          "version": "2.2.200"
+        }
+      },
+      {
         "package": "PerfectLib",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect.git",
         "state": {
@@ -249,7 +267,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "2894bdfef858449565b03c3a4cad11260385eaf2",
+          "revision": "dd8b4886d942c37c72813e0c69ec7fe34e872d1d",
           "version": null
         }
       },
@@ -258,7 +276,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
         "state": {
           "branch": "master",
-          "revision": "c40a2f16f62cb4a67267bb9679127ff174bebbe8",
+          "revision": "2c9d5719613dc91949520222fbf03270988c574c",
           "version": null
         }
       },
@@ -294,7 +312,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerShared.git",
         "state": {
           "branch": "master",
-          "revision": "c5f0e538b3d9cee65751dab619c667040a698a6b",
+          "revision": "d62e3020623e7f84bb88e8e85a28c24cb5e058b7",
           "version": null
         }
       },
