@@ -12,7 +12,7 @@ import Kitura
 
 extension RequestMessage {
     func setup(routerRequest: RouterRequest) throws {
-        if var request = self as? RequestingFileUpload {
+        if var request = self as? NeedingRequestBodyData {
             var data = Data()
             request.sizeOfDataInBytes = try routerRequest.read(into: &data)
             request.data = data

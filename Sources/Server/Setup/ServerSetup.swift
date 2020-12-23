@@ -37,7 +37,7 @@ class ServerSetup {
         return randomString
     }
 
-    static func credentials(_ router:Router, accountManager: AccountManager) {
+    static func credentials(_ router:Router, accountManager: AccountManager) -> [ServerRoute] {
         let secret = self.randomString(length: secretStringLength)
         router.all(middleware: KituraSession.Session(secret: secret))
         
@@ -47,12 +47,14 @@ class ServerSetup {
         // Needed for testing.
         accountManager.reset()
         
-        accountManager.setupAccounts(credentials: credentials)
+        let accountRoutes = accountManager.setupAccounts(credentials: credentials)
+        let accountEndpoints:[ServerEndpoint] = accountRoutes.map {$0.0}
         
         router.all { (request, response, next) in
             Log.info("REQUEST RECEIVED: \(request.urlURL.path)")
             
-            for route in ServerEndpoints.session.all {
+            // If the endpoint doesn't require authentication, handle it specially.
+            for route in ServerEndpoints.session.all + accountEndpoints {
                 if route.authenticationLevel == .none &&
                     route.path == request.urlURL.path {                    
                     next()
@@ -62,6 +64,8 @@ class ServerSetup {
             
             credentials.handle(request: request, response: response, next: next)
         }
+        
+        return accountRoutes
     }
 }
 

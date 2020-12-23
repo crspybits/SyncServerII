@@ -12,6 +12,7 @@ import Credentials
 import Kitura
 import ServerShared
 import ServerAccount
+import ServerAppleSignInAccount
 
 extension ControllerProtocol {
     // Make sure the current signed in user is a member of the sharing group.
@@ -126,7 +127,13 @@ public class RequestProcessingParameters: FinishUploadsParameters {
 public class Controllers {
     // When adding a new controller, you must add it to this list.
     private static let list:[ControllerProtocol.Type] =
-        [UserController.self, UtilController.self, FileController.self, SharingAccountsController.self, SharingGroupsController.self, PushNotificationsController.self]
+        [UserController.self,
+        UtilController.self,
+        FileController.self,
+        SharingAccountsController.self,
+        SharingGroupsController.self,
+        PushNotificationsController.self,
+        AppleServerServerNotification.self]
     
     static func setup() -> Bool {
         for controller in list {

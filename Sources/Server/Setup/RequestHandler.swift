@@ -292,8 +292,12 @@ class RequestHandler {
         
         setJsonResponseHeaders()
         let profile = request.userProfile
+#if DEBUG
+        for header in request.headers {
+            Log.info("request.header: \(header)")
+        }
+#endif
         self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
-        Log.info("self.deviceUUID: \(String(describing: self.deviceUUID))")
         
 #if DEBUG
         if let profile = profile {

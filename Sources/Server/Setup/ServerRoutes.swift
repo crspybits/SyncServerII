@@ -9,9 +9,11 @@
 import Kitura
 import ServerShared
 
+typealias ServerRoute = (ServerEndpoint, (RequestProcessingParameters)->())
+
 // When adding a new controller, you must also add it to the list in Controllers.swift
 public class ServerRoutes {
-    static func routes() -> [(ServerEndpoint, (RequestProcessingParameters)->())] {
+    static func routes() -> [ServerRoute] {
         let utilController = UtilController()
         let userController = UserController()
         let fileController = FileController()

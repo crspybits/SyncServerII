@@ -227,10 +227,24 @@ class SharingAccountsController : ControllerProtocol {
     
     private func redeemSharingInvitationForNewUser(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation, completion: @escaping ((RequestProcessingParameters.Response)->())) {
     
+        guard let userProfile = params.userProfile else {
+            let message = "Could not get userProfile!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        guard var profileCreds = params.profileCreds else {
+            let message = "Could not get profileCreds!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
         // No database creds because this is a new user-- so use params.profileCreds
         
         let user = User()
-        user.username = params.userProfile!.displayName
+        user.username = userProfile.displayName
         
         guard let accountScheme = params.accountProperties?.accountScheme else {
             let message = "Could not get account scheme from properties!"
@@ -240,8 +254,8 @@ class SharingAccountsController : ControllerProtocol {
         }
         
         user.accountType = accountScheme.accountName
-        user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON()
+        user.credsId = userProfile.id
+        user.creds = profileCreds.toJSON()
         
         var createInitialOwningUserFile = false
         var owningUserId: UserId?
@@ -252,7 +266,7 @@ class SharingAccountsController : ControllerProtocol {
         case .owning:
             // When the user is an owning user, they will rely on their own cloud storage to upload new files-- for sharing groups where they have upload permissions.
             // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, and where b) that owning account type needs a cloud storage folder (e.g., Google Drive). I'm not going to concern myself with the sharing permissions of the immediate sharing invitation because they may join other sharing groups-- and have write permissions there.
-            if params.profileCreds!.owningAccountsNeedCloudFolderName {
+            if profileCreds.owningAccountsNeedCloudFolderName {
                 guard let cloudFolderName = request.cloudFolderName else {
                     let message = "No cloud folder name given when redeeming sharing invitation using owning account that needs one!"
                     Log.error(message)
@@ -285,7 +299,6 @@ class SharingAccountsController : ControllerProtocol {
         
         // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
 
-        var profileCreds = params.profileCreds!
         profileCreds.accountCreationUser = .userId(userId)
         
         profileCreds.generateTokensIfNeeded(dbCreds: nil, routerResponse: params.routerResponse, success: {

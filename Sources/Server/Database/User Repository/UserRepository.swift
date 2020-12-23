@@ -167,7 +167,7 @@ class UserRepository : Repository, RepositoryLookup {
             return "accountType = '\(accountType)' AND credsId = '\(credsId)'"
         }
     }
-    
+
     // userId in the user model is ignored and the automatically generated userId is returned if the add is successful.
     // 6/12/19; Added `validateJSON`-- this is only for testing and normally should be left with the true default value.
     func add(user:User, accountManager: AccountManager, accountDelegate: AccountDelegate?, validateJSON: Bool = true) -> Int64? {

@@ -21,6 +21,7 @@ class CreateRoutes {
             
             func create(routerRequest: RouterRequest) -> RequestMessage? {
                 let queryDict = routerRequest.queryParameters
+                Log.debug("queryDict: \(queryDict)")
                 guard let request = try? ep.requestMessageType.decode(queryDict) else {
                     Log.error("Error doing request decode")
                     return nil
@@ -70,9 +71,9 @@ class CreateRoutes {
     static func getRoutes(services: Services) -> Router {
         let router = Router()
         
-        ServerSetup.credentials(router, accountManager: services.accountManager)
+        let accountRoutes = ServerSetup.credentials(router, accountManager: services.accountManager)
         
-        let routes = ServerRoutes.routes()
+        let routes = ServerRoutes.routes() + accountRoutes
         for (endpoint, controllerMethod) in routes {
             addRoute(ep: endpoint, processRequest: controllerMethod, services: services, router: router)
         }
