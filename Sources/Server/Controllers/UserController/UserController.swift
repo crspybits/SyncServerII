@@ -211,70 +211,83 @@ class UserController : ControllerProtocol {
             return
         }
         
-        let deviceUUIDRepoKey = DeviceUUIDRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        let removeResult = params.repos.deviceUUID.retry {
-            return params.repos.deviceUUID.remove(key: deviceUUIDRepoKey)
+        guard let userId = params.currentSignedInUser?.userId else {
+            let message = "Could not get userId!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        Self.removeUser(repos: params.repos, accountScheme: accountScheme, userId: userId, successResponseMessage:RemoveUserResponse(), completion: params.completion)
+    }
+
+    static func removeUser(repos: Repositories, accountScheme: AccountScheme, userId: UserId, successResponseMessage:ResponseMessage, completion: (RequestProcessingParameters.Response)->()) {
+        // I'm not going to remove the users files in their cloud storage. They own those. I think SyncServer doesn't have any business removing their files in this context.
+        
+        let deviceUUIDRepoKey = DeviceUUIDRepository.LookupKey.userId(userId)
+        let removeResult = repos.deviceUUID.retry {
+            return repos.deviceUUID.remove(key: deviceUUIDRepoKey)
         }
         guard case .removed = removeResult else {
             let message = "Could not remove deviceUUID's for user!"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
         // TODO: When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
         
         // This is somewhat aggressive: I'm going to remove both `Upload` and `DeferredUpload` records. It's somewhat aggressive because this gets rid of "work" the user has already done. However both of these record types have a UserId field, and this userId is being removed below (when we remove the `UserRepository` record). Plus, if the user was the cloud storage owner on these files, these files are getting marked as deleted as part of this user deletion anyways.
-        let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        let removeResult2 = params.repos.upload.retry {
-            return params.repos.upload.remove(key: uploadRepoKey)
+        let uploadRepoKey = UploadRepository.LookupKey.userId(userId)
+        let removeResult2 = repos.upload.retry {
+            return repos.upload.remove(key: uploadRepoKey)
         }
         guard case .removed = removeResult2 else {
             let message = "Could not remove Upload records for user!"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
         // 11/28/20; Didn't have this DeferredUpload deletion until today. I think this was the source of https://github.com/SyncServerII/ServerMain/issues/9 and https://github.com/SyncServerII/ServerMain/issues/8.
-        let deferrredUploadRepoKey = DeferredUploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        let deferrredUploadRemoveResult = params.repos.deferredUpload.retry {
-            return params.repos.deferredUpload.remove(key: deferrredUploadRepoKey)
+        let deferrredUploadRepoKey = DeferredUploadRepository.LookupKey.userId(userId)
+        let deferrredUploadRemoveResult = repos.deferredUpload.retry {
+            return repos.deferredUpload.remove(key: deferrredUploadRepoKey)
         }
         guard case .removed = deferrredUploadRemoveResult else {
             let message = "Could not remove DeferredUpload records for user!"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
         // 6/25/18; Up until today, user removal had included actual removal of all of the user's files from the FileIndex. BUT-- this goes against how deletion occurs on the SyncServer-- we mark files as deleted, but don't actually remove them from the FileIndex.
-        let markKey = FileIndexRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        guard let _ = params.repos.fileIndex.markFilesAsDeleted(key: markKey) else {
+        let markKey = FileIndexRepository.LookupKey.userId(userId)
+        guard let _ = repos.fileIndex.markFilesAsDeleted(key: markKey) else {
             let message = "Could not mark files as deleted for user!"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
         // The user will no longer be part of any sharing groups
-        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.userId(params.currentSignedInUser!.userId)
-        let removeResult3 = params.repos.sharingGroupUser.retry {
-            return params.repos.sharingGroupUser.remove(key: sharingGroupUserKey)
+        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.userId(userId)
+        let removeResult3 = repos.sharingGroupUser.retry {
+            return repos.sharingGroupUser.remove(key: sharingGroupUserKey)
         }
         guard case .removed = removeResult3 else {
             let message = "Could not remove sharing group references for user: \(removeResult3)"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
         // And, any sharing users making use of this user as an owningUserId can no longer use its userId.
-        let resetKey = SharingGroupUserRepository.LookupKey.owningUserId(params.currentSignedInUser!.userId)
-        guard params.repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
+        let resetKey = SharingGroupUserRepository.LookupKey.owningUserId(userId)
+        guard repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
             let message = "Could not remove sharing group references for owning user"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
@@ -282,30 +295,29 @@ class UserController : ControllerProtocol {
         
         // When removing an owning user: Also remove any sharing invitations that have that owning user in them-- this is just in case there are non-expired invitations from that sharing user. They will be invalid now.
         let sharingInvitationsKey = SharingInvitationRepository.LookupKey
-            .owningUserId(params.currentSignedInUser!.userId)
-        let removeResult4 = params.repos.sharing.retry {
-            return params.repos.sharing.remove(key: sharingInvitationsKey)
+            .owningUserId(userId)
+        let removeResult4 = repos.sharing.retry {
+            return repos.sharing.remove(key: sharingInvitationsKey)
         }
         guard case .removed = removeResult4 else {
             let message = "Could not remove sharing invitations for user: \(removeResult4)"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
         // This has to be last-- we have to remove all references to the user first-- due to foreign key constraints.
-        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountScheme.accountName, credsId: params.userProfile!.id)
-        let removeResult5 = params.repos.user.retry {
-            return params.repos.user.remove(key: userRepoKey)
+        let userRepoKey = UserRepository.LookupKey.userId(userId)
+        let removeResult5 = repos.user.retry {
+            return repos.user.remove(key: userRepoKey)
         }
         guard case .removed(let numberRows) = removeResult5, numberRows == 1 else {
             let message = "Could not remove user!"
             Log.error(message)
-            params.completion(.failure(.message(message)))
+            completion(.failure(.message(message)))
             return
         }
         
-        let response = RemoveUserResponse()
-        params.completion(.success(response))
+        completion(.success(successResponseMessage))
     }
 }

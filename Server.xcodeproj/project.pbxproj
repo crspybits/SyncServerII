@@ -25,18 +25,18 @@
 			dependencies = (
 				OBJ_3167 /* PBXTargetDependency */,
 				OBJ_3168 /* PBXTargetDependency */,
-				OBJ_3169 /* PBXTargetDependency */,
 				OBJ_3170 /* PBXTargetDependency */,
-				OBJ_3171 /* PBXTargetDependency */,
 				OBJ_3172 /* PBXTargetDependency */,
 				OBJ_3173 /* PBXTargetDependency */,
 				OBJ_3174 /* PBXTargetDependency */,
 				OBJ_3176 /* PBXTargetDependency */,
 				OBJ_3177 /* PBXTargetDependency */,
+				OBJ_3178 /* PBXTargetDependency */,
 				OBJ_3179 /* PBXTargetDependency */,
 				OBJ_3180 /* PBXTargetDependency */,
 				OBJ_3181 /* PBXTargetDependency */,
 				OBJ_3182 /* PBXTargetDependency */,
+				OBJ_3183 /* PBXTargetDependency */,
 			);
 			name = ServerPackageTests;
 			productName = ServerPackageTests;
@@ -44,8 +44,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		5897C7176FC9BCBB22DFF44D /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = DD736FAC6DA1E8C15260D143 /* ServerTests.json */; };
-		C8D12536E2793F4195E739AC /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = CADD7C706EA2DEAA948F62A9 /* Server.json */; };
+		5DE4C052333050C3FC04DBC5 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = CF32D012AABE7B6DF2C75450 /* ServerTests.json */; };
+		6852297615289482E367F6F0 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 94D39EDBEDDD03B205B0BA9A /* Server.json */; };
 		OBJ_1015 /* AppleClaims.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_357 /* AppleClaims.swift */; };
 		OBJ_1016 /* ApplePublicKey+HTTP.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_358 /* ApplePublicKey+HTTP.swift */; };
 		OBJ_1017 /* ApplePublicKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_359 /* ApplePublicKey.swift */; };
@@ -132,15 +132,15 @@
 		OBJ_1176 /* ServerShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ServerShared::ServerShared::Product /* ServerShared.framework */; };
 		OBJ_1177 /* Logging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = swift-log::Logging::Product /* Logging.framework */; };
 		OBJ_1199 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_441 /* Package.swift */; };
-		OBJ_1204 /* BaseCacheElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_450 /* BaseCacheElement.swift */; };
-		OBJ_1205 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_451 /* Credentials.swift */; };
-		OBJ_1206 /* CredentialsPluginProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_452 /* CredentialsPluginProtocol.swift */; };
-		OBJ_1207 /* CredentialsTokenTTL.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_453 /* CredentialsTokenTTL.swift */; };
-		OBJ_1208 /* MultiTypeSafeCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_454 /* MultiTypeSafeCredentials.swift */; };
-		OBJ_1209 /* RouterRequest+UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_455 /* RouterRequest+UserProfile.swift */; };
-		OBJ_1210 /* TypeSafeCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_456 /* TypeSafeCredentials.swift */; };
-		OBJ_1211 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_457 /* UserProfile.swift */; };
-		OBJ_1212 /* UserProfileDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_458 /* UserProfileDelegate.swift */; };
+		OBJ_1204 /* BaseCacheElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_456 /* BaseCacheElement.swift */; };
+		OBJ_1205 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_457 /* Credentials.swift */; };
+		OBJ_1206 /* CredentialsPluginProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_458 /* CredentialsPluginProtocol.swift */; };
+		OBJ_1207 /* CredentialsTokenTTL.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_459 /* CredentialsTokenTTL.swift */; };
+		OBJ_1208 /* MultiTypeSafeCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_460 /* MultiTypeSafeCredentials.swift */; };
+		OBJ_1209 /* RouterRequest+UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_461 /* RouterRequest+UserProfile.swift */; };
+		OBJ_1210 /* TypeSafeCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_462 /* TypeSafeCredentials.swift */; };
+		OBJ_1211 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_463 /* UserProfile.swift */; };
+		OBJ_1212 /* UserProfileDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_464 /* UserProfileDelegate.swift */; };
 		OBJ_1214 /* KituraSession.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Kitura-Session::KituraSession::Product /* KituraSession.framework */; };
 		OBJ_1215 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Cryptor::Cryptor::Product /* Cryptor.framework */; };
 		OBJ_1216 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Kitura::Kitura::Product /* Kitura.framework */; };
@@ -592,12 +592,12 @@
 		OBJ_2027 /* Logging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = swift-log::Logging::Product /* Logging.framework */; };
 		OBJ_2028 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */; };
 		OBJ_2029 /* ServerShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ServerShared::ServerShared::Product /* ServerShared.framework */; };
-		OBJ_2076 /* HeliumLogHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_476 /* HeliumLogHandler.swift */; };
-		OBJ_2077 /* HeliumLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_477 /* HeliumLogger.swift */; };
-		OBJ_2078 /* HeliumStreamLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_478 /* HeliumStreamLogger.swift */; };
+		OBJ_2076 /* HeliumLogHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_450 /* HeliumLogHandler.swift */; };
+		OBJ_2077 /* HeliumLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_451 /* HeliumLogger.swift */; };
+		OBJ_2078 /* HeliumStreamLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_452 /* HeliumStreamLogger.swift */; };
 		OBJ_2080 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */; };
 		OBJ_2081 /* Logging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = swift-log::Logging::Product /* Logging.framework */; };
-		OBJ_2089 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_479 /* Package.swift */; };
+		OBJ_2089 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_453 /* Package.swift */; };
 		OBJ_2094 /* AdditionalCookieAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_556 /* AdditionalCookieAttribute.swift */; };
 		OBJ_2095 /* CodableRouter+TypeSafeMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_557 /* CodableRouter+TypeSafeMiddleware.swift */; };
 		OBJ_2096 /* CodableRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_558 /* CodableRouter.swift */; };
@@ -663,8 +663,8 @@
 		OBJ_2157 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */; };
 		OBJ_2172 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_333 /* Package.swift */; };
 		OBJ_2178 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_322 /* Package.swift */; };
-		OBJ_2184 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_459 /* Package.swift */; };
-		OBJ_2190 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_473 /* Package.swift */; };
+		OBJ_2184 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_465 /* Package.swift */; };
+		OBJ_2190 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_479 /* Package.swift */; };
 		OBJ_2196 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_635 /* Package.swift */; };
 		OBJ_2202 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_687 /* Package.swift */; };
 		OBJ_2207 /* BodyDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_621 /* BodyDecoder.swift */; };
@@ -722,17 +722,17 @@
 		OBJ_2272 /* Logging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = swift-log::Logging::Product /* Logging.framework */; };
 		OBJ_2273 /* CHTTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */; };
 		OBJ_2284 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_613 /* Package.swift */; };
-		OBJ_2289 /* CookieCryptography.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_462 /* CookieCryptography.swift */; };
-		OBJ_2290 /* CookieManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_463 /* CookieManagement.swift */; };
-		OBJ_2291 /* CookieParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_464 /* CookieParameter.swift */; };
-		OBJ_2292 /* InMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_465 /* InMemoryStore.swift */; };
-		OBJ_2293 /* RouterRequest+Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_466 /* RouterRequest+Session.swift */; };
-		OBJ_2294 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_467 /* Session.swift */; };
-		OBJ_2295 /* SessionCookie.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_468 /* SessionCookie.swift */; };
-		OBJ_2296 /* SessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_469 /* SessionState.swift */; };
-		OBJ_2297 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_470 /* Store.swift */; };
-		OBJ_2298 /* StoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_471 /* StoreError.swift */; };
-		OBJ_2299 /* TypeSafeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_472 /* TypeSafeSession.swift */; };
+		OBJ_2289 /* CookieCryptography.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_468 /* CookieCryptography.swift */; };
+		OBJ_2290 /* CookieManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_469 /* CookieManagement.swift */; };
+		OBJ_2291 /* CookieParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_470 /* CookieParameter.swift */; };
+		OBJ_2292 /* InMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_471 /* InMemoryStore.swift */; };
+		OBJ_2293 /* RouterRequest+Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_472 /* RouterRequest+Session.swift */; };
+		OBJ_2294 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_473 /* Session.swift */; };
+		OBJ_2295 /* SessionCookie.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_474 /* SessionCookie.swift */; };
+		OBJ_2296 /* SessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_475 /* SessionState.swift */; };
+		OBJ_2297 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_476 /* Store.swift */; };
+		OBJ_2298 /* StoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_477 /* StoreError.swift */; };
+		OBJ_2299 /* TypeSafeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_478 /* TypeSafeSession.swift */; };
 		OBJ_2301 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Cryptor::Cryptor::Product /* Cryptor.framework */; };
 		OBJ_2302 /* Kitura.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Kitura::Kitura::Product /* Kitura.framework */; };
 		OBJ_2303 /* TypeDecoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */; };
@@ -1529,22 +1529,23 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		108EC5F921F62FC1DAE1FDB5 /* CopyFiles */ = {
+		2D8C1CA8F6AA8325A8E6361C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				C8D12536E2793F4195E739AC /* Server.json in CopyFiles */,
-				5897C7176FC9BCBB22DFF44D /* ServerTests.json in CopyFiles */,
+				6852297615289482E367F6F0 /* Server.json in CopyFiles */,
+				5DE4C052333050C3FC04DBC5 /* ServerTests.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		94D39EDBEDDD03B205B0BA9A /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
 		AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */ = {isa = PBXFileReference; path = AppleJWTDecoder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CADD7C706EA2DEAA948F62A9 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
+		CF32D012AABE7B6DF2C75450 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */ = {isa = PBXFileReference; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */ = {isa = PBXFileReference; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1553,7 +1554,6 @@
 		Cryptor::Cryptor::Product /* Cryptor.framework */ = {isa = PBXFileReference; path = Cryptor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorECC::CryptorECC::Product /* CryptorECC.framework */ = {isa = PBXFileReference; path = CryptorECC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */ = {isa = PBXFileReference; path = CryptorRSA.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		DD736FAC6DA1E8C15260D143 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */ = {isa = PBXFileReference; path = HeliumLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-Credentials::Credentials::Product /* Credentials.framework */ = {isa = PBXFileReference; path = Credentials.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */ = {isa = PBXFileReference; path = CredentialsFacebook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1876,33 +1876,33 @@
 		OBJ_446 /* ControllerProtocol.swift */ = {isa = PBXFileReference; path = ControllerProtocol.swift; sourceTree = "<group>"; };
 		OBJ_447 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ServerAccount/Package.swift; sourceTree = "<group>"; };
 		OBJ_45 /* UserController.swift */ = {isa = PBXFileReference; path = UserController.swift; sourceTree = "<group>"; };
-		OBJ_450 /* BaseCacheElement.swift */ = {isa = PBXFileReference; path = BaseCacheElement.swift; sourceTree = "<group>"; };
-		OBJ_451 /* Credentials.swift */ = {isa = PBXFileReference; path = Credentials.swift; sourceTree = "<group>"; };
-		OBJ_452 /* CredentialsPluginProtocol.swift */ = {isa = PBXFileReference; path = CredentialsPluginProtocol.swift; sourceTree = "<group>"; };
-		OBJ_453 /* CredentialsTokenTTL.swift */ = {isa = PBXFileReference; path = CredentialsTokenTTL.swift; sourceTree = "<group>"; };
-		OBJ_454 /* MultiTypeSafeCredentials.swift */ = {isa = PBXFileReference; path = MultiTypeSafeCredentials.swift; sourceTree = "<group>"; };
-		OBJ_455 /* RouterRequest+UserProfile.swift */ = {isa = PBXFileReference; path = "RouterRequest+UserProfile.swift"; sourceTree = "<group>"; };
-		OBJ_456 /* TypeSafeCredentials.swift */ = {isa = PBXFileReference; path = TypeSafeCredentials.swift; sourceTree = "<group>"; };
-		OBJ_457 /* UserProfile.swift */ = {isa = PBXFileReference; path = UserProfile.swift; sourceTree = "<group>"; };
-		OBJ_458 /* UserProfileDelegate.swift */ = {isa = PBXFileReference; path = UserProfileDelegate.swift; sourceTree = "<group>"; };
-		OBJ_459 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-Credentials/Package.swift"; sourceTree = "<group>"; };
+		OBJ_450 /* HeliumLogHandler.swift */ = {isa = PBXFileReference; path = HeliumLogHandler.swift; sourceTree = "<group>"; };
+		OBJ_451 /* HeliumLogger.swift */ = {isa = PBXFileReference; path = HeliumLogger.swift; sourceTree = "<group>"; };
+		OBJ_452 /* HeliumStreamLogger.swift */ = {isa = PBXFileReference; path = HeliumStreamLogger.swift; sourceTree = "<group>"; };
+		OBJ_453 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/HeliumLogger/Package.swift; sourceTree = "<group>"; };
+		OBJ_456 /* BaseCacheElement.swift */ = {isa = PBXFileReference; path = BaseCacheElement.swift; sourceTree = "<group>"; };
+		OBJ_457 /* Credentials.swift */ = {isa = PBXFileReference; path = Credentials.swift; sourceTree = "<group>"; };
+		OBJ_458 /* CredentialsPluginProtocol.swift */ = {isa = PBXFileReference; path = CredentialsPluginProtocol.swift; sourceTree = "<group>"; };
+		OBJ_459 /* CredentialsTokenTTL.swift */ = {isa = PBXFileReference; path = CredentialsTokenTTL.swift; sourceTree = "<group>"; };
 		OBJ_46 /* UtilController.swift */ = {isa = PBXFileReference; path = UtilController.swift; sourceTree = "<group>"; };
-		OBJ_462 /* CookieCryptography.swift */ = {isa = PBXFileReference; path = CookieCryptography.swift; sourceTree = "<group>"; };
-		OBJ_463 /* CookieManagement.swift */ = {isa = PBXFileReference; path = CookieManagement.swift; sourceTree = "<group>"; };
-		OBJ_464 /* CookieParameter.swift */ = {isa = PBXFileReference; path = CookieParameter.swift; sourceTree = "<group>"; };
-		OBJ_465 /* InMemoryStore.swift */ = {isa = PBXFileReference; path = InMemoryStore.swift; sourceTree = "<group>"; };
-		OBJ_466 /* RouterRequest+Session.swift */ = {isa = PBXFileReference; path = "RouterRequest+Session.swift"; sourceTree = "<group>"; };
-		OBJ_467 /* Session.swift */ = {isa = PBXFileReference; path = Session.swift; sourceTree = "<group>"; };
-		OBJ_468 /* SessionCookie.swift */ = {isa = PBXFileReference; path = SessionCookie.swift; sourceTree = "<group>"; };
-		OBJ_469 /* SessionState.swift */ = {isa = PBXFileReference; path = SessionState.swift; sourceTree = "<group>"; };
-		OBJ_470 /* Store.swift */ = {isa = PBXFileReference; path = Store.swift; sourceTree = "<group>"; };
-		OBJ_471 /* StoreError.swift */ = {isa = PBXFileReference; path = StoreError.swift; sourceTree = "<group>"; };
-		OBJ_472 /* TypeSafeSession.swift */ = {isa = PBXFileReference; path = TypeSafeSession.swift; sourceTree = "<group>"; };
-		OBJ_473 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-Session/Package.swift"; sourceTree = "<group>"; };
-		OBJ_476 /* HeliumLogHandler.swift */ = {isa = PBXFileReference; path = HeliumLogHandler.swift; sourceTree = "<group>"; };
-		OBJ_477 /* HeliumLogger.swift */ = {isa = PBXFileReference; path = HeliumLogger.swift; sourceTree = "<group>"; };
-		OBJ_478 /* HeliumStreamLogger.swift */ = {isa = PBXFileReference; path = HeliumStreamLogger.swift; sourceTree = "<group>"; };
-		OBJ_479 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/HeliumLogger/Package.swift; sourceTree = "<group>"; };
+		OBJ_460 /* MultiTypeSafeCredentials.swift */ = {isa = PBXFileReference; path = MultiTypeSafeCredentials.swift; sourceTree = "<group>"; };
+		OBJ_461 /* RouterRequest+UserProfile.swift */ = {isa = PBXFileReference; path = "RouterRequest+UserProfile.swift"; sourceTree = "<group>"; };
+		OBJ_462 /* TypeSafeCredentials.swift */ = {isa = PBXFileReference; path = TypeSafeCredentials.swift; sourceTree = "<group>"; };
+		OBJ_463 /* UserProfile.swift */ = {isa = PBXFileReference; path = UserProfile.swift; sourceTree = "<group>"; };
+		OBJ_464 /* UserProfileDelegate.swift */ = {isa = PBXFileReference; path = UserProfileDelegate.swift; sourceTree = "<group>"; };
+		OBJ_465 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-Credentials/Package.swift"; sourceTree = "<group>"; };
+		OBJ_468 /* CookieCryptography.swift */ = {isa = PBXFileReference; path = CookieCryptography.swift; sourceTree = "<group>"; };
+		OBJ_469 /* CookieManagement.swift */ = {isa = PBXFileReference; path = CookieManagement.swift; sourceTree = "<group>"; };
+		OBJ_470 /* CookieParameter.swift */ = {isa = PBXFileReference; path = CookieParameter.swift; sourceTree = "<group>"; };
+		OBJ_471 /* InMemoryStore.swift */ = {isa = PBXFileReference; path = InMemoryStore.swift; sourceTree = "<group>"; };
+		OBJ_472 /* RouterRequest+Session.swift */ = {isa = PBXFileReference; path = "RouterRequest+Session.swift"; sourceTree = "<group>"; };
+		OBJ_473 /* Session.swift */ = {isa = PBXFileReference; path = Session.swift; sourceTree = "<group>"; };
+		OBJ_474 /* SessionCookie.swift */ = {isa = PBXFileReference; path = SessionCookie.swift; sourceTree = "<group>"; };
+		OBJ_475 /* SessionState.swift */ = {isa = PBXFileReference; path = SessionState.swift; sourceTree = "<group>"; };
+		OBJ_476 /* Store.swift */ = {isa = PBXFileReference; path = Store.swift; sourceTree = "<group>"; };
+		OBJ_477 /* StoreError.swift */ = {isa = PBXFileReference; path = StoreError.swift; sourceTree = "<group>"; };
+		OBJ_478 /* TypeSafeSession.swift */ = {isa = PBXFileReference; path = TypeSafeSession.swift; sourceTree = "<group>"; };
+		OBJ_479 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-Session/Package.swift"; sourceTree = "<group>"; };
 		OBJ_48 /* Database+Extras.swift */ = {isa = PBXFileReference; path = "Database+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_483 /* AccountScheme.swift */ = {isa = PBXFileReference; path = AccountScheme.swift; sourceTree = "<group>"; };
 		OBJ_484 /* AuthTokenType.swift */ = {isa = PBXFileReference; path = AuthTokenType.swift; sourceTree = "<group>"; };
@@ -3567,7 +3567,7 @@
 				OBJ_334 /* ServerFacebookAccount */,
 				OBJ_338 /* ServerAppleSignInAccount */,
 				OBJ_347 /* CredentialsAppleSignIn */,
-				OBJ_355 /* AppleJWTDecoder 0.0.3 */,
+				OBJ_355 /* AppleJWTDecoder 0.0.4 */,
 				OBJ_362 /* SwiftJWKtoPEM 0.4.0 */,
 				OBJ_371 /* SwiftJWT 3.6.200 */,
 				OBJ_395 /* CryptorECC 1.2.200 */,
@@ -3577,9 +3577,9 @@
 				OBJ_431 /* ServerDropboxAccount */,
 				OBJ_436 /* ChangeResolvers */,
 				OBJ_442 /* ServerAccount */,
-				OBJ_448 /* Kitura-Credentials 2.5.200 */,
-				OBJ_460 /* Kitura-Session 3.3.200 */,
-				OBJ_474 /* HeliumLogger 1.9.200 */,
+				OBJ_448 /* HeliumLogger 1.9.200 */,
+				OBJ_454 /* Kitura-Credentials 2.5.200 */,
+				OBJ_466 /* Kitura-Session 3.3.200 */,
 				OBJ_480 /* ServerShared */,
 				OBJ_529 /* SwiftyAWSSNS 0.3.1 */,
 				OBJ_533 /* SwiftAWSSignatureV4 1.2.1 */,
@@ -4083,13 +4083,13 @@
 			path = .build/checkouts/CredentialsAppleSignIn/Sources/CredentialsAppleSignIn;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_355 /* AppleJWTDecoder 0.0.3 */ = {
+		OBJ_355 /* AppleJWTDecoder 0.0.4 */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_356 /* AppleJWTDecoder */,
 				OBJ_361 /* Package.swift */,
 			);
-			name = "AppleJWTDecoder 0.0.3";
+			name = "AppleJWTDecoder 0.0.4";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
@@ -4355,57 +4355,78 @@
 			path = .build/checkouts/ServerAccount/Sources/ServerAccount;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_448 /* Kitura-Credentials 2.5.200 */ = {
+		OBJ_448 /* HeliumLogger 1.9.200 */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_449 /* Credentials */,
-				OBJ_459 /* Package.swift */,
+				OBJ_449 /* HeliumLogger */,
+				OBJ_453 /* Package.swift */,
+			);
+			name = "HeliumLogger 1.9.200";
+			path = "";
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_449 /* HeliumLogger */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_450 /* HeliumLogHandler.swift */,
+				OBJ_451 /* HeliumLogger.swift */,
+				OBJ_452 /* HeliumStreamLogger.swift */,
+			);
+			name = HeliumLogger;
+			path = .build/checkouts/HeliumLogger/Sources/HeliumLogger;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_454 /* Kitura-Credentials 2.5.200 */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_455 /* Credentials */,
+				OBJ_465 /* Package.swift */,
 			);
 			name = "Kitura-Credentials 2.5.200";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_449 /* Credentials */ = {
+		OBJ_455 /* Credentials */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_450 /* BaseCacheElement.swift */,
-				OBJ_451 /* Credentials.swift */,
-				OBJ_452 /* CredentialsPluginProtocol.swift */,
-				OBJ_453 /* CredentialsTokenTTL.swift */,
-				OBJ_454 /* MultiTypeSafeCredentials.swift */,
-				OBJ_455 /* RouterRequest+UserProfile.swift */,
-				OBJ_456 /* TypeSafeCredentials.swift */,
-				OBJ_457 /* UserProfile.swift */,
-				OBJ_458 /* UserProfileDelegate.swift */,
+				OBJ_456 /* BaseCacheElement.swift */,
+				OBJ_457 /* Credentials.swift */,
+				OBJ_458 /* CredentialsPluginProtocol.swift */,
+				OBJ_459 /* CredentialsTokenTTL.swift */,
+				OBJ_460 /* MultiTypeSafeCredentials.swift */,
+				OBJ_461 /* RouterRequest+UserProfile.swift */,
+				OBJ_462 /* TypeSafeCredentials.swift */,
+				OBJ_463 /* UserProfile.swift */,
+				OBJ_464 /* UserProfileDelegate.swift */,
 			);
 			name = Credentials;
 			path = ".build/checkouts/Kitura-Credentials/Sources/Credentials";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_460 /* Kitura-Session 3.3.200 */ = {
+		OBJ_466 /* Kitura-Session 3.3.200 */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_461 /* KituraSession */,
-				OBJ_473 /* Package.swift */,
+				OBJ_467 /* KituraSession */,
+				OBJ_479 /* Package.swift */,
 			);
 			name = "Kitura-Session 3.3.200";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_461 /* KituraSession */ = {
+		OBJ_467 /* KituraSession */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_462 /* CookieCryptography.swift */,
-				OBJ_463 /* CookieManagement.swift */,
-				OBJ_464 /* CookieParameter.swift */,
-				OBJ_465 /* InMemoryStore.swift */,
-				OBJ_466 /* RouterRequest+Session.swift */,
-				OBJ_467 /* Session.swift */,
-				OBJ_468 /* SessionCookie.swift */,
-				OBJ_469 /* SessionState.swift */,
-				OBJ_470 /* Store.swift */,
-				OBJ_471 /* StoreError.swift */,
-				OBJ_472 /* TypeSafeSession.swift */,
+				OBJ_468 /* CookieCryptography.swift */,
+				OBJ_469 /* CookieManagement.swift */,
+				OBJ_470 /* CookieParameter.swift */,
+				OBJ_471 /* InMemoryStore.swift */,
+				OBJ_472 /* RouterRequest+Session.swift */,
+				OBJ_473 /* Session.swift */,
+				OBJ_474 /* SessionCookie.swift */,
+				OBJ_475 /* SessionState.swift */,
+				OBJ_476 /* Store.swift */,
+				OBJ_477 /* StoreError.swift */,
+				OBJ_478 /* TypeSafeSession.swift */,
 			);
 			name = KituraSession;
 			path = ".build/checkouts/Kitura-Session/Sources/KituraSession";
@@ -4429,27 +4450,6 @@
 			name = Database;
 			path = Database;
 			sourceTree = "<group>";
-		};
-		OBJ_474 /* HeliumLogger 1.9.200 */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_475 /* HeliumLogger */,
-				OBJ_479 /* Package.swift */,
-			);
-			name = "HeliumLogger 1.9.200";
-			path = "";
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_475 /* HeliumLogger */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_476 /* HeliumLogHandler.swift */,
-				OBJ_477 /* HeliumLogger.swift */,
-				OBJ_478 /* HeliumStreamLogger.swift */,
-			);
-			name = HeliumLogger;
-			path = .build/checkouts/HeliumLogger/Sources/HeliumLogger;
-			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_480 /* ServerShared */ = {
 			isa = PBXGroup;
@@ -5070,61 +5070,61 @@
 		OBJ_709 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
-				Server::OtherTests::Product /* OtherTests.xctest */,
-				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
-				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
-				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
-				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
-				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
-				ServerGoogleAccount::ServerGoogleAccount::Product /* ServerGoogleAccount.framework */,
-				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
-				Kitura::Kitura::Product /* Kitura.framework */,
-				Cryptor::Cryptor::Product /* Cryptor.framework */,
-				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
-				Kitura-net::KituraNet::Product /* KituraNet.framework */,
-				Server::UploaderTests::Product /* UploaderTests.xctest */,
-				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
-				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
-				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
-				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
-				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
-				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
-				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
-				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
-				SSLService::SSLService::Product /* SSLService.framework */,
-				Server::FileControllerBothUploadTests::Product /* FileControllerBothUploadTests.xctest */,
-				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
-				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
-				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
-				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
-				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
-				ServerShared::ServerShared::Product /* ServerShared.framework */,
-				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
-				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
-				swift-log::Logging::Product /* Logging.framework */,
-				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
 				ServerFacebookAccount::ServerFacebookAccount::Product /* ServerFacebookAccount.framework */,
-				Server::SharingTests::Product /* SharingTests.xctest */,
-				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
+				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
+				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
+				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
 				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
-				Server::TestsCommon::Product /* TestsCommon.xctest */,
-				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
-				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
-				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
+				ServerShared::ServerShared::Product /* ServerShared.framework */,
+				swift-log::Logging::Product /* Logging.framework */,
+				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
 				SwiftJWT::SwiftJWT::Product /* SwiftJWT.framework */,
-				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
-				Server::Server::Product /* Server.framework */,
-				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
-				Server::Main::Product /* Main */,
-				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
-				AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */,
-				Server::FileControllerUploadDeletionTests::Product /* FileControllerUploadDeletionTests.xctest */,
-				Socket::Socket::Product /* Socket.framework */,
-				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
-				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
-				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
+				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
+				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
+				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
 				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
+				Kitura-net::KituraNet::Product /* KituraNet.framework */,
+				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
+				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
+				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
+				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
+				Cryptor::Cryptor::Product /* Cryptor.framework */,
+				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
+				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
+				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
+				Server::OtherTests::Product /* OtherTests.xctest */,
+				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
+				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
+				ServerGoogleAccount::ServerGoogleAccount::Product /* ServerGoogleAccount.framework */,
+				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
+				AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */,
+				Server::TestsCommon::Product /* TestsCommon.xctest */,
+				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
+				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
+				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
+				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
+				Server::Main::Product /* Main */,
+				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
+				Server::SharingTests::Product /* SharingTests.xctest */,
+				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
+				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
+				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
+				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
+				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
+				Kitura::Kitura::Product /* Kitura.framework */,
+				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
+				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
+				SSLService::SSLService::Product /* SSLService.framework */,
+				Socket::Socket::Product /* Socket.framework */,
+				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
+				Server::Server::Product /* Server.framework */,
+				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
+				Server::UploaderTests::Product /* UploaderTests.xctest */,
+				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
+				Server::FileControllerUploadDeletionTests::Product /* FileControllerUploadDeletionTests.xctest */,
+				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
+				Server::FileControllerBothUploadTests::Product /* FileControllerBothUploadTests.xctest */,
+				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
 			);
 			name = Products;
 			path = "";
@@ -6754,7 +6754,7 @@
 			buildPhases = (
 				OBJ_2730 /* Sources */,
 				OBJ_2793 /* Frameworks */,
-				108EC5F921F62FC1DAE1FDB5 /* CopyFiles */,
+				2D8C1CA8F6AA8325A8E6361C /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -11455,59 +11455,59 @@
 		};
 		OBJ_3167 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerUploadDeletionTests /* FileControllerUploadDeletionTests */;
+			target = Server::ChangeResolverTests /* ChangeResolverTests */;
 		};
 		OBJ_3168 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
-		};
-		OBJ_3169 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::OtherTests /* OtherTests */;
+			target = Server::SharingTests /* SharingTests */;
 		};
 		OBJ_3170 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::TestsCommon /* TestsCommon */;
-		};
-		OBJ_3171 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::FileControllerUploadFileTests /* FileControllerUploadFileTests */;
+			target = Server::UserControllerTests /* UserControllerTests */;
 		};
 		OBJ_3172 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerBothUploadTests /* FileControllerBothUploadTests */;
+			target = Server::FileControllerUploadDeletionTests /* FileControllerUploadDeletionTests */;
 		};
 		OBJ_3173 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountFileTests /* AccountFileTests */;
+			target = Server::DatabaseTests /* DatabaseTests */;
 		};
 		OBJ_3174 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::SharingTests /* SharingTests */;
+			target = Server::UploaderTests /* UploaderTests */;
 		};
 		OBJ_3176 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::DatabaseTests /* DatabaseTests */;
+			target = Server::TestsCommon /* TestsCommon */;
 		};
 		OBJ_3177 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::UserControllerTests /* UserControllerTests */;
+			target = Server::FileControllerTests /* FileControllerTests */;
+		};
+		OBJ_3178 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::AccountFileTests /* AccountFileTests */;
 		};
 		OBJ_3179 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::ChangeResolverTests /* ChangeResolverTests */;
+			target = Server::FileControllerBothUploadTests /* FileControllerBothUploadTests */;
 		};
 		OBJ_3180 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerTests /* FileControllerTests */;
+			target = Server::PushNotificationTests /* PushNotificationTests */;
 		};
 		OBJ_3181 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::PushNotificationTests /* PushNotificationTests */;
+			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
 		};
 		OBJ_3182 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::UploaderTests /* UploaderTests */;
+			target = Server::OtherTests /* OtherTests */;
+		};
+		OBJ_3183 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::FileControllerUploadFileTests /* FileControllerUploadFileTests */;
 		};
 		OBJ_3289 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

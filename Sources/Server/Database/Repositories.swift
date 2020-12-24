@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Repositories {
+class Repositories {
     let db: Database
     
     lazy var user = UserRepository(db)
