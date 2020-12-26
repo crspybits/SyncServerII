@@ -13,10 +13,12 @@ import ServerGoogleAccount
 import ServerMicrosoftAccount
 import ServerFacebookAccount
 import ServerAppleSignInAccount
+import ServerDropboxAccount
 
 // Server startup configuration info, pulled from the Server.json file.
 
-struct ServerConfiguration: Decodable, GoogleCredsConfiguration, MicrosoftCredsConfiguration, FacebookCredsConfiguration, AppleSignInConfigurable {
+struct ServerConfiguration: Decodable, GoogleCredsConfiguration, MicrosoftCredsConfiguration, FacebookCredsConfiguration, AppleSignInConfigurable, DropboxCredsConfiguration {
+    
     /* When adding this .json into your Xcode project make sure to
     a) add it into Copy Files in Build Phases, and 
     b) select Products Directory as a destination.
@@ -51,6 +53,9 @@ struct ServerConfiguration: Decodable, GoogleCredsConfiguration, MicrosoftCredsC
     let MicrosoftClientSecret:String?
 
     let appleSignIn: AppleSignInConfiguration?
+    
+    let DropboxAppKey: String?
+    let DropboxAppSecret: String?
 
     let maxNumberDeviceUUIDPerUser:Int?
     

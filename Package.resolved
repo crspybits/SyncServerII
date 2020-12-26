@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/SyncServerII/AppleJWTDecoder.git",
         "state": {
           "branch": null,
-          "revision": "74c7357c715eaa45d01213efaa27941ff41ff4ad",
-          "version": "0.0.4"
+          "revision": "bd791ad027c52f8054dcb448b9a9981046712dbf",
+          "version": "0.0.6"
         }
       },
       {
@@ -34,15 +34,6 @@
         "state": {
           "branch": null,
           "revision": "c885fcdbe1b04718cb46d747387137653c030f6c",
-          "version": "1.0.200"
-        }
-      },
-      {
-        "package": "Signals",
-        "repositoryURL": "https://github.com/Kitura/BlueSignals.git",
-        "state": {
-          "branch": null,
-          "revision": "1f6c49e186c8a4eeef87ba14f2f97b8646559d13",
           "version": "1.0.200"
         }
       },
@@ -87,8 +78,8 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsDropbox.git",
         "state": {
           "branch": null,
-          "revision": "3be73caa8322e3f7f006661981d43814e1336ca5",
-          "version": "0.4.0"
+          "revision": "7381b4bae89df21a4f5bddcf64ecd5cebdcb2fa8",
+          "version": "0.4.4"
         }
       },
       {
@@ -201,7 +192,7 @@
       },
       {
         "package": "OpenSSL",
-        "repositoryURL": "https://github.com/Kitura/OpenSSL.git",
+        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
         "state": {
           "branch": null,
           "revision": "80b04f33b086fc90e28d9ae159d43705fb348e16",
@@ -227,15 +218,6 @@
         }
       },
       {
-        "package": "LinuxBridge",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
-        "state": {
-          "branch": null,
-          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
-          "version": "3.1.0"
-        }
-      },
-      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -246,11 +228,11 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
         "state": {
           "branch": null,
-          "revision": "5401a4713557237baabaef1caea93467cf5af138",
-          "version": "2.1.0"
+          "revision": "ed4f0e775c874b535fb24b00e6600b81f2932907",
+          "version": "2.1.1"
         }
       },
       {
@@ -267,7 +249,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "dd8b4886d942c37c72813e0c69ec7fe34e872d1d",
+          "revision": "cdbdcf096e4b55686a2cb640fa625d14ab321022",
           "version": null
         }
       },
@@ -276,7 +258,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
         "state": {
           "branch": "master",
-          "revision": "2c9d5719613dc91949520222fbf03270988c574c",
+          "revision": "553d0ed023b69acc19b8d689b32d676e16f82b69",
           "version": null
         }
       },
@@ -312,7 +294,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerShared.git",
         "state": {
           "branch": "master",
-          "revision": "d62e3020623e7f84bb88e8e85a28c24cb5e058b7",
+          "revision": "b2b65a1942d3d8506379841ebef276dd32f7c1fb",
           "version": null
         }
       },

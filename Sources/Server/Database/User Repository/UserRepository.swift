@@ -207,7 +207,7 @@ class UserRepository : Repository, RepositoryLookup {
         case .user(let oldCredsUser):
             // First need to merge creds-- otherwise, we might override part of the creds with our update.
             
-            // the `accountDelegate` is passed as nil because the creds that result here will never need to do the save operation in that delegate.
+            // the `accountDelegate` is passed as nil because the `updateCreds` method is what is used to implement the saveToDatabase call and it's cyclic to pass the delegate in this case.
             guard let oldCreds = try? accountManager.accountFromJSON(oldCredsUser.creds, accountName: oldCredsUser.accountType, user: .user(oldCredsUser), accountDelegate: nil) else {
                 return false
             }
