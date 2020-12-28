@@ -38,6 +38,15 @@
         }
       },
       {
+        "package": "Signals",
+        "repositoryURL": "https://github.com/Kitura/BlueSignals.git",
+        "state": {
+          "branch": null,
+          "revision": "1f6c49e186c8a4eeef87ba14f2f97b8646559d13",
+          "version": "1.0.200"
+        }
+      },
+      {
         "package": "Socket",
         "repositoryURL": "https://github.com/Kitura/BlueSocket.git",
         "state": {
@@ -192,7 +201,7 @@
       },
       {
         "package": "OpenSSL",
-        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
+        "repositoryURL": "https://github.com/Kitura/OpenSSL.git",
         "state": {
           "branch": null,
           "revision": "80b04f33b086fc90e28d9ae159d43705fb348e16",
@@ -218,6 +227,15 @@
         }
       },
       {
+        "package": "LinuxBridge",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-LinuxBridge.git",
+        "state": {
+          "branch": null,
+          "revision": "d6e64c48e6b06b6f1ab7ab9338280447baa8ca5c",
+          "version": "3.1.0"
+        }
+      },
+      {
         "package": "PerfectMySQL",
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
@@ -228,11 +246,11 @@
       },
       {
         "package": "mysqlclient",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient.git",
+        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-mysqlclient-Linux.git",
         "state": {
           "branch": null,
-          "revision": "ed4f0e775c874b535fb24b00e6600b81f2932907",
-          "version": "2.1.1"
+          "revision": "5401a4713557237baabaef1caea93467cf5af138",
+          "version": "2.1.0"
         }
       },
       {
@@ -249,7 +267,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": "master",
-          "revision": "cdbdcf096e4b55686a2cb640fa625d14ab321022",
+          "revision": "d15e402dfdccf49349ba2d525ff66b1167df7f0c",
           "version": null
         }
       },
@@ -276,7 +294,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerGoogleAccount.git",
         "state": {
           "branch": "master",
-          "revision": "527a314cdc1598c407d2ccf833e49947f1c09ab5",
+          "revision": "b440c6a559ed363c049f369f9e4186cead19c7c4",
           "version": null
         }
       },
