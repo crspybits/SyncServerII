@@ -107,6 +107,20 @@ struct TestFile {
         sha1Hash: "BF0DDB033035AE4EBB8267BF4D920183E9BC4B95",
         contents: .url(catMovURL),
         mimeType: .mov)
+        
+#if os(macOS)
+        // DEPRECATED-- not working
+        private static let catPngURL = URL(fileURLWithPath: "/tmp/Cat.png")
+#else
+        private static let catPngURL = URL(fileURLWithPath: "./Resources/Cat.png")
+#endif
+
+    static let catPng = TestFile(
+        dropboxCheckSum: "d8037620a8c3a506ec3b5b94353df15f24331c133eb7690434b11fa36205b209",
+        md5CheckSum: "b1dc755767401bd59352fa0a4a78d17b",
+        sha1Hash: "6C464286C12E8232382F829793249F55354FDB16",
+        contents: .url(catPngURL),
+        mimeType: .png)
 
 #if os(macOS)
         private static let urlFile = URL(fileURLWithPath: "/tmp/example.url")

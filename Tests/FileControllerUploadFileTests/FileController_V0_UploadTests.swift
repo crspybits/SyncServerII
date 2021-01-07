@@ -144,6 +144,12 @@ class FileController_V0_UploadTests: ServerTestCase {
         }
     }
     
+    func testUploadSingleV0PngFile() {
+        uploadSingleV0File { deviceUUID, fileUUID, changeResolverName in
+            return uploadPngFile(deviceUUID: deviceUUID, fileUUID: fileUUID)
+        }
+    }
+    
     // With non-nil changeResolverName
     let changeResolverName = CommentFile.changeResolverName
     

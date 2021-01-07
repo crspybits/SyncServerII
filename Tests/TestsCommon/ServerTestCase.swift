@@ -846,6 +846,12 @@ class ServerTestCase : XCTestCase {
         let movFile = TestFile.catMov
         return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .mov, file: movFile, fileLabel: UUID().uuidString, addUser:addUser, fileVersion:fileVersion, appMetaData:appMetaData, fileGroup: fileGroup, changeResolverName: changeResolverName, errorExpected:errorExpected)
     }
+    
+    func uploadPngFile(testAccount:TestAccount = .primaryOwningAccount, uploadIndex:Int32 = 1, uploadCount:Int32 = 1, owningAccountType: AccountScheme.AccountName? = nil, deviceUUID:String = Foundation.UUID().uuidString, fileUUID:String = Foundation.UUID().uuidString, addUser:AddUser = .yes, fileVersion:FileVersionInt = 0, appMetaData:String? = nil, fileGroup: FileGroup? = nil, changeResolverName: String? = nil, errorExpected:Bool = false) -> UploadFileResult? {
+        
+        let pngFile = TestFile.catPng
+        return uploadFileUsingServer(testAccount:testAccount, uploadIndex:uploadIndex, uploadCount:uploadCount, owningAccountType: owningAccountType, deviceUUID:deviceUUID, fileUUID:fileUUID, mimeType: .png, file: pngFile, fileLabel: UUID().uuidString, addUser:addUser, fileVersion:fileVersion, appMetaData:appMetaData, fileGroup: fileGroup, changeResolverName: changeResolverName, errorExpected:errorExpected)
+    }
 
     func getIndex(expectedFiles:[UploadFileRequest]? = nil, deviceUUID:String = Foundation.UUID().uuidString, sharingGroupUUID: String? = nil, expectedDeletionState:[String: Bool]? = nil, errorExpected: Bool = false) {
         

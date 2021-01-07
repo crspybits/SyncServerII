@@ -25,15 +25,15 @@
 			dependencies = (
 				OBJ_3169 /* PBXTargetDependency */,
 				OBJ_3170 /* PBXTargetDependency */,
-				OBJ_3172 /* PBXTargetDependency */,
+				OBJ_3171 /* PBXTargetDependency */,
 				OBJ_3173 /* PBXTargetDependency */,
+				OBJ_3174 /* PBXTargetDependency */,
 				OBJ_3175 /* PBXTargetDependency */,
 				OBJ_3176 /* PBXTargetDependency */,
 				OBJ_3177 /* PBXTargetDependency */,
-				OBJ_3178 /* PBXTargetDependency */,
 				OBJ_3179 /* PBXTargetDependency */,
-				OBJ_3180 /* PBXTargetDependency */,
 				OBJ_3181 /* PBXTargetDependency */,
+				OBJ_3182 /* PBXTargetDependency */,
 				OBJ_3183 /* PBXTargetDependency */,
 				OBJ_3184 /* PBXTargetDependency */,
 				OBJ_3185 /* PBXTargetDependency */,
@@ -44,8 +44,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		8EDB34D1C17B5842DB87E767 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2B5F5051FDA3ABCC0F94108D /* Server.json */; };
-		9462F0A955841D88D1EE090C /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = E04C70D159AB9B5908751912 /* ServerTests.json */; };
+		41174B78E9178C0CD6A65BD2 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7B70375A7FB010496B06B934 /* ServerTests.json */; };
+		75BC4C204EBB5A14494FD64A /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7BDAD10E75FE23D192B448EB /* Server.json */; };
 		OBJ_1016 /* AppleClaims.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_357 /* AppleClaims.swift */; };
 		OBJ_1017 /* ApplePublicKey+HTTP.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_358 /* ApplePublicKey+HTTP.swift */; };
 		OBJ_1018 /* ApplePublicKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_359 /* ApplePublicKey.swift */; };
@@ -1530,21 +1530,22 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		11918DC9F6E8635D735A6CAB /* CopyFiles */ = {
+		1768E0CB620ECD5A68AF0C9D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				8EDB34D1C17B5842DB87E767 /* Server.json in CopyFiles */,
-				9462F0A955841D88D1EE090C /* ServerTests.json in CopyFiles */,
+				75BC4C204EBB5A14494FD64A /* Server.json in CopyFiles */,
+				41174B78E9178C0CD6A65BD2 /* ServerTests.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2B5F5051FDA3ABCC0F94108D /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
+		7B70375A7FB010496B06B934 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		7BDAD10E75FE23D192B448EB /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
 		AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */ = {isa = PBXFileReference; path = AppleJWTDecoder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */ = {isa = PBXFileReference; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1554,7 +1555,6 @@
 		Cryptor::Cryptor::Product /* Cryptor.framework */ = {isa = PBXFileReference; path = Cryptor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorECC::CryptorECC::Product /* CryptorECC.framework */ = {isa = PBXFileReference; path = CryptorECC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */ = {isa = PBXFileReference; path = CryptorRSA.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E04C70D159AB9B5908751912 /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */ = {isa = PBXFileReference; path = HeliumLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-Credentials::Credentials::Product /* Credentials.framework */ = {isa = PBXFileReference; path = Credentials.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */ = {isa = PBXFileReference; path = CredentialsFacebook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1700,11 +1700,11 @@
 		OBJ_240 /* Updatable.swift */ = {isa = PBXFileReference; path = Updatable.swift; sourceTree = "<group>"; };
 		OBJ_241 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
 		OBJ_242 /* ZeroPadding.swift */ = {isa = PBXFileReference; path = ZeroPadding.swift; sourceTree = "<group>"; };
-		OBJ_243 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/CryptoSwift/Package.swift; sourceTree = "<group>"; };
+		OBJ_243 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/CryptoSwift/Package.swift; sourceTree = "<group>"; };
 		OBJ_246 /* Promise.swift */ = {isa = PBXFileReference; path = Promise.swift; sourceTree = "<group>"; };
 		OBJ_247 /* ThreadQueue.swift */ = {isa = PBXFileReference; path = ThreadQueue.swift; sourceTree = "<group>"; };
 		OBJ_248 /* Threading.swift */ = {isa = PBXFileReference; path = Threading.swift; sourceTree = "<group>"; };
-		OBJ_249 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Perfect-Thread/Package.swift"; sourceTree = "<group>"; };
+		OBJ_249 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Perfect-Thread/Package.swift"; sourceTree = "<group>"; };
 		OBJ_252 /* Bytes.swift */ = {isa = PBXFileReference; path = Bytes.swift; sourceTree = "<group>"; };
 		OBJ_253 /* Dir.swift */ = {isa = PBXFileReference; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_254 /* File.swift */ = {isa = PBXFileReference; path = File.swift; sourceTree = "<group>"; };
@@ -1715,12 +1715,12 @@
 		OBJ_259 /* SysProcess.swift */ = {isa = PBXFileReference; path = SysProcess.swift; sourceTree = "<group>"; };
 		OBJ_26 /* FileController+DownloadAppMetaData.swift */ = {isa = PBXFileReference; path = "FileController+DownloadAppMetaData.swift"; sourceTree = "<group>"; };
 		OBJ_260 /* Utilities.swift */ = {isa = PBXFileReference; path = Utilities.swift; sourceTree = "<group>"; };
-		OBJ_261 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Perfect/Package.swift; sourceTree = "<group>"; };
+		OBJ_261 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/Perfect/Package.swift; sourceTree = "<group>"; };
 		OBJ_264 /* MySQL.swift */ = {isa = PBXFileReference; path = MySQL.swift; sourceTree = "<group>"; };
 		OBJ_265 /* MySQLCRUD.swift */ = {isa = PBXFileReference; path = MySQLCRUD.swift; sourceTree = "<group>"; };
 		OBJ_266 /* MySQLStmt.swift */ = {isa = PBXFileReference; path = MySQLStmt.swift; sourceTree = "<group>"; };
 		OBJ_267 /* PerfectMySQL.swift */ = {isa = PBXFileReference; path = PerfectMySQL.swift; sourceTree = "<group>"; };
-		OBJ_268 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Perfect-MySQL/Package.swift"; sourceTree = "<group>"; };
+		OBJ_268 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Perfect-MySQL/Package.swift"; sourceTree = "<group>"; };
 		OBJ_27 /* FileController+DownloadFile.swift */ = {isa = PBXFileReference; path = "FileController+DownloadFile.swift"; sourceTree = "<group>"; };
 		OBJ_272 /* Coding.swift */ = {isa = PBXFileReference; path = Coding.swift; sourceTree = "<group>"; };
 		OBJ_273 /* CodingBindings.swift */ = {isa = PBXFileReference; path = CodingBindings.swift; sourceTree = "<group>"; };
@@ -1750,18 +1750,18 @@
 		OBJ_296 /* Table.swift */ = {isa = PBXFileReference; path = Table.swift; sourceTree = "<group>"; };
 		OBJ_297 /* Update.swift */ = {isa = PBXFileReference; path = Update.swift; sourceTree = "<group>"; };
 		OBJ_298 /* Where.swift */ = {isa = PBXFileReference; path = Where.swift; sourceTree = "<group>"; };
-		OBJ_299 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Perfect-CRUD/Package.swift"; sourceTree = "<group>"; };
+		OBJ_299 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Perfect-CRUD/Package.swift"; sourceTree = "<group>"; };
 		OBJ_30 /* FileController+UploadFile.swift */ = {isa = PBXFileReference; path = "FileController+UploadFile.swift"; sourceTree = "<group>"; };
 		OBJ_302 /* CredentialsMicrosoftOptions.swift */ = {isa = PBXFileReference; path = CredentialsMicrosoftOptions.swift; sourceTree = "<group>"; };
 		OBJ_303 /* CredentialsMicrosoftToken.swift */ = {isa = PBXFileReference; path = CredentialsMicrosoftToken.swift; sourceTree = "<group>"; };
 		OBJ_304 /* MicrosoftClaims.swift */ = {isa = PBXFileReference; path = MicrosoftClaims.swift; sourceTree = "<group>"; };
 		OBJ_305 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_306 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/CredentialsMicrosoft/Package.swift; sourceTree = "<group>"; };
+		OBJ_306 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/CredentialsMicrosoft/Package.swift; sourceTree = "<group>"; };
 		OBJ_309 /* CredentialsDropboxOptions.swift */ = {isa = PBXFileReference; path = CredentialsDropboxOptions.swift; sourceTree = "<group>"; };
 		OBJ_31 /* FileController.swift */ = {isa = PBXFileReference; path = FileController.swift; sourceTree = "<group>"; };
 		OBJ_310 /* CredentialsDropboxToken.swift */ = {isa = PBXFileReference; path = CredentialsDropboxToken.swift; sourceTree = "<group>"; };
 		OBJ_311 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_312 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/CredentialsDropbox/Package.swift; sourceTree = "<group>"; };
+		OBJ_312 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/CredentialsDropbox/Package.swift; sourceTree = "<group>"; };
 		OBJ_315 /* CredentialsGoogle.swift */ = {isa = PBXFileReference; path = CredentialsGoogle.swift; sourceTree = "<group>"; };
 		OBJ_316 /* CredentialsGoogleOptions.swift */ = {isa = PBXFileReference; path = CredentialsGoogleOptions.swift; sourceTree = "<group>"; };
 		OBJ_317 /* CredentialsGoogleToken.swift */ = {isa = PBXFileReference; path = CredentialsGoogleToken.swift; sourceTree = "<group>"; };
@@ -1770,7 +1770,7 @@
 		OBJ_32 /* FinishUploadDeletion.swift */ = {isa = PBXFileReference; path = FinishUploadDeletion.swift; sourceTree = "<group>"; };
 		OBJ_320 /* TypeSafeGoogleToken.swift */ = {isa = PBXFileReference; path = TypeSafeGoogleToken.swift; sourceTree = "<group>"; };
 		OBJ_321 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_322 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-CredentialsGoogle/Package.swift"; sourceTree = "<group>"; };
+		OBJ_322 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Kitura-CredentialsGoogle/Package.swift"; sourceTree = "<group>"; };
 		OBJ_325 /* CredentialsFacebook.swift */ = {isa = PBXFileReference; path = CredentialsFacebook.swift; sourceTree = "<group>"; };
 		OBJ_326 /* CredentialsFacebookOptions.swift */ = {isa = PBXFileReference; path = CredentialsFacebookOptions.swift; sourceTree = "<group>"; };
 		OBJ_327 /* CredentialsFacebookToken.swift */ = {isa = PBXFileReference; path = CredentialsFacebookToken.swift; sourceTree = "<group>"; };
@@ -1780,36 +1780,36 @@
 		OBJ_330 /* TypeSafeFacebook.swift */ = {isa = PBXFileReference; path = TypeSafeFacebook.swift; sourceTree = "<group>"; };
 		OBJ_331 /* TypeSafeFacebookToken.swift */ = {isa = PBXFileReference; path = TypeSafeFacebookToken.swift; sourceTree = "<group>"; };
 		OBJ_332 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_333 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-CredentialsFacebook/Package.swift"; sourceTree = "<group>"; };
+		OBJ_333 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Kitura-CredentialsFacebook/Package.swift"; sourceTree = "<group>"; };
 		OBJ_336 /* FacebookCreds.swift */ = {isa = PBXFileReference; path = FacebookCreds.swift; sourceTree = "<group>"; };
-		OBJ_337 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ServerFacebookAccount/Package.swift; sourceTree = "<group>"; };
+		OBJ_337 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/ServerFacebookAccount/Package.swift; sourceTree = "<group>"; };
 		OBJ_340 /* AppleSignInCreds+ClientSecret.swift */ = {isa = PBXFileReference; path = "AppleSignInCreds+ClientSecret.swift"; sourceTree = "<group>"; };
 		OBJ_341 /* AppleSignInCreds.swift */ = {isa = PBXFileReference; path = AppleSignInCreds.swift; sourceTree = "<group>"; };
 		OBJ_342 /* ApplelSignInCreds+Refresh.swift */ = {isa = PBXFileReference; path = "ApplelSignInCreds+Refresh.swift"; sourceTree = "<group>"; };
 		OBJ_343 /* NotificationRequest+JWT.swift */ = {isa = PBXFileReference; path = "NotificationRequest+JWT.swift"; sourceTree = "<group>"; };
 		OBJ_344 /* NotificationRequest.swift */ = {isa = PBXFileReference; path = NotificationRequest.swift; sourceTree = "<group>"; };
 		OBJ_345 /* NotificationResponse.swift */ = {isa = PBXFileReference; path = NotificationResponse.swift; sourceTree = "<group>"; };
-		OBJ_346 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ServerAppleSignInAccount/Package.swift; sourceTree = "<group>"; };
+		OBJ_346 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/ServerAppleSignInAccount/Package.swift; sourceTree = "<group>"; };
 		OBJ_349 /* AccountDetails.swift */ = {isa = PBXFileReference; path = AccountDetails.swift; sourceTree = "<group>"; };
 		OBJ_35 /* PushNotificationsController+SendPushNotifications.swift */ = {isa = PBXFileReference; path = "PushNotificationsController+SendPushNotifications.swift"; sourceTree = "<group>"; };
 		OBJ_350 /* CredentialsAppleSignInOptions.swift */ = {isa = PBXFileReference; path = CredentialsAppleSignInOptions.swift; sourceTree = "<group>"; };
 		OBJ_351 /* CredentialsAppleSignInToken.swift */ = {isa = PBXFileReference; path = CredentialsAppleSignInToken.swift; sourceTree = "<group>"; };
 		OBJ_352 /* CredentialsTokenClaims.swift */ = {isa = PBXFileReference; path = CredentialsTokenClaims.swift; sourceTree = "<group>"; };
 		OBJ_353 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_354 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/CredentialsAppleSignIn/Package.swift; sourceTree = "<group>"; };
+		OBJ_354 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/CredentialsAppleSignIn/Package.swift; sourceTree = "<group>"; };
 		OBJ_357 /* AppleClaims.swift */ = {isa = PBXFileReference; path = AppleClaims.swift; sourceTree = "<group>"; };
 		OBJ_358 /* ApplePublicKey+HTTP.swift */ = {isa = PBXFileReference; path = "ApplePublicKey+HTTP.swift"; sourceTree = "<group>"; };
 		OBJ_359 /* ApplePublicKey.swift */ = {isa = PBXFileReference; path = ApplePublicKey.swift; sourceTree = "<group>"; };
 		OBJ_36 /* PushNotificationsController.swift */ = {isa = PBXFileReference; path = PushNotificationsController.swift; sourceTree = "<group>"; };
 		OBJ_360 /* AppleSignInClaims.swift */ = {isa = PBXFileReference; path = AppleSignInClaims.swift; sourceTree = "<group>"; };
-		OBJ_361 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/AppleJWTDecoder/Package.swift; sourceTree = "<group>"; };
+		OBJ_361 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/AppleJWTDecoder/Package.swift; sourceTree = "<group>"; };
 		OBJ_364 /* Cert.swift */ = {isa = PBXFileReference; path = Cert.swift; sourceTree = "<group>"; };
 		OBJ_365 /* JWK.swift */ = {isa = PBXFileReference; path = JWK.swift; sourceTree = "<group>"; };
 		OBJ_366 /* JWKError.swift */ = {isa = PBXFileReference; path = JWKError.swift; sourceTree = "<group>"; };
 		OBJ_367 /* RSAKey+JWK.swift */ = {isa = PBXFileReference; path = "RSAKey+JWK.swift"; sourceTree = "<group>"; };
 		OBJ_368 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
 		OBJ_369 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_370 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Swift-JWK-to-PEM/Package.swift"; sourceTree = "<group>"; };
+		OBJ_370 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Swift-JWK-to-PEM/Package.swift"; sourceTree = "<group>"; };
 		OBJ_373 /* BlueECDSA.swift */ = {isa = PBXFileReference; path = BlueECDSA.swift; sourceTree = "<group>"; };
 		OBJ_374 /* BlueHMAC.swift */ = {isa = PBXFileReference; path = BlueHMAC.swift; sourceTree = "<group>"; };
 		OBJ_375 /* BlueRSA.swift */ = {isa = PBXFileReference; path = BlueRSA.swift; sourceTree = "<group>"; };
@@ -1832,7 +1832,7 @@
 		OBJ_391 /* SignerAlgorithm.swift */ = {isa = PBXFileReference; path = SignerAlgorithm.swift; sourceTree = "<group>"; };
 		OBJ_392 /* ValidateClaimsResult.swift */ = {isa = PBXFileReference; path = ValidateClaimsResult.swift; sourceTree = "<group>"; };
 		OBJ_393 /* VerifierAlgorithm.swift */ = {isa = PBXFileReference; path = VerifierAlgorithm.swift; sourceTree = "<group>"; };
-		OBJ_394 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Swift-JWT/Package.swift"; sourceTree = "<group>"; };
+		OBJ_394 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Swift-JWT/Package.swift"; sourceTree = "<group>"; };
 		OBJ_397 /* ASN1.swift */ = {isa = PBXFileReference; path = ASN1.swift; sourceTree = "<group>"; };
 		OBJ_398 /* Data+Extensions.swift */ = {isa = PBXFileReference; path = "Data+Extensions.swift"; sourceTree = "<group>"; };
 		OBJ_399 /* ECDecryptable.swift */ = {isa = PBXFileReference; path = ECDecryptable.swift; sourceTree = "<group>"; };
@@ -1845,7 +1845,7 @@
 		OBJ_405 /* ECSignature.swift */ = {isa = PBXFileReference; path = ECSignature.swift; sourceTree = "<group>"; };
 		OBJ_406 /* EllipticCurve.swift */ = {isa = PBXFileReference; path = EllipticCurve.swift; sourceTree = "<group>"; };
 		OBJ_407 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
-		OBJ_408 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/BlueECC/Package.swift; sourceTree = "<group>"; };
+		OBJ_408 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueECC/Package.swift; sourceTree = "<group>"; };
 		OBJ_41 /* SharingAccountsController.swift */ = {isa = PBXFileReference; path = SharingAccountsController.swift; sourceTree = "<group>"; };
 		OBJ_411 /* CryptorRSA.swift */ = {isa = PBXFileReference; path = CryptorRSA.swift; sourceTree = "<group>"; };
 		OBJ_412 /* CryptorRSAConstants.swift */ = {isa = PBXFileReference; path = CryptorRSAConstants.swift; sourceTree = "<group>"; };
@@ -1855,33 +1855,33 @@
 		OBJ_416 /* CryptorRSAUtilities.swift */ = {isa = PBXFileReference; path = CryptorRSAUtilities.swift; sourceTree = "<group>"; };
 		OBJ_417 /* Data+Extensions.swift */ = {isa = PBXFileReference; path = "Data+Extensions.swift"; sourceTree = "<group>"; };
 		OBJ_418 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
-		OBJ_419 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/BlueRSA/Package.swift; sourceTree = "<group>"; };
+		OBJ_419 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueRSA/Package.swift; sourceTree = "<group>"; };
 		OBJ_42 /* SharingGroupsController.swift */ = {isa = PBXFileReference; path = SharingGroupsController.swift; sourceTree = "<group>"; };
 		OBJ_422 /* MicrosoftCreds+CloudStorage.swift */ = {isa = PBXFileReference; path = "MicrosoftCreds+CloudStorage.swift"; sourceTree = "<group>"; };
 		OBJ_423 /* MicrosoftCreds+Uploads.swift */ = {isa = PBXFileReference; path = "MicrosoftCreds+Uploads.swift"; sourceTree = "<group>"; };
 		OBJ_424 /* MicrosoftCreds.swift */ = {isa = PBXFileReference; path = MicrosoftCreds.swift; sourceTree = "<group>"; };
-		OBJ_425 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ServerMicrosoftAccount/Package.swift; sourceTree = "<group>"; };
+		OBJ_425 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/ServerMicrosoftAccount/Package.swift; sourceTree = "<group>"; };
 		OBJ_428 /* GoogleCreds+CloudStorage.swift */ = {isa = PBXFileReference; path = "GoogleCreds+CloudStorage.swift"; sourceTree = "<group>"; };
 		OBJ_429 /* GoogleCreds.swift */ = {isa = PBXFileReference; path = GoogleCreds.swift; sourceTree = "<group>"; };
-		OBJ_430 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ServerGoogleAccount/Package.swift; sourceTree = "<group>"; };
+		OBJ_430 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/ServerGoogleAccount/Package.swift; sourceTree = "<group>"; };
 		OBJ_433 /* DropboxCreds+CloudStorage.swift */ = {isa = PBXFileReference; path = "DropboxCreds+CloudStorage.swift"; sourceTree = "<group>"; };
 		OBJ_434 /* DropboxCreds+Refresh.swift */ = {isa = PBXFileReference; path = "DropboxCreds+Refresh.swift"; sourceTree = "<group>"; };
 		OBJ_435 /* DropboxCreds.swift */ = {isa = PBXFileReference; path = DropboxCreds.swift; sourceTree = "<group>"; };
-		OBJ_436 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerDropboxAccount/Package.swift; sourceTree = "<group>"; };
+		OBJ_436 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerDropboxAccount/Package.swift; sourceTree = "<group>"; };
 		OBJ_439 /* ChangeResolver.swift */ = {isa = PBXFileReference; path = ChangeResolver.swift; sourceTree = "<group>"; };
 		OBJ_44 /* UserController+Extras.swift */ = {isa = PBXFileReference; path = "UserController+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_440 /* CommentFile.swift */ = {isa = PBXFileReference; path = CommentFile.swift; sourceTree = "<group>"; };
 		OBJ_441 /* WholeFileReplacer.swift */ = {isa = PBXFileReference; path = WholeFileReplacer.swift; sourceTree = "<group>"; };
-		OBJ_442 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ChangeResolvers/Package.swift; sourceTree = "<group>"; };
+		OBJ_442 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/ChangeResolvers/Package.swift; sourceTree = "<group>"; };
 		OBJ_445 /* Account.swift */ = {isa = PBXFileReference; path = Account.swift; sourceTree = "<group>"; };
 		OBJ_446 /* CloudStorage.swift */ = {isa = PBXFileReference; path = CloudStorage.swift; sourceTree = "<group>"; };
 		OBJ_447 /* ControllerProtocol.swift */ = {isa = PBXFileReference; path = ControllerProtocol.swift; sourceTree = "<group>"; };
-		OBJ_448 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ServerAccount/Package.swift; sourceTree = "<group>"; };
+		OBJ_448 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/ServerAccount/Package.swift; sourceTree = "<group>"; };
 		OBJ_45 /* UserController.swift */ = {isa = PBXFileReference; path = UserController.swift; sourceTree = "<group>"; };
 		OBJ_451 /* HeliumLogHandler.swift */ = {isa = PBXFileReference; path = HeliumLogHandler.swift; sourceTree = "<group>"; };
 		OBJ_452 /* HeliumLogger.swift */ = {isa = PBXFileReference; path = HeliumLogger.swift; sourceTree = "<group>"; };
 		OBJ_453 /* HeliumStreamLogger.swift */ = {isa = PBXFileReference; path = HeliumStreamLogger.swift; sourceTree = "<group>"; };
-		OBJ_454 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/HeliumLogger/Package.swift; sourceTree = "<group>"; };
+		OBJ_454 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/HeliumLogger/Package.swift; sourceTree = "<group>"; };
 		OBJ_457 /* BaseCacheElement.swift */ = {isa = PBXFileReference; path = BaseCacheElement.swift; sourceTree = "<group>"; };
 		OBJ_458 /* Credentials.swift */ = {isa = PBXFileReference; path = Credentials.swift; sourceTree = "<group>"; };
 		OBJ_459 /* CredentialsPluginProtocol.swift */ = {isa = PBXFileReference; path = CredentialsPluginProtocol.swift; sourceTree = "<group>"; };
@@ -1892,7 +1892,7 @@
 		OBJ_463 /* TypeSafeCredentials.swift */ = {isa = PBXFileReference; path = TypeSafeCredentials.swift; sourceTree = "<group>"; };
 		OBJ_464 /* UserProfile.swift */ = {isa = PBXFileReference; path = UserProfile.swift; sourceTree = "<group>"; };
 		OBJ_465 /* UserProfileDelegate.swift */ = {isa = PBXFileReference; path = UserProfileDelegate.swift; sourceTree = "<group>"; };
-		OBJ_466 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-Credentials/Package.swift"; sourceTree = "<group>"; };
+		OBJ_466 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Kitura-Credentials/Package.swift"; sourceTree = "<group>"; };
 		OBJ_469 /* CookieCryptography.swift */ = {isa = PBXFileReference; path = CookieCryptography.swift; sourceTree = "<group>"; };
 		OBJ_470 /* CookieManagement.swift */ = {isa = PBXFileReference; path = CookieManagement.swift; sourceTree = "<group>"; };
 		OBJ_471 /* CookieParameter.swift */ = {isa = PBXFileReference; path = CookieParameter.swift; sourceTree = "<group>"; };
@@ -1905,7 +1905,7 @@
 		OBJ_478 /* StoreError.swift */ = {isa = PBXFileReference; path = StoreError.swift; sourceTree = "<group>"; };
 		OBJ_479 /* TypeSafeSession.swift */ = {isa = PBXFileReference; path = TypeSafeSession.swift; sourceTree = "<group>"; };
 		OBJ_48 /* Database+Extras.swift */ = {isa = PBXFileReference; path = "Database+Extras.swift"; sourceTree = "<group>"; };
-		OBJ_480 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-Session/Package.swift"; sourceTree = "<group>"; };
+		OBJ_480 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Kitura-Session/Package.swift"; sourceTree = "<group>"; };
 		OBJ_484 /* AccountScheme.swift */ = {isa = PBXFileReference; path = AccountScheme.swift; sourceTree = "<group>"; };
 		OBJ_485 /* AuthTokenType.swift */ = {isa = PBXFileReference; path = AuthTokenType.swift; sourceTree = "<group>"; };
 		OBJ_486 /* CloudStorageType.swift */ = {isa = PBXFileReference; path = CloudStorageType.swift; sourceTree = "<group>"; };
@@ -1954,15 +1954,15 @@
 		OBJ_526 /* String+Extras.swift */ = {isa = PBXFileReference; path = "String+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_527 /* Synchronized.swift */ = {isa = PBXFileReference; path = Synchronized.swift; sourceTree = "<group>"; };
 		OBJ_528 /* Types.swift */ = {isa = PBXFileReference; path = Types.swift; sourceTree = "<group>"; };
-		OBJ_529 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/ServerShared/Package.swift; sourceTree = "<group>"; };
+		OBJ_529 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/ServerShared/Package.swift; sourceTree = "<group>"; };
 		OBJ_532 /* SwiftyAWSSNS.swift */ = {isa = PBXFileReference; path = SwiftyAWSSNS.swift; sourceTree = "<group>"; };
-		OBJ_533 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/SwiftyAWSSNS/Package.swift; sourceTree = "<group>"; };
+		OBJ_533 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/SwiftyAWSSNS/Package.swift; sourceTree = "<group>"; };
 		OBJ_536 /* AWSAccount.swift */ = {isa = PBXFileReference; path = AWSAccount.swift; sourceTree = "<group>"; };
 		OBJ_537 /* Chunking.swift */ = {isa = PBXFileReference; path = Chunking.swift; sourceTree = "<group>"; };
 		OBJ_538 /* String+Extensions.swift */ = {isa = PBXFileReference; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		OBJ_539 /* URLRequest+AWSAccountSigning.swift */ = {isa = PBXFileReference; path = "URLRequest+AWSAccountSigning.swift"; sourceTree = "<group>"; };
 		OBJ_54 /* DeferredUploadRepository.swift */ = {isa = PBXFileReference; path = DeferredUploadRepository.swift; sourceTree = "<group>"; };
-		OBJ_540 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/SwiftAWSSignatureV4/Package.swift; sourceTree = "<group>"; };
+		OBJ_540 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/SwiftAWSSignatureV4/Package.swift; sourceTree = "<group>"; };
 		OBJ_543 /* Crypto.swift */ = {isa = PBXFileReference; path = Crypto.swift; sourceTree = "<group>"; };
 		OBJ_544 /* Cryptor.swift */ = {isa = PBXFileReference; path = Cryptor.swift; sourceTree = "<group>"; };
 		OBJ_545 /* Digest.swift */ = {isa = PBXFileReference; path = Digest.swift; sourceTree = "<group>"; };
@@ -1975,7 +1975,7 @@
 		OBJ_551 /* StreamCryptor.swift */ = {isa = PBXFileReference; path = StreamCryptor.swift; sourceTree = "<group>"; };
 		OBJ_552 /* Updatable.swift */ = {isa = PBXFileReference; path = Updatable.swift; sourceTree = "<group>"; };
 		OBJ_553 /* Utilities.swift */ = {isa = PBXFileReference; path = Utilities.swift; sourceTree = "<group>"; };
-		OBJ_554 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/BlueCryptor/Package.swift; sourceTree = "<group>"; };
+		OBJ_554 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueCryptor/Package.swift; sourceTree = "<group>"; };
 		OBJ_557 /* AdditionalCookieAttribute.swift */ = {isa = PBXFileReference; path = AdditionalCookieAttribute.swift; sourceTree = "<group>"; };
 		OBJ_558 /* CodableRouter+TypeSafeMiddleware.swift */ = {isa = PBXFileReference; path = "CodableRouter+TypeSafeMiddleware.swift"; sourceTree = "<group>"; };
 		OBJ_559 /* CodableRouter.swift */ = {isa = PBXFileReference; path = CodableRouter.swift; sourceTree = "<group>"; };
@@ -2036,10 +2036,10 @@
 		OBJ_611 /* ResourcePathHandler.swift */ = {isa = PBXFileReference; path = ResourcePathHandler.swift; sourceTree = "<group>"; };
 		OBJ_612 /* ResponseHeadersSetter.swift */ = {isa = PBXFileReference; path = ResponseHeadersSetter.swift; sourceTree = "<group>"; };
 		OBJ_613 /* StaticFileServer.swift */ = {isa = PBXFileReference; path = StaticFileServer.swift; sourceTree = "<group>"; };
-		OBJ_614 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura/Package.swift; sourceTree = "<group>"; };
+		OBJ_614 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/Kitura/Package.swift; sourceTree = "<group>"; };
 		OBJ_617 /* OrderedDictionary.swift */ = {isa = PBXFileReference; path = OrderedDictionary.swift; sourceTree = "<group>"; };
 		OBJ_618 /* TypeDecoder.swift */ = {isa = PBXFileReference; path = TypeDecoder.swift; sourceTree = "<group>"; };
-		OBJ_619 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/TypeDecoder/Package.swift; sourceTree = "<group>"; };
+		OBJ_619 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/TypeDecoder/Package.swift; sourceTree = "<group>"; };
 		OBJ_62 /* SharingGroupUserRepository.swift */ = {isa = PBXFileReference; path = SharingGroupUserRepository.swift; sourceTree = "<group>"; };
 		OBJ_622 /* BodyDecoder.swift */ = {isa = PBXFileReference; path = BodyDecoder.swift; sourceTree = "<group>"; };
 		OBJ_623 /* BodyEncoder.swift */ = {isa = PBXFileReference; path = BodyEncoder.swift; sourceTree = "<group>"; };
@@ -2051,9 +2051,9 @@
 		OBJ_63 /* SharingInvitationRepository.swift */ = {isa = PBXFileReference; path = SharingInvitationRepository.swift; sourceTree = "<group>"; };
 		OBJ_630 /* QueryEncoder.swift */ = {isa = PBXFileReference; path = QueryEncoder.swift; sourceTree = "<group>"; };
 		OBJ_631 /* Contracts.swift */ = {isa = PBXFileReference; path = Contracts.swift; sourceTree = "<group>"; };
-		OBJ_632 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/KituraContracts/Package.swift; sourceTree = "<group>"; };
+		OBJ_632 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/KituraContracts/Package.swift; sourceTree = "<group>"; };
 		OBJ_635 /* TemplateEngine.swift */ = {isa = PBXFileReference; path = TemplateEngine.swift; sourceTree = "<group>"; };
-		OBJ_636 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-TemplateEngine/Package.swift"; sourceTree = "<group>"; };
+		OBJ_636 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Kitura-TemplateEngine/Package.swift"; sourceTree = "<group>"; };
 		OBJ_640 /* http_parser.c */ = {isa = PBXFileReference; path = http_parser.c; sourceTree = "<group>"; };
 		OBJ_641 /* utils.c */ = {isa = PBXFileReference; path = utils.c; sourceTree = "<group>"; };
 		OBJ_643 /* utils.h */ = {isa = PBXFileReference; path = utils.h; sourceTree = "<group>"; };
@@ -2099,22 +2099,22 @@
 		OBJ_685 /* ServerOptions.swift */ = {isa = PBXFileReference; path = ServerOptions.swift; sourceTree = "<group>"; };
 		OBJ_686 /* ServerRequest.swift */ = {isa = PBXFileReference; path = ServerRequest.swift; sourceTree = "<group>"; };
 		OBJ_687 /* ServerResponse.swift */ = {isa = PBXFileReference; path = ServerResponse.swift; sourceTree = "<group>"; };
-		OBJ_688 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/Kitura-net/Package.swift"; sourceTree = "<group>"; };
+		OBJ_688 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Kitura-net/Package.swift"; sourceTree = "<group>"; };
 		OBJ_69 /* ChangeResolverManager+Extras.swift */ = {isa = PBXFileReference; path = "ChangeResolverManager+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_691 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
 		OBJ_692 /* SSLService.swift */ = {isa = PBXFileReference; path = SSLService.swift; sourceTree = "<group>"; };
-		OBJ_693 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/BlueSSLService/Package.swift; sourceTree = "<group>"; };
+		OBJ_693 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueSSLService/Package.swift; sourceTree = "<group>"; };
 		OBJ_696 /* Socket.swift */ = {isa = PBXFileReference; path = Socket.swift; sourceTree = "<group>"; };
 		OBJ_697 /* SocketProtocols.swift */ = {isa = PBXFileReference; path = SocketProtocols.swift; sourceTree = "<group>"; };
 		OBJ_698 /* SocketUtils.swift */ = {isa = PBXFileReference; path = SocketUtils.swift; sourceTree = "<group>"; };
-		OBJ_699 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/BlueSocket/Package.swift; sourceTree = "<group>"; };
+		OBJ_699 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueSocket/Package.swift; sourceTree = "<group>"; };
 		OBJ_70 /* ChangeResolverManager.swift */ = {isa = PBXFileReference; path = ChangeResolverManager.swift; sourceTree = "<group>"; };
 		OBJ_702 /* Logger.swift */ = {isa = PBXFileReference; path = Logger.swift; sourceTree = "<group>"; };
-		OBJ_703 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/LoggerAPI/Package.swift; sourceTree = "<group>"; };
+		OBJ_703 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/LoggerAPI/Package.swift; sourceTree = "<group>"; };
 		OBJ_706 /* Locks.swift */ = {isa = PBXFileReference; path = Locks.swift; sourceTree = "<group>"; };
 		OBJ_707 /* LogHandler.swift */ = {isa = PBXFileReference; path = LogHandler.swift; sourceTree = "<group>"; };
 		OBJ_708 /* Logging.swift */ = {isa = PBXFileReference; path = Logging.swift; sourceTree = "<group>"; };
-		OBJ_709 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Desktop/NewSyncServer/ServerMain/.build/checkouts/swift-log/Package.swift"; sourceTree = "<group>"; };
+		OBJ_709 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/swift-log/Package.swift"; sourceTree = "<group>"; };
 		OBJ_71 /* FileDeletion.swift */ = {isa = PBXFileReference; path = FileDeletion.swift; sourceTree = "<group>"; };
 		OBJ_72 /* PeriodicUploader.swift */ = {isa = PBXFileReference; path = PeriodicUploader.swift; sourceTree = "<group>"; };
 		OBJ_73 /* Uploader+UploadDeletion.swift */ = {isa = PBXFileReference; path = "Uploader+UploadDeletion.swift"; sourceTree = "<group>"; };
@@ -5073,61 +5073,61 @@
 		OBJ_710 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
-				Kitura::Kitura::Product /* Kitura.framework */,
-				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
+				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
+				ServerFacebookAccount::ServerFacebookAccount::Product /* ServerFacebookAccount.framework */,
+				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
+				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
+				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
+				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
+				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
+				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
+				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
+				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
+				Kitura-net::KituraNet::Product /* KituraNet.framework */,
+				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
 				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
-				Socket::Socket::Product /* Socket.framework */,
-				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
-				AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */,
-				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
+				ServerShared::ServerShared::Product /* ServerShared.framework */,
+				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
+				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
 				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
-				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
-				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
-				Server::SharingTests::Product /* SharingTests.xctest */,
+				Kitura::Kitura::Product /* Kitura.framework */,
+				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
+				Cryptor::Cryptor::Product /* Cryptor.framework */,
+				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
+				Server::Server::Product /* Server.framework */,
+				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
 				SwiftJWT::SwiftJWT::Product /* SwiftJWT.framework */,
+				swift-log::Logging::Product /* Logging.framework */,
+				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
+				SSLService::SSLService::Product /* SSLService.framework */,
+				Server::UploaderTests::Product /* UploaderTests.xctest */,
+				Socket::Socket::Product /* Socket.framework */,
+				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
+				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
+				Server::SharingTests::Product /* SharingTests.xctest */,
+				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
+				Server::OtherTests::Product /* OtherTests.xctest */,
+				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
+				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
 				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
 				ServerGoogleAccount::ServerGoogleAccount::Product /* ServerGoogleAccount.framework */,
-				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
-				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
-				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
-				ServerFacebookAccount::ServerFacebookAccount::Product /* ServerFacebookAccount.framework */,
-				swift-log::Logging::Product /* Logging.framework */,
-				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
-				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
-				Server::OtherTests::Product /* OtherTests.xctest */,
-				Server::Main::Product /* Main */,
-				Server::UploaderTests::Product /* UploaderTests.xctest */,
-				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
-				SSLService::SSLService::Product /* SSLService.framework */,
-				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
-				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
-				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
-				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
-				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
 				Server::FileControllerBothUploadTests::Product /* FileControllerBothUploadTests.xctest */,
-				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
-				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
-				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
-				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
-				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
-				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
-				Cryptor::Cryptor::Product /* Cryptor.framework */,
-				Server::FileControllerUploadDeletionTests::Product /* FileControllerUploadDeletionTests.xctest */,
+				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
+				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
 				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
-				Kitura-net::KituraNet::Product /* KituraNet.framework */,
-				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
-				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
-				Server::TestsCommon::Product /* TestsCommon.xctest */,
-				Server::Server::Product /* Server.framework */,
+				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
+				Server::Main::Product /* Main */,
+				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
+				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
+				AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */,
+				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
 				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
-				ServerShared::ServerShared::Product /* ServerShared.framework */,
-				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
-				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
-				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
-				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
-				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
-				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
+				Server::FileControllerUploadDeletionTests::Product /* FileControllerUploadDeletionTests.xctest */,
+				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
+				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
+				Server::TestsCommon::Product /* TestsCommon.xctest */,
+				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
+				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
 			);
 			name = Products;
 			path = "";
@@ -6757,7 +6757,7 @@
 			buildPhases = (
 				OBJ_2731 /* Sources */,
 				OBJ_2794 /* Frameworks */,
-				11918DC9F6E8635D735A6CAB /* CopyFiles */,
+				1768E0CB620ECD5A68AF0C9D /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -11463,59 +11463,59 @@
 		};
 		OBJ_3169 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
+			target = Server::AccountFileTests /* AccountFileTests */;
 		};
 		OBJ_3170 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::UploaderTests /* UploaderTests */;
+			target = Server::FileControllerUploadDeletionTests /* FileControllerUploadDeletionTests */;
 		};
-		OBJ_3172 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::TestsCommon /* TestsCommon */;
-		};
-		OBJ_3173 /* PBXTargetDependency */ = {
+		OBJ_3171 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::SharingTests /* SharingTests */;
 		};
-		OBJ_3175 /* PBXTargetDependency */ = {
+		OBJ_3173 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountFileTests /* AccountFileTests */;
+			target = Server::TestsCommon /* TestsCommon */;
 		};
-		OBJ_3176 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::DatabaseTests /* DatabaseTests */;
-		};
-		OBJ_3177 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::FileControllerUploadDeletionTests /* FileControllerUploadDeletionTests */;
-		};
-		OBJ_3178 /* PBXTargetDependency */ = {
+		OBJ_3174 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::FileControllerTests /* FileControllerTests */;
 		};
-		OBJ_3179 /* PBXTargetDependency */ = {
+		OBJ_3175 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::OtherTests /* OtherTests */;
 		};
-		OBJ_3180 /* PBXTargetDependency */ = {
+		OBJ_3176 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::PushNotificationTests /* PushNotificationTests */;
 		};
-		OBJ_3181 /* PBXTargetDependency */ = {
+		OBJ_3177 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::UserControllerTests /* UserControllerTests */;
 		};
-		OBJ_3183 /* PBXTargetDependency */ = {
+		OBJ_3179 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::UploaderTests /* UploaderTests */;
+		};
+		OBJ_3181 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::FileControllerBothUploadTests /* FileControllerBothUploadTests */;
 		};
-		OBJ_3184 /* PBXTargetDependency */ = {
+		OBJ_3182 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::ChangeResolverTests /* ChangeResolverTests */;
 		};
-		OBJ_3185 /* PBXTargetDependency */ = {
+		OBJ_3183 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::DatabaseTests /* DatabaseTests */;
+		};
+		OBJ_3184 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::FileControllerUploadFileTests /* FileControllerUploadFileTests */;
+		};
+		OBJ_3185 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
 		};
 		OBJ_3291 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -15549,7 +15549,7 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SERVER;
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = ServerAccount;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
@@ -15811,7 +15811,7 @@
 			buildSettings = {
 				ENABLE_TESTABILITY = YES;
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.3.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk -package-description-version 5.2.0 -DDEBUG -DSERVER";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.3.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk -package-description-version 5.3.0 -DDEBUG -DSERVER";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -15820,7 +15820,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.3.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk -package-description-version 5.2.0";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -sdk /Applications/Xcode-12.3.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk -package-description-version 5.3.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
