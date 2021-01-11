@@ -186,8 +186,23 @@ class UserController : ControllerProtocol {
     func checkCreds(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
         
+        guard let currentUser = params.currentSignedInUser else {
+            let message = "No current user!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard let userId = currentUser.userId else {
+            let message = "No user id!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         let response = CheckCredsResponse()
-        response.userId = params.currentSignedInUser!.userId
+        let userInfo = CheckCredsResponse.UserInfo(userId: userId, fullUserName: currentUser.username)
+        response.userInfo = userInfo
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
         params.profileCreds!.generateTokensIfNeeded(dbCreds: params.creds!, routerResponse: params.routerResponse, success: {

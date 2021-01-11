@@ -144,12 +144,13 @@ class UserControllerTests: ServerTestCase {
             let headers = self.setupHeaders(testUser: testingAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "checkCreds failed")
+                Log.info("Status code: \(String(describing: response?.statusCode))")
+                XCTAssert(response?.statusCode == .OK, "checkCreds failed")
                 
                 if let dict = dict,
                     let checkCredsResponse = try? CheckCredsResponse.decode(dict) {
-                    XCTAssert(checkCredsResponse.userId != nil)
+                    XCTAssert(checkCredsResponse.userInfo?.fullUserName != nil)
+                    XCTAssert(checkCredsResponse.userInfo?.userId != nil)
                 }
                 else {
                     XCTFail()
@@ -167,8 +168,8 @@ class UserControllerTests: ServerTestCase {
             let headers = self.setupHeaders(testUser: .primaryOwningAccount, accessToken: creds.accessToken, deviceUUID:deviceUUID)
             
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .unauthorized, "checkCreds failed")
+                Log.info("Status code: \(String(describing: response?.statusCode))")
+                XCTAssert(response?.statusCode == .unauthorized, "checkCreds failed")
                 expectation.fulfill()
             }
         }

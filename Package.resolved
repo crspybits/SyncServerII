@@ -78,7 +78,7 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
         "state": {
           "branch": "master",
-          "revision": "ff3f44040077ddaefa81b7dd692059e1960eeb30",
+          "revision": "386abce6b94d20894c82d801100abbe330469ad7",
           "version": null
         }
       },
@@ -312,7 +312,7 @@
         "repositoryURL": "https://github.com/SyncServerII/ServerShared.git",
         "state": {
           "branch": "master",
-          "revision": "2cb3610a5ea7fe30a7d736e01087a41d77a169dd",
+          "revision": "3321be105e430ca5dab5c3c2019841fdb1d12479",
           "version": null
         }
       },

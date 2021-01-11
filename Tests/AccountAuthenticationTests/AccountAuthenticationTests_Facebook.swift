@@ -46,8 +46,8 @@ class AccountAuthenticationTests_Facebook: AccountAuthenticationTests {
         self.performServerTest(testAccount: testAccount) { expectation, facebookCreds in
             let headers = self.setupHeaders(testUser: self.testAccount, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
-                Log.info("Status code: \(response!.statusCode)")
-                XCTAssert(response!.statusCode == .OK, "Did not work on check creds request")
+                Log.info("Status code: \(String(describing: response?.statusCode))")
+                XCTAssert(response?.statusCode == .OK, "Did not work on check creds request")
                 expectation.fulfill()
             }
         }
