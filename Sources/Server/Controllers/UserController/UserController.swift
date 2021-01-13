@@ -200,8 +200,14 @@ class UserController : ControllerProtocol {
             return
         }
         
+        var fullUserName: String? = currentUser.username
+        // Don't send an empty user name back as an empty string.
+        if let username = currentUser.username, username.count == 0 {
+            fullUserName = nil
+        }
+        
         let response = CheckCredsResponse()
-        let userInfo = CheckCredsResponse.UserInfo(userId: userId, fullUserName: currentUser.username)
+        let userInfo = CheckCredsResponse.UserInfo(userId: userId, fullUserName: fullUserName)
         response.userInfo = userInfo
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
