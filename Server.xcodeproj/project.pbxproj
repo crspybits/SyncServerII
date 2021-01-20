@@ -24,13 +24,13 @@
 			);
 			dependencies = (
 				OBJ_3169 /* PBXTargetDependency */,
+				OBJ_3170 /* PBXTargetDependency */,
 				OBJ_3171 /* PBXTargetDependency */,
 				OBJ_3172 /* PBXTargetDependency */,
 				OBJ_3173 /* PBXTargetDependency */,
 				OBJ_3175 /* PBXTargetDependency */,
 				OBJ_3176 /* PBXTargetDependency */,
 				OBJ_3177 /* PBXTargetDependency */,
-				OBJ_3178 /* PBXTargetDependency */,
 				OBJ_3179 /* PBXTargetDependency */,
 				OBJ_3180 /* PBXTargetDependency */,
 				OBJ_3181 /* PBXTargetDependency */,
@@ -44,8 +44,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		73184B16FF67B791ACDE17A1 /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = E42DE118E596D80E8B9089FE /* ServerTests.json */; };
-		F7519D883727275FC37DF4EF /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 38E28D6FDA464F6EC91C0DF8 /* Server.json */; };
+		460FE57CE2E0279F074FCA4A /* ServerTests.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = EB27CEFC1D354B26A742F75E /* ServerTests.json */; };
+		9ADA6771313D8004348B0558 /* Server.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = BA8B74ADC445E31E203B4790 /* Server.json */; };
 		OBJ_1016 /* AppleClaims.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_357 /* AppleClaims.swift */; };
 		OBJ_1017 /* ApplePublicKey+HTTP.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_358 /* ApplePublicKey+HTTP.swift */; };
 		OBJ_1018 /* ApplePublicKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_359 /* ApplePublicKey.swift */; };
@@ -346,28 +346,28 @@
 		OBJ_1558 /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_551 /* StreamCryptor.swift */; };
 		OBJ_1559 /* Updatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_552 /* Updatable.swift */; };
 		OBJ_1560 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_553 /* Utilities.swift */; };
-		OBJ_1566 /* ASN1.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_388 /* ASN1.swift */; };
-		OBJ_1567 /* Data+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_389 /* Data+Extensions.swift */; };
-		OBJ_1568 /* ECDecryptable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_390 /* ECDecryptable.swift */; };
-		OBJ_1569 /* ECEncryptable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_391 /* ECEncryptable.swift */; };
-		OBJ_1570 /* ECError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_392 /* ECError.swift */; };
-		OBJ_1571 /* ECPrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_393 /* ECPrivateKey.swift */; };
-		OBJ_1572 /* ECPublicKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_394 /* ECPublicKey.swift */; };
-		OBJ_1573 /* ECSignable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_395 /* ECSignable.swift */; };
-		OBJ_1574 /* ECSignature.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_396 /* ECSignature.swift */; };
-		OBJ_1575 /* EllipticCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_397 /* EllipticCurve.swift */; };
-		OBJ_1576 /* SSLPointerTricks.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_398 /* SSLPointerTricks.swift */; };
-		OBJ_1583 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_399 /* Package.swift */; };
+		OBJ_1566 /* ASN1.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_397 /* ASN1.swift */; };
+		OBJ_1567 /* Data+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_398 /* Data+Extensions.swift */; };
+		OBJ_1568 /* ECDecryptable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_399 /* ECDecryptable.swift */; };
+		OBJ_1569 /* ECEncryptable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_400 /* ECEncryptable.swift */; };
+		OBJ_1570 /* ECError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_401 /* ECError.swift */; };
+		OBJ_1571 /* ECPrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_402 /* ECPrivateKey.swift */; };
+		OBJ_1572 /* ECPublicKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_403 /* ECPublicKey.swift */; };
+		OBJ_1573 /* ECSignable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_404 /* ECSignable.swift */; };
+		OBJ_1574 /* ECSignature.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_405 /* ECSignature.swift */; };
+		OBJ_1575 /* EllipticCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_406 /* EllipticCurve.swift */; };
+		OBJ_1576 /* SSLPointerTricks.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_407 /* SSLPointerTricks.swift */; };
+		OBJ_1583 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_408 /* Package.swift */; };
 		OBJ_1589 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_554 /* Package.swift */; };
-		OBJ_1594 /* CryptorRSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_402 /* CryptorRSA.swift */; };
-		OBJ_1595 /* CryptorRSAConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_403 /* CryptorRSAConstants.swift */; };
-		OBJ_1596 /* CryptorRSADigest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_404 /* CryptorRSADigest.swift */; };
-		OBJ_1597 /* CryptorRSAErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_405 /* CryptorRSAErrors.swift */; };
-		OBJ_1598 /* CryptorRSAKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_406 /* CryptorRSAKey.swift */; };
-		OBJ_1599 /* CryptorRSAUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_407 /* CryptorRSAUtilities.swift */; };
-		OBJ_1600 /* Data+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_408 /* Data+Extensions.swift */; };
-		OBJ_1601 /* SSLPointerTricks.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_409 /* SSLPointerTricks.swift */; };
-		OBJ_1608 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_410 /* Package.swift */; };
+		OBJ_1594 /* CryptorRSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_411 /* CryptorRSA.swift */; };
+		OBJ_1595 /* CryptorRSAConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_412 /* CryptorRSAConstants.swift */; };
+		OBJ_1596 /* CryptorRSADigest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_413 /* CryptorRSADigest.swift */; };
+		OBJ_1597 /* CryptorRSAErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_414 /* CryptorRSAErrors.swift */; };
+		OBJ_1598 /* CryptorRSAKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_415 /* CryptorRSAKey.swift */; };
+		OBJ_1599 /* CryptorRSAUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_416 /* CryptorRSAUtilities.swift */; };
+		OBJ_1600 /* Data+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_417 /* Data+Extensions.swift */; };
+		OBJ_1601 /* SSLPointerTricks.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_418 /* SSLPointerTricks.swift */; };
+		OBJ_1608 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_419 /* Package.swift */; };
 		OBJ_1614 /* DatabaseLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_105 /* DatabaseLockTests.swift */; };
 		OBJ_1615 /* DatabaseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_106 /* DatabaseModelTests.swift */; };
 		OBJ_1616 /* DatabaseUpdateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_107 /* DatabaseUpdateTests.swift */; };
@@ -1257,40 +1257,40 @@
 		OBJ_3354 /* URLRequest+AWSAccountSigning.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_539 /* URLRequest+AWSAccountSigning.swift */; };
 		OBJ_3356 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Cryptor::Cryptor::Product /* Cryptor.framework */; };
 		OBJ_3363 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_540 /* Package.swift */; };
-		OBJ_3368 /* Cert.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_413 /* Cert.swift */; };
-		OBJ_3369 /* JWK.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_414 /* JWK.swift */; };
-		OBJ_3370 /* JWKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_415 /* JWKError.swift */; };
-		OBJ_3371 /* RSAKey+JWK.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_416 /* RSAKey+JWK.swift */; };
-		OBJ_3372 /* SSLPointerTricks.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_417 /* SSLPointerTricks.swift */; };
-		OBJ_3373 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_418 /* Utils.swift */; };
-		OBJ_3380 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_419 /* Package.swift */; };
-		OBJ_3385 /* BlueECDSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_364 /* BlueECDSA.swift */; };
-		OBJ_3386 /* BlueHMAC.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_365 /* BlueHMAC.swift */; };
-		OBJ_3387 /* BlueRSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_366 /* BlueRSA.swift */; };
-		OBJ_3388 /* Claims.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_367 /* Claims.swift */; };
-		OBJ_3389 /* ClaimsMicroProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_369 /* ClaimsMicroProfile.swift */; };
-		OBJ_3390 /* ClaimsOpenID.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_370 /* ClaimsOpenID.swift */; };
-		OBJ_3391 /* ClaimsStandardJWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_371 /* ClaimsStandardJWT.swift */; };
-		OBJ_3392 /* Data+Base64URLEncoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_372 /* Data+Base64URLEncoded.swift */; };
-		OBJ_3393 /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_373 /* Header.swift */; };
-		OBJ_3394 /* JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_374 /* JWT.swift */; };
-		OBJ_3395 /* JWTDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_375 /* JWTDecoder.swift */; };
-		OBJ_3396 /* JWTEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_376 /* JWTEncoder.swift */; };
-		OBJ_3397 /* JWTError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_377 /* JWTError.swift */; };
-		OBJ_3398 /* JWTSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_378 /* JWTSigner.swift */; };
-		OBJ_3399 /* JWTVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_379 /* JWTVerifier.swift */; };
-		OBJ_3400 /* NoneAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_380 /* NoneAlgorithm.swift */; };
-		OBJ_3401 /* RSAKeyType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_381 /* RSAKeyType.swift */; };
-		OBJ_3402 /* SignerAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_382 /* SignerAlgorithm.swift */; };
-		OBJ_3403 /* ValidateClaimsResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_383 /* ValidateClaimsResult.swift */; };
-		OBJ_3404 /* VerifierAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_384 /* VerifierAlgorithm.swift */; };
+		OBJ_3368 /* Cert.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_364 /* Cert.swift */; };
+		OBJ_3369 /* JWK.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_365 /* JWK.swift */; };
+		OBJ_3370 /* JWKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_366 /* JWKError.swift */; };
+		OBJ_3371 /* RSAKey+JWK.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_367 /* RSAKey+JWK.swift */; };
+		OBJ_3372 /* SSLPointerTricks.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_368 /* SSLPointerTricks.swift */; };
+		OBJ_3373 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_369 /* Utils.swift */; };
+		OBJ_3380 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_370 /* Package.swift */; };
+		OBJ_3385 /* BlueECDSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_373 /* BlueECDSA.swift */; };
+		OBJ_3386 /* BlueHMAC.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_374 /* BlueHMAC.swift */; };
+		OBJ_3387 /* BlueRSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_375 /* BlueRSA.swift */; };
+		OBJ_3388 /* Claims.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_376 /* Claims.swift */; };
+		OBJ_3389 /* ClaimsMicroProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_378 /* ClaimsMicroProfile.swift */; };
+		OBJ_3390 /* ClaimsOpenID.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_379 /* ClaimsOpenID.swift */; };
+		OBJ_3391 /* ClaimsStandardJWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_380 /* ClaimsStandardJWT.swift */; };
+		OBJ_3392 /* Data+Base64URLEncoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_381 /* Data+Base64URLEncoded.swift */; };
+		OBJ_3393 /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_382 /* Header.swift */; };
+		OBJ_3394 /* JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_383 /* JWT.swift */; };
+		OBJ_3395 /* JWTDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_384 /* JWTDecoder.swift */; };
+		OBJ_3396 /* JWTEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_385 /* JWTEncoder.swift */; };
+		OBJ_3397 /* JWTError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_386 /* JWTError.swift */; };
+		OBJ_3398 /* JWTSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_387 /* JWTSigner.swift */; };
+		OBJ_3399 /* JWTVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_388 /* JWTVerifier.swift */; };
+		OBJ_3400 /* NoneAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_389 /* NoneAlgorithm.swift */; };
+		OBJ_3401 /* RSAKeyType.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_390 /* RSAKeyType.swift */; };
+		OBJ_3402 /* SignerAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_391 /* SignerAlgorithm.swift */; };
+		OBJ_3403 /* ValidateClaimsResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_392 /* ValidateClaimsResult.swift */; };
+		OBJ_3404 /* VerifierAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_393 /* VerifierAlgorithm.swift */; };
 		OBJ_3406 /* CryptorECC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CryptorECC::CryptorECC::Product /* CryptorECC.framework */; };
 		OBJ_3407 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Cryptor::Cryptor::Product /* Cryptor.framework */; };
 		OBJ_3408 /* KituraContracts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = KituraContracts::KituraContracts::Product /* KituraContracts.framework */; };
 		OBJ_3409 /* LoggerAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */; };
 		OBJ_3410 /* Logging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = swift-log::Logging::Product /* Logging.framework */; };
 		OBJ_3411 /* CryptorRSA.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */; };
-		OBJ_3423 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_385 /* Package.swift */; };
+		OBJ_3423 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_394 /* Package.swift */; };
 		OBJ_3428 /* SwiftyAWSSNS.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_532 /* SwiftyAWSSNS.swift */; };
 		OBJ_3430 /* SwiftAWSSignatureV4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */; };
 		OBJ_3431 /* Cryptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Cryptor::Cryptor::Product /* Cryptor.framework */; };
@@ -1530,22 +1530,22 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		B782AB5B0E0388CE1A4AA437 /* CopyFiles */ = {
+		2129331FF7717023D530663C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				F7519D883727275FC37DF4EF /* Server.json in CopyFiles */,
-				73184B16FF67B791ACDE17A1 /* ServerTests.json in CopyFiles */,
+				9ADA6771313D8004348B0558 /* Server.json in CopyFiles */,
+				460FE57CE2E0279F074FCA4A /* ServerTests.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		38E28D6FDA464F6EC91C0DF8 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
 		AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */ = {isa = PBXFileReference; path = AppleJWTDecoder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA8B74ADC445E31E203B4790 /* Server.json */ = {isa = PBXFileReference; includeInIndex = 1; path = Server.json; sourceTree = SOURCE_ROOT; };
 		ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */ = {isa = PBXFileReference; path = ChangeResolvers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */ = {isa = PBXFileReference; path = CredentialsAppleSignIn.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */ = {isa = PBXFileReference; path = CredentialsDropbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1554,7 +1554,7 @@
 		Cryptor::Cryptor::Product /* Cryptor.framework */ = {isa = PBXFileReference; path = Cryptor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorECC::CryptorECC::Product /* CryptorECC.framework */ = {isa = PBXFileReference; path = CryptorECC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */ = {isa = PBXFileReference; path = CryptorRSA.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E42DE118E596D80E8B9089FE /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
+		EB27CEFC1D354B26A742F75E /* ServerTests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = ServerTests.json; sourceTree = SOURCE_ROOT; };
 		HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */ = {isa = PBXFileReference; path = HeliumLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-Credentials::Credentials::Product /* Credentials.framework */ = {isa = PBXFileReference; path = Credentials.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */ = {isa = PBXFileReference; path = CredentialsFacebook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1803,59 +1803,59 @@
 		OBJ_36 /* PushNotificationsController.swift */ = {isa = PBXFileReference; path = PushNotificationsController.swift; sourceTree = "<group>"; };
 		OBJ_360 /* AppleSignInClaims.swift */ = {isa = PBXFileReference; path = AppleSignInClaims.swift; sourceTree = "<group>"; };
 		OBJ_361 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/AppleJWTDecoder/Package.swift; sourceTree = "<group>"; };
-		OBJ_364 /* BlueECDSA.swift */ = {isa = PBXFileReference; path = BlueECDSA.swift; sourceTree = "<group>"; };
-		OBJ_365 /* BlueHMAC.swift */ = {isa = PBXFileReference; path = BlueHMAC.swift; sourceTree = "<group>"; };
-		OBJ_366 /* BlueRSA.swift */ = {isa = PBXFileReference; path = BlueRSA.swift; sourceTree = "<group>"; };
-		OBJ_367 /* Claims.swift */ = {isa = PBXFileReference; path = Claims.swift; sourceTree = "<group>"; };
-		OBJ_369 /* ClaimsMicroProfile.swift */ = {isa = PBXFileReference; path = ClaimsMicroProfile.swift; sourceTree = "<group>"; };
-		OBJ_370 /* ClaimsOpenID.swift */ = {isa = PBXFileReference; path = ClaimsOpenID.swift; sourceTree = "<group>"; };
-		OBJ_371 /* ClaimsStandardJWT.swift */ = {isa = PBXFileReference; path = ClaimsStandardJWT.swift; sourceTree = "<group>"; };
-		OBJ_372 /* Data+Base64URLEncoded.swift */ = {isa = PBXFileReference; path = "Data+Base64URLEncoded.swift"; sourceTree = "<group>"; };
-		OBJ_373 /* Header.swift */ = {isa = PBXFileReference; path = Header.swift; sourceTree = "<group>"; };
-		OBJ_374 /* JWT.swift */ = {isa = PBXFileReference; path = JWT.swift; sourceTree = "<group>"; };
-		OBJ_375 /* JWTDecoder.swift */ = {isa = PBXFileReference; path = JWTDecoder.swift; sourceTree = "<group>"; };
-		OBJ_376 /* JWTEncoder.swift */ = {isa = PBXFileReference; path = JWTEncoder.swift; sourceTree = "<group>"; };
-		OBJ_377 /* JWTError.swift */ = {isa = PBXFileReference; path = JWTError.swift; sourceTree = "<group>"; };
-		OBJ_378 /* JWTSigner.swift */ = {isa = PBXFileReference; path = JWTSigner.swift; sourceTree = "<group>"; };
-		OBJ_379 /* JWTVerifier.swift */ = {isa = PBXFileReference; path = JWTVerifier.swift; sourceTree = "<group>"; };
+		OBJ_364 /* Cert.swift */ = {isa = PBXFileReference; path = Cert.swift; sourceTree = "<group>"; };
+		OBJ_365 /* JWK.swift */ = {isa = PBXFileReference; path = JWK.swift; sourceTree = "<group>"; };
+		OBJ_366 /* JWKError.swift */ = {isa = PBXFileReference; path = JWKError.swift; sourceTree = "<group>"; };
+		OBJ_367 /* RSAKey+JWK.swift */ = {isa = PBXFileReference; path = "RSAKey+JWK.swift"; sourceTree = "<group>"; };
+		OBJ_368 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
+		OBJ_369 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
+		OBJ_370 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Swift-JWK-to-PEM/Package.swift"; sourceTree = "<group>"; };
+		OBJ_373 /* BlueECDSA.swift */ = {isa = PBXFileReference; path = BlueECDSA.swift; sourceTree = "<group>"; };
+		OBJ_374 /* BlueHMAC.swift */ = {isa = PBXFileReference; path = BlueHMAC.swift; sourceTree = "<group>"; };
+		OBJ_375 /* BlueRSA.swift */ = {isa = PBXFileReference; path = BlueRSA.swift; sourceTree = "<group>"; };
+		OBJ_376 /* Claims.swift */ = {isa = PBXFileReference; path = Claims.swift; sourceTree = "<group>"; };
+		OBJ_378 /* ClaimsMicroProfile.swift */ = {isa = PBXFileReference; path = ClaimsMicroProfile.swift; sourceTree = "<group>"; };
+		OBJ_379 /* ClaimsOpenID.swift */ = {isa = PBXFileReference; path = ClaimsOpenID.swift; sourceTree = "<group>"; };
 		OBJ_38 /* FakePushNotifications.swift */ = {isa = PBXFileReference; path = FakePushNotifications.swift; sourceTree = "<group>"; };
-		OBJ_380 /* NoneAlgorithm.swift */ = {isa = PBXFileReference; path = NoneAlgorithm.swift; sourceTree = "<group>"; };
-		OBJ_381 /* RSAKeyType.swift */ = {isa = PBXFileReference; path = RSAKeyType.swift; sourceTree = "<group>"; };
-		OBJ_382 /* SignerAlgorithm.swift */ = {isa = PBXFileReference; path = SignerAlgorithm.swift; sourceTree = "<group>"; };
-		OBJ_383 /* ValidateClaimsResult.swift */ = {isa = PBXFileReference; path = ValidateClaimsResult.swift; sourceTree = "<group>"; };
-		OBJ_384 /* VerifierAlgorithm.swift */ = {isa = PBXFileReference; path = VerifierAlgorithm.swift; sourceTree = "<group>"; };
-		OBJ_385 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Swift-JWT/Package.swift"; sourceTree = "<group>"; };
-		OBJ_388 /* ASN1.swift */ = {isa = PBXFileReference; path = ASN1.swift; sourceTree = "<group>"; };
-		OBJ_389 /* Data+Extensions.swift */ = {isa = PBXFileReference; path = "Data+Extensions.swift"; sourceTree = "<group>"; };
+		OBJ_380 /* ClaimsStandardJWT.swift */ = {isa = PBXFileReference; path = ClaimsStandardJWT.swift; sourceTree = "<group>"; };
+		OBJ_381 /* Data+Base64URLEncoded.swift */ = {isa = PBXFileReference; path = "Data+Base64URLEncoded.swift"; sourceTree = "<group>"; };
+		OBJ_382 /* Header.swift */ = {isa = PBXFileReference; path = Header.swift; sourceTree = "<group>"; };
+		OBJ_383 /* JWT.swift */ = {isa = PBXFileReference; path = JWT.swift; sourceTree = "<group>"; };
+		OBJ_384 /* JWTDecoder.swift */ = {isa = PBXFileReference; path = JWTDecoder.swift; sourceTree = "<group>"; };
+		OBJ_385 /* JWTEncoder.swift */ = {isa = PBXFileReference; path = JWTEncoder.swift; sourceTree = "<group>"; };
+		OBJ_386 /* JWTError.swift */ = {isa = PBXFileReference; path = JWTError.swift; sourceTree = "<group>"; };
+		OBJ_387 /* JWTSigner.swift */ = {isa = PBXFileReference; path = JWTSigner.swift; sourceTree = "<group>"; };
+		OBJ_388 /* JWTVerifier.swift */ = {isa = PBXFileReference; path = JWTVerifier.swift; sourceTree = "<group>"; };
+		OBJ_389 /* NoneAlgorithm.swift */ = {isa = PBXFileReference; path = NoneAlgorithm.swift; sourceTree = "<group>"; };
 		OBJ_39 /* PushNotifications.swift */ = {isa = PBXFileReference; path = PushNotifications.swift; sourceTree = "<group>"; };
-		OBJ_390 /* ECDecryptable.swift */ = {isa = PBXFileReference; path = ECDecryptable.swift; sourceTree = "<group>"; };
-		OBJ_391 /* ECEncryptable.swift */ = {isa = PBXFileReference; path = ECEncryptable.swift; sourceTree = "<group>"; };
-		OBJ_392 /* ECError.swift */ = {isa = PBXFileReference; path = ECError.swift; sourceTree = "<group>"; };
-		OBJ_393 /* ECPrivateKey.swift */ = {isa = PBXFileReference; path = ECPrivateKey.swift; sourceTree = "<group>"; };
-		OBJ_394 /* ECPublicKey.swift */ = {isa = PBXFileReference; path = ECPublicKey.swift; sourceTree = "<group>"; };
-		OBJ_395 /* ECSignable.swift */ = {isa = PBXFileReference; path = ECSignable.swift; sourceTree = "<group>"; };
-		OBJ_396 /* ECSignature.swift */ = {isa = PBXFileReference; path = ECSignature.swift; sourceTree = "<group>"; };
-		OBJ_397 /* EllipticCurve.swift */ = {isa = PBXFileReference; path = EllipticCurve.swift; sourceTree = "<group>"; };
-		OBJ_398 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
-		OBJ_399 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueECC/Package.swift; sourceTree = "<group>"; };
+		OBJ_390 /* RSAKeyType.swift */ = {isa = PBXFileReference; path = RSAKeyType.swift; sourceTree = "<group>"; };
+		OBJ_391 /* SignerAlgorithm.swift */ = {isa = PBXFileReference; path = SignerAlgorithm.swift; sourceTree = "<group>"; };
+		OBJ_392 /* ValidateClaimsResult.swift */ = {isa = PBXFileReference; path = ValidateClaimsResult.swift; sourceTree = "<group>"; };
+		OBJ_393 /* VerifierAlgorithm.swift */ = {isa = PBXFileReference; path = VerifierAlgorithm.swift; sourceTree = "<group>"; };
+		OBJ_394 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Swift-JWT/Package.swift"; sourceTree = "<group>"; };
+		OBJ_397 /* ASN1.swift */ = {isa = PBXFileReference; path = ASN1.swift; sourceTree = "<group>"; };
+		OBJ_398 /* Data+Extensions.swift */ = {isa = PBXFileReference; path = "Data+Extensions.swift"; sourceTree = "<group>"; };
+		OBJ_399 /* ECDecryptable.swift */ = {isa = PBXFileReference; path = ECDecryptable.swift; sourceTree = "<group>"; };
 		OBJ_40 /* PushNotificationsService.swift */ = {isa = PBXFileReference; path = PushNotificationsService.swift; sourceTree = "<group>"; };
-		OBJ_402 /* CryptorRSA.swift */ = {isa = PBXFileReference; path = CryptorRSA.swift; sourceTree = "<group>"; };
-		OBJ_403 /* CryptorRSAConstants.swift */ = {isa = PBXFileReference; path = CryptorRSAConstants.swift; sourceTree = "<group>"; };
-		OBJ_404 /* CryptorRSADigest.swift */ = {isa = PBXFileReference; path = CryptorRSADigest.swift; sourceTree = "<group>"; };
-		OBJ_405 /* CryptorRSAErrors.swift */ = {isa = PBXFileReference; path = CryptorRSAErrors.swift; sourceTree = "<group>"; };
-		OBJ_406 /* CryptorRSAKey.swift */ = {isa = PBXFileReference; path = CryptorRSAKey.swift; sourceTree = "<group>"; };
-		OBJ_407 /* CryptorRSAUtilities.swift */ = {isa = PBXFileReference; path = CryptorRSAUtilities.swift; sourceTree = "<group>"; };
-		OBJ_408 /* Data+Extensions.swift */ = {isa = PBXFileReference; path = "Data+Extensions.swift"; sourceTree = "<group>"; };
-		OBJ_409 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
+		OBJ_400 /* ECEncryptable.swift */ = {isa = PBXFileReference; path = ECEncryptable.swift; sourceTree = "<group>"; };
+		OBJ_401 /* ECError.swift */ = {isa = PBXFileReference; path = ECError.swift; sourceTree = "<group>"; };
+		OBJ_402 /* ECPrivateKey.swift */ = {isa = PBXFileReference; path = ECPrivateKey.swift; sourceTree = "<group>"; };
+		OBJ_403 /* ECPublicKey.swift */ = {isa = PBXFileReference; path = ECPublicKey.swift; sourceTree = "<group>"; };
+		OBJ_404 /* ECSignable.swift */ = {isa = PBXFileReference; path = ECSignable.swift; sourceTree = "<group>"; };
+		OBJ_405 /* ECSignature.swift */ = {isa = PBXFileReference; path = ECSignature.swift; sourceTree = "<group>"; };
+		OBJ_406 /* EllipticCurve.swift */ = {isa = PBXFileReference; path = EllipticCurve.swift; sourceTree = "<group>"; };
+		OBJ_407 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
+		OBJ_408 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueECC/Package.swift; sourceTree = "<group>"; };
 		OBJ_41 /* SharingAccountsController.swift */ = {isa = PBXFileReference; path = SharingAccountsController.swift; sourceTree = "<group>"; };
-		OBJ_410 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueRSA/Package.swift; sourceTree = "<group>"; };
-		OBJ_413 /* Cert.swift */ = {isa = PBXFileReference; path = Cert.swift; sourceTree = "<group>"; };
-		OBJ_414 /* JWK.swift */ = {isa = PBXFileReference; path = JWK.swift; sourceTree = "<group>"; };
-		OBJ_415 /* JWKError.swift */ = {isa = PBXFileReference; path = JWKError.swift; sourceTree = "<group>"; };
-		OBJ_416 /* RSAKey+JWK.swift */ = {isa = PBXFileReference; path = "RSAKey+JWK.swift"; sourceTree = "<group>"; };
-		OBJ_417 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
-		OBJ_418 /* Utils.swift */ = {isa = PBXFileReference; path = Utils.swift; sourceTree = "<group>"; };
-		OBJ_419 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/chris/Developer/ServerMain/.build/checkouts/Swift-JWK-to-PEM/Package.swift"; sourceTree = "<group>"; };
+		OBJ_411 /* CryptorRSA.swift */ = {isa = PBXFileReference; path = CryptorRSA.swift; sourceTree = "<group>"; };
+		OBJ_412 /* CryptorRSAConstants.swift */ = {isa = PBXFileReference; path = CryptorRSAConstants.swift; sourceTree = "<group>"; };
+		OBJ_413 /* CryptorRSADigest.swift */ = {isa = PBXFileReference; path = CryptorRSADigest.swift; sourceTree = "<group>"; };
+		OBJ_414 /* CryptorRSAErrors.swift */ = {isa = PBXFileReference; path = CryptorRSAErrors.swift; sourceTree = "<group>"; };
+		OBJ_415 /* CryptorRSAKey.swift */ = {isa = PBXFileReference; path = CryptorRSAKey.swift; sourceTree = "<group>"; };
+		OBJ_416 /* CryptorRSAUtilities.swift */ = {isa = PBXFileReference; path = CryptorRSAUtilities.swift; sourceTree = "<group>"; };
+		OBJ_417 /* Data+Extensions.swift */ = {isa = PBXFileReference; path = "Data+Extensions.swift"; sourceTree = "<group>"; };
+		OBJ_418 /* SSLPointerTricks.swift */ = {isa = PBXFileReference; path = SSLPointerTricks.swift; sourceTree = "<group>"; };
+		OBJ_419 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/chris/Developer/ServerMain/.build/checkouts/BlueRSA/Package.swift; sourceTree = "<group>"; };
 		OBJ_42 /* SharingGroupsController.swift */ = {isa = PBXFileReference; path = SharingGroupsController.swift; sourceTree = "<group>"; };
 		OBJ_422 /* MicrosoftCreds+CloudStorage.swift */ = {isa = PBXFileReference; path = "MicrosoftCreds+CloudStorage.swift"; sourceTree = "<group>"; };
 		OBJ_423 /* MicrosoftCreds+Uploads.swift */ = {isa = PBXFileReference; path = "MicrosoftCreds+Uploads.swift"; sourceTree = "<group>"; };
@@ -3570,10 +3570,10 @@
 				OBJ_338 /* ServerAppleSignInAccount */,
 				OBJ_347 /* CredentialsAppleSignIn */,
 				OBJ_355 /* AppleJWTDecoder 0.0.6 */,
-				OBJ_362 /* SwiftJWT 3.6.200 */,
-				OBJ_386 /* CryptorECC 1.2.200 */,
-				OBJ_400 /* CryptorRSA 1.0.200 */,
-				OBJ_411 /* SwiftJWKtoPEM 0.4.0 */,
+				OBJ_362 /* SwiftJWKtoPEM 0.4.0 */,
+				OBJ_371 /* SwiftJWT 3.6.200 */,
+				OBJ_395 /* CryptorECC 1.2.200 */,
+				OBJ_409 /* CryptorRSA 1.0.200 */,
 				OBJ_420 /* ServerMicrosoftAccount */,
 				OBJ_426 /* ServerGoogleAccount */,
 				OBJ_431 /* ServerDropboxAccount */,
@@ -4107,52 +4107,29 @@
 			path = .build/checkouts/AppleJWTDecoder/Sources/AppleJWTDecoder;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_362 /* SwiftJWT 3.6.200 */ = {
+		OBJ_362 /* SwiftJWKtoPEM 0.4.0 */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_363 /* SwiftJWT */,
-				OBJ_385 /* Package.swift */,
+				OBJ_363 /* SwiftJWKtoPEM */,
+				OBJ_370 /* Package.swift */,
 			);
-			name = "SwiftJWT 3.6.200";
+			name = "SwiftJWKtoPEM 0.4.0";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_363 /* SwiftJWT */ = {
+		OBJ_363 /* SwiftJWKtoPEM */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_364 /* BlueECDSA.swift */,
-				OBJ_365 /* BlueHMAC.swift */,
-				OBJ_366 /* BlueRSA.swift */,
-				OBJ_367 /* Claims.swift */,
-				OBJ_368 /* ClaimsExamples */,
-				OBJ_372 /* Data+Base64URLEncoded.swift */,
-				OBJ_373 /* Header.swift */,
-				OBJ_374 /* JWT.swift */,
-				OBJ_375 /* JWTDecoder.swift */,
-				OBJ_376 /* JWTEncoder.swift */,
-				OBJ_377 /* JWTError.swift */,
-				OBJ_378 /* JWTSigner.swift */,
-				OBJ_379 /* JWTVerifier.swift */,
-				OBJ_380 /* NoneAlgorithm.swift */,
-				OBJ_381 /* RSAKeyType.swift */,
-				OBJ_382 /* SignerAlgorithm.swift */,
-				OBJ_383 /* ValidateClaimsResult.swift */,
-				OBJ_384 /* VerifierAlgorithm.swift */,
+				OBJ_364 /* Cert.swift */,
+				OBJ_365 /* JWK.swift */,
+				OBJ_366 /* JWKError.swift */,
+				OBJ_367 /* RSAKey+JWK.swift */,
+				OBJ_368 /* SSLPointerTricks.swift */,
+				OBJ_369 /* Utils.swift */,
 			);
-			name = SwiftJWT;
-			path = ".build/checkouts/Swift-JWT/Sources/SwiftJWT";
+			name = SwiftJWKtoPEM;
+			path = ".build/checkouts/Swift-JWK-to-PEM/Sources/SwiftJWKtoPEM";
 			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_368 /* ClaimsExamples */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_369 /* ClaimsMicroProfile.swift */,
-				OBJ_370 /* ClaimsOpenID.swift */,
-				OBJ_371 /* ClaimsStandardJWT.swift */,
-			);
-			name = ClaimsExamples;
-			path = ClaimsExamples;
-			sourceTree = "<group>";
 		};
 		OBJ_37 /* Service */ = {
 			isa = PBXGroup;
@@ -4165,83 +4142,106 @@
 			path = Service;
 			sourceTree = "<group>";
 		};
-		OBJ_386 /* CryptorECC 1.2.200 */ = {
+		OBJ_371 /* SwiftJWT 3.6.200 */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_387 /* CryptorECC */,
-				OBJ_399 /* Package.swift */,
+				OBJ_372 /* SwiftJWT */,
+				OBJ_394 /* Package.swift */,
+			);
+			name = "SwiftJWT 3.6.200";
+			path = "";
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_372 /* SwiftJWT */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_373 /* BlueECDSA.swift */,
+				OBJ_374 /* BlueHMAC.swift */,
+				OBJ_375 /* BlueRSA.swift */,
+				OBJ_376 /* Claims.swift */,
+				OBJ_377 /* ClaimsExamples */,
+				OBJ_381 /* Data+Base64URLEncoded.swift */,
+				OBJ_382 /* Header.swift */,
+				OBJ_383 /* JWT.swift */,
+				OBJ_384 /* JWTDecoder.swift */,
+				OBJ_385 /* JWTEncoder.swift */,
+				OBJ_386 /* JWTError.swift */,
+				OBJ_387 /* JWTSigner.swift */,
+				OBJ_388 /* JWTVerifier.swift */,
+				OBJ_389 /* NoneAlgorithm.swift */,
+				OBJ_390 /* RSAKeyType.swift */,
+				OBJ_391 /* SignerAlgorithm.swift */,
+				OBJ_392 /* ValidateClaimsResult.swift */,
+				OBJ_393 /* VerifierAlgorithm.swift */,
+			);
+			name = SwiftJWT;
+			path = ".build/checkouts/Swift-JWT/Sources/SwiftJWT";
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_377 /* ClaimsExamples */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_378 /* ClaimsMicroProfile.swift */,
+				OBJ_379 /* ClaimsOpenID.swift */,
+				OBJ_380 /* ClaimsStandardJWT.swift */,
+			);
+			name = ClaimsExamples;
+			path = ClaimsExamples;
+			sourceTree = "<group>";
+		};
+		OBJ_395 /* CryptorECC 1.2.200 */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_396 /* CryptorECC */,
+				OBJ_408 /* Package.swift */,
 			);
 			name = "CryptorECC 1.2.200";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_387 /* CryptorECC */ = {
+		OBJ_396 /* CryptorECC */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_388 /* ASN1.swift */,
-				OBJ_389 /* Data+Extensions.swift */,
-				OBJ_390 /* ECDecryptable.swift */,
-				OBJ_391 /* ECEncryptable.swift */,
-				OBJ_392 /* ECError.swift */,
-				OBJ_393 /* ECPrivateKey.swift */,
-				OBJ_394 /* ECPublicKey.swift */,
-				OBJ_395 /* ECSignable.swift */,
-				OBJ_396 /* ECSignature.swift */,
-				OBJ_397 /* EllipticCurve.swift */,
-				OBJ_398 /* SSLPointerTricks.swift */,
+				OBJ_397 /* ASN1.swift */,
+				OBJ_398 /* Data+Extensions.swift */,
+				OBJ_399 /* ECDecryptable.swift */,
+				OBJ_400 /* ECEncryptable.swift */,
+				OBJ_401 /* ECError.swift */,
+				OBJ_402 /* ECPrivateKey.swift */,
+				OBJ_403 /* ECPublicKey.swift */,
+				OBJ_404 /* ECSignable.swift */,
+				OBJ_405 /* ECSignature.swift */,
+				OBJ_406 /* EllipticCurve.swift */,
+				OBJ_407 /* SSLPointerTricks.swift */,
 			);
 			name = CryptorECC;
 			path = .build/checkouts/BlueECC/Sources/CryptorECC;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_400 /* CryptorRSA 1.0.200 */ = {
+		OBJ_409 /* CryptorRSA 1.0.200 */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_401 /* CryptorRSA */,
-				OBJ_410 /* Package.swift */,
+				OBJ_410 /* CryptorRSA */,
+				OBJ_419 /* Package.swift */,
 			);
 			name = "CryptorRSA 1.0.200";
 			path = "";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_401 /* CryptorRSA */ = {
+		OBJ_410 /* CryptorRSA */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_402 /* CryptorRSA.swift */,
-				OBJ_403 /* CryptorRSAConstants.swift */,
-				OBJ_404 /* CryptorRSADigest.swift */,
-				OBJ_405 /* CryptorRSAErrors.swift */,
-				OBJ_406 /* CryptorRSAKey.swift */,
-				OBJ_407 /* CryptorRSAUtilities.swift */,
-				OBJ_408 /* Data+Extensions.swift */,
-				OBJ_409 /* SSLPointerTricks.swift */,
+				OBJ_411 /* CryptorRSA.swift */,
+				OBJ_412 /* CryptorRSAConstants.swift */,
+				OBJ_413 /* CryptorRSADigest.swift */,
+				OBJ_414 /* CryptorRSAErrors.swift */,
+				OBJ_415 /* CryptorRSAKey.swift */,
+				OBJ_416 /* CryptorRSAUtilities.swift */,
+				OBJ_417 /* Data+Extensions.swift */,
+				OBJ_418 /* SSLPointerTricks.swift */,
 			);
 			name = CryptorRSA;
 			path = .build/checkouts/BlueRSA/Sources/CryptorRSA;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_411 /* SwiftJWKtoPEM 0.4.0 */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_412 /* SwiftJWKtoPEM */,
-				OBJ_419 /* Package.swift */,
-			);
-			name = "SwiftJWKtoPEM 0.4.0";
-			path = "";
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_412 /* SwiftJWKtoPEM */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_413 /* Cert.swift */,
-				OBJ_414 /* JWK.swift */,
-				OBJ_415 /* JWKError.swift */,
-				OBJ_416 /* RSAKey+JWK.swift */,
-				OBJ_417 /* SSLPointerTricks.swift */,
-				OBJ_418 /* Utils.swift */,
-			);
-			name = SwiftJWKtoPEM;
-			path = ".build/checkouts/Swift-JWK-to-PEM/Sources/SwiftJWKtoPEM";
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_420 /* ServerMicrosoftAccount */ = {
@@ -5073,61 +5073,61 @@
 		OBJ_710 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
-				Server::UploaderTests::Product /* UploaderTests.xctest */,
-				ServerShared::ServerShared::Product /* ServerShared.framework */,
-				Server::FileControllerBothUploadTests::Product /* FileControllerBothUploadTests.xctest */,
-				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
-				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
-				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
-				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
-				Server::TestsCommon::Product /* TestsCommon.xctest */,
 				Server::FileControllerUploadDeletionTests::Product /* FileControllerUploadDeletionTests.xctest */,
-				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
-				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
-				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
-				Cryptor::Cryptor::Product /* Cryptor.framework */,
-				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
-				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
-				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
-				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
-				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
-				Server::Main::Product /* Main */,
-				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
 				SSLService::SSLService::Product /* SSLService.framework */,
-				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
-				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
-				Kitura::Kitura::Product /* Kitura.framework */,
-				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
-				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
-				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
-				AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */,
-				Server::Server::Product /* Server.framework */,
 				swift-log::Logging::Product /* Logging.framework */,
-				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
-				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
-				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
 				Server::OtherTests::Product /* OtherTests.xctest */,
-				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
-				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
-				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
-				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
 				Socket::Socket::Product /* Socket.framework */,
+				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
+				Kitura-CredentialsGoogle::CredentialsGoogle::Product /* CredentialsGoogle.framework */,
 				ServerFacebookAccount::ServerFacebookAccount::Product /* ServerFacebookAccount.framework */,
+				Server::FileControllerTests::Product /* FileControllerTests.xctest */,
+				LoggerAPI::LoggerAPI::Product /* LoggerAPI.framework */,
 				ServerAppleSignInAccount::ServerAppleSignInAccount::Product /* ServerAppleSignInAccount.framework */,
+				Cryptor::Cryptor::Product /* Cryptor.framework */,
+				Server::FileControllerBothUploadTests::Product /* FileControllerBothUploadTests.xctest */,
+				HeliumLogger::HeliumLogger::Product /* HeliumLogger.framework */,
+				Server::AccountAuthenticationTests::Product /* AccountAuthenticationTests.xctest */,
+				Kitura::Kitura::Product /* Kitura.framework */,
+				Server::Server::Product /* Server.framework */,
+				Kitura-net::KituraNet::Product /* KituraNet.framework */,
+				Server::UserControllerTests::Product /* UserControllerTests.xctest */,
+				Kitura-Session::KituraSession::Product /* KituraSession.framework */,
+				PerfectMySQL::PerfectMySQL::Product /* PerfectMySQL.framework */,
+				AppleJWTDecoder::AppleJWTDecoder::Product /* AppleJWTDecoder.framework */,
+				Kitura-net::CHTTPParser::Product /* CHTTPParser.framework */,
+				ServerShared::ServerShared::Product /* ServerShared.framework */,
+				PerfectLib::PerfectLib::Product /* PerfectLib.framework */,
+				CryptorRSA::CryptorRSA::Product /* CryptorRSA.framework */,
+				CredentialsDropbox::CredentialsDropbox::Product /* CredentialsDropbox.framework */,
 				ServerGoogleAccount::ServerGoogleAccount::Product /* ServerGoogleAccount.framework */,
+				Server::PushNotificationTests::Product /* PushNotificationTests.xctest */,
+				SwiftJWKtoPEM::SwiftJWKtoPEM::Product /* SwiftJWKtoPEM.framework */,
+				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
+				Kitura-TemplateEngine::KituraTemplateEngine::Product /* KituraTemplateEngine.framework */,
+				SwiftJWT::SwiftJWT::Product /* SwiftJWT.framework */,
+				SwiftAWSSignatureV4::SwiftAWSSignatureV4::Product /* SwiftAWSSignatureV4.framework */,
+				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
+				CredentialsAppleSignIn::CredentialsAppleSignIn::Product /* CredentialsAppleSignIn.framework */,
+				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
+				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
+				Kitura-Credentials::Credentials::Product /* Credentials.framework */,
+				Server::Main::Product /* Main */,
+				PerfectCRUD::PerfectCRUD::Product /* PerfectCRUD.framework */,
+				Server::TestsCommon::Product /* TestsCommon.xctest */,
+				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
 				ServerDropboxAccount::ServerDropboxAccount::Product /* ServerDropboxAccount.framework */,
+				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
+				TypeDecoder::TypeDecoder::Product /* TypeDecoder.framework */,
 				Server::SharingTests::Product /* SharingTests.xctest */,
 				ServerMicrosoftAccount::ServerMicrosoftAccount::Product /* ServerMicrosoftAccount.framework */,
-				SwiftJWT::SwiftJWT::Product /* SwiftJWT.framework */,
-				CryptoSwift::CryptoSwift::Product /* CryptoSwift.framework */,
-				PerfectThread::PerfectThread::Product /* PerfectThread.framework */,
-				Server::AccountFileTests::Product /* AccountFileTests.xctest */,
-				SwiftyAWSSNS::SwiftyAWSSNS::Product /* SwiftyAWSSNS.framework */,
-				ChangeResolvers::ChangeResolvers::Product /* ChangeResolvers.framework */,
-				ServerAccount::ServerAccount::Product /* ServerAccount.framework */,
-				CredentialsMicrosoft::CredentialsMicrosoft::Product /* CredentialsMicrosoft.framework */,
-				Kitura-net::KituraNet::Product /* KituraNet.framework */,
+				KituraContracts::KituraContracts::Product /* KituraContracts.framework */,
+				Kitura-CredentialsFacebook::CredentialsFacebook::Product /* CredentialsFacebook.framework */,
+				Server::UploaderTests::Product /* UploaderTests.xctest */,
+				Server::DatabaseTests::Product /* DatabaseTests.xctest */,
+				Server::ChangeResolverTests::Product /* ChangeResolverTests.xctest */,
+				Server::FileControllerUploadFileTests::Product /* FileControllerUploadFileTests.xctest */,
+				CryptorECC::CryptorECC::Product /* CryptorECC.framework */,
 			);
 			name = Products;
 			path = "";
@@ -6757,7 +6757,7 @@
 			buildPhases = (
 				OBJ_2731 /* Sources */,
 				OBJ_2794 /* Frameworks */,
-				B782AB5B0E0388CE1A4AA437 /* CopyFiles */,
+				2129331FF7717023D530663C /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -11463,19 +11463,23 @@
 		};
 		OBJ_3169 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::UploaderTests /* UploaderTests */;
+			target = Server::FileControllerTests /* FileControllerTests */;
 		};
-		OBJ_3171 /* PBXTargetDependency */ = {
+		OBJ_3170 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = Server::FileControllerUploadDeletionTests /* FileControllerUploadDeletionTests */;
 		};
+		OBJ_3171 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = Server::AccountFileTests /* AccountFileTests */;
+		};
 		OBJ_3172 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerBothUploadTests /* FileControllerBothUploadTests */;
+			target = Server::TestsCommon /* TestsCommon */;
 		};
 		OBJ_3173 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::SharingTests /* SharingTests */;
+			target = Server::UserControllerTests /* UserControllerTests */;
 		};
 		OBJ_3175 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -11483,39 +11487,35 @@
 		};
 		OBJ_3176 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::FileControllerTests /* FileControllerTests */;
+			target = Server::ChangeResolverTests /* ChangeResolverTests */;
 		};
 		OBJ_3177 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountFileTests /* AccountFileTests */;
-		};
-		OBJ_3178 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = Server::DatabaseTests /* DatabaseTests */;
+			target = Server::SharingTests /* SharingTests */;
 		};
 		OBJ_3179 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::ChangeResolverTests /* ChangeResolverTests */;
+			target = Server::OtherTests /* OtherTests */;
 		};
 		OBJ_3180 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
+			target = Server::PushNotificationTests /* PushNotificationTests */;
 		};
 		OBJ_3181 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::OtherTests /* OtherTests */;
+			target = Server::AccountAuthenticationTests /* AccountAuthenticationTests */;
 		};
 		OBJ_3182 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::PushNotificationTests /* PushNotificationTests */;
+			target = Server::DatabaseTests /* DatabaseTests */;
 		};
 		OBJ_3183 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::TestsCommon /* TestsCommon */;
+			target = Server::FileControllerBothUploadTests /* FileControllerBothUploadTests */;
 		};
 		OBJ_3184 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = Server::UserControllerTests /* UserControllerTests */;
+			target = Server::UploaderTests /* UploaderTests */;
 		};
 		OBJ_3291 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

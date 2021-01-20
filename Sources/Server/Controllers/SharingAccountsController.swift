@@ -65,9 +65,17 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
+        let expiry = createSharingInvitationRequest.expiryDuration
+        if let expiry = expiry, expiry <= 0 {
+            let message = "Expiry duration(\(expiry)) <= 0"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         let result = params.repos.sharing.add(
             owningUserId: effectiveOwningUserId, sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID,
-            permission: createSharingInvitationRequest.permission, allowSocialAcceptance: allowSocialAcceptance, numberAcceptors: numberAcceptors)
+            permission: createSharingInvitationRequest.permission, allowSocialAcceptance: allowSocialAcceptance, numberAcceptors: numberAcceptors, expiryDuration: expiry ?? ServerConstants.sharingInvitationExpiryDuration)
         
         guard case .success(let sharingInvitationUUID) = result else {
             let message = "Failed to add Sharing Invitation"
