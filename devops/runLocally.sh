@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Usage: runLocally.sh <Server.json> [latest | <ServerRelease>]
-# This runs a docker image.
 
 # Once started, you can test with:
 # 	http://localhost:8080/HealthCheck/

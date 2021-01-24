@@ -1,199 +1,546 @@
 {
   "all": [
-    "AccountAuthenticationTests",
-    "AccountFileTests",
-    "ChangeResolverTests",
-    "DatabaseTests",
-    "FileControllerUploadFileTests",
-    "FileControllerUploadDeletionTests",
-    "FileControllerBothUploadTests",
-    "FileControllerTests",
-    "UploaderTests",
-    "PushNotificationTests",
-    "SharingTests",
-    "OtherTests",
-    "UserControllerTests"
+    "basic",
+    "google",
+    "dropbox",
+    "owning_google",
+    "owning_dropbox",
+    "sharing_create",
+    "sharing_info",
+    "sharing_redeem",
+    "sharing_file",
+    "sharing_groups",
+    "facebook"
   ],
-  "AccountAuthenticationTests": [
+  "basic": [
     {
-      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Google"
+      "name": "HealthCheckTests"
     },
     {
-      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Facebook"
+      "name": "VersionTests"
     },
     {
-      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Dropbox"
+      "name": "DatabaseModelTests"
     },
     {
-      "name": "AccountAuthenticationTests.AccountAuthenticationTests_Microsoft"
+      "name": "GeneralDatabaseTests"
+    },
+    {
+      "name": "MessageTests"
+    },
+    {
+      "name": "SpecificDatabaseTests"
+    },
+    {
+      "name": "SpecificDatabaseTests_SharingInvitationRepository"
+    },
+    {
+      "name": "SpecificDatabaseTests_Uploads"
+    },
+    {
+      "name": "SpecificDatabaseTests_UserRepository"
+    },
+    {
+      "name": "SpecificDatabaseTests_SharingGroups"
+    },
+    {
+      "name": "SpecificDatabaseTests_SharingGroupUsers"
+    },
+    {
+      "name": "MockStorageTests"
+    },
+    {
+      "name": "MockStorageLiveTests"
     }
   ],
-  "ChangeResolverTests": [
+  "google": [
     {
-      "name": "ChangeResolverTests.ApplyDeferredUploadsTests"
+      "name": "AccountAuthenticationTests_Google"
     },
     {
-      "name": "ChangeResolverTests.ChangeResolverManagerTests"
-    },
-    {
-      "name": "ChangeResolverTests.FileDeletionTests"
+      "name": "GoogleDriveTests"
     }
   ],
-  "DatabaseTests": [
+  "facebook": [
     {
-      "name": "DatabaseTests.DatabaseLockTests"
-    },
-    {
-      "name": "DatabaseTests.DatabaseModelTests"
-    },
-    {
-      "name": "DatabaseTests.DatabaseUpdateTests"
-    },
-    {
-      "name": "DatabaseTests.GeneralDatabaseTests"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_DeferredUploadRepository"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_DeviceUUID"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_FileIndex"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroups"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingGroupUsers"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_SharingInvitationRepository"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_Uploads"
-    },
-    {
-      "name": "DatabaseTests.SpecificDatabaseTests_UserRepository"
+      "name": "AccountAuthenticationTests_Facebook"
     }
   ],
-  "FileControllerUploadFileTests": [
+  "dropbox": [
     {
-      "name": "FileControllerUploadFileTests.FileController_FinishUploadsTests"
+      "name": "AccountAuthenticationTests_Dropbox"
     },
     {
-      "name": "FileControllerUploadFileTests.FileController_V0_UploadTests"
-    },
-    {
-      "name": "FileControllerUploadFileTests.FileController_VN_UploadTests"
+      "name": "DropboxTests"
     }
   ],
-  "FileControllerUploadDeletionTests": [
+  "owning_google": [
     {
-      "name": "FileControllerUploadDeletionTests.FileController_FinishUploadsTests"
-    },
-    {
-      "name": "FileControllerUploadDeletionTests.FileController_UploadDeletionTests"
-    }
-  ],
-  "FileControllerBothUploadTests": [
-    {
-      "name": "FileControllerBothUploadTests.FileController_BothUploadSeparateTests"
-    },
-    {
-      "name": "FileControllerBothUploadTests.FileController_UploadsOverlapTests"
-    }
-  ],
-  "UploaderTests": [
-    {
-      "name": "UploaderTests.PruneTests"
-    },
-    {
-      "name": "UploaderTests.UploaderFileChangeTests"
-    },
-    {
-      "name": "UploaderTests.UploaderFileDeletionTests"
-    }
-  ],
-  "FileControllerTests": [
-    {
-      "name": "FileControllerTests.FileController_DownloadAppMetaDataTests",
+      "name": "FailureTests",
       "parameters": [
-        "MOCK_STORAGE" 
-       ]
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
     },
     {
-      "name": "FileControllerTests.FileController_DownloadTests"
-    },
-    {
-      "name": "FileControllerTests.FileController_GetUploadsResults"
-    },
-    {
-      "name": "FileControllerTests.FileController_IndexTests",
+      "name": "FileController_UploadTests",
       "parameters": [
-        "MOCK_STORAGE" 
-       ]
-    }
-  ],
-  "PushNotificationTests": [
-    {
-      "name": "PushNotificationTests.SendPushNotificationsTests"
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
     },
     {
-      "name": "PushNotificationTests.RegisterPushNotificationsTest"
-    }
-  ],
-  "AccountFileTests": [
-    {
-      "name": "AccountFileTests.MockStorageTests",
+      "name": "FileController_DoneUploadsTests",
       "parameters": [
-        "MOCK_STORAGE" 
-       ]
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
     },
     {
-      "name": "AccountFileTests.MockStorageLiveTests",
+      "name": "FileControllerTests_UploadDeletion",
       "parameters": [
-        "MOCK_STORAGE"
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "FileControllerTests_GetUploads",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "FileController_MultiVersionFiles",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "FileController_DownloadAppMetaDataTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "FileController_UploadAppMetaDataTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "FileController_FileGroupUUIDTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "FileControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "GeneralAuthTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
+      ]
+    },
+    {
+      "name": "UserControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1"
       ]
     }
   ],
-  "SharingTests": [
+  "owning_dropbox": [
     {
-      "name": "SharingTests.Sharing_FileManipulationTests"
+      "name": "FailureTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
     },
     {
-      "name": "SharingTests.SharingAccountsController_CreateSharingInvitation"
+      "name": "FileController_UploadTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
     },
     {
-      "name": "SharingTests.SharingAccountsController_GetSharingInvitationInfo"
+      "name": "FileController_DoneUploadsTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
     },
     {
-      "name": "SharingTests.SharingAccountsController_RedeemSharingInvitation"
+      "name": "FileControllerTests_UploadDeletion",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
     },
     {
-      "name": "SharingTests.SharingGroupsControllerTests"
+      "name": "FileControllerTests_GetUploads",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "FileController_MultiVersionFiles",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "FileController_DownloadAppMetaDataTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "FileController_UploadAppMetaDataTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "FileController_FileGroupUUIDTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "FileControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "GeneralAuthTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
+    },
+    {
+      "name": "UserControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1"
+      ]
     }
   ],
-  "OtherTests": [
+  "sharing_create": [
     {
-      "name": "OtherTests.FailureTests"
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
     },
     {
-      "name": "OtherTests.HealthCheckTests"
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
     },
     {
-      "name": "OtherTests.MessageTests"
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
     },
     {
-      "name": "OtherTests.VersionTests"
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
     },
     {
-      "name": "OtherTests.RepeatingTimerTests"
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_CreateSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
     }
   ],
-  "UserControllerTests": [
+  "sharing_info": [
     {
-      "name": "UserControllerTests.UserControllerTests"
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_GetSharingInvitationInfo",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    }
+  ],
+  "sharing_redeem": [
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingAccountsController_RedeemSharingInvitation",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2",
+        "PRIMARY_SHARING_FACEBOOK1"
+      ]
+    }
+  ],
+  "sharing_file": [
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_DROPBOX2",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_GOOGLE2",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_GOOGLE3"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_FACEBOOK1",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    },
+    {
+      "name": "Sharing_FileManipulationTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "PRIMARY_SHARING_DROPBOX2",
+        "SECONDARY_SHARING_FACEBOOK2"
+      ]
+    }
+  ],
+  "sharing_groups": [
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_GOOGLE1",
+        "SECONDARY_OWNING_DROPBOX2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_GOOGLE2"
+      ]
+    },
+    {
+      "name": "SharingGroupsControllerTests",
+      "parameters": [
+        "PRIMARY_OWNING_DROPBOX1",
+        "SECONDARY_OWNING_DROPBOX2"
+      ]
     }
   ]
 }
+

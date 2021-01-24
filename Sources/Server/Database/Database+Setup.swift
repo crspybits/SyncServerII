@@ -17,10 +17,12 @@ extension Database {
         FileIndexRepository.self,
         SharingInvitationRepository.self,
         SharingGroupUserRepository.self,
-        DeferredUploadRepository.self
+        MasterVersionRepository.self
     ]
     
-    static func setup(db: Database) -> Bool {
+    static func setup() -> Bool {
+        let db = Database(showStartupInfo: true)
+
         // The ordering of these table creations is important because of foreign key constraints.
 
         for repoType in repoTypes {
@@ -34,10 +36,12 @@ extension Database {
     }
     
 #if DEBUG
-    static func remove(db: Database) {
+    static func remove() {
         // Reversing the order on removal to deal with foreign key constraints.
         let reversedRepoTypes = repoTypes.reversed()
         
+        let db = Database(showStartupInfo: false)
+
         for repoType in reversedRepoTypes {
             let repo = repoType.init(db)
             _ = repo.remove()

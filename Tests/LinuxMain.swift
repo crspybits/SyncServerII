@@ -1,10 +1,5 @@
 import XCTest
-@testable import AccountTests
-@testable import DatabaseTests
-@testable import FileControllerTests
-@testable import SharingTests
-@testable import AccountFileTests
-@testable import OtherTests
+@testable import ServerTests
 
 XCTMain([
     testCase(HealthCheckTests.allTests),
@@ -21,6 +16,8 @@ XCTMain([
     testCase(FileController_MultiVersionFiles.allTests),
     testCase(GeneralAuthTests.allTests),
     testCase(GeneralDatabaseTests.allTests),
+    testCase(GoogleDriveTests.allTests),
+    testCase(DropboxTests.allTests),
     testCase(MessageTests.allTests),
     testCase(Sharing_FileManipulationTests.allTests),
     testCase(SharingAccountsController_CreateSharingInvitation.allTests),
@@ -39,8 +36,5 @@ XCTMain([
     testCase(SharingGroupsControllerTests.allTests),
     testCase(SharingAccountsController_GetSharingInvitationInfo.allTests),
     testCase(MockStorageTests.allTests),
-    testCase(MockStorageLiveTests.allTests),
-    testCase(AccountAuthenticationTests_Microsoft.allTests),
-    testCase(SpecificDatabaseTests_UploadRequestLog.allTests)
-    
+    testCase(MockStorageLiveTests.allTests)
 ])

@@ -6,10 +6,9 @@
 //
 
 import LoggerAPI
-import ServerShared
+import SyncServerShared
 import Foundation
 import SwiftyAWSSNS
-import ServerAccount
 
 class PushNotificationsController : ControllerProtocol {
     class func setup() -> Bool {
@@ -23,23 +22,22 @@ class PushNotificationsController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
-        
-        guard let userId = params.currentSignedInUser?.userId else {
-            let message = "Could not get userId"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
+
+        guard let pn = PushNotifications() else {
+            params.completion(.failure(nil))
             return
         }
         
-        let topicName = params.services.pushNotifications.topicName(userId: userId)
+        let userId = params.currentSignedInUser!.userId!
+        let topicName = PushNotifications.topicName(userId: userId)
 
-        params.services.pushNotifications.createPlatformEndpoint(apnsToken: request.pushNotificationToken) { response in
+        pn.sns.createPlatformEndpoint(apnsToken: request.pushNotificationToken) { response in
             switch response {
             case .success(let endpointArn):
-                params.services.pushNotifications.createTopic(topicName: topicName) { response in
+                pn.sns.createTopic(topicName: topicName) { response in
                     switch response {
                     case .success(let topicArn):
-                        params.services.pushNotifications.subscribe(endpointArn: endpointArn, topicArn: topicArn) { response in
+                        pn.sns.subscribe(endpointArn: endpointArn, topicArn: topicArn) { response in
                             switch response {
                             case .success:
                                 guard params.repos.user.updatePushNotificationTopic(
@@ -53,22 +51,21 @@ class PushNotificationsController : ControllerProtocol {
                                 let response = RegisterPushNotificationTokenResponse()
                                 params.completion(.success(response))
                                 return
-                                
-                            case .failure(let error):
+                            case .error(let error):
                                 let message = "Failed on subscribe: \(error)"
                                 Log.error(message)
                                 params.completion(.failure(.message(message)))
                                 return
                             }
                         }
-                    case .failure(let error):
+                    case .error(let error):
                         let message = "Failed on createTopic: \(error)"
                         Log.error(message)
                         params.completion(.failure(.message(message)))
                         return
                     }
                 }
-            case .failure(let error):
+            case .error(let error):
                 let message = "Failed on createPlatformEndpoint: \(error)"
                 Log.error(message)
                 params.completion(.failure(.message(message)))

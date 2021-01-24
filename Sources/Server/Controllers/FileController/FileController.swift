@@ -10,16 +10,15 @@ import Foundation
 import LoggerAPI
 import Credentials
 import CredentialsGoogle
-import ServerShared
-import ServerAccount
+import SyncServerShared
 
-class FileController : ControllerProtocol {    
+class FileController : ControllerProtocol {
     enum CheckError : Error {
         case couldNotConvertModelObject
         case errorLookingUpInFileIndex
     }
     
-    // Result is nil only if there is no existing file in the FileIndex. Throws an error if there is an error.
+    // Result is nil if there is no existing file in the FileIndex. Throws an error if there is an error.
     static func checkForExistingFile(params:RequestProcessingParameters, sharingGroupUUID: String, fileUUID: String) throws -> FileIndex? {
         
         let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
@@ -52,21 +51,22 @@ class FileController : ControllerProtocol {
     }
     
     // OWNER
-    // userId is the owning user Id-- e.g., obtained from the userId field of FileIndex.
-    static func getCreds(forUserId userId: UserId, userRepo: UserRepository, accountManager: AccountManager, accountDelegate: AccountDelegate?) -> Account? {
+    static func getCreds(forUserId userId: UserId, from db: Database, delegate: AccountDelegate) -> Account? {
         let userKey = UserRepository.LookupKey.userId(userId)
-        let userResults = userRepo.lookup(key: userKey, modelInit: User.init)
+        let userResults = UserRepository(db).lookup(key: userKey, modelInit: User.init)
         guard case .found(let model) = userResults,
             let user = model as? User else {
             Log.error("Could not get user from database.")
             return nil
         }
     
-        guard let credsJSON = user.creds, let creds = try? accountManager.accountFromJSON(credsJSON, accountName: user.accountType, user: .user(user), accountDelegate: accountDelegate) else {
+        guard var creds = user.credsObject else {
             Log.error("Could not get user creds.")
             return nil
         }
-                
+        
+        creds.delegate = delegate
+        
         return creds
     }
             
@@ -93,7 +93,7 @@ class FileController : ControllerProtocol {
             return
         }
         
-        let clientSharingGroups:[ServerShared.SharingGroup] = groups.map { serverGroup in
+        let clientSharingGroups:[SyncServerShared.SharingGroup] = groups.map { serverGroup in
             return serverGroup.toClient()
         }
         
@@ -114,21 +114,58 @@ class FileController : ControllerProtocol {
             params.completion(.failure(.message(message)))
             return
         }
+        
+        Controllers.getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
             
-        let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)
+            let fileIndexResult = params.repos.fileIndex.fileIndex(forSharingGroupUUID: sharingGroupUUID)
 
-        switch fileIndexResult {
-        case .fileIndex(let fileIndex):
-            Log.info("Number of entries in FileIndex: \(fileIndex.count)")
-            let response = IndexResponse()
-            response.fileIndex = fileIndex
-            response.sharingGroups = clientSharingGroups
+            switch fileIndexResult {
+            case .fileIndex(let fileIndex):
+                Log.info("Number of entries in FileIndex: \(fileIndex.count)")
+                let response = IndexResponse()
+                response.fileIndex = fileIndex
+                response.masterVersion = masterVersion
+                response.sharingGroups = clientSharingGroups
+                params.completion(.success(response))
+                
+            case .error(let error):
+                let message = "Error: \(error)"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+                return
+            }
+        }
+    }
+    
+    func getUploads(params:RequestProcessingParameters) {
+        guard let getUploadsRequest = params.request as? GetUploadsRequest else {
+            let message = "Did not receive GetUploadsRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard sharingGroupSecurityCheck(sharingGroupUUID: getUploadsRequest.sharingGroupUUID, params: params) else {
+            let message = "Failed in sharing group security check."
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        let uploadsResult = params.repos.upload.uploadedFiles(forUserId: params.currentSignedInUser!.userId, sharingGroupUUID: getUploadsRequest.sharingGroupUUID, deviceUUID: params.deviceUUID!)
+
+        switch uploadsResult {
+        case .uploads(let uploads):
+            let fileInfo = UploadRepository.uploadsToFileInfo(uploads: uploads)
+            let response = GetUploadsResponse()
+            response.uploads = fileInfo
             params.completion(.success(response))
             
         case .error(let error):
-            let message = "Error: \(error)"
+            let message = "Error: \(String(describing: error))"
             Log.error(message)
             params.completion(.failure(.message(message)))
+            return
         }
     }
 }
