@@ -1,6 +1,6 @@
 SyncServer
 
-Version
+Version 1.0.0 (1/24/21; beta testing)
 	* Change configuration files to use Codable
 	* Adding Microsoft authentication and OneDrive
     * Adding Apple Sign In authentication

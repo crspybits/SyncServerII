@@ -68,18 +68,18 @@
         "package": "ChangeResolvers",
         "repositoryURL": "https://github.com/SyncServerII/ChangeResolvers.git",
         "state": {
-          "branch": "master",
-          "revision": "30b73253204a79e036f133465005d5f16f923b9a",
-          "version": null
+          "branch": null,
+          "revision": "91e0f2a6b3121e83e1a369198d54141bb3e37b08",
+          "version": "0.0.2"
         }
       },
       {
         "package": "CredentialsAppleSignIn",
         "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
         "state": {
-          "branch": "master",
-          "revision": "386abce6b94d20894c82d801100abbe330469ad7",
-          "version": null
+          "branch": null,
+          "revision": "838cefff261ac1e0564f2c91062233f5907c1ea6",
+          "version": "0.0.4"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsDropbox.git",
         "state": {
           "branch": null,
-          "revision": "7381b4bae89df21a4f5bddcf64ecd5cebdcb2fa8",
-          "version": "0.4.4"
+          "revision": "95d05cf3a4e5e303d41d2fe4a21dff2e03514232",
+          "version": "0.4.5"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsMicrosoft.git",
         "state": {
           "branch": null,
-          "revision": "c4fedb1432ed7948a9cdd613aab0667adade3ed5",
-          "version": "0.1.0"
+          "revision": "d77336e9a97a75b89446c0764b6c65818bf4fd9b",
+          "version": "0.2.1"
         }
       },
       {
@@ -266,54 +266,63 @@
         "package": "ServerAccount",
         "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
-          "branch": "master",
-          "revision": "d15e402dfdccf49349ba2d525ff66b1167df7f0c",
-          "version": null
+          "branch": null,
+          "revision": "8dc5b24eb55f97c90bc989fac746302be53a1a0d",
+          "version": "0.0.8"
         }
       },
       {
         "package": "ServerAppleSignInAccount",
         "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
         "state": {
-          "branch": "master",
-          "revision": "553d0ed023b69acc19b8d689b32d676e16f82b69",
-          "version": null
+          "branch": null,
+          "revision": "2f21b740b31511a988f31640dd4c85281e82630e",
+          "version": "0.0.2"
+        }
+      },
+      {
+        "package": "ServerDropboxAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerDropboxAccount.git",
+        "state": {
+          "branch": null,
+          "revision": "5e9024e46d9b5c689e91e836a8112aeedd1c4900",
+          "version": "0.0.2"
         }
       },
       {
         "package": "ServerFacebookAccount",
         "repositoryURL": "https://github.com/SyncServerII/ServerFacebookAccount.git",
         "state": {
-          "branch": "master",
-          "revision": "4f60a91335bafe42a2b7fbe7e210892e01aa657e",
-          "version": null
+          "branch": null,
+          "revision": "8e4d0d4e0420e78410a19a51fdad7925c6845c6c",
+          "version": "0.0.1"
         }
       },
       {
         "package": "ServerGoogleAccount",
         "repositoryURL": "https://github.com/SyncServerII/ServerGoogleAccount.git",
         "state": {
-          "branch": "master",
-          "revision": "b440c6a559ed363c049f369f9e4186cead19c7c4",
-          "version": null
+          "branch": null,
+          "revision": "b7b93c157464197840b57b8095414b25713e9b40",
+          "version": "0.0.2"
         }
       },
       {
         "package": "ServerMicrosoftAccount",
         "repositoryURL": "https://github.com/SyncServerII/ServerMicrosoftAccount.git",
         "state": {
-          "branch": "master",
-          "revision": "5e013639ac6f66b4e675d95097846cdaa6ed0560",
-          "version": null
+          "branch": null,
+          "revision": "b395ee2f0ee6271dc49cb81461ee6819e09cf730",
+          "version": "0.0.2"
         }
       },
       {
         "package": "ServerShared",
         "repositoryURL": "https://github.com/SyncServerII/ServerShared.git",
         "state": {
-          "branch": "master",
-          "revision": "ab5b7c0abb653d5d4cd772c3133932ad9031f18e",
-          "version": null
+          "branch": null,
+          "revision": "6c725c50cdb575c183943dcfcdb7394390a5e933",
+          "version": "0.0.4"
         }
       },
       {

@@ -1,20 +1,25 @@
 //
-//  AccountAuthenticationTests_Facebook.swift
-//  ServerTests
+//  AccountAuthenticationTests_Apple.swift
+//  AccountAuthenticationTests
 //
-//  Created by Christopher Prince on 7/19/17.
+//  Created by Christopher G Prince on 1/24/21.
 //
 
 import XCTest
-import ServerShared
-import LoggerAPI
+import Kitura
+import KituraNet
 @testable import Server
 @testable import TestsCommon
+import LoggerAPI
+import HeliumLogger
+import CredentialsAppleSignIn
+import Foundation
+import ServerShared
 
-class AccountAuthenticationTests_Facebook: AccountAuthenticationTests {
+class AccountAuthenticationTests_Apple: AccountAuthenticationTests {
     override func setUp() {
         super.setUp()
-        testAccount = .facebook1
+        testAccount = .apple1
     }
     
     override func tearDown() {
@@ -38,13 +43,13 @@ class AccountAuthenticationTests_Facebook: AccountAuthenticationTests {
         super.testGoodPathWithBadMethodWithGoodCredsFails()
     }
 
-    func testThatFacebookUserHasValidCreds() {
+    func testThatAppleSignInUserHasValidCreds() {
         createSharingUser(withSharingPermission: .read, sharingUser: testAccount)
         
         let deviceUUID = Foundation.UUID().uuidString
         
-        self.performServerTest(testAccount: testAccount) { expectation, facebookCreds in
-            let headers = self.setupHeaders(testUser: self.testAccount, accessToken: facebookCreds.accessToken, deviceUUID:deviceUUID)
+        self.performServerTest(testAccount: testAccount) { expectation, appleSignInCreds in
+            let headers = self.setupHeaders(testUser: self.testAccount, accessToken: appleSignInCreds.accessToken, deviceUUID:deviceUUID)
             self.performRequest(route: ServerEndpoints.checkCreds, headers: headers) { response, dict in
                 Log.info("Status code: \(String(describing: response?.statusCode))")
                 XCTAssert(response?.statusCode == .OK, "Did not work on check creds request")
@@ -58,4 +63,3 @@ class AccountAuthenticationTests_Facebook: AccountAuthenticationTests {
         // super.testThatAccountForExistingUserCannotBeCreated()
     }
 }
-

@@ -15,6 +15,7 @@ import ServerAccount
 @testable import ServerDropboxAccount
 @testable import ServerGoogleAccount
 @testable import ServerMicrosoftAccount
+@testable import ServerAppleSignInAccount
 import ServerFacebookAccount
 
 func ==(lhs: TestAccount, rhs:TestAccount) -> Bool {
@@ -104,7 +105,7 @@ struct TestAccount {
 
     static let facebook2 = TestAccount(tokenKey: \.FacebookLongLivedToken2, idKey: \.FacebookId2, scheme: .facebook)
     
-    static let dropbox1 = TestAccount(tokenKey: \.DropboxAccessToken1, idKey: \.DropboxId1, scheme: .dropbox)
+    static let dropbox1 = TestAccount(tokenKey: \.DropboxRefreshToken1, idKey: \.DropboxId1, scheme: .dropbox)
     
     static let dropbox2 = TestAccount(tokenKey: \.DropboxAccessToken2, idKey: \.DropboxId2, scheme: .dropbox)
     
@@ -115,7 +116,7 @@ struct TestAccount {
     
     static let microsoft2 = TestAccount(tokenKey: \.microsoft2.refreshToken, secondTokenKey: \.microsoft2.idToken, idKey: \.microsoft2.id, scheme: .microsoft)
     
-    static let apple1 = TestAccount(tokenKey: \.apple1.refreshToken, secondTokenKey: \.apple1.authorizationCode, idKey: \.apple1.idToken, scheme: .appleSignIn)
+    static let apple1 = TestAccount(tokenKey: \.apple1.idToken, secondTokenKey: \.apple1.authorizationCode, idKey: \.apple1.id, scheme: .appleSignIn)
     
     static let microsoft1ExpiredAccessToken = TestAccount(tokenKey: \.microsoft1ExpiredAccessToken.refreshToken, secondTokenKey: \.microsoft1ExpiredAccessToken.accessToken, idKey: \.microsoft1ExpiredAccessToken.id, scheme: .microsoft)
     
@@ -147,13 +148,16 @@ struct TestAccount {
         
         // MARK: Dropbox
         AccountScheme.dropbox.registerHandler(type: .getCredentials) { testAccount, callback in
-            guard let creds = DropboxCreds(configuration: Configuration.server, delegate: nil) else {
-                XCTFail()
-                return
+            CredsCache.credsFor(dropboxAccount: testAccount) { creds in
+                callback(creds)
             }
-            creds.accessToken = testAccount.token()
-            creds.accountId = testAccount.id()
-            callback(creds)
+        }
+        
+        // MARK: Microsoft
+        AccountScheme.microsoft.registerHandler(type: .getCredentials) { testAccount, callback in
+            CredsCache.credsFor(microsoftAccount: testAccount) { creds in
+                callback(creds)
+            }
         }
         
         // MARK: Facebook
@@ -165,12 +169,15 @@ struct TestAccount {
             creds.accessToken = testAccount.token()
             callback(creds)
         }
-        
-        // MARK: Microsoft
-        AccountScheme.microsoft.registerHandler(type: .getCredentials) { testAccount, callback in
-            CredsCache.credsFor(microsoftAccount: testAccount) { creds in
-                callback(creds)
+
+        // MARK: Apple Sign In
+        AccountScheme.appleSignIn.registerHandler(type: .getCredentials) { testAccount, callback in
+            guard let creds = AppleSignInCreds(configuration: Configuration.server, delegate: nil) else {
+                XCTFail()
+                return
             }
+            creds.accessToken = testAccount.token()
+            callback(creds)
         }
     }
 }
@@ -264,34 +271,44 @@ extension AccountScheme {
                 XCTFail()
                 return
             }
-            creds.accessToken = testAccount.token()
+            
+            creds.refreshToken = testAccount.token()
             creds.accountId = testAccount.id()
             
-            guard let cloudStorage = creds.cloudStorage(mock: MockStorage()) else {
-                XCTFail()
-                expectation.fulfill()
-                return
-            }
-            
-            cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
-                switch result {
-                case .success:
-                    break
-                case .accessTokenRevokedOrExpired:
+            creds.refresh { error in
+                guard error == nil, creds.accessToken != nil else {
+                    Log.error("Error: \(error)")
                     XCTFail()
-                case .failure(let error):
-                    if fileNotFoundOK,
-                        let error = error as? DropboxCreds.DropboxError,
-                        case .couldNotGetId = error {
-                        expectation.fulfill()
-                    }
-                    else {
-                        XCTFail("DropboxCreds file deletion: \(error)")
-                        expectation.fulfill()
-                    }
+                    expectation.fulfill()
+                    return
                 }
+                
+                guard let cloudStorage = creds.cloudStorage(mock: MockStorage()) else {
+                    XCTFail()
+                    expectation.fulfill()
+                    return
+                }
+                
+                cloudStorage.deleteFile(cloudFileName:cloudFileName, options:options) { result in
+                    switch result {
+                    case .success:
+                        break
+                    case .accessTokenRevokedOrExpired:
+                        XCTFail()
+                    case .failure(let error):
+                        if fileNotFoundOK,
+                            let error = error as? DropboxCreds.DropboxError,
+                            case .couldNotGetId = error {
+                            expectation.fulfill()
+                        }
+                        else {
+                            XCTFail("DropboxCreds file deletion: \(error)")
+                            expectation.fulfill()
+                        }
+                    }
 
-                expectation.fulfill()
+                    expectation.fulfill()
+                }
             }
             
         case AccountScheme.microsoft.accountName:
@@ -388,6 +405,31 @@ class CredsCache {
             }
             cache[microsoftAccount.id()] = creds
             creds.refreshToken = microsoftAccount.token()
+            creds.refresh {[unowned creds] error in
+                XCTAssert(error == nil, "credsFor: Failure on refresh: \(error!)")
+                completion(creds)
+            }
+        }
+    }
+    
+    static func credsFor(dropboxAccount:TestAccount,
+                         completion: @escaping (_ creds: DropboxCreds)->()) {
+        if let creds = cache[dropboxAccount.id()] {
+            guard let creds = creds as? DropboxCreds else {
+                assert(false)
+                return
+            }
+            
+            completion(creds)
+        }
+        else {
+            Log.info("Attempting to refresh Dropbox Creds...")
+            guard let creds = DropboxCreds(configuration: Configuration.server, delegate: nil) else {
+                XCTFail()
+                return
+            }
+            cache[dropboxAccount.id()] = creds
+            creds.refreshToken = dropboxAccount.token()
             creds.refresh {[unowned creds] error in
                 XCTAssert(error == nil, "credsFor: Failure on refresh: \(error!)")
                 completion(creds)

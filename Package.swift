@@ -16,33 +16,27 @@ let package = Package(
 
         // .package(path: "../ServerShared"),
         // .package(url: "../ServerShared", .branch("master")),
-        .package(url: "https://github.com/SyncServerII/ServerShared.git", .branch("master")),
+        .package(url: "https://github.com/SyncServerII/ServerShared.git", from: "0.0.4"),
+        //.package(url: "https://github.com/SyncServerII/ServerShared.git", .branch("master")),
         
-        .package(url: "https://github.com/SyncServerII/ChangeResolvers.git", .branch("master")),
+        .package(url: "https://github.com/SyncServerII/ChangeResolvers.git", from: "0.0.1"),
+        // .package(url: "https://github.com/SyncServerII/ChangeResolvers.git", .branch("master")),
         
-        .package(url: "https://github.com/SyncServerII/ServerAccount.git", .branch("master")),
+        .package(url: "https://github.com/SyncServerII/ServerAccount.git", from: "0.0.8"),
+        //.package(url: "https://github.com/SyncServerII/ServerAccount.git", .branch("master")),
         
-        .package(path: "../ServerDropboxAccount"),
-
-        //.package(url: "https://github.com/SyncServerII/ServerDropboxAccount.git", .branch("master")),
-        
-        .package(url: "https://github.com/SyncServerII/ServerGoogleAccount.git", .branch("master")),
-        .package(url: "https://github.com/SyncServerII/ServerMicrosoftAccount.git", .branch("master")),
-        .package(url: "https://github.com/SyncServerII/ServerAppleSignInAccount.git", .branch("master")),
-        .package(url: "https://github.com/SyncServerII/ServerFacebookAccount.git", .branch("master")),
+        .package(url: "https://github.com/SyncServerII/ServerDropboxAccount.git", from: "0.0.2"),
+        .package(url: "https://github.com/SyncServerII/ServerGoogleAccount.git", from: "0.0.2"),
+        .package(url: "https://github.com/SyncServerII/ServerMicrosoftAccount.git", from: "0.0.2"),
+        .package(url: "https://github.com/SyncServerII/ServerAppleSignInAccount.git", from: "0.0.1"),
+        .package(url: "https://github.com/SyncServerII/ServerFacebookAccount.git", from: "0.0.1"),
 
         .package(url: "https://github.com/IBM-Swift/Kitura-Credentials.git", .upToNextMajor(from: "2.4.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git", .upToNextMajor(from: "2.3.1")),
         .package(url: "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git", .upToNextMajor(from: "2.3.1")),
-        
-        // .package(url: "../../repos/CredentialsDropbox", .branch("master")),
-        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.4.1"),
-        
-        // .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", .branch("master")),
-        .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git",  from: "0.1.0"),
-        
-        .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git", .branch("master")),
-        // .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git",  from: "0.1.0"),
+        .package(url: "https://github.com/crspybits/CredentialsDropbox.git", from: "0.4.5"),
+        .package(url: "https://github.com/crspybits/CredentialsMicrosoft.git", from: "0.2.0"),
+        .package(url: "https://github.com/crspybits/CredentialsAppleSignIn.git", from: "0.0.4"),
 
         // .package(url: "../../repos/Perfect-MySQL", .branch("master")),
         // .package(url:"https://github.com/crspybits/Perfect-MySQL.git", from: "3.1.3"),

@@ -68,8 +68,10 @@ class Sharing_FileManipulationTests: ServerTestCase {
         let deviceUUID2 = Foundation.UUID().uuidString
         
         var owningAccountType: AccountScheme.AccountName
-        
+        var fileLabel: String?
+
         if v0File {
+            fileLabel = UUID().uuidString
             switch sharingUser.scheme.userType {
             case .owning:
                 owningAccountType = sharingUser.scheme.accountName
@@ -82,7 +84,7 @@ class Sharing_FileManipulationTests: ServerTestCase {
         }
         
         // Attempting to upload a file by our sharing user        
-        guard let uploadResult = uploadTextFile(testAccount: sharingUser, mimeType: mimeType, owningAccountType: owningAccountType, deviceUUID:deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), fileLabel: UUID().uuidString, errorExpected: failureExpected, stringFile: file, dataToUpload: dataToUpload) else {
+        guard let uploadResult = uploadTextFile(testAccount: sharingUser, mimeType: mimeType, owningAccountType: owningAccountType, deviceUUID:deviceUUID2, fileUUID: fileUUID, addUser: .no(sharingGroupUUID:sharingGroupUUID), fileLabel: fileLabel, errorExpected: failureExpected, stringFile: file, dataToUpload: dataToUpload) else {
             if !failureExpected {
                 XCTFail()
             }

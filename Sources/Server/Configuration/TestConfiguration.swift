@@ -48,7 +48,7 @@ struct TestConfiguration: Decodable {
     let FacebookId2: String
 
     // Dropbox access tokens live forever-- until revoked-- chris@cprince.com
-    let DropboxAccessToken1: String
+    let DropboxRefreshToken1: String
     let DropboxId1: String
   
     // Dropbox access token -- chris@SpasticMuffin.biz
@@ -98,10 +98,14 @@ struct TestConfiguration: Decodable {
     */
     let microsoft2RevokedAccessToken: MicrosoftTokens
     
+    /*
+    I'm not sure why but the identity token (`idToken`) that's getting written into the SyncServer db is different than that passed up from Neebla. Both seem to work in my tests.
+     */
     struct AppleSignInTokens: Decodable {
         let authorizationCode: String
         let refreshToken: String
         let idToken: String
+        let id: String
     }
     
     let apple1: AppleSignInTokens
