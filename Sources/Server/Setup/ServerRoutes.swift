@@ -7,44 +7,50 @@
 //
 
 import Kitura
-import SyncServerShared
+import ServerShared
+
+typealias ServerRoute = (ServerEndpoint, (RequestProcessingParameters)->())
 
 // When adding a new controller, you must also add it to the list in Controllers.swift
 public class ServerRoutes {
-    class func add(proxyRouter:CreateRoutes) {
+    static func routes() -> [ServerRoute] {
         let utilController = UtilController()
-        proxyRouter.addRoute(ep: ServerEndpoints.healthCheck, processRequest: utilController.healthCheck)
-#if DEBUG
-        proxyRouter.addRoute(ep: ServerEndpoints.checkPrimaryCreds, processRequest: utilController.checkPrimaryCreds)
-#endif
-
         let userController = UserController()
-        proxyRouter.addRoute(ep: ServerEndpoints.addUser, processRequest: userController.addUser)
-        proxyRouter.addRoute(ep: ServerEndpoints.checkCreds, processRequest: userController.checkCreds)
-        proxyRouter.addRoute(ep: ServerEndpoints.removeUser, processRequest: userController.removeUser)
-        
         let fileController = FileController()
-        proxyRouter.addRoute(ep: ServerEndpoints.index, processRequest: fileController.index)
-        proxyRouter.addRoute(ep: ServerEndpoints.uploadFile, processRequest: fileController.uploadFile)
-        proxyRouter.addRoute(ep: ServerEndpoints.uploadAppMetaData, processRequest: fileController.uploadAppMetaData)
-        proxyRouter.addRoute(ep: ServerEndpoints.doneUploads, processRequest: fileController.doneUploads)
-        proxyRouter.addRoute(ep: ServerEndpoints.downloadFile, processRequest: fileController.downloadFile)
-        proxyRouter.addRoute(ep: ServerEndpoints.downloadAppMetaData, processRequest: fileController.downloadAppMetaData)
-        proxyRouter.addRoute(ep: ServerEndpoints.getUploads, processRequest: fileController.getUploads)
-        proxyRouter.addRoute(ep: ServerEndpoints.uploadDeletion, processRequest: fileController.uploadDeletion)
-        
         let sharingAccountsController = SharingAccountsController()
-        proxyRouter.addRoute(ep: ServerEndpoints.createSharingInvitation, processRequest: sharingAccountsController.createSharingInvitation)
-        proxyRouter.addRoute(ep: ServerEndpoints.getSharingInvitationInfo, processRequest: sharingAccountsController.getSharingInvitationInfo)
-        proxyRouter.addRoute(ep: ServerEndpoints.redeemSharingInvitation, processRequest: sharingAccountsController.redeemSharingInvitation)
-        
         let sharingGroupsController = SharingGroupsController()
-        proxyRouter.addRoute(ep: ServerEndpoints.createSharingGroup, processRequest: sharingGroupsController.createSharingGroup)
-        proxyRouter.addRoute(ep: ServerEndpoints.updateSharingGroup, processRequest: sharingGroupsController.updateSharingGroup)
-        proxyRouter.addRoute(ep: ServerEndpoints.removeSharingGroup, processRequest: sharingGroupsController.removeSharingGroup)
-        proxyRouter.addRoute(ep: ServerEndpoints.removeUserFromSharingGroup, processRequest: sharingGroupsController.removeUserFromSharingGroup)
-        
         let pushNotificationsController = PushNotificationsController()
-        proxyRouter.addRoute(ep: ServerEndpoints.registerPushNotificationToken, processRequest: pushNotificationsController.registerPushNotificationToken)
+
+        var result = [
+            (ServerEndpoints.healthCheck, utilController.healthCheck),
+
+            (ServerEndpoints.addUser, userController.addUser),
+            (ServerEndpoints.checkCreds, userController.checkCreds),
+            (ServerEndpoints.removeUser, userController.removeUser),
+            
+            (ServerEndpoints.index, fileController.index),
+            (ServerEndpoints.uploadFile, fileController.uploadFile),
+            (ServerEndpoints.downloadFile, fileController.downloadFile),
+            (ServerEndpoints.downloadAppMetaData, fileController.downloadAppMetaData),
+            (ServerEndpoints.uploadDeletion, fileController.uploadDeletion),
+            (ServerEndpoints.getUploadsResults, fileController.getUploadsResults),
+            
+            (ServerEndpoints.createSharingInvitation, sharingAccountsController.createSharingInvitation),
+            (ServerEndpoints.getSharingInvitationInfo, sharingAccountsController.getSharingInvitationInfo),
+            (ServerEndpoints.redeemSharingInvitation, sharingAccountsController.redeemSharingInvitation),
+            
+            (ServerEndpoints.createSharingGroup, sharingGroupsController.createSharingGroup),
+            (ServerEndpoints.updateSharingGroup, sharingGroupsController.updateSharingGroup),
+            (ServerEndpoints.removeSharingGroup, sharingGroupsController.removeSharingGroup),
+            (ServerEndpoints.removeUserFromSharingGroup, sharingGroupsController.removeUserFromSharingGroup),
+            
+            (ServerEndpoints.registerPushNotificationToken, pushNotificationsController.registerPushNotificationToken),
+            (ServerEndpoints.sendPushNotifications, pushNotificationsController.sendPushNotifications)
+        ]
+        
+#if DEBUG
+        result += [(ServerEndpoints.checkPrimaryCreds, utilController.checkPrimaryCreds)]
+#endif
+        return result
     }
 }

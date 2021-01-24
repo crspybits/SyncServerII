@@ -10,7 +10,7 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 
 class DeviceUUID : NSObject, Model {
     static let userIdKey = "userId"
@@ -38,7 +38,7 @@ class DeviceUUID : NSObject, Model {
         }
     }
 
-    override init() {
+    required override init() {
         super.init()
     }
     
@@ -53,7 +53,7 @@ class DeviceUUID : NSObject, Model {
 class DeviceUUIDRepository : Repository, RepositoryLookup {
     private(set) var db:Database!
     
-    var maximumNumberOfDeviceUUIDsPerUser:Int? = Constants.session.maxNumberDeviceUUIDPerUser
+    var maximumNumberOfDeviceUUIDsPerUser:Int? = Configuration.server.maxNumberDeviceUUIDPerUser
     
     required init(_ db:Database) {
         self.db = db

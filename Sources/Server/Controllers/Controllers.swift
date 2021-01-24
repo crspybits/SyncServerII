@@ -10,11 +10,9 @@ import Foundation
 import LoggerAPI
 import Credentials
 import Kitura
-import SyncServerShared
-
-protocol ControllerProtocol {
-    static func setup() -> Bool
-}
+import ServerShared
+import ServerAccount
+import ServerAppleSignInAccount
 
 extension ControllerProtocol {
     // Make sure the current signed in user is a member of the sharing group.
@@ -67,7 +65,7 @@ extension ControllerProtocol {
     }
 }
 
-public class RequestProcessingParameters {
+public class RequestProcessingParameters: FinishUploadsParameters {
     let request: RequestMessage!
     let ep: ServerEndpoint!
     
@@ -81,24 +79,28 @@ public class RequestProcessingParameters {
     let profileCreds: Account?
     
     let userProfile: UserProfile?
-    let accountProperties:AccountManager.AccountProperties?
+    let accountProperties:AccountProperties?
     let currentSignedInUser:User?
     let db:Database!
     var repos:Repositories!
     let routerResponse:RouterResponse!
     let deviceUUID:String?
+    let services:Services
+    let accountDelegate: AccountDelegate
     
     enum Response {
         case success(ResponseMessage)
+        
+        case successWithRunner(ResponseMessage, runner: RequestHandler.PostRequestRunner?)
         
         // Fatal error processing the request, i.e., an error that could not be handled in the normal responses made in the ResponseMessage.
         case failure(RequestHandler.FailureResult?)
     }
     
-    let accountDelegate: AccountDelegate
     let completion: (Response)->()
     
-    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountManager.AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, accountDelegate: AccountDelegate, completion: @escaping (Response)->()) {
+    init(request: RequestMessage, ep:ServerEndpoint, creds: Account?, effectiveOwningUserCreds: Account?, profileCreds: Account?, userProfile: UserProfile?, accountProperties: AccountProperties?, currentSignedInUser: User?, db:Database, repos:Repositories, routerResponse:RouterResponse, deviceUUID: String?, services: Services, accountDelegate: AccountDelegate, completion: @escaping (Response)->()) {
+    
         self.request = request
         self.ep = ep
         self.creds = creds
@@ -112,6 +114,7 @@ public class RequestProcessingParameters {
         self.routerResponse = routerResponse
         self.deviceUUID = deviceUUID
         self.completion = completion
+        self.services = services
         self.accountDelegate = accountDelegate
     }
     
@@ -124,7 +127,13 @@ public class RequestProcessingParameters {
 public class Controllers {
     // When adding a new controller, you must add it to this list.
     private static let list:[ControllerProtocol.Type] =
-        [UserController.self, UtilController.self, FileController.self, SharingAccountsController.self, SharingGroupsController.self, PushNotificationsController.self]
+        [UserController.self,
+        UtilController.self,
+        FileController.self,
+        SharingAccountsController.self,
+        SharingGroupsController.self,
+        PushNotificationsController.self,
+        AppleServerToServerNotifications.self]
     
     static func setup() -> Bool {
         for controller in list {
@@ -137,144 +146,6 @@ public class Controllers {
         return true
     }
     
-    enum UpdateMasterVersionResult : Error, RetryRequest {
-        case success
-        case error(String)
-        case masterVersionUpdate(MasterVersionInt)
-        
-        case deadlock
-        case waitTimeout
-        
-        var shouldRetry: Bool {
-            if case .deadlock = self {
-                return true
-            }
-            else if case .waitTimeout = self {
-                return true
-            }
-            else {
-                return false
-            }
-        }
-    }
-    
-    private static func updateMasterVersion(sharingGroupUUID:String, currentMasterVersion:MasterVersionInt, params:RequestProcessingParameters) -> UpdateMasterVersionResult {
-
-        let currentMasterVersionObj = MasterVersion()
-        
-        // The master version reflects a sharing group.
-        currentMasterVersionObj.sharingGroupUUID = sharingGroupUUID
-        
-        currentMasterVersionObj.masterVersion = currentMasterVersion
-        let updateMasterVersionResult = params.repos.masterVersion.updateToNext(current: currentMasterVersionObj)
-        
-        var result:UpdateMasterVersionResult!
-        
-        switch updateMasterVersionResult {
-        case .success:
-            result = .success
-            
-        case .error(let error):
-            let message = "Failed lookup in MasterVersionRepository: \(error)"
-            Log.error(message)
-            result = .error(message)
-            
-        case .deadlock:
-            result = .deadlock
-            
-        case .waitTimeout:
-            result = .waitTimeout
-            
-        case .didNotMatchCurrentMasterVersion:
-            getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { (error, masterVersion) in
-                if error == nil {
-                    result = .masterVersionUpdate(masterVersion!)
-                }
-                else {
-                    result = .error("\(error!)")
-                }
-            }
-        }
-        
-        return result
-    }
-    
-    enum GetMasterVersionError : Error {
-    case error(String)
-    case noObjectFound
-    }
-    
-    // Synchronous callback.
-    // Get the master version for a sharing group because the master version reflects the overall version of the data for a sharing group.
-    static func getMasterVersion(sharingGroupUUID: String, params:RequestProcessingParameters, completion:(Error?, MasterVersionInt?)->()) {
-        
-        let key = MasterVersionRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
-        let result = params.repos.masterVersion.lookup(key: key, modelInit: MasterVersion.init)
-        
-        switch result {
-        case .error(let error):
-            completion(GetMasterVersionError.error(error), nil)
-            
-        case .found(let model):
-            let masterVersionObj = model as! MasterVersion
-            completion(nil, masterVersionObj.masterVersion)
-            
-        case .noObjectFound:
-            let errorMessage = "Master version record not found for: \(key)"
-            Log.error(errorMessage)
-            completion(GetMasterVersionError.noObjectFound, nil)
-        }
-    }
-    
-    static func getMasterVersion(sharingGroupUUID: String, params:RequestProcessingParameters) -> MasterVersionInt? {
-        var result: MasterVersionInt?
-        
-        getMasterVersion(sharingGroupUUID: sharingGroupUUID, params: params) { error, masterVersion in
-            if error == nil {
-                result = masterVersion
-            }
-        }
-        
-        return result
-    }
-    
-    // Returns nil on success.
-    static func updateMasterVersion(sharingGroupUUID: String, masterVersion: MasterVersionInt, params:RequestProcessingParameters, responseType: MasterVersionUpdateResponse.Type?) -> RequestProcessingParameters.Response? {
-    
-        let updateResult = params.repos.masterVersion.retry {
-            return updateMasterVersion(sharingGroupUUID: sharingGroupUUID, currentMasterVersion: masterVersion, params: params)
-        }
-                
-        switch updateResult {
-        case .success:
-            return nil
-
-        case .masterVersionUpdate(let updatedMasterVersion):
-            Log.warning("Master version update: \(updatedMasterVersion)")
-            if let responseType = responseType {
-                var response = responseType.init()
-                response.masterVersionUpdate = updatedMasterVersion
-                return .success(response)
-            }
-            else {
-                let message = "Master version update but no response type was given."
-                Log.error(message)
-                return .failure(.message(message))
-            }
-            
-        case .deadlock:
-            return .failure(.message("Deadlock!"))
-
-        case .waitTimeout:
-            return .failure(.message("Timeout!"))
-            
-        case .error(let error):
-            let message = "Failed on updateMasterVersion: \(error)"
-            Log.error(message)
-            return .failure(.message(message))
-        }
-    }
-    
     enum EffectiveOwningUserId {
         case found(UserId)
         case noObjectFound
@@ -284,7 +155,7 @@ public class Controllers {
     
     static func getEffectiveOwningUserId(user: User, sharingGroupUUID: String, sharingGroupUserRepo: SharingGroupUserRepository) -> EffectiveOwningUserId {
         
-        if user.accountType.userType == .owning {
+        if AccountScheme(.accountName(user.accountType))?.userType == .owning {
             return .found(user.userId)
         }
         

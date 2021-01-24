@@ -7,6 +7,7 @@
 
 import Foundation
 import LoggerAPI
+import ServerAccount
 
 extension UserController {
     enum CreateInitialFileResponse {
@@ -17,8 +18,8 @@ extension UserController {
     
     static func createInitialFileForOwningUser(cloudFolderName: String?, cloudStorage: CloudStorage, completion: @escaping (CreateInitialFileResponse)->()) {
     
-        guard let fileName = Constants.session.owningUserAccountCreation.initialFileName,
-                let fileContents = Constants.session.owningUserAccountCreation.initialFileContents,
+        guard let fileName = Configuration.server.owningUserAccountCreation.initialFileName,
+                let fileContents = Configuration.server.owningUserAccountCreation.initialFileContents,
                 let data = fileContents.data(using: .utf8) else {
                 
             // Note: This is not an error-- the server just isn't configured to create these files for owning user accounts.

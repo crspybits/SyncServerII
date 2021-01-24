@@ -8,11 +8,11 @@
 import Foundation
 import Credentials
 import Kitura
-import SyncServerShared
+import ServerShared
 import LoggerAPI
+import ServerAccount
 
 class AccountManager {
-    static let session = AccountManager()
     private var accountTypes = [Account.Type]()
     
     var numberAccountTypes: Int {
@@ -24,7 +24,7 @@ class AccountManager {
         var number = 0
         
         for accountType in accountTypes {
-            if accountType.accountType.userType == .owning {
+            if accountType.accountScheme.userType == .owning {
                 number += 1
             }
         }
@@ -32,7 +32,7 @@ class AccountManager {
         return number
     }
     
-    private init() {
+    init() {
     }
     
     func reset() {
@@ -43,7 +43,8 @@ class AccountManager {
     func addAccountType(_ newAccountType:Account.Type) {
         for accountType in accountTypes {
             // Don't add the same account type twice!
-            if newAccountType.accountType.toAuthTokenType() == accountType.accountType.toAuthTokenType() {
+            if newAccountType == accountType {
+                // TODO: Thow an error; don't crash server.
                 assert(false)
             }
         }
@@ -55,13 +56,6 @@ class AccountManager {
     enum UpdateUserProfileError : Error {
         case noAccountWithThisToken
         case noTokenFoundInHeaders
-        case badTokenFoundInHeaders
-    }
-    
-    // Account specific properties obtained from a request.
-    struct AccountProperties {
-        let accountType: AccountType
-        let properties: [String: Any]
     }
     
     // Allow the specific Account's to process headers in their own special way, and get values from the request.
@@ -72,41 +66,41 @@ class AccountManager {
             throw UpdateUserProfileError.noTokenFoundInHeaders
         }
         
-        guard let tokenType = ServerConstants.AuthTokenType(rawValue: tokenTypeString) else {
-            throw UpdateUserProfileError.badTokenFoundInHeaders
-        }
-        
         for accountType in accountTypes {
-            if tokenType == accountType.accountType.toAuthTokenType() {
-                return AccountProperties(accountType: AccountType.fromAuthTokenType(tokenType), properties: accountType.getProperties(fromRequest: request))
+            if tokenTypeString == accountType.accountScheme.authTokenType {
+                return AccountProperties(accountScheme: accountType.accountScheme, properties: accountType.getProperties(fromHeaders: request.headers))
             }
         }
         
         throw UpdateUserProfileError.noAccountWithThisToken
     }
     
-    func accountFromProperties(properties: AccountProperties, user:AccountCreationUser?, delegate:AccountDelegate?) -> Account? {
+    func accountFromProperties(properties: AccountProperties, user:AccountCreationUser?, accountDelegate: AccountDelegate?) -> Account? {
         
-        let currentAccountType = properties.accountType
+        let currentAccountScheme = properties.accountScheme
         for accountType in accountTypes {
-            if accountType.accountType == currentAccountType {
-                return accountType.fromProperties(properties, user: user, delegate: delegate)
+            if accountType.accountScheme == currentAccountScheme {
+                return accountType.fromProperties(properties, user: user, configuration: Configuration.server, delegate: accountDelegate)
             }
         }
         
         return nil
     }
     
-    func accountFromJSON(_ json:String, accountType type: AccountType, user:AccountCreationUser, delegate:AccountDelegate?) throws -> Account? {
+    func accountFromJSON(_ json:String, accountName name: AccountScheme.AccountName, user:AccountCreationUser, accountDelegate: AccountDelegate?) throws -> Account? {
     
         for accountType in accountTypes {
-            if accountType.accountType == type {
-                return try accountType.fromJSON(json, user: user, delegate: delegate)
+            if accountType.accountScheme.accountName == name {
+                return try accountType.fromJSON(json, user: user, configuration: Configuration.server, delegate: accountDelegate)
             }
         }
         
-        Log.error("Could not find accountType: \(type)")
+        Log.error("Could not find accountName: \(name)")
         
         return nil
     }
 }
+
+extension Headers: AccountHeaders {    
+}
+

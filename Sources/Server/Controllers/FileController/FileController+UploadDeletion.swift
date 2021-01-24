@@ -8,8 +8,33 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
 import Kitura
+
+/* Algorithm:
+
+1) Gets the database key for
+    a) the fileUUID if the request one
+    b) the fileGroupUUID, if the deletion request has one
+2) Gets all the [FileInfo] objects for the files for those keys
+3) If all of the files are already marked as deleted, returns success.
+    Just a repeated attempt to delete the same file.
+4) If at least one file not yet deleted, marks the FileIndex as deleted for all of the files.
+    Doesn't yet delete the file in Cloud Storage.
+5) Creates a DeferredUpload, and
+    a) If this deletion is for one fileUUID, creates a Upload record.
+        and links in the DeferredUpload
+    b) If this deletion is for a fileGroupUUID, doesn't create an Upload record.
+6) The Uploader will then (asynchonously):
+    a) For a single fileUUID
+        Flush out any DeferredUpload record(s) for that file
+        And remove any Upload record(s).
+        Delete the file from Cloud Storage.
+    b) For a fileGroupUUID
+        Flush out any DeferredUpload record(s) for the files associated with that file group.
+        And remove any Upload record(s) for that file group.
+        Delete the file(s) from Cloud Storage.
+ */
 
 extension FileController {
     func uploadDeletion(params:RequestProcessingParameters) {
@@ -20,204 +45,165 @@ extension FileController {
             return
         }
         
-        guard sharingGroupSecurityCheck(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, params: params) else {
+        guard let deviceUUID = params.deviceUUID else {
+            let message = "No deviceUUID in UploadDeletionRequest"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        guard let sharingGroupUUID = uploadDeletionRequest.sharingGroupUUID,
+            sharingGroupSecurityCheck(sharingGroupUUID: sharingGroupUUID, params: params) else {
             let message = "Failed in sharing group security check."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard uploadDeletionRequest.fileVersion != nil else {
-            let message = "File version not given in upload request."
+        // Do we have a fileUUID or a fileGroupUUID?
+        
+        var keys = [FileIndexRepository.LookupKey]()
+        
+        enum DeletionType {
+            case singleFile
+            case fileGroup
+        }
+        let deletionType: DeletionType
+        
+        if let fileUUID = uploadDeletionRequest.fileUUID {
+            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, fileUUID: fileUUID)
+            keys += [key]
+            deletionType = .singleFile
+        }
+        else if let fileGroupUUID = uploadDeletionRequest.fileGroupUUID {
+            let key = FileIndexRepository.LookupKey.fileGroupUUIDAndSharingGroup(fileGroupUUID: fileGroupUUID, sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID)
+            keys += [key]
+            deletionType = .fileGroup
+        }
+        else {
+            let message = "Did not have either a fileUUID or a fileGroupUUID"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        Controllers.getMasterVersion(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, params: params) { (error, masterVersion) in
-            if error != nil {
-                let message = "Error: \(String(describing: error))"
+        let files:[FileInfo]
+        
+        let indexResult = params.repos.fileIndex.fileIndex(forKeys: keys)
+        switch indexResult {
+        case .error(let error):
+            Log.error(error)
+            params.completion(.failure(.message(error)))
+            return
+        case .fileIndex(let fileInfos):
+            files = fileInfos
+        }
+        
+        guard files.count > 0 else {
+            let message = "File(s) \(keys) not in FileIndex"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
+        // Are all of the file(s) marked as deleted?
+        if (files.filter {$0.deleted == true}).count == files.count {
+            Log.info("File(s) already marked as deleted: Not deleting again.")
+            let response = UploadDeletionResponse()
+            params.completion(.success(response))
+            return
+        }
+        
+        // Mark the file(s) as deleted in the FileIndex
+        for key in keys {
+            guard let _ = params.repos.fileIndex.markFilesAsDeleted(key: key) else {
+                let message = "Failed marking file(s) as deleted: \(key)"
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
             }
-
-            if masterVersion != uploadDeletionRequest.masterVersion {
-                let response = UploadDeletionResponse()
-                Log.warning("Master version update: \(String(describing: masterVersion))")
-                response.masterVersionUpdate = masterVersion
-                params.completion(.success(response))
-                return
-            }
+        }
+        
+        let finishType:FinishUploadDeletion.DeletionsType
+        
+        switch deletionType {
+        case .fileGroup:
+            finishType = .fileGroup(fileGroupUUID: uploadDeletionRequest.fileGroupUUID)
             
-            // Check whether this fileUUID exists in the FileIndex.
-
-            let key = FileIndexRepository.LookupKey.primaryKeys(sharingGroupUUID: uploadDeletionRequest.sharingGroupUUID, fileUUID: uploadDeletionRequest.fileUUID)
-            
-            let lookupResult = params.repos.fileIndex.lookup(key: key, modelInit: FileIndex.init)
-            
-            var fileIndexObj:FileIndex!
-            
-            switch lookupResult {
-            case .found(let modelObj):
-                fileIndexObj = modelObj as? FileIndex
-                if fileIndexObj == nil {
-                    let message = "Could not convert model object to FileIndex"
-                    Log.error(message)
-                    params.completion(.failure(.message(message)))
-                    return
-                }
-                
-            case .noObjectFound:
-                let message = "Could not find file to delete in FileIndex"
-                Log.error(message)
-                params.completion(.failure(.message(message)))
-                return
-                
-            case .error(let error):
-                let message = "Error looking up file in FileIndex: \(error)"
+        case .singleFile:
+            guard files.count == 1 else {
+                let message = "Single file deletion and not exactly one file."
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
             }
             
-            if fileIndexObj.fileVersion != uploadDeletionRequest.fileVersion {
-                let message = "File index version is: \(String(describing: fileIndexObj.fileVersion)), but you asked to delete version: \(String(describing: uploadDeletionRequest.fileVersion))"
+            let file = files[0]
+            
+            guard file.fileGroupUUID == nil else {
+                let message = "Single file deletion but the file had a file group."
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
             }
             
-            Log.debug("uploadDeletionRequest.actualDeletion: \(String(describing: uploadDeletionRequest.actualDeletion))")
-            
-#if DEBUG
-            if let actualDeletion = uploadDeletionRequest.actualDeletion, actualDeletion {
-                actuallyDeleteFileFromServer(key:key, uploadDeletionRequest:uploadDeletionRequest, fileIndexObj:fileIndexObj, params:params)
+            guard let fileUUID = file.fileUUID else {
+                let message = "Single file deletion and no fileUUID given."
+                Log.error(message)
+                params.completion(.failure(.message(message)))
                 return
             }
-#endif
-
-            var errorString:String?
             
-            // Create entry in Upload table.
+            Log.info("Upload deletion for fileUUID: ")
+                        
             let upload = Upload()
-            upload.fileUUID = uploadDeletionRequest.fileUUID
-            upload.deviceUUID = params.deviceUUID
-            upload.fileVersion = uploadDeletionRequest.fileVersion
-            upload.state = .toDeleteFromFileIndex
+            upload.fileUUID = fileUUID
+            upload.deviceUUID = deviceUUID
+            upload.state = .deleteSingleFile
             upload.userId = params.currentSignedInUser!.userId
-            upload.sharingGroupUUID = uploadDeletionRequest.sharingGroupUUID
+            upload.sharingGroupUUID = sharingGroupUUID
+            
+            // So we don't get failures due to nil checks.
+            upload.uploadCount = 1
+            upload.uploadIndex = 1
             
             let uploadAddResult = params.repos.upload.add(upload: upload)
             
             switch uploadAddResult {
             case .success(_):
-                let response = UploadDeletionResponse()
-                params.completion(.success(response))
-                return
-                
-            case .duplicateEntry:
-                Log.info("File was already marked for deletion: Not adding again.")
-                let response = UploadDeletionResponse()
-                params.completion(.success(response))
-                return
-                
-            case .aModelValueWasNil:
-                errorString = "A model value was nil!"
-                
-            case .deadlock:
-                errorString = "Deadlock"
+                finishType = .singleFile(upload: upload)
 
-            case .waitTimeout:
-                errorString = "waitTimeout"
-                
-            case .otherError(let error):
-                errorString = error
-            }
-
-            Log.error(errorString!)
-            params.completion(.failure(.message(errorString!)))
-            return
-        }
-    }
-    
-#if DEBUG
-    func actuallyDeleteFileFromServer(key:FileIndexRepository.LookupKey, uploadDeletionRequest: Filenaming, fileIndexObj:FileIndex, params:RequestProcessingParameters) {
-    
-        let result = params.repos.fileIndex.retry {
-            return params.repos.fileIndex.remove(key: key)
-        }
-        
-        switch result {
-        case .removed(numberRows: let numberRows):
-            if numberRows != 1 {
-                let message = "Number of rows deleted \(numberRows) != 1"
+            default:
+                let message = "Error adding Upload record: \(uploadAddResult)"
                 Log.error(message)
                 params.completion(.failure(.message(message)))
                 return
             }
-            
-        case .deadlock:
-            let message = "Error deleting from FileIndex: deadlock"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        
-        case .waitTimeout:
-            let message = "Error deleting from FileIndex: waitTimeout"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-            
-        case .error(let error):
-            let message = "Error deleting from FileIndex: \(error)"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
         }
         
-        // OWNER
-        // Need to get creds for the user that uploaded the v0 file.
-        guard let cloudStorageCreds = FileController.getCreds(forUserId: fileIndexObj.userId, from: params.db, delegate: params.accountDelegate)?.cloudStorage else {
-            let message = "Could not obtain CloudStorage creds for original v0 owner of file."
-            Log.error(message)
-            params.completion(.failure(
-                    .goneWithReason(message: message, .userRemoved)))
-            return
-        }
+        let uploader = Uploader(services: params.services.uploaderServices, delegate: params.services)
 
-        let cloudFileName = uploadDeletionRequest.cloudFileName(deviceUUID: fileIndexObj.deviceUUID!, mimeType: fileIndexObj.mimeType!)
-        
-        // Because we need this to get the cloudFolderName
-        guard let effectiveOwningUserCreds = params.effectiveOwningUserCreds else {
-            let message = "No effectiveOwningUserCreds"
-            Log.debug(message)
-            params.completion(.failure(
-                    .goneWithReason(message: message, .userRemoved)))
-            return
-        }
-        
-        let options = CloudStorageFileNameOptions(cloudFolderName: effectiveOwningUserCreds.cloudFolderName, mimeType: fileIndexObj.mimeType!)
-        
-        cloudStorageCreds.deleteFile(cloudFileName: cloudFileName, options: options) { result in
-        
-            switch result {
-            case .success:
-                break
-            case .accessTokenRevokedOrExpired:
-                // As in [1].
-                Log.warning("Error deleting file from cloud storage: Access token revoked or expired")
-                
-            case .failure(let error):
-                // [1]
-                Log.warning("Error deleting file from cloud storage: \(error)!")
-                // I'm not going to fail if this fails-- this is for debugging and it's not a big deal. Drop through and report success.
-            }
+        do {
+            let finishUploads = try FinishUploadDeletion(type: finishType, uploader: uploader, sharingGroupUUID: sharingGroupUUID, params: params)
+            let result = try finishUploads.finish()
             
-            let response = UploadDeletionResponse()
-            params.completion(.success(response))
+            switch result {
+            case .deferred(let deferredUploadId, let runner):
+                Log.info("Success deleting files: Subject to deferred transfer.")
+                let response = UploadDeletionResponse()
+                response.deferredUploadId = deferredUploadId
+                params.completion(.successWithRunner(response, runner: runner))
+                
+            case .error:
+                let message = "Could not complete FinishUploads"
+                Log.error(message)
+                params.completion(.failure(.message(message)))
+            }
+        } catch let error {
+            let message = "Could not finish FinishUploads: \(error)"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
     }
-#endif
 }

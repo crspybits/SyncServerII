@@ -1,5 +1,31 @@
 SyncServer
 
+Version 1.0.0 (1/24/21; beta testing)
+	* Change configuration files to use Codable
+	* Adding Microsoft authentication and OneDrive
+    * Adding Apple Sign In authentication
+    * Removed SMServerLib-- no longer used.
+    * Now using ChangeResolvers on server.
+    	- This implies a change also for clients because they are no longer dealing with conflict resolution
+    * Endpoint changes:
+    	- Removed DoneUploads endpoint-- now using an N of M pair of parameters in upload requests.
+    	AppMetaDataUpload endpoint-- can only provide app meta data in v0 of a file.
+    	- Added GetUploadsResults: Determine the status of asynchronous processing of an upload file or an upload deletion.
+    	- Removed GetUploads.
+    	- Added SendPushNotifications: Send a push notification to all members of a sharing group (except for the sender).
+    * Database changes.
+    	- Various columns added.
+    		e.g., add objectType column to FileIndex and Upload tables
+    	- Remove appMetaDataVersion column from Upload, and FileIndex
+    	- Removed MasterVersion table.
+    	- Index removed from Upload table: "UNIQUE (fileUUID, userId, deviceUUID)"
+    		Did this by: 
+    			SHOW INDEX FROM Upload
+    			DROP INDEX fileUUID ON Upload 
+    * Will need an agressive iOS app update requirement
+    	- iOS app will absolutely have to update prior to using endpoints for new server.
+    * Updated to using Swift 5.3
+
 Version 0.25.1 (8/24/19)
 	* Adding retries to mySQL record removal method-- because an AWS load test revealed issues.
 	* Adding CloudWatch agent into Elastic Beanstalk deployment.

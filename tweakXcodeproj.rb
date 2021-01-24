@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/ruby
 
 # 12/3/17-- not sure why, but the path `/usr/bin/ruby` isn't working any more. More specifically, require 'xcodeproj' fails. Perhaps because of a High Sierra install?
 
@@ -13,7 +13,9 @@
 # https://gist.github.com/niklasberglund/129065e2612d00c811d0
 # https://github.com/CocoaPods/Xcodeproj
 # http://stackoverflow.com/questions/34367048/how-do-you-automate-do-copy-files-in-build-phases-using-a-cocoapods-post-insta?rq=1
+# https://rubygems.org/gems/xcodeproj/versions/1.16.0
 
+gem 'xcodeproj'
 require 'xcodeproj'
 
 path_to_project = "Server.xcodeproj"
@@ -36,10 +38,13 @@ fileRef2.path = 'ServerTests.json'
 phase.add_file_reference(fileRef2)	
 
 # 2) Add in script phase for testing target-- because I haven't figured out to get access to the Products directory at test-run time.
-target = project.targets.select { |target| target.name == 'ServerTests' }.first
-puts "Add Script Phase to #{target}"
-phase = target.new_shell_script_build_phase()
-phase.shell_script = "cp Server.json /tmp; cp ServerTests.json /tmp; cp Resources/Cat.jpg /tmp"
+
+# 5/31/20-- This next code isn't working any more since I added more test targets. But, more importantly, I'm not running the tests from Xcode, so not going to worry about it.
+
+# target = project.targets.select { |target| target.name == 'ServerTests' }.first
+# puts "Add Script Phase to #{target}"
+# phase = target.new_shell_script_build_phase()
+# phase.shell_script = "cp Server.json /tmp; cp ServerTests.json /tmp; cp Resources/Cat.jpg /tmp; cp VERSION /tmp; cp Resources/example.url /tmp"
 
 # 3) Add in DEBUG and SERVER flags
 	
@@ -54,6 +59,9 @@ project.targets.each do |target|
 	target.build_settings('Debug')['OTHER_SWIFT_FLAGS'] << '-DDEBUG -DSERVER'
 	
 	# target.build_settings('Debug')['SWIFT_VERSION'] = '4.0'
+
+	# https://stackoverflow.com/questions/30787674/module-was-not-compiled-for-testing-when-using-testable
+	target.build_settings('Debug')['ENABLE_TESTABILITY'] = 'YES'
 end
 
 project.save()

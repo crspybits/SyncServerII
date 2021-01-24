@@ -38,9 +38,14 @@ TEST_JSON="Tools/TestSuites.json"
 COMMAND=$1
 OPTION=$2
 ALL_COUNT=`jq -r '.all | length' < ${TEST_JSON}`
-BASIC_SWIFT_TEST_CMD="swift test -Xswiftc -DDEBUG -Xswiftc -DSERVER"
+BUILD_PATH=".build.linux"
+
+# See https://oleb.net/2020/swift-test-discovery/
+# For --build-path, see https://stackoverflow.com/questions/62805684/server-side-swift-development-on-macos-with-xcode-testing-on-docker-ubuntu-how
+BASIC_SWIFT_TEST_CMD="swift test --build-path ${BUILD_PATH} --enable-test-discovery -Xswiftc -DDEBUG -Xswiftc -DSERVER"
+
 SWIFT_DEFINE="-Xswiftc -D"
-SYNCSERVER_TEST_MODULE="ServerTests"
+# SYNCSERVER_TEST_MODULE="ServerTests"
 TEST_OUT_DIR=".testing"
 
 # Final stats
@@ -70,32 +75,56 @@ generateOutput () {
     local outputPrefix=$2
     local compilerResult=$3
 
-    # The following depends on the assumption: That when a Swift test passes, there is a line containing the text " 0 failure", and that each test, pass or fail has lines "failure" in them (e.g., 0 failures or N failures). And further, that there are two of these lines per test. Of course, changes in the Swift testing output could change this and break this assumption.
+    # The following depends on the assumption:
+    # As of 8/26/20, with Swift 5.3 beta, the filtered testing results have a summary line:
+    #   Executed 12 tests, with 54 failures (6 unexpected) in 270.938 (270.938) seconds
+    # The number in parentheses "(N unexpected)" is the number of test cases that failed.
 
-    # The number of lines of output, divided by 2, is the total number of tests.
-    local totalLines=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ERROR | wc -l`
-    local totalTests=`expr $totalLines / 2`
+    # https://linuxize.com/post/regular-expressions-in-grep/
+    # The following pulls out a single line, such as:
+    #   Executed 12 tests, with 54 failures (6 unexpected)
 
-    # This gives failures-- the number of lines divided by 2 is N, the number of failures.
-    local failures=`cat "$resultsFileName" | grep  ' failure' | grep -Ev ' 0 failure' | grep -Ev ERROR | wc -l`
-    failures=`expr $failures / 2`
+    local executedText=`cat "$resultsFileName" | grep -Eo 'Executed [0-9]* test[s]?, with [0-9]* failure[s]? \([0-9]* unexpected\)' | head -n 1`
+
+    # 2nd item -- number tests
+    # 5th item -- number of failures
+    # 7th item -- number unexpected-- not sure what this is.
+    
+    local totalTests=`echo "$executedText" | awk '{print $2}'`
+    local failures=`echo "$executedText" | awk '{print substr($7,2); }'`
+        
+    if [ "empty${failures}" == "empty" ] || [ "$failures" == 0 ]; then
+        # sometimes `unexpected` is 0, but `failures` are non-zero.
+        
+        if [ "empty${executedText}" == "empty" ]; then
+            printf "${outputPrefix}${RED}Unknown failure${NC}\n"
+            
+            # Just to give failures a value because otherwise getting script failures. e.g., "expr: syntax error"
+            failures=1
+        else
+            failures=`echo "$executedText" | awk '{print $5}'`
+        fi
+    fi
+
     TOTAL_FAILED_TEST_CASES=`expr $TOTAL_FAILED_TEST_CASES + $failures`
-    local passLines=`cat "$resultsFileName" | grep ' passed at ' | wc -l`
-    local testsPassed=`expr $passLines / 2`
 
     local possibleCompileFailure="false"
 
     if [ "${compilerResult}empty" != "empty" ] && [ $compilerResult -ne 0 ]; then
         possibleCompileFailure="true"
     fi
+    
+#    printf "possibleCompileFailure: $possibleCompileFailure\n"
+#    printf "failures: $failures\n"
+#    printf "totalTests: $totalTests\n"
 
-    if [ $possibleCompileFailure == "false" ] && [ "$failures" == "0" ] && [ $testsPassed == $totalTests ]; then
-        printf "${outputPrefix}${GREEN}Passed${NC} ($testsPassed/$totalTests tests): $resultsFileName\n"
+    if [ $possibleCompileFailure == "false" ] && [ "$failures" == 0 ]; then
+        printf "${outputPrefix}${GREEN}Passed${NC} ($totalTests/$totalTests tests): $resultsFileName\n"
         TOTAL_SUITES_PASSED=`expr $TOTAL_SUITES_PASSED + 1`
     else
         TOTAL_SUITES_FAILED=`expr $TOTAL_SUITES_FAILED + 1`
 
-        if [ $possibleCompileFailure == "true" ] && [ "$failures" == "0" ]; then
+        if [ $possibleCompileFailure == "true" ] && [ "$failures" == 0 ]; then
              printf "${outputPrefix}${RED}Compile failure${NC}: $resultsFileName\n"
         else
             printf "${outputPrefix}${RED}$failures FAILURES${NC} (out of $totalTests tests): $resultsFileName\n"
@@ -139,14 +168,16 @@ runSpecificSuite () {
                 outputPrefix="\t\t"
             
                 # I'm having problems running successive builds with parameters, back-to-back. Getting build failures. This seems to fix it. The problem stems from having to rebuild on each test run-- since these are build-time parameters. Somehow the build system seems to get confused otherwise.
-                swift package clean
+                # 8/15/20; Try again now with current swift version to not use this
+                # swift package --build-path ${BUILD_PATH} clean
             fi
         else
             outputPrefix="\t"
         fi
 
         local outputFileName="$TEST_OUT_DIR"/$testCaseName.$fileNameCounter
-        local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName"
+        # local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $SYNCSERVER_TEST_MODULE.$testCaseName"
+        local command="$BASIC_SWIFT_TEST_CMD $commandParams --filter $testCaseName"
 
         printf "$outputPrefix$command\n"
 
@@ -205,7 +236,10 @@ if  [ "${COMMAND}" == "suites" ] || [ "${COMMAND}" == "print-suites" ] ; then
     fi
 elif [ "${COMMAND}" == "filter" ] ; then
     OUTPUT_FILE_NAME="$TEST_OUT_DIR"/filter.txt
-    $BASIC_SWIFT_TEST_CMD --filter ${OPTION} > $OUTPUT_FILE_NAME
+    
+    command="$BASIC_SWIFT_TEST_CMD --filter ${OPTION}"
+    printf "$command\n"
+    $command > $OUTPUT_FILE_NAME
 
     # For testing to see if the compiler failed.
     compilerResult=$?

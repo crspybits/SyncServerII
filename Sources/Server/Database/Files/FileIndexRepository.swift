@@ -10,11 +10,14 @@
 
 import Foundation
 import LoggerAPI
-import SyncServerShared
+import ServerShared
+import ChangeResolvers
+import ServerAccount
 
 typealias FileIndexId = Int64
 
-class FileIndex : NSObject, Model, Filenaming {
+class FileIndex : NSObject, Model {
+    
     static let fileIndexIdKey = "fileIndexId"
     var fileIndexId: FileIndexId!
     
@@ -22,12 +25,15 @@ class FileIndex : NSObject, Model, Filenaming {
     var fileUUID: String!
     
     static let deviceUUIDKey = "deviceUUID"
-    // We don't give the deviceUUID when updating the fileIndex for an upload deletion.
-    var deviceUUID:String?
+    var deviceUUID:String!
     
     static let fileGroupUUIDKey = "fileGroupUUID"
     // Not all files have to be associated with a file group.
     var fileGroupUUID:String?
+
+    static let objectTypeKey = "objectType"
+    // Not all files have to be associated with a file group, and thus not all files have a objectType.
+    var objectType:String?
     
     // Currently allowing files to be in exactly one sharing group.
     static let sharingGroupUUIDKey = "sharingGroupUUID"
@@ -48,12 +54,14 @@ class FileIndex : NSObject, Model, Filenaming {
     static let mimeTypeKey = "mimeType"
     var mimeType: String!
     
+    // Nil only if files are static and changes cannot be applied.
+    static let changeResolverNameKey = "changeResolverName"
+    var changeResolverName: String?
+    
     static let appMetaDataKey = "appMetaData"
     var appMetaData: String?
     
-    static let appMetaDataVersionKey = "appMetaDataVersion"
-    var appMetaDataVersion: AppMetaDataVersionInt?
-    
+    // When "deleted" files are not fully removed from the system. They are removed from cloud storage, but just marked as deleted in the FileIndex. This effectively also marks the containing file group as deleted.
     static let deletedKey = "deleted"
     var deleted:Bool!
     
@@ -62,6 +70,9 @@ class FileIndex : NSObject, Model, Filenaming {
     
     static let lastUploadedCheckSumKey = "lastUploadedCheckSum"
     var lastUploadedCheckSum: String?
+
+    static let fileLabelKey = "fileLabel"
+    var fileLabel: String?
     
     // For queries; not in this table.
     static let accountTypeKey = "accountType"
@@ -78,6 +89,9 @@ class FileIndex : NSObject, Model, Filenaming {
 
             case FileIndex.fileGroupUUIDKey:
                 fileGroupUUID = newValue as! String?
+
+            case FileIndex.objectTypeKey:
+                objectType = newValue as? String
                 
             case FileIndex.sharingGroupUUIDKey:
                 sharingGroupUUID = newValue as! String?
@@ -99,9 +113,6 @@ class FileIndex : NSObject, Model, Filenaming {
                 
             case FileIndex.appMetaDataKey:
                 appMetaData = newValue as! String?
-                
-            case FileIndex.appMetaDataVersionKey:
-                appMetaDataVersion = newValue as! AppMetaDataVersionInt?
             
             case FileIndex.deletedKey:
                 deleted = newValue as! Bool?
@@ -111,6 +122,12 @@ class FileIndex : NSObject, Model, Filenaming {
                 
             case FileIndex.lastUploadedCheckSumKey:
                 lastUploadedCheckSum = newValue as! String?
+                
+            case FileIndex.changeResolverNameKey:
+                changeResolverName = newValue as? String
+
+            case FileIndex.fileLabelKey:
+                fileLabel = newValue as? String
                 
             case User.accountTypeKey:
                 accountType = newValue as! String?
@@ -126,7 +143,7 @@ class FileIndex : NSObject, Model, Filenaming {
         }
     }
     
-    override init() {
+    required override init() {
         super.init()
     }
     
@@ -153,11 +170,36 @@ class FileIndex : NSObject, Model, Filenaming {
     }
     
     override var description : String {
-        return "fileIndexId: \(String(describing: fileIndexId)); fileUUID: \(String(describing: fileUUID)); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(String(describing: updateDate)); userId: \(String(describing: userId)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); appMetaDataVersion: \(String(describing: appMetaDataVersion)); deleted: \(String(describing: deleted)); fileVersion: \(String(describing: fileVersion)); lastUploadedCheckSum: \(String(describing: lastUploadedCheckSum))"
+        return "fileIndexId: \(String(describing: fileIndexId)); fileUUID: \(String(describing: fileUUID)); deviceUUID: \(deviceUUID ?? ""); creationDate: \(String(describing: creationDate)); updateDate: \(String(describing: updateDate)); userId: \(String(describing: userId)); mimeTypeKey: \(String(describing: mimeType)); appMetaData: \(String(describing: appMetaData)); deleted: \(String(describing: deleted)); fileVersion: \(String(describing: fileVersion)); lastUploadedCheckSum: \(String(describing: lastUploadedCheckSum))"
     }
 }
 
-class FileIndexRepository : Repository, RepositoryLookup {
+extension FileIndex {
+    enum Errors: Swift.Error {
+        case couldNotGetOwningUserCreds
+        case couldNotConvertToCloudStorage
+    }
+    
+    func getCloudStorage(userRepo: UserRepository, services: UploaderServices) throws -> (Account, CloudStorage) {
+        guard let owningUserCreds = FileController.getCreds(forUserId: userId, userRepo: userRepo, accountManager: services.accountManager, accountDelegate: nil) else {
+            throw Errors.couldNotGetOwningUserCreds
+        }
+        
+        guard let cloudStorage = owningUserCreds.cloudStorage(mock: services.mockStorage) else {
+            throw Errors.couldNotConvertToCloudStorage
+        }
+        
+        return (owningUserCreds, cloudStorage)
+    }
+}
+
+class FileIndexRepository : Repository, RepositoryLookup, ModelIndexId {
+    static let indexIdKey = FileIndex.fileIndexIdKey
+    
+    enum Errors: Swift.Error {
+        case couldNotLookupFileUUID
+    }
+
     private(set) var db:Database!
     
     required init(_ db:Database) {
@@ -171,6 +213,9 @@ class FileIndexRepository : Repository, RepositoryLookup {
     static var tableName:String {
         return "FileIndex"
     }
+    
+    static let uniqueFileLabelConstraintName = "UniqueFileLabel"
+    static let uniqueFileLabelConstraint = "UNIQUE (fileGroupUUID, fileLabel)"
     
     func upcreate() -> Database.TableUpcreateResult {
         let createColumns =
@@ -187,8 +232,11 @@ class FileIndexRepository : Repository, RepositoryLookup {
             // This plays a different role than it did in the Upload table. Here, it forms part of the filename in cloud storage, and thus must be retained. We will ignore this field otherwise, i.e., we will not have two entries in this table for the same userId, fileUUID pair.
             "deviceUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
             
-            // identifies a group of files (assigned by app)
+            // Optionally identifies a group of files (assigned by app). If NULL, the file is not in a file group (it's in a group of size 1).
             "fileGroupUUID VARCHAR(\(Database.uuidLength)), " +
+            
+            // 9/12/20; Not making this NOT NULL to grandfather in earlier versions of Neebla and because not all files have file groups.
+            "objectType VARCHAR(\(FileGroup.maxLengthObjectTypeName)), " +
             
             "sharingGroupUUID VARCHAR(\(Database.uuidLength)) NOT NULL, " +
 
@@ -202,6 +250,9 @@ class FileIndexRepository : Repository, RepositoryLookup {
             // App-specific meta data
             "appMetaData TEXT, " +
 
+            // 11/3/20; Optional only because files prior to this don't have this field.
+            "fileLabel VARCHAR(\(FileLabel.maxLength)), " +
+            
             // true if file has been deleted, false if not.
             "deleted BOOL NOT NULL, " +
             
@@ -214,7 +265,12 @@ class FileIndexRepository : Repository, RepositoryLookup {
             "lastUploadedCheckSum TEXT, " +
 
             "FOREIGN KEY (sharingGroupUUID) REFERENCES \(SharingGroupRepository.tableName)(\(SharingGroup.sharingGroupUUIDKey)), " +
+            
+            "changeResolverName VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength)), " +
 
+            // Because file label's must be unique within file group's.
+            "CONSTRAINT \(Self.uniqueFileLabelConstraintName) \(Self.uniqueFileLabelConstraint), " +
+            
             "UNIQUE (fileUUID, sharingGroupUUID), " +
             "UNIQUE (fileIndexId))"
         
@@ -242,17 +298,36 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 }
             }
             
-            // 3/23/18; Evolution 3: Add the appMetaDataVersion column.
-            if db.columnExists(FileIndex.appMetaDataVersionKey, in: tableName) == false {
-                if !db.addColumn("\(FileIndex.appMetaDataVersionKey) INT", to: tableName) {
-                    return .failure(.columnCreation)
-                }
-            }
-            
             // 4/19/18; Evolution 4: Add in fileGroupUUID
             if db.columnExists(FileIndex.fileGroupUUIDKey, in: tableName) == false {
                 if !db.addColumn("\(FileIndex.fileGroupUUIDKey) VARCHAR(\(Database.uuidLength))", to: tableName) {
                     return .failure(.columnCreation)
+                }
+            }
+            
+            // 7/15/20; Evolution 5
+            if db.columnExists(FileIndex.changeResolverNameKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.changeResolverNameKey) VARCHAR(\(ChangeResolverConstants.maxChangeResolverNameLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+
+            if db.columnExists(FileIndex.objectTypeKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.objectTypeKey) VARCHAR(\(FileGroup.maxLengthObjectTypeName))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+
+            if db.columnExists(FileIndex.fileLabelKey, in: tableName) == false {
+                if !db.addColumn("\(FileIndex.fileLabelKey) VARCHAR(\(FileLabel.maxLength))", to: tableName) {
+                    return .failure(.columnCreation)
+                }
+            }
+
+            if db.namedConstraintExists(Self.uniqueFileLabelConstraintName, in: tableName) == false {
+                if !db.createConstraint(constraint:
+                    "\(Self.uniqueFileLabelConstraintName) \(Self.uniqueFileLabelConstraint)", tableName: tableName) {
+                    return .failure(.constraintCreation)
                 }
             }
             
@@ -264,7 +339,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
     }
     
     private func haveNilFieldForAdd(fileIndex:FileIndex) -> Bool {
-        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.lastUploadedCheckSum == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil
+        return fileIndex.fileUUID == nil || fileIndex.userId == nil || fileIndex.mimeType == nil || fileIndex.deviceUUID == nil || fileIndex.deleted == nil || fileIndex.fileVersion == nil || fileIndex.lastUploadedCheckSum == nil || fileIndex.creationDate == nil || fileIndex.updateDate == nil || fileIndex.fileLabel == nil
     }
     
     enum AddFileIndexResponse: RetryRequest {
@@ -289,30 +364,52 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return .error
         }
         
-        let deletedValue = fileIndex.deleted == true ? 1 : 0
-        
-        let creationDateValue = DateExtras.date(fileIndex.creationDate!, toFormat: .DATETIME)
-        let updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
-        
-        // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
-        let (appMetaDataFieldValue, appMetaDataFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.appMetaData, fieldName: Upload.appMetaDataKey)
+        let insert = Database.PreparedStatement(repo: self, type: .insert)
 
-        let (appMetaDataVersionFieldValue, appMetaDataVersionFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.appMetaDataVersion, fieldName: Upload.appMetaDataVersionKey, fieldIsString:false)
+        insert.add(fieldName: FileIndex.fileVersionKey, value: .int32Optional(fileIndex.fileVersion))
+        insert.add(fieldName: FileIndex.userIdKey, value: .int64Optional(fileIndex.userId))
         
-        let (fileGroupUUIDFieldValue, fileGroupUUIDFieldName) = getInsertFieldValueAndName(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
+        insert.add(fieldName: FileIndex.deletedKey, value: .boolOptional(fileIndex.deleted))
+
+        insert.add(fieldName: FileIndex.fileGroupUUIDKey, value: .stringOptional(fileIndex.fileGroupUUID))
+        insert.add(fieldName: FileIndex.objectTypeKey, value: .stringOptional(fileIndex.objectType))
         
-        let query = "INSERT INTO \(tableName) (\(FileIndex.fileUUIDKey), \(FileIndex.userIdKey), \(FileIndex.deviceUUIDKey), \(FileIndex.creationDateKey), \(FileIndex.updateDateKey), \(FileIndex.mimeTypeKey), \(FileIndex.deletedKey), \(FileIndex.fileVersionKey), \(FileIndex.lastUploadedCheckSumKey), \(FileIndex.sharingGroupUUIDKey) \(appMetaDataFieldName) \(appMetaDataVersionFieldName) \(fileGroupUUIDFieldName) ) VALUES('\(fileIndex.fileUUID!)', \(fileIndex.userId!), '\(fileIndex.deviceUUID!)', '\(creationDateValue)', '\(updateDateValue)', '\(fileIndex.mimeType!)', \(deletedValue), \(fileIndex.fileVersion!), '\(fileIndex.lastUploadedCheckSum!)', '\(fileIndex.sharingGroupUUID!)' \(appMetaDataFieldValue) \(appMetaDataVersionFieldValue) \(fileGroupUUIDFieldValue) );"
+        insert.add(fieldName: FileIndex.appMetaDataKey, value: .stringOptional(fileIndex.appMetaData))
+        insert.add(fieldName: FileIndex.fileUUIDKey, value: .stringOptional(fileIndex.fileUUID))
+        insert.add(fieldName: FileIndex.deviceUUIDKey, value: .stringOptional(fileIndex.deviceUUID))
+        insert.add(fieldName: FileIndex.mimeTypeKey, value: .stringOptional(fileIndex.mimeType))
+        insert.add(fieldName: FileIndex.lastUploadedCheckSumKey, value: .stringOptional(fileIndex.lastUploadedCheckSum))
+        insert.add(fieldName: FileIndex.sharingGroupUUIDKey, value: .stringOptional(fileIndex.sharingGroupUUID))
+        insert.add(fieldName: FileIndex.changeResolverNameKey, value: .stringOptional(fileIndex.changeResolverName))
+
+        if let creationDate = fileIndex.creationDate {
+            let creationDateValue = DateExtras.date(creationDate, toFormat: .DATETIME)
+            insert.add(fieldName: FileIndex.creationDateKey, value: .string(creationDateValue))
+        }
         
-        if db.query(statement: query) {
+        if let updateDate = fileIndex.updateDate {
+            let updateDateValue = DateExtras.date(updateDate, toFormat: .DATETIME)
+            insert.add(fieldName: FileIndex.updateDateKey, value: .string(updateDateValue))
+        }
+        
+        insert.add(fieldName: FileIndex.fileLabelKey, value: .stringOptional(fileIndex.fileLabel))
+        
+        do {
+            try insert.run()
+            Log.info("Sucessfully created \(tableName) row")
             return .success(uploadId: db.lastInsertId())
         }
-        else if db.errorCode() == Database.deadlockError {
-            return .deadlock
-        }
-        else {
-            let error = db.error
-            Log.error("Could not insert row into \(tableName): \(error)")
-            return .error
+        catch (let error) {
+            Log.info("Failed inserting \(tableName) row: \(db.errorCode()); \(db.errorMessage())")
+            
+            if db.errorCode() == Database.deadlockError {
+                return .deadlock
+            }
+            else {
+                let message = "Could not insert into \(tableName): \(error)"
+                Log.error(message)
+                return .error
+            }
         }
     }
     
@@ -336,6 +433,8 @@ class FileIndexRepository : Repository, RepositoryLookup {
     enum UpdateType {
         case uploadFile
         case uploadDeletion
+        
+        // DEPRECATED
         case uploadAppMetaData
     }
     
@@ -350,8 +449,6 @@ class FileIndexRepository : Repository, RepositoryLookup {
         
         // TODO: *2* Seems like we could use an encoding here to deal with sql injection issues.
         let appMetaDataField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaData, fieldName: FileIndex.appMetaDataKey)
-
-        let appMetaDataVersionField = getUpdateFieldSetter(fieldValue: fileIndex.appMetaDataVersion, fieldName: FileIndex.appMetaDataVersionKey, fieldIsString: false)
         
         let lastUploadedCheckSumField = getUpdateFieldSetter(fieldValue: fileIndex.lastUploadedCheckSum, fieldName: FileIndex.lastUploadedCheckSumKey)
         
@@ -362,16 +459,20 @@ class FileIndexRepository : Repository, RepositoryLookup {
         let fileVersionField = getUpdateFieldSetter(fieldValue: fileIndex.fileVersion, fieldName: FileIndex.fileVersionKey, fieldIsString: false)
         
         let fileGroupUUIDField = getUpdateFieldSetter(fieldValue: fileIndex.fileGroupUUID, fieldName: FileIndex.fileGroupUUIDKey)
-        
+
+        let objectTypeField = getUpdateFieldSetter(fieldValue: fileIndex.objectType, fieldName: FileIndex.objectTypeKey)
+
         var updateDateValue:String?
         if fileIndex.updateDate != nil {
             updateDateValue = DateExtras.date(fileIndex.updateDate, toFormat: .DATETIME)
         }
         let updateDateField = getUpdateFieldSetter(fieldValue: updateDateValue, fieldName: FileIndex.updateDateKey)
         
+        let changeResolverNameField = getUpdateFieldSetter(fieldValue: fileIndex.changeResolverName, fieldName: FileIndex.changeResolverNameKey)
+        
         let deletedValue = fileIndex.deleted == true ? 1 : 0
-
-        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(appMetaDataVersionField) \(fileVersionField) \(fileGroupUUIDField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
+        
+        let query = "UPDATE \(tableName) SET \(FileIndex.fileUUIDKey)='\(fileIndex.fileUUID!)', \(FileIndex.deletedKey)=\(deletedValue) \(appMetaDataField) \(lastUploadedCheckSumField) \(mimeTypeField) \(deviceUUIDField) \(updateDateField) \(fileVersionField) \(fileGroupUUIDField) \(changeResolverNameField) \(objectTypeField) WHERE \(FileIndex.fileIndexIdKey)=\(fileIndex.fileIndexId!)"
         
         if db.query(statement: query) {
             // "When using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows may not actually equal the number of rows matched, only the number of rows that were literally affected by the query." From: https://dev.mysql.com/doc/apis-php/en/apis-php-function.mysql-affected-rows.html
@@ -389,13 +490,15 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return false
         }
     }
-    
+
     enum LookupKey : CustomStringConvertible {
         case fileIndexId(Int64)
         case userId(UserId)
         case primaryKeys(sharingGroupUUID: String, fileUUID:String)
         case sharingGroupUUID(sharingGroupUUID: String)
         case userAndSharingGroup(UserId, sharingGroupUUID: String)
+        case fileGroupUUIDAndSharingGroup(fileGroupUUID: String, sharingGroupUUID: String)
+        case fileGroupUUIDAndFileLabel(fileGroupUUID: String, fileLabel: String)
         
         var description : String {
             switch self {
@@ -409,6 +512,10 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 return "sharingGroupUUID(\(sharingGroupUUID)))"
             case .userAndSharingGroup(let userId, let sharingGroupUUID):
                 return "userId(\(userId)); sharingGroupUUID(\(sharingGroupUUID)))"
+            case .fileGroupUUIDAndSharingGroup(let fileGroupUUID, let sharingGroupUUID):
+                return "fileGroupUUID(\(fileGroupUUID); sharingGroupUUID(\(sharingGroupUUID))"
+            case .fileGroupUUIDAndFileLabel(fileGroupUUID: let fileGroupUUID, fileLabel: let fileLabel):
+                return "fileGroupUUID(\(fileGroupUUID); fileLabel(\(fileLabel))"
             }
         }
     }
@@ -425,6 +532,10 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return "sharingGroupUUID = '\(sharingGroupUUID)'"
         case .userAndSharingGroup(let userId, let sharingGroupUUID):
             return "userId = \(userId) AND sharingGroupUUID = '\(sharingGroupUUID)'"
+        case .fileGroupUUIDAndSharingGroup(let fileGroupUUID, let sharingGroupUUID):
+            return "fileGroupUUID = '\(fileGroupUUID)' AND sharingGroupUUID = '\(sharingGroupUUID)'"
+        case .fileGroupUUIDAndFileLabel(let fileGroupUUID, let fileLabel):
+            return "fileGroupUUID = '\(fileGroupUUID)' AND fileLabel = '\(fileLabel)'"
         }
     }
     
@@ -442,8 +553,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
         case failure(RequestHandler.FailureResult?)
     }
     
+    enum EffectiveOwningUser {
+        case success(UserId)
+        case failure(RequestHandler.FailureResult)
+    }
+         
     func transferUploads(uploadUserId: UserId,
-        owningUserId: @escaping ()->(FileController.EffectiveOwningUser), sharingGroupUUID: String, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> TransferUploadsResult {
+        owningUserId: @escaping ()->(EffectiveOwningUser), sharingGroupUUID: String, uploadingDeviceUUID:String, uploadRepo:UploadRepository) -> TransferUploadsResult {
         
         var error = false
         var failureResult:RequestHandler.FailureResult?
@@ -454,7 +570,12 @@ class FileIndexRepository : Repository, RepositoryLookup {
             return .failure(nil)
         }
         
-        uploadSelect.forEachRow { rowModel in
+        uploadSelect.forEachRow { [weak self] rowModel in
+            guard let self = self else {
+                error = true
+                return
+            }
+            
             if error {
                 return
             }
@@ -462,15 +583,15 @@ class FileIndexRepository : Repository, RepositoryLookup {
             let upload = rowModel as! Upload
             
             // This will a) mark the FileIndex entry as deleted for toDeleteFromFileIndex, and b) mark it as not deleted for *both* uploadingUndelete and uploading files. So, effectively, it does part of our upload undelete for us.
-            let uploadDeletion = upload.state == .toDeleteFromFileIndex
+            let uploadDeletion = upload.state == .deleteSingleFile
 
             let fileIndex = FileIndex()
             fileIndex.lastUploadedCheckSum = upload.lastUploadedCheckSum
             fileIndex.deleted = uploadDeletion
             fileIndex.fileUUID = upload.fileUUID
             
-            // If this an uploadDeletion or updating app meta data, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
-            if !uploadDeletion && upload.state != .uploadingAppMetaData {
+            // If this an uploadDeletion, it seems inappropriate to update the deviceUUID in the file index-- all we're doing is marking it as deleted.
+            if !uploadDeletion {
                 // Using `uploadingDeviceUUID` here, but equivalently use upload.deviceUUID-- they are the same. See [1] above.
                 assert(uploadingDeviceUUID == upload.deviceUUID)
                 fileIndex.deviceUUID = uploadingDeviceUUID
@@ -478,37 +599,45 @@ class FileIndexRepository : Repository, RepositoryLookup {
             
             fileIndex.mimeType = upload.mimeType
             fileIndex.appMetaData = upload.appMetaData
-            fileIndex.appMetaDataVersion = upload.appMetaDataVersion
             fileIndex.fileGroupUUID = upload.fileGroupUUID
-            
-            if let uploadFileVersion = upload.fileVersion {
-                fileIndex.fileVersion = uploadFileVersion
+            fileIndex.objectType = upload.objectType
 
-                if uploadFileVersion == 0 {
-                    fileIndex.creationDate = upload.creationDate
-                    
-                    // OWNER
-                    // version 0 of a file establishes the owning user. The owning user doesn't change if new versions are uploaded.
-                    switch owningUserId() {
-                    case .success(let userId):
-                        fileIndex.userId = userId
-                    case .failure(let failure):
-                        failureResult = failure
-                        error = true
-                        return
-                    }
+            if upload.state == .v0UploadCompleteFile {
+                fileIndex.fileVersion = 0
+                fileIndex.creationDate = upload.creationDate
+                fileIndex.changeResolverName = upload.changeResolverName
+                
+                // OWNER
+                // version 0 of a file establishes the owning user. The owning user doesn't change if new versions are uploaded.
+                switch owningUserId() {
+                case .success(let userId):
+                    fileIndex.userId = userId
+                case .failure(let failure):
+                    failureResult = failure
+                    error = true
+                    return
+                }
 
-                    // Similarly, the sharing group id doesn't change over time.
-                    fileIndex.sharingGroupUUID = upload.sharingGroupUUID
+                // Similarly, the sharing group id and fileLabel do not change over time.
+                fileIndex.sharingGroupUUID = upload.sharingGroupUUID
+                fileIndex.fileLabel = upload.fileLabel
+            }
+            else if upload.state == .vNUploadFileChange {
+                guard let fileVersion = upload.fileVersion else {
+                    Log.error("No file version, and vNUploadFileChange")
+                    error = true
+                    return
                 }
                 
-                fileIndex.updateDate = upload.updateDate
+                fileIndex.fileVersion = fileVersion
             }
-            else if upload.state != .uploadingAppMetaData {
-                Log.error("No file version, and not uploading app meta data.")
+            else {
+                Log.error("No file version.")
                 error = true
                 return
             }
+            
+            fileIndex.updateDate = upload.updateDate
             
             let key = LookupKey.primaryKeys(sharingGroupUUID: upload.sharingGroupUUID, fileUUID: upload.fileUUID)
             let result = self.lookup(key: key, modelInit: FileIndex.init)
@@ -528,7 +657,7 @@ class FileIndexRepository : Repository, RepositoryLookup {
                         return
                     }
                 }
-                else if upload.state != .uploadingAppMetaData {
+                else {
                     guard upload.fileVersion == (existingFileIndex.fileVersion + 1) else {
                         Log.error("Did not have next version of file!")
                         error = true
@@ -542,9 +671,6 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 if uploadDeletion {
                     updateType = .uploadDeletion
                 }
-                else if upload.state == .uploadingAppMetaData {
-                    updateType = .uploadAppMetaData
-                }
                 
                 guard self.update(fileIndex: fileIndex, updateType: updateType) else {
                     Log.error("Could not update FileIndex!")
@@ -553,18 +679,13 @@ class FileIndexRepository : Repository, RepositoryLookup {
                 }
                 
             case .noObjectFound:
-                if upload.state == .uploadingAppMetaData {
-                    Log.error("Attempting to upload app meta data for a file not present in the file index: \(key)!")
-                    error = true
-                    return
-                }
-                else if uploadDeletion {
+                if uploadDeletion {
                     Log.error("Attempting to delete a file not present in the file index: \(key)!")
                     error = true
                     return
                 }
                 else {
-                    guard upload.fileVersion == 0 else {
+                    guard upload.state == .v0UploadCompleteFile else {
                         Log.error("Did not have version 0 of file!")
                         error = true
                         return
@@ -614,8 +735,10 @@ class FileIndexRepository : Repository, RepositoryLookup {
         }
     }
     
+    // Returns nil on error; number of rows marked otherwise.
+    // 8/5/20: Just added the "and \(FileIndex.deletedKey) = 0"-- which should ensure that the update can not occur twice, successfully, in a race.
     func markFilesAsDeleted(key:LookupKey) -> Int64? {
-        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + lookupConstraint(key: key)
+        let query = "UPDATE \(tableName) SET \(FileIndex.deletedKey)=1 WHERE " + lookupConstraint(key: key) + " and \(FileIndex.deletedKey) = 0"
         if db.query(statement: query) {
             let numberRows = db.numberAffectedRows()
             Log.debug("Number rows: \(numberRows) for query: \(query)")
@@ -662,19 +785,22 @@ class FileIndexRepository : Repository, RepositoryLookup {
             fileInfo.mimeType = rowModel.mimeType
             fileInfo.creationDate = rowModel.creationDate
             fileInfo.updateDate = rowModel.updateDate
-            fileInfo.appMetaDataVersion = rowModel.appMetaDataVersion
             fileInfo.fileGroupUUID = rowModel.fileGroupUUID
             fileInfo.owningUserId = rowModel.userId
             fileInfo.sharingGroupUUID = rowModel.sharingGroupUUID
-
-            guard let rawAccountType = rowModel.accountType,
-                let accountType = AccountType(rawValue: rawAccountType),
-                let cloudStorageType = accountType.cloudStorageType else {
+            fileInfo.objectType = rowModel.objectType
+            fileInfo.changeResolverName = rowModel.changeResolverName
+            fileInfo.appMetaData = rowModel.appMetaData
+            fileInfo.fileLabel = rowModel.fileLabel
+            
+            guard let accountType = rowModel.accountType,
+                let accountScheme = AccountScheme(.accountName(accountType)),
+                let cloudStorageType = accountScheme.cloudStorageType else {
                     error = .error("Failed getting cloud storage type for fileUUID: \(String(describing: rowModel.fileUUID))")
                 return
             }
             
-            fileInfo.cloudStorageType = cloudStorageType.rawValue
+            fileInfo.cloudStorageType = cloudStorageType
 
             result.append(fileInfo)
         }
@@ -712,5 +838,16 @@ class FileIndexRepository : Repository, RepositoryLookup {
         query += " )"
         
         return fileIndex(forSelectQuery: query)
+    }
+    
+    func getFileIndex(forFileUUID fileUUID: String, sharingGroupUUID: String) throws -> FileIndex {
+        let key = Self.LookupKey.primaryKeys(sharingGroupUUID: sharingGroupUUID, fileUUID: fileUUID)
+        let result = lookup(key: key, modelInit: FileIndex.init)
+        guard case .found(let model) = result,
+            let fileIndex = model as? FileIndex else {
+            throw Errors.couldNotLookupFileUUID
+        }
+        
+        return fileIndex
     }
 }

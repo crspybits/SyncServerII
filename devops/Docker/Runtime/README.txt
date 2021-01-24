@@ -12,9 +12,9 @@ docker login
 # See also https://stackoverflow.com/questions/41984399/denied-requested-access-to-the-resource-is-denied-docker
 
 docker tag swift-ubuntu-runtime:latest crspybits/swift-ubuntu-runtime:latest
-docker tag swift-ubuntu-runtime:latest crspybits/swift-ubuntu-runtime:5.0.1
+docker tag swift-ubuntu-runtime:latest crspybits/swift-ubuntu-runtime:5.2.3
 docker push crspybits/swift-ubuntu-runtime:latest
-docker push crspybits/swift-ubuntu-runtime:5.0.1
+docker push crspybits/swift-ubuntu-runtime:5.2.3
 
 Run this with:
 docker run -p 8080:8080 --rm -i -t -v /Users/chris/Desktop/Apps/:/root/extras crspybits/swift-ubuntu-runtime:latest

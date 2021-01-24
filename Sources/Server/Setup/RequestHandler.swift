@@ -13,7 +13,8 @@ import KituraSession
 import Credentials
 import CredentialsGoogle
 import Foundation
-import SyncServerShared
+import ServerShared
+import ServerAccount
 
 /* I'm getting the following error, after having started using SSL and self-signing certificates:
 [2017-05-20T21:26:32.218-06:00] [ERROR] [IncomingSocketHandler.swift:148 handleRead()] Read from socket (file descriptor 15) failed. Error = Error code: -9806(0x-264E), ERROR: SSLRead, code: -9806, reason: errSSLClosedAbort.
@@ -23,6 +24,8 @@ See also: https://github.com/IBM-Swift/Kitura-net/issues/196
 public typealias ProcessRequest = (RequestProcessingParameters)->()
 
 class RequestHandler {
+    typealias PostRequestRunner = () throws -> ()
+    
     private var request:RouterRequest!
     private var response:RouterResponse!
     
@@ -31,9 +34,9 @@ class RequestHandler {
     private var currentSignedInUser:User?
     private var deviceUUID:String?
     private var endpoint:ServerEndpoint!
-    private var accountDelegate: AccountDelegateHandler!
-    
-    init(request:RouterRequest, response:RouterResponse, endpoint:ServerEndpoint? = nil) {
+    private let services: Services
+
+    init(request:RouterRequest, response:RouterResponse, services: Services, endpoint:ServerEndpoint? = nil) {
         self.request = request
         self.response = response
         if endpoint == nil {
@@ -43,6 +46,7 @@ class RequestHandler {
             self.authenticationLevel = endpoint!.authenticationLevel
         }
         self.endpoint = endpoint
+        self.services = services
         ServerStatsKeeper.session.increment(stat: .apiRequestsCreated)
         
         Log.info("RequestHandler.init: numberCreated: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsCreated)); numberDeleted: \(ServerStatsKeeper.session.currentValue(stat: .apiRequestsDeleted));")
@@ -81,6 +85,7 @@ class RequestHandler {
             ]
             
         case .goneWithReason(message: let message, let goneReason):
+            Log.warning("Gone: \(goneReason); message: \(message)")
             code = .gone
             result = [
                 errorKey: message,
@@ -101,8 +106,8 @@ class RequestHandler {
     }
     
     private func endWith(clientResponse:EndWithResponse) {
-        self.response.headers.append(ServerConstants.httpResponseCurrentServerVersion, value: Constants.session.deployedGitTag)
-        if let minIOSClientVersion = Constants.session.iOSMinimumClientVersion {
+        self.response.headers.append(ServerConstants.httpResponseCurrentServerVersion, value: Configuration.misc.deployedGitTag)
+        if let minIOSClientVersion = Configuration.server.iOSMinimumClientVersion {
             self.response.headers.append(
                 ServerConstants.httpResponseMinimumIOSClientAppVersion, value: minIOSClientVersion)
         }
@@ -167,7 +172,7 @@ class RequestHandler {
     }
     
     enum ServerResult {
-        case success(SuccessResult)
+        case success(SuccessResult, runner: RequestHandler.PostRequestRunner?)
         case failure(FailureResult)
     }
     
@@ -207,8 +212,16 @@ class RequestHandler {
             case .noObjectFound:
                 // One reason that the sharing group user might not be found is that the SharingGroupUser was removed from the system-- e.g., if an owning user is deleted, SharingGroupUser rows that have it as their owningUserId will be removed.
                 // If a client fails with this error, it seems like some kind of client error or edge case where the client should have been updated already (i.e., from an Index endpoint call) so that it doesn't make such a request. Therefore, I'm not going to code a special case on the client to deal with this.
-                self.failWithError(failureResult:
+                // 7/8/20; Actually, this occurs simply when an incorrect sharingGroupUUID is used when uploading a file. Let's test to see if the sharingGroupUUID exists.
+                if let exists = sharingGroupExists(sharingGroupUUID: sharingGroupUUID), exists {
+                    self.failWithError(failureResult:
                         .goneWithReason(message: "SharingGroupUser object not found!", .userRemoved))
+                }
+                else {
+                    self.failWithError(failureResult:
+                        .message("sharingGroupUUID not found!"))
+                }
+                        
                 return .failure
             case .error(let error):
                 self.failWithError(message: error)
@@ -219,6 +232,20 @@ class RequestHandler {
         }
         
         return .success(sharingGroupUUID: nil)
+    }
+    
+    private func sharingGroupExists(sharingGroupUUID: String) -> Bool? {
+        let key = SharingGroupRepository.LookupKey.sharingGroupUUID(sharingGroupUUID)
+        let result = repositories.sharingGroup.lookup(key: key, modelInit: SharingGroup.init)
+        switch result {
+        case .found:
+            return true
+        case .noObjectFound:
+            return false
+        case .error(let error):
+            Log.error("sharingGroupExists: \(error)")
+            return nil
+        }
     }
     
     // Starts a transaction, and calls the `dbOperations` closure. If the closure succeeds (no error), then commits the transaction. Otherwise, rolls it back.
@@ -237,7 +264,7 @@ class RequestHandler {
         
         func dbTransactionHandleResult(_ result: ServerResult) {
             switch result {
-            case .success(_):
+            case .success:
                 if !db.commit() {
                     let message = "Error during COMMIT operation!"
                     Log.error(message)
@@ -245,7 +272,7 @@ class RequestHandler {
                     return
                 }
                 
-            case .failure(_):
+            case .failure:
                 if !db.rollback() {
                     let message = "Error during ROLLBACK operation!"
                     Log.error(message)
@@ -265,8 +292,12 @@ class RequestHandler {
         
         setJsonResponseHeaders()
         let profile = request.userProfile
+#if DEBUG
+//        for header in request.headers {
+//            Log.info("request.header: \(header)")
+//        }
+#endif
         self.deviceUUID = request.headers[ServerConstants.httpRequestDeviceUUID]
-        Log.info("self.deviceUUID: \(String(describing: self.deviceUUID))")
         
 #if DEBUG
         if let profile = profile {
@@ -276,11 +307,18 @@ class RequestHandler {
         }
 #endif
 
-        let db = Database()
-        repositories = Repositories(db: db)
-        accountDelegate = AccountDelegateHandler(userRepository: repositories.user)
+        // Establishing a database connection per request.
+        guard let db = Database() else {
+            let message = "Could not open database connection for request."
+            Log.error(message)
+            failWithError(message: message)
+            return
+        }
         
-        var accountProperties: AccountManager.AccountProperties?
+        repositories = Repositories(db: db)
+        let accountDelegate = UserRepository.AccountDelegateHandler(userRepository: repositories.user, accountManager: services.accountManager)
+        
+        var accountProperties: AccountProperties?
         
         switch authenticationLevel! {
         case .none:
@@ -289,7 +327,7 @@ class RequestHandler {
         case .primary, .secondary:
             // Only do this if we are requiring primary or secondary authorization-- this gets account specific properties from the request, assuming we are using authorization.
             do {
-                accountProperties = try AccountManager.session.getProperties(fromRequest: request)
+                accountProperties = try services.accountManager.getProperties(fromRequest: request)
             } catch (let error) {
                 let message = "YIKES: could not get account properties from request: \(error)"
                 Log.error(message)
@@ -315,7 +353,7 @@ class RequestHandler {
                 return
             }
             
-            let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountProperties.accountType, credsId: profile!.id)
+            let key = UserRepository.LookupKey.accountTypeInfo(accountType:accountProperties.accountScheme.accountName, credsId: profile!.id)
             let userLookup = self.repositories.user.lookup(key: key, modelInit: User.init)
             
             switch userLookup {
@@ -324,7 +362,7 @@ class RequestHandler {
                 var errorString:String?
                 
                 do {
-                    dbCreds = try AccountManager.session.accountFromJSON(currentSignedInUser!.creds, accountType: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), delegate: accountDelegate)
+                    dbCreds = try services.accountManager.accountFromJSON(currentSignedInUser!.creds, accountName: currentSignedInUser!.accountType, user: .user(currentSignedInUser!), accountDelegate: accountDelegate)
                 } catch (let error) {
                     errorString = "\(error)"  
                 }
@@ -367,8 +405,9 @@ class RequestHandler {
         if profile == nil {
             assert(authenticationLevel! == .none)
             
-            dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
+            dbTransaction(db, handleResult: handleTransactionResult) { [weak self] handleResult in
+                guard let self = self else { return }
+                self.doRemainingRequestProcessing(dbCreds: nil, profileCreds:nil, requestObject: requestObject, db: db, profile: nil, accountProperties: nil, sharingGroupUUID: sharingGroupUUID, accountDelegate: accountDelegate, processRequest: processRequest, handleResult: handleResult)
             }
         }
         else {
@@ -390,10 +429,11 @@ class RequestHandler {
                 return
             }
             
-            if let profileCreds = AccountManager.session.accountFromProperties(properties: accountProperties, user: credsUser, delegate: accountDelegate) {
+            if let profileCreds = services.accountManager.accountFromProperties(properties: accountProperties, user: credsUser, accountDelegate: accountDelegate) {
             
-                dbTransaction(db, handleResult: handleTransactionResult) { handleResult in
-                    doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, processRequest: processRequest, handleResult: handleResult)
+                dbTransaction(db, handleResult: handleTransactionResult) { [weak self] handleResult in
+                    guard let self = self else { return }
+                    self.doRemainingRequestProcessing(dbCreds:dbCreds, profileCreds:profileCreds, requestObject: requestObject, db: db, profile: profile, accountProperties: accountProperties, sharingGroupUUID: sharingGroupUUID, accountDelegate: accountDelegate, processRequest: processRequest, handleResult: handleResult)
                 }
             }
             else {
@@ -403,26 +443,38 @@ class RequestHandler {
     }
     
     private func handleTransactionResult(_ result:ServerResult) {
+        var postRequestRunner: RequestHandler.PostRequestRunner?
+        
         // `endWith` and `failWithError` call the `RouterResponse` `end` method, and thus we have waited until the very end of processing of the request to finish and return control back to the caller.
         switch result {
-        case .success(.jsonString(let jsonString)):
+        case .success(.jsonString(let jsonString), let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .jsonString(jsonString))
             
-        case .success(.dataWithHeaders(let data, headers: let headers)):
+        case .success(.dataWithHeaders(let data, headers: let headers), let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .data(data: data, headers: headers))
         
-        case .success(.headers(let headers)):
+        case .success(.headers(let headers), let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .headers(headers))
         
-        case .success(.nothing):
+        case .success(.nothing, let runner):
+            postRequestRunner = runner
             endWith(clientResponse: .jsonDict([:]))
             
         case .failure(let failureResult):
             failWithError(failureResult: failureResult)
         }
+        
+        do {
+            try postRequestRunner?()
+        } catch let error {
+            Log.error("Post commit runner: \(error)")
+        }
     }
     
-    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountManager.AccountProperties?, sharingGroupUUID: String?, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
+    private func doRemainingRequestProcessing(dbCreds:Account?, profileCreds:Account?, requestObject:RequestMessage, db: Database, profile: UserProfile?, accountProperties: AccountProperties?, sharingGroupUUID: String?, accountDelegate: AccountDelegate, processRequest: @escaping ProcessRequest, handleResult:@escaping (ServerResult) ->()) {
         
         var effectiveOwningUserCreds:Account?
         
@@ -443,14 +495,13 @@ class RequestHandler {
                     return
                 }
                 
-                effectiveOwningUserCreds = effectiveOwningUser.credsObject
+                effectiveOwningUserCreds = try? services.accountManager.accountFromJSON(effectiveOwningUser.creds, accountName: effectiveOwningUser.accountType, user: .user(effectiveOwningUser), accountDelegate: accountDelegate)
+                
                 guard effectiveOwningUserCreds != nil else {
                     handleResult(.failure(.message("Could not get effective owning user creds.")))
                     return
                 }
                 
-                effectiveOwningUserCreds!.delegate = accountDelegate
-
             case .noObjectFound:
                 // Not treating this as an error. Downstream from this, where needed, we check to see if effectiveOwningUserCreds is nil. See also [1] in Controllers.swift.
                 Log.warning("No object found when trying to populate effectiveOwningUserCreds")
@@ -461,13 +512,18 @@ class RequestHandler {
             }
         }
         
-        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, accountDelegate: accountDelegate) { response in
+        let params = RequestProcessingParameters(request: requestObject, ep:endpoint, creds: dbCreds, effectiveOwningUserCreds: effectiveOwningUserCreds, profileCreds: profileCreds, userProfile: profile, accountProperties: accountProperties, currentSignedInUser: currentSignedInUser, db:db, repos:repositories, routerResponse:response, deviceUUID: deviceUUID, services: services, accountDelegate: accountDelegate) { response in
         
             var message:ResponseMessage!
+            var postCommitRunner: RequestHandler.PostRequestRunner?
             
             switch response {
             case .success(let responseMessage):
                 message = responseMessage
+                
+            case .successWithRunner(let responseMessage, runner: let runner):
+                message = responseMessage
+                postCommitRunner = runner
                 
             case .failure(let failureResult):
                 if let failureResult = failureResult {
@@ -487,14 +543,14 @@ class RequestHandler {
             
             switch message.responseType {
             case .json:
-                handleResult(.success(.jsonString(jsonString)))
+                handleResult(.success(.jsonString(jsonString), runner: postCommitRunner))
 
             case .data(let data):
-                handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString])))
+                handleResult(.success(.dataWithHeaders(data, headers:[ServerConstants.httpResponseMessageParams:jsonString]), runner: postCommitRunner))
                 
             case .header:
                 handleResult(.success(.headers(
-                    [ServerConstants.httpResponseMessageParams:jsonString])))
+                    [ServerConstants.httpResponseMessageParams:jsonString]), runner: postCommitRunner))
             }
         } // end: let params = RequestProcessingParameters
 
@@ -504,9 +560,7 @@ class RequestHandler {
     }
     
     // MARK: AccountDelegate
-    
 
-    
     enum CheckDeviceUUIDResult {
         case success
         case uuidNotNeeded

@@ -2,39 +2,84 @@
   "object": {
     "pins": [
       {
-        "package": "Cryptor",
-        "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
+        "package": "AppleJWTDecoder",
+        "repositoryURL": "https://github.com/SyncServerII/AppleJWTDecoder.git",
         "state": {
           "branch": null,
-          "revision": "6f79b4ea0a7ef8acb08ba3f3e23da32e83acaca3",
-          "version": "1.0.28"
+          "revision": "bd791ad027c52f8054dcb448b9a9981046712dbf",
+          "version": "0.0.6"
+        }
+      },
+      {
+        "package": "Cryptor",
+        "repositoryURL": "https://github.com/Kitura/BlueCryptor.git",
+        "state": {
+          "branch": null,
+          "revision": "ee5880e031da4c609f372cf7472476ab51d5dd19",
+          "version": "1.0.200"
+        }
+      },
+      {
+        "package": "CryptorECC",
+        "repositoryURL": "https://github.com/Kitura/BlueECC.git",
+        "state": {
+          "branch": null,
+          "revision": "baf6ed3fc1a622675f0041b4aff7c02dd1a93818",
+          "version": "1.2.200"
+        }
+      },
+      {
+        "package": "CryptorRSA",
+        "repositoryURL": "https://github.com/Kitura/BlueRSA.git",
+        "state": {
+          "branch": null,
+          "revision": "c885fcdbe1b04718cb46d747387137653c030f6c",
+          "version": "1.0.200"
         }
       },
       {
         "package": "Signals",
-        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
+        "repositoryURL": "https://github.com/Kitura/BlueSignals.git",
         "state": {
           "branch": null,
-          "revision": "6d13339441e687695f9980303594304599a03560",
-          "version": "1.0.20"
+          "revision": "1f6c49e186c8a4eeef87ba14f2f97b8646559d13",
+          "version": "1.0.200"
         }
       },
       {
         "package": "Socket",
-        "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
+        "repositoryURL": "https://github.com/Kitura/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "ccc671b022bc60e5fffcb2aa15f499c6331bfd18",
-          "version": "1.0.46"
+          "revision": "c9894fd117457f1d006575fbfb2fdfd6f79eac03",
+          "version": "1.0.200"
         }
       },
       {
         "package": "SSLService",
-        "repositoryURL": "https://github.com/IBM-Swift/BlueSSLService.git",
+        "repositoryURL": "https://github.com/Kitura/BlueSSLService.git",
         "state": {
           "branch": null,
-          "revision": "0127cd4156bb0ba702894f2509199e4b65ca1db5",
-          "version": "1.0.46"
+          "revision": "ae5889d2a8b068d2d3ab91ec73aa8f557c03cd8a",
+          "version": "1.0.200"
+        }
+      },
+      {
+        "package": "ChangeResolvers",
+        "repositoryURL": "https://github.com/SyncServerII/ChangeResolvers.git",
+        "state": {
+          "branch": null,
+          "revision": "91e0f2a6b3121e83e1a369198d54141bb3e37b08",
+          "version": "0.0.2"
+        }
+      },
+      {
+        "package": "CredentialsAppleSignIn",
+        "repositoryURL": "https://github.com/crspybits/CredentialsAppleSignIn.git",
+        "state": {
+          "branch": null,
+          "revision": "838cefff261ac1e0564f2c91062233f5907c1ea6",
+          "version": "0.0.4"
         }
       },
       {
@@ -42,8 +87,26 @@
         "repositoryURL": "https://github.com/crspybits/CredentialsDropbox.git",
         "state": {
           "branch": null,
-          "revision": "3be73caa8322e3f7f006661981d43814e1336ca5",
-          "version": "0.4.0"
+          "revision": "95d05cf3a4e5e303d41d2fe4a21dff2e03514232",
+          "version": "0.4.5"
+        }
+      },
+      {
+        "package": "CredentialsMicrosoft",
+        "repositoryURL": "https://github.com/crspybits/CredentialsMicrosoft.git",
+        "state": {
+          "branch": null,
+          "revision": "d77336e9a97a75b89446c0764b6c65818bf4fd9b",
+          "version": "0.2.1"
+        }
+      },
+      {
+        "package": "CryptoSwift",
+        "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "5669f222e46c8134fb1f399c745fa6882b43532e",
+          "version": "1.3.8"
         }
       },
       {
@@ -51,8 +114,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/HeliumLogger.git",
         "state": {
           "branch": null,
-          "revision": "779865e83149a59894b14950aa83f70b7e81bc27",
-          "version": "1.8.1"
+          "revision": "55fd2f0b70793017acee853c53cfcf8da0bd8d8d",
+          "version": "1.9.200"
         }
       },
       {
@@ -60,8 +123,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura.git",
         "state": {
           "branch": null,
-          "revision": "f19737e885be1dbc97f146e9af3fe99fe7b67b72",
-          "version": "2.7.0"
+          "revision": "daf6479097469a0c1fe64755db6e23f788a3ec29",
+          "version": "2.9.200"
         }
       },
       {
@@ -69,8 +132,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-Credentials.git",
         "state": {
           "branch": null,
-          "revision": "1daf65e3f89280fb22afbb9d46d15c89d2f7918c",
-          "version": "2.4.1"
+          "revision": "9edcb49d50ae57e0065b17e6209c82169aecb207",
+          "version": "2.5.200"
         }
       },
       {
@@ -78,8 +141,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsFacebook.git",
         "state": {
           "branch": null,
-          "revision": "acf1b5e4de813582fb9520189f4613559185f7bc",
-          "version": "2.3.1"
+          "revision": "ab5bb088ac4b275bd9a15f21e75eeebecf6e0897",
+          "version": "2.3.200"
         }
       },
       {
@@ -87,62 +150,62 @@
         "repositoryURL": "https://github.com/IBM-Swift/Kitura-CredentialsGoogle.git",
         "state": {
           "branch": null,
-          "revision": "a68feb5789625ec8ffb50829ef0f1ed0d7f08574",
-          "version": "2.3.1"
+          "revision": "df9ecfa6405afd87bfc55f9788e0e25962f0b890",
+          "version": "2.3.200"
         }
       },
       {
         "package": "Kitura-net",
-        "repositoryURL": "https://github.com/IBM-Swift/Kitura-net.git",
+        "repositoryURL": "https://github.com/Kitura/Kitura-net.git",
         "state": {
           "branch": null,
-          "revision": "5fc06b21e8e615147fa8341c249ae010a1b41fba",
-          "version": "2.3.0"
+          "revision": "e017a57772eb477c294d72b25ab9ae38d25539f5",
+          "version": "2.4.200"
         }
       },
       {
         "package": "Kitura-Session",
-        "repositoryURL": "https://github.com/IBM-Swift/Kitura-Session.git",
+        "repositoryURL": "https://github.com/Kitura/Kitura-Session.git",
         "state": {
           "branch": null,
-          "revision": "24f18691d1f03162e2726a4e2dd2cbf5cb1741cb",
-          "version": "3.3.3"
+          "revision": "774509e7fb48a01400c177c771faa5f8ff7842e4",
+          "version": "3.3.200"
         }
       },
       {
         "package": "Kitura-TemplateEngine",
-        "repositoryURL": "https://github.com/IBM-Swift/Kitura-TemplateEngine.git",
+        "repositoryURL": "https://github.com/Kitura/Kitura-TemplateEngine.git",
         "state": {
           "branch": null,
-          "revision": "d62d74bca48c6fb76f9fc1f48eeb2d7af415e80b",
-          "version": "2.0.1"
+          "revision": "1670b09bfb63b66f7dffff627a06b50492485407",
+          "version": "2.0.200"
         }
       },
       {
         "package": "KituraContracts",
-        "repositoryURL": "https://github.com/IBM-Swift/KituraContracts.git",
+        "repositoryURL": "https://github.com/Kitura/KituraContracts.git",
         "state": {
           "branch": null,
-          "revision": "4f8237d6fe2cc1593761660dc4d0ab2c516d73eb",
-          "version": "1.1.2"
+          "revision": "8418006e39e2efae9b31ae92721cb597ac29c617",
+          "version": "1.2.200"
         }
       },
       {
         "package": "LoggerAPI",
-        "repositoryURL": "https://github.com/IBM-Swift/LoggerAPI.git",
+        "repositoryURL": "https://github.com/Kitura/LoggerAPI.git",
         "state": {
           "branch": null,
-          "revision": "3357dd9526cdf9436fa63bb792b669e6efdc43da",
-          "version": "1.9.0"
+          "revision": "e82d34eab3f0b05391082b11ea07d3b70d2f65bb",
+          "version": "1.9.200"
         }
       },
       {
         "package": "OpenSSL",
-        "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
+        "repositoryURL": "https://github.com/Kitura/OpenSSL.git",
         "state": {
           "branch": null,
-          "revision": "6c7e2e3610037fbc05c0d846cec981518961d8bf",
-          "version": "2.2.2"
+          "revision": "80b04f33b086fc90e28d9ae159d43705fb348e16",
+          "version": "2.2.200"
         }
       },
       {
@@ -177,8 +240,8 @@
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-MySQL.git",
         "state": {
           "branch": null,
-          "revision": "f9af3a9984aa4785fcbe7126eaf0bc39320296ec",
-          "version": "3.4.1"
+          "revision": "fe63085fe4639944657bf2f33b775e8036974eef",
+          "version": "3.5.1"
         }
       },
       {
@@ -195,17 +258,89 @@
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Thread.git",
         "state": {
           "branch": null,
-          "revision": "fbbd7aec0ebe06fbeed58da54153226dd7613c4a",
-          "version": "3.0.6"
+          "revision": "a50b9a33f08fce638f33ae3121613fe499cc23ec",
+          "version": "3.0.7"
         }
       },
       {
-        "package": "SMServerLib",
-        "repositoryURL": "https://github.com/crspybits/SMServerLib.git",
+        "package": "ServerAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerAccount.git",
         "state": {
           "branch": null,
-          "revision": "d84d6ceacc0c67f8dc0c8e30ecd59469ff9b2775",
-          "version": "1.2.0"
+          "revision": "8dc5b24eb55f97c90bc989fac746302be53a1a0d",
+          "version": "0.0.8"
+        }
+      },
+      {
+        "package": "ServerAppleSignInAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerAppleSignInAccount.git",
+        "state": {
+          "branch": null,
+          "revision": "2f21b740b31511a988f31640dd4c85281e82630e",
+          "version": "0.0.2"
+        }
+      },
+      {
+        "package": "ServerDropboxAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerDropboxAccount.git",
+        "state": {
+          "branch": null,
+          "revision": "5e9024e46d9b5c689e91e836a8112aeedd1c4900",
+          "version": "0.0.2"
+        }
+      },
+      {
+        "package": "ServerFacebookAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerFacebookAccount.git",
+        "state": {
+          "branch": null,
+          "revision": "8e4d0d4e0420e78410a19a51fdad7925c6845c6c",
+          "version": "0.0.1"
+        }
+      },
+      {
+        "package": "ServerGoogleAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerGoogleAccount.git",
+        "state": {
+          "branch": null,
+          "revision": "b7b93c157464197840b57b8095414b25713e9b40",
+          "version": "0.0.2"
+        }
+      },
+      {
+        "package": "ServerMicrosoftAccount",
+        "repositoryURL": "https://github.com/SyncServerII/ServerMicrosoftAccount.git",
+        "state": {
+          "branch": null,
+          "revision": "b395ee2f0ee6271dc49cb81461ee6819e09cf730",
+          "version": "0.0.2"
+        }
+      },
+      {
+        "package": "ServerShared",
+        "repositoryURL": "https://github.com/SyncServerII/ServerShared.git",
+        "state": {
+          "branch": null,
+          "revision": "6c725c50cdb575c183943dcfcdb7394390a5e933",
+          "version": "0.0.4"
+        }
+      },
+      {
+        "package": "SwiftJWKtoPEM",
+        "repositoryURL": "https://github.com/ibm-cloud-security/Swift-JWK-to-PEM.git",
+        "state": {
+          "branch": null,
+          "revision": "b18e2af1392bb84f1cde83b1e00847051c9fdda6",
+          "version": "0.4.0"
+        }
+      },
+      {
+        "package": "SwiftJWT",
+        "repositoryURL": "https://github.com/IBM-Swift/Swift-JWT.git",
+        "state": {
+          "branch": null,
+          "revision": "2f2fc12ae88660e0760b04d9e6c341517b31ad7b",
+          "version": "3.6.200"
         }
       },
       {
@@ -213,8 +348,8 @@
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
           "branch": null,
-          "revision": "f4240bf022a69815241a883c03645444b58ac553",
-          "version": "1.1.0"
+          "revision": "173f567a2dfec11d74588eea82cecea555bdc0bc",
+          "version": "1.4.0"
         }
       },
       {
@@ -222,8 +357,8 @@
         "repositoryURL": "https://github.com/crspybits/SwiftAWSSignatureV4.git",
         "state": {
           "branch": null,
-          "revision": "21b9ab8201caeeb4a0f9dbb39ff8021c1ccb53e4",
-          "version": "1.2.0"
+          "revision": "c66f2db1211ad1969e3d11791b9de62361c78f45",
+          "version": "1.2.1"
         }
       },
       {
@@ -231,26 +366,17 @@
         "repositoryURL": "https://github.com/crspybits/SwiftyAWSSNS.git",
         "state": {
           "branch": null,
-          "revision": "38f1d7c598be682ec49c47de8dbbb212d69e5dae",
-          "version": "0.3.0"
-        }
-      },
-      {
-        "package": "SyncServerShared",
-        "repositoryURL": "https://github.com/crspybits/SyncServer-Shared.git",
-        "state": {
-          "branch": null,
-          "revision": "a420dd4d0f0d5d0e65c7cd1f338d41ab0cd6590c",
-          "version": "11.0.0"
+          "revision": "7c34f9370d93c0f9aecad4f54fa367c2b1fb538a",
+          "version": "0.3.1"
         }
       },
       {
         "package": "TypeDecoder",
-        "repositoryURL": "https://github.com/IBM-Swift/TypeDecoder.git",
+        "repositoryURL": "https://github.com/Kitura/TypeDecoder.git",
         "state": {
           "branch": null,
-          "revision": "39bb56b3b5c8ffb1b475c529fb1cfdb64e709a02",
-          "version": "1.3.3"
+          "revision": "a5978582981f7151594bdaf5fe0d3cd9b1d2d0c0",
+          "version": "1.3.200"
         }
       }
     ]

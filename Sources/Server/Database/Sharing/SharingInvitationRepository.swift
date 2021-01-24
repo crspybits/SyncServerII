@@ -7,10 +7,14 @@
 //
 
 import Foundation
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 
 class SharingInvitation : NSObject, Model {
+    required override init() {
+        super.init()
+    }
+
     static let sharingInvitationUUIDKey = "sharingInvitationUUID"
     var sharingInvitationUUID:String!
     

@@ -7,10 +7,11 @@
 //
 
 import Credentials
-import SyncServerShared
+import ServerShared
 import LoggerAPI
 import KituraNet
 import Foundation
+import ServerAccount
 
 class SharingAccountsController : ControllerProtocol {
     class func setup() -> Bool {
@@ -64,9 +65,17 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
+        let expiry = createSharingInvitationRequest.expiryDuration
+        if let expiry = expiry, expiry <= 0 {
+            let message = "Expiry duration(\(expiry)) <= 0"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         let result = params.repos.sharing.add(
             owningUserId: effectiveOwningUserId, sharingGroupUUID: createSharingInvitationRequest.sharingGroupUUID,
-            permission: createSharingInvitationRequest.permission, allowSocialAcceptance: allowSocialAcceptance, numberAcceptors: numberAcceptors)
+            permission: createSharingInvitationRequest.permission, allowSocialAcceptance: allowSocialAcceptance, numberAcceptors: numberAcceptors, expiryDuration: expiry ?? ServerConstants.sharingInvitationExpiryDuration)
         
         guard case .success(let sharingInvitationUUID) = result else {
             let message = "Failed to add Sharing Invitation"
@@ -111,15 +120,15 @@ class SharingAccountsController : ControllerProtocol {
     private func redeem(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation,
                         sharingInvitationKey: SharingInvitationRepository.LookupKey, completion: @escaping ((RequestProcessingParameters.Response)->())) {
         
-        guard let accountType = params.accountProperties?.accountType else {
-            let message = "Could not get account type from account properties!"
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme from account properties!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
 
         if !sharingInvitation.allowSocialAcceptance {
-            guard accountType.userType == .owning else {
+            guard accountScheme.userType == .owning else {
                 let message = "Invitation does not allow social acceptance, but signed in user is not owning"
                 Log.error(message)
                 params.completion(.failure(.messageWithStatus(message, HTTPStatusCode.forbidden)))
@@ -131,20 +140,6 @@ class SharingAccountsController : ControllerProtocol {
             let message = "Number of acceptors was 0 or less."
             Log.error(message)
             params.completion(.failure(.message(message)))
-            return
-        }
-        
-        // I'm not requiring a master version from the client-- because they don't yet have a context in which to be concerned about the master version; however, I am updating the master version because I want to inform other clients of a change in the sharing group-- i.e., of a user being added to the sharing group.
-        
-        guard let masterVersion = Controllers.getMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, params: params) else {
-            let message = "Could not get master version for sharing group uuid: \(String(describing: sharingInvitation.sharingGroupUUID))"
-            Log.error(message)
-            completion(.failure(.message(message)))
-            return
-        }
-        
-        if let response = Controllers.updateMasterVersion(sharingGroupUUID: sharingInvitation.sharingGroupUUID, masterVersion: masterVersion, params: params, responseType: nil) {
-            completion(response)
             return
         }
 
@@ -178,7 +173,7 @@ class SharingAccountsController : ControllerProtocol {
             return
         }
         
-        let userExists = UserController.userExists(accountType: accountType, credsId: credsId, userRepository: params.repos.user)
+        let userExists = UserController.userExists(accountType: accountScheme.accountName, credsId: credsId, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
             redeemSharingInvitationForNewUser(params:params, request: request, sharingInvitation: sharingInvitation, completion: completion)
@@ -212,7 +207,15 @@ class SharingAccountsController : ControllerProtocol {
         }
         
         var owningUserId: UserId?
-        if existingUser.accountType.userType == .sharing {
+        
+        guard let accountScheme = AccountScheme(.accountName(existingUser.accountType)) else {
+            let message = "Could not look up AccountScheme from account type: \(String(describing: existingUser.accountType))"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        if accountScheme.userType == .sharing {
             owningUserId = sharingInvitation.owningUserId
         }
 
@@ -232,32 +235,46 @@ class SharingAccountsController : ControllerProtocol {
     
     private func redeemSharingInvitationForNewUser(params:RequestProcessingParameters, request: RedeemSharingInvitationRequest, sharingInvitation: SharingInvitation, completion: @escaping ((RequestProcessingParameters.Response)->())) {
     
-        // No database creds because this is a new user-- so use params.profileCreds
-        
-        let user = User()
-        user.username = params.userProfile!.displayName
-        
-        guard let accountType = params.accountProperties?.accountType else {
-            let message = "Could not get account type from properties!"
+        guard let userProfile = params.userProfile else {
+            let message = "Could not get userProfile!"
             Log.error(message)
             completion(.failure(.message(message)))
             return
         }
         
-        user.accountType = accountType
-        user.credsId = params.userProfile!.id
-        user.creds = params.profileCreds!.toJSON(userType:user.accountType.userType)
+        guard var profileCreds = params.profileCreds else {
+            let message = "Could not get profileCreds!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        // No database creds because this is a new user-- so use params.profileCreds
+        
+        let user = User()
+        user.username = userProfile.displayName
+        
+        guard let accountScheme = params.accountProperties?.accountScheme else {
+            let message = "Could not get account scheme from properties!"
+            Log.error(message)
+            completion(.failure(.message(message)))
+            return
+        }
+        
+        user.accountType = accountScheme.accountName
+        user.credsId = userProfile.id
+        user.creds = profileCreds.toJSON()
         
         var createInitialOwningUserFile = false
         var owningUserId: UserId?
 
-        switch user.accountType.userType {
+        switch accountScheme.userType {
         case .sharing:
             owningUserId = sharingInvitation.owningUserId
         case .owning:
             // When the user is an owning user, they will rely on their own cloud storage to upload new files-- for sharing groups where they have upload permissions.
             // Cloud storage folder must be present when redeeming an invitation: a) using an owning account, and where b) that owning account type needs a cloud storage folder (e.g., Google Drive). I'm not going to concern myself with the sharing permissions of the immediate sharing invitation because they may join other sharing groups-- and have write permissions there.
-            if params.profileCreds!.owningAccountsNeedCloudFolderName {
+            if profileCreds.owningAccountsNeedCloudFolderName {
                 guard let cloudFolderName = request.cloudFolderName else {
                     let message = "No cloud folder name given when redeeming sharing invitation using owning account that needs one!"
                     Log.error(message)
@@ -270,7 +287,7 @@ class SharingAccountsController : ControllerProtocol {
             }
         }
         
-        guard let userId = params.repos.user.add(user: user) else {
+        guard let userId = params.repos.user.add(user: user, accountManager: params.services.accountManager, accountDelegate: params.accountDelegate) else {
             let message = "Failed on adding sharing user to User!"
             Log.error(message)
             completion(.failure(.message(message)))
@@ -290,13 +307,12 @@ class SharingAccountsController : ControllerProtocol {
         
         // 11/5/17; Up until now I had been calling `generateTokensIfNeeded` for Facebook creds and that had been generating tokens. Somehow, in running my tests today, I'm getting failures from the Facebook API when I try to do this. This may only occur in testing because I'm passing long-lived access tokens. Plus, it's possible this error has gone undiagnosed until now. In testing, there is no need to generate the long-lived access tokens.
 
-        var profileCreds = params.profileCreds!
-        profileCreds.accountCreationUser = .userId(userId, user.accountType.userType)
+        profileCreds.accountCreationUser = .userId(userId)
         
-        profileCreds.generateTokensIfNeeded(userType: user.accountType.userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(dbCreds: nil, routerResponse: params.routerResponse, success: {
             if createInitialOwningUserFile {
                 // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
-                guard let cloudStorageCreds = profileCreds.cloudStorage else {
+                guard let cloudStorageCreds = profileCreds.cloudStorage(mock: params.services.mockStorage) else {
                     let message = "Could not obtain CloudStorage Creds"
                     Log.error(message)
                     completion(.failure(.message(message)))
