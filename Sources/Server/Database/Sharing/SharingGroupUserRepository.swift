@@ -9,7 +9,7 @@
 
 import Foundation
 import LoggerAPI
-import ServerShared
+import SyncServerShared
 
 typealias SharingGroupUserId = Int64
 
@@ -73,7 +73,7 @@ class SharingGroupUser : NSObject, Model {
         }
     }
     
-    required override init() {
+    override init() {
         super.init()
     }
 }
@@ -180,13 +180,13 @@ class SharingGroupUserRepository : Repository, RepositoryLookup {
         }
     }
     
-    func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> [ServerShared.SharingGroupUser]? {
+    func sharingGroupUsers(forSharingGroupUUID sharingGroupUUID: String) -> [SyncServerShared.SharingGroupUser]? {
         guard let users: [User] = sharingGroupUsers(forSharingGroupUUID: sharingGroupUUID) else {
             return nil
         }
         
-        let result = users.map { user -> ServerShared.SharingGroupUser in
-            let sharingGroupUser = ServerShared.SharingGroupUser()
+        let result = users.map { user -> SyncServerShared.SharingGroupUser in
+            let sharingGroupUser = SyncServerShared.SharingGroupUser()
             sharingGroupUser.name = user.username
             sharingGroupUser.userId = user.userId
             return sharingGroupUser

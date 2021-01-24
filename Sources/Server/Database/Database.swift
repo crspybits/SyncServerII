@@ -9,7 +9,6 @@
 import LoggerAPI
 import Foundation
 import PerfectMySQL
-import ServerShared
 
 // See https://github.com/PerfectlySoft/Perfect-MySQL for assumptions about mySQL installation.
 // For mySQL interface docs, see: http://perfect.org/docs/MySQL.html
@@ -38,27 +37,27 @@ class Database {
         return "Failure: \(self.connection.errorCode()) \(self.connection.errorMessage())"
     }
     
-    init?(showStartupInfo:Bool = false) {
+    init(showStartupInfo:Bool = false) {
         self.connection = MySQL()
         if showStartupInfo {
-            Log.info("Connecting to database with host: \(Configuration.server.db.host)...")
+            Log.info("Connecting to database with host: \(Constants.session.db.host)...")
         }
-        guard self.connection.connect(host: Configuration.server.db.host, user: Configuration.server.db.user, password: Configuration.server.db.password ) else {
-            Log.error("Failure connecting to mySQL server \(Configuration.server.db.host): \(self.error)")
-            return nil
+        guard self.connection.connect(host: Constants.session.db.host, user: Constants.session.db.user, password: Constants.session.db.password ) else {
+            Log.error("Failure connecting to mySQL server \(Constants.session.db.host): \(self.error)")
+            return
         }
         
         ServerStatsKeeper.session.increment(stat: .dbConnectionsOpened)
 
         if showStartupInfo {
-            Log.info("Connecting to database named: \(Configuration.server.db.database)...")
+            Log.info("Connecting to database named: \(Constants.session.db.database)...")
         }
         
         Log.info("DB CONNECTION STATS: opened: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsOpened)); closed: \(ServerStatsKeeper.session.currentValue(stat: .dbConnectionsClosed))")
 
-        guard self.connection.selectDatabase(named: Configuration.server.db.database) else {
+        guard self.connection.selectDatabase(named: Constants.session.db.database) else {
             Log.error("Failure: \(self.error)")
-            return nil
+            return
         }
     }
     
@@ -107,7 +106,6 @@ class Database {
         case query
         case tableCreation
         case columnCreation
-        case constraintCreation
         case columnRemoval
     }
     
@@ -120,7 +118,7 @@ class Database {
     func createTableIfNeeded(tableName:String, columnCreateQuery:String) -> TableUpcreateResult {
         let checkForTable = "SELECT * " +
             "FROM information_schema.tables " +
-            "WHERE table_schema = '\(Configuration.server.db.database)' " +
+            "WHERE table_schema = '\(Constants.session.db.database)' " +
             "AND table_name = '\(tableName)' " +
             "LIMIT 1;"
         
@@ -149,7 +147,7 @@ class Database {
     func columnExists(_ column:String, in tableName:String) -> Bool? {
         let checkForColumn = "SELECT * " +
             "FROM information_schema.columns " +
-            "WHERE table_schema = '\(Configuration.server.db.database)' " +
+            "WHERE table_schema = '\(Constants.session.db.database)' " +
             "AND table_name = '\(tableName)' " +
             "AND column_name = '\(column)' " +
             "LIMIT 1;"
@@ -180,47 +178,10 @@ class Database {
         return true
     }
     
-    // columnName is just the column name, no column type.
     func removeColumn(_ columnName:String, from tableName:String) -> Bool {
         let alterTable = "ALTER TABLE \(tableName) DROP \(columnName)"
         
         guard query(statement: alterTable) else {
-            Log.error("Failure: \(self.error)")
-            return false
-        }
-        
-        return true
-    }
-    
-    func namedConstraintExists(_ constraintName:String, in tableName:String) -> Bool? {
-        let checkForConstraint = "SELECT * " +
-            "FROM information_schema.TABLE_CONSTRAINTS " +
-            "WHERE " +
-            "CONSTRAINT_SCHEMA = '\(Configuration.server.db.database)' AND " +
-            "TABLE_NAME = '\(tableName)' AND " +
-            "CONSTRAINT_NAME = '\(constraintName)' AND " +
-            "CONSTRAINT_TYPE = 'UNIQUE'"
-        
-        guard query(statement: checkForConstraint) else {
-            Log.error("Failure: \(self.error)")
-            return nil
-        }
-        
-        if let results = connection.storeResults(), results.numRows() == 1 {
-            Log.info("Constraint \(constraintName) was already in database table \(tableName)")
-            return true
-        }
-        
-        Log.info("Constraint \(constraintName) was not in database table \(tableName)")
-        return false
-    }
-    
-    // constraint, e.g., "UniqueFileLabel UNIQUE (fileGroupUUID, fileLabel)"
-    func createConstraint(constraint: String, tableName: String) -> Bool {
-        let create = "ALTER TABLE \(tableName) " +
-            "ADD CONSTRAINT \(constraint)"
-            
-        guard query(statement: create) else {
             Log.error("Failure: \(self.error)")
             return false
         }
@@ -235,22 +196,14 @@ class Database {
         See https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html#isolevel_repeatable-read
     */
     func startTransaction() -> Bool {
-        // 9/5/20: Due to: https://github.com/SyncServerII/ServerMain/issues/5
-        let isolationLevel = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED;"
-
-        guard query(statement: isolationLevel) else {
-            Log.error("Could not set isolation level: \(self.error)")
-            return false
-        }
-        
         let start = "START TRANSACTION;"
-        
-        guard query(statement: start) else {
+        if query(statement: start) {
+            return true
+        }
+        else {
             Log.error("Could not start transaction: \(self.error)")
             return false
         }
-        
-        return true
     }
     
     func commit() -> Bool {
@@ -278,7 +231,7 @@ class Database {
 
 private struct DBLog {
     static func query(_ query: String) {
-        Log.debug("DB QUERY: \(query)")
+        // Log.debug("DB QUERY: \(query)")
     }
 }
 
@@ -343,12 +296,7 @@ class Select {
         let results = self.stmt.results()
         var failure = false
         
-        let returnCode = results.forEachRow { [weak self] row in
-            guard let self = self else {
-                failure = true
-                return
-            }
-            
+        let returnCode = results.forEachRow { row in
             if failure {
                 return
             }
@@ -381,7 +329,25 @@ class Select {
                     return
                 }
                 
-                // Give first priority to `typeConvertersToModel` -- so it can override the fieldType if needed.
+				switch fieldType {
+				case "integer", "double", "string", "date":
+                    break
+                case "bytes":
+                    if let bytes = rowFieldValue as? Array<UInt8> {
+                        // Assume this is actually a String. Some Text fields come back this way.
+                        if let str = String(bytes: bytes, encoding: String.Encoding.utf8) {
+                            rowFieldValue = str
+                        }
+                    }
+                default:
+                    Log.error("Unknown field type: \(String(describing: self.fieldTypes[fieldNumber])); fieldNumber: \(fieldNumber)")
+                    if !ignoreErrors {
+                        self.forEachRowStatus = .unknownFieldType
+                        failure = true
+                        return
+                    }
+				}
+                
                 if let converter = rowModel.typeConvertersToModel(propertyName: fieldName) {
                     let value = converter(rowFieldValue)
                     
@@ -399,26 +365,6 @@ class Select {
                     }
                     else {
                         rowFieldValue = value!
-                    }
-                }
-                else {
-                    switch fieldType {
-                    case "integer", "double", "string", "date":
-                        break
-                    case "bytes":
-                        if let bytes = rowFieldValue as? Array<UInt8> {
-                            // Assume this is actually a String. Some Text fields come back this way.
-                            if let str = String(bytes: bytes, encoding: String.Encoding.utf8) {
-                                rowFieldValue = str
-                            }
-                        }
-                    default:
-                        Log.error("Unknown field type: \(String(describing: self.fieldTypes[fieldNumber])); fieldNumber: \(fieldNumber)")
-                        if !ignoreErrors {
-                            self.forEachRowStatus = .unknownFieldType
-                            failure = true
-                            return
-                        }
                     }
                 }
                 
@@ -463,30 +409,12 @@ class Select {
 extension Database {
     // This intended for a one-off insert of a row, or row updates.
     class PreparedStatement {
-        // When inserting with the optional ValueTypes, if the specific value is nil, it is not inserted.
         enum ValueType {
             case null
-            
             case int(Int)
-            case intOptional(Int?)
-            
-            case int32(Int32)
-            case int32Optional(Int32?)
-            
             case int64(Int64)
-            case int64Optional(Int64?)
-            
             case string(String)
-            case stringOptional(String?)
-            
             case bool(Bool)
-            case boolOptional(Bool?)
-            
-            case data(Data)
-            case dataOptional(Data?)
-            
-            case dateTime(Date)
-            case dateTimeOptional(Date?)
         }
         
         enum Errors : Error {
@@ -503,7 +431,6 @@ extension Database {
         
         private var whereValueTypes = [ValueType]()
         private var whereFieldNames = [String]()
-        private var whereConstraint:String?
 
         enum StatementType {
             case insert
@@ -527,12 +454,6 @@ extension Database {
             assert(statementType == .update)
             whereFieldNames += [fieldName]
             whereValueTypes += [value]
-        }
-        
-        // For update only; provide a single value for a WHERE clause. E.g., from a LOOKUPKEY
-        func `where`(constraint: String) {
-            assert(statementType == .update)
-            whereConstraint = constraint
         }
         
         // Returns the id of the inserted row for an insert. For an update, returns the number of rows updated.
@@ -577,8 +498,6 @@ extension Database {
                         count += 1
                         whereClause += "\(whereFieldName)=?"
                     }
-                } else if let whereConstraint = whereConstraint {
-                    whereClause = "WHERE \(whereConstraint)"
                 }
                 
                 query = "UPDATE \(repo.tableName) SET \(setValues) \(whereClause)"
@@ -593,90 +512,18 @@ extension Database {
             }
             
             for valueType in valueTypes + whereValueTypes {
-                var haveValue = true
-                
                 switch valueType {
                 case .null:
                     self.stmt.bindParam()
-                    
                 case .int(let intValue):
                     self.stmt.bindParam(intValue)
-                case .intOptional(let intValue):
-                    if let intValue = intValue {
-                        self.stmt.bindParam(intValue)
-                    }
-                    else {
-                        haveValue = false
-                    }
-                    
-                case .int32(let int32Value):
-                    self.stmt.bindParam(int32Value)
-                case .int32Optional(let int32Value):
-                    if let int32Value = int32Value {
-                        self.stmt.bindParam(int32Value)
-                    }
-                    else {
-                        haveValue = false
-                    }
-                    
                 case .int64(let int64Value):
                     self.stmt.bindParam(int64Value)
-                case .int64Optional(let int64Value):
-                    if let int64Value = int64Value {
-                        self.stmt.bindParam(int64Value)
-                    }
-                    else {
-                        haveValue = false
-                    }
-                    
                 case .string(let stringValue):
                     self.stmt.bindParam(stringValue)
-                case .stringOptional(let stringValue):
-                    if let stringValue = stringValue {
-                        self.stmt.bindParam(stringValue)
-                    }
-                    else {
-                        haveValue = false
-                    }
-                    
                 case .bool(let boolValue):
                     // Bool is TINYINT(1), which is Int8; https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html
                     self.stmt.bindParam(Int8(boolValue ? 1 : 0))
-                case .boolOptional(let boolValue):
-                    if let boolValue = boolValue {
-                        self.stmt.bindParam(Int8(boolValue ? 1 : 0))
-                    }
-                    else {
-                        haveValue = false
-                    }
-                    
-                case .data(let dataValue):
-                    let uint8Array = [UInt8](dataValue)
-                    self.stmt.bindParam(uint8Array)
-                case .dataOptional(let dataValue):
-                    if let dataValue = dataValue {
-                        let uint8Array = [UInt8](dataValue)
-                        self.stmt.bindParam(uint8Array)
-                    }
-                    else {
-                        haveValue = false
-                    }
-                    
-                case .dateTime(let dateValue):
-                    let dateString = DateExtras.date(dateValue, toFormat: .DATETIME)
-                    self.stmt.bindParam(dateString)
-                case .dateTimeOptional(let dateValue):
-                    if let dateValue = dateValue {
-                        let dateString = DateExtras.date(dateValue, toFormat: .DATETIME)
-                        self.stmt.bindParam(dateString)
-                    }
-                    else {
-                        haveValue = false
-                    }
-                }
-                
-                if !haveValue {
-                    self.stmt.bindParam()
                 }
             }
             
@@ -690,37 +537,6 @@ extension Database {
             case .update:
                 return repo.db.connection.numberAffectedRows()
             }
-        }
-    } // end PreparedStatement
-}
-
-extension RepositoryBasics where Self: ModelIndexId {
-
-    // Updates consist of fieldName/ValueType key/value pairs. indexId provides the value for the index field that youare updating, to find the record in the database (along with the ModelIndexId key). Don't include the index field in the update(s).
-    // Returns true iff success.
-    func update(indexId: Int64,
-        with updates:[String: Database.PreparedStatement.ValueType]) -> Bool {
-        
-        guard updates.count > 0 else {
-            return false
-        }
-        
-        let update = Database.PreparedStatement(repo: self, type: .update)
-        
-        update.where(fieldName: Self.indexIdKey, value: .int64(indexId))
-                
-        for (fieldName, valueType) in updates {
-            update.add(fieldName: fieldName, value: valueType)
-        }
-        
-        do {
-            try update.run()
-            Log.info("Sucessfully updated \(tableName) row")
-            return true
-        }
-        catch (let error) {
-            Log.error("Failed updating \(tableName) row: \(db.errorCode()); \(db.errorMessage()); \(error)")
-            return false
         }
     }
 }

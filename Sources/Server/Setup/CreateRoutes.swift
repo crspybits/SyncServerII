@@ -8,27 +8,29 @@
 
 import Foundation
 import Kitura
-import ServerShared
+import SyncServerShared
 import LoggerAPI
 
 class CreateRoutes {
-    private init() {}
+    private var router = Router()
+
+    init() {
+    }
     
-    private static func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest, services: Services, router: Router) {
+    func addRoute(ep:ServerEndpoint, processRequest: @escaping ProcessRequest) {
         func handleRequest(routerRequest:RouterRequest, routerResponse:RouterResponse) {
             Log.info("parsedURL: \(routerRequest.parsedURL)")
-            let handler = RequestHandler(request: routerRequest, response: routerResponse, services: services, endpoint:ep)
+            let handler = RequestHandler(request: routerRequest, response: routerResponse, endpoint:ep)
             
             func create(routerRequest: RouterRequest) -> RequestMessage? {
                 let queryDict = routerRequest.queryParameters
-                Log.debug("queryDict: \(queryDict)")
                 guard let request = try? ep.requestMessageType.decode(queryDict) else {
                     Log.error("Error doing request decode")
                     return nil
                 }
                 
                 do {
-                    try request.setup(routerRequest: routerRequest)
+                    try request.setup(request: routerRequest)
                 } catch (let error) {
                     Log.error("Error doing request setup: \(error)")
                     return nil
@@ -47,39 +49,33 @@ class CreateRoutes {
         
         switch (ep.method) {
         case .get:
-            router.get(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            self.router.get(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
             
         case .post:
-            router.post(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            self.router.post(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         
         case .patch:
-            router.patch(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            self.router.patch(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         
         case .delete:
-            router.delete(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
+            self.router.delete(ep.pathWithSuffixSlash) { routerRequest, routerResponse, _ in
                 handleRequest(routerRequest: routerRequest, routerResponse: routerResponse)
             }
         }
     }
     
-    static func getRoutes(services: Services) -> Router {
-        let router = Router()
-        
-        let accountRoutes = ServerSetup.credentials(router, accountManager: services.accountManager)
-        
-        let routes = ServerRoutes.routes() + accountRoutes
-        for (endpoint, controllerMethod) in routes {
-            addRoute(ep: endpoint, processRequest: controllerMethod, services: services, router: router)
-        }
+    func getRoutes() -> Router {
+        ServerSetup.credentials(self.router)
+        ServerRoutes.add(proxyRouter: self)
 
-        router.error { request, response, _ in
-            let handler = RequestHandler(request: request, response: response, services: services)
+        self.router.error { request, response, _ in
+            let handler = RequestHandler(request: request, response: response)
             
             let errorDescription: String
             if let error = response.error {
@@ -92,14 +88,14 @@ class CreateRoutes {
             handler.failWithError(message: message)
         }
 
-        router.all { request, response, _ in
-            let handler = RequestHandler(request: request, response: response, services: services)
+        self.router.all { request, response, _ in
+            let handler = RequestHandler(request: request, response: response)
             let message = "Route not found in server: \(request.originalURL)"
             response.statusCode = .notFound
             handler.failWithError(message: message)
         }
         
-        return router
+        return self.router
     }
 }
 

@@ -32,13 +32,15 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Server::TestsCommon"
-               BuildableName = "TestsCommon.xctest"
-               BlueprintName = "TestsCommon"
+               BlueprintIdentifier = "Server::ServerTests"
+               BuildableName = "ServerTests.xctest"
+               BlueprintName = "ServerTests"
                ReferencedContainer = "container:Server.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <AdditionalOptions>
+      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -60,6 +62,8 @@
             ReferencedContainer = "container:Server.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <AdditionalOptions>
+      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

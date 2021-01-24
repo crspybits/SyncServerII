@@ -9,8 +9,7 @@
 import LoggerAPI
 import Credentials
 import CredentialsGoogle
-import ServerShared
-import ServerAccount
+import SyncServerShared
 
 class UserController : ControllerProtocol {
     // Don't do this setup in init so that database initalizations don't have to be done per endpoint call.
@@ -28,7 +27,7 @@ class UserController : ControllerProtocol {
     }
     
     // Looks up user in mySQL database. credsId is typically from userProfile.id
-    static func userExists(accountType: AccountScheme.AccountName, credsId: String,  userRepository:UserRepository) -> UserStatus {
+    static func userExists(accountType: AccountType, credsId: String,  userRepository:UserRepository) -> UserStatus {
         let result = userRepository.lookup(key: .accountTypeInfo(accountType:accountType, credsId:credsId), modelInit: User.init)
         
         switch result {
@@ -52,57 +51,42 @@ class UserController : ControllerProtocol {
             return
         }
         
-        guard let accountScheme = params.accountProperties?.accountScheme else {
-            let message = "Could not get account scheme."
+        guard let accountType = params.accountProperties?.accountType else {
+            let message = "Could not get account type."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let userProfile = params.userProfile else {
-            let message = "Could not get user profile."
+        guard let credsId = params.userProfile?.id else {
+            let message = "Could not get credsId."
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        let credsId = userProfile.id
-        
-        let userExists = UserController.userExists(accountType: accountScheme.accountName, credsId: credsId, userRepository: params.repos.user)
+        let userExists = UserController.userExists(accountType: accountType, credsId: credsId, userRepository: params.repos.user)
         switch userExists {
         case .doesNotExist:
             break
         case .error, .exists(_):
             let message = "Could not add user: Already exists!"
-            Log.warning(message)
-            let response = AddUserResponse()
-            response.userAlreadyExisted = true
-            params.completion(.success(response))
+            Log.error(message)
+            params.completion(.failure(.message(message)))
             return
         }
         
-        guard var profileCreds = params.profileCreds else {
-            let message = "Could not get profile creds!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-
-        guard profileCreds.canCreateAccount(with: userProfile) else {
-            let message = "Could not create account!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
+        // This necessarily is an owning user-- sharing users are created by the redeemSharingInvitation endpoint.
+        let userType:UserType = .owning
 
         // No database creds because this is a new user-- so use params.profileCreds
         let user = User()
-        user.username = userProfile.displayName
-        user.accountType = accountScheme.accountName
-        user.credsId = userProfile.id
-        user.creds = profileCreds.toJSON()
+        user.username = params.userProfile!.displayName
+        user.accountType = accountType
+        user.credsId = params.userProfile!.id
+        user.creds = params.profileCreds!.toJSON(userType: userType)
         
-        if profileCreds.owningAccountsNeedCloudFolderName {
+        if params.profileCreds!.owningAccountsNeedCloudFolderName {
             guard addUserRequest.cloudFolderName != nil else {
                 let message = "owningAccountsNeedCloudFolderName but no cloudFolderName"
                 Log.error(message)
@@ -113,14 +97,14 @@ class UserController : ControllerProtocol {
             user.cloudFolderName = addUserRequest.cloudFolderName
         }
         
-        guard profileCreds.accountScheme.userType == .owning else {
+        guard params.profileCreds?.accountType.userType == .owning else {
             let message = "Attempting to add a user with an Account that only allows sharing users!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let userId = params.repos.user.add(user: user, accountManager: params.services.accountManager, accountDelegate: params.accountDelegate) else {
+        guard let userId = params.repos.user.add(user: user) else {
             let message = "Failed on adding user to User!"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -144,14 +128,22 @@ class UserController : ControllerProtocol {
             return
         }
         
+        if !params.repos.masterVersion.initialize(sharingGroupUUID: addUserRequest.sharingGroupUUID) {
+            let message = "Failed on creating MasterVersion record for sharing group!"
+            Log.error(message)
+            params.completion(.failure(.message(message)))
+            return
+        }
+        
         let response = AddUserResponse()
         response.userId = userId
         
         // Previously, we won't have established an `accountCreationUser` for these Creds-- because this is a new user.
-        profileCreds.accountCreationUser = .userId(userId)
+        var profileCreds = params.profileCreds!
+        profileCreds.accountCreationUser = .userId(userId, userType)
 
         // We're creating an account for an owning user. `profileCreds` will be an owning user account and this will implement the CloudStorage protocol.
-        guard let cloudStorageCreds = profileCreds.cloudStorage(mock: params.services.mockStorage) else {
+        guard let cloudStorageCreds = profileCreds.cloudStorage else {
             let message = "Could not obtain CloudStorage Creds"
             Log.error(message)
             params.completion(.failure(.message(message)))
@@ -161,7 +153,7 @@ class UserController : ControllerProtocol {
         Log.info("About to check if we need to generate tokens...")
         
         // I am not doing token generation earlier (e.g., in the RequestHandler) because in most cases, we don't have a user database record created earlier, so if needed cannot save the tokens generated.
-        profileCreds.generateTokensIfNeeded(dbCreds: nil, routerResponse: params.routerResponse, success: {
+        profileCreds.generateTokensIfNeeded(userType: userType, dbCreds: nil, routerResponse: params.routerResponse, success: {
         
             UserController.createInitialFileForOwningUser(cloudFolderName: addUserRequest.cloudFolderName, cloudStorage: cloudStorageCreds) { creationResponse in
                 switch creationResponse {
@@ -186,32 +178,11 @@ class UserController : ControllerProtocol {
     func checkCreds(params:RequestProcessingParameters) {
         assert(params.ep.authenticationLevel == .secondary)
         
-        guard let currentUser = params.currentSignedInUser else {
-            let message = "No current user!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        guard let userId = currentUser.userId else {
-            let message = "No user id!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        var fullUserName: String? = currentUser.username
-        // Don't send an empty user name back as an empty string.
-        if let username = currentUser.username, username.count == 0 {
-            fullUserName = nil
-        }
-        
         let response = CheckCredsResponse()
-        let userInfo = CheckCredsResponse.UserInfo(userId: userId, fullUserName: fullUserName)
-        response.userInfo = userInfo
+        response.userId = params.currentSignedInUser!.userId
         
         // If we got this far, that means we passed primary and secondary authentication, but we also have to generate tokens, if needed.
-        params.profileCreds!.generateTokensIfNeeded(dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
+        params.profileCreds!.generateTokensIfNeeded(userType: params.currentSignedInUser!.accountType.userType, dbCreds: params.creds!, routerResponse: params.routerResponse, success: {
             params.completion(.success(response))
         }, failure: {
             params.completion(.failure(nil))
@@ -225,90 +196,64 @@ class UserController : ControllerProtocol {
         
         // I'm not going to remove the users files in their cloud storage. They own those. I think SyncServer doesn't have any business removing their files in this context.
         
-        guard let accountScheme = params.accountProperties?.accountScheme else {
-            let message = "Could not get accountScheme!"
+        guard let accountType = params.accountProperties?.accountType else {
+            let message = "Could not get accountType!"
             Log.error(message)
             params.completion(.failure(.message(message)))
             return
         }
         
-        guard let userId = params.currentSignedInUser?.userId else {
-            let message = "Could not get userId!"
-            Log.error(message)
-            params.completion(.failure(.message(message)))
-            return
-        }
-        
-        Self.removeUser(repos: params.repos, accountScheme: accountScheme, userId: userId, successResponseMessage:RemoveUserResponse(), completion: params.completion)
-    }
-
-    static func removeUser(repos: Repositories, accountScheme: AccountScheme, userId: UserId, successResponseMessage:ResponseMessage, completion: (RequestProcessingParameters.Response)->()) {
-        // I'm not going to remove the users files in their cloud storage. They own those. I think SyncServer doesn't have any business removing their files in this context.
-        
-        let deviceUUIDRepoKey = DeviceUUIDRepository.LookupKey.userId(userId)
-        let removeResult = repos.deviceUUID.retry {
-            return repos.deviceUUID.remove(key: deviceUUIDRepoKey)
+        let deviceUUIDRepoKey = DeviceUUIDRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        let removeResult = params.repos.deviceUUID.retry {
+            return params.repos.deviceUUID.remove(key: deviceUUIDRepoKey)
         }
         guard case .removed = removeResult else {
             let message = "Could not remove deviceUUID's for user!"
             Log.error(message)
-            completion(.failure(.message(message)))
+            params.completion(.failure(.message(message)))
             return
         }
         
-        // TODO: When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
+        // When deleting a user, should set to NULL any sharing users that have that userId (being deleted) as their owningUserId.
         
-        // This is somewhat aggressive: I'm going to remove both `Upload` and `DeferredUpload` records. It's somewhat aggressive because this gets rid of "work" the user has already done. However both of these record types have a UserId field, and this userId is being removed below (when we remove the `UserRepository` record). Plus, if the user was the cloud storage owner on these files, these files are getting marked as deleted as part of this user deletion anyways.
-        let uploadRepoKey = UploadRepository.LookupKey.userId(userId)
-        let removeResult2 = repos.upload.retry {
-            return repos.upload.remove(key: uploadRepoKey)
+        let uploadRepoKey = UploadRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        let removeResult2 = params.repos.upload.retry {
+            return params.repos.upload.remove(key: uploadRepoKey)
         }
         guard case .removed = removeResult2 else {
-            let message = "Could not remove Upload records for user!"
+            let message = "Could not remove upload files for user!"
             Log.error(message)
-            completion(.failure(.message(message)))
-            return
-        }
-        
-        // 11/28/20; Didn't have this DeferredUpload deletion until today. I think this was the source of https://github.com/SyncServerII/ServerMain/issues/9 and https://github.com/SyncServerII/ServerMain/issues/8.
-        let deferrredUploadRepoKey = DeferredUploadRepository.LookupKey.userId(userId)
-        let deferrredUploadRemoveResult = repos.deferredUpload.retry {
-            return repos.deferredUpload.remove(key: deferrredUploadRepoKey)
-        }
-        guard case .removed = deferrredUploadRemoveResult else {
-            let message = "Could not remove DeferredUpload records for user!"
-            Log.error(message)
-            completion(.failure(.message(message)))
+            params.completion(.failure(.message(message)))
             return
         }
         
         // 6/25/18; Up until today, user removal had included actual removal of all of the user's files from the FileIndex. BUT-- this goes against how deletion occurs on the SyncServer-- we mark files as deleted, but don't actually remove them from the FileIndex.
-        let markKey = FileIndexRepository.LookupKey.userId(userId)
-        guard let _ = repos.fileIndex.markFilesAsDeleted(key: markKey) else {
+        let markKey = FileIndexRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        guard let _ = params.repos.fileIndex.markFilesAsDeleted(key: markKey) else {
             let message = "Could not mark files as deleted for user!"
             Log.error(message)
-            completion(.failure(.message(message)))
+            params.completion(.failure(.message(message)))
             return
         }
         
         // The user will no longer be part of any sharing groups
-        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.userId(userId)
-        let removeResult3 = repos.sharingGroupUser.retry {
-            return repos.sharingGroupUser.remove(key: sharingGroupUserKey)
+        let sharingGroupUserKey = SharingGroupUserRepository.LookupKey.userId(params.currentSignedInUser!.userId)
+        let removeResult3 = params.repos.sharingGroupUser.retry {
+            return params.repos.sharingGroupUser.remove(key: sharingGroupUserKey)
         }
         guard case .removed = removeResult3 else {
             let message = "Could not remove sharing group references for user: \(removeResult3)"
             Log.error(message)
-            completion(.failure(.message(message)))
+            params.completion(.failure(.message(message)))
             return
         }
         
         // And, any sharing users making use of this user as an owningUserId can no longer use its userId.
-        let resetKey = SharingGroupUserRepository.LookupKey.owningUserId(userId)
-        guard repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
+        let resetKey = SharingGroupUserRepository.LookupKey.owningUserId(params.currentSignedInUser!.userId)
+        guard params.repos.sharingGroupUser.resetOwningUserIds(key: resetKey) else {
             let message = "Could not remove sharing group references for owning user"
             Log.error(message)
-            completion(.failure(.message(message)))
+            params.completion(.failure(.message(message)))
             return
         }
         
@@ -316,29 +261,30 @@ class UserController : ControllerProtocol {
         
         // When removing an owning user: Also remove any sharing invitations that have that owning user in them-- this is just in case there are non-expired invitations from that sharing user. They will be invalid now.
         let sharingInvitationsKey = SharingInvitationRepository.LookupKey
-            .owningUserId(userId)
-        let removeResult4 = repos.sharing.retry {
-            return repos.sharing.remove(key: sharingInvitationsKey)
+            .owningUserId(params.currentSignedInUser!.userId)
+        let removeResult4 = params.repos.sharing.retry {
+            return params.repos.sharing.remove(key: sharingInvitationsKey)
         }
         guard case .removed = removeResult4 else {
             let message = "Could not remove sharing invitations for user: \(removeResult4)"
             Log.error(message)
-            completion(.failure(.message(message)))
+            params.completion(.failure(.message(message)))
             return
         }
         
         // This has to be last-- we have to remove all references to the user first-- due to foreign key constraints.
-        let userRepoKey = UserRepository.LookupKey.userId(userId)
-        let removeResult5 = repos.user.retry {
-            return repos.user.remove(key: userRepoKey)
+        let userRepoKey = UserRepository.LookupKey.accountTypeInfo(accountType: accountType, credsId: params.userProfile!.id)
+        let removeResult5 = params.repos.user.retry {
+            return params.repos.user.remove(key: userRepoKey)
         }
         guard case .removed(let numberRows) = removeResult5, numberRows == 1 else {
             let message = "Could not remove user!"
             Log.error(message)
-            completion(.failure(.message(message)))
+            params.completion(.failure(.message(message)))
             return
         }
         
-        completion(.success(successResponseMessage))
+        let response = RemoveUserResponse()
+        params.completion(.success(response))
     }
 }

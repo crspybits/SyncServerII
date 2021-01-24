@@ -8,9 +8,8 @@
 
 import LoggerAPI
 import Credentials
-import ServerShared
+import SyncServerShared
 import Foundation
-import ServerAccount
 
 class UtilController : ControllerProtocol {
     static var serverStart:Date!
@@ -25,7 +24,7 @@ class UtilController : ControllerProtocol {
         
         response.currentServerDateTime = Date()
         response.serverUptime = -UtilController.serverStart.timeIntervalSinceNow
-        response.deployedGitTag = Configuration.misc.deployedGitTag
+        response.deployedGitTag = Constants.session.deployedGitTag
         
         let stats = ServerStatsKeeper.session.stats
         var diagnostics = ""

@@ -9,7 +9,7 @@
 
 import Foundation
 import LoggerAPI
-import ServerShared
+import SyncServerShared
 
 class SharingGroup : NSObject, Model {
     static let sharingGroupUUIDKey = "sharingGroupUUID"
@@ -20,13 +20,17 @@ class SharingGroup : NSObject, Model {
     
     static let deletedKey = "deleted"
     var deleted:Bool!
+    
+    // Not a part of this table, but a convenience for doing joins with the MasterVersion table.
+    static let masterVersionKey = "masterVersion"
+    var masterVersion: MasterVersionInt!
 
     // Similarly, not part of this table. For doing joins.
     public static let permissionKey = "permission"
     public var permission:Permission?
     
     // Also not part of this table. For doing fetches of sharing group users for the sharing group.
-    public var sharingGroupUsers:[ServerShared.SharingGroupUser]!
+    public var sharingGroupUsers:[SyncServerShared.SharingGroupUser]!
 
     static let accountTypeKey = "accountType"
     var accountType: String!
@@ -45,6 +49,9 @@ class SharingGroup : NSObject, Model {
             
             case SharingGroup.deletedKey:
                 deleted = newValue as! Bool?
+
+            case SharingGroup.masterVersionKey:
+                masterVersion = newValue as! MasterVersionInt?
                 
             case SharingGroup.permissionKey:
                 permission = newValue as! Permission?
@@ -65,7 +72,7 @@ class SharingGroup : NSObject, Model {
         }
     }
     
-    required override init() {
+    override init() {
         super.init()
     }
     
@@ -84,18 +91,19 @@ class SharingGroup : NSObject, Model {
         }
     }
     
-    func toClient() -> ServerShared.SharingGroup  {
-        let clientGroup = ServerShared.SharingGroup()
+    func toClient() -> SyncServerShared.SharingGroup  {
+        let clientGroup = SyncServerShared.SharingGroup()
         clientGroup.sharingGroupUUID = sharingGroupUUID
         clientGroup.sharingGroupName = sharingGroupName
         clientGroup.deleted = deleted
+        clientGroup.masterVersion = masterVersion
         clientGroup.permission = permission
         clientGroup.sharingGroupUsers = sharingGroupUsers
         
         Log.debug("accountType: \(String(describing: accountType)) (expected to be nil for an owning user)")
         
         if let accountType = accountType {
-            clientGroup.cloudStorageType = AccountScheme(.accountName(accountType))?.cloudStorageType
+            clientGroup.cloudStorageType = AccountType(rawValue: accountType)?.cloudStorageType?.rawValue
         }
 
         return clientGroup
@@ -178,9 +186,10 @@ class SharingGroupRepository: Repository, RepositoryLookup {
     }
 
     func sharingGroups(forUserId userId: UserId, sharingGroupUserRepo: SharingGroupUserRepository, userRepo: UserRepository) -> [SharingGroup]? {
+        let masterVersionTableName = MasterVersionRepository.tableName
         let sharingGroupUserTableName = SharingGroupUserRepository.tableName
         
-        let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted,  \(sharingGroupUserTableName).permission, \(sharingGroupUserTableName).owningUserId FROM \(tableName),\(sharingGroupUserTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID"
+        let query = "select \(tableName).sharingGroupUUID, \(tableName).sharingGroupName, \(tableName).deleted, \(masterVersionTableName).masterVersion, \(sharingGroupUserTableName).permission, \(sharingGroupUserTableName).owningUserId FROM \(tableName),\(sharingGroupUserTableName), \(masterVersionTableName) WHERE \(sharingGroupUserTableName).userId = \(userId) AND \(sharingGroupUserTableName).sharingGroupUUID = \(tableName).sharingGroupUUID AND \(tableName).sharingGroupUUID = \(masterVersionTableName).sharingGroupUUID"
         
         // The "owners" or "parents" of the sharing groups the sharing user is in
         guard let owningUsers = userRepo.getOwningSharingGroupUsers(forSharingUserId: userId) else {
@@ -197,7 +206,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         for sharingGroup in sharingGroups {
             let owningUser = owningUsers.filter {sharingGroup.owningUserId != nil && $0.userId == sharingGroup.owningUserId}
             if owningUser.count == 1 {
-                sharingGroup.accountType = owningUser[0].accountType
+                sharingGroup.accountType = owningUser[0].accountType.rawValue
             }
         }
         
@@ -216,7 +225,7 @@ class SharingGroupRepository: Repository, RepositoryLookup {
         select.forEachRow { rowModel in
             let sharingGroup = rowModel as! SharingGroup
             
-            if let sgus:[ServerShared.SharingGroupUser] = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupUUID: sharingGroup.sharingGroupUUID) {
+            if let sgus:[SyncServerShared.SharingGroupUser] = sharingGroupUserRepo.sharingGroupUsers(forSharingGroupUUID: sharingGroup.sharingGroupUUID) {
                 sharingGroup.sharingGroupUsers = sgus
             }
             else {

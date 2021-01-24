@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import ServerShared
 
 enum ServerStat : String {
     case dbConnectionsOpened
